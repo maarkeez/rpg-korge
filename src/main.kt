@@ -40,14 +40,15 @@ class MyScene : Scene() {
 
             uiGridFill(
                 size= Size(width=390, height=390),
+                spacing = Spacing(2.0,2.0),
                 cols = 8,
                 rows = 8) {
 
                 for (n in 0 until cols * rows) {
-                    uiButton("$n").also { button ->
-                        button.bgColorOut = RGBA(229, 229, 229, 0)
-                        button.bgColorOver = RGBA(252, 252, 252, 0)
-                        button.background.borderColor = RGBA(187, 187, 187, 0)
+                    uiButton().also { button ->
+                        button.bgColorOut = Colors.WHITE
+                        button.bgColorOver = Colors.LIGHTSKYBLUE
+                        button.background.borderColor = Colors.LIGHTGRAY
                     }
                 }
             }
@@ -56,14 +57,14 @@ class MyScene : Scene() {
                 uiMaterialLayer().also {
                     it.size = Size(width= 195, height=200)
                     it.radius = RectCorners(16f,16f,16f, 8f)
-                    it.bgColor = Colors.SKYBLUE
+                    it.bgColor = Colors.WHITE
                     it.borderColor = Colors.DIMGREY
                     it.borderSize = 2.0
                 }
                 uiMaterialLayer().also {
                     it.size = Size(width= 195, height=200)
                     it.radius = RectCorners(16f,16f,16f, 8f)
-                    it.bgColor = Colors.SKYBLUE
+                    it.bgColor = Colors.WHITE
                     it.borderColor = Colors.DIMGREY
                     it.borderSize = 2.0
                 }
