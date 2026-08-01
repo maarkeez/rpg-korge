@@ -7,6 +7,7 @@ import korlibs.korge.view.*
 import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.image.text.TextAlignment
+import korlibs.image.text.TextAlignment.Companion.MIDDLE_CENTER
 import korlibs.io.file.std.*
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
@@ -60,7 +61,7 @@ class MyScene : Scene() {
                 }
             }
 
-            uiVerticalStack(padding = 1.0) {
+            uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
                 uiHorizontalStack {
                     uiButton().also { button ->
@@ -74,14 +75,26 @@ class MyScene : Scene() {
                         uiText("Goblin", size = Size(width=281.5, height=14))
                         uiText("Movements left: 2    Remaining casts: 1", size = Size(width=281.5, height=14)) {}
                         uiSpacing(Size(0, 30))
-                        uiProgressBar(size = Size(281.5, 8), current = 50f, maximum = 100f).also { progressBar ->
+                        uiProgressBar(size = Size(281.5, 12), current = 75f, maximum = 100f).also { progressBar ->
                             progressBar.styles.uiSelectedColor = Colors.RED
                             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                            progressBar.text("75/100")
                         }
                         uiSpacing(Size(0, 4))
-                        uiProgressBar(size = Size(281.5, 8), current = 50f, maximum = 100f).also { progressBar ->
+                        uiProgressBar(size = Size(281.5, 12), current = 50f, maximum = 100f).also { progressBar ->
                             progressBar.styles.uiSelectedColor = Colors.BLUE
                             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                            progressBar.text("50/100")
+                        }
+                    }
+                }
+                uiHorizontalStack(padding = 1.0) {
+                    repeat(6){
+                        uiButton().also { button ->
+                            button.size = Size(width= 48.75, height=48.75)
+                            button.bgColorOut = Colors.WHITE
+                            button.bgColorOver = Colors.LIGHTSKYBLUE
+                            button.background.borderColor = Colors.LIGHTGRAY
                         }
                     }
                 }
