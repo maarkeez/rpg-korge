@@ -11,11 +11,17 @@ import korlibs.io.file.std.*
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
 import korlibs.korge.style.textSize
+import korlibs.korge.ui.UIText
+import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiMaterialLayer
+import korlibs.korge.ui.uiProgressBar
+import korlibs.korge.ui.uiSelectedColor
+import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiText
+import korlibs.korge.ui.uiUnselectedColor
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
@@ -30,6 +36,7 @@ class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
 
         uiVerticalStack(padding = 2.0) {
+            uiSpacing(Size(0, 10))
             uiText(
                 text = "Human turn - Round 1",
                 size = Size(width=390, height=50)
@@ -53,21 +60,32 @@ class MyScene : Scene() {
                 }
             }
 
-            uiHorizontalStack(padding = 1.0) {
-                uiMaterialLayer().also {
-                    it.size = Size(width= 195, height=200)
-                    it.radius = RectCorners(16f,16f,16f, 8f)
-                    it.bgColor = Colors.WHITE
-                    it.borderColor = Colors.DIMGREY
-                    it.borderSize = 2.0
+            uiVerticalStack(padding = 1.0) {
+                uiSpacing(Size(0, 10))
+                uiHorizontalStack {
+                    uiButton().also { button ->
+                        button.size = Size(width= 97.5, height=97.5)
+                        button.bgColorOut = Colors.WHITE
+                        button.bgColorOver = Colors.LIGHTSKYBLUE
+                        button.background.borderColor = Colors.LIGHTGRAY
+                    }
+                    uiSpacing(Size(10, 0))
+                    uiVerticalStack(padding = 1.0) {
+                        uiText("Goblin", size = Size(width=281.5, height=14))
+                        uiText("Movements left: 2    Remaining casts: 1", size = Size(width=281.5, height=14)) {}
+                        uiSpacing(Size(0, 30))
+                        uiProgressBar(size = Size(281.5, 8), current = 50f, maximum = 100f).also { progressBar ->
+                            progressBar.styles.uiSelectedColor = Colors.RED
+                            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                        }
+                        uiSpacing(Size(0, 4))
+                        uiProgressBar(size = Size(281.5, 8), current = 50f, maximum = 100f).also { progressBar ->
+                            progressBar.styles.uiSelectedColor = Colors.BLUE
+                            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                        }
+                    }
                 }
-                uiMaterialLayer().also {
-                    it.size = Size(width= 195, height=200)
-                    it.radius = RectCorners(16f,16f,16f, 8f)
-                    it.bgColor = Colors.WHITE
-                    it.borderColor = Colors.DIMGREY
-                    it.borderSize = 2.0
-                }
+
             }
         }
 
