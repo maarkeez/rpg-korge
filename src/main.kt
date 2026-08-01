@@ -76,19 +76,19 @@ class MyScene : Scene() {
                         uiText("Movements left: 2    Remaining casts: 1", size = Size(width=281.5, height=14)) {}
                         uiSpacing(Size(0, 30))
                         uiProgressBar(size = Size(281.5, 12), current = 75f, maximum = 100f).also { progressBar ->
-                            progressBar.styles.uiSelectedColor = Colors.RED
+                            progressBar.styles.uiSelectedColor = RGBA(255, 55, 95)
                             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
                             progressBar.text("75/100")
                         }
                         uiSpacing(Size(0, 4))
                         uiProgressBar(size = Size(281.5, 12), current = 50f, maximum = 100f).also { progressBar ->
-                            progressBar.styles.uiSelectedColor = Colors.BLUE
+                            progressBar.styles.uiSelectedColor = RGBA(0, 145, 255)
                             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
                             progressBar.text("50/100")
                         }
                     }
                 }
-                uiHorizontalStack(padding = 1.0) {
+                uiHorizontalStack(padding = 2.0) {
                     repeat(6){
                         uiButton().also { button ->
                             button.size = Size(width= 48.75, height=48.75)
@@ -98,7 +98,12 @@ class MyScene : Scene() {
                         }
                     }
                 }
-
+                uiButton("Finish turn").also { button ->
+                    button.size = Size(width= 390, height=48.75)
+                    button.bgColorOut = RGBA(0, 136, 255)
+                    button.bgColorOver = RGBA(30, 110, 244)
+                    button.background.borderColor = Colors.LIGHTGRAY
+                }
             }
         }
 
