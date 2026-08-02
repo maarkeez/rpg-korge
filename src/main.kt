@@ -24,6 +24,8 @@ import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiUnselectedColor
 import korlibs.korge.ui.uiVerticalStack
+import korlibs.korge.view.align.centerOn
+import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
 
@@ -64,7 +66,7 @@ class MyScene : Scene() {
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
                 uiHorizontalStack {
-                    uiButton().also { button ->
+                    uiButton("\uD83D\uDC79").also { button ->
                         button.size = Size(width= 97.5, height=97.5)
                         button.bgColorOut = Colors.WHITE
                         button.bgColorOver = Colors.LIGHTSKYBLUE
@@ -74,17 +76,34 @@ class MyScene : Scene() {
                     uiVerticalStack(padding = 1.0) {
                         uiText("Goblin", size = Size(width=281.5, height=14))
                         uiText("Movements left: 2    Remaining casts: 1", size = Size(width=281.5, height=14)) {}
-                        uiSpacing(Size(0, 30))
-                        uiProgressBar(size = Size(281.5, 12), current = 75f, maximum = 100f).also { progressBar ->
-                            progressBar.styles.uiSelectedColor = RGBA(255, 55, 95)
-                            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
-                            progressBar.text("75/100")
+                        uiSpacing(Size(0, 15))
+                        container {
+                            val healthBar = uiProgressBar(size = Size(281.5, 16), current = 75f, maximum = 100f).also { progressBar ->
+                                progressBar.styles.uiSelectedColor = RGBA(255, 55, 95)
+                                progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                            }
+                            val healthLabel = text(
+                                text = "75 / 100",
+                                textSize = 14.0,
+                                color = Colors.WHITE
+                            )
+                            healthLabel.centerXOn(healthBar)
+                            healthLabel.y = (healthBar.height - healthLabel.height) / 2 + 1
                         }
+
                         uiSpacing(Size(0, 4))
-                        uiProgressBar(size = Size(281.5, 12), current = 50f, maximum = 100f).also { progressBar ->
-                            progressBar.styles.uiSelectedColor = RGBA(0, 145, 255)
-                            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
-                            progressBar.text("50/100")
+                        container {
+                            val manaBar = uiProgressBar(size = Size(281.5, 16), current = 40f, maximum = 100f).also { progressBar ->
+                                progressBar.styles.uiSelectedColor = RGBA(0, 145, 255)
+                                progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+                            }
+                            val manaLabel = text(
+                                text = "40 / 100",
+                                textSize = 14.0,
+                                color = Colors.WHITE
+                            )
+                            manaLabel.centerXOn(manaBar)
+                            manaLabel.y = (manaBar.height - manaLabel.height) / 2 + 1
                         }
                     }
                 }
@@ -98,6 +117,7 @@ class MyScene : Scene() {
                         }
                     }
                 }
+                uiSpacing(Size(0, 5))
                 uiButton("Finish turn").also { button ->
                     button.size = Size(width= 390, height=48.75)
                     button.bgColorOut = RGBA(0, 136, 255)
