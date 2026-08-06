@@ -1,5 +1,5 @@
 package effect.domain
 
-interface EffectEvent {
+sealed interface EffectEvent {
     data class EffectCreated(val effectId: String): EffectEvent
 }

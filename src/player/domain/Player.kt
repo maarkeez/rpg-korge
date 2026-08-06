@@ -52,25 +52,18 @@ data class Player private constructor(
     )
 
     @JvmInline
-    private value class Id private constructor(val value: String){
-
-        companion object {
-            operator fun invoke(value: String): Id {
-               if(value.isEmpty()) throw EmptyPlayerId()
-                return Player.Id(value)
-            }
+    private value class Id(val value: String){
+        init {
+            if(value.isEmpty()) throw EmptyPlayerId()
         }
         fun toDto() = value
     }
     @JvmInline
-    private value class Name private constructor(val value: String){
+    private value class Name(val value: String){
 
-        companion object {
-            operator fun invoke(value: String): Name {
-                if(value.isEmpty()) throw EmptyPlayerName()
-                if(value.count() > 50) throw PlayerNameLongerThanExpected()
-                return Player.Name(value)
-            }
+        init {
+            if(value.isEmpty()) throw EmptyPlayerName()
+            if(value.count() > 50) throw PlayerNameLongerThanExpected()
         }
 
         fun toDto() = value

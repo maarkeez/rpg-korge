@@ -1,6 +1,6 @@
 package player.domain
 
-interface PlayerEvent {
+sealed interface PlayerEvent {
     data class PlayerCreated(
         val playerId: String,
         val playerName: String,
