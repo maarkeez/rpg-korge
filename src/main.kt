@@ -1,6 +1,8 @@
 import battle.adapters.presentation.BattleApi
 import battle.adapters.presentation.BattleInfoPresenter
 import battle.adapters.presentation.BattleInfoView
+import battle.adapters.presentation.FinishTurnPresenter
+import battle.adapters.presentation.FinishTurnView
 import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.adapters.presentation.BattlefieldPresenter
 import battlefield.adapters.presentation.BattlefieldView
@@ -128,12 +130,8 @@ class MyScene : Scene() {
                     }
                 }
                 uiSpacing(Size(0, 5))
-                uiButton("Finish turn").also { button ->
-                    button.size = Size(width= 390, height=48.75)
-                    button.bgColorOut = RGBA(0, 136, 255)
-                    button.bgColorOver = RGBA(30, 110, 244)
-                    button.background.borderColor = Colors.LIGHTGRAY
-                }
+                val finishTurnView = FinishTurnView(this)
+                val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi)
             }
         }
 
