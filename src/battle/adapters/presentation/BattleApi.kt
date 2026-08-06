@@ -1,5 +1,6 @@
 package battle.adapters.presentation
 
+import battle.adapters.events.OnTurnFinished
 import battle.adapters.storage.InMemoryBattleRepository
 import battle.domain.BattleRepository
 import battle.usecases.commands.DefeatPlayer
@@ -13,11 +14,19 @@ import shared.domain.EventBus
 class BattleApi(
     eventBus: EventBus,
 ) {
+    // Storage
     private val battleRepository : BattleRepository = InMemoryBattleRepository()
+
+    // Commands
     val defeatPlayer = DefeatPlayer(battleRepository, eventBus)
     val finishBattle = FinishBattle(battleRepository, eventBus)
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
     val startFirstRound = StartFirstRound(battleRepository, eventBus)
     val startNextRound = StartNextRound(battleRepository, eventBus)
+
+    // Queries
     val searchBattle = SearchBattle(battleRepository)
+
+    // Event Listeners
+    val onTurnFinished = OnTurnFinished(eventBus, startNextRound)
 }

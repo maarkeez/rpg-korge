@@ -35,10 +35,11 @@ data class Battle private constructor(
     
     fun startNextRound(): Battle {
         val nextRound = CurrentRound(currentRound.value + 1)
+        val nextPlayerTurn = CurrentPlayerTurn(turnQueue.value.first())
         return copy(
             currentRound = nextRound,
             currentPlayerTurn = CurrentPlayerTurn(turnQueue.value.first()),
-            events = events + setOf(BattleRoundStarted(nextRound.value ))
+            events = events + setOf(BattleRoundStarted(nextRound.value ) , PlayerTurnStarted(nextPlayerTurn.value))
         )
     }
 
