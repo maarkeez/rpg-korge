@@ -36,8 +36,7 @@ data class Player private constructor(
         )
     }
 
-    fun pullEvents(): Pair<Set<PlayerEvent>, Player> =
-        events to copy(events = emptySet())
+    fun pullEvents() = events to copy(events = emptySet())
 
     fun toDto()= PlayerDto(
         id = id.toDto(),

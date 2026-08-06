@@ -43,7 +43,7 @@ data class Effect private constructor(
         }
     }
 
-    fun pullEvents(): Pair<Set<EffectEvent>, Effect> = events to copy(events = emptySet())
+    fun pullEvents() = events to copy(events = emptySet())
 
     fun toDto() = Dto(
         id = id.value,

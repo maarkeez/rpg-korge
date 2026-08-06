@@ -47,7 +47,7 @@ data class Ability private constructor(
         targetPattern = targetPattern.toDto()
     )
 
-    fun pullEvents(): Pair<Set<AbilityEvent>, Ability> = events to copy(events = emptySet())
+    fun pullEvents() = events to copy(events = emptySet())
     
     @JvmInline private value class Id(val value: String){
         init {
