@@ -4,7 +4,7 @@ import battle.domain.BattleEvent.BattleRoundFinished
 import battle.usecases.commands.*
 import shared.domain.*
 
-class OnTurnFinished(
+class OnRoundFinished(
     eventBus: EventBus,
     startNextRound: StartNextRound,
 ) {

@@ -1,6 +1,6 @@
 package battle.adapters.presentation
 
-import battle.adapters.events.OnTurnFinished
+import battle.adapters.events.OnRoundFinished
 import battle.adapters.storage.InMemoryBattleRepository
 import battle.domain.BattleRepository
 import battle.usecases.commands.DefeatPlayer
@@ -28,5 +28,5 @@ class BattleApi(
     val searchBattle = SearchBattle(battleRepository)
 
     // Event Listeners
-    val onTurnFinished = OnTurnFinished(eventBus, startNextRound)
+    val onTurnFinished = OnRoundFinished(eventBus, startNextRound)
 }
