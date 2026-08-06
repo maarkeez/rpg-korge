@@ -55,6 +55,7 @@ class MyScene : Scene() {
             battleApi,
             effectApi,
             abilityApi,
+            battleUnitApi,
             battlefieldApi,
         )
 

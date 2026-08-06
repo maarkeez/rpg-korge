@@ -22,6 +22,8 @@
     <RunAsTest>false</RunAsTest>
     <GradleProfilingDisabled>false</GradleProfilingDisabled>
     <GradleCoverageDisabled>false</GradleCoverageDisabled>
-    <method v="2" />
+    <method v="2">
+      <option name="MirrordIdeaBeforeRunTask" enabled="false" />
+    </method>
   </configuration>
 </component>

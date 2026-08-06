@@ -1,7 +1,6 @@
 package player.usecases.queries
 
 import player.domain.Player
-import player.domain.PlayerPublisher
 import player.domain.PlayerRepository
 
 class SearchPlayerById(
