@@ -6,37 +6,23 @@ import battle.adapters.presentation.FinishTurnView
 import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.adapters.presentation.BattlefieldPresenter
 import battlefield.adapters.presentation.BattlefieldView
-import battlesetup.adapters.presentation.SetupBattle
-import korlibs.encoding.Hex
-import korlibs.time.*
+import battlesetup.adapters.presentation.BattleSetupApi
+import effect.adapters.presentation.EffectApi
 import korlibs.korge.*
 import korlibs.korge.scene.*
-import korlibs.korge.tween.*
 import korlibs.korge.view.*
 import korlibs.image.color.*
-import korlibs.image.format.*
-import korlibs.image.text.TextAlignment
-import korlibs.image.text.TextAlignment.Companion.MIDDLE_CENTER
-import korlibs.io.file.std.*
 import korlibs.korge.style.styles
-import korlibs.korge.style.textAlignment
-import korlibs.korge.style.textSize
-import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiButton
-import korlibs.korge.ui.uiGridFill
 import korlibs.korge.ui.uiHorizontalStack
-import korlibs.korge.ui.uiMaterialLayer
 import korlibs.korge.ui.uiProgressBar
 import korlibs.korge.ui.uiSelectedColor
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiText
-import korlibs.korge.ui.uiUnselectedColor
 import korlibs.korge.ui.uiVerticalStack
-import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
-import korlibs.math.interpolation.*
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
 
@@ -59,6 +45,13 @@ class MyScene : Scene() {
         val playerApi = PlayerApi()
         val battleApi = BattleApi(eventBus)
         val battlefieldApi = BattlefieldApi(eventBus)
+        val effectApi = EffectApi(eventBus)
+        val battleSetupApi = BattleSetupApi(
+            playerApi,
+            battleApi,
+            effectApi,
+            battlefieldApi,
+        )
 
         // Main scene
         uiVerticalStack(padding = 2.0) {
@@ -136,12 +129,6 @@ class MyScene : Scene() {
         }
 
         // Start game
-        val setupBattle = SetupBattle(
-            playerApi,
-            battleApi,
-            battlefieldApi
-        )
-        setupBattle()
-
+        battleSetupApi.setupBattle()
 	}
 }
