@@ -1,12 +1,12 @@
 package player.usecases.commands
 
 import player.domain.Player
-import player.domain.PlayerPublisher
 import player.domain.PlayerRepository
+import shared.domain.EventBus
 
 class RequestPlayerCreation(
     private val playerRepository: PlayerRepository,
-    private val playerPublisher: PlayerPublisher,
+    private val eventBus: EventBus,
 ) {
     operator fun invoke(id: String, name: String, type: PlayerType) {
         if(playerRepository.searchById(id) != null) return
@@ -15,7 +15,7 @@ class RequestPlayerCreation(
             PlayerType.HUMAN -> Player.createHuman(id, name)
         }.pullEvents()
         playerRepository.create(player)
-        playerPublisher.publish(events)
+        eventBus.publish(events)
     }
 
     enum class PlayerType {

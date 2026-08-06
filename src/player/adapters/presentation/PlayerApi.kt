@@ -1,15 +1,18 @@
 package player.adapters.presentation
 
-import player.adapters.events.InMemoryPlayerPublisher
-import player.adapters.storage.InMemoryPlayerRepository
-import player.domain.PlayerPublisher
-import player.domain.PlayerRepository
-import player.usecases.commands.RequestPlayerCreation
-import player.usecases.queries.SearchPlayerById
+import player.adapters.storage.*
+import player.domain.*
+import player.usecases.commands.*
+import player.usecases.queries.*
+import shared.domain.*
 
-class PlayerApi {
+class PlayerApi(eventBus: EventBus) {
+    // Storage
     private val playerRepository : PlayerRepository = InMemoryPlayerRepository()
-    private val playerPublisher : PlayerPublisher = InMemoryPlayerPublisher()
-    val requestPlayerCreation = RequestPlayerCreation(playerRepository, playerPublisher)
+
+    // Commands
+    val requestPlayerCreation = RequestPlayerCreation(playerRepository, eventBus)
+
+    // Queries
     val searchPlayerById = SearchPlayerById(playerRepository)
 }
