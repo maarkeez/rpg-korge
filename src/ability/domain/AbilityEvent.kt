@@ -1,6 +1,8 @@
 package ability.domain
 
-sealed interface AbilityEvent {
+import shared.domain.DomainEvent
+
+sealed interface AbilityEvent: DomainEvent {
     data class AbilityCreated(
         val abilityId: String,
     ): AbilityEvent

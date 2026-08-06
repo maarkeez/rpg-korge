@@ -9,11 +9,12 @@ import effect.domain.Effect
 import effect.domain.EffectPublisher
 import effect.domain.EffectRepository
 import effect.usecases.queries.SearchEffectById
+import shared.domain.EventBus
 
 class RequestAbilityCreation(
     private val abilityRepository: AbilityRepository,
-    private val abilityPublisher: AbilityPublisher,
     private val searchEffectById: SearchEffectById,
+    private val eventBus: EventBus,
 ) {
     operator fun invoke(abilityDto: Ability.Dto) {
         if(abilityRepository.searchById(abilityDto.id) != null) return
@@ -21,6 +22,6 @@ class RequestAbilityCreation(
         if(!allEffectsExist) throw AbilityEffectDoesNotExist()
         val (events, ability) = Ability.create(abilityDto).pullEvents()
         abilityRepository.create(ability)
-        abilityPublisher.publish(events)
+        eventBus.publish(events)
     }
 }

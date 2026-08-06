@@ -1,3 +1,4 @@
+import ability.adapters.presentation.AbilityApi
 import battle.adapters.presentation.BattleApi
 import battle.adapters.presentation.BattleInfoPresenter
 import battle.adapters.presentation.BattleInfoView
@@ -46,10 +47,12 @@ class MyScene : Scene() {
         val battleApi = BattleApi(eventBus)
         val battlefieldApi = BattlefieldApi(eventBus)
         val effectApi = EffectApi(eventBus)
+        val abilityApi = AbilityApi(effectApi, eventBus)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,
             effectApi,
+            abilityApi,
             battlefieldApi,
         )
 

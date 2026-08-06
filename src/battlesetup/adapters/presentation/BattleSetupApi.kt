@@ -1,5 +1,6 @@
 package battlesetup.adapters.presentation
 
+import ability.adapters.presentation.AbilityApi
 import battle.adapters.presentation.BattleApi
 import battlefield.adapters.presentation.BattlefieldApi
 import battlesetup.usecases.commands.SetupBattle
@@ -12,12 +13,14 @@ class BattleSetupApi(
     playerApi: PlayerApi,
     battleApi: BattleApi,
     effectApi: EffectApi,
+    abilityApi: AbilityApi,
     battlefieldApi: BattlefieldApi,
 ) {
     val setupBattle = SetupBattle(
         playerApi.requestPlayerCreation,
         battlefieldApi.initializeBattlefield,
         battleApi.startFirstRound,
-        effectApi.requestEffectCreation
+        effectApi.requestEffectCreation,
+        abilityApi.requestAbilityCreation,
     )
 }
