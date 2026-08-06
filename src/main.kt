@@ -1,6 +1,9 @@
 import battle.adapters.presentation.BattleApi
 import battle.adapters.presentation.BattleInfoPresenter
 import battle.adapters.presentation.BattleInfoView
+import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.adapters.presentation.BattlefieldPresenter
+import battlefield.adapters.presentation.BattlefieldView
 import battlesetup.adapters.presentation.SetupBattle
 import korlibs.encoding.Hex
 import korlibs.time.*
@@ -53,10 +56,12 @@ class MyScene : Scene() {
         // Backend APIs
         val playerApi = PlayerApi()
         val battleApi = BattleApi(eventBus)
+        val battlefieldApi = BattlefieldApi(eventBus)
 
         // Main scene
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
+            // Battle info
             val battleInfoView = BattleInfoView(this)
             val battleInfoPresenter = BattleInfoPresenter(
                 battleInfoView,
@@ -64,21 +69,9 @@ class MyScene : Scene() {
                 playerApi,
                 eventBus,
             )
-
-            uiGridFill(
-                size= Size(width=390, height=390),
-                spacing = Spacing(2.0,2.0),
-                cols = 8,
-                rows = 8) {
-
-                for (n in 0 until cols * rows) {
-                    uiButton().also { button ->
-                        button.bgColorOut = Colors.WHITE
-                        button.bgColorOver = Colors.LIGHTSKYBLUE
-                        button.background.borderColor = Colors.LIGHTGRAY
-                    }
-                }
-            }
+            // Battlefield
+            val battlefieldView = BattlefieldView(this)
+            val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battlefieldApi, eventBus)
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
@@ -148,6 +141,7 @@ class MyScene : Scene() {
         val setupBattle = SetupBattle(
             playerApi,
             battleApi,
+            battlefieldApi
         )
         setupBattle()
 

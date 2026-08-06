@@ -28,6 +28,11 @@ data class Battlefield private constructor(
         }
     }
 
+    fun toDto() = Dto(
+        rows = rows.value,
+        columns = columns.value,
+    )
+
     fun occupy(row: Int, column: Int, battleUnitId: String): Battlefield {
         if(!tiles.isVacant(row, column)) throw TileIsNotVacant()
         val updatedTiles = tiles.occupy(row, column, battleUnitId)
@@ -122,4 +127,9 @@ data class Battlefield private constructor(
         @JvmInline private value class OccupyingBattleUnitId(val value: String)
         @JvmInline private value class TerrainId(val value: String)
     }
+
+    data class Dto(
+        val rows: Int,
+        val columns: Int,
+    )
 }
