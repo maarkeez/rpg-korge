@@ -23,10 +23,16 @@ data class Battle private constructor(
                 currentRound = CurrentRound(1),
                 currentPlayerTurn = CurrentPlayerTurn(players.first()),
                 isFinished = IsFinished(false),
-                events = setOf(BattleStarted)
+                events = setOf(BattleStarted, PlayerTurnStarted(players.first()))
             )
         }
     }
+    
+    fun toDto() = Dto(
+        currentPlayerTurn = currentPlayerTurn.value,
+        currentRound = currentRound.value
+    )
+    
     fun startNextRound(): Battle {
         val nextRound = CurrentRound(currentRound.value + 1)
         return copy(
@@ -80,4 +86,10 @@ data class Battle private constructor(
     @JvmInline private value class CurrentRound(val value: Int)
     @JvmInline private value class CurrentPlayerTurn(val value: String)
     @JvmInline private value class IsFinished(val value: Boolean)
+    
+    
+    data class Dto(
+        val currentPlayerTurn: String,
+        val currentRound: Int,
+    )
 }

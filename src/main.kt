@@ -1,3 +1,7 @@
+import battle.adapters.presentation.BattleApi
+import battle.adapters.presentation.BattleInfoPresenter
+import battle.adapters.presentation.BattleInfoView
+import battlesetup.adapters.presentation.SetupBattle
 import korlibs.encoding.Hex
 import korlibs.time.*
 import korlibs.korge.*
@@ -28,6 +32,8 @@ import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
 import korlibs.math.interpolation.*
+import player.adapters.presentation.PlayerApi
+import shared.domain.EventBus
 
 suspend fun main() = Korge(windowSize = Size(390, 844), backgroundColor = Colors["#2b2b2b"]) {
 	val sceneContainer = sceneContainer()
@@ -38,15 +44,26 @@ suspend fun main() = Korge(windowSize = Size(390, 844), backgroundColor = Colors
 class MyScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
 
+        // Event bus
+        val eventBus = EventBus()
+        addUpdater {
+            eventBus.dispatch()
+        }
+
+        // Backend APIs
+        val playerApi = PlayerApi()
+        val battleApi = BattleApi(eventBus)
+
+        // Main scene
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
-            uiText(
-                text = "Human turn - Round 1",
-                size = Size(width=390, height=50)
-            ){
-                this.styles.textAlignment = TextAlignment.MIDDLE_CENTER
-                this.styles.textSize = 32.0
-            }
+            val battleInfoView = BattleInfoView(this)
+            val battleInfoPresenter = BattleInfoPresenter(
+                battleInfoView,
+                battleApi,
+                playerApi,
+                eventBus,
+            )
 
             uiGridFill(
                 size= Size(width=390, height=390),
@@ -126,6 +143,13 @@ class MyScene : Scene() {
                 }
             }
         }
+
+        // Start game
+        val setupBattle = SetupBattle(
+            playerApi,
+            battleApi,
+        )
+        setupBattle()
 
 	}
 }

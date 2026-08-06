@@ -1,6 +1,8 @@
 package battle.domain
 
-sealed interface BattleEvent {
+import shared.domain.DomainEvent
+
+sealed interface BattleEvent: DomainEvent {
     object BattleStarted : BattleEvent
     data class BattleRoundStarted(val round: Int) : BattleEvent
     data class BattleRoundFinished(val round: Int) : BattleEvent
