@@ -4,6 +4,7 @@ import ability.domain.Ability
 import ability.usecases.commands.RequestAbilityCreation
 import battle.usecases.commands.*
 import battlefield.usecases.commands.*
+import battleunit.usecases.commands.DeployBattleUnit
 import effect.domain.Effect
 import effect.domain.Effect.Dto.ApplicationDto
 import effect.usecases.commands.RequestEffectCreation
@@ -17,6 +18,7 @@ class SetupBattle(
     private val startFirstRound: StartFirstRound,
     private val requestEffectCreation: RequestEffectCreation,
     private val requestAbilityCreation: RequestAbilityCreation,
+    private val deployBattleUnit: DeployBattleUnit,
 ) {
     operator fun invoke(){
         val playerOneId = "player-one"
@@ -49,6 +51,8 @@ class SetupBattle(
             targetPattern = "ADJACENT_ENEMY",
         )
         requestAbilityCreation(punch)
+
+        // TODO: Deploy battle unit
 
         startFirstRound(listOf(playerOneId, playerTwoId))
     }

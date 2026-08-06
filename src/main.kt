@@ -8,6 +8,7 @@ import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.adapters.presentation.BattlefieldPresenter
 import battlefield.adapters.presentation.BattlefieldView
 import battlesetup.adapters.presentation.BattleSetupApi
+import battleunit.adapters.presentation.BattleUnitApi
 import effect.adapters.presentation.EffectApi
 import korlibs.korge.*
 import korlibs.korge.scene.*
@@ -48,6 +49,7 @@ class MyScene : Scene() {
         val battlefieldApi = BattlefieldApi(eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
+        val battleUnitApi = BattleUnitApi(eventBus)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,

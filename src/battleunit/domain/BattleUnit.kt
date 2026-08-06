@@ -14,6 +14,9 @@ data class BattleUnit private constructor(
     private val ongoingEffects: OngoingEffects,
 ){
 
+    fun toDto() = Dto(
+        id = id.value,
+    )
     @JvmInline private value class Id(val value: String)
     @JvmInline private value class UnitId(val value: String)
     @JvmInline private value class PlayerId(val value: String)
@@ -37,4 +40,8 @@ data class BattleUnit private constructor(
             @JvmInline private value class TurnsLeft(val value: Int) : ApplicationStatus
         }
     }
+
+    data class Dto(
+        val id: String,
+    )
 }

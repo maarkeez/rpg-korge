@@ -4,6 +4,7 @@ import ability.adapters.presentation.AbilityApi
 import battle.adapters.presentation.BattleApi
 import battlefield.adapters.presentation.BattlefieldApi
 import battlesetup.usecases.commands.SetupBattle
+import battleunit.adapters.presentation.BattleUnitApi
 import effect.adapters.presentation.EffectApi
 import player.adapters.presentation.PlayerApi
 import player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
@@ -14,6 +15,7 @@ class BattleSetupApi(
     battleApi: BattleApi,
     effectApi: EffectApi,
     abilityApi: AbilityApi,
+    battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
 ) {
     val setupBattle = SetupBattle(
@@ -22,5 +24,6 @@ class BattleSetupApi(
         battleApi.startFirstRound,
         effectApi.requestEffectCreation,
         abilityApi.requestAbilityCreation,
+        battleUnitApi.deployBattleUnit,
     )
 }
