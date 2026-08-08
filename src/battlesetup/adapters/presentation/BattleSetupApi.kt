@@ -7,12 +7,14 @@ import battlesetup.usecases.commands.SetupBattle
 import battleunit.adapters.presentation.BattleUnitApi
 import effect.adapters.presentation.EffectApi
 import player.adapters.presentation.PlayerApi
+import unit.adapters.presentation.UnitApi
 
 class BattleSetupApi(
     playerApi: PlayerApi,
     battleApi: BattleApi,
     effectApi: EffectApi,
     abilityApi: AbilityApi,
+    unitApi: UnitApi,
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
 ) {
@@ -22,6 +24,7 @@ class BattleSetupApi(
         battleApi.startFirstRound,
         effectApi.requestEffectCreation,
         abilityApi.requestAbilityCreation,
+        unitApi.requestUnitCreation,
         battleUnitApi.deployBattleUnit,
     )
 }

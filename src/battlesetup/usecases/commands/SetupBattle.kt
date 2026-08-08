@@ -6,11 +6,13 @@ import battle.usecases.commands.*
 import battlefield.usecases.commands.*
 import battleunit.usecases.commands.DeployBattleUnit
 import effect.domain.Effect
+import unit.domain.Unit
 import effect.domain.Effect.Dto.ApplicationDto
 import effect.usecases.commands.RequestEffectCreation
 import player.usecases.commands.*
 import player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import unit.usecases.commands.RequestUnitCreation
 
 class SetupBattle(
     private val requestPlayerCreation: RequestPlayerCreation,
@@ -18,6 +20,7 @@ class SetupBattle(
     private val startFirstRound: StartFirstRound,
     private val requestEffectCreation: RequestEffectCreation,
     private val requestAbilityCreation: RequestAbilityCreation,
+    private val requestUnitCreation: RequestUnitCreation,
     private val deployBattleUnit: DeployBattleUnit,
 ) {
     operator fun invoke(){
@@ -52,7 +55,23 @@ class SetupBattle(
         )
         requestAbilityCreation(punch)
 
-        // TODO: Deploy battle unit
+        val goblinUnit = Unit.Dto(
+            id = "goblin",
+            name = "Goblin",
+            healthPoints = 10,
+            manaPoints = 10,
+            abilities = listOf(punch.id),
+            movementRange = 3
+        )
+        requestUnitCreation(goblinUnit)
+
+        deployBattleUnit(
+            battleUnitId = "player-one-unit-one",
+            unitId = goblinUnit.id,
+            playerId= playerOneId,
+            deployAtRow = 0,
+            deployAtColumn = 0,
+        )
 
         startFirstRound(listOf(playerOneId, playerTwoId))
     }

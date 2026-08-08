@@ -1,5 +1,6 @@
 package unit.domain
 
+import unit.domain.UnitEvent.UnitCreated
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -10,8 +11,24 @@ data class Unit private constructor(
     private val manaPoints: ManaPoints,
     private val abilities: Abilities,
     private val movementRange: MovementRange,
+    private val events: Set<UnitEvent>,
 ) {
 
+    companion object {
+        fun create(unitDto: Dto): Unit {
+            return Unit(
+                id = Id(unitDto.id),
+                name = Name(unitDto.name),
+                healthPoints = HealthPoints(unitDto.healthPoints),
+                manaPoints = ManaPoints(unitDto.manaPoints),
+                abilities = Abilities(unitDto.abilities),
+                movementRange = MovementRange(unitDto.movementRange),
+                events = setOf(UnitCreated(unitDto.id))
+            )
+        }
+    }
+
+    fun pullEvents() = events to copy(events = emptySet())
     fun toDto() = Dto(
         id = id.value,
         name = name.value,

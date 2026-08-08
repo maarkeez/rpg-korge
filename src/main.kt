@@ -45,7 +45,7 @@ class MyScene : Scene() {
         }
 
         // Backend APIs
-        val unitApi = UnitApi()
+        val unitApi = UnitApi(eventBus)
         val playerApi = PlayerApi(eventBus)
         val battleApi = BattleApi(eventBus)
         val battlefieldApi = BattlefieldApi(eventBus)
@@ -57,6 +57,7 @@ class MyScene : Scene() {
             battleApi,
             effectApi,
             abilityApi,
+            unitApi,
             battleUnitApi,
             battlefieldApi,
         )
