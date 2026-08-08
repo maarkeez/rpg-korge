@@ -2,8 +2,6 @@ package ability.adapters.storage
 
 import ability.domain.Ability
 import ability.domain.AbilityRepository
-import player.domain.Player
-import player.domain.PlayerRepository
 
 class InMemoryAbilityRepository: AbilityRepository {
     private val abilities = mutableMapOf<String, Ability>()

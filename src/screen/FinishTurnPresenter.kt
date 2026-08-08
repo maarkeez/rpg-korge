@@ -1,4 +1,6 @@
-package battle.adapters.presentation
+package screen
+
+import battle.adapters.presentation.BattleApi
 
 class FinishTurnPresenter(
     finishTurnView: FinishTurnView,

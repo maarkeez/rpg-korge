@@ -1,11 +1,7 @@
-package battlefield.adapters.presentation
+package screen
 
-import battle.adapters.presentation.BattleApi
-import battle.adapters.presentation.BattleInfoView
-import battle.domain.BattleEvent.PlayerTurnStarted
-import battlefield.domain.BattlefieldEvent
+import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
-import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
 
 class BattlefieldPresenter(

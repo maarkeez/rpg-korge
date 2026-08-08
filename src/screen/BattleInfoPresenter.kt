@@ -1,5 +1,6 @@
-package battle.adapters.presentation
+package screen
 
+import battle.adapters.presentation.BattleApi
 import battle.domain.BattleEvent.PlayerTurnStarted
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus

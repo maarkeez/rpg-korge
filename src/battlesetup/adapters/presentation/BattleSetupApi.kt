@@ -7,8 +7,6 @@ import battlesetup.usecases.commands.SetupBattle
 import battleunit.adapters.presentation.BattleUnitApi
 import effect.adapters.presentation.EffectApi
 import player.adapters.presentation.PlayerApi
-import player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
-import player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 
 class BattleSetupApi(
     playerApi: PlayerApi,

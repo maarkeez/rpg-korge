@@ -1,14 +1,9 @@
-package battlefield.adapters.presentation
+package screen
 
 import battlefield.domain.Battlefield
 import korlibs.image.color.Colors
-import korlibs.image.text.TextAlignment
-import korlibs.korge.style.styles
-import korlibs.korge.style.textAlignment
-import korlibs.korge.style.textSize
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
-import korlibs.korge.ui.uiText
 import korlibs.korge.view.Container
 import korlibs.math.geom.*
 

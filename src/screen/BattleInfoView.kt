@@ -1,4 +1,4 @@
-package battle.adapters.presentation
+package screen
 
 import korlibs.image.text.TextAlignment
 import korlibs.korge.style.styles
