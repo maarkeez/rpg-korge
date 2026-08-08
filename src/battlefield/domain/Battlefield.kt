@@ -1,5 +1,6 @@
 package battlefield.domain
 
+import battlefield.domain.Battlefield.Dto.TileDto
 import battlefield.domain.BattlefieldError.TileIsNotVacant
 import battlefield.domain.BattlefieldError.TileNotFound
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
@@ -31,6 +32,7 @@ data class Battlefield private constructor(
     fun toDto() = Dto(
         rows = rows.value,
         columns = columns.value,
+        tiles = tiles.toDto()
     )
 
     fun occupy(row: Int, column: Int, battleUnitId: String): Battlefield {
@@ -47,7 +49,7 @@ data class Battlefield private constructor(
     fun removeOccupant(battleUnitId: String): Battlefield {
         if(!tiles.isDeployed(battleUnitId)) return this
         val updatedTiles = tiles.removeOccupant(battleUnitId)
-        val occupantRemovedEvent = OccupantRemoved(battlefieldUnitId = battleUnitId)
+        val occupantRemovedEvent = OccupantRemoved(battleUnitId = battleUnitId)
         return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
     }
 
@@ -94,6 +96,10 @@ data class Battlefield private constructor(
             return Tiles(updatedTiles)
         }
 
+        fun toDto(): Map<Dto.PositionDto, TileDto> = this.tiles.map { entry ->
+            Dto.PositionDto(entry.key.row, entry.key.column) to entry.value.toDto()
+        }.toMap()
+
         companion object {
             fun create(tiles: List<List<String>>): Tiles {
                 val tiles = tiles.flatMapIndexed { rowIndex, row ->
@@ -124,6 +130,9 @@ data class Battlefield private constructor(
             fun isOccupiedBy(battleUnitId: String) = occupyingBattleUnitId?.value == battleUnitId
             fun row() = position.row
             fun column() = position.column
+            fun toDto() = TileDto(
+                battleUnitId = this.occupyingBattleUnitId?.value
+            )
         }
 
         private data class Position(val row: Int, val column: Int)
@@ -134,5 +143,11 @@ data class Battlefield private constructor(
     data class Dto(
         val rows: Int,
         val columns: Int,
-    )
+        val tiles: Map<PositionDto, TileDto>
+    ){
+        data class TileDto(
+            val battleUnitId: String?
+        )
+        data class PositionDto(val row: Int, val column: Int)
+    }
 }
