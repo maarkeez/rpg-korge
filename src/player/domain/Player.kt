@@ -38,13 +38,13 @@ data class Player private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    fun toDto()= PlayerDto(
+    fun toDto()= Dto(
         id = id.toDto(),
         name = name.toDto(),
         type = type.toDto(),
     )
 
-    data class PlayerDto(
+    data class Dto(
         val id: String,
         val name: String,
         val type: String,

@@ -52,6 +52,9 @@ data class Battlefield private constructor(
     }
 
     fun pullEvents() = events to copy(events = emptySet())
+    fun canBeOccupied(row: Int, column: Int): Boolean {
+        return tiles.isVacant(row, column)
+    }
 
     @JvmInline private value class Rows(val value: Int)
     @JvmInline private value class Columns(val value: Int)

@@ -27,6 +27,7 @@ import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
+import unit.adapters.presentation.UnitApi
 
 suspend fun main() = Korge(windowSize = Size(390, 844), backgroundColor = Colors["#2b2b2b"]) {
 	val sceneContainer = sceneContainer()
@@ -44,12 +45,13 @@ class MyScene : Scene() {
         }
 
         // Backend APIs
+        val unitApi = UnitApi()
         val playerApi = PlayerApi(eventBus)
         val battleApi = BattleApi(eventBus)
         val battlefieldApi = BattlefieldApi(eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
-        val battleUnitApi = BattleUnitApi(eventBus)
+        val battleUnitApi = BattleUnitApi(unitApi, playerApi, battlefieldApi, eventBus)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,
