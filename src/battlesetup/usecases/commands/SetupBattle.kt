@@ -66,11 +66,33 @@ class SetupBattle(
         requestUnitCreation(goblinUnit)
 
         deployBattleUnit(
-            battleUnitId = "player-one-unit-one",
+            battleUnitId = "player-2-unit-1",
             unitId = goblinUnit.id,
-            playerId= playerOneId,
+            playerId= playerTwoId,
             deployAtRow = 0,
             deployAtColumn = 0,
+        )
+        deployBattleUnit(
+            battleUnitId = "player-2-unit-2",
+            unitId = goblinUnit.id,
+            playerId= playerTwoId,
+            deployAtRow = 1,
+            deployAtColumn = 1,
+        )
+
+        deployBattleUnit(
+            battleUnitId = "player-1-unit-1",
+            unitId = goblinUnit.id,
+            playerId= playerOneId,
+            deployAtRow = 6,
+            deployAtColumn = 6,
+        )
+        deployBattleUnit(
+            battleUnitId = "player-1-unit-2",
+            unitId = goblinUnit.id,
+            playerId= playerOneId,
+            deployAtRow = 7,
+            deployAtColumn = 7,
         )
 
         startFirstRound(listOf(playerOneId, playerTwoId))

@@ -38,6 +38,7 @@ data class BattleUnit private constructor(
 
     fun toDto() = Dto(
         id = id.value,
+        playerId = playerId.value,
     )
 
     @JvmInline private value class Id(val value: String)
@@ -74,5 +75,6 @@ data class BattleUnit private constructor(
 
     data class Dto(
         val id: String,
+        val playerId: String,
     )
 }
