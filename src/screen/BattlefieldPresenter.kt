@@ -10,11 +10,12 @@ import shared.domain.Subscription
 
 class BattlefieldPresenter(
     private val battlefieldView: BattlefieldView,
+    private val battleUnitInfoView: BattleUnitInfoView,
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
     private val playerApi: PlayerApi,
     eventBus: EventBus,
-) {
+) : BattlefieldView.Delegate {
 
     private val subscriptions = listOf(
         eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -25,6 +26,10 @@ class BattlefieldPresenter(
 
         },
     )
+
+    init {
+        battlefieldView.setDelegate(this)
+    }
 
     fun displayBattlefield() {
         val battlefield = battlefieldApi.searchBattlefield()!!
@@ -43,5 +48,15 @@ class BattlefieldPresenter(
 
     fun dispose() {
         subscriptions.forEach(Subscription::dispose)
+    }
+
+    override fun tileSelected(row: Int, column: Int) {
+        val occupantId = battlefieldApi.searchOccupant(row, column)
+        if(occupantId != null) {
+            val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
+            battleUnitInfoView.display(battleUnit)
+        }else{
+            battleUnitInfoView.clear()
+        }
     }
 }

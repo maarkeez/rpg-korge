@@ -58,6 +58,10 @@ data class Battlefield private constructor(
         return tiles.isVacant(row, column)
     }
 
+    fun occupant(row: Int, column: Int): String? {
+        return tiles.occupant(row, column)
+    }
+
     @JvmInline private value class Rows(val value: Int)
     @JvmInline private value class Columns(val value: Int)
     @JvmInline private value class Tiles(val tiles: Map<Position, Tile>) {
@@ -99,6 +103,10 @@ data class Battlefield private constructor(
         fun toDto(): Map<Dto.PositionDto, TileDto> = this.tiles.map { entry ->
             Dto.PositionDto(entry.key.row, entry.key.column) to entry.value.toDto()
         }.toMap()
+
+        fun occupant(row: Int, column: Int): String? {
+            return tiles[Position(row = row, column = column)]?.toDto()?.battleUnitId
+        }
 
         companion object {
             fun create(tiles: List<List<String>>): Tiles {

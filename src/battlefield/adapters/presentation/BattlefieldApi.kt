@@ -7,6 +7,7 @@ import battlefield.usecases.commands.RemoveOccupant
 import battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import battlefield.usecases.queries.SearchBattlefield
+import battlefield.usecases.queries.SearchOccupant
 import shared.domain.EventBus
 
 class BattlefieldApi(eventBus: EventBus) {
@@ -20,6 +21,7 @@ class BattlefieldApi(eventBus: EventBus) {
 
     // Queries
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
+    val searchOccupant = SearchOccupant(battlefieldRepository)
     val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
 
     // Event Listeners

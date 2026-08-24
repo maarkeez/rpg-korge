@@ -1,8 +1,13 @@
 package screen
 
+import battleunit.domain.BattleUnit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
+import korlibs.image.text.TextAlignment
 import korlibs.korge.style.styles
+import korlibs.korge.style.textAlignment
+import korlibs.korge.style.textColor
+import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiHorizontalStack
@@ -14,17 +19,27 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.korge.view.align.centerXOn
 import korlibs.korge.view.container
+import korlibs.korge.view.setText
 import korlibs.korge.view.text
 import korlibs.math.geom.*
 
-class BattleUnitInfoView(): Container() {
+class BattleUnitInfoView: Container() {
+
+    private lateinit var battleUnitAvatar: UIButton
+
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                uiButton("").also { button ->
+                battleUnitAvatar = uiButton("").also { button ->
                     button.size = Size(width = 97.5, height = 97.5)
                     button.bgColorOut = Colors.WHITE
                     button.bgColorOver = Colors.LIGHTSKYBLUE
                     button.background.borderColor = Colors.LIGHTGRAY
+                    button.uiText("", button.size){
+                        button.styles {
+                            textColor = Colors.BLACK
+                            textAlignment = TextAlignment.MIDDLE_CENTER
+                        }
+                    }
                 }
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
@@ -78,5 +93,13 @@ class BattleUnitInfoView(): Container() {
 
     init {
         addChild(battleUnitInfoLayout)
+    }
+
+    fun display(battleUnit: BattleUnit.Dto) {
+        battleUnitAvatar.setText("*")
+    }
+
+    fun clear() {
+        battleUnitAvatar.setText("")
     }
 }

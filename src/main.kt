@@ -64,6 +64,10 @@ class MyScene : Scene() {
         )
 
         // Main scene
+        val battlefieldView = BattlefieldView()
+        val battleUnitInfoView = BattleUnitInfoView()
+        val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battleUnitInfoView, battlefieldApi, battleUnitApi, playerApi, eventBus)
+
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
             // Battle info
@@ -75,13 +79,11 @@ class MyScene : Scene() {
                 eventBus,
             )
             // Battlefield
-            val battlefieldView = BattlefieldView()
             addChild(battlefieldView)
-            val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battlefieldApi, battleUnitApi, playerApi, eventBus)
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-                val battleUnitInfoView = BattleUnitInfoView()
+
                 addChild(battleUnitInfoView)
                 uiSpacing(Size(0, 5))
                 val finishTurnView = FinishTurnView()
