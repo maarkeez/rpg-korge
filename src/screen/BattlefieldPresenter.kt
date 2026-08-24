@@ -7,6 +7,7 @@ import battleunit.adapters.presentation.BattleUnitApi
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
 import shared.domain.Subscription
+import unit.adapters.presentation.UnitApi
 
 class BattlefieldPresenter(
     private val battlefieldView: BattlefieldView,
@@ -14,6 +15,7 @@ class BattlefieldPresenter(
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
     private val playerApi: PlayerApi,
+    private val unitApi: UnitApi,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate {
 
@@ -54,9 +56,10 @@ class BattlefieldPresenter(
         val occupantId = battlefieldApi.searchOccupant(row, column)
         if(occupantId != null) {
             val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
-            battleUnitInfoView.display(battleUnit)
+            val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+            battleUnitInfoView.display(battleUnit, unit)
         }else{
-            battleUnitInfoView.clear()
+            battleUnitInfoView.hide()
         }
     }
 }

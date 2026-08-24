@@ -1,6 +1,7 @@
 package screen
 
 import battleunit.domain.BattleUnit
+import unit.domain.Unit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.text.TextAlignment
@@ -8,6 +9,8 @@ import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
 import korlibs.korge.style.textColor
 import korlibs.korge.ui.UIButton
+import korlibs.korge.ui.UIProgressBar
+import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiHorizontalStack
@@ -17,6 +20,7 @@ import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
+import korlibs.korge.view.Text
 import korlibs.korge.view.align.centerXOn
 import korlibs.korge.view.container
 import korlibs.korge.view.setText
@@ -26,6 +30,12 @@ import korlibs.math.geom.*
 class BattleUnitInfoView: Container() {
 
     private lateinit var battleUnitAvatar: UIButton
+    private lateinit var unitNameLabel: UIText
+    private lateinit var remainingTurnActionsLabel: UIText
+    private lateinit var healthLabel: Text
+    private lateinit var healthBar: UIProgressBar
+    private lateinit var manaLabel: Text
+    private lateinit var manaBar: UIProgressBar
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
@@ -43,17 +53,17 @@ class BattleUnitInfoView: Container() {
                 }
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
-                    uiText("Goblin", size = Size(width = 281.5, height = 14))
-                    uiText("Movements left: 2    Remaining casts: 1", size = Size(width = 281.5, height = 14)) {}
+                    unitNameLabel = uiText("", size = Size(width = 281.5, height = 14))
+                    remainingTurnActionsLabel = uiText("", size = Size(width = 281.5, height = 14)) {}
                     uiSpacing(Size(0, 15))
                     container {
-                        val healthBar =
+                        healthBar =
                             uiProgressBar(size = Size(281.5, 16), current = 75f, maximum = 100f).also { progressBar ->
                                 progressBar.styles.uiSelectedColor = RGBA(255, 55, 95)
                                 progressBar.styles.uiBackgroundColor = Colors.DIMGREY
                             }
-                        val healthLabel = text(
-                            text = "75 / 100",
+                        healthLabel = text(
+                            text = "",
                             textSize = 14.0,
                             color = Colors.WHITE
                         )
@@ -63,13 +73,13 @@ class BattleUnitInfoView: Container() {
 
                     uiSpacing(Size(0, 4))
                     container {
-                        val manaBar =
+                        manaBar =
                             uiProgressBar(size = Size(281.5, 16), current = 40f, maximum = 100f).also { progressBar ->
                                 progressBar.styles.uiSelectedColor = RGBA(0, 145, 255)
                                 progressBar.styles.uiBackgroundColor = Colors.DIMGREY
                             }
-                        val manaLabel = text(
-                            text = "40 / 100",
+                        manaLabel = text(
+                            text = "",
                             textSize = 14.0,
                             color = Colors.WHITE
                         )
@@ -92,14 +102,27 @@ class BattleUnitInfoView: Container() {
 
 
     init {
+        visible = false
         addChild(battleUnitInfoLayout)
     }
 
-    fun display(battleUnit: BattleUnit.Dto) {
+    fun display(battleUnit: BattleUnit.Dto, unit: Unit.Dto) {
+        visible = true
+        // Avatar
         battleUnitAvatar.setText("*")
+        // Name
+        unitNameLabel.setText(unit.name)
+        // Remaining turn actions
+        remainingTurnActionsLabel.setText("Movements left: ${battleUnit.remainingTurnActions.remainingSteps}    Remaining casts: ${battleUnit.remainingTurnActions.remainingCasts}")
+        // Health
+        healthLabel.setText("${battleUnit.remainingHealthPoints} / ${unit.healthPoints}")
+        healthBar.current = (battleUnit.remainingHealthPoints.toDouble() / unit.healthPoints.toDouble()) * 100
+        // Mana
+        manaLabel.setText("${battleUnit.remainingManaPoints} / ${unit.manaPoints}")
+        manaBar.current = (battleUnit.remainingManaPoints.toDouble() / unit.manaPoints.toDouble()) * 100
     }
 
-    fun clear() {
-        battleUnitAvatar.setText("")
+    fun hide() {
+        visible = false
     }
 }

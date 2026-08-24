@@ -66,7 +66,7 @@ class MyScene : Scene() {
         // Main scene
         val battlefieldView = BattlefieldView()
         val battleUnitInfoView = BattleUnitInfoView()
-        val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battleUnitInfoView, battlefieldApi, battleUnitApi, playerApi, eventBus)
+        val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battleUnitInfoView, battlefieldApi, battleUnitApi, playerApi, unitApi, eventBus)
 
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))

@@ -39,6 +39,10 @@ data class BattleUnit private constructor(
     fun toDto() = Dto(
         id = id.value,
         playerId = playerId.value,
+        remainingHealthPoints = remainingHealthPoints.value,
+        remainingManaPoints = remainingManaPoints.value,
+        remainingTurnActions = remainingTurnActions.toDto(),
+        unitId = unitId.value,
     )
 
     @JvmInline private value class Id(val value: String)
@@ -53,6 +57,11 @@ data class BattleUnit private constructor(
         constructor(movementRange: Int): this(RemainingSteps(movementRange), RemainingCasts(1))
         @JvmInline private value class RemainingSteps(val value: Int)
         @JvmInline private value class RemainingCasts(val value: Int)
+
+        fun toDto() = Dto.RemainingTurnActionsDto(
+            remainingCasts = remainingSteps.value,
+            remainingSteps = remainingCasts.value
+        )
     }
     @JvmInline private value class AbilityCooldowns(val value: Map<AbilityId, CooldownTurnsLeft>){
         constructor(abilities: List<String>) : this(abilities.associate {
@@ -76,5 +85,14 @@ data class BattleUnit private constructor(
     data class Dto(
         val id: String,
         val playerId: String,
-    )
+        val remainingHealthPoints: Int,
+        val remainingManaPoints: Int,
+        val remainingTurnActions: RemainingTurnActionsDto,
+        val unitId: String,
+    ){
+        data class RemainingTurnActionsDto(
+            val remainingCasts: Int,
+            val remainingSteps: Int,
+        )
+    }
 }
