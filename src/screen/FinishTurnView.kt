@@ -7,10 +7,10 @@ import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 import korlibs.math.geom.*
 
-class FinishTurnView(container: Container) {
+class FinishTurnView: Container() {
 
     private var delegate: Delegate? = null
-    private val button = container.uiButton("Finish turn")
+    private val button = uiButton("Finish turn")
         .also { button ->
             button.size = Size(width= 390, height=48.75)
             button.bgColorOut = RGBA(0, 136, 255)
@@ -24,7 +24,7 @@ class FinishTurnView(container: Container) {
         }
 
     init {
-        container.addChild(button)
+        addChild(button)
     }
 
     fun setDelegate(delegate: Delegate) {
