@@ -36,6 +36,7 @@ class BattleUnitInfoView: Container() {
     private lateinit var healthBar: UIProgressBar
     private lateinit var manaLabel: Text
     private lateinit var manaBar: UIProgressBar
+    private lateinit var abilityButtons: Array<UIButton?>
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
@@ -89,13 +90,15 @@ class BattleUnitInfoView: Container() {
                 }
             }
             uiHorizontalStack(padding = 2.0) {
-                repeat(6) {
-                    uiButton().also { button ->
+                abilityButtons = arrayOfNulls(6)
+                repeat(6) { index ->
+                    val abilityButton = uiButton().also { button ->
                         button.size = Size(width = 48.75, height = 48.75)
                         button.bgColorOut = Colors.WHITE
                         button.bgColorOver = Colors.LIGHTSKYBLUE
                         button.background.borderColor = Colors.LIGHTGRAY
                     }
+                    abilityButtons[index] = abilityButton
                 }
             }
         }
@@ -107,6 +110,7 @@ class BattleUnitInfoView: Container() {
     }
 
     fun display(battleUnit: BattleUnit.Dto, unit: Unit.Dto) {
+        abilityButtons.forEach { it?.visible = false }
         visible = true
         // Avatar
         battleUnitAvatar.setText("*")
@@ -120,6 +124,12 @@ class BattleUnitInfoView: Container() {
         // Mana
         manaLabel.setText("${battleUnit.remainingManaPoints} / ${unit.manaPoints}")
         manaBar.current = (battleUnit.remainingManaPoints.toDouble() / unit.manaPoints.toDouble()) * 100
+        // Abilities
+        battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
+            abilityButtons[index]?.also { abilityButton ->
+                abilityButton.visible = true
+            }
+        }
     }
 
     fun hide() {

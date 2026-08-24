@@ -42,6 +42,7 @@ data class BattleUnit private constructor(
         remainingHealthPoints = remainingHealthPoints.value,
         remainingManaPoints = remainingManaPoints.value,
         remainingTurnActions = remainingTurnActions.toDto(),
+        abilityCooldowns = abilityCooldowns.toDto(),
         unitId = unitId.value,
     )
 
@@ -64,12 +65,14 @@ data class BattleUnit private constructor(
         )
     }
     @JvmInline private value class AbilityCooldowns(val value: Map<AbilityId, CooldownTurnsLeft>){
+
         constructor(abilities: List<String>) : this(abilities.associate {
             abilityId -> AbilityId(abilityId) to CooldownTurnsLeft(0)
         })
 
         @JvmInline private value class AbilityId(val value: String)
         @JvmInline private value class CooldownTurnsLeft(val value: Int)
+        fun toDto(): Map<String, Int> = value.entries.associate { it.key.value to it.value.value }
     }
     @JvmInline private value class OngoingEffects(val value: List<Effect>){
         constructor(): this(emptyList())
@@ -88,6 +91,7 @@ data class BattleUnit private constructor(
         val remainingHealthPoints: Int,
         val remainingManaPoints: Int,
         val remainingTurnActions: RemainingTurnActionsDto,
+        val abilityCooldowns: Map<String, Int>,
         val unitId: String,
     ){
         data class RemainingTurnActionsDto(
