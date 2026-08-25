@@ -1,11 +1,13 @@
 package battlefield.domain
 
+import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.domain.Battlefield.Dto.TileDto
 import battlefield.domain.BattlefieldError.TileIsNotVacant
 import battlefield.domain.BattlefieldError.TileNotFound
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
 import battlefield.domain.BattlefieldEvent.OccupantRemoved
+import kotlin.Int
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -62,6 +64,14 @@ data class Battlefield private constructor(
         return tiles.occupant(row, column)
     }
 
+    fun position(battleUnitId: String): PositionDto? = tiles.position(battleUnitId)
+
+    fun isInBoundaries(row: Int, column: Int): Boolean {
+        if(row < 0 || row >= rows.value) return false
+        if(column < 0 || column >= rows.value) return false
+        return true
+    }
+
     @JvmInline private value class Rows(val value: Int)
     @JvmInline private value class Columns(val value: Int)
     @JvmInline private value class Tiles(val tiles: Map<Position, Tile>) {
@@ -100,13 +110,17 @@ data class Battlefield private constructor(
             return Tiles(updatedTiles)
         }
 
-        fun toDto(): Map<Dto.PositionDto, TileDto> = this.tiles.map { entry ->
-            Dto.PositionDto(entry.key.row, entry.key.column) to entry.value.toDto()
+        fun toDto(): Map<PositionDto, TileDto> = this.tiles.map { entry ->
+            PositionDto(entry.key.row, entry.key.column) to entry.value.toDto()
         }.toMap()
 
         fun occupant(row: Int, column: Int): String? {
             return tiles[Position(row = row, column = column)]?.toDto()?.battleUnitId
         }
+
+        fun position(battleUnitId: String): PositionDto? = tiles.entries
+            .firstOrNull { (_, tile) -> tile.isOccupiedBy(battleUnitId) }
+            ?.key?.toDto()
 
         companion object {
             fun create(tiles: List<List<String>>): Tiles {
@@ -143,7 +157,9 @@ data class Battlefield private constructor(
             )
         }
 
-        private data class Position(val row: Int, val column: Int)
+        private data class Position(val row: Int, val column: Int){
+            fun toDto() = PositionDto(row = row, column = column)
+        }
         @JvmInline private value class OccupyingBattleUnitId(val value: String)
         @JvmInline private value class TerrainId(val value: String)
     }

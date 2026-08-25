@@ -76,4 +76,11 @@ class BattlefieldView: Container() {
         fun tileSelected(row: Int, column: Int)
     }
 
+    fun displayPotentialMovement(row: Int, column: Int) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.background.bgColor = Colors.GREEN
+        tileButton.bgColorOut = Colors.GREEN
+        tileButton.bgColorOver = Colors.DARKGREEN
+    }
+
 }

@@ -53,13 +53,24 @@ class BattlefieldPresenter(
     }
 
     override fun tileSelected(row: Int, column: Int) {
+        // TODO: Reset battlefield style
         val occupantId = battlefieldApi.searchOccupant(row, column)
         if(occupantId != null) {
             // Display battle unit info
             val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
             val unit = unitApi.searchUnitById(battleUnit.unitId)!!
             battleUnitInfoView.display(battleUnit, unit)
-            // TODO: Display movement range
+            val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
+                battleUnitId = battleUnit.id,
+                distance = battleUnit.remainingTurnActions.remainingSteps
+            )
+            tilesThatCanBeOccupied.forEach{ position ->
+                battlefieldView.displayPotentialMovement(
+                    row = position.row,
+                    column = position.column
+                )
+            }
+
         }else{
             battleUnitInfoView.hide()
         }
