@@ -38,6 +38,7 @@ class BattlefieldPresenter(
         eventBus.subscribe<BattlefieldEvent.OccupantRemoved> {
 
         },
+        // TODO: On turn finished, clear selection
     )
 
     init {
@@ -143,12 +144,20 @@ class BattlefieldPresenter(
         if(selectionState !is BattleUnitSelected) return
         val battleUnitSelected = selectionState as BattleUnitSelected
         val castPositions = battleUnitApi.whereCanCast(battleUnitSelected.battleUnitId, abilityId)
+        if(castPositions.isEmpty()) return
+        battlefieldView.resetTiles()
         castPositions.forEach { position ->
             battlefieldView.displayPotentialCast(
                 row = position.row,
                 column = position.column
             )
         }
+        selectionState = AbilitySelected(
+            row = battleUnitSelected.row,
+            column = battleUnitSelected.column,
+            battleUnitId = battleUnitSelected.battleUnitId,
+            abilityId = abilityId
+        )
     }
 
     private sealed interface SelectionState{
