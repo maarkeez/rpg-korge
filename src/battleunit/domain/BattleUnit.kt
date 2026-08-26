@@ -76,6 +76,7 @@ data class BattleUnit private constructor(
     }
 
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
+    fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
 
     @JvmInline private value class Id(val value: String)
     @JvmInline private value class UnitId(val value: String)

@@ -52,7 +52,7 @@ class MyScene : Scene() {
         val battlefieldApi = BattlefieldApi(eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
-        val battleUnitApi = BattleUnitApi(unitApi, playerApi, battlefieldApi, eventBus)
+        val battleUnitApi = BattleUnitApi(abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,

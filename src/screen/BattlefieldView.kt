@@ -81,6 +81,13 @@ class BattlefieldView: Container() {
         tileButton.bgColorOver = Colors.DARKGREEN
     }
 
+    fun displayPotentialCast(row: Int, column: Int) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.background.bgColor = Colors.RED
+        tileButton.bgColorOut = Colors.RED
+        tileButton.bgColorOver = Colors.DARKRED
+    }
+
     fun resetTiles() {
         battlefieldGrid.children.forEach {
             val tileButton = it as UIButton

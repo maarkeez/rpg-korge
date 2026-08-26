@@ -5,6 +5,7 @@ import unit.domain.Unit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.text.TextAlignment
+import korlibs.korge.input.onClick
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
 import korlibs.korge.style.textColor
@@ -37,6 +38,7 @@ class BattleUnitInfoView: Container() {
     private lateinit var manaLabel: Text
     private lateinit var manaBar: UIProgressBar
     private lateinit var abilityButtons: Array<UIButton?>
+    private var delegate: Delegate? = null
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
@@ -109,6 +111,10 @@ class BattleUnitInfoView: Container() {
         addChild(battleUnitInfoLayout)
     }
 
+    fun setDelegate(delegate: Delegate) {
+        this.delegate = delegate
+    }
+
     fun display(battleUnit: BattleUnit.Dto, unit: Unit.Dto) {
         abilityButtons.forEach { it?.visible = false }
         visible = true
@@ -128,11 +134,16 @@ class BattleUnitInfoView: Container() {
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
             abilityButtons[index]?.also { abilityButton ->
                 abilityButton.visible = true
+                abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }
         }
     }
 
     fun hide() {
         visible = false
+    }
+
+    interface Delegate {
+        fun abilitySelected(abilityId: String)
     }
 }

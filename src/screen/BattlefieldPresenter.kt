@@ -7,6 +7,7 @@ import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnitEvent
 import player.adapters.presentation.PlayerApi
+import screen.BattlefieldPresenter.SelectionState.AbilitySelected
 import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
 import screen.BattlefieldPresenter.SelectionState.NothingSelected
 import shared.domain.EventBus
@@ -21,7 +22,7 @@ class BattlefieldPresenter(
     private val playerApi: PlayerApi,
     private val unitApi: UnitApi,
     eventBus: EventBus,
-) : BattlefieldView.Delegate {
+) : BattlefieldView.Delegate, BattleUnitInfoView.Delegate {
 
     private var selectionState: SelectionState = NothingSelected
 
@@ -41,6 +42,7 @@ class BattlefieldPresenter(
 
     init {
         battlefieldView.setDelegate(this)
+        battleUnitInfoView.setDelegate(this)
     }
 
     fun displayBattlefield() {
@@ -70,6 +72,7 @@ class BattlefieldPresenter(
         when (selectionState) {
             is NothingSelected -> onNothingSelectedATileWasSelected(row, column)
             is BattleUnitSelected -> onBattleUnitSelectedATileWasSelected(row, column)
+            is AbilitySelected -> {}
         }
     }
 
@@ -136,8 +139,21 @@ class BattlefieldPresenter(
         battlefieldView.resetTiles()
     }
 
+    override fun abilitySelected(abilityId: String) {
+        if(selectionState !is BattleUnitSelected) return
+        val battleUnitSelected = selectionState as BattleUnitSelected
+        val castPositions = battleUnitApi.whereCanCast(battleUnitSelected.battleUnitId, abilityId)
+        castPositions.forEach { position ->
+            battlefieldView.displayPotentialCast(
+                row = position.row,
+                column = position.column
+            )
+        }
+    }
+
     private sealed interface SelectionState{
         object NothingSelected : SelectionState
         data class BattleUnitSelected(val row: Int, val column: Int, val battleUnitId: String) : SelectionState
+        data class AbilitySelected(val row: Int, val column: Int, val battleUnitId: String, val abilityId: String) : SelectionState
     }
 }
