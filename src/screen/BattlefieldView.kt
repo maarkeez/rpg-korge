@@ -83,4 +83,13 @@ class BattlefieldView: Container() {
         tileButton.bgColorOver = Colors.DARKGREEN
     }
 
+    fun resetTiles() {
+        battlefieldGrid.children.forEach {
+            val tileButton = it as UIButton
+            tileButton.bgColorOut = Colors.WHITE
+            tileButton.bgColorOver = Colors.LIGHTSKYBLUE
+            tileButton.background.borderColor = Colors.LIGHTGRAY
+        }
+    }
+
 }

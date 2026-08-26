@@ -5,6 +5,8 @@ import battlefield.domain.BattlefieldEvent
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battleunit.adapters.presentation.BattleUnitApi
 import player.adapters.presentation.PlayerApi
+import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
+import screen.BattlefieldPresenter.SelectionState.NothingSelected
 import shared.domain.EventBus
 import shared.domain.Subscription
 import unit.adapters.presentation.UnitApi
@@ -18,6 +20,8 @@ class BattlefieldPresenter(
     private val unitApi: UnitApi,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate {
+
+    private var selectionState: SelectionState = NothingSelected
 
     private val subscriptions = listOf(
         eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -53,26 +57,58 @@ class BattlefieldPresenter(
     }
 
     override fun tileSelected(row: Int, column: Int) {
-        // TODO: Reset battlefield style
+        when (selectionState) {
+            is NothingSelected -> onNothingSelectedATileWasSelected(row, column)
+            is BattleUnitSelected -> onBattleUnitSelectedATileWasSelected(row, column)
+        }
+    }
+
+    private fun onNothingSelectedATileWasSelected(row: Int, column: Int) {
         val occupantId = battlefieldApi.searchOccupant(row, column)
         if(occupantId != null) {
-            // Display battle unit info
-            val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
-            val unit = unitApi.searchUnitById(battleUnit.unitId)!!
-            battleUnitInfoView.display(battleUnit, unit)
-            val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
-                battleUnitId = battleUnit.id,
-                distance = battleUnit.remainingTurnActions.remainingSteps
-            )
-            tilesThatCanBeOccupied.forEach{ position ->
-                battlefieldView.displayPotentialMovement(
-                    row = position.row,
-                    column = position.column
-                )
-            }
-
+            selectBattleUnit(row, column, occupantId)
         }else{
-            battleUnitInfoView.hide()
+            clearSelection()
         }
+    }
+
+    private fun onBattleUnitSelectedATileWasSelected(row: Int, column: Int) {
+        val occupantId = battlefieldApi.searchOccupant(row, column)
+        val currentState = selectionState as BattleUnitSelected
+        if(occupantId!= null && occupantId != currentState.battleUnitId) {
+            clearSelection()
+            selectBattleUnit(row, column, occupantId)
+        }else{
+            clearSelection()
+            // TODO: Implement movement
+        }
+    }
+
+    private fun selectBattleUnit(row: Int, column: Int, occupantId: String) {
+        selectionState = BattleUnitSelected(row, column, occupantId)
+        val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
+        val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+        battleUnitInfoView.display(battleUnit, unit)
+        val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
+            battleUnitId = battleUnit.id,
+            distance = battleUnit.remainingTurnActions.remainingSteps
+        )
+        tilesThatCanBeOccupied.forEach { position ->
+            battlefieldView.displayPotentialMovement(
+                row = position.row,
+                column = position.column
+            )
+        }
+    }
+
+    private fun clearSelection() {
+        selectionState = NothingSelected
+        battleUnitInfoView.hide()
+        battlefieldView.resetTiles()
+    }
+
+    private sealed interface SelectionState{
+        object NothingSelected : SelectionState
+        data class BattleUnitSelected(val row: Int, val column: Int, val battleUnitId: String) : SelectionState
     }
 }
