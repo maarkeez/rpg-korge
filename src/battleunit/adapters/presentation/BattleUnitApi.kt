@@ -1,10 +1,12 @@
 package battleunit.adapters.presentation
 
 import battlefield.adapters.presentation.BattlefieldApi
+import battleunit.adapters.events.OnPlayerTurnStarted
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitRepository
 import battleunit.usecases.commands.DeployBattleUnit
 import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.commands.ResetBattleUnitActions
 import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.SearchBattleUnitById
 import battleunit.usecases.services.DistanceService
@@ -39,6 +41,7 @@ class BattleUnitApi(
         battlefieldApi.searchPosition,
         distanceService,
     )
+    val resetBattleUnitActions = ResetBattleUnitActions(battleUnitRepository)
 
     // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
@@ -47,4 +50,7 @@ class BattleUnitApi(
         battlefieldApi.searchPosition,
         distanceService
     )
+
+    // Events
+    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActions, eventBus)
 }

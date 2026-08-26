@@ -6,9 +6,17 @@ import kotlin.collections.set
 
 class InMemoryBattleUnitRepository: BattleUnitRepository {
     private val battleUnits = mutableMapOf<String, BattleUnit>()
+
     override fun create(battleUnit: BattleUnit) {
         battleUnits[battleUnit.toDto().id] = battleUnit
     }
 
+    override fun update(battleUnit: BattleUnit) {
+        battleUnits[battleUnit.toDto().id] = battleUnit
+    }
+
     override fun searchById(id: String) = battleUnits[id]
+
+    override fun searchByPlayerId(playerId: String) = battleUnits.values
+        .filter { it.toDto().playerId == playerId }
 }

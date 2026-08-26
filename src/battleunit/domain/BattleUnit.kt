@@ -70,6 +70,11 @@ data class BattleUnit private constructor(
         )
     }
 
+    fun resetActions(): BattleUnit {
+        val remainingTurnActions = remainingTurnActions.reset()
+        return copy(remainingTurnActions = remainingTurnActions)
+    }
+
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
 
     @JvmInline private value class Id(val value: String)
@@ -78,10 +83,12 @@ data class BattleUnit private constructor(
     @JvmInline private value class RemainingHealthPoints(val value: Int)
     @JvmInline private value class RemainingManaPoints(val value: Int)
     private data class RemainingTurnActions(
+        private val movementRange: MovementRange,
         private val remainingSteps: RemainingSteps,
         private val remainingCasts: RemainingCasts
     ){
-        constructor(movementRange: Int): this(RemainingSteps(movementRange), RemainingCasts(1))
+        constructor(movementRange: Int): this(MovementRange(movementRange), RemainingSteps(movementRange), RemainingCasts(1))
+        @JvmInline private value class MovementRange(val value: Int)
         @JvmInline private value class RemainingSteps(val value: Int)
         @JvmInline private value class RemainingCasts(val value: Int)
 
@@ -95,6 +102,13 @@ data class BattleUnit private constructor(
             if(distance <= 0) throw MovementDistanceMustBeGreaterThanZero()
             if(!canMoveDistance(distance)) throw MovementDistanceExceedsRemainingSteps()
             return copy(remainingSteps = RemainingSteps(remainingSteps.value - distance))
+        }
+
+        fun reset(): RemainingTurnActions {
+            return copy(
+                remainingSteps = RemainingSteps(movementRange.value),
+                remainingCasts = RemainingCasts(1)
+            )
         }
     }
     @JvmInline private value class AbilityCooldowns(val value: Map<AbilityId, CooldownTurnsLeft>){
