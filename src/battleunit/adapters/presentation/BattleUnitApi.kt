@@ -4,7 +4,10 @@ import battlefield.adapters.presentation.BattlefieldApi
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitRepository
 import battleunit.usecases.commands.DeployBattleUnit
+import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.SearchBattleUnitById
+import battleunit.usecases.services.DistanceService
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
 import unit.adapters.presentation.UnitApi
@@ -19,6 +22,9 @@ class BattleUnitApi(
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
 
+    // Services
+    private val distanceService = DistanceService()
+
     // Commands
     val deployBattleUnit = DeployBattleUnit(
         battleUnitRepository,
@@ -27,8 +33,18 @@ class BattleUnitApi(
         playerApi.searchPlayerById,
         battlefieldApi.canBattlefieldTileBeOccupied
     )
+    val moveBattleUnit = MoveBattleUnit(
+        battleUnitRepository,
+        eventBus,
+        battlefieldApi.searchPosition,
+        distanceService,
+    )
 
     // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
-
+    val canMoveTo = CanMoveTo(
+        battleUnitRepository,
+        battlefieldApi.searchPosition,
+        distanceService
+    )
 }

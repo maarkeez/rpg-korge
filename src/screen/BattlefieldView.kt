@@ -8,12 +8,10 @@ import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
 import korlibs.korge.style.textColor
 import korlibs.korge.ui.UIButton
-import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
 import korlibs.korge.ui.uiText
 import korlibs.korge.view.Container
-import korlibs.korge.view.position
 import korlibs.korge.view.setText
 import korlibs.math.geom.*
 
@@ -62,12 +60,12 @@ class BattlefieldView: Container() {
 
     private fun tileName(row: Int, column: Int): String = "row-$row-column-$column"
 
-    fun displayHumanBattlefieldUnit(row: Int, column: Int) {
+    fun displayHumanBattleUnit(row: Int, column: Int) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column))
         tileButton.setText("H")
     }
 
-    fun displayCPUBattlefieldUnit(row: Int, column: Int) {
+    fun displayCPUBattleUnit(row: Int, column: Int) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column))
         tileButton.setText("CPU")
     }
@@ -90,6 +88,11 @@ class BattlefieldView: Container() {
             tileButton.bgColorOver = Colors.LIGHTSKYBLUE
             tileButton.background.borderColor = Colors.LIGHTGRAY
         }
+    }
+
+    fun removeBattleUnit(row: Int, column: Int) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column))
+        tileButton.setText("")
     }
 
 }

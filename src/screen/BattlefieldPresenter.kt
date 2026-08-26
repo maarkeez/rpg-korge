@@ -1,9 +1,11 @@
 package screen
 
 import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.domain.Battlefield
 import battlefield.domain.BattlefieldEvent
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.domain.BattleUnitEvent
 import player.adapters.presentation.PlayerApi
 import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
 import screen.BattlefieldPresenter.SelectionState.NothingSelected
@@ -25,8 +27,12 @@ class BattlefieldPresenter(
 
     private val subscriptions = listOf(
         eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
-        eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> { event ->
-            displayUnit(event.row, event.column, event.battlefieldUnitId)
+        eventBus.subscribe<BattleUnitEvent.BattleUnitDeployed> { event ->
+            displayUnit(event.row, event.column, event.battleUnitId)
+        },
+        eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
+            removeUnit(event.fromRow, event.fromColumn)
+            displayUnit(event.toRow, event.toColumn, event.battleUnitId)
         },
         eventBus.subscribe<BattlefieldEvent.OccupantRemoved> {
 
@@ -42,14 +48,18 @@ class BattlefieldPresenter(
         battlefieldView.displayBattlefield(battlefield)
     }
 
-    fun displayUnit(row: Int, column: Int, battlefieldUnitId: String) {
-        val battleUnit = battleUnitApi.searchBattleUnitById(battlefieldUnitId) ?: return
+    fun displayUnit(row: Int, column: Int, battleUnitId: String) {
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         val player = playerApi.searchPlayerById(battleUnit.playerId)!!
         if(player.type == "HUMAN"){
-            battlefieldView.displayHumanBattlefieldUnit(row, column)
+            battlefieldView.displayHumanBattleUnit(row, column)
         }else{
-            battlefieldView.displayCPUBattlefieldUnit(row, column)
+            battlefieldView.displayCPUBattleUnit(row, column)
         }
+    }
+
+    fun removeUnit(row: Int, column: Int) {
+        battlefieldView.removeBattleUnit(row, column)
     }
 
     fun dispose() {
@@ -75,12 +85,24 @@ class BattlefieldPresenter(
     private fun onBattleUnitSelectedATileWasSelected(row: Int, column: Int) {
         val occupantId = battlefieldApi.searchOccupant(row, column)
         val currentState = selectionState as BattleUnitSelected
-        if(occupantId!= null && occupantId != currentState.battleUnitId) {
+        if(occupantId == null) {
+            clearSelection()
+            val battleUnit = battleUnitApi.searchBattleUnitById(currentState.battleUnitId)!!
+            val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
+                battleUnitId = currentState.battleUnitId,
+                distance = battleUnit.remainingTurnActions.remainingSteps
+            )
+            val selectedTileInMovementRange = tilesThatCanBeOccupied.contains(Battlefield.Dto.PositionDto(row, column))
+            val player = playerApi.searchPlayerById(battleUnit.playerId)!!
+            val isHumanPlayer = player.type == "HUMAN"
+            if(selectedTileInMovementRange && isHumanPlayer) {
+                battleUnitApi.moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = row, moveToColumn = column)
+            }
+        } else if(occupantId == currentState.battleUnitId) {
+            clearSelection()
+        } else if(occupantId != currentState.battleUnitId) {
             clearSelection()
             selectBattleUnit(row, column, occupantId)
-        }else{
-            clearSelection()
-            // TODO: Implement movement
         }
     }
 
@@ -93,7 +115,14 @@ class BattlefieldPresenter(
             battleUnitId = battleUnit.id,
             distance = battleUnit.remainingTurnActions.remainingSteps
         )
-        tilesThatCanBeOccupied.forEach { position ->
+        val tilesWhereCanBeMoved = tilesThatCanBeOccupied.filter { tilePosition ->
+            battleUnitApi.canMoveTo(
+                battleUnitId = battleUnit.id,
+                moveToRow = tilePosition.row,
+                moveToColumn = tilePosition.column
+            )
+        }
+        tilesWhereCanBeMoved.forEach { position ->
             battlefieldView.displayPotentialMovement(
                 row = position.row,
                 column = position.column

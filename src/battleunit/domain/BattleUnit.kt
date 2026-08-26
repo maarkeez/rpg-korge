@@ -1,6 +1,9 @@
 package battleunit.domain
 
+import battleunit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
+import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
+import battleunit.domain.BattleUnitEvent.BattleUnitMoved
 import player.domain.Player
 import unit.domain.Unit
 import kotlin.jvm.JvmInline
@@ -46,6 +49,29 @@ data class BattleUnit private constructor(
         unitId = unitId.value,
     )
 
+    fun move(
+        distance: Int,
+        fromRow: Int,
+        fromColumn: Int,
+        toRow: Int,
+        toColumn: Int,
+    ): BattleUnit {
+        val remainingTurnActions = remainingTurnActions.move(distance)
+        val movedEvent = BattleUnitMoved(
+            battleUnitId = id.value,
+            fromRow = fromRow,
+            fromColumn = fromColumn,
+            toRow = toRow,
+            toColumn = toColumn
+        )
+        return copy(
+            remainingTurnActions = remainingTurnActions,
+            events = events + movedEvent
+        )
+    }
+
+    fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
+
     @JvmInline private value class Id(val value: String)
     @JvmInline private value class UnitId(val value: String)
     @JvmInline private value class PlayerId(val value: String)
@@ -60,9 +86,16 @@ data class BattleUnit private constructor(
         @JvmInline private value class RemainingCasts(val value: Int)
 
         fun toDto() = Dto.RemainingTurnActionsDto(
-            remainingCasts = remainingSteps.value,
-            remainingSteps = remainingCasts.value
+            remainingSteps = remainingSteps.value,
+            remainingCasts = remainingCasts.value,
         )
+
+        fun canMoveDistance(distance: Int): Boolean = distance <= remainingSteps.value
+        fun move(distance: Int): RemainingTurnActions {
+            if(distance <= 0) throw MovementDistanceMustBeGreaterThanZero()
+            if(!canMoveDistance(distance)) throw MovementDistanceExceedsRemainingSteps()
+            return copy(remainingSteps = RemainingSteps(remainingSteps.value - distance))
+        }
     }
     @JvmInline private value class AbilityCooldowns(val value: Map<AbilityId, CooldownTurnsLeft>){
 
