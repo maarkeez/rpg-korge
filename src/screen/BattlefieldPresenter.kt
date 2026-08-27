@@ -1,5 +1,6 @@
 package screen
 
+import battle.domain.BattleEvent
 import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.domain.Battlefield
 import battlefield.domain.BattlefieldEvent
@@ -38,7 +39,9 @@ class BattlefieldPresenter(
         eventBus.subscribe<BattlefieldEvent.OccupantRemoved> {
 
         },
-        // TODO: On turn finished, clear selection
+        eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
+            clearSelection()
+        }
     )
 
     init {
@@ -73,7 +76,7 @@ class BattlefieldPresenter(
         when (selectionState) {
             is NothingSelected -> onNothingSelectedATileWasSelected(row, column)
             is BattleUnitSelected -> onBattleUnitSelectedATileWasSelected(row, column)
-            is AbilitySelected -> {}
+            is AbilitySelected -> onAbilitySelectedATileWasSelected(row, column)
         }
     }
 
@@ -143,6 +146,8 @@ class BattlefieldPresenter(
     override fun abilitySelected(abilityId: String) {
         if(selectionState !is BattleUnitSelected) return
         val battleUnitSelected = selectionState as BattleUnitSelected
+        val canCastAbility = battleUnitApi.canCastAbility(battleUnitSelected.battleUnitId, abilityId)
+        if(!canCastAbility) return
         val castPositions = battleUnitApi.whereCanCast(battleUnitSelected.battleUnitId, abilityId)
         if(castPositions.isEmpty()) return
         battlefieldView.resetTiles()
@@ -158,6 +163,12 @@ class BattlefieldPresenter(
             battleUnitId = battleUnitSelected.battleUnitId,
             abilityId = abilityId
         )
+    }
+
+    private fun onAbilitySelectedATileWasSelected(row: Int, column: Int) {
+        val abilitySelected = selectionState as AbilitySelected
+        battleUnitApi.castAbility(abilitySelected.battleUnitId, abilitySelected.abilityId, row, column)
+        clearSelection()
     }
 
     private sealed interface SelectionState{

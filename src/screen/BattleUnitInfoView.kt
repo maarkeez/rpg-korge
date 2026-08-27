@@ -131,9 +131,18 @@ class BattleUnitInfoView: Container() {
         manaLabel.setText("${battleUnit.remainingManaPoints} / ${unit.manaPoints}")
         manaBar.current = (battleUnit.remainingManaPoints.toDouble() / unit.manaPoints.toDouble()) * 100
         // Abilities
+        val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
             abilityButtons[index]?.also { abilityButton ->
                 abilityButton.visible = true
+                val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
+                if(!canCast || isInCooldown) {
+                    abilityButton.bgColorOut = Colors.DIMGRAY
+                    abilityButton.bgColorOver = Colors.DIMGRAY
+                }else{
+                    abilityButton.bgColorOut = Colors.WHITE
+                    abilityButton.bgColorOver = Colors.LIGHTSKYBLUE
+                }
                 abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }
         }

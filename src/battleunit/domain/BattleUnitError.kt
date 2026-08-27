@@ -6,4 +6,7 @@ sealed class BattleUnitError(message: String) : Throwable(message=message) {
     class BattlefieldTileCanNotBeOccupied : BattleUnitError("Battlefield tile can not be occupied")
     class MovementDistanceExceedsRemainingSteps : BattleUnitError("Movement distance exceeds remaining steps")
     class MovementDistanceMustBeGreaterThanZero : BattleUnitError("Movement distance must be greater than zero")
+    class BattleUnitCanNotCastAbility : BattleUnitError("Battle unit can not cast ability")
+    class InvalidCastPosition : BattleUnitError("Invalid cast position")
+    class AbilityDoesNotExists : BattleUnitError("Ability does not exist")
 }

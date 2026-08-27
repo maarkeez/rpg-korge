@@ -5,9 +5,11 @@ import battlefield.adapters.presentation.BattlefieldApi
 import battleunit.adapters.events.OnPlayerTurnStarted
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitRepository
+import battleunit.usecases.commands.CastAbility
 import battleunit.usecases.commands.DeployBattleUnit
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.commands.ResetBattleUnitActions
+import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.SearchBattleUnitById
 import battleunit.usecases.queries.WhereCanCast
@@ -30,6 +32,23 @@ class BattleUnitApi(
     // Services
     private val distanceService = DistanceService()
 
+    // Queries
+    val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
+    val canMoveTo = CanMoveTo(
+        battleUnitRepository,
+        battlefieldApi.searchPosition,
+        distanceService
+    )
+    val whereCanCast = WhereCanCast(
+        battleUnitRepository,
+        battlefieldApi.searchPosition,
+        abilityApi.searchAbilityById,
+        battlefieldApi.searchOccupant,
+    )
+    val canCastAbility = CanCastAbility(
+        battleUnitRepository,
+    )
+
     // Commands
     val deployBattleUnit = DeployBattleUnit(
         battleUnitRepository,
@@ -45,19 +64,11 @@ class BattleUnitApi(
         distanceService,
     )
     val resetBattleUnitActions = ResetBattleUnitActions(battleUnitRepository)
-
-    // Queries
-    val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
-    val canMoveTo = CanMoveTo(
-        battleUnitRepository,
-        battlefieldApi.searchPosition,
-        distanceService
-    )
-    val whereCanCast = WhereCanCast(
-        battleUnitRepository,
-        battlefieldApi.searchPosition,
+    val castAbility = CastAbility(
+        whereCanCast,
         abilityApi.searchAbilityById,
-        battlefieldApi.searchOccupant,
+        battleUnitRepository,
+        eventBus,
     )
 
     // Events

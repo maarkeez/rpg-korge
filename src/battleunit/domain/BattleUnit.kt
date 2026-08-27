@@ -77,6 +77,25 @@ data class BattleUnit private constructor(
 
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
+    fun canCastAbility(abilityId: String): Boolean {
+      return remainingTurnActions.canCastAbility() && abilityCooldowns.canCastAbility(abilityId)
+    }
+
+    fun castAbility(abilityId: String, abilityCooldown: Int, row: Int, column: Int): BattleUnit {
+        val remainingTurnActions = remainingTurnActions.castAbility()
+        val abilityCooldowns = abilityCooldowns.castAbility(abilityId, abilityCooldown)
+        val abilityCastedEvent = BattleUnitEvent.AbilityCasted(
+            battleUnitId = id.value,
+            abilityId = abilityId,
+            row = row,
+            column = column
+        )
+        return copy(
+            remainingTurnActions = remainingTurnActions,
+            abilityCooldowns = abilityCooldowns,
+            events = events + abilityCastedEvent
+        )
+    }
 
     @JvmInline private value class Id(val value: String)
     @JvmInline private value class UnitId(val value: String)
@@ -111,6 +130,9 @@ data class BattleUnit private constructor(
                 remainingCasts = RemainingCasts(1)
             )
         }
+
+        fun canCastAbility(): Boolean = remainingCasts.value > 0
+        fun castAbility() = copy(remainingCasts = RemainingCasts(remainingCasts.value - 1))
     }
     @JvmInline private value class AbilityCooldowns(val value: Map<AbilityId, CooldownTurnsLeft>){
 
@@ -120,7 +142,21 @@ data class BattleUnit private constructor(
 
         @JvmInline private value class AbilityId(val value: String)
         @JvmInline private value class CooldownTurnsLeft(val value: Int)
+
         fun toDto(): Map<String, Int> = value.entries.associate { it.key.value to it.value.value }
+
+        fun canCastAbility(abilityId: String): Boolean {
+            val cooldownTurnsLeft = value[AbilityId(abilityId)] ?: return false
+            return cooldownTurnsLeft.value == 0
+        }
+
+        fun castAbility(abilityId: String, abilityCooldown: Int): AbilityCooldowns {
+            val abilityCooldowns = buildMap {
+                put(AbilityId(abilityId), CooldownTurnsLeft(abilityCooldown))
+                value.entries.filter { it.key.value != abilityId }.forEach { put(it.key, it.value) }
+            }
+            return AbilityCooldowns(abilityCooldowns)
+        }
     }
     @JvmInline private value class OngoingEffects(val value: List<Effect>){
         constructor(): this(emptyList())
