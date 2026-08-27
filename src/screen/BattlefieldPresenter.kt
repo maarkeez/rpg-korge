@@ -7,6 +7,8 @@ import battlefield.domain.BattlefieldEvent
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnitEvent
+import battleunit.usecases.queries.WhereCanCast
+import battleunit.usecases.queries.WhereCanCast.PositionDto
 import player.adapters.presentation.PlayerApi
 import screen.BattlefieldPresenter.SelectionState.AbilitySelected
 import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
@@ -167,7 +169,10 @@ class BattlefieldPresenter(
 
     private fun onAbilitySelectedATileWasSelected(row: Int, column: Int) {
         val abilitySelected = selectionState as AbilitySelected
-        battleUnitApi.castAbility(abilitySelected.battleUnitId, abilitySelected.abilityId, row, column)
+        val castPositions = battleUnitApi.whereCanCast(abilitySelected.battleUnitId, abilitySelected.abilityId)
+        if(castPositions.contains(PositionDto(row, column))) {
+            battleUnitApi.castAbility(abilitySelected.battleUnitId, abilitySelected.abilityId, row, column)
+        }
         clearSelection()
     }
 
