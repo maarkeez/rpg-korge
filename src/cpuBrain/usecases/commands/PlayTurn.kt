@@ -14,6 +14,7 @@ class PlayTurn(
     private val whereCanCast: WhereCanCast,
     private val castAbility: CastAbility,
     private val finishPlayerTurn: FinishPlayerTurn,
+    private val searchBattleUnitById: SearchBattleUnitById,
 ) {
     operator fun invoke(playerId: String) {
         val player = searchPlayerById(playerId) ?: return
@@ -31,6 +32,7 @@ class PlayTurn(
     }
 
     private fun tryToCastAbility(battleUnit: BattleUnit.Dto) {
+        val battleUnit = searchBattleUnitById(battleUnit.id) ?: return
         if (battleUnit.remainingTurnActions.remainingCasts > 0) {
             battleUnit.abilityCooldowns.entries.filter { it.value == 0 }.randomOrNull()?.key?.let { abilityId ->
                 whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castPosition ->

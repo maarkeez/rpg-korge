@@ -213,8 +213,13 @@ data class BattleUnit private constructor(
 
         fun castAbility(abilityId: String, abilityCooldown: Int): AbilityCooldowns {
             val abilityCooldowns = buildMap {
-                put(AbilityId(abilityId), CooldownTurnsLeft(abilityCooldown))
-                value.entries.filter { it.key.value != abilityId }.forEach { put(it.key, it.value) }
+                value.entries.forEach {
+                    if(it.key.value == abilityId){
+                        put(AbilityId(abilityId), CooldownTurnsLeft(abilityCooldown))
+                    }else {
+                        put(it.key, it.value)
+                    }
+                }
             }
             return AbilityCooldowns(abilityCooldowns)
         }

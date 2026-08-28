@@ -23,6 +23,7 @@ class CpuBrainApi(
         battleUnitApi.whereCanCast,
         battleUnitApi.castAbility,
         battleApi.finishPlayerTurn,
+        battleUnitApi.searchBattleUnitById,
     )
 
     // Events
