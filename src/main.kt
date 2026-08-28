@@ -14,16 +14,8 @@ import korlibs.korge.*
 import korlibs.korge.scene.*
 import korlibs.korge.view.*
 import korlibs.image.color.*
-import korlibs.korge.style.styles
-import korlibs.korge.ui.uiBackgroundColor
-import korlibs.korge.ui.uiButton
-import korlibs.korge.ui.uiHorizontalStack
-import korlibs.korge.ui.uiProgressBar
-import korlibs.korge.ui.uiSelectedColor
 import korlibs.korge.ui.uiSpacing
-import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
-import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
 import player.adapters.presentation.PlayerApi
 import screen.BattleUnitInfoView
@@ -48,11 +40,11 @@ class MyScene : Scene() {
         // Backend APIs
         val unitApi = UnitApi(eventBus)
         val playerApi = PlayerApi(eventBus)
-        val battleApi = BattleApi(eventBus)
         val battlefieldApi = BattlefieldApi(eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+        val battleApi = BattleApi(eventBus, battleUnitApi)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,

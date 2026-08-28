@@ -13,6 +13,7 @@ import battleunit.usecases.commands.ReceiveAbilityEffects
 import battleunit.usecases.commands.ResetBattleUnitActions
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.CanMoveTo
+import battleunit.usecases.queries.HasAllBattleUnitsDefeated
 import battleunit.usecases.queries.SearchBattleUnitById
 import battleunit.usecases.queries.WhereCanCast
 import battleunit.usecases.services.DistanceService
@@ -81,6 +82,7 @@ class BattleUnitApi(
         eventBus,
         battlefieldApi.searchOccupant,
     )
+    val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActions, eventBus)

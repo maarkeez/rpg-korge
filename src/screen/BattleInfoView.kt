@@ -24,4 +24,8 @@ class BattleInfoView(container: Container) {
     fun displayBattleInfo(playerName: String, round: Int){
         label.text = "$playerName turn - Round: $round"
     }
+
+    fun displayPlayerWin(playerName: String) {
+        label.text = "$playerName wins!"
+    }
 }

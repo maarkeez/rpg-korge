@@ -1,9 +1,13 @@
 package screen
 
 import battle.adapters.presentation.BattleApi
+import battle.domain.BattleEvent
+import battle.domain.BattleEvent.PlayerDefeated
 import battle.domain.BattleEvent.PlayerTurnStarted
+import battle.domain.BattleEvent.PlayerVictory
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
+import shared.domain.Subscription
 
 class BattleInfoPresenter(
     private val battleInfoView: BattleInfoView,
@@ -12,9 +16,14 @@ class BattleInfoPresenter(
     eventBus: EventBus,
 ) {
 
-    private val subscription = eventBus.subscribe<PlayerTurnStarted> {
-        updateBattleInfo()
-    }
+    private val subscriptions = listOf(
+        eventBus.subscribe<PlayerTurnStarted> {
+            updateBattleInfo()
+        },
+        eventBus.subscribe<PlayerVictory> { event ->
+            displayPlayerWin(event.playerId)
+        }
+    )
 
     fun updateBattleInfo() {
         val battle = battleApi.searchBattle()!!
@@ -22,7 +31,12 @@ class BattleInfoPresenter(
         battleInfoView.displayBattleInfo(player.name, battle.currentRound)
     }
 
+    fun displayPlayerWin(playerId: String) {
+        val player = playerApi.searchPlayerById(playerId)!!
+        battleInfoView.displayPlayerWin(player.name)
+    }
+
     fun dispose() {
-        subscription.dispose()
+        subscriptions.forEach(Subscription::dispose)
     }
 }

@@ -18,6 +18,7 @@ data class Battle private constructor(
         fun startFirstRound(
             players: List<String>
         ): Battle{
+            if(players.size < 2) throw MinimumTwoPlayersRequired()
             return Battle(
                 turnQueue = TurnQueue(players),
                 currentRound = CurrentRound(1),
@@ -60,6 +61,8 @@ data class Battle private constructor(
         }
     }
 
+    fun isBattleFinished(): Boolean = turnQueue.value.size == 1
+
     fun finishBattle(): Battle = copy(
         isFinished = IsFinished(true),
         events = events + PlayerVictory(turnQueue.value.single()),
@@ -79,11 +82,7 @@ data class Battle private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    @JvmInline private value class TurnQueue(val value: List<String>){
-        init {
-            if(value.size < 2) throw MinimumTwoPlayersRequired()
-        }
-    }
+    @JvmInline private value class TurnQueue(val value: List<String>)
     @JvmInline private value class CurrentRound(val value: Int)
     @JvmInline private value class CurrentPlayerTurn(val value: String)
     @JvmInline private value class IsFinished(val value: Boolean)

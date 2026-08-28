@@ -113,6 +113,8 @@ data class BattleUnit private constructor(
         )
     }
 
+    fun isDefeated() : Boolean = remainingHealthPoints.value <= 0
+
     fun applyImmediateEffect(effect: Effect.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
         if(effect.type == "DECREASE_HEALTH"){
@@ -120,7 +122,10 @@ data class BattleUnit private constructor(
             val newEvents = buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))
                 if(remainingHealthPoints.value <= 0){
-                    add(BattleUnitDefeated(battleUnitId = id.value))
+                    add(BattleUnitDefeated(
+                        playerId = playerId.value,
+                        battleUnitId = id.value
+                    ))
                 }
             }
             return copy(
