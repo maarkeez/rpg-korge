@@ -9,4 +9,5 @@ sealed class BattleUnitError(message: String) : Throwable(message=message) {
     class BattleUnitCanNotCastAbility : BattleUnitError("Battle unit can not cast ability")
     class InvalidCastPosition : BattleUnitError("Invalid cast position")
     class AbilityDoesNotExists : BattleUnitError("Ability does not exist")
+    class FailedToReceiveAbilityEffects : BattleUnitError("Failed to receive ability effects")
 }

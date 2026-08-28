@@ -24,4 +24,17 @@ sealed interface BattleUnitEvent: DomainEvent{
         val row: Int,
         val column: Int
     ): BattleUnitEvent
+
+    data class EffectReceived(
+        val battleUnitId: String,
+        val effectId: String,
+    ): BattleUnitEvent
+
+    data class BattleUnitDamaged(
+        val battleUnitId: String,
+    ): BattleUnitEvent
+
+    data class BattleUnitDefeated(
+        val battleUnitId: String,
+    ): BattleUnitEvent
 }

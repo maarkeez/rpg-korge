@@ -2,8 +2,12 @@ package battleunit.domain
 
 import battleunit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
+import battleunit.domain.BattleUnitEvent.BattleUnitDamaged
+import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
 import battleunit.domain.BattleUnitEvent.BattleUnitMoved
+import battleunit.domain.BattleUnitEvent.EffectReceived
+import effect.domain.Effect
 import player.domain.Player
 import unit.domain.Unit
 import kotlin.jvm.JvmInline
@@ -97,6 +101,38 @@ data class BattleUnit private constructor(
         )
     }
 
+    fun receiveImmediateEffect(effectId: String): BattleUnit {
+        val ongoingEffects = ongoingEffects.receiveImmediateEffect(effectId)
+        val effectReceivedEvent = EffectReceived(
+            battleUnitId = id.value,
+            effectId = effectId
+        )
+        return copy(
+            ongoingEffects = ongoingEffects,
+            events = events + effectReceivedEvent
+        )
+    }
+
+    fun applyImmediateEffect(effect: Effect.Dto): BattleUnit {
+        val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
+        if(effect.type == "DECREASE_HEALTH"){
+            val remainingHealthPoints = RemainingHealthPoints(remainingHealthPoints.value - effect.power)
+            val newEvents = buildList {
+                add(BattleUnitDamaged(battleUnitId = id.value))
+                if(remainingHealthPoints.value <= 0){
+                    add(BattleUnitDefeated(battleUnitId = id.value))
+                }
+            }
+            return copy(
+                ongoingEffects = ongoingEffects,
+                remainingHealthPoints = remainingHealthPoints,
+                events = events + newEvents
+            )
+        }else{
+            TODO("Not implemented yet")
+        }
+    }
+
     @JvmInline private value class Id(val value: String)
     @JvmInline private value class UnitId(val value: String)
     @JvmInline private value class PlayerId(val value: String)
@@ -159,12 +195,22 @@ data class BattleUnit private constructor(
         }
     }
     @JvmInline private value class OngoingEffects(val value: List<Effect>){
+        fun receiveImmediateEffect(effectId: String): OngoingEffects {
+            val newEffect = Effect(EffectId(effectId), ApplicationStatus.Pending)
+            return OngoingEffects(value + newEffect)
+        }
+
+        fun applyPendingEffect(effectId: String): OngoingEffects {
+            // TODO: Validate type
+            return OngoingEffects(value.filter { it.effectId.value != effectId })
+        }
+
         constructor(): this(emptyList())
 
         private data class Effect(val effectId: EffectId, val applicationStatus: ApplicationStatus)
         @JvmInline private value class EffectId(val value: String)
         private sealed interface ApplicationStatus {
-            private object Pending : ApplicationStatus
+            object Pending : ApplicationStatus
             @JvmInline private value class TurnsLeft(val value: Int) : ApplicationStatus
         }
     }
