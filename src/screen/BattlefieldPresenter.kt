@@ -97,10 +97,17 @@ class BattlefieldPresenter(
         if(occupantId == null) {
             clearSelection()
             val battleUnit = battleUnitApi.searchBattleUnitById(currentState.battleUnitId)!!
+            // TODO: Should we have a battle unit use case "where can be moved" instead?
             val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
                 battleUnitId = currentState.battleUnitId,
                 distance = battleUnit.remainingTurnActions.remainingSteps
-            )
+            ).filter { position ->
+                battleUnitApi.canMoveTo(
+                    battleUnitId = currentState.battleUnitId,
+                    moveToRow = position.row,
+                    moveToColumn = position.column,
+                )
+            }
             val selectedTileInMovementRange = tilesThatCanBeOccupied.contains(Battlefield.Dto.PositionDto(row, column))
             val player = playerApi.searchPlayerById(battleUnit.playerId)!!
             val isHumanPlayer = player.type == "HUMAN"
