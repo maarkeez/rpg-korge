@@ -8,3 +8,5 @@ You can find this template at GitHub: <https://github.com/korlibs/korge-hello-wo
 
 You can find the KorGE documentation here: <https://docs.korge.org/korge/>
 # rpg-korge
+
+You can play this game at https://maarkeez.github.io/rpg-korge/
