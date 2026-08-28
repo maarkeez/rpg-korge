@@ -50,8 +50,13 @@ data class Battlefield private constructor(
 
     fun removeOccupant(battleUnitId: String): Battlefield {
         if(!tiles.isDeployed(battleUnitId)) return this
+        val occupantPosition = tiles.position(battleUnitId)!!
         val updatedTiles = tiles.removeOccupant(battleUnitId)
-        val occupantRemovedEvent = OccupantRemoved(battleUnitId = battleUnitId)
+        val occupantRemovedEvent = OccupantRemoved(
+            battleUnitId = battleUnitId,
+            row = occupantPosition.row,
+            column = occupantPosition.column,
+        )
         return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
     }
 

@@ -38,8 +38,8 @@ class BattlefieldPresenter(
             removeUnit(event.fromRow, event.fromColumn)
             displayUnit(event.toRow, event.toColumn, event.battleUnitId)
         },
-        eventBus.subscribe<BattlefieldEvent.OccupantRemoved> {
-
+        eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
+            removeUnit(event.row, event.column)
         },
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
             clearSelection()

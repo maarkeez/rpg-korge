@@ -1,5 +1,6 @@
 package battlefield.adapters.presentation
 
+import battlefield.adapters.events.OnBattleUnitDefeated
 import battlefield.adapters.events.OnBattleUnitDeployed
 import battlefield.adapters.events.OnBattleUnitMoved
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
@@ -32,4 +33,5 @@ class BattlefieldApi(eventBus: EventBus) {
     // Event Listeners
     private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(updateBattlefieldOccupancy, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
 }
