@@ -31,6 +31,10 @@ class FinishTurnView: Container() {
         this.delegate = delegate
     }
 
+    fun hide() {
+        visible = false
+    }
+
     interface Delegate {
         fun finishTurn()
     }

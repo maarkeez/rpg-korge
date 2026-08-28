@@ -15,7 +15,9 @@ import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.HasAllBattleUnitsDefeated
 import battleunit.usecases.queries.SearchBattleUnitById
+import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
 import battleunit.usecases.queries.WhereCanCast
+import battleunit.usecases.queries.WhereCanMove
 import battleunit.usecases.services.DistanceService
 import effect.adapters.presentation.EffectApi
 import player.adapters.presentation.PlayerApi
@@ -44,11 +46,17 @@ class BattleUnitApi(
         battlefieldApi.searchPosition,
         distanceService
     )
+    val whereCanMove = WhereCanMove(
+        battleUnitRepository,
+        battlefieldApi.searchTilesThatCanBeOccupied,
+        canMoveTo,
+    )
     val whereCanCast = WhereCanCast(
         battleUnitRepository,
         battlefieldApi.searchPosition,
         abilityApi.searchAbilityById,
         battlefieldApi.searchOccupant,
+        distanceService,
     )
     val canCastAbility = CanCastAbility(
         battleUnitRepository,
@@ -83,6 +91,7 @@ class BattleUnitApi(
         battlefieldApi.searchOccupant,
     )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
+    val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActions, eventBus)

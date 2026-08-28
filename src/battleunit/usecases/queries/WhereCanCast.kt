@@ -6,12 +6,14 @@ import battlefield.usecases.queries.SearchOccupant
 import battlefield.usecases.queries.SearchPosition
 import battleunit.domain.BattleUnit
 import battleunit.domain.BattleUnitRepository
+import battleunit.usecases.services.DistanceService
 
 class WhereCanCast(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val searchAbilityById: SearchAbilityById,
     private val searchOccupant: SearchOccupant,
+    private val distanceService: DistanceService,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -35,6 +37,13 @@ class WhereCanCast(
                     val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
                     if(occupantBattleUnit.isSamePlayer(battleUnit)) continue
                     val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
+                    val enemyDistance = distanceService.manhattanDistance(
+                        fromRow = currentPosition.row,
+                        fromColumn = currentPosition.column,
+                        toRow = row,
+                        toColumn = column
+                    )
+                    if(enemyDistance > 1) continue
                     add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
                 }
             }

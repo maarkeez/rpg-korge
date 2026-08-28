@@ -9,6 +9,7 @@ import screen.BattlefieldPresenter
 import screen.BattlefieldView
 import battlesetup.adapters.presentation.BattleSetupApi
 import battleunit.adapters.presentation.BattleUnitApi
+import cpuBrain.adapters.presentation.CpuBrainApi
 import effect.adapters.presentation.EffectApi
 import korlibs.korge.*
 import korlibs.korge.scene.*
@@ -45,6 +46,7 @@ class MyScene : Scene() {
         val abilityApi = AbilityApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val battleApi = BattleApi(eventBus, battleUnitApi)
+        val cpuBrainApi = CpuBrainApi(playerApi, battleUnitApi, battleApi, eventBus)
         val battleSetupApi = BattleSetupApi(
             playerApi,
             battleApi,
@@ -80,7 +82,7 @@ class MyScene : Scene() {
                 uiSpacing(Size(0, 5))
                 val finishTurnView = FinishTurnView()
                 addChild(finishTurnView)
-                val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi)
+                val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
             }
         }
 
