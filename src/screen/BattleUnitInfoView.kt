@@ -136,12 +136,12 @@ class BattleUnitInfoView: Container() {
             abilityButtons[index]?.also { abilityButton ->
                 abilityButton.visible = true
                 val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
-                if(!canCast || isInCooldown) {
-                    abilityButton.bgColorOut = Colors.DIMGRAY
-                    abilityButton.bgColorOver = Colors.DIMGRAY
-                }else{
+                if(canCast && !isInCooldown) {
                     abilityButton.bgColorOut = Colors.WHITE
                     abilityButton.bgColorOver = Colors.LIGHTSKYBLUE
+                }else{
+                    abilityButton.bgColorOut = Colors.DIMGRAY
+                    abilityButton.bgColorOver = Colors.DIMGRAY
                 }
                 abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }

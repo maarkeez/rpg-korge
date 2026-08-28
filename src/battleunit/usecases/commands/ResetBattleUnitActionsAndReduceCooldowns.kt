@@ -2,7 +2,7 @@ package battleunit.usecases.commands
 
 import battleunit.domain.*
 
-class ResetBattleUnitActions(
+class ResetBattleUnitActionsAndReduceCooldowns(
     private val battleUnitRepository: BattleUnitRepository,
 ) {
     operator fun invoke(
@@ -10,6 +10,7 @@ class ResetBattleUnitActions(
     ) {
         battleUnitRepository.searchByPlayerId(playerId)
             .map(BattleUnit::resetActions)
+            .map(BattleUnit::reduceCoolDowns)
             .forEach(battleUnitRepository::update)
     }
 }

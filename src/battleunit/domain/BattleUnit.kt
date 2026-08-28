@@ -82,6 +82,11 @@ data class BattleUnit private constructor(
         return copy(remainingTurnActions = remainingTurnActions)
     }
 
+    fun reduceCoolDowns(): BattleUnit {
+        val abilityCooldowns = abilityCooldowns.reduceCoolDowns()
+        return copy(abilityCooldowns = abilityCooldowns)
+    }
+
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
     fun canCastAbility(abilityId: String): Boolean {
@@ -195,7 +200,9 @@ data class BattleUnit private constructor(
         })
 
         @JvmInline private value class AbilityId(val value: String)
-        @JvmInline private value class CooldownTurnsLeft(val value: Int)
+        @JvmInline private value class CooldownTurnsLeft(val value: Int){
+            fun reduce() = CooldownTurnsLeft(max(0, value - 1))
+        }
 
         fun toDto(): Map<String, Int> = value.entries.associate { it.key.value to it.value.value }
 
@@ -208,6 +215,15 @@ data class BattleUnit private constructor(
             val abilityCooldowns = buildMap {
                 put(AbilityId(abilityId), CooldownTurnsLeft(abilityCooldown))
                 value.entries.filter { it.key.value != abilityId }.forEach { put(it.key, it.value) }
+            }
+            return AbilityCooldowns(abilityCooldowns)
+        }
+
+        fun reduceCoolDowns(): AbilityCooldowns {
+            val abilityCooldowns = buildMap {
+                value.entries.forEach { (abilityId, cooldownTurnsLeft) ->
+                    put(abilityId, cooldownTurnsLeft.reduce())
+                }
             }
             return AbilityCooldowns(abilityCooldowns)
         }

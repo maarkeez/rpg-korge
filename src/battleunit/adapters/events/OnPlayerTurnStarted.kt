@@ -5,10 +5,10 @@ import battleunit.usecases.commands.*
 import shared.domain.*
 
 class OnPlayerTurnStarted(
-    resetBattleUnitActions: ResetBattleUnitActions,
+    resetBattleUnitActionsAndReduceCooldowns: ResetBattleUnitActionsAndReduceCooldowns,
     eventBus: EventBus,
 ) {
     val subscription = eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
-        resetBattleUnitActions(playerId = event.playerId)
+        resetBattleUnitActionsAndReduceCooldowns(playerId = event.playerId)
     }
 }

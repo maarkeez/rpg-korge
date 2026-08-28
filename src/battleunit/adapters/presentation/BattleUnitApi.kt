@@ -10,7 +10,7 @@ import battleunit.usecases.commands.CastAbility
 import battleunit.usecases.commands.DeployBattleUnit
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.commands.ReceiveAbilityEffects
-import battleunit.usecases.commands.ResetBattleUnitActions
+import battleunit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.HasAllBattleUnitsDefeated
@@ -76,7 +76,7 @@ class BattleUnitApi(
         battlefieldApi.searchPosition,
         distanceService,
     )
-    val resetBattleUnitActions = ResetBattleUnitActions(battleUnitRepository)
+    val resetBattleUnitActionsAndReduceCooldowns = ResetBattleUnitActionsAndReduceCooldowns(battleUnitRepository)
     val castAbility = CastAbility(
         whereCanCast,
         abilityApi.searchAbilityById,
@@ -95,6 +95,6 @@ class BattleUnitApi(
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
 
     // Events
-    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActions, eventBus)
+    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, eventBus)
     private val onAbilityCasted = OnAbilityCasted(receiveAbilityEffects, eventBus)
 }
