@@ -24,6 +24,7 @@ class WhereCanCast(
         val ability = searchAbilityById(abilityId) ?: return emptyList()
         return when(ability.targetPattern) {
             "ADJACENT_ENEMY" -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
+            "SELF" -> listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))
             else -> emptyList()
         }
     }

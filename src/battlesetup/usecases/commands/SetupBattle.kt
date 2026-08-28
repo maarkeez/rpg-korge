@@ -43,7 +43,20 @@ class SetupBattle(
                 beforeApplyingEffect = null
             )
         )
+        val lowDamageHeal = Effect.Dto(
+            id = "low-damage-heal",
+            type = "INCREASE_HEALTH",
+            power = 20,
+            probability = 100,
+            modifiers = emptyList(),
+            application = ApplicationDto(
+                "IMMEDIATELY",
+                onTurnStarted = null,
+                beforeApplyingEffect = null
+            )
+        )
         requestEffectCreation(lowPhysicalDamage)
+        requestEffectCreation(lowDamageHeal)
 
         val punch = Ability.Dto(
             id = "punch",
@@ -53,14 +66,23 @@ class SetupBattle(
             effects = listOf(lowPhysicalDamage.id),
             targetPattern = "ADJACENT_ENEMY",
         )
+        val heal = Ability.Dto(
+            id = "heal",
+            name = "Heal",
+            cost = 10,
+            cooldown = 2,
+            effects = listOf(lowDamageHeal.id),
+            targetPattern = "SELF",
+        )
         requestAbilityCreation(punch)
+        requestAbilityCreation(heal)
 
         val goblinUnit = Unit.Dto(
             id = "goblin",
             name = "Goblin",
-            healthPoints = 10,
+            healthPoints = 20,
             manaPoints = 10,
-            abilities = listOf(punch.id),
+            abilities = listOf(punch.id, heal.id),
             movementRange = 3
         )
         requestUnitCreation(goblinUnit)

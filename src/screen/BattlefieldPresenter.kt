@@ -152,6 +152,7 @@ class BattlefieldPresenter(
         if(castPositions.isEmpty()) return
         battlefieldView.resetTiles()
         castPositions.forEach { position ->
+            // FIXME: It is being invoked but the tile background is kept white for SELF healing abilities
             battlefieldView.displayPotentialCast(
                 row = position.row,
                 column = position.column

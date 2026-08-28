@@ -5,12 +5,15 @@ import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
 import battleunit.domain.BattleUnitEvent.BattleUnitDamaged
 import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
+import battleunit.domain.BattleUnitEvent.BattleUnitHealed
 import battleunit.domain.BattleUnitEvent.BattleUnitMoved
 import battleunit.domain.BattleUnitEvent.EffectReceived
 import effect.domain.Effect
 import player.domain.Player
 import unit.domain.Unit
 import kotlin.jvm.JvmInline
+import kotlin.math.max
+import kotlin.math.min
 
 @ConsistentCopyVisibility
 data class BattleUnit private constructor(
@@ -115,23 +118,33 @@ data class BattleUnit private constructor(
 
     fun isDefeated() : Boolean = remainingHealthPoints.value <= 0
 
-    fun applyImmediateEffect(effect: Effect.Dto): BattleUnit {
+    fun applyImmediateEffect(effect: Effect.Dto, unit: Unit.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
-        if(effect.type == "DECREASE_HEALTH"){
-            val remainingHealthPoints = RemainingHealthPoints(remainingHealthPoints.value - effect.power)
+        if(effect.type == "DECREASE_HEALTH") {
+            val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.power))
             val newEvents = buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))
-                if(remainingHealthPoints.value <= 0){
-                    add(BattleUnitDefeated(
-                        playerId = playerId.value,
-                        battleUnitId = id.value
-                    ))
+                if (remainingHealthPoints.value <= 0) {
+                    add(
+                        BattleUnitDefeated(
+                            playerId = playerId.value,
+                            battleUnitId = id.value
+                        )
+                    )
                 }
             }
             return copy(
                 ongoingEffects = ongoingEffects,
                 remainingHealthPoints = remainingHealthPoints,
                 events = events + newEvents
+            )
+        }else if(effect.type == "INCREASE_HEALTH"){
+            val remainingHealthPoints = RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.power))
+            val healedEvent = BattleUnitHealed(id.value)
+            return copy(
+                ongoingEffects = ongoingEffects,
+                remainingHealthPoints = remainingHealthPoints,
+                events = events + healedEvent
             )
         }else{
             TODO("Not implemented yet")
