@@ -4,17 +4,18 @@ import battle.usecases.commands.FinishPlayerTurn
 import battleunit.domain.*
 import battleunit.usecases.commands.*
 import battleunit.usecases.queries.*
+import cpuBrain.usecases.queries.WhereShouldMove
 import player.usecases.queries.*
 
 class PlayTurn(
     private val searchPlayerById: SearchPlayerById,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
-    private val whereCanMove: WhereCanMove,
     private val moveBattleUnit: MoveBattleUnit,
     private val whereCanCast: WhereCanCast,
     private val castAbility: CastAbility,
     private val finishPlayerTurn: FinishPlayerTurn,
     private val searchBattleUnitById: SearchBattleUnitById,
+    private val whereShouldMove: WhereShouldMove,
 ) {
     operator fun invoke(playerId: String) {
         val player = searchPlayerById(playerId) ?: return
@@ -22,8 +23,7 @@ class PlayTurn(
         val battleUnits = searchBattleUnitsByPlayerId(playerId)
         battleUnits.forEach { battleUnit ->
             tryToCastAbility(battleUnit)
-            val tilesInMovementRange = whereCanMove(battleUnitId = battleUnit.id)
-            tilesInMovementRange.randomOrNull()?.let { newPosition ->
+            whereShouldMove(battleUnitId = battleUnit.id)?.let { newPosition ->
                 moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = newPosition.row, moveToColumn = newPosition.column)
             }
             tryToCastAbility(battleUnit)

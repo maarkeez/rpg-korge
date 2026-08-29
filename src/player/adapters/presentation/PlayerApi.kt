@@ -15,4 +15,5 @@ class PlayerApi(eventBus: EventBus) {
 
     // Queries
     val searchPlayerById = SearchPlayerById(playerRepository)
+    val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
 }
