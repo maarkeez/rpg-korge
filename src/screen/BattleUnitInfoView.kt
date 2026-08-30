@@ -171,7 +171,9 @@ class BattleUnitInfoView: Container() {
                 }
                 val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
                 if(canCast && !isInCooldown) {
+                    // Do nothing
                 }else{
+                    // TODO: Display darker
                 }
                 abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }
