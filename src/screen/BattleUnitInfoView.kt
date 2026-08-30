@@ -46,11 +46,13 @@ class BattleUnitInfoView: Container() {
     private lateinit var abilityButtons: Array<UIButton?>
     private lateinit var knightPortrait: Bitmap
     private lateinit var ratPortrait: Bitmap
+    private lateinit var heal: Bitmap
     private var delegate: Delegate? = null
 
     suspend fun loadAssets() {
         knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
         ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
+        heal = resourcesVfs["ability/heal.png"].readBitmap()
     }
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
@@ -103,9 +105,10 @@ class BattleUnitInfoView: Container() {
                 repeat(6) { index ->
                     val abilityButton = uiButton().also { button ->
                         button.size = Size(width = 48.75, height = 48.75)
-                        button.bgColorOut = Colors.WHITE
-                        button.bgColorOver = Colors.LIGHTSKYBLUE
-                        button.background.borderColor = Colors.LIGHTGRAY
+                        button.bgColorOut = Colors.TRANSPARENT
+                        button.bgColorOver = Colors.TRANSPARENT
+                        button.background.borderColor = Colors.TRANSPARENT
+                        button.background.bgColor = Colors.TRANSPARENT
                     }
                     abilityButtons[index] = abilityButton
                 }
@@ -153,14 +156,22 @@ class BattleUnitInfoView: Container() {
         val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
             abilityButtons[index]?.also { abilityButton ->
+                abilityButton.findViewByName("ability")?.removeFromParent()
                 abilityButton.visible = true
+                when(abilityId) {
+                    "heal" -> heal
+                    else -> null
+                }?.let { avatarBitmap ->
+                    abilityButton.image(avatarBitmap) {
+                        name = "ability"
+                        smoothing = false
+                        scale = 3.0
+                        centerOn(abilityButton)
+                    }
+                }
                 val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
                 if(canCast && !isInCooldown) {
-                    abilityButton.bgColorOut = Colors.WHITE
-                    abilityButton.bgColorOver = Colors.LIGHTSKYBLUE
                 }else{
-                    abilityButton.bgColorOut = Colors.DIMGRAY
-                    abilityButton.bgColorOver = Colors.DIMGRAY
                 }
                 abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }
