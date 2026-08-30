@@ -75,12 +75,12 @@ class BattlefieldView: Container() {
 
     private fun tileName(row: Int, column: Int): String = "row-$row-column-$column"
 
-    fun displayHumanBattleUnit(row: Int, column: Int) {
+    fun displayKnightBattleUnit(row: Int, column: Int) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.addImage(knightBitmap, BATTLE_UNIT)
     }
 
-    fun displayCPUBattleUnit(row: Int, column: Int) {
+    fun displayRatBattleUnit(row: Int, column: Int) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.addImage(ratBitmap, BATTLE_UNIT)
     }

@@ -32,9 +32,11 @@ suspend fun main() = Korge(windowSize = Size(390, 844), backgroundColor = Colors
 class MyScene : Scene() {
 
     val battlefieldView = BattlefieldView()
+    val battleUnitInfoView = BattleUnitInfoView()
 
     override suspend fun SContainer.sceneInit() {
         battlefieldView.loadAssets()
+        battleUnitInfoView.loadAssets()
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -65,7 +67,6 @@ class MyScene : Scene() {
         )
 
         // Main scene
-        val battleUnitInfoView = BattleUnitInfoView()
         val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battleUnitInfoView, battlefieldApi, battleUnitApi, playerApi, unitApi, eventBus)
 
         uiVerticalStack(padding = 2.0) {

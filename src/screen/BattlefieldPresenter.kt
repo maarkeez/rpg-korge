@@ -57,11 +57,11 @@ class BattlefieldPresenter(
 
     fun displayUnit(row: Int, column: Int, battleUnitId: String) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
-        val player = playerApi.searchPlayerById(battleUnit.playerId)!!
-        if(player.type == "HUMAN"){
-            battlefieldView.displayHumanBattleUnit(row, column)
-        }else{
-            battlefieldView.displayCPUBattleUnit(row, column)
+        if(battleUnit.unitId == "knight"){
+            battlefieldView.displayKnightBattleUnit(row, column)
+        }
+        if(battleUnit.unitId == "rat"){
+            battlefieldView.displayRatBattleUnit(row, column)
         }
     }
 

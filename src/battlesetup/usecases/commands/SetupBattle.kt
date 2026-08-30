@@ -77,26 +77,35 @@ class SetupBattle(
         requestAbilityCreation(punch)
         requestAbilityCreation(heal)
 
-        val goblinUnit = Unit.Dto(
-            id = "goblin",
-            name = "Goblin",
+        val ratUnit = Unit.Dto(
+            id = "rat",
+            name = "Rat",
             healthPoints = 20,
             manaPoints = 10,
             abilities = listOf(punch.id, heal.id),
             movementRange = 3
         )
-        requestUnitCreation(goblinUnit)
+        val knight = Unit.Dto(
+            id = "knight",
+            name = "Knight",
+            healthPoints = 20,
+            manaPoints = 10,
+            abilities = listOf(punch.id, heal.id),
+            movementRange = 3
+        )
+        requestUnitCreation(ratUnit)
+        requestUnitCreation(knight)
 
         deployBattleUnit(
             battleUnitId = "player-2-unit-1",
-            unitId = goblinUnit.id,
+            unitId = ratUnit.id,
             playerId= playerTwoId,
             deployAtRow = 0,
             deployAtColumn = 0,
         )
         deployBattleUnit(
             battleUnitId = "player-2-unit-2",
-            unitId = goblinUnit.id,
+            unitId = ratUnit.id,
             playerId= playerTwoId,
             deployAtRow = 1,
             deployAtColumn = 1,
@@ -104,14 +113,14 @@ class SetupBattle(
 
         deployBattleUnit(
             battleUnitId = "player-1-unit-1",
-            unitId = goblinUnit.id,
+            unitId = knight.id,
             playerId= playerOneId,
             deployAtRow = 6,
             deployAtColumn = 6,
         )
         deployBattleUnit(
             battleUnitId = "player-1-unit-2",
-            unitId = goblinUnit.id,
+            unitId = knight.id,
             playerId= playerOneId,
             deployAtRow = 7,
             deployAtColumn = 7,

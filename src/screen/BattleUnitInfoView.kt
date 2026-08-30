@@ -1,10 +1,14 @@
 package screen
 
 import battleunit.domain.BattleUnit
+import korlibs.image.bitmap.Bitmap
 import unit.domain.Unit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
+import korlibs.image.format.BitmapNativeImage
+import korlibs.image.format.readBitmap
 import korlibs.image.text.TextAlignment
+import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.input.onClick
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
@@ -22,8 +26,10 @@ import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.korge.view.Text
+import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.align.centerXOn
 import korlibs.korge.view.container
+import korlibs.korge.view.image
 import korlibs.korge.view.setText
 import korlibs.korge.view.text
 import korlibs.math.geom.*
@@ -38,7 +44,14 @@ class BattleUnitInfoView: Container() {
     private lateinit var manaLabel: Text
     private lateinit var manaBar: UIProgressBar
     private lateinit var abilityButtons: Array<UIButton?>
+    private lateinit var knightPortrait: Bitmap
+    private lateinit var ratPortrait: Bitmap
     private var delegate: Delegate? = null
+
+    suspend fun loadAssets() {
+        knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
+        ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
+    }
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
@@ -47,12 +60,6 @@ class BattleUnitInfoView: Container() {
                     button.bgColorOut = Colors.WHITE
                     button.bgColorOver = Colors.LIGHTSKYBLUE
                     button.background.borderColor = Colors.LIGHTGRAY
-                    button.uiText("", button.size){
-                        button.styles {
-                            textColor = Colors.BLACK
-                            textAlignment = TextAlignment.MIDDLE_CENTER
-                        }
-                    }
                 }
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
@@ -119,7 +126,19 @@ class BattleUnitInfoView: Container() {
         abilityButtons.forEach { it?.visible = false }
         visible = true
         // Avatar
-        battleUnitAvatar.setText("*")
+        battleUnitAvatar.findViewByName("avatar")?.removeFromParent()
+        when(battleUnit.unitId) {
+            "knight" -> knightPortrait
+            "rat" -> ratPortrait
+            else -> null
+        }?.let { avatarBitmap ->
+            battleUnitAvatar.image(avatarBitmap) {
+                name = "avatar"
+                smoothing = false
+                scale = 3.0
+                centerOn(battleUnitAvatar)
+            }
+        }
         // Name
         unitNameLabel.setText(unit.name)
         // Remaining turn actions
