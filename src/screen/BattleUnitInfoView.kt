@@ -15,24 +15,19 @@ import unit.domain.*
 
 class BattleUnitInfoView: Container() {
 
-    private lateinit var battleUnitAvatar: UIButton
     private lateinit var unitNameLabel: UIText
     private lateinit var remainingTurnActionsLabel: UIText
-    private lateinit var manaLabel: Text
-    private lateinit var manaBar: UIProgressBar
     private lateinit var abilityButtons: Array<UIButton?>
-    private lateinit var knightPortrait: Bitmap
-    private lateinit var ratPortrait: Bitmap
     private lateinit var heal: Bitmap
     private lateinit var sword: Bitmap
     private lateinit var abilitySelection: Bitmap
     private var delegate: Delegate? = null
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
+    private lateinit var unitAvatarView: UnitAvatarView
 
     suspend fun loadAssets() {
-        knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
-        ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
+        unitAvatarView.loadAssets()
         heal = resourcesVfs["ability/heal.png"].readBitmap()
         sword = resourcesVfs["ability/sword.png"].readBitmap()
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
@@ -40,12 +35,9 @@ class BattleUnitInfoView: Container() {
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                battleUnitAvatar = uiButton("").also { button ->
-                    button.size = Size(width = 97.5, height = 97.5)
-                    button.bgColorOut = Colors.WHITE
-                    button.bgColorOver = Colors.LIGHTSKYBLUE
-                    button.background.borderColor = Colors.LIGHTGRAY
-                }
+                unitAvatarView = UnitAvatarView(Size(width = 97.5, height = 97.5))
+                addChild(unitAvatarView)
+
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
                     unitNameLabel = uiText("", size = Size(width = 281.5, height = 14))
@@ -88,19 +80,7 @@ class BattleUnitInfoView: Container() {
         abilityButtons.forEach { it?.visible = false }
         visible = true
         // Avatar
-        battleUnitAvatar.findViewByName("avatar")?.removeFromParent()
-        when(battleUnit.unitId) {
-            "knight" -> knightPortrait
-            "rat" -> ratPortrait
-            else -> null
-        }?.let { avatarBitmap ->
-            battleUnitAvatar.image(avatarBitmap) {
-                name = "avatar"
-                smoothing = false
-                scale = 3.0
-                centerOn(battleUnitAvatar)
-            }
-        }
+        unitAvatarView.display(battleUnit.unitId)
         // Name
         unitNameLabel.setText(unit.name)
         // Remaining turn actions
