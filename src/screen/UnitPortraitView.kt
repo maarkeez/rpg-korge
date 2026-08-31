@@ -11,7 +11,7 @@ import korlibs.math.geom.*
 
 class UnitPortraitView(size: Size): UIContainer(size) {
 
-    private val battleUnitAvatar = uiButton("").also { button ->
+    private val battleUnitPortrait = uiButton("").also { button ->
         button.size = size
         button.bgColorOut = Colors.WHITE
         button.bgColorOver = Colors.LIGHTSKYBLUE
@@ -26,22 +26,21 @@ class UnitPortraitView(size: Size): UIContainer(size) {
     }
 
     init {
-        addChild(battleUnitAvatar)
+        addChild(battleUnitPortrait)
     }
 
     fun display(unitId: String) {
-        // Avatar
-        battleUnitAvatar.findViewByName("avatar")?.removeFromParent()
+        battleUnitPortrait.findViewByName("portrait")?.removeFromParent()
         when(unitId) {
             "knight" -> knightPortrait
             "rat" -> ratPortrait
             else -> null
         }?.let { avatarBitmap ->
-            battleUnitAvatar.image(avatarBitmap) {
-                name = "avatar"
+            battleUnitPortrait.image(avatarBitmap) {
+                name = "portrait"
                 smoothing = false
                 scale = 3.0
-                centerOn(battleUnitAvatar)
+                centerOn(battleUnitPortrait)
             }
         }
         visible = true
