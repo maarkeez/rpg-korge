@@ -1,48 +1,23 @@
 package screen
 
-import battleunit.domain.BattleUnit
-import korlibs.image.bitmap.Bitmap
-import unit.domain.Unit
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.format.BitmapNativeImage
-import korlibs.image.format.readBitmap
-import korlibs.image.text.TextAlignment
-import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.input.onClick
-import korlibs.korge.style.styles
-import korlibs.korge.style.textAlignment
-import korlibs.korge.style.textColor
-import korlibs.korge.ui.UIButton
-import korlibs.korge.ui.UIProgressBar
-import korlibs.korge.ui.UIText
-import korlibs.korge.ui.uiBackgroundColor
-import korlibs.korge.ui.uiButton
-import korlibs.korge.ui.uiHorizontalStack
-import korlibs.korge.ui.uiProgressBar
-import korlibs.korge.ui.uiSelectedColor
-import korlibs.korge.ui.uiSpacing
-import korlibs.korge.ui.uiText
-import korlibs.korge.ui.uiVerticalStack
-import korlibs.korge.view.Container
-import korlibs.korge.view.Text
-import korlibs.korge.view.align.centerOn
-import korlibs.korge.view.align.centerXOn
-import korlibs.korge.view.container
-import korlibs.korge.view.filter.ColorMatrixFilter
-import korlibs.korge.view.filter.filter
-import korlibs.korge.view.image
-import korlibs.korge.view.setText
-import korlibs.korge.view.text
+import battleunit.domain.*
+import korlibs.image.bitmap.*
+import korlibs.image.color.*
+import korlibs.image.format.*
+import korlibs.io.file.std.*
+import korlibs.korge.input.*
+import korlibs.korge.ui.*
+import korlibs.korge.view.*
+import korlibs.korge.view.align.*
+import korlibs.korge.view.filter.*
 import korlibs.math.geom.*
+import unit.domain.*
 
 class BattleUnitInfoView: Container() {
 
     private lateinit var battleUnitAvatar: UIButton
     private lateinit var unitNameLabel: UIText
     private lateinit var remainingTurnActionsLabel: UIText
-    private lateinit var healthLabel: Text
-    private lateinit var healthBar: UIProgressBar
     private lateinit var manaLabel: Text
     private lateinit var manaBar: UIProgressBar
     private lateinit var abilityButtons: Array<UIButton?>
@@ -52,6 +27,8 @@ class BattleUnitInfoView: Container() {
     private lateinit var sword: Bitmap
     private lateinit var abilitySelection: Bitmap
     private var delegate: Delegate? = null
+    private lateinit var healthBarView: HealthBarView
+    private lateinit var manaBarView: ManaBarView
 
     suspend fun loadAssets() {
         knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
@@ -74,36 +51,12 @@ class BattleUnitInfoView: Container() {
                     unitNameLabel = uiText("", size = Size(width = 281.5, height = 14))
                     remainingTurnActionsLabel = uiText("", size = Size(width = 281.5, height = 14)) {}
                     uiSpacing(Size(0, 15))
-                    container {
-                        healthBar =
-                            uiProgressBar(size = Size(281.5, 16), current = 75f, maximum = 100f).also { progressBar ->
-                                progressBar.styles.uiSelectedColor = RGBA(255, 55, 95)
-                                progressBar.styles.uiBackgroundColor = Colors.DIMGREY
-                            }
-                        healthLabel = text(
-                            text = "",
-                            textSize = 14.0,
-                            color = Colors.WHITE
-                        )
-                        healthLabel.centerXOn(healthBar)
-                        healthLabel.y = (healthBar.height - healthLabel.height) / 2 + 1
-                    }
+                    healthBarView =  HealthBarView(Size(281.5, 16))
+                    addChild(healthBarView)
 
                     uiSpacing(Size(0, 4))
-                    container {
-                        manaBar =
-                            uiProgressBar(size = Size(281.5, 16), current = 40f, maximum = 100f).also { progressBar ->
-                                progressBar.styles.uiSelectedColor = RGBA(0, 145, 255)
-                                progressBar.styles.uiBackgroundColor = Colors.DIMGREY
-                            }
-                        manaLabel = text(
-                            text = "",
-                            textSize = 14.0,
-                            color = Colors.WHITE
-                        )
-                        manaLabel.centerXOn(manaBar)
-                        manaLabel.y = (manaBar.height - manaLabel.height) / 2 + 1
-                    }
+                    manaBarView = ManaBarView(Size(281.5, 16))
+                    addChild(manaBarView)
                 }
             }
             uiHorizontalStack(padding = 2.0) {
@@ -153,11 +106,15 @@ class BattleUnitInfoView: Container() {
         // Remaining turn actions
         remainingTurnActionsLabel.setText("Movements left: ${battleUnit.remainingTurnActions.remainingSteps}    Remaining casts: ${battleUnit.remainingTurnActions.remainingCasts}")
         // Health
-        healthLabel.setText("${battleUnit.remainingHealthPoints} / ${unit.healthPoints}")
-        healthBar.current = (battleUnit.remainingHealthPoints.toDouble() / unit.healthPoints.toDouble()) * 100
+        healthBarView.display(
+            remainingHealthPoints = battleUnit.remainingHealthPoints,
+            maxHealthPoints = unit.healthPoints,
+        )
         // Mana
-        manaLabel.setText("${battleUnit.remainingManaPoints} / ${unit.manaPoints}")
-        manaBar.current = (battleUnit.remainingManaPoints.toDouble() / unit.manaPoints.toDouble()) * 100
+        manaBarView.display(
+            remainingManaPoints = battleUnit.remainingManaPoints,
+            maxManaPoints = unit.manaPoints,
+        )
         // Abilities
         val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
