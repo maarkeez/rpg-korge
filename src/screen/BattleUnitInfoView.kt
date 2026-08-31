@@ -29,6 +29,8 @@ import korlibs.korge.view.Text
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.align.centerXOn
 import korlibs.korge.view.container
+import korlibs.korge.view.filter.ColorMatrixFilter
+import korlibs.korge.view.filter.filter
 import korlibs.korge.view.image
 import korlibs.korge.view.setText
 import korlibs.korge.view.text
@@ -160,6 +162,8 @@ class BattleUnitInfoView: Container() {
             abilityButtons[index]?.also { abilityButton ->
                 abilityButton.findViewByName("ability")?.removeFromParent()
                 abilityButton.visible = true
+                val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
+                val canUseAbility = canCast && !isInCooldown
                 when(abilityId) {
                     "heal" -> heal
                     "sword" -> sword
@@ -170,18 +174,24 @@ class BattleUnitInfoView: Container() {
                         smoothing = false
                         scale = 3.0
                         centerOn(abilityButton)
+                        if(!canUseAbility){
+                            filter = darkFilter()
+                        }
                     }
-                }
-                val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
-                if(canCast && !isInCooldown) {
-                    // Do nothing
-                }else{
-                    // TODO: Display darker
                 }
                 abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
             }
         }
     }
+
+    private fun darkFilter(): ColorMatrixFilter = ColorMatrixFilter(
+        Matrix4.fromRows(
+            0.5f, 0f, 0f, 0f,
+            0f, 0.5f, 0f, 0f,
+            0f, 0f, 0.5f, 0f,
+            0f, 0f, 0f, 1f
+        )
+    )
 
     fun hide() {
         visible = false
