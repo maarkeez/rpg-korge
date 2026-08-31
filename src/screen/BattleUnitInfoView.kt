@@ -15,7 +15,7 @@ import unit.domain.*
 
 class BattleUnitInfoView: Container() {
 
-    private lateinit var unitNameLabel: UIText
+    private lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
     private lateinit var abilityButtons: Array<UIButton?>
     private lateinit var heal: Bitmap
@@ -40,7 +40,9 @@ class BattleUnitInfoView: Container() {
 
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
-                    unitNameLabel = uiText("", size = Size(width = 281.5, height = 14))
+                    unitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
+                    addChild(unitNameView)
+
                     remainingTurnActionsLabel = uiText("", size = Size(width = 281.5, height = 14)) {}
                     uiSpacing(Size(0, 15))
                     healthBarView =  HealthBarView(Size(281.5, 16))
@@ -82,7 +84,7 @@ class BattleUnitInfoView: Container() {
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
         // Name
-        unitNameLabel.setText(unit.name)
+        unitNameView.display(unitName = unit.name)
         // Remaining turn actions
         remainingTurnActionsLabel.setText("Movements left: ${battleUnit.remainingTurnActions.remainingSteps}    Remaining casts: ${battleUnit.remainingTurnActions.remainingCasts}")
         // Health
