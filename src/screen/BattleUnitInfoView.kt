@@ -47,12 +47,14 @@ class BattleUnitInfoView: Container() {
     private lateinit var knightPortrait: Bitmap
     private lateinit var ratPortrait: Bitmap
     private lateinit var heal: Bitmap
+    private lateinit var sword: Bitmap
     private var delegate: Delegate? = null
 
     suspend fun loadAssets() {
         knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
         ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
         heal = resourcesVfs["ability/heal.png"].readBitmap()
+        sword = resourcesVfs["ability/sword.png"].readBitmap()
     }
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
@@ -160,6 +162,7 @@ class BattleUnitInfoView: Container() {
                 abilityButton.visible = true
                 when(abilityId) {
                     "heal" -> heal
+                    "sword" -> sword
                     else -> null
                 }?.let { avatarBitmap ->
                     abilityButton.image(avatarBitmap) {

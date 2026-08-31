@@ -58,9 +58,9 @@ class SetupBattle(
         requestEffectCreation(lowPhysicalDamage)
         requestEffectCreation(lowDamageHeal)
 
-        val punch = Ability.Dto(
-            id = "punch",
-            name = "Punch",
+        val sword = Ability.Dto(
+            id = "sword",
+            name = "Sword",
             cost = 0,
             cooldown = 0,
             effects = listOf(lowPhysicalDamage.id),
@@ -74,7 +74,7 @@ class SetupBattle(
             effects = listOf(lowDamageHeal.id),
             targetPattern = "SELF",
         )
-        requestAbilityCreation(punch)
+        requestAbilityCreation(sword)
         requestAbilityCreation(heal)
 
         val ratUnit = Unit.Dto(
@@ -82,7 +82,7 @@ class SetupBattle(
             name = "Rat",
             healthPoints = 20,
             manaPoints = 10,
-            abilities = listOf(punch.id, heal.id),
+            abilities = listOf(sword.id, heal.id),
             movementRange = 3
         )
         val knight = Unit.Dto(
@@ -90,7 +90,7 @@ class SetupBattle(
             name = "Knight",
             healthPoints = 20,
             manaPoints = 10,
-            abilities = listOf(punch.id, heal.id),
+            abilities = listOf(sword.id, heal.id),
             movementRange = 3
         )
         requestUnitCreation(ratUnit)
