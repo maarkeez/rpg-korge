@@ -167,9 +167,13 @@ class BattlefieldPresenter(
     }
 
     private fun onAbilitySelectedATileWasSelected(row: Int, column: Int) {
+        castAbilityAndClearSelection(row, column)
+    }
+
+    private fun castAbilityAndClearSelection(row: Int, column: Int) {
         val abilitySelected = selectionState as AbilitySelected
         val castPositions = battleUnitApi.whereCanCast(abilitySelected.battleUnitId, abilitySelected.abilityId)
-        if(castPositions.contains(PositionDto(row, column))) {
+        if (castPositions.contains(PositionDto(row, column))) {
             battleUnitApi.castAbility(abilitySelected.battleUnitId, abilitySelected.abilityId, row, column)
         }
         clearSelection()
