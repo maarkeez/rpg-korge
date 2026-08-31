@@ -50,6 +50,7 @@ class BattleUnitInfoView: Container() {
     private lateinit var ratPortrait: Bitmap
     private lateinit var heal: Bitmap
     private lateinit var sword: Bitmap
+    private lateinit var abilitySelection: Bitmap
     private var delegate: Delegate? = null
 
     suspend fun loadAssets() {
@@ -57,6 +58,7 @@ class BattleUnitInfoView: Container() {
         ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
         heal = resourcesVfs["ability/heal.png"].readBitmap()
         sword = resourcesVfs["ability/sword.png"].readBitmap()
+        abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
     }
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
@@ -161,6 +163,7 @@ class BattleUnitInfoView: Container() {
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
             abilityButtons[index]?.also { abilityButton ->
                 abilityButton.findViewByName("ability")?.removeFromParent()
+                abilityButton.findViewByName("abilitySelection")?.removeFromParent()
                 abilityButton.visible = true
                 val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
                 val canUseAbility = canCast && !isInCooldown
@@ -179,7 +182,15 @@ class BattleUnitInfoView: Container() {
                         }
                     }
                 }
-                abilityButton.onClick { delegate?.abilitySelected(abilityId = abilityId) }
+                abilityButton.onClick {
+                    abilityButton.image(abilitySelection){
+                        name = "abilitySelection"
+                        smoothing = false
+                        scale = 3.0
+                        centerOn(abilityButton)
+                    }
+                    delegate?.abilitySelected(abilityId = abilityId)
+                }
             }
         }
     }
