@@ -9,7 +9,7 @@ import korlibs.korge.view.*
 import korlibs.korge.view.align.*
 import korlibs.math.geom.*
 
-class UnitAvatarView(size: Size): UIContainer(size) {
+class UnitPortraitView(size: Size): UIContainer(size) {
 
     private val battleUnitAvatar = uiButton("").also { button ->
         button.size = size

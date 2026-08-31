@@ -24,10 +24,10 @@ class BattleUnitInfoView: Container() {
     private var delegate: Delegate? = null
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
-    private lateinit var unitAvatarView: UnitAvatarView
+    private lateinit var unitPortraitView: UnitPortraitView
 
     suspend fun loadAssets() {
-        unitAvatarView.loadAssets()
+        unitPortraitView.loadAssets()
         heal = resourcesVfs["ability/heal.png"].readBitmap()
         sword = resourcesVfs["ability/sword.png"].readBitmap()
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
@@ -35,8 +35,8 @@ class BattleUnitInfoView: Container() {
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                unitAvatarView = UnitAvatarView(Size(width = 97.5, height = 97.5))
-                addChild(unitAvatarView)
+                unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
+                addChild(unitPortraitView)
 
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
@@ -80,7 +80,7 @@ class BattleUnitInfoView: Container() {
         abilityButtons.forEach { it?.visible = false }
         visible = true
         // Avatar
-        unitAvatarView.display(battleUnit.unitId)
+        unitPortraitView.display(battleUnit.unitId)
         // Name
         unitNameLabel.setText(unit.name)
         // Remaining turn actions
