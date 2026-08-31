@@ -148,6 +148,9 @@ class BattlefieldPresenter(
         val battleUnitSelected = selectionState as BattleUnitSelected
         val canCastAbility = battleUnitApi.canCastAbility(battleUnitSelected.battleUnitId, abilityId)
         if(!canCastAbility) return
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitSelected.battleUnitId)!!
+        val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(abilityId)
+        battleUnitInfoView.displayAbilitySelected(abilityIndex)
         val castPositions = battleUnitApi.whereCanCast(battleUnitSelected.battleUnitId, abilityId)
         if(castPositions.isEmpty()) return
         battlefieldView.resetTiles()

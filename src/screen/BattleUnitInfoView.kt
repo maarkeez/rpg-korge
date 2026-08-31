@@ -122,14 +122,20 @@ class BattleUnitInfoView: Container() {
                     }
                 }
                 abilityButton.onClick {
-                    abilityButton.image(abilitySelection){
-                        name = "abilitySelection"
-                        smoothing = false
-                        scale = 3.0
-                        centerOn(abilityButton)
-                    }
                     delegate?.abilitySelected(abilityId = abilityId)
                 }
+            }
+        }
+    }
+
+    fun displayAbilitySelected(index: Int) {
+        abilityButtons.forEach { abilityButton -> abilityButton?.findViewByName("abilitySelection")?.removeFromParent() }
+        abilityButtons[index]?.also { abilityButton ->
+            abilityButton.image(abilitySelection){
+                name = "abilitySelection"
+                smoothing = false
+                scale = 3.0
+                centerOn(abilityButton)
             }
         }
     }
