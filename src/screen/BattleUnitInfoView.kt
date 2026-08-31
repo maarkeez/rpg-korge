@@ -107,13 +107,13 @@ class BattleUnitInfoView: Container() {
         remainingTurnActionsLabel.setText("Movements left: ${battleUnit.remainingTurnActions.remainingSteps}    Remaining casts: ${battleUnit.remainingTurnActions.remainingCasts}")
         // Health
         healthBarView.display(
-            remainingHealthPoints = battleUnit.remainingHealthPoints,
-            maxHealthPoints = unit.healthPoints,
+            remaining = battleUnit.remainingHealthPoints,
+            maximum = unit.healthPoints,
         )
         // Mana
         manaBarView.display(
-            remainingManaPoints = battleUnit.remainingManaPoints,
-            maxManaPoints = unit.manaPoints,
+            remaining = battleUnit.remainingManaPoints,
+            maximum = unit.manaPoints,
         )
         // Abilities
         val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
