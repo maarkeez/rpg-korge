@@ -2,10 +2,8 @@ package screen
 
 import battleunit.domain.*
 import korlibs.image.bitmap.*
-import korlibs.image.color.*
 import korlibs.image.format.*
 import korlibs.io.file.std.*
-import korlibs.korge.input.*
 import korlibs.korge.ui.*
 import korlibs.korge.view.*
 import korlibs.korge.view.align.*
@@ -17,30 +15,14 @@ class BattleUnitInfoView: Container() {
 
     private lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
-    private lateinit var abilityButtons: Array<UIButton?>
-    private lateinit var heal: Bitmap
-    private lateinit var sword: Bitmap
-    private lateinit var poisonedSword: Bitmap
-    private lateinit var mushroom: Bitmap
-    private lateinit var skull: Bitmap
-    private lateinit var teleport: Bitmap
-    private lateinit var bee: Bitmap
-    private lateinit var abilitySelection: Bitmap
-    private var delegate: Delegate? = null
+    private lateinit var abilityButtons: Array<AbilityButtonView>
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
     private lateinit var unitPortraitView: UnitPortraitView
 
     suspend fun loadAssets() {
         unitPortraitView.loadAssets()
-        heal = resourcesVfs["ability/heal.png"].readBitmap()
-        sword = resourcesVfs["ability/sword.png"].readBitmap()
-        poisonedSword = resourcesVfs["ability/poisoned_sword.png"].readBitmap()
-        mushroom = resourcesVfs["ability/mushroom.png"].readBitmap()
-        skull = resourcesVfs["ability/skull.png"].readBitmap()
-        teleport = resourcesVfs["ability/teleport.png"].readBitmap()
-        bee = resourcesVfs["ability/bee.png"].readBitmap()
-        abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
+        abilityButtons.forEach { abilityButton -> abilityButton.loadAssets() }
     }
 
     private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
@@ -64,17 +46,16 @@ class BattleUnitInfoView: Container() {
                 }
             }
             uiHorizontalStack(padding = 2.0) {
-                abilityButtons = arrayOfNulls(6)
-                repeat(6) { index ->
-                    val abilityButton = uiButton().also { button ->
-                        button.size = Size(width = 48.75, height = 48.75)
-                        button.bgColorOut = Colors.TRANSPARENT
-                        button.bgColorOver = Colors.TRANSPARENT
-                        button.background.borderColor = Colors.TRANSPARENT
-                        button.background.bgColor = Colors.TRANSPARENT
-                    }
-                    abilityButtons[index] = abilityButton
-                }
+                val abilityButtonSize = Size(width = 48.75, height = 48.75)
+                abilityButtons = arrayOf(
+                    AbilityButtonView(abilityButtonSize),
+                    AbilityButtonView(abilityButtonSize),
+                    AbilityButtonView(abilityButtonSize),
+                    AbilityButtonView(abilityButtonSize),
+                    AbilityButtonView(abilityButtonSize),
+                    AbilityButtonView(abilityButtonSize),
+                )
+                abilityButtons.forEach(::addChild)
             }
         }
 
@@ -84,13 +65,12 @@ class BattleUnitInfoView: Container() {
         addChild(battleUnitInfoLayout)
     }
 
-    fun setDelegate(delegate: Delegate) {
-        this.delegate = delegate
+    fun setDelegate(delegate: AbilityButtonView.Delegate) {
+        abilityButtons.forEach { abilityButton -> abilityButton.setDelegate(delegate) }
     }
 
     fun display(battleUnit: BattleUnit.Dto, unit: Unit.Dto) {
-        abilityButtons.forEach { it?.visible = false }
-        visible = true
+        abilityButtons.forEach(AbilityButtonView::hide)
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
         // Name
@@ -110,65 +90,20 @@ class BattleUnitInfoView: Container() {
         // Abilities
         val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
         battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
-            abilityButtons[index]?.also { abilityButton ->
-                abilityButton.findViewByName("ability")?.removeFromParent()
-                abilityButton.findViewByName("abilitySelection")?.removeFromParent()
-                abilityButton.visible = true
-                val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
-                val canUseAbility = canCast && !isInCooldown
-                when(abilityId) {
-                    "heal" -> heal
-                    "poisoned-sword" -> poisonedSword
-                    "sword" -> sword
-                    "mushroom" -> mushroom
-                    "skull" -> skull
-                    "teleport" -> teleport
-                    "bee" -> bee
-                    else -> null
-                }?.let { avatarBitmap ->
-                    abilityButton.image(avatarBitmap) {
-                        name = "ability"
-                        smoothing = false
-                        scale = 3.0
-                        centerOn(abilityButton)
-                        if(!canUseAbility){
-                            filter = darkFilter()
-                        }
-                    }
-                }
-                abilityButton.onClick {
-                    delegate?.abilitySelected(abilityId = abilityId)
-                }
-            }
+            val abilityButton = abilityButtons[index]
+            val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
+            val canUseAbility = canCast && !isInCooldown
+            abilityButton.display(abilityId = abilityId, canCast = canUseAbility)
         }
+        visible = true
     }
 
     fun displayAbilitySelected(index: Int) {
-        abilityButtons.forEach { abilityButton -> abilityButton?.findViewByName("abilitySelection")?.removeFromParent() }
-        abilityButtons[index]?.also { abilityButton ->
-            abilityButton.image(abilitySelection){
-                name = "abilitySelection"
-                smoothing = false
-                scale = 3.0
-                centerOn(abilityButton)
-            }
-        }
+        abilityButtons.forEach(AbilityButtonView::unselect)
+        abilityButtons[index].select()
     }
-
-    private fun darkFilter(): ColorMatrixFilter = ColorMatrixFilter(
-        Matrix4.fromRows(
-            0.5f, 0f, 0f, 0f,
-            0f, 0.5f, 0f, 0f,
-            0f, 0f, 0.5f, 0f,
-            0f, 0f, 0f, 1f
-        )
-    )
 
     fun hide() {
         visible = false
-    }
-
-    interface Delegate {
-        fun abilitySelected(abilityId: String)
     }
 }

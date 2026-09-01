@@ -31,7 +31,7 @@ class BattlefieldPresenter(
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
     eventBus: EventBus,
-) : BattlefieldView.Delegate, BattleUnitInfoView.Delegate, AttackPreviewView.Delegate {
+) : BattlefieldView.Delegate, AbilityButtonView.Delegate, AttackPreviewView.Delegate {
 
     private var selectionState: SelectionState = NothingSelected
 
@@ -174,8 +174,8 @@ class BattlefieldPresenter(
             )
         }
         selectionState = AbilitySelected(
-            casterRow = battleUnitSelected.row,
-            casterColumn = battleUnitSelected.column,
+            casterRow = battleUnitSelected.casterRow,
+            casterColumn = battleUnitSelected.casterColumn,
             battleUnitId = battleUnitSelected.battleUnitId,
             abilityId = abilityId
         )
@@ -252,7 +252,7 @@ class BattlefieldPresenter(
 
     private sealed interface SelectionState{
         object NothingSelected : SelectionState
-        data class BattleUnitSelected(val row: Int, val column: Int, val battleUnitId: String) : SelectionState
+        data class BattleUnitSelected(val casterRow: Int, val casterColumn: Int, val battleUnitId: String) : SelectionState
         data class AbilitySelected(val casterRow: Int, val casterColumn: Int, val battleUnitId: String, val abilityId: String) : SelectionState
         data class CastTargetSelected(
             val casterRow: Int,
