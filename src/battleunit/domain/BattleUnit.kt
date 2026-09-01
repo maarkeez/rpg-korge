@@ -1,8 +1,10 @@
 package battleunit.domain
 
 import ability.domain.Ability
+import battleunit.domain.BattleUnitError.EffectNotFound
 import battleunit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
+import battleunit.domain.BattleUnitError.NotDelayedEffect
 import battleunit.domain.BattleUnitError.RemainingManaPointsBelowZero
 import battleunit.domain.BattleUnitEvent.BattleUnitDamaged
 import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
@@ -56,6 +58,7 @@ data class BattleUnit private constructor(
         remainingTurnActions = remainingTurnActions.toDto(),
         abilityCooldowns = abilityCooldowns.toDto(),
         unitId = unitId.value,
+        ongoingEffects = ongoingEffects.toDto()
     )
 
     fun move(
@@ -126,39 +129,76 @@ data class BattleUnit private constructor(
         )
     }
 
+    fun receiveDelayedEffect(effectId: String, turnsLeft: Int): BattleUnit {
+        val ongoingEffects = ongoingEffects.receiveDelayedEffect(effectId, turnsLeft)
+        val effectReceivedEvent = EffectReceived(
+            battleUnitId = id.value,
+            effectId = effectId
+        )
+        return copy(
+            ongoingEffects = ongoingEffects,
+            events = events + effectReceivedEvent
+        )
+    }
+
     fun isDefeated() : Boolean = remainingHealthPoints.value <= 0
 
     fun applyImmediateEffect(effect: Effect.Dto, unit: Unit.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
-        if(effect.type == "DECREASE_HEALTH") {
-            val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.power))
-            val newEvents = buildList {
-                add(BattleUnitDamaged(battleUnitId = id.value))
-                if (remainingHealthPoints.value <= 0) {
-                    add(
-                        BattleUnitDefeated(
-                            playerId = playerId.value,
-                            battleUnitId = id.value
-                        )
-                    )
-                }
+        return when (effect.type) {
+            "DECREASE_HEALTH" -> {
+                applyDecreaseHealthEffect(effect, ongoingEffects)
             }
-            return copy(
-                ongoingEffects = ongoingEffects,
-                remainingHealthPoints = remainingHealthPoints,
-                events = events + newEvents
-            )
-        }else if(effect.type == "INCREASE_HEALTH"){
-            val remainingHealthPoints = RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.power))
-            val healedEvent = BattleUnitHealed(id.value)
-            return copy(
-                ongoingEffects = ongoingEffects,
-                remainingHealthPoints = remainingHealthPoints,
-                events = events + healedEvent
-            )
+            "INCREASE_HEALTH" -> {
+                val remainingHealthPoints =
+                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.power))
+                val healedEvent = BattleUnitHealed(id.value)
+                copy(
+                    ongoingEffects = ongoingEffects,
+                    remainingHealthPoints = remainingHealthPoints,
+                    events = events + healedEvent
+                )
+            }
+            else -> {
+                TODO("Not implemented yet")
+            }
+        }
+    }
+
+    fun hasDelayedOngoingEffects(): Boolean {
+        return ongoingEffects.hasDelayedOngoingEffects()
+    }
+
+    fun applyDelayedEffect(effect: Effect.Dto): BattleUnit {
+        val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
+        return if(effect.type == "DECREASE_HEALTH") {
+            applyDecreaseHealthEffect(effect, ongoingEffects)
         }else{
             TODO("Not implemented yet")
         }
+    }
+
+    private fun applyDecreaseHealthEffect(
+        effect: Effect.Dto,
+        ongoingEffects: OngoingEffects
+    ): BattleUnit {
+        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.power))
+        val newEvents = buildList {
+            add(BattleUnitDamaged(battleUnitId = id.value))
+            if (remainingHealthPoints.value <= 0) {
+                add(
+                    BattleUnitDefeated(
+                        playerId = playerId.value,
+                        battleUnitId = id.value
+                    )
+                )
+            }
+        }
+        return copy(
+            ongoingEffects = ongoingEffects,
+            remainingHealthPoints = remainingHealthPoints,
+            events = events + newEvents
+        )
     }
 
     @JvmInline private value class Id(val value: String)
@@ -166,9 +206,9 @@ data class BattleUnit private constructor(
     @JvmInline private value class PlayerId(val value: String)
     @JvmInline private value class RemainingHealthPoints(val value: Int)
     @JvmInline private value class RemainingManaPoints(val value: Int) {
-//        init {
-//            if(value < 0) throw RemainingManaPointsBelowZero()
-//        }
+        init {
+            if(value < 0) throw RemainingManaPointsBelowZero()
+        }
     }
     private data class RemainingTurnActions(
         private val movementRange: MovementRange,
@@ -244,7 +284,12 @@ data class BattleUnit private constructor(
     }
     @JvmInline private value class OngoingEffects(val value: List<Effect>){
         fun receiveImmediateEffect(effectId: String): OngoingEffects {
-            val newEffect = Effect(EffectId(effectId), ApplicationStatus.Pending)
+            val newEffect = Effect(EffectId(effectId), ApplicationStatus.pending())
+            return OngoingEffects(value + newEffect)
+        }
+
+        fun receiveDelayedEffect(effectId: String, turnsLeft: Int): OngoingEffects {
+            val newEffect = Effect(EffectId(effectId), ApplicationStatus.delayed(turnsLeft))
             return OngoingEffects(value + newEffect)
         }
 
@@ -253,13 +298,49 @@ data class BattleUnit private constructor(
             return OngoingEffects(value.filter { it.effectId.value != effectId })
         }
 
+        fun applyDelayedEffect(effectId: String): OngoingEffects {
+            val effect = value.firstOrNull { it.effectId.value == effectId } ?: throw EffectNotFound()
+            if(!effect.applicationStatus.isDelayed()) throw NotDelayedEffect()
+            val turnsLeft = (effect.applicationStatus as ApplicationStatus.TurnsLeft).apply()
+            val ongoingEffects = if(turnsLeft != null){
+                buildList {
+                    value.forEach { ongoingEffect ->
+                        if(ongoingEffect.effectId.value == effectId){
+                            add(ongoingEffect.copy(applicationStatus = turnsLeft))
+                        }else{
+                            add(ongoingEffect)
+                        }
+                    }
+                }
+            }else{
+                value.filter { it.effectId.value != effectId }
+            }
+            return OngoingEffects(ongoingEffects)
+        }
+
+        fun hasDelayedOngoingEffects(): Boolean = value.any { it.applicationStatus.isDelayed() }
+        fun toDto(): Dto.OngoingEffectsDto {
+            return Dto.OngoingEffectsDto(
+                delayedEffects = value.filter { it.applicationStatus.isDelayed() }.map { it.effectId.value }
+            )
+        }
+
         constructor(): this(emptyList())
 
         private data class Effect(val effectId: EffectId, val applicationStatus: ApplicationStatus)
         @JvmInline private value class EffectId(val value: String)
         private sealed interface ApplicationStatus {
             object Pending : ApplicationStatus
-            @JvmInline private value class TurnsLeft(val value: Int) : ApplicationStatus
+            @JvmInline value class TurnsLeft(val value: Int) : ApplicationStatus {
+                fun apply(): TurnsLeft? = if(value - 1 == 0) null else TurnsLeft(value - 1)
+            }
+
+            companion object {
+                fun pending(): ApplicationStatus = Pending
+                fun delayed(turnsLeft: Int): ApplicationStatus = TurnsLeft(turnsLeft)
+            }
+
+            fun isDelayed() = this is TurnsLeft
         }
     }
 
@@ -271,10 +352,15 @@ data class BattleUnit private constructor(
         val remainingTurnActions: RemainingTurnActionsDto,
         val abilityCooldowns: Map<String, Int>,
         val unitId: String,
+        val ongoingEffects: OngoingEffectsDto,
     ){
         data class RemainingTurnActionsDto(
             val remainingCasts: Int,
             val remainingSteps: Int,
+        )
+
+        data class OngoingEffectsDto(
+            val delayedEffects: List<String>,
         )
     }
 }

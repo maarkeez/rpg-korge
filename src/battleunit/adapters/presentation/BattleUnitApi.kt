@@ -6,6 +6,7 @@ import battleunit.adapters.events.OnAbilityCasted
 import battleunit.adapters.events.OnPlayerTurnStarted
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitRepository
+import battleunit.usecases.commands.ApplyOnTurnStartedEffects
 import battleunit.usecases.commands.CastAbility
 import battleunit.usecases.commands.DeployBattleUnit
 import battleunit.usecases.commands.MoveBattleUnit
@@ -94,8 +95,14 @@ class BattleUnitApi(
     )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
+    val applyOnTurnStartedEffects = ApplyOnTurnStartedEffects(
+        effectApi.searchEffectById,
+        searchBattleUnitsByPlayerId,
+        battleUnitRepository,
+        eventBus,
+    )
 
     // Events
-    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, eventBus)
+    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, eventBus)
     private val onAbilityCasted = OnAbilityCasted(receiveAbilityEffects, eventBus)
 }

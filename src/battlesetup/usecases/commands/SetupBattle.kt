@@ -8,6 +8,7 @@ import battleunit.usecases.commands.DeployBattleUnit
 import effect.domain.Effect
 import unit.domain.Unit
 import effect.domain.Effect.Dto.ApplicationDto
+import effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import effect.usecases.commands.RequestEffectCreation
 import player.usecases.commands.*
 import player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
@@ -31,6 +32,20 @@ class SetupBattle(
 
         initializeBattlefield(8, 8, List(8){List(8){ "tile-id-$it" }})
 
+        val venomDamage = Effect.Dto(
+            id = "venom-damage",
+            type = "DECREASE_HEALTH",
+            power = 3,
+            probability = 100,
+            modifiers = emptyList(),
+            application = ApplicationDto(
+                "ON_TURN_STARTED",
+                onTurnStarted = OnTurnStartedDto(
+                    duration = 5
+                ),
+                beforeApplyingEffect = null
+            )
+        )
         val lowPhysicalDamage = Effect.Dto(
             id = "low-physical-damage",
             type = "DECREASE_HEALTH",
@@ -55,9 +70,18 @@ class SetupBattle(
                 beforeApplyingEffect = null
             )
         )
+        requestEffectCreation(venomDamage)
         requestEffectCreation(lowPhysicalDamage)
         requestEffectCreation(lowDamageHeal)
 
+        val poisonedSword = Ability.Dto(
+            id = "poisoned-sword",
+            name = "Poisoned Sword",
+            cost = 5,
+            cooldown = 1,
+            effects = listOf(venomDamage.id),
+            targetPattern = "ADJACENT_ENEMY",
+        )
         val sword = Ability.Dto(
             id = "sword",
             name = "Sword",
@@ -74,6 +98,7 @@ class SetupBattle(
             effects = listOf(lowDamageHeal.id),
             targetPattern = "SELF",
         )
+        requestAbilityCreation(poisonedSword)
         requestAbilityCreation(sword)
         requestAbilityCreation(heal)
 
@@ -88,9 +113,9 @@ class SetupBattle(
         val knight = Unit.Dto(
             id = "knight",
             name = "Knight",
-            healthPoints = 20,
+            healthPoints = 100,
             manaPoints = 30,
-            abilities = listOf(sword.id, heal.id),
+            abilities = listOf(sword.id, poisonedSword.id, heal.id),
             movementRange = 3
         )
         requestUnitCreation(ratUnit)

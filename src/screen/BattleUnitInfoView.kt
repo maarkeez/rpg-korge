@@ -20,6 +20,7 @@ class BattleUnitInfoView: Container() {
     private lateinit var abilityButtons: Array<UIButton?>
     private lateinit var heal: Bitmap
     private lateinit var sword: Bitmap
+    private lateinit var poisonedSword: Bitmap
     private lateinit var abilitySelection: Bitmap
     private var delegate: Delegate? = null
     private lateinit var healthBarView: HealthBarView
@@ -30,6 +31,7 @@ class BattleUnitInfoView: Container() {
         unitPortraitView.loadAssets()
         heal = resourcesVfs["ability/heal.png"].readBitmap()
         sword = resourcesVfs["ability/sword.png"].readBitmap()
+        poisonedSword = resourcesVfs["ability/poisoned_sword.png"].readBitmap()
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
     }
 
@@ -108,6 +110,7 @@ class BattleUnitInfoView: Container() {
                 val canUseAbility = canCast && !isInCooldown
                 when(abilityId) {
                     "heal" -> heal
+                    "poisoned-sword" -> poisonedSword
                     "sword" -> sword
                     else -> null
                 }?.let { avatarBitmap ->

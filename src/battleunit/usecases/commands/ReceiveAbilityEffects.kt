@@ -45,9 +45,23 @@ class ReceiveAbilityEffects(
         val unit = searchUnitById(occupantBattleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
         // TODO: Implement all the effect logic: Probability, modifiers, applications, etc
         val (events, updatedBattleUnit) = effects.fold(occupantBattleUnit) { battleUnit, effect ->
-            battleUnit
-                .receiveImmediateEffect(effect.id)
-                .applyImmediateEffect(effect, unit)
+            when (effect.application.type) {
+                "IMMEDIATELY" -> {
+                    battleUnit
+                        .receiveImmediateEffect(effectId = effect.id)
+                        .applyImmediateEffect(effect, unit)
+                }
+                "ON_TURN_STARTED" -> {
+                    battleUnit.receiveDelayedEffect(
+                        effectId = effect.id,
+                        turnsLeft = effect.application.onTurnStarted!!.duration
+                    )
+                }
+                else -> {
+                    throw RuntimeException("Unexpected effect $effect")
+                }
+            }
+
         }.pullEvents()
         battleUnitRepository.update(updatedBattleUnit)
         eventBus.publish(events)
