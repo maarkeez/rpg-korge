@@ -28,6 +28,7 @@ class BattlefieldView: Container() {
     private lateinit var tileSelection1BitMap: Bitmap
     private lateinit var tileSelection2BitMap: Bitmap
     private lateinit var tileSelection3BitMap: Bitmap
+    private lateinit var unitSelectionBitMap: Bitmap
 
     private val battlefieldGrid = uiGridFill(
         size= Size(width=384, height=384),
@@ -51,6 +52,7 @@ class BattlefieldView: Container() {
         tileSelection1BitMap = resourcesVfs["battlefield/tile_selection_1.png"].readBitmap()
         tileSelection2BitMap = resourcesVfs["battlefield/tile_selection_2.png"].readBitmap()
         tileSelection3BitMap = resourcesVfs["battlefield/tile_selection_3.png"].readBitmap()
+        unitSelectionBitMap = resourcesVfs["battlefield/unit_selection.png"].readBitmap()
     }
 
     fun displayBattlefield(dto: Battlefield.Dto) {
@@ -98,6 +100,12 @@ class BattlefieldView: Container() {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         if(tileButton.findViewByName(SELECTION) != null) return
         tileButton.addImage(tileSelection2BitMap, SELECTION)
+    }
+
+    fun displayUnitSelection(row: Int, column: Int) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.findViewByName(SELECTION)?.removeFromParent()
+        tileButton.addImage(unitSelectionBitMap, SELECTION)
     }
 
     fun resetTiles() {

@@ -151,6 +151,7 @@ class BattlefieldPresenter(
                 column = position.column
             )
         }
+        battlefieldView.displayUnitSelection(row, column)
     }
 
     private fun clearSelection() {
