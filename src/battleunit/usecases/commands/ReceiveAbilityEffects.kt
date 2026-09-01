@@ -2,6 +2,7 @@ package battleunit.usecases.commands
 
 import ability.usecases.queries.SearchAbilityById
 import battlefield.usecases.queries.SearchOccupant
+import battlefield.usecases.queries.SearchPosition
 import battleunit.domain.*
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
@@ -17,6 +18,7 @@ class ReceiveAbilityEffects(
     private val eventBus: EventBus,
     private val searchOccupant: SearchOccupant,
     private val searchUnitById: SearchUnitById,
+    private val searchPosition: SearchPosition,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -24,20 +26,38 @@ class ReceiveAbilityEffects(
         row: Int,
         column: Int,
     ) {
-        battleUnitRepository.searchById(battleUnitId) ?: return
+        val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
         val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
         val effects = ability.effects.map { effectId -> searchEffectById(effectId) ?: throw FailedToReceiveAbilityEffects() }
         // TODO: Implement other target patterns
-        val occupantId = searchOccupant(row, column) ?: throw FailedToReceiveAbilityEffects()
+        val occupantId = searchOccupant(row, column)
         if(ability.targetPattern == "ADJACENT_ENEMY") {
+            if(occupantId == null) throw FailedToReceiveAbilityEffects()
             val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: throw FailedToReceiveAbilityEffects()
             val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
             if(battleUnit.isSamePlayer(occupantBattleUnit)) throw FailedToReceiveAbilityEffects()
+            receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
         if(ability.targetPattern == "SELF") {
+            if(occupantId == null) throw FailedToReceiveAbilityEffects()
             if(occupantId != battleUnitId) throw FailedToReceiveAbilityEffects()
+            receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
-        receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
+        if(ability.targetPattern == "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"){
+            if(occupantId != null) throw FailedToReceiveAbilityEffects()
+            receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
+            if(effects.any{effect -> effect.type == "TELEPORT"}){
+                val currentPosition = searchPosition(battleUnitId)!!
+                val (events, updatedBattleUnit) = battleUnit.teleport(
+                    fromRow = currentPosition.row,
+                    fromColumn = currentPosition.column,
+                    toRow = row,
+                    toColumn = column,
+                ).pullEvents()
+                battleUnitRepository.update(updatedBattleUnit)
+                eventBus.publish(events)
+            }
+        }
     }
 
     private fun receiveAbilityEffects(battleUnitId: String, effects: List<Effect.Dto>) {

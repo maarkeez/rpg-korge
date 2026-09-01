@@ -38,6 +38,10 @@ sealed interface BattleUnitEvent: DomainEvent{
         val battleUnitId: String,
     ): BattleUnitEvent
 
+    data class BattleUnitTeleported(
+        val battleUnitId: String,
+    ): BattleUnitEvent
+
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,

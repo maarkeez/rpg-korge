@@ -93,6 +93,7 @@ class BattleUnitApi(
         eventBus,
         battlefieldApi.searchOccupant,
         unitApi.searchUnitById,
+        battlefieldApi.searchPosition,
     )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)

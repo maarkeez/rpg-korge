@@ -11,6 +11,7 @@ import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
 import battleunit.domain.BattleUnitEvent.BattleUnitHealed
 import battleunit.domain.BattleUnitEvent.BattleUnitMoved
+import battleunit.domain.BattleUnitEvent.BattleUnitTeleported
 import battleunit.domain.BattleUnitEvent.EffectReceived
 import effect.domain.Effect
 import player.domain.Player
@@ -69,6 +70,25 @@ data class BattleUnit private constructor(
         toColumn: Int,
     ): BattleUnit {
         val remainingTurnActions = remainingTurnActions.move(distance)
+        val movedEvent = BattleUnitMoved(
+            battleUnitId = id.value,
+            fromRow = fromRow,
+            fromColumn = fromColumn,
+            toRow = toRow,
+            toColumn = toColumn
+        )
+        return copy(
+            remainingTurnActions = remainingTurnActions,
+            events = events + movedEvent
+        )
+    }
+
+    fun teleport(
+        fromRow: Int,
+        fromColumn: Int,
+        toRow: Int,
+        toColumn: Int,
+    ): BattleUnit {
         val movedEvent = BattleUnitMoved(
             battleUnitId = id.value,
             fromRow = fromRow,
@@ -157,6 +177,11 @@ data class BattleUnit private constructor(
                     ongoingEffects = ongoingEffects,
                     remainingHealthPoints = remainingHealthPoints,
                     events = events + healedEvent
+                )
+            }
+            "TELEPORT" -> {
+                copy(
+                    events = events + BattleUnitTeleported(battleUnitId = id.value)
                 )
             }
             else -> {
