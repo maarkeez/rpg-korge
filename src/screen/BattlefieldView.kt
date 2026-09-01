@@ -96,6 +96,7 @@ class BattlefieldView: Container() {
 
     fun displayPotentialCast(row: Int, column: Int) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        if(tileButton.findViewByName(SELECTION) != null) return
         tileButton.addImage(tileSelection2BitMap, SELECTION)
     }
 
