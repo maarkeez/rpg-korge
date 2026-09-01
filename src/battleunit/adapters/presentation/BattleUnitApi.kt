@@ -11,6 +11,7 @@ import battleunit.usecases.commands.CastAbility
 import battleunit.usecases.commands.DeployBattleUnit
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.commands.ReceiveAbilityEffects
+import battleunit.usecases.commands.ReplenishMana
 import battleunit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.CanMoveTo
@@ -103,8 +104,12 @@ class BattleUnitApi(
         battleUnitRepository,
         eventBus,
     )
+    val replenishMana = ReplenishMana(
+        battleUnitRepository,
+        unitApi.searchUnitById,
+    )
 
     // Events
-    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, eventBus)
+    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
     private val onAbilityCasted = OnAbilityCasted(receiveAbilityEffects, eventBus)
 }

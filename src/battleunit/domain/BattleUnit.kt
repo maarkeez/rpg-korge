@@ -112,6 +112,11 @@ data class BattleUnit private constructor(
         return copy(abilityCooldowns = abilityCooldowns)
     }
 
+    fun replenishMana(unit: Unit.Dto): BattleUnit {
+        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + 10, unit.manaPoints))
+        return copy(remainingManaPoints = remainingManaPoints)
+    }
+
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
     fun canCastAbility(ability: Ability.Dto): Boolean {
