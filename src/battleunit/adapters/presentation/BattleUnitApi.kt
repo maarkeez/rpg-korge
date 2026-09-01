@@ -60,6 +60,7 @@ class BattleUnitApi(
     )
     val canCastAbility = CanCastAbility(
         battleUnitRepository,
+        abilityApi.searchAbilityById,
     )
 
     // Commands

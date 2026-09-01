@@ -1,5 +1,6 @@
 package battleunit.domain
 
+import ability.domain.Ability
 import battleunit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
 import battleunit.domain.BattleUnitError.RemainingManaPointsBelowZero
@@ -90,9 +91,10 @@ data class BattleUnit private constructor(
 
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
-    fun canCastAbility(abilityId: String): Boolean {
-        // TODO: Consider ability cost
-      return remainingTurnActions.canCastAbility() && abilityCooldowns.canCastAbility(abilityId)
+    fun canCastAbility(ability: Ability.Dto): Boolean {
+      return remainingTurnActions.canCastAbility()
+          && abilityCooldowns.canCastAbility(ability.id)
+          && remainingManaPoints.value >= ability.cooldown
     }
 
     fun castAbility(abilityId: String, abilityCooldown: Int, abilityCost: Int, row: Int, column: Int): BattleUnit {

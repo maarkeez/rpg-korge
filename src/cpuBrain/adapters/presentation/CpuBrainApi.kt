@@ -40,6 +40,7 @@ class CpuBrainApi(
         battleUnitApi.searchBattleUnitsByPlayerId,
         battleUnitApi.moveBattleUnit,
         battleUnitApi.whereCanCast,
+        battleUnitApi.canCastAbility,
         battleUnitApi.castAbility,
         battleApi.finishPlayerTurn,
         battleUnitApi.searchBattleUnitById,

@@ -22,10 +22,10 @@ class CastAbility(
         column: Int,
     ) {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
-        if(!storedBattleUnit.canCastAbility(abilityId)) throw BattleUnitCanNotCastAbility()
+        val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
+        if(!storedBattleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
         val whereCanCast = whereCanCast(battleUnitId, abilityId)
         if(!whereCanCast.contains(PositionDto(row, column))) throw InvalidCastPosition()
-        val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
         val (events, battleUnit) = storedBattleUnit
             .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, abilityCost= ability.cost, row = row, column = column)
             .pullEvents()
