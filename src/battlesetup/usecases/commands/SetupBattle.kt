@@ -98,9 +98,45 @@ class SetupBattle(
             effects = listOf(lowDamageHeal.id),
             targetPattern = "SELF",
         )
+        val mushroom = Ability.Dto(
+            id = "mushroom",
+            name = "Mushroom",
+            cost = 10,
+            cooldown = 0,
+            effects = listOf(lowPhysicalDamage.id),
+            targetPattern = "ADJACENT_ENEMY",
+        )
+        val skull = Ability.Dto(
+            id = "skull",
+            name = "Skull",
+            cost = 10,
+            cooldown = 0,
+            effects = listOf(lowPhysicalDamage.id),
+            targetPattern = "ADJACENT_ENEMY",
+        )
+        val teleport = Ability.Dto(
+            id = "teleport",
+            name = "Teleport",
+            cost = 10,
+            cooldown = 0,
+            effects = listOf(lowPhysicalDamage.id),
+            targetPattern = "ADJACENT_ENEMY",
+        )
+        val bee = Ability.Dto(
+            id = "bee",
+            name = "Bee",
+            cost = 10,
+            cooldown = 0,
+            effects = listOf(lowPhysicalDamage.id),
+            targetPattern = "ADJACENT_ENEMY",
+        )
         requestAbilityCreation(poisonedSword)
         requestAbilityCreation(sword)
         requestAbilityCreation(heal)
+        requestAbilityCreation(mushroom)
+        requestAbilityCreation(skull)
+        requestAbilityCreation(teleport)
+        requestAbilityCreation(bee)
 
         val ratUnit = Unit.Dto(
             id = "rat",
@@ -115,7 +151,14 @@ class SetupBattle(
             name = "Knight",
             healthPoints = 100,
             manaPoints = 30,
-            abilities = listOf(sword.id, poisonedSword.id, heal.id),
+            abilities = listOf(
+                poisonedSword.id,
+                mushroom.id,
+                skull.id,
+                teleport.id,
+                bee.id,
+                heal.id
+            ),
             movementRange = 3
         )
         requestUnitCreation(ratUnit)

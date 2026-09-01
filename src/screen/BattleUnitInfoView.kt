@@ -21,6 +21,10 @@ class BattleUnitInfoView: Container() {
     private lateinit var heal: Bitmap
     private lateinit var sword: Bitmap
     private lateinit var poisonedSword: Bitmap
+    private lateinit var mushroom: Bitmap
+    private lateinit var skull: Bitmap
+    private lateinit var teleport: Bitmap
+    private lateinit var bee: Bitmap
     private lateinit var abilitySelection: Bitmap
     private var delegate: Delegate? = null
     private lateinit var healthBarView: HealthBarView
@@ -32,6 +36,10 @@ class BattleUnitInfoView: Container() {
         heal = resourcesVfs["ability/heal.png"].readBitmap()
         sword = resourcesVfs["ability/sword.png"].readBitmap()
         poisonedSword = resourcesVfs["ability/poisoned_sword.png"].readBitmap()
+        mushroom = resourcesVfs["ability/mushroom.png"].readBitmap()
+        skull = resourcesVfs["ability/skull.png"].readBitmap()
+        teleport = resourcesVfs["ability/teleport.png"].readBitmap()
+        bee = resourcesVfs["ability/bee.png"].readBitmap()
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
     }
 
@@ -112,6 +120,10 @@ class BattleUnitInfoView: Container() {
                     "heal" -> heal
                     "poisoned-sword" -> poisonedSword
                     "sword" -> sword
+                    "mushroom" -> mushroom
+                    "skull" -> skull
+                    "teleport" -> teleport
+                    "bee" -> bee
                     else -> null
                 }?.let { avatarBitmap ->
                     abilityButton.image(avatarBitmap) {
