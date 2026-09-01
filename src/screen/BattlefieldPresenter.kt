@@ -173,6 +173,15 @@ class BattlefieldPresenter(
             }
             else -> return
         }
+        if(selectionState is AbilitySelected && (selectionState as AbilitySelected).abilityId == abilityId) {
+            clearSelection()
+            selectBattleUnit(
+                row = casterRow,
+                column = casterColumn,
+                occupantId = battleUnitId
+            )
+            return
+        }
         val canCastAbility = battleUnitApi.canCastAbility(battleUnitId, abilityId)
         if(!canCastAbility) return
         battlefieldView.resetTiles()
