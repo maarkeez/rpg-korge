@@ -46,6 +46,7 @@ class ReceiveAbilityEffects(
         if(ability.targetPattern == "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"){
             if(occupantId != null) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
+						// TODO: refactor receiveImmediateEffect to handle teleport
             if(effects.any{effect -> effect.type == "TELEPORT"}){
                 val currentPosition = searchPosition(battleUnitId)!!
                 val (events, updatedBattleUnit) = battleUnit.teleport(
