@@ -190,10 +190,12 @@ data class BattleUnit private constructor(
         }
     }
 
+		// TODO: Rename to "on turn started"
     fun hasDelayedOngoingEffects(): Boolean {
         return ongoingEffects.hasDelayedOngoingEffects()
     }
 
+		// TODO: Rename to "on turn started"
     fun applyDelayedEffect(effect: Effect.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
         return if(effect.type == "DECREASE_HEALTH") {
