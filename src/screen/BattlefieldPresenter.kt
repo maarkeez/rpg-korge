@@ -155,28 +155,35 @@ class BattlefieldPresenter(
     }
 
     override fun abilitySelected(abilityId: String) {
-        if(selectionState !is BattleUnitSelected) return
-        val battleUnitSelected = selectionState as BattleUnitSelected
-        val canCastAbility = battleUnitApi.canCastAbility(battleUnitSelected.battleUnitId, abilityId)
+        val (casterRow, casterColumn, battleUnitId) = when(selectionState) {
+            is BattleUnitSelected -> {
+                val state = selectionState as BattleUnitSelected
+                Triple(state.casterRow, state.casterColumn, state.battleUnitId)
+            }
+            is AbilitySelected -> {
+                val state = selectionState as AbilitySelected
+                Triple(state.casterRow, state.casterColumn, state.battleUnitId)
+            }
+            else -> return
+        }
+        val canCastAbility = battleUnitApi.canCastAbility(battleUnitId, abilityId)
         if(!canCastAbility) return
-        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitSelected.battleUnitId)!!
+        battlefieldView.resetTiles()
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId)!!
         val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(abilityId)
         battleUnitInfoView.displayAbilitySelected(abilityIndex)
         battleHudView.displayBattleUnitInfoView()
-        val castPositions = battleUnitApi.whereCanCast(battleUnitSelected.battleUnitId, abilityId)
-        if(castPositions.isEmpty()) return
-        battlefieldView.resetTiles()
+        val castPositions = battleUnitApi.whereCanCast(battleUnitId, abilityId)
         castPositions.forEach { position ->
-            // FIXME: It is being invoked but the tile background is kept white for SELF healing abilities
             battlefieldView.displayPotentialCast(
                 row = position.row,
                 column = position.column
             )
         }
         selectionState = AbilitySelected(
-            casterRow = battleUnitSelected.casterRow,
-            casterColumn = battleUnitSelected.casterColumn,
-            battleUnitId = battleUnitSelected.battleUnitId,
+            casterRow = casterRow,
+            casterColumn = casterColumn,
+            battleUnitId = battleUnitId,
             abilityId = abilityId
         )
     }
