@@ -89,7 +89,7 @@ class SetupBattle(
             id = "knight",
             name = "Knight",
             healthPoints = 20,
-            manaPoints = 10,
+            manaPoints = 30,
             abilities = listOf(sword.id, heal.id),
             movementRange = 3
         )

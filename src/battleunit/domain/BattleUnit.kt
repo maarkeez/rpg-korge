@@ -2,6 +2,7 @@ package battleunit.domain
 
 import battleunit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import battleunit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
+import battleunit.domain.BattleUnitError.RemainingManaPointsBelowZero
 import battleunit.domain.BattleUnitEvent.BattleUnitDamaged
 import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
@@ -90,10 +91,11 @@ data class BattleUnit private constructor(
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
     fun canCastAbility(abilityId: String): Boolean {
+        // TODO: Consider ability cost
       return remainingTurnActions.canCastAbility() && abilityCooldowns.canCastAbility(abilityId)
     }
 
-    fun castAbility(abilityId: String, abilityCooldown: Int, row: Int, column: Int): BattleUnit {
+    fun castAbility(abilityId: String, abilityCooldown: Int, abilityCost: Int, row: Int, column: Int): BattleUnit {
         val remainingTurnActions = remainingTurnActions.castAbility()
         val abilityCooldowns = abilityCooldowns.castAbility(abilityId, abilityCooldown)
         val abilityCastedEvent = BattleUnitEvent.AbilityCasted(
@@ -103,6 +105,7 @@ data class BattleUnit private constructor(
             column = column
         )
         return copy(
+            remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityCost),
             remainingTurnActions = remainingTurnActions,
             abilityCooldowns = abilityCooldowns,
             events = events + abilityCastedEvent
@@ -160,7 +163,11 @@ data class BattleUnit private constructor(
     @JvmInline private value class UnitId(val value: String)
     @JvmInline private value class PlayerId(val value: String)
     @JvmInline private value class RemainingHealthPoints(val value: Int)
-    @JvmInline private value class RemainingManaPoints(val value: Int)
+    @JvmInline private value class RemainingManaPoints(val value: Int) {
+//        init {
+//            if(value < 0) throw RemainingManaPointsBelowZero()
+//        }
+    }
     private data class RemainingTurnActions(
         private val movementRange: MovementRange,
         private val remainingSteps: RemainingSteps,

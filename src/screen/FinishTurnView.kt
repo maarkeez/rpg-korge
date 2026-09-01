@@ -18,7 +18,6 @@ class FinishTurnView: Container() {
             button.background.borderColor = Colors.LIGHTGRAY
 
             button.onClick {
-                println("Finish turn clicked!")
                 delegate?.finishTurn()
             }
         }

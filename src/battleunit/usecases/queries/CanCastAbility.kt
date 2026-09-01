@@ -10,6 +10,7 @@ class CanCastAbility(
         abilityId: String,
     ): Boolean {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return false
+        // TODO: Consider ability cost
         return battleUnit.canCastAbility(abilityId)
     }
 }

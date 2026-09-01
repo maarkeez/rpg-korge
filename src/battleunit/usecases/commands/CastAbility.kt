@@ -27,7 +27,7 @@ class CastAbility(
         if(!whereCanCast.contains(PositionDto(row, column))) throw InvalidCastPosition()
         val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
         val (events, battleUnit) = storedBattleUnit
-            .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, row = row, column = column)
+            .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, abilityCost= ability.cost, row = row, column = column)
             .pullEvents()
         battleUnitRepository.update(battleUnit)
         eventBus.publish(events)

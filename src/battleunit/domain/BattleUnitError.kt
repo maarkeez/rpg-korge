@@ -10,4 +10,5 @@ sealed class BattleUnitError(message: String) : Throwable(message=message) {
     class InvalidCastPosition : BattleUnitError("Invalid cast position")
     class AbilityDoesNotExists : BattleUnitError("Ability does not exist")
     class FailedToReceiveAbilityEffects : BattleUnitError("Failed to receive ability effects")
+    class RemainingManaPointsBelowZero : BattleUnitError("Remaining mana points must be greater than zero")
 }

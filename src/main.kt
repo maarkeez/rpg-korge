@@ -19,7 +19,9 @@ import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.*
 import player.adapters.presentation.PlayerApi
+import screen.AttackPreviewView
 import screen.BattleUnitInfoView
+import screen.BattleHudView
 import shared.domain.EventBus
 import unit.adapters.presentation.UnitApi
 
@@ -33,10 +35,17 @@ class MyScene : Scene() {
 
     val battlefieldView = BattlefieldView()
     val battleUnitInfoView = BattleUnitInfoView()
+    val attackPreviewView = AttackPreviewView()
+    val battleHudView = BattleHudView(
+        Size(390, 300),
+        battleUnitInfoView,
+        attackPreviewView
+    )
 
     override suspend fun SContainer.sceneInit() {
         battlefieldView.loadAssets()
         battleUnitInfoView.loadAssets()
+        attackPreviewView.loadAssets()
     }
 
 	override suspend fun SContainer.sceneMain() {
@@ -67,7 +76,18 @@ class MyScene : Scene() {
         )
 
         // Main scene
-        val battlefieldPresenter = BattlefieldPresenter(battlefieldView, battleUnitInfoView, battlefieldApi, battleUnitApi, playerApi, unitApi, eventBus)
+        val battlefieldPresenter = BattlefieldPresenter(
+            battlefieldView,
+            battleUnitInfoView,
+            attackPreviewView,
+            battleHudView,
+            battlefieldApi,
+            battleUnitApi,
+            playerApi,
+            unitApi,
+            abilityApi,
+            eventBus
+        )
 
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
@@ -84,8 +104,7 @@ class MyScene : Scene() {
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-
-                addChild(battleUnitInfoView)
+                addChild(battleHudView)
                 uiSpacing(Size(0, 5))
                 val finishTurnView = FinishTurnView()
                 addChild(finishTurnView)
