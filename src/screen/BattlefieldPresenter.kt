@@ -151,7 +151,7 @@ class BattlefieldPresenter(
                 column = position.column
             )
         }
-        battlefieldView.displayUnitSelection(row, column)
+        battlefieldView.displayTileSelection(row, column)
     }
 
     private fun clearSelection() {
@@ -232,6 +232,10 @@ class BattlefieldPresenter(
                 receiverUnit = null,
                 damage = null
             )
+            battlefieldView.displayTileSelection(
+                row = row,
+                column = column
+            )
         } else {
             val targetBattleUnit = battleUnitApi.searchBattleUnitById(targetBattleUnitId)!!
             val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
@@ -243,6 +247,10 @@ class BattlefieldPresenter(
                 receiverBattleUnit = targetBattleUnit,
                 receiverUnit = targetUnit,
                 damage = damage
+            )
+            battlefieldView.displayTileSelection(
+                row = row,
+                column = column
             )
         }
         selectionState = CastTargetSelected(
