@@ -53,6 +53,7 @@ class AttackPreviewView: Container() {
             uiHorizontalStack {
                 uiVerticalStack(padding = 1.0) {
                     receiverUnitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
+                    receiverUnitNameView.alignTextToRight()
                     addChild(receiverUnitNameView)
 
                     uiSpacing(Size(0, 15))
