@@ -25,9 +25,8 @@ class WhereShouldMove(
         }
         val unit = searchUnitById(id = battleUnit.unitId)!!
 
-        val healthRatio = battleUnit.remainingHealthPoints / unit.healthPoints
-        val enemyPreference = healthRatio
-        val allyPreference = 1 - healthRatio
+        val enemyPreference = battleUnit.remainingHealthPoints.toDouble() / unit.healthPoints.toDouble()
+        val allyPreference = 1 - enemyPreference
 
         val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId)
         val enemyBattleUnits = if(enemyPlayer != null) {
