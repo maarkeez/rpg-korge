@@ -71,6 +71,12 @@ class BattlefieldPresenter(
         if(battleUnit.unitId == "rat"){
             battlefieldView.displayRatBattleUnit(row, column)
         }
+        if(selectionState is BattleUnitSelected){
+            val selectedBattleUnit = (selectionState as BattleUnitSelected).battleUnitId
+            if(battleUnitId == selectedBattleUnit){
+                selectBattleUnit(row, column, battleUnitId)
+            }
+        }
     }
 
     fun removeUnit(row: Int, column: Int) {
@@ -103,7 +109,7 @@ class BattlefieldPresenter(
         val occupantId = battlefieldApi.searchOccupant(row, column)
         val currentState = selectionState as BattleUnitSelected
         if(occupantId == null) {
-            clearSelection()
+            battlefieldView.resetTiles()
             val battleUnit = battleUnitApi.searchBattleUnitById(currentState.battleUnitId)!!
             val tilesInMovementRange = battleUnitApi.whereCanMove(
                 battleUnitId = currentState.battleUnitId
