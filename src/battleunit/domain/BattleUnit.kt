@@ -149,6 +149,7 @@ data class BattleUnit private constructor(
         )
     }
 
+		// TODO: Rename to "on turn started"
     fun receiveDelayedEffect(effectId: String, turnsLeft: Int): BattleUnit {
         val ongoingEffects = ongoingEffects.receiveDelayedEffect(effectId, turnsLeft)
         val effectReceivedEvent = EffectReceived(
@@ -354,6 +355,7 @@ data class BattleUnit private constructor(
 
         constructor(): this(emptyList())
 
+		// TODO: Refactor Effect class to have private constructor
         private data class Effect(val effectId: EffectId, val applicationStatus: ApplicationStatus)
         @JvmInline private value class EffectId(val value: String)
         private sealed interface ApplicationStatus {
