@@ -83,7 +83,7 @@ data class Ability private constructor(
     private enum class TargetPattern {
         SELF,
         ADJACENT_ENEMY,
-        BATTLE_UNIT_WITH_ADJACENT_TILE_VACANT;
+        VACANT_TILE_ADJACENT_TO_BATTLE_UNIT;
 
         companion object {
             operator fun invoke(targetPattern:String): TargetPattern =  runCatching { TargetPattern.valueOf(targetPattern) }.getOrElse { throw InvalidTargetPattern() }

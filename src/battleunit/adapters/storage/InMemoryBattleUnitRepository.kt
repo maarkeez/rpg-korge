@@ -19,4 +19,6 @@ class InMemoryBattleUnitRepository: BattleUnitRepository {
 
     override fun searchByPlayerId(playerId: String) = battleUnits.values
         .filter { it.toDto().playerId == playerId }
+
+    override fun searchAll(): List<BattleUnit> = battleUnits.values.toList()
 }

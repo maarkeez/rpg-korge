@@ -70,9 +70,22 @@ class SetupBattle(
                 beforeApplyingEffect = null
             )
         )
+        val teleportEffect = Effect.Dto(
+            id = "teleport",
+            type = "TELEPORT",
+            power = 0,
+            probability = 100,
+            modifiers = emptyList(),
+            application = ApplicationDto(
+                "IMMEDIATELY",
+                onTurnStarted = null,
+                beforeApplyingEffect = null
+            )
+        )
         requestEffectCreation(venomDamage)
         requestEffectCreation(lowPhysicalDamage)
         requestEffectCreation(lowDamageHeal)
+        requestEffectCreation(teleportEffect)
 
         val poisonedSword = Ability.Dto(
             id = "poisoned-sword",
@@ -117,10 +130,10 @@ class SetupBattle(
         val teleport = Ability.Dto(
             id = "teleport",
             name = "Teleport",
-            cost = 10,
-            cooldown = 0,
-            effects = listOf(lowPhysicalDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            cost = 5,
+            cooldown = 1,
+            effects = listOf(teleportEffect.id),
+            targetPattern = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT",
         )
         val bee = Ability.Dto(
             id = "bee",

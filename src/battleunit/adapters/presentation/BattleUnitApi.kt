@@ -58,6 +58,7 @@ class BattleUnitApi(
         abilityApi.searchAbilityById,
         battlefieldApi.searchOccupant,
         distanceService,
+        battlefieldApi.canBattlefieldTileBeOccupied,
     )
     val canCastAbility = CanCastAbility(
         battleUnitRepository,
