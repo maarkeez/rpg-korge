@@ -86,6 +86,7 @@ class MyScene : Scene() {
             playerApi,
             unitApi,
             abilityApi,
+            battleApi,
             eventBus
         )
 

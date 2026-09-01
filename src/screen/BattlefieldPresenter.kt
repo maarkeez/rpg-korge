@@ -1,6 +1,7 @@
 package screen
 
 import ability.adapters.presentation.AbilityApi
+import battle.adapters.presentation.BattleApi
 import battle.domain.BattleEvent
 import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.domain.Battlefield
@@ -28,6 +29,7 @@ class BattlefieldPresenter(
     private val playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
+    private val battleApi: BattleApi,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate, BattleUnitInfoView.Delegate, AttackPreviewView.Delegate {
 
@@ -188,6 +190,11 @@ class BattlefieldPresenter(
             return
         }
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(abilitySelected.battleUnitId)!!
+        val currentPlayerId = battleApi.searchBattle()?.currentPlayerTurn ?: return
+        if(currentPlayerId != casterBattleUnit.playerId) {
+            clearSelection()
+            return
+        }
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(abilitySelected.abilityId)!!
         val targetBattleUnitId = battlefieldApi.searchOccupant(row, column)
