@@ -33,7 +33,7 @@ class SetupBattle(
         initializeBattlefield(8, 8, List(8){List(8){ "tile-id-$it" }})
 
         val venomDamage = Effect.Dto(
-            id = Effect.Dto.Id.VENOM_DAMAGE,
+            id = "venom-damage",
             type = "DECREASE_HEALTH",
             power = 3,
             probability = 100,
@@ -47,7 +47,7 @@ class SetupBattle(
             )
         )
         val lowPhysicalDamage = Effect.Dto(
-            id = Effect.Dto.Id.LOW_PHYSICAL_DAMAGE,
+            id = "low-physical-damage",
             type = "DECREASE_HEALTH",
             power = 10,
             probability = 100,
@@ -59,7 +59,7 @@ class SetupBattle(
             )
         )
         val lowDamageHeal = Effect.Dto(
-            id = Effect.Dto.Id.LOW_HEAL,
+            id = "low-damage-heal",
             type = "INCREASE_HEALTH",
             power = 20,
             probability = 100,
@@ -71,7 +71,7 @@ class SetupBattle(
             )
         )
         val teleportEffect = Effect.Dto(
-            id = Effect.Dto.Id.TELEPORT,
+            id = "teleport",
             type = "TELEPORT",
             power = 0,
             probability = 100,

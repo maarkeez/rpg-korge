@@ -142,7 +142,7 @@ data class BattleUnit private constructor(
         )
     }
 
-    fun receiveImmediateEffect(effectId: Effect.Dto.Id): BattleUnit {
+    fun receiveImmediateEffect(effectId: String): BattleUnit {
         val ongoingEffects = ongoingEffects.receiveImmediateEffect(effectId)
         val effectReceivedEvent = EffectReceived(
             battleUnitId = id.value,
@@ -155,7 +155,7 @@ data class BattleUnit private constructor(
     }
 
 		// TODO: Rename to "on turn started"
-    fun receiveDelayedEffect(effectId: Effect.Dto.Id, turnsLeft: Int): BattleUnit {
+    fun receiveDelayedEffect(effectId: String, turnsLeft: Int): BattleUnit {
         val ongoingEffects = ongoingEffects.receiveDelayedEffect(effectId, turnsLeft)
         val effectReceivedEvent = EffectReceived(
             battleUnitId = id.value,
@@ -316,22 +316,22 @@ data class BattleUnit private constructor(
         }
     }
     @JvmInline private value class OngoingEffects(val value: List<Effect>){
-        fun receiveImmediateEffect(effectId: Effect.Dto.Id): OngoingEffects {
+        fun receiveImmediateEffect(effectId: String): OngoingEffects {
             val newEffect = Effect(EffectId(effectId), ApplicationStatus.pending())
             return OngoingEffects(value + newEffect)
         }
 
-        fun receiveDelayedEffect(effectId: Effect.Dto.Id, turnsLeft: Int): OngoingEffects {
+        fun receiveDelayedEffect(effectId: String, turnsLeft: Int): OngoingEffects {
             val newEffect = Effect(EffectId(effectId), ApplicationStatus.delayed(turnsLeft))
             return OngoingEffects(value + newEffect)
         }
 
-        fun applyPendingEffect(effectId: Effect.Dto.Id): OngoingEffects {
+        fun applyPendingEffect(effectId: String): OngoingEffects {
             // TODO: Validate type
             return OngoingEffects(value.filter { it.effectId.value != effectId })
         }
 
-        fun applyDelayedEffect(effectId: Effect.Dto.Id): OngoingEffects {
+        fun applyDelayedEffect(effectId: String): OngoingEffects {
             val effect = value.firstOrNull { it.effectId.value == effectId } ?: throw EffectNotFound()
             if(!effect.applicationStatus.isDelayed()) throw NotDelayedEffect()
             val turnsLeft = (effect.applicationStatus as ApplicationStatus.TurnsLeft).apply()
@@ -362,7 +362,7 @@ data class BattleUnit private constructor(
 
 		// TODO: Refactor Effect class to have private constructor
         private data class Effect(val effectId: EffectId, val applicationStatus: ApplicationStatus)
-        @JvmInline private value class EffectId(val value: Effect.Dto.Id)
+        @JvmInline private value class EffectId(val value: String)
         private sealed interface ApplicationStatus {
             object Pending : ApplicationStatus
             @JvmInline value class TurnsLeft(val value: Int) : ApplicationStatus {
@@ -394,7 +394,7 @@ data class BattleUnit private constructor(
         )
 
         data class OngoingEffectsDto(
-            val delayedEffects: List<Effect.Dto.Id>,
+            val delayedEffects: List<String>,
         )
     }
 }

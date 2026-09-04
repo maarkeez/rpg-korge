@@ -11,7 +11,6 @@ import ability.domain.AbilityError.InvalidTargetPattern
 import ability.domain.AbilityError.NegativeAbilityCooldown
 import ability.domain.AbilityError.NegativeAbilityCost
 import ability.domain.AbilityEvent.AbilityCreated
-import effect.domain.Effect
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -74,7 +73,7 @@ data class Ability private constructor(
             if(value > 99) throw AbilityCooldownAboveLimit()
         }
     }
-    @JvmInline private value class Effects(val value: List<Effect.Dto.Id>){
+    @JvmInline private value class Effects(val value: List<String>){
         init {
             if(value.isEmpty()) throw AbilityEmptyEffects()
             if(value.size > 3) throw AbilityEffectsAboveLimit()
@@ -98,7 +97,7 @@ data class Ability private constructor(
         val name: String,
         val cost: Int,
         val cooldown: Int,
-        val effects: List<Effect.Dto.Id>,
+        val effects: List<String>,
         val targetPattern: String,
     )
 }

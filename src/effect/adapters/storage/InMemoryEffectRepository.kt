@@ -6,11 +6,11 @@ import player.domain.Player
 import kotlin.collections.set
 
 class InMemoryEffectRepository : EffectRepository {
-    private val effects = mutableMapOf<Effect.Dto.Id, Effect>()
+    private val effects = mutableMapOf<String, Effect>()
 
     override fun create(effect: Effect) {
         effects[effect.toDto().id] = effect
     }
 
-    override fun searchById(id: Effect.Dto.Id) = effects[id]
+    override fun searchById(id: String) = effects[id]
 }
