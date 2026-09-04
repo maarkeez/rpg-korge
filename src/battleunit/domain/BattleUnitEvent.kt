@@ -1,5 +1,6 @@
 package battleunit.domain
 
+import effect.domain.Effect
 import shared.domain.DomainEvent
 
 sealed interface BattleUnitEvent: DomainEvent{
@@ -27,7 +28,7 @@ sealed interface BattleUnitEvent: DomainEvent{
 
     data class EffectReceived(
         val battleUnitId: String,
-        val effectId: String,
+        val effectId: Effect.Dto.Id,
     ): BattleUnitEvent
 
     data class BattleUnitDamaged(

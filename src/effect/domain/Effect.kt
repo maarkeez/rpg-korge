@@ -32,7 +32,7 @@ data class Effect private constructor(
     companion object {
         fun create(dto: Dto): Effect {
             return Effect(
-                id = Id(dto.id),
+                id = Id.create(dto.id),
                 type = Type(dto.type),
                 power = Power(dto.power),
                 probability = Probability(dto.probability),
@@ -46,7 +46,7 @@ data class Effect private constructor(
     fun pullEvents() = events to copy(events = emptySet())
 
     fun toDto() = Dto(
-        id = id.value,
+        id = id.toDto(),
         type = type.toDto(),
         power = power.value,
         probability = probability.value,
@@ -55,11 +55,29 @@ data class Effect private constructor(
     )
 
 
-    @JvmInline private value class Id(val value: String){
-        init {
-            if(value.isBlank()) throw EmptyEffectId()
+    private enum class Id {
+        VENOM_DAMAGE,
+        LOW_PHYSICAL_DAMAGE,
+        LOW_HEAL,
+        TELEPORT;
+
+        fun toDto(): Dto.Id = when(this){
+            VENOM_DAMAGE -> Dto.Id.VENOM_DAMAGE
+            LOW_PHYSICAL_DAMAGE -> Dto.Id.LOW_PHYSICAL_DAMAGE
+            LOW_HEAL -> Dto.Id.LOW_HEAL
+            TELEPORT -> Dto.Id.TELEPORT
+        }
+
+        companion object {
+            fun create(id: Dto.Id): Id = when(id) {
+                Dto.Id.VENOM_DAMAGE -> VENOM_DAMAGE
+                Dto.Id.LOW_PHYSICAL_DAMAGE -> LOW_PHYSICAL_DAMAGE
+                Dto.Id.LOW_HEAL -> LOW_HEAL
+                Dto.Id.TELEPORT -> TELEPORT
+            }
         }
     }
+
     @JvmInline private value class Power(val value: Int){
         init {
             if(value<0) throw NegativePower()
@@ -163,13 +181,19 @@ data class Effect private constructor(
     }
 
     data class Dto(
-        val id: String,
+        val id: Id,
         val type: String,
         val power: Int,
         val probability: Int,
         val modifiers: List<ModifierDto>,
         val application: ApplicationDto,
     ){
+        enum class Id {
+            VENOM_DAMAGE,
+            LOW_PHYSICAL_DAMAGE,
+            LOW_HEAL,
+            TELEPORT
+        }
         data class ModifierDto(
             val type: String,
             val stack: StackDto?,
