@@ -1,9 +1,19 @@
 package screen.battlefieldHud.domain
 
 import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
+import kotlin.collections.plus
 
 sealed interface BattlefieldHud {
-    object Idle : BattlefieldHud {
+    data class Idle(
+        private val events: Set<BattlefieldHudEvent>,
+    ) : BattlefieldHud {
+
+        companion object {
+            fun create() = Idle(setOf(BattlefieldHudEvent.Idle))
+        }
+
+        fun idle() = copy(events = events + BattlefieldHudEvent.Idle)
+
         fun selectBattleUnit(
             tile: Dto.TileDto,
             battleUnitId: String,
@@ -12,14 +22,13 @@ sealed interface BattlefieldHud {
             tile = tile,
             battleUnitId = battleUnitId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            events = setOf(
-                SelectedBattleUnit(
+            events = events + SelectedBattleUnit(
                     tile = tile,
                     battleUnitId = battleUnitId,
                     tilesWhereCanBeMoved = tilesWhereCanBeMoved
-                )
             )
         )
+        fun pullEvents() = events to copy(events = emptySet())
     }
 
     data class DisplayMovementRange(
@@ -30,6 +39,7 @@ sealed interface BattlefieldHud {
     ): BattlefieldHud{
 
         fun pullEvents() = events to copy(events = emptySet())
+        fun idle() = Idle(events + BattlefieldHudEvent.Idle)
     }
 
     interface Dto {

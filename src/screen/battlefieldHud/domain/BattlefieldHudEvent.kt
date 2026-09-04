@@ -10,4 +10,6 @@ sealed interface BattlefieldHudEvent: DomainEvent {
         val battleUnitId: String,
         val tilesWhereCanBeMoved: Set<TileDto>
     ): BattlefieldHudEvent
+
+    object Idle: BattlefieldHudEvent
 }

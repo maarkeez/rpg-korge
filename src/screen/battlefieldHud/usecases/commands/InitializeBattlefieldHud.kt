@@ -7,6 +7,6 @@ class InitializeBattlefieldHud(
     private val battlefieldHudRepository: BattlefieldHudRepository
 ) {
     operator fun invoke() {
-        battlefieldHudRepository.create(Idle)
+        battlefieldHudRepository.create(Idle.create())
     }
 }

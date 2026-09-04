@@ -45,6 +45,7 @@ class BattlefieldPresenter(
     private val processTileSelected = ProcessTileSelected(
         battlefieldApi,
         battleUnitApi,
+        playerApi,
         battlefieldHudRepository,
         eventBus,
     )
@@ -57,6 +58,7 @@ class BattlefieldPresenter(
             displayUnit(event.row, event.column, event.battleUnitId)
         },
         eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
+            battlefieldView.resetTiles()
             removeUnit(event.fromRow, event.fromColumn)
             displayUnit(event.toRow, event.toColumn, event.battleUnitId)
         },
@@ -68,6 +70,9 @@ class BattlefieldPresenter(
         },
         eventBus.subscribe<SelectedBattleUnit> { event ->
             displayMovementRange(event)
+        },
+        eventBus.subscribe<BattlefieldHudEvent.Idle> { event ->
+            clearSelection()
         }
     )
 
@@ -109,42 +114,10 @@ class BattlefieldPresenter(
 
     override fun tileSelected(row: Int, column: Int) {
         when (selectionState) {
-            is NothingSelected -> onNothingSelectedATileWasSelected(row, column)
-            is BattleUnitSelected -> onBattleUnitSelectedATileWasSelected(row, column)
+            is NothingSelected -> processTileSelected(row = row, column = column)
+            is BattleUnitSelected -> processTileSelected(row = row, column = column)
             is AbilitySelected -> onAbilitySelectedATileWasSelected(row, column)
             is CastTargetSelected -> {}
-        }
-    }
-
-    private fun onNothingSelectedATileWasSelected(row: Int, column: Int) {
-        val occupantId = battlefieldApi.searchOccupant(row, column)
-        if(occupantId != null) {
-            processTileSelected(row = row, column = column)
-        }else{
-            clearSelection()
-        }
-    }
-
-    private fun onBattleUnitSelectedATileWasSelected(row: Int, column: Int) {
-        val occupantId = battlefieldApi.searchOccupant(row, column)
-        val currentState = selectionState as BattleUnitSelected
-        if(occupantId == null) {
-            battlefieldView.resetTiles()
-            val battleUnit = battleUnitApi.searchBattleUnitById(currentState.battleUnitId)!!
-            val tilesInMovementRange = battleUnitApi.whereCanMove(
-                battleUnitId = currentState.battleUnitId
-            )
-            val selectedTileInMovementRange = tilesInMovementRange.contains(Battlefield.Dto.PositionDto(row, column))
-            val player = playerApi.searchPlayerById(battleUnit.playerId)!!
-            val isHumanPlayer = player.type == "HUMAN"
-            if(selectedTileInMovementRange && isHumanPlayer) {
-                battleUnitApi.moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = row, moveToColumn = column)
-            }
-        } else if(occupantId == currentState.battleUnitId) {
-            clearSelection()
-        } else if(occupantId != currentState.battleUnitId) {
-            clearSelection()
-            selectBattleUnit(row, column, occupantId)
         }
     }
 
