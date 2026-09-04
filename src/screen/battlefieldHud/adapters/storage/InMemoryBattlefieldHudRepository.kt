@@ -3,7 +3,7 @@ package screen.battlefieldHud.adapters.storage
 import screen.battlefieldHud.domain.BattlefieldHud
 import screen.battlefieldHud.domain.BattlefieldHudRepository
 
-class InMemoryBattlefieldHudRepositoryImpl : BattlefieldHudRepository {
+class InMemoryBattlefieldHudRepository : BattlefieldHudRepository {
 
     private var battlefieldHud: BattlefieldHud? = null
 

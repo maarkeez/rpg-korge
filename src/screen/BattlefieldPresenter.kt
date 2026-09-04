@@ -15,6 +15,13 @@ import screen.BattlefieldPresenter.SelectionState.AbilitySelected
 import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
 import screen.BattlefieldPresenter.SelectionState.CastTargetSelected
 import screen.BattlefieldPresenter.SelectionState.NothingSelected
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud
+import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
+import screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud
+import screen.battlefieldHud.usecases.commands.ProcessTileSelected
 import shared.domain.EventBus
 import shared.domain.Subscription
 import unit.adapters.presentation.UnitApi
@@ -33,6 +40,15 @@ class BattlefieldPresenter(
     eventBus: EventBus,
 ) : BattlefieldView.Delegate, AbilityButtonView.Delegate, AttackPreviewView.Delegate {
 
+    private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
+    private val initializeBattlefieldHud = InitializeBattlefieldHud(battlefieldHudRepository)
+    private val processTileSelected = ProcessTileSelected(
+        battlefieldApi,
+        battleUnitApi,
+        battlefieldHudRepository,
+        eventBus,
+    )
+
     private var selectionState: SelectionState = NothingSelected
 
     private val subscriptions = listOf(
@@ -49,10 +65,14 @@ class BattlefieldPresenter(
         },
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
             clearSelection()
+        },
+        eventBus.subscribe<SelectedBattleUnit> { event ->
+            displayMovementRange(event)
         }
     )
 
     init {
+        initializeBattlefieldHud.invoke()
         battlefieldView.setDelegate(this)
         battleUnitInfoView.setDelegate(this)
         attackPreviewView.setDelegate(this)
@@ -99,7 +119,7 @@ class BattlefieldPresenter(
     private fun onNothingSelectedATileWasSelected(row: Int, column: Int) {
         val occupantId = battlefieldApi.searchOccupant(row, column)
         if(occupantId != null) {
-            selectBattleUnit(row, column, occupantId)
+            processTileSelected(row = row, column = column)
         }else{
             clearSelection()
         }
@@ -152,6 +172,25 @@ class BattlefieldPresenter(
             )
         }
         battlefieldView.displayTileSelection(row, column)
+    }
+
+    private fun displayMovementRange(selectedBattleUnitEvent: SelectedBattleUnit) {
+        selectionState = BattleUnitSelected(
+            casterRow = selectedBattleUnitEvent.tile.row,
+            casterColumn = selectedBattleUnitEvent.tile.column,
+            battleUnitId = selectedBattleUnitEvent.battleUnitId,
+        )
+        val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
+        val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+        battleUnitInfoView.display(battleUnit, unit)
+        battleHudView.displayBattleUnitInfoView()
+        selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
+            battlefieldView.displayPotentialMovement(row = tile.row, column = tile.column)
+        }
+        battlefieldView.displayTileSelection(
+            row = selectedBattleUnitEvent.tile.row,
+            column = selectedBattleUnitEvent.tile.column
+        )
     }
 
     private fun clearSelection() {

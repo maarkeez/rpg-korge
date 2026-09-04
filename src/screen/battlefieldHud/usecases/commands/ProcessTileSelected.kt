@@ -3,7 +3,7 @@ package screen.battlefieldHud.usecases.commands
 import battlefield.adapters.presentation.*
 import battleunit.adapters.presentation.*
 import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.Dto
+import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import screen.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
 import shared.domain.*
 
@@ -13,7 +13,8 @@ class ProcessTileSelected(
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(tile: Dto.TileDto) {
+    operator fun invoke(row: Int, column: Int) {
+        val tile = TileDto(row = row, column = column)
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when(battlefieldHud) {
             is BattlefieldHud.Idle -> selectTileWhenIdle(battlefieldHud, tile)
@@ -25,7 +26,7 @@ class ProcessTileSelected(
 
     private fun selectTileWhenIdle(
         battlefieldHud: BattlefieldHud.Idle,
-        tile: Dto.TileDto
+        tile: TileDto
     ) {
         val battleUnitId = battlefieldApi.searchOccupant(row = tile.row, column = tile.column) ?: return
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId)!!
@@ -39,7 +40,7 @@ class ProcessTileSelected(
                 moveToColumn = tilePosition.column
             )
         }
-        .map { tilePosition -> Dto.TileDto(row = tilePosition.row, column = tilePosition.column) }
+        .map { tilePosition -> TileDto(row = tilePosition.row, column = tilePosition.column) }
         .toSet()
         val (events, updatedBattlefieldHud) = battlefieldHud.selectBattleUnit(
             tile = tile,
