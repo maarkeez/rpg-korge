@@ -37,17 +37,17 @@ For example, here you are a command test:
 package ability.usecases.commands
 
 import ability.adapters.storage.*
+import ability.domain.AbilityEvent
 import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
-    private val eventBus: EventBus = mock()
+    private val eventBus = FakeEventBus()
     private val searchEffectById: SearchEffectById = mock()
     private val requestAbilityCreation = RequestAbilityCreation(
         abilityRepository = abilityRepository,
@@ -65,10 +65,13 @@ class RequestAbilityCreationTest {
         requestAbilityCreation(abilityDto = ability)
         // Then
         val storedAbility = abilityRepository.searchById(ability.id)?.toDto()
-        assertThat(storedAbility).isEqualTo(ability)
+        org.assertj.core.api.Assertions.assertThat(storedAbility).isEqualTo(ability)
+        assertThat(eventBus).hasPublishedEvents(AbilityEvent.AbilityCreated(ability.id))
     }
 }
 ```
+
+Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `assertThat(eventBus).hasPublishedEvents(...)`. Since the custom `assertThat(FakeEventBus)` extension shares its name with the AssertJ one, import the fake utilities via `import shared.domain.*` and qualify the plain AssertJ assertion as `org.assertj.core.api.Assertions.assertThat(...)`.
 
 ## Run tests
 
