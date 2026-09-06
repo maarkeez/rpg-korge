@@ -1,9 +1,12 @@
 package screen.battlefieldHud.domain
 
+import screen.battlefieldHud.domain.BattlefieldHud.Dto
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import shared.domain.DomainEvent
 
 sealed interface BattlefieldHudEvent: DomainEvent {
+
+    object Idle: BattlefieldHudEvent
 
     data class SelectedBattleUnit(
         val tile: TileDto,
@@ -11,5 +14,14 @@ sealed interface BattlefieldHudEvent: DomainEvent {
         val tilesWhereCanBeMoved: Set<TileDto>
     ): BattlefieldHudEvent
 
-    object Idle: BattlefieldHudEvent
+    data class SelectedBattleUnitAbility(
+        val casterTile: TileDto,
+        val battleUnitId: String,
+        val abilityId: String,
+        val tilesWhereCanCast: Set<TileDto>,
+    ): BattlefieldHudEvent
+
+    data class AbilityDeselected(
+        val abilityId: String,
+    ): BattlefieldHudEvent
 }

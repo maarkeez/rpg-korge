@@ -21,6 +21,9 @@ class ProcessTileSelected(
         when(battlefieldHud) {
             is BattlefieldHud.Idle -> selectTileWhenIdle(battlefieldHud, tile)
             is BattlefieldHud.DisplayMovementRange -> selectTileWhenDisplayingMovement(tile, battlefieldHud)
+            is BattlefieldHud.DisplayAbilityCastRange -> {
+
+            }
         }
     }
 
