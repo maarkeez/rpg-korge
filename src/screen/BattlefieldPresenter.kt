@@ -17,6 +17,7 @@ import screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud
 import screen.battlefieldHud.usecases.commands.ProcessAbilitySelected
 import screen.battlefieldHud.usecases.commands.ProcessTileSelected
 import screen.battlefieldHud.usecases.commands.UpdateMovementRange
+import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.EventBus
 import shared.domain.Subscription
 import unit.adapters.presentation.UnitApi
@@ -36,21 +37,24 @@ class BattlefieldPresenter(
 ) : BattlefieldView.Delegate, AbilityButtonView.Delegate, AttackPreviewView.Delegate {
 
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
+    private val movementService = MovementService(
+        battlefieldApi,
+        battleUnitApi
+    )
     private val initializeBattlefieldHud = InitializeBattlefieldHud(battlefieldHudRepository)
     private val processTileSelected = ProcessTileSelected(
         battlefieldApi,
         battleUnitApi,
         playerApi,
         battleApi,
-        unitApi,
-        abilityApi,
         battlefieldHudRepository,
         eventBus,
+        movementService,
     )
     private val processAbilitySelected = ProcessAbilitySelected(
         battleUnitApi,
         battlefieldHudRepository,
-        eventBus
+        eventBus,
     )
     private val confirmCast = ConfirmCast(
         battleUnitApi,
@@ -63,9 +67,9 @@ class BattlefieldPresenter(
     )
     private val updateMovementRange = UpdateMovementRange(
         battlefieldApi,
-        battleUnitApi,
         battlefieldHudRepository,
         eventBus,
+        movementService,
     )
 
     private val subscriptions = listOf(

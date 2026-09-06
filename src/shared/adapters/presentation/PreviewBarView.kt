@@ -7,6 +7,7 @@ import korlibs.korge.view.*
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.align.centerXOn
 import korlibs.math.geom.*
+import kotlin.math.max
 
 open class PreviewBarView(
     size: Size,
@@ -48,6 +49,7 @@ open class PreviewBarView(
         remainingAfter: Int,
         maximum: Int
     ) {
+        val remainingAfter = max(0, remainingAfter)
         val filledPercentage = (remainingAfter.toDouble() / maximum.toDouble())
         val previewPercentage = (remainingBefore.toDouble() / maximum.toDouble())
         this.filled.width = this.size.width * filledPercentage

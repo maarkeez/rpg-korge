@@ -6,6 +6,7 @@ import screen.battlefieldHud.domain.BattlefieldHud.*
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import screen.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
 import screen.battlefieldHud.domain.BattlefieldHudError.InvalidBattlefieldHudState
+import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.*
 
 class ProcessAbilitySelected(
@@ -16,15 +17,10 @@ class ProcessAbilitySelected(
     operator fun invoke(abilityId: String) {
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when(battlefieldHud) {
-            is Idle -> throw InvalidBattlefieldHudState()
-
             is DisplayMovementRange -> {
                 val canCastAbility = battleUnitApi.canCastAbility(battlefieldHud.battleUnitId, abilityId)
                 if(!canCastAbility) return
-                val castPositions = battleUnitApi.whereCanCast(battlefieldHud.battleUnitId, abilityId)
-                val tilesWhereCanCast = castPositions.map { position ->
-                    TileDto(row = position.row, column = position.column)
-                }.toSet()
+                val tilesWhereCanCast = tilesWhereCanCast(battlefieldHud.battleUnitId, abilityId)
                 val (events, updatedBattlefieldHud) = battlefieldHud.selectAbility(
                     abilityId = abilityId,
                     tilesWhereCanCast = tilesWhereCanCast,
@@ -34,13 +30,34 @@ class ProcessAbilitySelected(
             }
 
             is DisplayAbilityCastRange -> {
-                if(abilityId != battlefieldHud.abilityId) return
-                val (events, updatedBattlefieldHud) = battlefieldHud.deselectAbility().pullEvents()
-                battlefieldHudRepository.update(updatedBattlefieldHud)
-                eventBus.publish(events)
+                if(abilityId == battlefieldHud.abilityId) {
+                    val (events, updatedBattlefieldHud) = battlefieldHud.deselectAbility().pullEvents()
+                    battlefieldHudRepository.update(updatedBattlefieldHud)
+                    eventBus.publish(events)
+                } else {
+                    val tilesWhereCanCast = tilesWhereCanCast(battlefieldHud.battleUnitId, abilityId)
+                    val (events, updatedBattlefieldHud) = battlefieldHud.selectAbility(
+                        abilityId = abilityId,
+                        tilesWhereCanCast = tilesWhereCanCast
+                    ).pullEvents()
+                    battlefieldHudRepository.update(updatedBattlefieldHud)
+                    eventBus.publish(events)
+                }
             }
 
-            is DisplayAbilityCastPreview -> {}
+            is Idle,
+            is DisplayAbilityCastPreview -> throw InvalidBattlefieldHudState()
         }
+    }
+
+    private fun tilesWhereCanCast(
+        battleUnitId: String,
+        abilityId: String
+    ): Set<TileDto> {
+        val castPositions = battleUnitApi.whereCanCast(battleUnitId, abilityId)
+        val tilesWhereCanCast = castPositions.map { position ->
+            TileDto(row = position.row, column = position.column)
+        }.toSet()
+        return tilesWhereCanCast
     }
 }

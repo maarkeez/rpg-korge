@@ -82,6 +82,18 @@ sealed interface BattlefieldHud {
         private val events: Set<BattlefieldHudEvent>,
     ): BattlefieldHud {
         fun pullEvents() = events to copy(events = emptySet())
+
+        fun selectAbility(abilityId: String, tilesWhereCanCast: Set<Dto.TileDto>) = copy(
+            abilityId = abilityId,
+            tilesWhereCanCast = tilesWhereCanCast,
+            events = events + SelectedBattleUnitAbility(
+                casterTile = casterTile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanCast = tilesWhereCanCast
+            )
+        )
+
         fun deselectAbility() = DisplayMovementRange(
             tile = casterTile,
             battleUnitId = battleUnitId,
