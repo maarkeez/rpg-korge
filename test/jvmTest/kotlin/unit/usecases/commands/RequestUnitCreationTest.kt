@@ -1,15 +1,15 @@
 package unit.usecases.commands
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
 import unit.adapters.storage.*
+import unit.domain.UnitEvent
 import unit.domain.UnitMother.unit
 
 class RequestUnitCreationTest {
     private val unitRepository = InMemoryUnitRepository()
-    private val eventBus: EventBus = mock()
+    private val eventBus = FakeEventBus()
     private val requestUnitCreation = RequestUnitCreation(
         unitRepository = unitRepository,
         eventBus = eventBus
@@ -23,6 +23,7 @@ class RequestUnitCreationTest {
         requestUnitCreation(unitDto = unit)
         // Then
         val storedUnit = unitRepository.searchById(unit.id)?.toDto()
-        assertThat(storedUnit).isEqualTo(unit)
+        org.assertj.core.api.Assertions.assertThat(storedUnit).isEqualTo(unit)
+        assertThat(eventBus).hasPublishedEvents(UnitEvent.UnitCreated(unit.id))
     }
 }
