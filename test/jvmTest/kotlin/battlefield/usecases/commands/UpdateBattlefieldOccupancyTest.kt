@@ -1,0 +1,58 @@
+package battlefield.usecases.commands
+
+import battlefield.adapters.storage.*
+import battlefield.domain.*
+import org.junit.*
+import shared.domain.*
+
+class UpdateBattlefieldOccupancyTest {
+    private val battlefieldRepository = InMemoryBattlefieldRepository()
+    private val eventBus = FakeEventBus()
+    private val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(
+        battlefieldRepository = battlefieldRepository,
+        eventBus = eventBus,
+    )
+
+    @Test
+    fun `should occupy tile when the tile is vacant`() {
+        // Given
+        battlefieldRepository.create(BattlefieldMother.battlefield())
+        val battleUnitId = "battle-unit-1"
+        // When
+        updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = battleUnitId)
+        // Then
+        val storedBattlefield = battlefieldRepository.search()?.toDto()
+        org.assertj.core.api.Assertions.assertThat(
+            storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.battleUnitId,
+        ).isEqualTo(battleUnitId)
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldEvent.BattlefieldTileOccupied(1, 1, battleUnitId)
+        )
+    }
+
+    @Test
+    fun `should throw tile error when the tile is not vacant`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield()
+            .occupy(1, 1, "other-battle-unit")
+            .pullEvents().second
+        battlefieldRepository.create(battlefield)
+        // When
+        val error = org.assertj.core.api.Assertions.catchThrowable {
+            updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
+        }
+        // Then
+        org.assertj.core.api.Assertions.assertThat(error)
+            .isInstanceOf(BattlefieldError.TileIsNotVacant::class.java)
+    }
+
+    @Test
+    fun `should not occupy tile when no battlefield exists`() {
+        // Given
+        // When
+        updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
+        // Then
+        org.assertj.core.api.Assertions.assertThat(battlefieldRepository.search()).isNull()
+        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+    }
+}
