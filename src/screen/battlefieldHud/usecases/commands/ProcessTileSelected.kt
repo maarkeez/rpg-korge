@@ -30,7 +30,7 @@ class ProcessTileSelected(
             is DisplayMovementRange -> selectTileWhenDisplayingMovement(battlefieldHud, tile)
             is DisplayAbilityCastRange -> selectTileWhenDisplayingAbilityCastRange(battlefieldHud, tile)
             is DisplayAbilityCastPreview -> {
-
+                // Do nothing
             }
         }
     }

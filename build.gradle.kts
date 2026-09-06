@@ -29,6 +29,7 @@ korge {
 
 dependencies {
     add("commonMainApi", project(":deps"))
-    //add("commonMainApi", project(":korge-dragonbones"))
+    add("jvmTestApi", "org.mockito.kotlin:mockito-kotlin:6.3.0")
+    add("jvmTestApi", "org.assertj:assertj-core:3.27.7")
 }
 
