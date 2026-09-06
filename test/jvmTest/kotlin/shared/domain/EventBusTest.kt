@@ -1,12 +1,13 @@
 package shared.domain
 
 import effect.domain.EffectEvent
+import shared.adapters.events.InMemoryEventBus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import unit.domain.UnitEvent
 
 class EventBusTest {
-    private val eventBus = EventBus()
+    private val eventBus: EventBus = InMemoryEventBus()
 
     @Test
     fun `should deliver event to subscriber when dispatched`() {

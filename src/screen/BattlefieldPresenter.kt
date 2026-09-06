@@ -20,6 +20,7 @@ import screen.battlefieldHud.usecases.commands.UpdateMovementRange
 import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.EventBus
 import shared.domain.Subscription
+import shared.domain.subscribe
 import unit.adapters.presentation.UnitApi
 
 class BattlefieldPresenter(

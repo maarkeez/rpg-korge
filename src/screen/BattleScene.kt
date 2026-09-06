@@ -24,7 +24,7 @@ import player.adapters.presentation.PlayerApi
 import screen.AttackPreviewView
 import screen.BattleUnitInfoView
 import screen.BattleHudView
-import shared.domain.EventBus
+import shared.adapters.events.InMemoryEventBus
 import unit.adapters.presentation.UnitApi
 
 class BattleScene : Scene() {
@@ -47,7 +47,7 @@ class BattleScene : Scene() {
 	override suspend fun SContainer.sceneMain() {
 
         // Event bus
-        val eventBus = EventBus()
+        val eventBus = InMemoryEventBus()
         addUpdater {
             eventBus.dispatch()
         }

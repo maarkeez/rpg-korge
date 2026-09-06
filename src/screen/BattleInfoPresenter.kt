@@ -8,6 +8,7 @@ import battle.domain.BattleEvent.PlayerVictory
 import player.adapters.presentation.PlayerApi
 import shared.domain.EventBus
 import shared.domain.Subscription
+import shared.domain.subscribe
 
 class BattleInfoPresenter(
     private val battleInfoView: BattleInfoView,
