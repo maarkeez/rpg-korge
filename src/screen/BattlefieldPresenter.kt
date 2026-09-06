@@ -142,10 +142,6 @@ class BattlefieldPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
-    override fun tileSelected(row: Int, column: Int) {
-        processTileSelected(row = row, column = column)
-    }
-
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit) {
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
@@ -179,10 +175,6 @@ class BattlefieldPresenter(
                 column = tilePosition.column
             )
         }
-    }
-
-    override fun abilitySelected(abilityId: String) {
-        processAbilitySelected(abilityId)
     }
 
     private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed) {
@@ -227,11 +219,9 @@ class BattlefieldPresenter(
         battleHudView.displayAttackPreviewView()
     }
 
-    override fun castConfirmed() {
-        confirmCast()
-    }
-
-    override fun castCancelled() {
-        cancelCast()
-    }
+    // Delegates
+    override fun tileSelected(row: Int, column: Int) = processTileSelected(row = row, column = column)
+    override fun abilitySelected(abilityId: String) = processAbilitySelected(abilityId)
+    override fun castConfirmed() = confirmCast()
+    override fun castCancelled() = cancelCast()
 }
