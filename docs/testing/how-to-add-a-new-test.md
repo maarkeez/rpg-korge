@@ -69,3 +69,7 @@ class RequestAbilityCreationTest {
     }
 }
 ```
+
+## Run tests
+
+All the project tests can be run using `./gradlew clean jvmTest`

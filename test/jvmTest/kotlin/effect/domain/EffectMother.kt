@@ -7,19 +7,29 @@ import korlibs.crypto.SecureRandom.nextInt
 object EffectMother {
     fun effect(
         id: String = effectId(),
+        power: Int = 3,
+        applicationType: String = "ON_TURN_STARTED",
     ) = Effect.create(Effect.Dto(
         id = id,
         type = "DECREASE_HEALTH",
-        power = 3,
+        power = power,
         probability = 100,
         modifiers = emptyList(),
-        application = ApplicationDto(
-            "ON_TURN_STARTED",
-            onTurnStarted = OnTurnStartedDto(
-                duration = 5
-            ),
-            beforeApplyingEffect = null
-        )
+        application = if (applicationType == "IMMEDIATELY") {
+            ApplicationDto(
+                type = "IMMEDIATELY",
+                onTurnStarted = null,
+                beforeApplyingEffect = null
+            )
+        } else {
+            ApplicationDto(
+                type = "ON_TURN_STARTED",
+                onTurnStarted = OnTurnStartedDto(
+                    duration = 5
+                ),
+                beforeApplyingEffect = null
+            )
+        }
     ))
 
     fun effectId(): String = "effect-${nextInt(from = 1, until = 100)}"
