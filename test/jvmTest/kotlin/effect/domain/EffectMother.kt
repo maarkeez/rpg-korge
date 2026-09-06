@@ -2,7 +2,7 @@ package effect.domain
 
 import effect.domain.Effect.Dto.ApplicationDto
 import effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import korlibs.crypto.SecureRandom.nextInt
+import kotlin.random.Random
 
 object EffectMother {
     fun effect(
@@ -32,5 +32,5 @@ object EffectMother {
         }
     ))
 
-    fun effectId(): String = "effect-${nextInt(from = 1, until = 100)}"
+    fun effectId(): String = "effect-${Random.nextInt(1, 100)}"
 }

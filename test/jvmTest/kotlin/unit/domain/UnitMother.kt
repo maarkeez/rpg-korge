@@ -1,7 +1,7 @@
 package unit.domain
 
 import ability.domain.AbilityMother
-import korlibs.crypto.SecureRandom.nextInt
+import kotlin.random.Random
 import korlibs.io.util.UUID
 
 object UnitMother {
@@ -22,10 +22,10 @@ object UnitMother {
         movementRange = movementRange,
     ))
 
-    fun id() = "unit-${nextInt(from = 1, until = 100)}"
+    fun id() = "unit-${Random.nextInt(1, 100)}"
     fun name() = "Unit ${UUID.randomUUID().toString().takeLast(5)}"
-    fun healthPoints() = nextInt(from = 1, until = 99)
-    fun manaPoints() = nextInt(from = 0, until = 99)
-    fun abilities() = List(nextInt(from = 1, until = 4)) { AbilityMother.ability().toDto().id }
-    fun movementRange() = nextInt(from = 1, until = 5)
+    fun healthPoints() = Random.nextInt(1, 99)
+    fun manaPoints() = Random.nextInt(0, 99)
+    fun abilities() = List(Random.nextInt(1, 4)) { AbilityMother.ability().toDto().id }
+    fun movementRange() = Random.nextInt(1, 5)
 }
