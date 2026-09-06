@@ -24,4 +24,17 @@ sealed interface BattlefieldHudEvent: DomainEvent {
     data class AbilityDeselected(
         val abilityId: String,
     ): BattlefieldHudEvent
+
+    data class SelfAbilityCastPreviewed(
+        val casterBattleUnitId: String,
+        val abilityId: String,
+        val castTile: TileDto,
+    ): BattlefieldHudEvent
+
+    data class EnemyAbilityCastPreviewed(
+        val casterBattleUnitId: String,
+        val abilityId: String,
+        val castTile: TileDto,
+        val enemyBattleUnitId: String,
+    ): BattlefieldHudEvent
 }

@@ -4,26 +4,19 @@ import ability.adapters.presentation.AbilityApi
 import battle.adapters.presentation.BattleApi
 import battle.domain.BattleEvent
 import battlefield.adapters.presentation.BattlefieldApi
-import battlefield.domain.Battlefield
 import battlefield.domain.BattlefieldEvent
 import battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnitEvent
-import battleunit.usecases.queries.WhereCanCast.PositionDto
 import player.adapters.presentation.PlayerApi
-import screen.BattlefieldPresenter.SelectionState.AbilitySelected
-import screen.BattlefieldPresenter.SelectionState.BattleUnitSelected
-import screen.BattlefieldPresenter.SelectionState.CastTargetSelected
-import screen.BattlefieldPresenter.SelectionState.NothingSelected
 import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
-import screen.battlefieldHud.domain.BattlefieldHud
-import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import screen.battlefieldHud.domain.BattlefieldHudEvent
-import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
-import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnitAbility
+import screen.battlefieldHud.usecases.commands.CancelCast
+import screen.battlefieldHud.usecases.commands.ConfirmCast
 import screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud
 import screen.battlefieldHud.usecases.commands.ProcessAbilitySelected
 import screen.battlefieldHud.usecases.commands.ProcessTileSelected
+import screen.battlefieldHud.usecases.commands.UpdateMovementRange
 import shared.domain.EventBus
 import shared.domain.Subscription
 import unit.adapters.presentation.UnitApi
@@ -35,10 +28,10 @@ class BattlefieldPresenter(
     private val battleHudView: BattleHudView,
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
-    private val playerApi: PlayerApi,
+    playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
-    private val battleApi: BattleApi,
+    battleApi: BattleApi,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate, AbilityButtonView.Delegate, AttackPreviewView.Delegate {
 
@@ -48,6 +41,9 @@ class BattlefieldPresenter(
         battlefieldApi,
         battleUnitApi,
         playerApi,
+        battleApi,
+        unitApi,
+        abilityApi,
         battlefieldHudRepository,
         eventBus,
     )
@@ -56,8 +52,21 @@ class BattlefieldPresenter(
         battlefieldHudRepository,
         eventBus
     )
-
-    private var selectionState: SelectionState = NothingSelected
+    private val confirmCast = ConfirmCast(
+        battleUnitApi,
+        battlefieldHudRepository,
+        eventBus
+    )
+    private val cancelCast = CancelCast(
+        battlefieldHudRepository,
+        eventBus
+    )
+    private val updateMovementRange = UpdateMovementRange(
+        battlefieldApi,
+        battleUnitApi,
+        battlefieldHudRepository,
+        eventBus,
+    )
 
     private val subscriptions = listOf(
         eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -68,6 +77,7 @@ class BattlefieldPresenter(
             battlefieldView.resetTiles()
             removeUnit(event.fromRow, event.fromColumn)
             displayUnit(event.toRow, event.toColumn, event.battleUnitId)
+            updateMovementRange(event.battleUnitId)
         },
         eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
             removeUnit(event.row, event.column)
@@ -75,7 +85,7 @@ class BattlefieldPresenter(
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
             clearSelection()
         },
-        eventBus.subscribe<SelectedBattleUnit> { event ->
+        eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
             displayMovementRange(event)
         },
         eventBus.subscribe<BattlefieldHudEvent.Idle> {
@@ -86,6 +96,15 @@ class BattlefieldPresenter(
         },
         eventBus.subscribe<BattlefieldHudEvent.AbilityDeselected> {
             clearSelection()
+        },
+        eventBus.subscribe<BattlefieldHudEvent.AbilityDeselected> {
+            clearSelection()
+        },
+        eventBus.subscribe<BattlefieldHudEvent.SelfAbilityCastPreviewed> { event ->
+            displaySelfAbilityCastPreview(event)
+        },
+        eventBus.subscribe<BattlefieldHudEvent.EnemyAbilityCastPreviewed> { event ->
+            displayEnemyAbilityCastPreview(event)
         },
     )
 
@@ -109,12 +128,6 @@ class BattlefieldPresenter(
         if(battleUnit.unitId == "rat"){
             battlefieldView.displayRatBattleUnit(row, column)
         }
-        if(selectionState is BattleUnitSelected){
-            val selectedBattleUnit = (selectionState as BattleUnitSelected).battleUnitId
-            if(battleUnitId == selectedBattleUnit){
-                selectBattleUnit(row, column, battleUnitId)
-            }
-        }
     }
 
     fun removeUnit(row: Int, column: Int) {
@@ -126,48 +139,13 @@ class BattlefieldPresenter(
     }
 
     override fun tileSelected(row: Int, column: Int) {
-        when (selectionState) {
-            is NothingSelected -> processTileSelected(row = row, column = column)
-            is BattleUnitSelected -> processTileSelected(row = row, column = column)
-            is AbilitySelected -> onAbilitySelectedATileWasSelected(row, column)
-            is CastTargetSelected -> {}
-        }
+        processTileSelected(row = row, column = column)
     }
 
-    private fun selectBattleUnit(row: Int, column: Int, occupantId: String) {
-        selectionState = BattleUnitSelected(row, column, occupantId)
-        val battleUnit = battleUnitApi.searchBattleUnitById(occupantId)!!
-        val unit = unitApi.searchUnitById(battleUnit.unitId)!!
-        battleUnitInfoView.display(battleUnit, unit)
-        battleHudView.displayBattleUnitInfoView()
-        val tilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied(
-            battleUnitId = battleUnit.id,
-            distance = battleUnit.remainingTurnActions.remainingSteps
-        )
-        val tilesWhereCanBeMoved = tilesThatCanBeOccupied.filter { tilePosition ->
-            battleUnitApi.canMoveTo(
-                battleUnitId = battleUnit.id,
-                moveToRow = tilePosition.row,
-                moveToColumn = tilePosition.column
-            )
-        }
-        tilesWhereCanBeMoved.forEach { position ->
-            battlefieldView.displayPotentialMovement(
-                row = position.row,
-                column = position.column
-            )
-        }
-        battlefieldView.displayTileSelection(row, column)
-    }
-
-    private fun displayMovementRange(selectedBattleUnitEvent: SelectedBattleUnit) {
-        selectionState = BattleUnitSelected(
-            casterRow = selectedBattleUnitEvent.tile.row,
-            casterColumn = selectedBattleUnitEvent.tile.column,
-            battleUnitId = selectedBattleUnitEvent.battleUnitId,
-        )
+    private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit) {
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+        battlefieldView.resetTiles()
         battleUnitInfoView.display(battleUnit, unit)
         battleHudView.displayBattleUnitInfoView()
         selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
@@ -180,14 +158,12 @@ class BattlefieldPresenter(
     }
 
     private fun clearSelection() {
-        selectionState = NothingSelected
         battleUnitInfoView.hide()
         battlefieldView.resetTiles()
         battleHudView.hide()
     }
 
-
-    private fun displayAbilitySelected(event: SelectedBattleUnitAbility) {
+    private fun displayAbilitySelected(event: BattlefieldHudEvent.SelectedBattleUnitAbility) {
         battlefieldView.resetTiles()
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
         val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
@@ -205,94 +181,53 @@ class BattlefieldPresenter(
         processAbilitySelected(abilityId)
     }
 
-    private fun onAbilitySelectedATileWasSelected(row: Int, column: Int) {
-        //castAbilityAndClearSelection(row, column)
-        val abilitySelected = selectionState as AbilitySelected
-        val castPositions = battleUnitApi.whereCanCast(abilitySelected.battleUnitId, abilitySelected.abilityId)
-        if (!castPositions.contains(PositionDto(row, column))) {
-            clearSelection()
-            return
-        }
-        val casterBattleUnit = battleUnitApi.searchBattleUnitById(abilitySelected.battleUnitId)!!
-        val currentPlayerId = battleApi.searchBattle()?.currentPlayerTurn ?: return
-        if(currentPlayerId != casterBattleUnit.playerId) {
-            clearSelection()
-            return
-        }
+    private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed) {
+        val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
-        val ability = abilityApi.searchAbilityById(abilitySelected.abilityId)!!
-        val targetBattleUnitId = battlefieldApi.searchOccupant(row, column)
-        val isSameUnit = casterBattleUnit.id == targetBattleUnitId
-        val noTargetBattleUnit = targetBattleUnitId == null
-        if(isSameUnit || noTargetBattleUnit) {
-            attackPreviewView.display(
-                casterBattleUnit = casterBattleUnit,
-                casterUnit = casterUnit,
-                manaCost = ability.cost,
-                receiverBattleUnit = null,
-                receiverUnit = null,
-                damage = null
-            )
-            battlefieldView.displayTileSelection(
-                row = row,
-                column = column
-            )
-        } else {
-            val targetBattleUnit = battleUnitApi.searchBattleUnitById(targetBattleUnitId)!!
-            val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
-            val damage = abilityApi.calculateImmediateDamage(ability.id)
-            attackPreviewView.display(
-                casterBattleUnit = casterBattleUnit,
-                casterUnit = casterUnit,
-                manaCost = ability.cost,
-                receiverBattleUnit = targetBattleUnit,
-                receiverUnit = targetUnit,
-                damage = damage
-            )
-            battlefieldView.displayTileSelection(
-                row = row,
-                column = column
-            )
-        }
-        selectionState = CastTargetSelected(
-            casterRow = abilitySelected.casterRow,
-            casterColumn = abilitySelected.casterColumn,
-            battleUnitId = abilitySelected.battleUnitId,
-            abilityId = abilitySelected.abilityId,
-            targetRow = row,
-            targetColumn = column,
+        val ability = abilityApi.searchAbilityById(event.abilityId)!!
+        attackPreviewView.display(
+            casterBattleUnit = casterBattleUnit,
+            casterUnit = casterUnit,
+            manaCost = ability.cost,
+            receiverBattleUnit = null,
+            receiverUnit = null,
+            damage = null
+        )
+        battlefieldView.displayTileSelection(
+            row = event.castTile.row,
+            column = event.castTile.column
         )
         battleHudView.displayAttackPreviewView()
     }
 
-    private fun castAbility() {
-        val castTargetSelected = selectionState as CastTargetSelected
-        val castPositions = battleUnitApi.whereCanCast(castTargetSelected.battleUnitId, castTargetSelected.abilityId)
-        if (castPositions.contains(PositionDto(castTargetSelected.targetRow, castTargetSelected.targetColumn))) {
-            battleUnitApi.castAbility(castTargetSelected.battleUnitId, castTargetSelected.abilityId, castTargetSelected.targetRow, castTargetSelected.targetColumn)
-        }
+    private fun displayEnemyAbilityCastPreview(event: BattlefieldHudEvent.EnemyAbilityCastPreviewed) {
+        val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
+        val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
+        val ability = abilityApi.searchAbilityById(event.abilityId)!!
+
+        val targetBattleUnit = battleUnitApi.searchBattleUnitById(event.enemyBattleUnitId)!!
+        val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
+        val damage = abilityApi.calculateImmediateDamage(ability.id)
+        attackPreviewView.display(
+            casterBattleUnit = casterBattleUnit,
+            casterUnit = casterUnit,
+            manaCost = ability.cost,
+            receiverBattleUnit = targetBattleUnit,
+            receiverUnit = targetUnit,
+            damage = damage
+        )
+        battlefieldView.displayTileSelection(
+            row = event.castTile.row,
+            column = event.castTile.column
+        )
+        battleHudView.displayAttackPreviewView()
     }
 
     override fun castConfirmed() {
-        castAbility()
-        clearSelection()
+        confirmCast()
     }
 
     override fun castCancelled() {
-        clearSelection()
-    }
-
-    private sealed interface SelectionState{
-        object NothingSelected : SelectionState
-        data class BattleUnitSelected(val casterRow: Int, val casterColumn: Int, val battleUnitId: String) : SelectionState
-        data class AbilitySelected(val casterRow: Int, val casterColumn: Int, val battleUnitId: String, val abilityId: String) : SelectionState
-        data class CastTargetSelected(
-            val casterRow: Int,
-            val casterColumn: Int,
-            val battleUnitId: String,
-            val abilityId: String,
-            val targetRow: Int,
-            val targetColumn: Int
-        ) : SelectionState
+        cancelCast()
     }
 }

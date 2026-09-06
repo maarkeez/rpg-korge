@@ -39,6 +39,8 @@ class ProcessAbilitySelected(
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             }
+
+            is DisplayAbilityCastPreview -> {}
         }
     }
 }

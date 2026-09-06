@@ -3,6 +3,7 @@ package screen.battlefieldHud.domain
 import screen.battlefieldHud.domain.BattlefieldHudEvent.AbilityDeselected
 import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
 import screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnitAbility
+import screen.battlefieldHud.domain.BattlefieldHudEvent.SelfAbilityCastPreviewed
 import kotlin.collections.plus
 
 sealed interface BattlefieldHud {
@@ -30,6 +31,7 @@ sealed interface BattlefieldHud {
                     tilesWhereCanBeMoved = tilesWhereCanBeMoved
             )
         )
+
         fun pullEvents() = events to copy(events = emptySet())
     }
 
@@ -55,6 +57,20 @@ sealed interface BattlefieldHud {
                 tilesWhereCanCast = tilesWhereCanCast
             )
         )
+
+        fun tilesWhereCanBeMoved(
+            tile: Dto.TileDto,
+            tilesWhereCanBeMoved: Set<Dto.TileDto>
+        ) = copy(
+            tile = tile,
+            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+            events = events
+                + SelectedBattleUnit(
+                    tile = tile,
+                    battleUnitId = battleUnitId,
+                    tilesWhereCanBeMoved = tilesWhereCanBeMoved
+                )
+        )
     }
 
     data class DisplayAbilityCastRange(
@@ -78,6 +94,57 @@ sealed interface BattlefieldHud {
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved
             )
         )
+
+        fun previewSelfAbilityCast(
+            castTile: Dto.TileDto,
+        ) = DisplayAbilityCastPreview(
+            casterTile = casterTile,
+            battleUnitId = battleUnitId,
+            abilityId = abilityId,
+            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+            tilesWhereCanCast = tilesWhereCanCast,
+            castTile = castTile,
+            enemyBattleUnitId = null,
+            events = events
+                + SelfAbilityCastPreviewed(
+                    casterBattleUnitId = battleUnitId,
+                    abilityId = abilityId,
+                    castTile = castTile
+                )
+        )
+
+        fun idle() = Idle(events + BattlefieldHudEvent.Idle)
+
+        fun previewEnemyAbilityCast(castTile: Dto.TileDto, enemyBattleUnitId: String) = DisplayAbilityCastPreview(
+            casterTile = casterTile,
+            battleUnitId = battleUnitId,
+            abilityId = abilityId,
+            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+            tilesWhereCanCast = tilesWhereCanCast,
+            castTile = castTile,
+            enemyBattleUnitId = enemyBattleUnitId,
+            events = events
+                + BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                    casterBattleUnitId = battleUnitId,
+                    abilityId = abilityId,
+                    castTile = castTile,
+                    enemyBattleUnitId = enemyBattleUnitId
+                )
+        )
+    }
+
+    data class DisplayAbilityCastPreview(
+        val casterTile: BattlefieldHud.Dto.TileDto,
+        val battleUnitId: String,
+        val abilityId: String,
+        val tilesWhereCanBeMoved: Set<BattlefieldHud.Dto.TileDto>,
+        val tilesWhereCanCast: Set<BattlefieldHud.Dto.TileDto>,
+        val castTile: Dto.TileDto,
+        val enemyBattleUnitId: String?,
+        private val events: Set<BattlefieldHudEvent>,
+    ): BattlefieldHud {
+        fun pullEvents() = events to copy(events = emptySet())
+        fun idle() = Idle(events + BattlefieldHudEvent.Idle)
     }
 
     interface Dto {
