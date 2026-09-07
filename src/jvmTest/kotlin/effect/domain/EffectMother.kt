@@ -2,7 +2,7 @@ package effect.domain
 
 import effect.domain.Effect.Dto.ApplicationDto
 import effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import kotlin.random.Random
+import kotlin.random.*
 
 object EffectMother {
     fun effect(

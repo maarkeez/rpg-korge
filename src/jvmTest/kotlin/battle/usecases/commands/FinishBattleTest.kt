@@ -2,8 +2,10 @@ package battle.usecases.commands
 
 import battle.adapters.storage.*
 import battle.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class FinishBattleTest {
     private val battleRepository = InMemoryBattleRepository()
@@ -33,6 +35,6 @@ class FinishBattleTest {
         // When
         finishBattle()
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

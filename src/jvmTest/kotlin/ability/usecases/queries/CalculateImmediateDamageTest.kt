@@ -1,7 +1,7 @@
 package ability.usecases.queries
 
 import ability.adapters.storage.*
-import ability.domain.AbilityMother
+import ability.domain.*
 import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*

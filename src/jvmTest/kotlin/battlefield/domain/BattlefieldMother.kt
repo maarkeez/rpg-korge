@@ -1,6 +1,6 @@
 package battlefield.domain
 
-import kotlin.random.Random
+import kotlin.random.*
 
 object BattlefieldMother {
 

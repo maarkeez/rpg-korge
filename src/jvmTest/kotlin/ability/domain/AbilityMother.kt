@@ -1,8 +1,8 @@
 package ability.domain
 
 import effect.domain.EffectMother.effectId
-import kotlin.random.Random
-import korlibs.io.util.UUID
+import korlibs.io.util.*
+import kotlin.random.*
 
 object AbilityMother {
 

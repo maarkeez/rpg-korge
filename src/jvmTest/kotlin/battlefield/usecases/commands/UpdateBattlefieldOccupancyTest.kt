@@ -2,8 +2,10 @@ package battlefield.usecases.commands
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class UpdateBattlefieldOccupancyTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
@@ -22,7 +24,7 @@ class UpdateBattlefieldOccupancyTest {
         updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = battleUnitId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(
+        assertThat(
             storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.battleUnitId,
         ).isEqualTo(battleUnitId)
         assertThat(eventBus).hasPublishedEvents(
@@ -42,7 +44,7 @@ class UpdateBattlefieldOccupancyTest {
             updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error)
+        assertThat(error)
             .isInstanceOf(BattlefieldError.TileIsNotVacant::class.java)
     }
 
@@ -52,7 +54,7 @@ class UpdateBattlefieldOccupancyTest {
         // When
         updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(battlefieldRepository.search()).isNull()
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(battlefieldRepository.search()).isNull()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

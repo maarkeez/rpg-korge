@@ -1,10 +1,9 @@
 package battleunit.domain
 
-import player.domain.Player
-import player.domain.PlayerMother
+import player.domain.*
+import unit.domain.*
 import unit.domain.Unit
-import unit.domain.UnitMother
-import kotlin.random.Random
+import kotlin.random.*
 
 object BattleUnitMother {
 

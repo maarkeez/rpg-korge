@@ -2,8 +2,10 @@ package battlefield.usecases.commands
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class RemoveOccupantTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
@@ -23,7 +25,7 @@ class RemoveOccupantTest {
         removeOccupant(battleUnitId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(
+        assertThat(
             storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.battleUnitId,
         ).isNull()
         assertThat(eventBus).hasPublishedEvents(
@@ -38,6 +40,6 @@ class RemoveOccupantTest {
         // When
         removeOccupant("unknown-battle-unit")
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

@@ -1,6 +1,6 @@
 package player.domain
 
-import kotlin.random.Random
+import kotlin.random.*
 
 object PlayerMother {
 

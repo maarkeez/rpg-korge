@@ -1,8 +1,9 @@
 package player.usecases.queries
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import player.adapters.storage.*
-import player.domain.PlayerMother
+import player.domain.*
 import player.domain.PlayerMother.player
 
 class SearchPlayerByIdTest {
@@ -18,7 +19,7 @@ class SearchPlayerByIdTest {
         // When
         val storedPlayer = searchPlayerById(playerDto.id)
         // Then
-        org.assertj.core.api.Assertions.assertThat(storedPlayer).isEqualTo(playerDto)
+        assertThat(storedPlayer).isEqualTo(playerDto)
     }
 
     @Test
@@ -28,6 +29,6 @@ class SearchPlayerByIdTest {
         // When
         val storedPlayer = searchPlayerById(unknownPlayerId)
         // Then
-        org.assertj.core.api.Assertions.assertThat(storedPlayer).isNull()
+        assertThat(storedPlayer).isNull()
     }
 }

@@ -2,6 +2,7 @@ package battlefield.usecases.queries
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 
 class CanBattlefieldTileBeOccupiedTest {
@@ -15,7 +16,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isTrue()
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -26,7 +27,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -36,6 +37,6 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(5, 5)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 }

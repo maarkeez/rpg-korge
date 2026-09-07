@@ -1,6 +1,6 @@
 package shared.domain
 
-import kotlin.reflect.KClass
+import kotlin.reflect.*
 
 class FakeEventBus : EventBus {
 

@@ -1,9 +1,9 @@
 # How to add a new test
 
 ## Tests location
-All the tests can be found at `test/jvmTest`
 
-The test MUST be in the same package as the class being tested. For example, given the class `src/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `test/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt` 
+- All the tests can be found at `src/jvmTest`
+- The test MUST be in the same package as the class being tested. For example, given the class `src/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt` 
 
 ## Test naming convention
 
@@ -33,7 +33,7 @@ The test MUST be in the same package as the class being tested. For example, giv
 For example, here you are a command test:
 
 ```kotlin
-// test/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt
+// src/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt
 package ability.usecases.commands
 
 import ability.adapters.storage.*
@@ -44,6 +44,7 @@ import effect.usecases.queries.*
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
@@ -71,7 +72,7 @@ class RequestAbilityCreationTest {
 }
 ```
 
-Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `assertThat(eventBus).hasPublishedEvents(...)`. Since the custom `assertThat(FakeEventBus)` extension shares its name with the AssertJ one, import the fake utilities via `import shared.domain.*` and qualify the plain AssertJ assertion as `org.assertj.core.api.Assertions.assertThat(...)`.
+Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `assertThat(eventBus).hasPublishedEvents(...)`. Since the custom `assertThat(FakeEventBus)` extension shares its name with the AssertJ one, import the fake utilities via `import shared.domain.assertThat` and import the plain AssertJ assertion as `import org.assertj.core.api.Assertions.assertThat`.
 
 ## Run tests
 

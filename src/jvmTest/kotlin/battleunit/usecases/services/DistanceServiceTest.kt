@@ -1,5 +1,6 @@
 package battleunit.usecases.services
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 
 class DistanceServiceTest {
@@ -11,7 +12,7 @@ class DistanceServiceTest {
         // When
         val distance = distanceService.manhattanDistance(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 4)
         // Then
-        org.assertj.core.api.Assertions.assertThat(distance).isEqualTo(7)
+        assertThat(distance).isEqualTo(7)
     }
 
     @Test
@@ -20,6 +21,6 @@ class DistanceServiceTest {
         // When
         val distance = distanceService.manhattanDistance(fromRow = 2, fromColumn = 2, toRow = 2, toColumn = 2)
         // Then
-        org.assertj.core.api.Assertions.assertThat(distance).isEqualTo(0)
+        assertThat(distance).isEqualTo(0)
     }
 }

@@ -1,21 +1,16 @@
 package cpuBrain.usecases.commands
 
-import battle.usecases.commands.FinishPlayerTurn
-import battlefield.domain.Battlefield
-import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother
-import battleunit.usecases.commands.CastAbility
-import battleunit.usecases.commands.MoveBattleUnit
-import battleunit.usecases.queries.CanCastAbility
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanCast
-import cpuBrain.usecases.queries.WhereShouldMove
-import org.junit.Test
+import battle.usecases.commands.*
+import battlefield.domain.*
+import battleunit.domain.*
+import battleunit.usecases.commands.*
+import battleunit.usecases.queries.*
+import cpuBrain.usecases.queries.*
+import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
-import player.usecases.queries.SearchPlayerById
-import unit.domain.UnitMother
+import player.domain.*
+import player.usecases.queries.*
+import unit.domain.*
 
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()

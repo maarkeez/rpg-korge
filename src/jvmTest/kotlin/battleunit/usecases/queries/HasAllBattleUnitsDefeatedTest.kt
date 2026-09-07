@@ -2,9 +2,10 @@ package battleunit.usecases.queries
 
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
-import player.domain.PlayerMother
-import unit.domain.UnitMother
+import player.domain.*
+import unit.domain.*
 
 class HasAllBattleUnitsDefeatedTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -25,7 +26,7 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isTrue()
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -47,7 +48,7 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -56,6 +57,6 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isTrue()
+        assertThat(result).isTrue()
     }
 }

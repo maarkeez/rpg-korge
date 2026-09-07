@@ -1,9 +1,11 @@
 package unit.usecases.commands
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 import unit.adapters.storage.*
-import unit.domain.UnitEvent
+import unit.domain.*
 import unit.domain.UnitMother.unit
 
 class RequestUnitCreationTest {
@@ -22,7 +24,7 @@ class RequestUnitCreationTest {
         requestUnitCreation(unitDto = unit)
         // Then
         val storedUnit = unitRepository.searchById(unit.id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedUnit).isEqualTo(unit)
+        assertThat(storedUnit).isEqualTo(unit)
         assertThat(eventBus).hasPublishedEvents(UnitEvent.UnitCreated(unit.id))
     }
 }

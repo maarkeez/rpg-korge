@@ -1,19 +1,16 @@
 package cpuBrain.usecases.queries
 
-import battlefield.domain.Battlefield
-import battlefield.usecases.queries.SearchPosition
-import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanMove
-import org.junit.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import player.domain.PlayerMother
-import player.usecases.queries.SearchEnemyPlayer
-import unit.domain.UnitMother
-import unit.usecases.queries.SearchUnitById
+import battlefield.domain.*
+import battlefield.usecases.queries.*
+import battleunit.domain.*
+import battleunit.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.*
+import org.mockito.kotlin.*
+import player.domain.*
+import player.usecases.queries.*
+import unit.domain.*
+import unit.usecases.queries.*
 
 class WhereShouldMoveTest {
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
@@ -59,7 +56,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEqualTo(position(0, 2))
+        assertThat(result).isEqualTo(position(0, 2))
     }
 
     @Test
@@ -80,7 +77,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEqualTo(position(0, 1))
+        assertThat(result).isEqualTo(position(0, 1))
     }
 
     @Test
@@ -99,7 +96,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -115,6 +112,6 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 }

@@ -1,19 +1,21 @@
 package battleunit.usecases.commands
 
-import ability.domain.AbilityMother
+import ability.domain.*
 import ability.usecases.queries.*
 import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
-import effect.domain.EffectMother
+import effect.domain.*
 import effect.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
+import player.domain.*
 import shared.domain.*
-import unit.domain.UnitMother
+import shared.domain.assertThat
+import unit.domain.*
 import unit.usecases.queries.*
 
 class ReceiveAbilityEffectsTest {
@@ -54,7 +56,7 @@ class ReceiveAbilityEffectsTest {
         receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
+        assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.EffectReceived(battleUnitId, effectId),
             BattleUnitEvent.BattleUnitDamaged(battleUnitId),
@@ -72,7 +74,7 @@ class ReceiveAbilityEffectsTest {
             receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error).isInstanceOf(AbilityDoesNotExists::class.java)
+        assertThat(error).isInstanceOf(AbilityDoesNotExists::class.java)
     }
 
     @Test
@@ -90,7 +92,7 @@ class ReceiveAbilityEffectsTest {
             receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error).isInstanceOf(FailedToReceiveAbilityEffects::class.java)
+        assertThat(error).isInstanceOf(FailedToReceiveAbilityEffects::class.java)
     }
 
     @Test
@@ -99,6 +101,6 @@ class ReceiveAbilityEffectsTest {
         // When
         receiveAbilityEffects(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", row = 0, column = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

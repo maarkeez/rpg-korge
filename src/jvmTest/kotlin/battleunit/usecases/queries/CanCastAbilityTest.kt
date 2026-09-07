@@ -1,12 +1,13 @@
 package battleunit.usecases.queries
 
-import ability.domain.AbilityMother
+import ability.domain.*
 import ability.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import unit.domain.UnitMother
+import unit.domain.*
 
 class CanCastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -25,7 +26,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isTrue()
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -37,7 +38,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -52,7 +53,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -62,6 +63,6 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 }

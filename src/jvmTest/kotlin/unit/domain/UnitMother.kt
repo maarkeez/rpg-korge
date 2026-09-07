@@ -1,8 +1,8 @@
 package unit.domain
 
-import ability.domain.AbilityMother
-import kotlin.random.Random
-import korlibs.io.util.UUID
+import ability.domain.*
+import korlibs.io.util.*
+import kotlin.random.*
 
 object UnitMother {
 

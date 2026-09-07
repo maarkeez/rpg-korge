@@ -3,12 +3,14 @@ package battleunit.usecases.commands
 import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
+import player.domain.*
 import player.usecases.queries.*
 import shared.domain.*
-import unit.domain.UnitMother
+import shared.domain.assertThat
+import unit.domain.*
 import unit.usecases.queries.*
 
 class DeployBattleUnitTest {
@@ -43,10 +45,10 @@ class DeployBattleUnitTest {
         )
         // Then
         val storedBattleUnit = battleUnitRepository.searchById("battle-unit-1")?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit).isNotNull
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.playerId).isEqualTo(player.id)
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit.unitId).isEqualTo(unit.id)
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit.remainingHealthPoints).isEqualTo(unit.healthPoints)
+        assertThat(storedBattleUnit).isNotNull
+        assertThat(storedBattleUnit!!.playerId).isEqualTo(player.id)
+        assertThat(storedBattleUnit.unitId).isEqualTo(unit.id)
+        assertThat(storedBattleUnit.remainingHealthPoints).isEqualTo(unit.healthPoints)
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.BattleUnitDeployed("battle-unit-1", 0, 0)
         )
@@ -61,7 +63,7 @@ class DeployBattleUnitTest {
             deployBattleUnit("battle-unit-1", "unknown-unit", "player-1", 0, 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error).isInstanceOf(BattleUnitError.UnitNotFound::class.java)
+        assertThat(error).isInstanceOf(BattleUnitError.UnitNotFound::class.java)
     }
 
     @Test
@@ -75,7 +77,7 @@ class DeployBattleUnitTest {
             deployBattleUnit("battle-unit-1", unit.id, "unknown-player", 0, 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error).isInstanceOf(BattleUnitError.PlayerNotFound::class.java)
+        assertThat(error).isInstanceOf(BattleUnitError.PlayerNotFound::class.java)
     }
 
     @Test
@@ -91,7 +93,7 @@ class DeployBattleUnitTest {
             deployBattleUnit("battle-unit-1", unit.id, player.id, 0, 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error)
+        assertThat(error)
             .isInstanceOf(BattleUnitError.BattlefieldTileCanNotBeOccupied::class.java)
     }
 }

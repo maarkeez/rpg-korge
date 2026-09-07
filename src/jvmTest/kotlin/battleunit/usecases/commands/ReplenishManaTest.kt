@@ -2,10 +2,11 @@ package battleunit.usecases.commands
 
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
-import unit.domain.UnitMother
+import player.domain.*
+import unit.domain.*
 import unit.usecases.queries.*
 
 class ReplenishManaTest {
@@ -27,7 +28,7 @@ class ReplenishManaTest {
         replenishMana("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(15)
+        assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(15)
     }
 
     @Test
@@ -44,7 +45,7 @@ class ReplenishManaTest {
         replenishMana("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(12)
+        assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(12)
     }
 
     @Test
@@ -53,6 +54,6 @@ class ReplenishManaTest {
         // When
         replenishMana("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(battleUnitRepository.searchAll()).isEmpty()
+        assertThat(battleUnitRepository.searchAll()).isEmpty()
     }
 }

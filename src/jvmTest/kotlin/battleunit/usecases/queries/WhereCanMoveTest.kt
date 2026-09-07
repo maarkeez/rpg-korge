@@ -4,9 +4,10 @@ import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import unit.domain.UnitMother
+import unit.domain.*
 
 class WhereCanMoveTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -31,7 +32,7 @@ class WhereCanMoveTest {
         // When
         val result = whereCanMove(battleUnitId)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).containsExactly(firstPosition, thirdPosition)
+        assertThat(result).containsExactly(firstPosition, thirdPosition)
     }
 
     @Test
@@ -40,6 +41,6 @@ class WhereCanMoveTest {
         // When
         val result = whereCanMove("unknown-battle-unit")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 }

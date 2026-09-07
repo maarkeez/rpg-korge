@@ -1,12 +1,13 @@
 package player.usecases.commands
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import player.adapters.storage.*
-import player.domain.PlayerEvent
-import player.domain.PlayerMother
+import player.domain.*
 import player.domain.PlayerMother.id
 import player.domain.PlayerMother.name
 import shared.domain.*
+import shared.domain.assertThat
 
 class RequestPlayerCreationTest {
     private val playerRepository = InMemoryPlayerRepository()
@@ -25,7 +26,7 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.HUMAN)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "HUMAN").toDto())
+        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "HUMAN").toDto())
         assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, "HUMAN"))
     }
 
@@ -38,7 +39,7 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.CPU)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "CPU").toDto())
+        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "CPU").toDto())
         assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, "CPU"))
     }
 
@@ -55,7 +56,7 @@ class RequestPlayerCreationTest {
         )
         // Then
         val storedPlayer = playerRepository.searchById(existingPlayer.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedPlayer).isEqualTo(existingPlayer.toDto())
+        assertThat(storedPlayer).isEqualTo(existingPlayer.toDto())
         assertThat(eventBus).hasPublishedEvents()
     }
 }

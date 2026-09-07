@@ -2,6 +2,7 @@ package battlefield.usecases.queries
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 
 class SearchTilesThatCanBeOccupiedTest {
@@ -17,7 +18,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).containsExactlyInAnyOrder(
+        assertThat(result).containsExactlyInAnyOrder(
             Battlefield.Dto.PositionDto(0, 0),
             Battlefield.Dto.PositionDto(0, 1),
             Battlefield.Dto.PositionDto(0, 2),
@@ -38,7 +39,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 
     @Test
@@ -47,7 +48,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 
     @Test
@@ -57,6 +58,6 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied("unknown-battle-unit", distance = 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 }

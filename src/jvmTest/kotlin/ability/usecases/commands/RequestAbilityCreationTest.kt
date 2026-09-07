@@ -1,13 +1,15 @@
 package ability.usecases.commands
 
 import ability.adapters.storage.*
-import ability.domain.AbilityEvent
+import ability.domain.*
 import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
+import shared.domain.assertThat
 
 
 class RequestAbilityCreationTest {
@@ -32,7 +34,7 @@ class RequestAbilityCreationTest {
         requestAbilityCreation(abilityDto = ability)
         // Then
         val storedAbility = abilityRepository.searchById(ability.id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedAbility).isEqualTo(ability)
+        assertThat(storedAbility).isEqualTo(ability)
         assertThat(eventBus).hasPublishedEvents(AbilityEvent.AbilityCreated(ability.id))
     }
 }

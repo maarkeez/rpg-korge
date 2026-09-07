@@ -2,8 +2,10 @@ package battle.usecases.commands
 
 import battle.adapters.storage.*
 import battle.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class StartNextRoundTest {
     private val battleRepository = InMemoryBattleRepository()
@@ -22,7 +24,7 @@ class StartNextRoundTest {
         startNextRound()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattle)
+        assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2))
         assertThat(eventBus).hasPublishedEvents(
             BattleEvent.BattleRoundStarted(2),
@@ -36,7 +38,7 @@ class StartNextRoundTest {
         // When
         startNextRound()
         // Then
-        org.assertj.core.api.Assertions.assertThat(battleRepository.search()).isNull()
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(battleRepository.search()).isNull()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

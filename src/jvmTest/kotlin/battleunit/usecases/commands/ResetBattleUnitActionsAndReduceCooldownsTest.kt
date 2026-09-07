@@ -2,9 +2,10 @@ package battleunit.usecases.commands
 
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
-import player.domain.PlayerMother
-import unit.domain.UnitMother
+import player.domain.*
+import unit.domain.*
 
 class ResetBattleUnitActionsAndReduceCooldownsTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -25,9 +26,9 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         resetBattleUnitActionsAndReduceCooldowns("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(exhaustedBattleUnit.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(4)
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit.remainingTurnActions.remainingCasts).isEqualTo(1)
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit.abilityCooldowns["ability-1"]).isEqualTo(2)
+        assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(4)
+        assertThat(storedBattleUnit.remainingTurnActions.remainingCasts).isEqualTo(1)
+        assertThat(storedBattleUnit.abilityCooldowns["ability-1"]).isEqualTo(2)
     }
 
     @Test
@@ -36,6 +37,6 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         // When
         resetBattleUnitActionsAndReduceCooldowns("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(battleUnitRepository.searchAll()).isEmpty()
+        assertThat(battleUnitRepository.searchAll()).isEmpty()
     }
 }

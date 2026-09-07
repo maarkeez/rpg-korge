@@ -5,10 +5,12 @@ import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.services.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
-import unit.domain.UnitMother
+import shared.domain.assertThat
+import unit.domain.*
 
 class MoveBattleUnitTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -33,7 +35,7 @@ class MoveBattleUnitTest {
         moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 2, moveToColumn = 1)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(2)
+        assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(2)
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.BattleUnitMoved(battleUnitId, 0, 0, 2, 1)
         )
@@ -45,7 +47,7 @@ class MoveBattleUnitTest {
         // When
         moveBattleUnit(battleUnitId = "unknown-battle-unit", moveToRow = 1, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 
     @Test
@@ -57,6 +59,6 @@ class MoveBattleUnitTest {
         // When
         moveBattleUnit(battleUnitId = battleUnit.toDto().id, moveToRow = 1, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

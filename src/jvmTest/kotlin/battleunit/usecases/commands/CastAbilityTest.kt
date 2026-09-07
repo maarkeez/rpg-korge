@@ -1,14 +1,16 @@
 package battleunit.usecases.commands
 
-import ability.domain.AbilityMother
+import ability.domain.*
 import ability.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
-import unit.domain.UnitMother
+import shared.domain.assertThat
+import unit.domain.*
 
 class CastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -38,7 +40,7 @@ class CastAbilityTest {
         castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingTurnActions.remainingCasts).isEqualTo(0)
+        assertThat(storedBattleUnit!!.remainingTurnActions.remainingCasts).isEqualTo(0)
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.AbilityCasted(battleUnitId, "ability-1", 0, 0)
         )
@@ -50,7 +52,7 @@ class CastAbilityTest {
         // When
         castAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", row = 0, column = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 
     @Test
@@ -64,7 +66,7 @@ class CastAbilityTest {
             castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error)
+        assertThat(error)
             .isInstanceOf(BattleUnitError.AbilityDoesNotExists::class.java)
     }
 
@@ -82,7 +84,7 @@ class CastAbilityTest {
             castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error)
+        assertThat(error)
             .isInstanceOf(BattleUnitError.BattleUnitCanNotCastAbility::class.java)
     }
 
@@ -103,7 +105,7 @@ class CastAbilityTest {
             castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         }
         // Then
-        org.assertj.core.api.Assertions.assertThat(error)
+        assertThat(error)
             .isInstanceOf(BattleUnitError.InvalidCastPosition::class.java)
     }
 }

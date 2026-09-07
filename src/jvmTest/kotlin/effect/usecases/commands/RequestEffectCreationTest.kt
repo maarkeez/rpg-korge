@@ -1,10 +1,12 @@
 package effect.usecases.commands
 
 import effect.adapters.storage.*
-import effect.domain.EffectEvent
+import effect.domain.*
 import effect.domain.EffectMother.effect
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class RequestEffectCreationTest {
     private val effectRepository = InMemoryEffectRepository()
@@ -22,7 +24,7 @@ class RequestEffectCreationTest {
         requestEffectCreation(effectDto = effect)
         // Then
         val storedEffect = effectRepository.searchById(effect.id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedEffect).isEqualTo(effect)
+        assertThat(storedEffect).isEqualTo(effect)
         assertThat(eventBus).hasPublishedEvents(EffectEvent.EffectCreated(effect.id))
     }
 
@@ -36,7 +38,7 @@ class RequestEffectCreationTest {
         requestEffectCreation(effectDto = duplicateEffect.toDto())
         // Then
         val storedEffect = effectRepository.searchById(existingEffect.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedEffect).isEqualTo(existingEffect.toDto())
+        assertThat(storedEffect).isEqualTo(existingEffect.toDto())
         assertThat(eventBus).hasPublishedEvents()
     }
 }

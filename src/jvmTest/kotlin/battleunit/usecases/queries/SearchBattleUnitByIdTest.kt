@@ -2,6 +2,7 @@ package battleunit.usecases.queries
 
 import battleunit.adapters.storage.*
 import battleunit.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 
 class SearchBattleUnitByIdTest {
@@ -16,7 +17,7 @@ class SearchBattleUnitByIdTest {
         // When
         val result = searchBattleUnitById(battleUnit.toDto().id)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEqualTo(battleUnit.toDto())
+        assertThat(result).isEqualTo(battleUnit.toDto())
     }
 
     @Test
@@ -25,6 +26,6 @@ class SearchBattleUnitByIdTest {
         // When
         val result = searchBattleUnitById("unknown-battle-unit")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 }

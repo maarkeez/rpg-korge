@@ -2,6 +2,7 @@ package battlefield.usecases.queries
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 
 class SearchOccupantTest {
@@ -17,7 +18,7 @@ class SearchOccupantTest {
         // When
         val result = searchOccupant(1, 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEqualTo(battleUnitId)
+        assertThat(result).isEqualTo(battleUnitId)
     }
 
     @Test
@@ -27,6 +28,6 @@ class SearchOccupantTest {
         // When
         val result = searchOccupant(1, 1)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isNull()
+        assertThat(result).isNull()
     }
 }

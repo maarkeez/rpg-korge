@@ -1,6 +1,6 @@
 package shared.domain
 
-import org.assertj.core.api.AbstractAssert
+import org.assertj.core.api.*
 import org.assertj.core.api.Assertions.assertThat
 
 class EventBusAssert(

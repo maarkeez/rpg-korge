@@ -5,9 +5,10 @@ import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.services.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import unit.domain.UnitMother
+import unit.domain.*
 
 class CanMoveToTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -24,7 +25,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isTrue()
+        assertThat(result).isTrue()
     }
 
     @Test
@@ -36,7 +37,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -46,7 +47,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = "unknown-battle-unit", moveToRow = 1, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -58,6 +59,6 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 1, moveToColumn = 0)
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isFalse()
+        assertThat(result).isFalse()
     }
 }

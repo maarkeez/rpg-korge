@@ -3,9 +3,11 @@ package battle.usecases.commands
 import battle.adapters.storage.*
 import battle.domain.*
 import battleunit.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class DefeatPlayerTest {
     private val battleRepository = InMemoryBattleRepository()
@@ -28,7 +30,7 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattle)
+        assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
         assertThat(eventBus).hasPublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
@@ -44,8 +46,8 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattle)
+        assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

@@ -3,13 +3,15 @@ package battleunit.usecases.commands
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.queries.*
-import effect.domain.EffectMother
+import effect.domain.*
 import effect.usecases.queries.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
+import player.domain.*
 import shared.domain.*
-import unit.domain.UnitMother
+import shared.domain.assertThat
+import unit.domain.*
 
 class ApplyOnTurnStartedEffectsTest {
     private val searchEffectById: SearchEffectById = mock()
@@ -40,7 +42,7 @@ class ApplyOnTurnStartedEffectsTest {
         applyOnTurnStartedEffects("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
+        assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
         assertThat(eventBus).hasPublishedEvents(BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id))
     }
 
@@ -51,7 +53,7 @@ class ApplyOnTurnStartedEffectsTest {
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 
     @Test
@@ -63,6 +65,6 @@ class ApplyOnTurnStartedEffectsTest {
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

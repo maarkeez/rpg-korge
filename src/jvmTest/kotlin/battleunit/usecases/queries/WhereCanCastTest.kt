@@ -1,15 +1,16 @@
 package battleunit.usecases.queries
 
-import ability.domain.AbilityMother
+import ability.domain.*
 import ability.usecases.queries.*
 import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.usecases.queries.*
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.services.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import org.mockito.kotlin.*
-import player.domain.PlayerMother
+import player.domain.*
 
 class WhereCanCastTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -40,7 +41,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result)
+        assertThat(result)
             .containsExactly(WhereCanCast.PositionDto(2, 2))
     }
 
@@ -63,7 +64,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result)
+        assertThat(result)
             .containsExactly(WhereCanCast.PositionDto(1, 2))
     }
 
@@ -87,7 +88,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(casterId, "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).containsExactlyInAnyOrder(
+        assertThat(result).containsExactlyInAnyOrder(
             WhereCanCast.PositionDto(1, 2),
             WhereCanCast.PositionDto(2, 1),
         )
@@ -103,7 +104,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnit.toDto().id, "unknown-ability")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 
     @Test
@@ -112,6 +113,6 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast("unknown-battle-unit", "ability-1")
         // Then
-        org.assertj.core.api.Assertions.assertThat(result).isEmpty()
+        assertThat(result).isEmpty()
     }
 }

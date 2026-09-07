@@ -2,8 +2,10 @@ package battlefield.usecases.commands
 
 import battlefield.adapters.storage.*
 import battlefield.domain.*
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.*
 import shared.domain.*
+import shared.domain.assertThat
 
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
@@ -23,12 +25,12 @@ class InitializeBattlefieldTest {
         initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedBattlefield).isNotNull
-        org.assertj.core.api.Assertions.assertThat(storedBattlefield!!.rows).isEqualTo(rows)
-        org.assertj.core.api.Assertions.assertThat(storedBattlefield.columns).isEqualTo(columns)
-        org.assertj.core.api.Assertions.assertThat(storedBattlefield.tiles).hasSize(rows * columns)
-        org.assertj.core.api.Assertions.assertThat(storedBattlefield.tiles.values)
-            .allSatisfy { tile -> org.assertj.core.api.Assertions.assertThat(tile.battleUnitId).isNull() }
+        assertThat(storedBattlefield).isNotNull
+        assertThat(storedBattlefield!!.rows).isEqualTo(rows)
+        assertThat(storedBattlefield.columns).isEqualTo(columns)
+        assertThat(storedBattlefield.tiles).hasSize(rows * columns)
+        assertThat(storedBattlefield.tiles.values)
+            .allSatisfy { tile -> assertThat(tile.battleUnitId).isNull() }
         assertThat(eventBus).hasPublishedEvents(BattlefieldEvent.BattlefieldCreated)
     }
 
@@ -40,8 +42,8 @@ class InitializeBattlefieldTest {
         // When
         initializeBattlefield(rows = 3, columns = 3, tiles = emptyList())
         // Then
-        org.assertj.core.api.Assertions.assertThat(battlefieldRepository.search()?.toDto())
+        assertThat(battlefieldRepository.search()?.toDto())
             .isEqualTo(existingBattlefield.toDto())
-        org.assertj.core.api.Assertions.assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus.publishedEvents).isEmpty()
     }
 }
