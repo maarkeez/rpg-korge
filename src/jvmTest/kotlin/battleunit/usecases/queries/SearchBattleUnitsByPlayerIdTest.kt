@@ -3,7 +3,7 @@ package battleunit.usecases.queries
 import battleunit.adapters.storage.*
 import battleunit.domain.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import player.domain.*
 import unit.domain.*
 

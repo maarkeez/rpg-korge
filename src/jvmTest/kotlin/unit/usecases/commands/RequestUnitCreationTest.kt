@@ -1,7 +1,7 @@
 package unit.usecases.commands
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import shared.domain.*
 import shared.domain.assertThat
 import unit.adapters.storage.*

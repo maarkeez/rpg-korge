@@ -2,7 +2,7 @@ package screen.battlefieldHud.usecases.commands
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.*
+import org.junit.jupiter.api.Test
 import screen.battlefieldHud.adapters.storage.*
 import screen.battlefieldHud.domain.*
 import screen.battlefieldHud.domain.BattlefieldHud.*

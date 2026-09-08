@@ -4,7 +4,8 @@ import battlefield.adapters.presentation.*
 import battlefield.domain.*
 import battlefield.usecases.queries.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import screen.battlefieldHud.adapters.storage.*
 import screen.battlefieldHud.domain.*
@@ -26,7 +27,7 @@ class UpdateMovementRangeTest {
         movementService = movementService,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(battlefieldApi.searchPosition).thenReturn(searchPosition)
     }

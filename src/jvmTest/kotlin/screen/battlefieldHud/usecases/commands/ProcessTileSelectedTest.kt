@@ -10,7 +10,8 @@ import battleunit.domain.*
 import battleunit.usecases.commands.*
 import battleunit.usecases.queries.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import player.adapters.presentation.*
 import player.domain.*
@@ -45,7 +46,7 @@ class ProcessTileSelectedTest {
         movementService = movementService,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(battlefieldApi.searchOccupant).thenReturn(searchOccupant)
         whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)

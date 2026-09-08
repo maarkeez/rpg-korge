@@ -4,7 +4,7 @@ import effect.adapters.storage.*
 import effect.domain.*
 import effect.domain.EffectMother.effect
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 
 class SearchEffectByIdTest {
     private val effectRepository = InMemoryEffectRepository()

@@ -4,7 +4,7 @@ import battle.adapters.storage.*
 import battle.domain.*
 import battleunit.usecases.queries.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import shared.domain.*
 import shared.domain.assertThat

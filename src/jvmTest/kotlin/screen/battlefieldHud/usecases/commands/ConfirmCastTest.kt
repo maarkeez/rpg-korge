@@ -4,7 +4,8 @@ import battleunit.adapters.presentation.*
 import battleunit.usecases.commands.*
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import screen.battlefieldHud.adapters.storage.*
 import screen.battlefieldHud.domain.*
@@ -23,7 +24,7 @@ class ConfirmCastTest {
         eventBus = eventBus,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(battleUnitApi.castAbility).thenReturn(castAbility)
     }

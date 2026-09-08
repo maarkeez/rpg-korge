@@ -3,7 +3,7 @@ package battlefield.usecases.queries
 import battlefield.adapters.storage.*
 import battlefield.domain.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 
 class CanBattlefieldTileBeOccupiedTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()

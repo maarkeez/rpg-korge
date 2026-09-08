@@ -4,7 +4,7 @@ import ability.adapters.storage.*
 import ability.domain.*
 import ability.domain.AbilityMother.ability
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 
 class SearchAbilityByIdTest {
     private val abilityRepository = InMemoryAbilityRepository()

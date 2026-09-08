@@ -10,7 +10,7 @@ import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import effect.domain.*
 import effect.usecases.queries.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import player.domain.*
 import shared.domain.*

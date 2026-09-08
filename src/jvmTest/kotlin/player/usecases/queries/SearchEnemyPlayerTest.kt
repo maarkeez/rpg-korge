@@ -1,7 +1,7 @@
 package player.usecases.queries
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import player.adapters.storage.*
 import player.domain.PlayerMother.player
 

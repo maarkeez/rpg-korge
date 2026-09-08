@@ -3,7 +3,7 @@ package battle.usecases.commands
 import battle.adapters.storage.*
 import battle.domain.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import shared.domain.*
 import shared.domain.assertThat
 

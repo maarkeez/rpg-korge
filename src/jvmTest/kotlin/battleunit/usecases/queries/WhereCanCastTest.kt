@@ -8,7 +8,7 @@ import battleunit.adapters.storage.*
 import battleunit.domain.*
 import battleunit.usecases.services.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import player.domain.*
 

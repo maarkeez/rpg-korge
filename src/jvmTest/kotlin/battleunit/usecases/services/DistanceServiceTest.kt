@@ -1,7 +1,7 @@
 package battleunit.usecases.services
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 
 class DistanceServiceTest {
     private val distanceService = DistanceService()

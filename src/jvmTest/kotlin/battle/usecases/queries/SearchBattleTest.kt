@@ -3,7 +3,7 @@ package battle.usecases.queries
 import battle.adapters.storage.*
 import battle.domain.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 
 class SearchBattleTest {
     private val battleRepository = InMemoryBattleRepository()

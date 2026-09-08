@@ -32,8 +32,6 @@ dependencies {
     add("jvmTestApi", "org.mockito.kotlin:mockito-kotlin:6.3.0")
     add("jvmTestApi", "org.assertj:assertj-core:3.27.7")
     add("jvmTestApi", "org.junit.jupiter:junit-jupiter:6.1.3")
-    add("jvmTestApi", "junit:junit:4.13.2")
-    add("jvmTestRuntimeOnly", "org.junit.vintage:junit-vintage-engine:6.1.3")
 }
 
 tasks.withType<Test>().configureEach {

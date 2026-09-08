@@ -7,7 +7,8 @@ import battleunit.adapters.presentation.*
 import battleunit.domain.*
 import battleunit.usecases.queries.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import screen.battlefieldHud.domain.*
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
@@ -23,7 +24,7 @@ class MovementServiceTest {
         battleUnitApi = battleUnitApi,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() {
         whenever(battlefieldApi.searchTilesThatCanBeOccupied).thenReturn(searchTilesThatCanBeOccupied)
         whenever(battleUnitApi.canMoveTo).thenReturn(canMoveTo)

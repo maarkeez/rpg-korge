@@ -20,7 +20,7 @@
 
 ## Test libraries
 
-- The test MUST be annotated with `@org.junit.Test`
+- The test MUST be annotated with `@org.junit.jupiter.api.Test`
 - The test MUST be asserted using `AssertJ` library assertions
 
 ## Test fixtures
@@ -79,7 +79,7 @@ import ability.domain.AbilityEvent
 import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*
-import org.junit.*
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import shared.domain.*
 import shared.domain.assertThat

@@ -2,7 +2,7 @@ package shared.domain
 
 import effect.domain.*
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.*
+import org.junit.jupiter.api.Test
 import shared.adapters.events.*
 import unit.domain.*
 

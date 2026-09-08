@@ -6,7 +6,7 @@ import battleunit.domain.*
 import battleunit.usecases.commands.*
 import battleunit.usecases.queries.*
 import cpuBrain.usecases.queries.*
-import org.junit.*
+import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import player.domain.*
 import player.usecases.queries.*
