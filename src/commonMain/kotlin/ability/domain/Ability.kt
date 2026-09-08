@@ -86,10 +86,10 @@ data class Ability private constructor(
         VACANT_TILE_ADJACENT_TO_BATTLE_UNIT;
 
         companion object {
-            operator fun invoke(targetPattern:String): TargetPattern =  runCatching { valueOf(targetPattern) }.getOrElse { throw InvalidTargetPattern() }
+            operator fun invoke(targetPattern: Dto.TargetPatternDto): TargetPattern =  runCatching { valueOf(targetPattern.name) }.getOrElse { throw InvalidTargetPattern() }
         }
 
-        fun toDto() = name
+        fun toDto() = Dto.TargetPatternDto.valueOf(name)
     }
 
     data class Dto(
@@ -98,6 +98,12 @@ data class Ability private constructor(
         val cost: Int,
         val cooldown: Int,
         val effects: List<String>,
-        val targetPattern: String,
-    )
+        val targetPattern: TargetPatternDto,
+    ) {
+        enum class TargetPatternDto {
+            SELF,
+            ADJACENT_ENEMY,
+            VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+        }
+    }
 }

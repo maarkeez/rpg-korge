@@ -1,5 +1,6 @@
 package battleunit.usecases.commands
 
+import ability.domain.Ability
 import ability.usecases.queries.SearchAbilityById
 import battlefield.usecases.queries.SearchOccupant
 import battlefield.usecases.queries.SearchPosition
@@ -31,19 +32,19 @@ class ReceiveAbilityEffects(
         val effects = ability.effects.map { effectId -> searchEffectById(effectId) ?: throw FailedToReceiveAbilityEffects() }
         // TODO: Implement other target patterns
         val occupantId = searchOccupant(row, column)
-        if(ability.targetPattern == "ADJACENT_ENEMY") {
+        if(ability.targetPattern == Ability.Dto.TargetPatternDto.ADJACENT_ENEMY) {
             if(occupantId == null) throw FailedToReceiveAbilityEffects()
             val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: throw FailedToReceiveAbilityEffects()
             val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
             if(battleUnit.isSamePlayer(occupantBattleUnit)) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
-        if(ability.targetPattern == "SELF") {
+        if(ability.targetPattern == Ability.Dto.TargetPatternDto.SELF) {
             if(occupantId == null) throw FailedToReceiveAbilityEffects()
             if(occupantId != battleUnitId) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
-        if(ability.targetPattern == "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"){
+        if(ability.targetPattern == Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT){
             if(occupantId != null) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
 						// TODO: refactor receiveImmediateEffect to handle teleport

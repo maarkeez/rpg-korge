@@ -47,7 +47,7 @@ class ReceiveAbilityEffectsTest {
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchAbilityById("ability-1")).thenReturn(
-            AbilityMother.ability(id = "ability-1", targetPattern = "SELF", effects = listOf(effectId)).toDto(),
+            AbilityMother.ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf(effectId)).toDto(),
         )
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchOccupant(0, 0)).thenReturn(battleUnitId)
@@ -83,7 +83,7 @@ class ReceiveAbilityEffectsTest {
         val battleUnit = BattleUnitMother.battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("ability-1")).thenReturn(
-            AbilityMother.ability(id = "ability-1", targetPattern = "SELF", effects = listOf("effect-1")).toDto(),
+            AbilityMother.ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf("effect-1")).toDto(),
         )
         whenever(searchEffectById("effect-1")).thenReturn(EffectMother.effect(id = "effect-1").toDto())
         whenever(searchOccupant(0, 0)).thenReturn(null)

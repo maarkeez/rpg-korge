@@ -12,7 +12,7 @@ object AbilityMother {
         cost: Int = cost(),
         cooldown: Int = cooldown(),
         effects: List<String> = effects(),
-        targetPattern: String = targetPattern(),
+        targetPattern: Ability.Dto.TargetPatternDto = targetPattern(),
     )= Ability.create(dto=Ability.Dto(
         id = id,
         name = name,
@@ -27,5 +27,5 @@ object AbilityMother {
     fun cost() = Random.nextInt(0, 999)
     fun cooldown() = Random.nextInt(0, 99)
     fun effects() = List(Random.nextInt(1, 4)){ effectId() }
-    fun targetPattern() = listOf("SELF","ADJACENT_ENEMY","VACANT_TILE_ADJACENT_TO_BATTLE_UNIT").random()
+    fun targetPattern() = Ability.Dto.TargetPatternDto.values().random()
 }

@@ -36,7 +36,7 @@ class WhereCanCastTest {
         val battleUnitId = battleUnit.toDto().id
         whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(2, 2))
         whenever(searchAbilityById("ability-1")).thenReturn(
-            AbilityMother.ability(targetPattern = "SELF").toDto(),
+            AbilityMother.ability(targetPattern = Ability.Dto.TargetPatternDto.SELF).toDto(),
         )
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
@@ -57,7 +57,7 @@ class WhereCanCastTest {
         val battleUnitId = battleUnit.toDto().id
         whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
         whenever(searchAbilityById("ability-1")).thenReturn(
-            AbilityMother.ability(targetPattern = "ADJACENT_ENEMY").toDto(),
+            AbilityMother.ability(targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY).toDto(),
         )
         whenever(searchOccupant(1, 2)).thenReturn(enemyBattleUnit.toDto().id)
         whenever(searchPosition(enemyBattleUnit.toDto().id)).thenReturn(PositionDto(1, 2))
@@ -78,7 +78,7 @@ class WhereCanCastTest {
         val casterId = caster.toDto().id
         whenever(searchPosition(casterId)).thenReturn(PositionDto(0, 0))
         whenever(searchAbilityById("ability-1")).thenReturn(
-            AbilityMother.ability(targetPattern = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT").toDto(),
+            AbilityMother.ability(targetPattern = Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT).toDto(),
         )
         whenever(searchPosition(otherBattleUnit.toDto().id)).thenReturn(PositionDto(2, 2))
         whenever(canBattlefieldTileBeOccupied(1, 2)).thenReturn(true)

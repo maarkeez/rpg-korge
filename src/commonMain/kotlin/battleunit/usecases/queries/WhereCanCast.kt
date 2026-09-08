@@ -1,5 +1,6 @@
 package battleunit.usecases.queries
 
+import ability.domain.Ability
 import ability.usecases.queries.SearchAbilityById
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.CanBattlefieldTileBeOccupied
@@ -25,10 +26,9 @@ class WhereCanCast(
         val currentPosition = searchPosition(battleUnitId) ?: return emptyList()
         val ability = searchAbilityById(abilityId) ?: return emptyList()
         return when(ability.targetPattern) {
-            "ADJACENT_ENEMY" -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
-            "SELF" -> listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))
-            "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT" -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
-            else -> emptyList()
+            Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
+            Ability.Dto.TargetPatternDto.SELF -> listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))
+            Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
         }
     }
 

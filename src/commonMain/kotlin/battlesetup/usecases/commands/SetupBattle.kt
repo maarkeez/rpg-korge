@@ -93,7 +93,7 @@ class SetupBattle(
             cost = 5,
             cooldown = 1,
             effects = listOf(venomDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
         )
         val sword = Ability.Dto(
             id = "sword",
@@ -101,7 +101,7 @@ class SetupBattle(
             cost = 0,
             cooldown = 0,
             effects = listOf(lowPhysicalDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
         )
         val heal = Ability.Dto(
             id = "heal",
@@ -109,7 +109,7 @@ class SetupBattle(
             cost = 10,
             cooldown = 2,
             effects = listOf(lowDamageHeal.id),
-            targetPattern = "SELF",
+            targetPattern = Ability.Dto.TargetPatternDto.SELF,
         )
         val mushroom = Ability.Dto(
             id = "mushroom",
@@ -117,7 +117,7 @@ class SetupBattle(
             cost = 10,
             cooldown = 0,
             effects = listOf(lowPhysicalDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
         )
         val skull = Ability.Dto(
             id = "skull",
@@ -125,7 +125,7 @@ class SetupBattle(
             cost = 10,
             cooldown = 0,
             effects = listOf(lowPhysicalDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
         )
         val teleport = Ability.Dto(
             id = "teleport",
@@ -133,7 +133,7 @@ class SetupBattle(
             cost = 5,
             cooldown = 1,
             effects = listOf(teleportEffect.id),
-            targetPattern = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT",
+            targetPattern = Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
         )
         val bee = Ability.Dto(
             id = "bee",
@@ -141,7 +141,7 @@ class SetupBattle(
             cost = 10,
             cooldown = 0,
             effects = listOf(lowPhysicalDamage.id),
-            targetPattern = "ADJACENT_ENEMY",
+            targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
         )
         requestAbilityCreation(poisonedSword)
         requestAbilityCreation(sword)
