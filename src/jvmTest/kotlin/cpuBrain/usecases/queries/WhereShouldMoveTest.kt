@@ -28,7 +28,7 @@ class WhereShouldMoveTest {
         searchUnitById = searchUnitById,
     )
 
-    private val player = PlayerMother.player(id = "player-1", type = "CPU")
+    private val player = PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
     private val enemyPlayer = PlayerMother.player(id = "player-2")
     private val unit = UnitMother.unit(id = "unit-1", healthPoints = 10)
 

@@ -5,6 +5,7 @@ import battleunit.domain.*
 import battleunit.usecases.commands.*
 import battleunit.usecases.queries.*
 import cpuBrain.usecases.queries.WhereShouldMove
+import player.domain.Player
 import player.usecases.queries.*
 
 class PlayTurn(
@@ -20,7 +21,7 @@ class PlayTurn(
 ) {
     operator fun invoke(playerId: String) {
         val player = searchPlayerById(playerId) ?: return
-        if(player.type != "CPU") return
+        if(player.type != Player.Dto.PlayerTypeDto.CPU) return
         val battleUnits = searchBattleUnitsByPlayerId(playerId)
         battleUnits.forEach { battleUnit ->
             tryToCastAbility(battleUnit)

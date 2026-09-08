@@ -105,7 +105,7 @@ class ProcessTileSelectedTest {
         battlefieldHudRepository.create(hud)
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = "HUMAN").toDto())
+        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN).toDto())
         // When
         processTileSelected(2, 3)
         // Then
@@ -126,7 +126,7 @@ class ProcessTileSelectedTest {
         )
         whenever(searchOccupant(5, 5)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = "HUMAN").toDto())
+        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN).toDto())
         // When
         processTileSelected(5, 5)
         // Then
@@ -147,7 +147,7 @@ class ProcessTileSelectedTest {
         )
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = "CPU").toDto())
+        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU).toDto())
         // When
         processTileSelected(2, 3)
         // Then

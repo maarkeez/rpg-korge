@@ -34,7 +34,7 @@ class PlayTurnTest {
         whereShouldMove = whereShouldMove,
     )
 
-    private val player = PlayerMother.player(id = "player-1", type = "CPU")
+    private val player = PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
 
     private fun battleUnitDto(id: String, remainingCasts: Int): BattleUnit.Dto =
         BattleUnitMother
@@ -59,7 +59,7 @@ class PlayTurnTest {
     @Test
     fun `should not play turn when the player is not a cpu`() {
         // Given
-        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = "HUMAN").toDto())
+        whenever(searchPlayerById("player-1")).thenReturn(PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN).toDto())
         // When
         playTurn("player-1")
         // Then

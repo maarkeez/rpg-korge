@@ -4,6 +4,7 @@ import battle.adapters.presentation.BattleApi
 import battlefield.adapters.presentation.*
 import battleunit.adapters.presentation.*
 import player.adapters.presentation.PlayerApi
+import player.domain.Player
 import screen.battlefieldHud.domain.*
 import screen.battlefieldHud.domain.BattlefieldHud.*
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
@@ -42,7 +43,7 @@ class ProcessTileSelected(
             val battleUnit = battleUnitApi.searchBattleUnitById(battlefieldHud.battleUnitId)!!
             val selectedTileInMovementRange = battlefieldHud.tilesWhereCanBeMoved.contains(tile)
             val player = playerApi.searchPlayerById(battleUnit.playerId)!!
-            if(player.type != "HUMAN") {
+            if(player.type != Player.Dto.PlayerTypeDto.HUMAN) {
                 val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)

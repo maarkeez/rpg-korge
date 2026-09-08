@@ -47,8 +47,13 @@ data class Player private constructor(
     data class Dto(
         val id: String,
         val name: String,
-        val type: String,
-    )
+        val type: PlayerTypeDto,
+    ) {
+        enum class PlayerTypeDto {
+            CPU,
+            HUMAN
+        }
+    }
 
     @JvmInline
     private value class Id(val value: String){
@@ -71,9 +76,6 @@ data class Player private constructor(
         CPU,
         HUMAN;
 
-        fun toDto() = when(this) {
-            CPU -> "CPU"
-            HUMAN -> "HUMAN"
-        }
+        fun toDto() = Dto.PlayerTypeDto.valueOf(name)
     }
 }

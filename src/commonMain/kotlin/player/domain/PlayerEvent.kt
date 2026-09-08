@@ -6,6 +6,6 @@ sealed interface PlayerEvent: DomainEvent {
     data class PlayerCreated(
         val playerId: String,
         val playerName: String,
-        val playerType: String,
+        val playerType: Player.Dto.PlayerTypeDto,
     ): PlayerEvent
 }

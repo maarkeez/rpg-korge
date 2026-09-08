@@ -26,8 +26,8 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.HUMAN)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "HUMAN").toDto())
-        assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, "HUMAN"))
+        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = Player.Dto.PlayerTypeDto.HUMAN).toDto())
+        assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.HUMAN))
     }
 
     @Test
@@ -39,8 +39,8 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.CPU)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = "CPU").toDto())
-        assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, "CPU"))
+        assertThat(storedPlayer).isEqualTo(PlayerMother.player(playerId, playerName, type = Player.Dto.PlayerTypeDto.CPU).toDto())
+        assertThat(eventBus).hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.CPU))
     }
 
     @Test
