@@ -85,9 +85,9 @@ data class Effect private constructor(
         TELEPORT;
 
         companion object {
-            operator fun invoke(type: String): Type = runCatching { valueOf(type) }.getOrElse { throw InvalidEffectType() }
+            operator fun invoke(type: Dto.TypeDto): Type = runCatching { valueOf(type.name) }.getOrElse { throw InvalidEffectType() }
         }
-        fun toDto() = name
+        fun toDto() = Dto.TypeDto.valueOf(name)
     }
 
     private sealed interface Modifier {
@@ -164,12 +164,18 @@ data class Effect private constructor(
 
     data class Dto(
         val id: String,
-        val type: String,
+        val type: TypeDto,
         val power: Int,
         val probability: Int,
         val modifiers: List<ModifierDto>,
         val application: ApplicationDto,
     ){
+        enum class TypeDto {
+            DECREASE_HEALTH,
+            INCREASE_HEALTH,
+            NEGATE_INCREASE_HEALTH,
+            TELEPORT,
+        }
         data class ModifierDto(
             val type: String,
             val stack: StackDto?,

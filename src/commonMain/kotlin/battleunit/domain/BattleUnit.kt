@@ -172,10 +172,10 @@ data class BattleUnit private constructor(
     fun applyImmediateEffect(effect: Effect.Dto, unit: Unit.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
         return when (effect.type) {
-            "DECREASE_HEALTH" -> {
+            Effect.Dto.TypeDto.DECREASE_HEALTH -> {
                 applyDecreaseHealthEffect(effect, ongoingEffects)
             }
-            "INCREASE_HEALTH" -> {
+            Effect.Dto.TypeDto.INCREASE_HEALTH -> {
                 val remainingHealthPoints =
                     RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.power))
                 val healedEvent = BattleUnitHealed(id.value)
@@ -185,7 +185,7 @@ data class BattleUnit private constructor(
                     events = events + healedEvent
                 )
             }
-            "TELEPORT" -> {
+            Effect.Dto.TypeDto.TELEPORT -> {
                 copy(
                     events = events + BattleUnitTeleported(battleUnitId = id.value)
                 )
@@ -204,7 +204,7 @@ data class BattleUnit private constructor(
 		// TODO: Rename to "on turn started"
     fun applyDelayedEffect(effect: Effect.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
-        return if(effect.type == "DECREASE_HEALTH") {
+        return if(effect.type == Effect.Dto.TypeDto.DECREASE_HEALTH) {
             applyDecreaseHealthEffect(effect, ongoingEffects)
         }else{
             TODO("Not implemented yet")

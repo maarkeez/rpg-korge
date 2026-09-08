@@ -11,7 +11,7 @@ object EffectMother {
         applicationType: String = "ON_TURN_STARTED",
     ) = Effect.create(Effect.Dto(
         id = id,
-        type = "DECREASE_HEALTH",
+        type = Effect.Dto.TypeDto.DECREASE_HEALTH,
         power = power,
         probability = 100,
         modifiers = emptyList(),

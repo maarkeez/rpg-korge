@@ -34,7 +34,7 @@ class SetupBattle(
 
         val venomDamage = Effect.Dto(
             id = "venom-damage",
-            type = "DECREASE_HEALTH",
+            type = Effect.Dto.TypeDto.DECREASE_HEALTH,
             power = 3,
             probability = 100,
             modifiers = emptyList(),
@@ -48,7 +48,7 @@ class SetupBattle(
         )
         val lowPhysicalDamage = Effect.Dto(
             id = "low-physical-damage",
-            type = "DECREASE_HEALTH",
+            type = Effect.Dto.TypeDto.DECREASE_HEALTH,
             power = 10,
             probability = 100,
             modifiers = emptyList(),
@@ -60,7 +60,7 @@ class SetupBattle(
         )
         val lowDamageHeal = Effect.Dto(
             id = "low-damage-heal",
-            type = "INCREASE_HEALTH",
+            type = Effect.Dto.TypeDto.INCREASE_HEALTH,
             power = 20,
             probability = 100,
             modifiers = emptyList(),
@@ -72,7 +72,7 @@ class SetupBattle(
         )
         val teleportEffect = Effect.Dto(
             id = "teleport",
-            type = "TELEPORT",
+            type = Effect.Dto.TypeDto.TELEPORT,
             power = 0,
             probability = 100,
             modifiers = emptyList(),
