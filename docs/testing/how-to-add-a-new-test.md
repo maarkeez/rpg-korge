@@ -28,6 +28,44 @@
 - The test MUST use object mothers to create the required test data (e.g.: `val effect = EffectMother.effect()`)
 - The test MUST set only the relevant values while creating objects with object mothers (e.g.: `val ability = ability(effects = listOf(effect.id)).toDto()`)
 
+## Test nested classes
+
+- When the class under test has multiple public functions, we MUST use junit `@Nested` and create one nested class per public function
+- Domain class tests SHOULD use `@Nested`. Often they will grow their available public functions.
+- Commands and queries use cases class tests MUST not use `@Nested`. They are expected to have only one single public function.
+
+For example:
+
+```kotlin
+// Class under test
+class MainClass {
+
+    fun functionOne() {
+        // Function one logic goes here
+    }
+
+    fun functionTwo() {
+        // Function two logic goes here
+    }
+}
+
+// Test example
+import org.junit.jupiter.api.Nested
+
+class MainClassTest {
+
+    @Nested
+    class FunctionOneTest {
+        // Function one tests go here
+    }
+
+    @Nested
+    class FunctionTwoTest {
+        // Function two tests go here
+    }
+}
+```
+
 ## Test example
 
 For example, here you are a command test:
