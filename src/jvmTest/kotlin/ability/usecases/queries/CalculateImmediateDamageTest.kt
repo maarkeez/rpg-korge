@@ -1,9 +1,8 @@
 package ability.usecases.queries
 
 import ability.adapters.storage.InMemoryAbilityRepository
-import ability.domain.AbilityMother
 import ability.domain.AbilityMother.ability
-import effect.domain.EffectMother
+import effect.domain.EffectMother.effect
 import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,22 +21,9 @@ class CalculateImmediateDamageTest {
     @Test
     fun `should sum power of immediately applied effects when ability has a mix of immediate and non immediate effects`() {
         // Given
-        val immediateEffect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect(id = "effect-1", power = 4, applicationType = "IMMEDIATELY")
-                .toDto()
-        val onTurnStartedEffect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect(id = "effect-2", power = 10)
-                .toDto()
-        val ability =
-            _root_ide_package_.ability.domain.AbilityMother.ability(
-                effects =
-                    listOf(
-                        immediateEffect.id,
-                        onTurnStartedEffect.id,
-                    ),
-            )
+        val immediateEffect = effect(id = "effect-1", power = 4, applicationType = "IMMEDIATELY").toDto()
+        val onTurnStartedEffect = effect(id = "effect-2", power = 10).toDto()
+        val ability = ability(effects = listOf(immediateEffect.id, onTurnStartedEffect.id))
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)
         whenever(searchEffectById(immediateEffect.id)).thenReturn(immediateEffect)
@@ -52,7 +38,7 @@ class CalculateImmediateDamageTest {
     fun `should return zero when ability does not exist`() {
         // Given
         val unknownAbilityId =
-            _root_ide_package_.ability.domain.AbilityMother
+            ability.domain.AbilityMother
                 .id()
         // When
         val damage = calculateImmediateDamage(unknownAbilityId)

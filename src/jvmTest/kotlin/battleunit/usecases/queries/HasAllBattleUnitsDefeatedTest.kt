@@ -1,11 +1,11 @@
 package battleunit.usecases.queries
 
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.domain.PlayerMother
-import unit.domain.UnitMother
+import player.domain.PlayerMother.player
+import unit.domain.UnitMother.unit
 
 class HasAllBattleUnitsDefeatedTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -15,15 +15,13 @@ class HasAllBattleUnitsDefeatedTest {
     fun `should return true when all player battle units are defeated`() {
         // Given
         val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
+            player(id = "player-1")
         repeat(2) {
             battleUnitRepository.create(
-                _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+                battleUnit(
                     player = player.toDto(),
                     unit =
-                        _root_ide_package_.unit.domain.UnitMother
-                            .unit(healthPoints = 0)
+                        unit(healthPoints = 0)
                             .toDto(),
                 ),
             )
@@ -37,25 +35,17 @@ class HasAllBattleUnitsDefeatedTest {
     @Test
     fun `should return false when at least one battle unit is alive`() {
         // Given
-        val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
+        val player = player(id = "player-1")
         battleUnitRepository.create(
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 player = player.toDto(),
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(healthPoints = 0)
-                        .toDto(),
+                unit = unit(healthPoints = 0).toDto(),
             ),
         )
         battleUnitRepository.create(
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 player = player.toDto(),
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(healthPoints = 10)
-                        .toDto(),
+                unit = unit(healthPoints = 10).toDto(),
             ),
         )
         // When

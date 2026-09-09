@@ -1,6 +1,7 @@
 package battlefieldHud.usecases.commands
 
-import battlefieldHud.domain.BattlefieldHudMother
+import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
+import battlefieldHud.domain.BattlefieldHudMother.tile
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.usecases.commands.CastAbility
 import org.assertj.core.api.Assertions.assertThat
@@ -14,6 +15,7 @@ import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import screen.battlefieldHud.domain.BattlefieldHud.Idle
 import screen.battlefieldHud.domain.BattlefieldHudError
 import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.usecases.commands.ConfirmCast
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
@@ -21,9 +23,9 @@ class ConfirmCastTest {
     private val battleUnitApi: BattleUnitApi = mock()
     private val castAbility: CastAbility = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val confirmCast =
-        _root_ide_package_.screen.battlefieldHud.usecases.commands.ConfirmCast(
+        ConfirmCast(
             battleUnitApi = battleUnitApi,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
@@ -37,11 +39,9 @@ class ConfirmCastTest {
     @Test
     fun `should cast the ability and go idle when the hud is previewing the ability cast`() {
         // Given
-        val castTile =
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(1, 1)
+        val castTile = tile(1, 1)
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview(
+            displayAbilityCastPreview(
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castTile = castTile,
@@ -57,8 +57,7 @@ class ConfirmCastTest {
             column = castTile.column,
         )
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -66,7 +65,7 @@ class ConfirmCastTest {
     fun `should throw an invalid hud state error when the hud is idle`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .idle(),
         )
         // When
@@ -79,7 +78,7 @@ class ConfirmCastTest {
     fun `should throw an invalid hud state error when the hud is displaying the movement range`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayMovementRange(),
         )
         // When
@@ -92,7 +91,7 @@ class ConfirmCastTest {
     fun `should throw an invalid hud state error when the hud is displaying the ability cast range`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastRange(),
         )
         // When

@@ -3,13 +3,14 @@ package usecases.commands
 import battle.usecases.commands.FinishPlayerTurn
 import battlefield.domain.Battlefield
 import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.commands.CastAbility
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.SearchBattleUnitById
 import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
 import battleunit.usecases.queries.WhereCanCast
+import cpuBrain.usecases.commands.PlayTurn
 import cpuBrain.usecases.queries.WhereShouldMove
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,9 +20,9 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import player.domain.Player
-import player.domain.PlayerMother
+import player.domain.PlayerMother.player
 import player.usecases.queries.SearchPlayerById
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()
@@ -34,7 +35,7 @@ class PlayTurnTest {
     private val searchBattleUnitById: SearchBattleUnitById = mock()
     private val whereShouldMove: WhereShouldMove = mock()
     private val playTurn =
-        _root_ide_package_.cpuBrain.usecases.commands.PlayTurn(
+        PlayTurn(
             searchPlayerById = searchPlayerById,
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
             moveBattleUnit = moveBattleUnit,
@@ -46,22 +47,16 @@ class PlayTurnTest {
             whereShouldMove = whereShouldMove,
         )
 
-    private val player =
-        _root_ide_package_.player.domain.PlayerMother
-            .player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
+    private val player = player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
 
     private fun battleUnitDto(
         id: String,
         remainingCasts: Int,
     ): BattleUnit.Dto =
-        _root_ide_package_.battleunit.domain.BattleUnitMother
-            .battleUnit(
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(abilities = listOf("ability-1"))
-                        .toDto(),
-                player = player.toDto(),
-            ).toDto()
+        battleUnit(
+            unit = unit(abilities = listOf("ability-1")).toDto(),
+            player = player.toDto(),
+        ).toDto()
             .copy(
                 id = id,
                 remainingTurnActions = BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = remainingCasts, remainingSteps = 3),
@@ -82,9 +77,7 @@ class PlayTurnTest {
     fun `should not play turn when the player is not a cpu`() {
         // Given
         whenever(searchPlayerById("player-1")).thenReturn(
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
-                .toDto(),
+            player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN).toDto(),
         )
         // When
         playTurn("player-1")

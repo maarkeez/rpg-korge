@@ -3,7 +3,7 @@ package battle.usecases.commands
 import battle.adapters.storage.InMemoryBattleRepository
 import battle.domain.Battle
 import battle.domain.BattleEvent
-import battle.domain.BattleMother
+import battle.domain.BattleMother.battle
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import shared.domain.FakeEventBus
@@ -11,7 +11,7 @@ import shared.domain.assertThat
 
 class StartNextRoundTest {
     private val battleRepository = InMemoryBattleRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val startNextRound =
         StartNextRound(
             battleRepository = battleRepository,
@@ -22,17 +22,14 @@ class StartNextRoundTest {
     fun `should start next round when a battle exists`() {
         // Given
         val players = listOf("player-1", "player-2")
-        battleRepository.create(
-            _root_ide_package_.battle.domain.BattleMother
-                .battle(players),
-        )
+        battleRepository.create(battle(players))
         // When
         startNextRound()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2))
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattleEvent.BattleRoundStarted(2),
             BattleEvent.PlayerTurnStarted(players.first()),
         )

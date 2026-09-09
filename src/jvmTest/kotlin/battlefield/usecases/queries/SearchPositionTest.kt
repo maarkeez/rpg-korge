@@ -2,7 +2,7 @@ package battlefield.usecases.queries
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
 import battlefield.domain.Battlefield
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -15,8 +15,7 @@ class SearchPositionTest {
         // Given
         val battleUnitId = "battle-unit-1"
         val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+            battlefield()
                 .occupy(1, 1, battleUnitId)
                 .pullEvents()
                 .second
@@ -30,10 +29,7 @@ class SearchPositionTest {
     @Test
     fun `should return null when the battle unit is not deployed`() {
         // Given
-        battlefieldRepository.create(
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield(),
-        )
+        battlefieldRepository.create(battlefield())
         // When
         val result = searchPosition("unknown-battle-unit")
         // Then

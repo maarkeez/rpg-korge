@@ -3,7 +3,7 @@ package battle.usecases.commands
 import battle.adapters.storage.InMemoryBattleRepository
 import battle.domain.Battle
 import battle.domain.BattleEvent
-import battle.domain.BattleMother
+import battle.domain.BattleMother.battle
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import shared.domain.FakeEventBus
@@ -11,7 +11,7 @@ import shared.domain.assertThat
 
 class FinishPlayerTurnTest {
     private val battleRepository = InMemoryBattleRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val finishPlayerTurn =
         FinishPlayerTurn(
             battleRepository = battleRepository,
@@ -22,18 +22,14 @@ class FinishPlayerTurnTest {
     fun `should start next player turn when another player remains in the queue`() {
         // Given
         val players = listOf("player-1", "player-2")
-        battleRepository.create(
-            _root_ide_package_.battle.domain.BattleMother
-                .battle(players),
-        )
+        battleRepository.create(battle(players))
         // When
         finishPlayerTurn()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattleEvent.PlayerTurnStarted(players[1]))
     }
 
@@ -42,8 +38,7 @@ class FinishPlayerTurnTest {
         // Given
         val players = listOf("player-1", "player-2")
         val battle =
-            _root_ide_package_.battle.domain.BattleMother
-                .battle(players)
+            battle(players)
                 .finishPlayerTurn()
                 .pullEvents()
                 .second
@@ -54,8 +49,7 @@ class FinishPlayerTurnTest {
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattleEvent.BattleRoundFinished(1))
     }
 }

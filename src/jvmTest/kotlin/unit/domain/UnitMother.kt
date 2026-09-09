@@ -1,6 +1,6 @@
 package unit.domain
 
-import ability.domain.AbilityMother
+import ability.domain.AbilityMother.ability
 import korlibs.io.util.UUID
 import kotlin.random.Random
 
@@ -32,13 +32,7 @@ object UnitMother {
 
     fun manaPoints() = Random.nextInt(0, 99)
 
-    fun abilities() =
-        List(Random.nextInt(1, 4)) {
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability()
-                .toDto()
-                .id
-        }
+    fun abilities() = List(Random.nextInt(1, 4)) { ability().toDto().id }
 
     fun movementRange() = Random.nextInt(1, 5)
 }

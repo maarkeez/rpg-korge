@@ -3,7 +3,7 @@ package ability.usecases.commands
 import ability.adapters.storage.InMemoryAbilityRepository
 import ability.domain.AbilityEvent
 import ability.domain.AbilityMother.ability
-import effect.domain.EffectMother
+import effect.domain.EffectMother.effect
 import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,7 +14,7 @@ import shared.domain.assertThat
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val searchEffectById: SearchEffectById = mock()
     private val requestAbilityCreation =
         RequestAbilityCreation(
@@ -26,23 +26,15 @@ class RequestAbilityCreationTest {
     @Test
     fun `should create ability`() {
         // Given
-        val effect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect()
-                .toDto()
-        val ability =
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(
-                    effects = listOf(effect.id),
-                ).toDto()
+        val effect = effect().toDto()
+        val ability = ability(effects = listOf(effect.id)).toDto()
         whenever(searchEffectById(effect.id)).thenReturn(effect)
         // When
         requestAbilityCreation(abilityDto = ability)
         // Then
         val storedAbility = abilityRepository.searchById(ability.id)?.toDto()
         assertThat(storedAbility).isEqualTo(ability)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(AbilityEvent.AbilityCreated(ability.id))
     }
 }

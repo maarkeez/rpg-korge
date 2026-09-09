@@ -2,7 +2,7 @@ package battlefield.usecases.queries
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
 import battlefield.domain.Battlefield
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -15,8 +15,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // Given
         val battleUnitId = "battle-unit-1"
         val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+            battlefield()
                 .occupy(1, 1, battleUnitId)
                 .pullEvents()
                 .second
@@ -41,8 +40,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // Given
         val battleUnitId = "battle-unit-1"
         val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+            battlefield()
                 .occupy(1, 1, battleUnitId)
                 .pullEvents()
                 .second
@@ -66,8 +64,7 @@ class SearchTilesThatCanBeOccupiedTest {
     fun `should return empty list when the battle unit is not deployed`() {
         // Given
         battlefieldRepository.create(
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield(),
+            battlefield(),
         )
         // When
         val result = searchTilesThatCanBeOccupied("unknown-battle-unit", distance = 1)

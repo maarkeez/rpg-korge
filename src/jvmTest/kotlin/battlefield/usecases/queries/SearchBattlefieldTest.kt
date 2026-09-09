@@ -1,7 +1,7 @@
 package battlefield.usecases.queries
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -12,9 +12,7 @@ class SearchBattlefieldTest {
     @Test
     fun `should return battlefield when one exists`() {
         // Given
-        val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+        val battlefield = battlefield()
         battlefieldRepository.create(battlefield)
         // When
         val result = searchBattlefield()

@@ -4,7 +4,7 @@ import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.usecases.queries.SearchPosition
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitEvent
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.services.DistanceService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -12,11 +12,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class MoveBattleUnitTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val searchPosition: SearchPosition = mock()
     private val distanceService = DistanceService()
     private val moveBattleUnit =
@@ -30,14 +30,7 @@ class MoveBattleUnitTest {
     @Test
     fun `should move battle unit when a reachable position is provided`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(
-                    unit =
-                        _root_ide_package_.unit.domain.UnitMother
-                            .unit(movementRange = 5)
-                            .toDto(),
-                )
+        val battleUnit = battleUnit(unit = unit(movementRange = 5).toDto())
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(0, 0))
@@ -46,7 +39,7 @@ class MoveBattleUnitTest {
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
         assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(2)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.BattleUnitMoved(battleUnitId, 0, 0, 2, 1),
         )
     }
@@ -64,8 +57,7 @@ class MoveBattleUnitTest {
     fun `should not move battle unit when the position is not found`() {
         // Given
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+            battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(null)
         // When

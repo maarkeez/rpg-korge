@@ -1,11 +1,11 @@
 package battleunit.usecases.commands
 
-import ability.domain.AbilityMother
+import ability.domain.AbilityMother.ability
 import ability.usecases.queries.SearchAbilityById
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitError
 import battleunit.domain.BattleUnitEvent
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.queries.WhereCanCast
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -13,11 +13,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class CastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val whereCanCast: WhereCanCast = mock()
     private val searchAbilityById: SearchAbilityById = mock()
     private val castAbility =
@@ -31,17 +31,8 @@ class CastAbilityTest {
     @Test
     fun `should cast ability when the position is a valid cast position`() {
         // Given
-        val ability =
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(id = "ability-1", cost = 0, cooldown = 0)
-                .toDto()
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(abilities = listOf("ability-1"), manaPoints = 10)
-                        .toDto(),
-            )
+        val ability = ability(id = "ability-1", cost = 0, cooldown = 0).toDto()
+        val battleUnit = battleUnit(unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
@@ -52,7 +43,7 @@ class CastAbilityTest {
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
         assertThat(storedBattleUnit!!.remainingTurnActions.remainingCasts).isEqualTo(0)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.AbilityCasted(battleUnitId, "ability-1", 0, 0),
         )
     }
@@ -70,8 +61,7 @@ class CastAbilityTest {
     fun `should throw ability does not exist when the ability is unknown`() {
         // Given
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+            battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
@@ -88,14 +78,12 @@ class CastAbilityTest {
     fun `should throw can not cast error when the battle unit can not cast the ability`() {
         // Given
         val ability =
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(id = "ability-1")
+            ability(id = "ability-1")
                 .toDto()
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(abilities = listOf("other-ability"), manaPoints = 10)
+                    unit(abilities = listOf("other-ability"), manaPoints = 10)
                         .toDto(),
             )
         battleUnitRepository.create(battleUnit)
@@ -114,14 +102,12 @@ class CastAbilityTest {
     fun `should throw invalid cast position error when the position is not a valid cast position`() {
         // Given
         val ability =
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(id = "ability-1", cost = 0, cooldown = 0)
+            ability(id = "ability-1", cost = 0, cooldown = 0)
                 .toDto()
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(abilities = listOf("ability-1"), manaPoints = 10)
+                    unit(abilities = listOf("ability-1"), manaPoints = 10)
                         .toDto(),
             )
         battleUnitRepository.create(battleUnit)

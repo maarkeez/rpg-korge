@@ -3,13 +3,13 @@ package battleunit.usecases.queries
 import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.usecases.queries.SearchPosition
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.services.DistanceService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class CanMoveToTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -21,13 +21,11 @@ class CanMoveToTest {
     fun `should return true when the distance is within the remaining steps`() {
         // Given
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(
-                    unit =
-                        _root_ide_package_.unit.domain.UnitMother
-                            .unit(movementRange = 5)
-                            .toDto(),
-                )
+            battleUnit(
+                unit =
+                    unit(movementRange = 5)
+                        .toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
         // When
@@ -39,14 +37,7 @@ class CanMoveToTest {
     @Test
     fun `should return false when the distance exceeds the remaining steps`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(
-                    unit =
-                        _root_ide_package_.unit.domain.UnitMother
-                            .unit(movementRange = 2)
-                            .toDto(),
-                )
+        val battleUnit = battleUnit(unit = unit(movementRange = 2).toDto())
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
         // When
@@ -68,9 +59,7 @@ class CanMoveToTest {
     @Test
     fun `should return false when the position is not found`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(null)
         // When

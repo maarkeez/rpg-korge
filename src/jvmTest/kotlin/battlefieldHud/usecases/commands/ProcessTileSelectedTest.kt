@@ -1,14 +1,15 @@
 package battlefieldHud.usecases.commands
 
 import battle.adapters.presentation.BattleApi
-import battle.domain.BattleMother
 import battle.usecases.queries.SearchBattle
 import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.usecases.queries.SearchOccupant
-import battlefieldHud.domain.BattlefieldHudMother
+import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
+import battlefieldHud.domain.BattlefieldHudMother.tile
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
@@ -22,13 +23,13 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import player.adapters.presentation.PlayerApi
 import player.domain.Player
-import player.domain.PlayerMother
 import player.usecases.queries.SearchPlayerById
 import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import screen.battlefieldHud.domain.BattlefieldHud.Idle
 import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.usecases.commands.ProcessTileSelected
 import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
@@ -45,9 +46,9 @@ class ProcessTileSelectedTest {
     private val searchBattle: SearchBattle = mock()
     private val movementService: MovementService = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val processTileSelected =
-        _root_ide_package_.screen.battlefieldHud.usecases.commands.ProcessTileSelected(
+        ProcessTileSelected(
             battlefieldApi = battlefieldApi,
             battleUnitApi = battleUnitApi,
             playerApi = playerApi,
@@ -70,13 +71,12 @@ class ProcessTileSelectedTest {
         id: String,
         playerId: String,
     ): BattleUnit.Dto =
-        _root_ide_package_.battleunit.domain.BattleUnitMother
-            .battleUnit(
-                player =
-                    _root_ide_package_.player.domain.PlayerMother
-                        .player(id = playerId)
-                        .toDto(),
-            ).toDto()
+        battleUnit(
+            player =
+                player.domain.PlayerMother
+                    .player(id = playerId)
+                    .toDto(),
+        ).toDto()
             .copy(id = id, playerId = playerId)
 
     @Test
@@ -84,11 +84,10 @@ class ProcessTileSelectedTest {
         // Given
         val tilesWhereCanBeMoved =
             setOf(
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(1, 3),
+                tile(1, 3),
             )
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .idle(),
         )
         whenever(searchOccupant(1, 2)).thenReturn("battle-unit-1")
@@ -99,15 +98,13 @@ class ProcessTileSelectedTest {
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
         assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-1")
         assertThat(storedHud.tile).isEqualTo(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(1, 2),
+            tile(1, 2),
         )
         assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(1, 2),
+                    tile(1, 2),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
@@ -118,7 +115,7 @@ class ProcessTileSelectedTest {
     fun `should go idle when an empty tile is selected while idle`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .idle(),
         )
         whenever(searchOccupant(0, 0)).thenReturn(null)
@@ -126,8 +123,7 @@ class ProcessTileSelectedTest {
         processTileSelected(0, 0)
         // Then
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -135,22 +131,20 @@ class ProcessTileSelectedTest {
     fun `should move the battle unit when a tile within the movement range is selected`() {
         // Given
         val hud =
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(2, 3),
+                        tile(2, 3),
                     ),
             )
         battlefieldHudRepository.create(hud)
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchPlayerById("player-1")).thenReturn(
-            _root_ide_package_.player.domain.PlayerMother
+            player.domain.PlayerMother
                 .player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
                 .toDto(),
         )
@@ -166,22 +160,20 @@ class ProcessTileSelectedTest {
     fun `should go idle when a tile outside the movement range is selected`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(2, 3),
+                        tile(2, 3),
                     ),
             ),
         )
         whenever(searchOccupant(5, 5)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchPlayerById("player-1")).thenReturn(
-            _root_ide_package_.player.domain.PlayerMother
+            player.domain.PlayerMother
                 .player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
                 .toDto(),
         )
@@ -190,8 +182,7 @@ class ProcessTileSelectedTest {
         // Then
         verify(moveBattleUnit, never()).invoke(eq("battle-unit-1"), eq(5), eq(5))
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -199,22 +190,20 @@ class ProcessTileSelectedTest {
     fun `should go idle without moving the battle unit when it belongs to a non-human player`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(2, 3),
+                        tile(2, 3),
                     ),
             ),
         )
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchPlayerById("player-1")).thenReturn(
-            _root_ide_package_.player.domain.PlayerMother
+            player.domain.PlayerMother
                 .player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
                 .toDto(),
         )
@@ -223,8 +212,7 @@ class ProcessTileSelectedTest {
         // Then
         verify(moveBattleUnit, never()).invoke(eq("battle-unit-1"), eq(2), eq(3))
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -232,10 +220,9 @@ class ProcessTileSelectedTest {
     fun `should go idle when the tile is occupied by the same battle unit`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
             ),
         )
@@ -244,8 +231,7 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -254,14 +240,12 @@ class ProcessTileSelectedTest {
         // Given
         val tilesWhereCanBeMoved =
             setOf(
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(2, 3),
+                tile(2, 3),
             )
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
             ),
         )
@@ -273,16 +257,14 @@ class ProcessTileSelectedTest {
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
         assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-2")
         assertThat(storedHud.tile).isEqualTo(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(2, 2),
+            tile(2, 2),
         )
         assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.Idle,
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(2, 2),
+                    tile(2, 2),
                 battleUnitId = "battle-unit-2",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
@@ -293,7 +275,7 @@ class ProcessTileSelectedTest {
     fun `should do nothing when the hud is previewing the ability cast`() {
         // Given
         val hud =
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastPreview()
         battlefieldHudRepository.create(hud)
         // When
@@ -307,22 +289,16 @@ class ProcessTileSelectedTest {
     fun `should preview the self ability cast when the selected tile is a cast position with no occupant`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
-                casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+            displayAbilityCastRange(
+                casterTile = tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast =
-                    setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(1, 1),
-                    ),
+                tilesWhereCanCast = setOf(tile(1, 1)),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            _root_ide_package_.battle.domain.BattleMother
+            battle.domain.BattleMother
                 .battle(players = listOf("player-1", "player-2"))
                 .toDto(),
         )
@@ -332,17 +308,15 @@ class ProcessTileSelectedTest {
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         assertThat(storedHud.castTile).isEqualTo(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(1, 1),
+            tile(1, 1),
         )
         assertThat(storedHud.enemyBattleUnitId).isNull()
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelfAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(1, 1),
+                    tile(1, 1),
             ),
         )
     }
@@ -351,22 +325,20 @@ class ProcessTileSelectedTest {
     fun `should preview the enemy ability cast when the selected tile is occupied by an enemy battle unit`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
+            displayAbilityCastRange(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(1, 1),
+                        tile(1, 1),
                     ),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            _root_ide_package_.battle.domain.BattleMother
+            battle.domain.BattleMother
                 .battle(players = listOf("player-1", "player-2"))
                 .toDto(),
         )
@@ -376,17 +348,15 @@ class ProcessTileSelectedTest {
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         assertThat(storedHud.castTile).isEqualTo(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(1, 1),
+            tile(1, 1),
         )
         assertThat(storedHud.enemyBattleUnitId).isEqualTo("enemy-battle-unit-1")
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(1, 1),
+                    tile(1, 1),
                 enemyBattleUnitId = "enemy-battle-unit-1",
             ),
         )
@@ -396,22 +366,20 @@ class ProcessTileSelectedTest {
     fun `should go idle when the selected tile is not a cast position`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
+            displayAbilityCastRange(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(1, 1),
+                        tile(1, 1),
                     ),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            _root_ide_package_.battle.domain.BattleMother
+            battle.domain.BattleMother
                 .battle(players = listOf("player-1", "player-2"))
                 .toDto(),
         )
@@ -419,8 +387,7 @@ class ProcessTileSelectedTest {
         processTileSelected(4, 4)
         // Then
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -428,22 +395,20 @@ class ProcessTileSelectedTest {
     fun `should go idle when the caster is not the current player`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
+            displayAbilityCastRange(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast =
                     setOf(
-                        _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                            .tile(1, 1),
+                        tile(1, 1),
                     ),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            _root_ide_package_.battle.domain.BattleMother
+            battle.domain.BattleMother
                 .battle(players = listOf("player-1", "player-2"))
                 .toDto()
                 .copy(currentPlayerTurn = "player-2"),
@@ -452,8 +417,7 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -461,8 +425,7 @@ class ProcessTileSelectedTest {
     fun `should do nothing when no battle exists`() {
         // Given
         val hud =
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .displayAbilityCastRange()
+            displayAbilityCastRange()
         battlefieldHudRepository.create(hud)
         whenever(searchBattleUnitById(any())).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(null)

@@ -2,7 +2,7 @@ package battlefield.usecases.commands
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
 import battlefield.domain.BattlefieldEvent
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.terrainId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import shared.domain.FakeEventBus
@@ -10,7 +10,7 @@ import shared.domain.assertThat
 
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val initializeBattlefield =
         InitializeBattlefield(
             battlefieldRepository = battlefieldRepository,
@@ -25,8 +25,7 @@ class InitializeBattlefieldTest {
         val tiles =
             List(rows) {
                 List(columns) {
-                    _root_ide_package_.battlefield.domain.BattlefieldMother
-                        .terrainId()
+                    terrainId()
                 }
             }
         // When
@@ -39,8 +38,7 @@ class InitializeBattlefieldTest {
         assertThat(storedBattlefield.tiles).hasSize(rows * columns)
         assertThat(storedBattlefield.tiles.values)
             .allSatisfy { tile -> assertThat(tile.battleUnitId).isNull() }
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldEvent.BattlefieldCreated)
     }
 
@@ -48,7 +46,7 @@ class InitializeBattlefieldTest {
     fun `should not create battlefield when a battlefield already exists`() {
         // Given
         val existingBattlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
+            battlefield.domain.BattlefieldMother
                 .battlefield()
         battlefieldRepository.create(existingBattlefield)
         // When

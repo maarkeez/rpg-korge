@@ -1,5 +1,7 @@
 package battle.domain
 
+import battle.domain.BattleMother.battle
+import battle.domain.BattleMother.finishedBattle
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -45,7 +47,7 @@ class BattleTest {
         fun `should expose the current player turn and round when converted to dto`() {
             // Given
             val players = listOf("player-1", "player-2")
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val result = battle.toDto()
             // Then
@@ -59,7 +61,7 @@ class BattleTest {
         fun `should increment the round and start the first player turn when a battle exists`() {
             // Given
             val players = listOf("player-1", "player-2")
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val nextBattle = battle.startNextRound()
             // Then
@@ -75,7 +77,7 @@ class BattleTest {
         fun `should start the next player turn when another player remains in the queue`() {
             // Given
             val players = listOf("player-1", "player-2")
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val nextBattle = battle.finishPlayerTurn()
             // Then
@@ -89,8 +91,7 @@ class BattleTest {
             // Given
             val players = listOf("player-1", "player-2")
             val battle =
-                BattleMother
-                    .battle(players)
+                battle(players)
                     .finishPlayerTurn()
                     .pullEvents()
                     .second
@@ -109,7 +110,7 @@ class BattleTest {
         fun `should be finished when only one player remains`() {
             // Given
             val players = listOf("player-1", "player-2")
-            val battle = BattleMother.battle(players).defeatPlayer(players[1])
+            val battle = battle(players).defeatPlayer(players[1])
             // When
             val result = battle.isBattleFinished()
             // Then
@@ -120,7 +121,7 @@ class BattleTest {
         fun `should not be finished when more than one player remains`() {
             // Given
             val players = listOf("player-1", "player-2")
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val result = battle.isBattleFinished()
             // Then
@@ -135,7 +136,7 @@ class BattleTest {
             // Given
             val players = listOf("player-1", "player-2")
             val winner = players[1]
-            val battle = BattleMother.finishedBattle(players)
+            val battle = finishedBattle(players)
             // When
             val finishedBattle = battle.finishBattle()
             // Then
@@ -151,7 +152,7 @@ class BattleTest {
             // Given
             val players = listOf("player-1", "player-2")
             val defeatedPlayer = players[1]
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val nextBattle = battle.defeatPlayer(defeatedPlayer)
             // Then
@@ -165,7 +166,7 @@ class BattleTest {
             // Given
             val players = listOf("player-1", "player-2")
             val defeatedPlayer = players.first()
-            val battle = BattleMother.battle(players)
+            val battle = battle(players)
             // When
             val nextBattle = battle.defeatPlayer(defeatedPlayer)
             // Then
@@ -192,7 +193,7 @@ class BattleTest {
         @Test
         fun `should not pull events when there are no pending events`() {
             // Given
-            val battle = BattleMother.battle()
+            val battle = battle()
             // When
             val (events, _) = battle.pullEvents()
             // Then

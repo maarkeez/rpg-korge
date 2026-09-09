@@ -1,7 +1,7 @@
 package battleunit.usecases.commands
 
 import ability.domain.Ability
-import ability.domain.AbilityMother
+import ability.domain.AbilityMother.ability
 import ability.usecases.queries.SearchAbilityById
 import battlefield.usecases.queries.SearchOccupant
 import battlefield.usecases.queries.SearchPosition
@@ -9,17 +9,18 @@ import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import battleunit.domain.BattleUnitEvent
-import battleunit.domain.BattleUnitMother
-import effect.domain.EffectMother
+import battleunit.domain.BattleUnitMother.battleUnit
+import effect.domain.EffectMother.effect
 import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import player.domain.PlayerMother
+import player.domain.PlayerMother.player
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 import unit.usecases.queries.SearchUnitById
 
 class ReceiveAbilityEffectsTest {
@@ -29,7 +30,7 @@ class ReceiveAbilityEffectsTest {
     private val searchUnitById: SearchUnitById = mock()
     private val searchPosition: SearchPosition = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val receiveAbilityEffects =
         ReceiveAbilityEffects(
             searchAbilityById = searchAbilityById,
@@ -45,26 +46,14 @@ class ReceiveAbilityEffectsTest {
     fun `should apply immediate effect when the ability targets self`() {
         // Given
         val effectId = "effect-1"
-        val effect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect(id = effectId, power = 3, applicationType = "IMMEDIATELY")
-                .toDto()
-        val unit =
-            _root_ide_package_.unit.domain.UnitMother
-                .unit(healthPoints = 10)
-                .toDto()
-        val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
-                .toDto()
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(unit = unit, player = player)
+        val effect = effect(id = effectId, power = 3, applicationType = "IMMEDIATELY").toDto()
+        val unit = unit(healthPoints = 10).toDto()
+        val player = player(id = "player-1").toDto()
+        val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchAbilityById("ability-1")).thenReturn(
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf(effectId))
+            ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf(effectId))
                 .toDto(),
         )
         whenever(searchEffectById(effectId)).thenReturn(effect)
@@ -75,7 +64,7 @@ class ReceiveAbilityEffectsTest {
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
         assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.EffectReceived(battleUnitId, effectId),
             BattleUnitEvent.BattleUnitDamaged(battleUnitId),
         )
@@ -84,14 +73,12 @@ class ReceiveAbilityEffectsTest {
     @Test
     fun `should throw ability does not exist when the ability is unknown`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            catchThrowable {
                 receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
             }
         // Then
@@ -101,24 +88,20 @@ class ReceiveAbilityEffectsTest {
     @Test
     fun `should throw failed to receive error when the self tile has no occupant`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("ability-1")).thenReturn(
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf("effect-1"))
+            ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf("effect-1"))
                 .toDto(),
         )
         whenever(searchEffectById("effect-1")).thenReturn(
-            _root_ide_package_.effect.domain.EffectMother
-                .effect(id = "effect-1")
+            effect(id = "effect-1")
                 .toDto(),
         )
         whenever(searchOccupant(0, 0)).thenReturn(null)
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            catchThrowable {
                 receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
             }
         // Then

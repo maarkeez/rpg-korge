@@ -1,8 +1,8 @@
 package ability.usecases.queries
 
 import ability.adapters.storage.InMemoryAbilityRepository
-import ability.domain.AbilityMother
 import ability.domain.AbilityMother.ability
+import ability.domain.AbilityMother.id
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -13,9 +13,7 @@ class SearchAbilityByIdTest {
     @Test
     fun `should return ability when it exists`() {
         // Given
-        val ability =
-            _root_ide_package_.ability.domain.AbilityMother
-                .ability()
+        val ability = ability()
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)
         // When
@@ -27,9 +25,7 @@ class SearchAbilityByIdTest {
     @Test
     fun `should return null when ability does not exist`() {
         // Given
-        val unknownAbilityId =
-            _root_ide_package_.ability.domain.AbilityMother
-                .id()
+        val unknownAbilityId = id()
         // When
         val storedAbility = searchAbilityById(unknownAbilityId)
         // Then

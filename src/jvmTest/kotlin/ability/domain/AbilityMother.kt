@@ -34,8 +34,7 @@ object AbilityMother {
 
     fun effects() =
         List(Random.nextInt(1, 4)) {
-            _root_ide_package_.effect.domain.EffectMother
-                .effectId()
+            effectId()
         }
 
     fun targetPattern() =

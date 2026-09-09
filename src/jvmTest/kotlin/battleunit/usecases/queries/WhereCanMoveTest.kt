@@ -3,12 +3,12 @@ package battleunit.usecases.queries
 import battlefield.domain.Battlefield.Dto.PositionDto
 import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class WhereCanMoveTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -19,14 +19,7 @@ class WhereCanMoveTest {
     @Test
     fun `should return positions that can be moved to when the battle unit can move`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(
-                    unit =
-                        _root_ide_package_.unit.domain.UnitMother
-                            .unit(movementRange = 2)
-                            .toDto(),
-                )
+        val battleUnit = battleUnit(unit = unit(movementRange = 2).toDto())
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         val firstPosition = PositionDto(0, 1)

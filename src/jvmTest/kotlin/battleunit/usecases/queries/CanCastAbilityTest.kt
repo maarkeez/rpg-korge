@@ -1,14 +1,12 @@
 package battleunit.usecases.queries
 
-import ability.domain.AbilityMother
 import ability.usecases.queries.SearchAbilityById
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import unit.domain.UnitMother
 
 class CanCastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -19,13 +17,13 @@ class CanCastAbilityTest {
     fun `should return true when the battle unit can cast the ability`() {
         // Given
         val ability =
-            _root_ide_package_.ability.domain.AbilityMother
+            ability.domain.AbilityMother
                 .ability(id = "ability-1", cost = 0, cooldown = 0)
                 .toDto()
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 unit =
-                    _root_ide_package_.unit.domain.UnitMother
+                    unit.domain.UnitMother
                         .unit(abilities = listOf("ability-1"), manaPoints = 10)
                         .toDto(),
             )
@@ -40,9 +38,7 @@ class CanCastAbilityTest {
     @Test
     fun `should return false when the ability does not exist`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
@@ -55,13 +51,13 @@ class CanCastAbilityTest {
     fun `should return false when the battle unit does not have the ability`() {
         // Given
         val ability =
-            _root_ide_package_.ability.domain.AbilityMother
+            ability.domain.AbilityMother
                 .ability(id = "ability-1")
                 .toDto()
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 unit =
-                    _root_ide_package_.unit.domain.UnitMother
+                    unit.domain.UnitMother
                         .unit(abilities = listOf("other-ability"), manaPoints = 10)
                         .toDto(),
             )
@@ -77,7 +73,7 @@ class CanCastAbilityTest {
     fun `should return false when the battle unit does not exist`() {
         // Given
         whenever(searchAbilityById("ability-1")).thenReturn(
-            _root_ide_package_.ability.domain.AbilityMother
+            ability.domain.AbilityMother
                 .ability()
                 .toDto(),
         )

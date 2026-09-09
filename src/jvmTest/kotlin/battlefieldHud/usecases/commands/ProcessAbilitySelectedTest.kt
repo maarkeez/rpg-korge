@@ -1,6 +1,8 @@
 package battlefieldHud.usecases.commands
 
-import battlefieldHud.domain.BattlefieldHudMother
+import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
+import battlefieldHud.domain.BattlefieldHudMother.tile
 import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.WhereCanCast
@@ -15,6 +17,7 @@ import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import screen.battlefieldHud.domain.BattlefieldHudError
 import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.usecases.commands.ProcessAbilitySelected
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
@@ -23,9 +26,9 @@ class ProcessAbilitySelectedTest {
     private val canCastAbility: CanCastAbility = mock()
     private val whereCanCast: WhereCanCast = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val processAbilitySelected =
-        _root_ide_package_.screen.battlefieldHud.usecases.commands.ProcessAbilitySelected(
+        ProcessAbilitySelected(
             battleUnitApi = battleUnitApi,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
@@ -42,16 +45,13 @@ class ProcessAbilitySelectedTest {
         // Given
         val tilesWhereCanCast =
             setOf(
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(1, 1),
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(2, 2),
+                tile(1, 1),
+                tile(2, 2),
             )
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange(
+            displayMovementRange(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
             ),
         )
@@ -64,11 +64,10 @@ class ProcessAbilitySelectedTest {
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
         assertThat(storedHud.abilityId).isEqualTo("ability-1")
         assertThat(storedHud.tilesWhereCanCast).isEqualTo(tilesWhereCanCast)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = tilesWhereCanCast,
@@ -80,8 +79,7 @@ class ProcessAbilitySelectedTest {
     fun `should not select the ability when the battle unit cannot cast`() {
         // Given
         val hud =
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .displayMovementRange(battleUnitId = "battle-unit-1")
+            displayMovementRange(battleUnitId = "battle-unit-1")
         battlefieldHudRepository.create(hud)
         whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(false)
         // When
@@ -96,14 +94,12 @@ class ProcessAbilitySelectedTest {
         // Given
         val tilesWhereCanBeMoved =
             setOf(
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(0, 1),
+                tile(0, 1),
             )
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
+            displayAbilityCastRange(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
@@ -114,16 +110,14 @@ class ProcessAbilitySelectedTest {
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
         assertThat(storedHud.tile).isEqualTo(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                .tile(0, 0),
+            tile(0, 0),
         )
         assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.AbilityDeselected(abilityId = "ability-1"),
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
@@ -135,14 +129,12 @@ class ProcessAbilitySelectedTest {
         // Given
         val newTilesWhereCanCast =
             setOf(
-                _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                    .tile(2, 2),
+                tile(2, 2),
             )
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange(
+            displayAbilityCastRange(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
             ),
@@ -155,11 +147,10 @@ class ProcessAbilitySelectedTest {
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
         assertThat(storedHud.abilityId).isEqualTo("ability-2")
         assertThat(storedHud.tilesWhereCanCast).isEqualTo(newTilesWhereCanCast)
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
-                    _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
-                        .tile(0, 0),
+                    tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-2",
                 tilesWhereCanCast = newTilesWhereCanCast,
@@ -171,7 +162,7 @@ class ProcessAbilitySelectedTest {
     fun `should throw an invalid hud state error when the hud is idle`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .idle(),
         )
         // When
@@ -184,7 +175,7 @@ class ProcessAbilitySelectedTest {
     fun `should throw an invalid hud state error when the hud is previewing the ability cast`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastPreview(),
         )
         // When

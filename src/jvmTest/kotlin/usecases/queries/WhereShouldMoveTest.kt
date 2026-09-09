@@ -3,18 +3,19 @@ package usecases.queries
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchPosition
 import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.queries.SearchBattleUnitById
 import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
 import battleunit.usecases.queries.WhereCanMove
+import cpuBrain.usecases.queries.WhereShouldMove
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import player.domain.Player
-import player.domain.PlayerMother
+import player.domain.PlayerMother.player
 import player.usecases.queries.SearchEnemyPlayer
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 import unit.usecases.queries.SearchUnitById
 
 class WhereShouldMoveTest {
@@ -25,7 +26,7 @@ class WhereShouldMoveTest {
     private val searchEnemyPlayer: SearchEnemyPlayer = mock()
     private val searchUnitById: SearchUnitById = mock()
     private val whereShouldMove =
-        _root_ide_package_.cpuBrain.usecases.queries.WhereShouldMove(
+        WhereShouldMove(
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
             whereCanMove = whereCanMove,
             searchBattleUnitById = searchBattleUnitById,
@@ -34,29 +35,19 @@ class WhereShouldMoveTest {
             searchUnitById = searchUnitById,
         )
 
-    private val player =
-        _root_ide_package_.player.domain.PlayerMother
-            .player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
-    private val enemyPlayer =
-        _root_ide_package_.player.domain.PlayerMother
-            .player(id = "player-2")
-    private val unit =
-        _root_ide_package_.unit.domain.UnitMother
-            .unit(id = "unit-1", healthPoints = 10)
+    private val player = player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
+    private val enemyPlayer = player(id = "player-2")
+    private val unit = unit(id = "unit-1", healthPoints = 10)
 
     private fun battleUnitDto(
         id: String,
         playerId: String,
         remainingHealthPoints: Int,
     ): BattleUnit.Dto =
-        _root_ide_package_.battleunit.domain.BattleUnitMother
-            .battleUnit(
-                unit = unit.toDto(),
-                player =
-                    _root_ide_package_.player.domain.PlayerMother
-                        .player(id = playerId)
-                        .toDto(),
-            ).toDto()
+        battleUnit(
+            unit = unit.toDto(),
+            player = player(id = playerId).toDto(),
+        ).toDto()
             .copy(id = id, remainingHealthPoints = remainingHealthPoints)
 
     private fun position(

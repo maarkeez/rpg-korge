@@ -2,24 +2,24 @@ package battleunit.usecases.commands
 
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitEvent
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import effect.domain.EffectMother
+import effect.domain.EffectMother.effect
 import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import player.domain.PlayerMother
+import player.domain.PlayerMother.player
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.UnitMother
+import unit.domain.UnitMother.unit
 
 class ApplyOnTurnStartedEffectsTest {
     private val searchEffectById: SearchEffectById = mock()
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val applyOnTurnStartedEffects =
         ApplyOnTurnStartedEffects(
             searchEffectById = searchEffectById,
@@ -32,21 +32,11 @@ class ApplyOnTurnStartedEffectsTest {
     fun `should apply delayed effect when the battle unit has a delayed ongoing effect`() {
         // Given
         val effectId = "effect-1"
-        val effect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect(id = effectId, power = 3, applicationType = "ON_TURN_STARTED")
-                .toDto()
-        val unit =
-            _root_ide_package_.unit.domain.UnitMother
-                .unit(healthPoints = 10)
-                .toDto()
-        val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
-                .toDto()
+        val effect = effect(id = effectId, power = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val unit = unit(healthPoints = 10).toDto()
+        val player = player(id = "player-1").toDto()
         val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(unit = unit, player = player)
+            battleUnit(unit = unit, player = player)
                 .receiveDelayedEffect(effectId = effectId, turnsLeft = 1)
                 .pullEvents()
                 .second
@@ -58,8 +48,7 @@ class ApplyOnTurnStartedEffectsTest {
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
         assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id))
     }
 
@@ -76,9 +65,7 @@ class ApplyOnTurnStartedEffectsTest {
     @Test
     fun `should not apply any effect when the battle unit has no delayed ongoing effects`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit.toDto()))
         // When

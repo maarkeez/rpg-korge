@@ -1,7 +1,7 @@
 package battleunit.usecases.queries
 
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -12,9 +12,7 @@ class SearchBattleUnitByIdTest {
     @Test
     fun `should return battle unit when it exists`() {
         // Given
-        val battleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit()
+        val battleUnit = battleUnit()
         battleUnitRepository.create(battleUnit)
         // When
         val result = searchBattleUnitById(battleUnit.toDto().id)

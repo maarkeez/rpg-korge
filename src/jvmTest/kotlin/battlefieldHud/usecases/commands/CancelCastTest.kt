@@ -1,6 +1,5 @@
 package battlefieldHud.usecases.commands
 
-import battlefieldHud.domain.BattlefieldHudMother
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -8,14 +7,15 @@ import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import screen.battlefieldHud.domain.BattlefieldHud.Idle
 import screen.battlefieldHud.domain.BattlefieldHudError
 import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.usecases.commands.CancelCast
 import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class CancelCastTest {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val cancelCast =
-        _root_ide_package_.screen.battlefieldHud.usecases.commands.CancelCast(
+        CancelCast(
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
@@ -24,15 +24,14 @@ class CancelCastTest {
     fun `should cancel the cast and go idle when the hud is previewing the ability cast`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastPreview(),
         )
         // When
         cancelCast()
         // Then
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
@@ -40,7 +39,7 @@ class CancelCastTest {
     fun `should throw an invalid hud state error when the hud is idle`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .idle(),
         )
         // When
@@ -53,7 +52,7 @@ class CancelCastTest {
     fun `should throw an invalid hud state error when the hud is displaying the movement range`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayMovementRange(),
         )
         // When
@@ -66,7 +65,7 @@ class CancelCastTest {
     fun `should throw an invalid hud state error when the hud is displaying the ability cast range`() {
         // Given
         battlefieldHudRepository.create(
-            _root_ide_package_.battlefieldHud.domain.BattlefieldHudMother
+            battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastRange(),
         )
         // When

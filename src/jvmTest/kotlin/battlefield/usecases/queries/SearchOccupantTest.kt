@@ -1,7 +1,7 @@
 package battlefield.usecases.queries
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -14,8 +14,7 @@ class SearchOccupantTest {
         // Given
         val battleUnitId = "battle-unit-1"
         val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+            battlefield()
                 .occupy(1, 1, battleUnitId)
                 .pullEvents()
                 .second
@@ -29,10 +28,7 @@ class SearchOccupantTest {
     @Test
     fun `should return null when the tile is vacant`() {
         // Given
-        battlefieldRepository.create(
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield(),
-        )
+        battlefieldRepository.create(battlefield())
         // When
         val result = searchOccupant(1, 1)
         // Then

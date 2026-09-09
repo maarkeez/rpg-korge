@@ -14,7 +14,7 @@ import shared.domain.assertThat
 
 class DefeatPlayerTest {
     private val battleRepository = InMemoryBattleRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val hasAllBattleUnitsDefeated: HasAllBattleUnitsDefeated = mock()
     private val defeatPlayer =
         DefeatPlayer(
@@ -28,7 +28,7 @@ class DefeatPlayerTest {
         // Given
         val players = listOf("player-1", "player-2")
         battleRepository.create(
-            _root_ide_package_.battle.domain.BattleMother
+            BattleMother
                 .battle(players),
         )
         val defeatedPlayer = players[1]
@@ -39,8 +39,7 @@ class DefeatPlayerTest {
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
-        _root_ide_package_.shared.domain
-            .assertThat(eventBus)
+        assertThat(eventBus)
             .hasPublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
 
@@ -49,7 +48,7 @@ class DefeatPlayerTest {
         // Given
         val players = listOf("player-1", "player-2")
         battleRepository.create(
-            _root_ide_package_.battle.domain.BattleMother
+            BattleMother
                 .battle(players),
         )
         val defeatedPlayer = players[1]

@@ -1,11 +1,11 @@
 package battleunit.usecases.queries
 
 import battleunit.adapters.storage.InMemoryBattleUnitRepository
-import battleunit.domain.BattleUnitMother
+import battleunit.domain.BattleUnitMother.battleUnit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.domain.PlayerMother
-import unit.domain.UnitMother
+import player.domain.PlayerMother.player
+import unit.domain.UnitMother.unit
 
 class SearchBattleUnitsByPlayerIdTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -15,14 +15,11 @@ class SearchBattleUnitsByPlayerIdTest {
     fun `should return battle units when the player has battle units`() {
         // Given
         val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
+            player(id = "player-1")
         val firstBattleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(player = player.toDto())
+            battleUnit(player = player.toDto())
         val secondBattleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother
-                .battleUnit(player = player.toDto())
+            battleUnit(player = player.toDto())
         battleUnitRepository.create(firstBattleUnit)
         battleUnitRepository.create(secondBattleUnit)
         // When
@@ -35,24 +32,16 @@ class SearchBattleUnitsByPlayerIdTest {
     @Test
     fun `should not return defeated battle units when the player has defeated battle units`() {
         // Given
-        val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
+        val player = player(id = "player-1")
         val aliveBattleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 player = player.toDto(),
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(healthPoints = 10)
-                        .toDto(),
+                unit = unit(healthPoints = 10).toDto(),
             )
         val defeatedBattleUnit =
-            _root_ide_package_.battleunit.domain.BattleUnitMother.battleUnit(
+            battleUnit(
                 player = player.toDto(),
-                unit =
-                    _root_ide_package_.unit.domain.UnitMother
-                        .unit(healthPoints = 0)
-                        .toDto(),
+                unit = unit(healthPoints = 0).toDto(),
             )
         battleUnitRepository.create(aliveBattleUnit)
         battleUnitRepository.create(defeatedBattleUnit)

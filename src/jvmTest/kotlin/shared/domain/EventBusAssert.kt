@@ -7,7 +7,7 @@ class EventBusAssert(
     actual: shared.domain.FakeEventBus?,
 ) : AbstractAssert<shared.domain.EventBusAssert, shared.domain.FakeEventBus>(
         actual,
-        _root_ide_package_.shared.domain.EventBusAssert::class.java,
+        EventBusAssert::class.java,
     ) {
     fun hasPublishedEvents(vararg expected: DomainEvent): shared.domain.EventBusAssert {
         isNotNull
@@ -19,4 +19,4 @@ class EventBusAssert(
     }
 }
 
-fun assertThat(eventBus: shared.domain.FakeEventBus): shared.domain.EventBusAssert = _root_ide_package_.shared.domain.EventBusAssert(eventBus)
+fun assertThat(eventBus: shared.domain.FakeEventBus): shared.domain.EventBusAssert = EventBusAssert(eventBus)

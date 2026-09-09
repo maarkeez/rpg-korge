@@ -12,12 +12,8 @@ class SearchEnemyPlayerTest {
     @Test
     fun `should return enemy player when another player exists`() {
         // Given
-        val player =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-1")
-        val enemyPlayer =
-            _root_ide_package_.player.domain.PlayerMother
-                .player(id = "player-2")
+        val player = player(id = "player-1")
+        val enemyPlayer = player(id = "player-2")
         playerRepository.create(player)
         playerRepository.create(enemyPlayer)
         // When

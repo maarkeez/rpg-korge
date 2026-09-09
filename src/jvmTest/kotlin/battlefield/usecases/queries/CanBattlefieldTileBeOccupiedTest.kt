@@ -1,7 +1,7 @@
 package battlefield.usecases.queries
 
 import battlefield.adapters.storage.InMemoryBattlefieldRepository
-import battlefield.domain.BattlefieldMother
+import battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -13,8 +13,7 @@ class CanBattlefieldTileBeOccupiedTest {
     fun `should return true when the tile is vacant and within boundaries`() {
         // Given
         battlefieldRepository.create(
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield(),
+            battlefield(),
         )
         // When
         val result = canBattlefieldTileBeOccupied(1, 1)
@@ -26,8 +25,7 @@ class CanBattlefieldTileBeOccupiedTest {
     fun `should return false when the tile is occupied`() {
         // Given
         val battlefield =
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield()
+            battlefield()
                 .occupy(1, 1, "battle-unit-1")
                 .pullEvents()
                 .second
@@ -42,8 +40,7 @@ class CanBattlefieldTileBeOccupiedTest {
     fun `should return false when the tile is out of boundaries`() {
         // Given
         battlefieldRepository.create(
-            _root_ide_package_.battlefield.domain.BattlefieldMother
-                .battlefield(),
+            battlefield(),
         )
         // When
         val result = canBattlefieldTileBeOccupied(5, 5)

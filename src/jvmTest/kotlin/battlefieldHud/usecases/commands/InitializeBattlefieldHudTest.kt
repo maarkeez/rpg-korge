@@ -4,11 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import screen.battlefieldHud.domain.BattlefieldHud
+import screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud
 
 class InitializeBattlefieldHudTest {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val initializeBattlefieldHud =
-        _root_ide_package_.screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud(
+        InitializeBattlefieldHud(
             battlefieldHudRepository = battlefieldHudRepository,
         )
 

@@ -21,8 +21,7 @@ class AbilityTest {
         fun `should create ability when the dto is valid`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
             // When
             val createdAbility = Ability.create(dto = dto)
@@ -34,8 +33,7 @@ class AbilityTest {
         fun `should fail when the id is blank`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(id = "  ")
             // When
@@ -48,8 +46,7 @@ class AbilityTest {
         fun `should fail when the name is blank`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(name = "  ")
             // When
@@ -62,8 +59,7 @@ class AbilityTest {
         fun `should fail when the name is longer than 50 characters`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(name = "a".repeat(51))
             // When
@@ -76,8 +72,7 @@ class AbilityTest {
         fun `should fail when the cost is negative`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(cost = -1)
             // When
@@ -90,8 +85,7 @@ class AbilityTest {
         fun `should fail when the cost is above the limit`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(cost = 1000)
             // When
@@ -104,8 +98,7 @@ class AbilityTest {
         fun `should fail when the cooldown is negative`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(cooldown = -1)
             // When
@@ -118,8 +111,7 @@ class AbilityTest {
         fun `should fail when the cooldown is above the limit`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(cooldown = 100)
             // When
@@ -132,8 +124,7 @@ class AbilityTest {
         fun `should fail when the effects are empty`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(effects = emptyList())
             // When
@@ -146,8 +137,7 @@ class AbilityTest {
         fun `should fail when the effects are above the limit`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
                     .copy(effects = List(4) { "effect-$it" })
             // When
@@ -163,8 +153,7 @@ class AbilityTest {
         fun `should expose the ability data when converted to dto`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .toDto()
             val createdAbility = Ability.create(dto = dto)
             // When
@@ -177,8 +166,7 @@ class AbilityTest {
         fun `should expose the target pattern as its dto representation`() {
             // Given
             val dto =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability(targetPattern = Ability.Dto.TargetPatternDto.SELF)
+                ability(targetPattern = Ability.Dto.TargetPatternDto.SELF)
                     .toDto()
             val createdAbility = Ability.create(dto = dto)
             // When
@@ -194,8 +182,7 @@ class AbilityTest {
         fun `should pull the created event when the ability has pending events`() {
             // Given
             val createdAbility =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
             // When
             val (events, _) = createdAbility.pullEvents()
             // Then
@@ -206,8 +193,7 @@ class AbilityTest {
         fun `should not pull events when there are no pending events`() {
             // Given
             val (events, updatedAbility) =
-                _root_ide_package_.ability.domain.AbilityMother
-                    .ability()
+                ability()
                     .pullEvents()
             // When
             val (pulledEvents, _) = updatedAbility.pullEvents()

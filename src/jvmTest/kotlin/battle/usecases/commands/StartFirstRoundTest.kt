@@ -11,7 +11,7 @@ import shared.domain.assertThat
 
 class StartFirstRoundTest {
     private val battleRepository = InMemoryBattleRepository()
-    private val eventBus = _root_ide_package_.shared.domain.FakeEventBus()
+    private val eventBus = FakeEventBus()
     private val startFirstRound =
         StartFirstRound(
             battleRepository = battleRepository,
@@ -28,7 +28,7 @@ class StartFirstRoundTest {
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
             .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
-        _root_ide_package_.shared.domain.assertThat(eventBus).hasPublishedEvents(
+        assertThat(eventBus).hasPublishedEvents(
             BattleEvent.BattleStarted,
             BattleEvent.PlayerTurnStarted(players.first()),
         )

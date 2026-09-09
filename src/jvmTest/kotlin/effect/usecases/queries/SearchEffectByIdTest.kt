@@ -1,8 +1,8 @@
 package effect.usecases.queries
 
 import effect.adapters.storage.InMemoryEffectRepository
-import effect.domain.EffectMother
 import effect.domain.EffectMother.effect
+import effect.domain.EffectMother.effectId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -13,9 +13,7 @@ class SearchEffectByIdTest {
     @Test
     fun `should return effect when it exists`() {
         // Given
-        val effect =
-            _root_ide_package_.effect.domain.EffectMother
-                .effect()
+        val effect = effect()
         val effectDto = effect.toDto()
         effectRepository.create(effect)
         // When
@@ -27,9 +25,7 @@ class SearchEffectByIdTest {
     @Test
     fun `should return null when effect does not exist`() {
         // Given
-        val unknownEffectId =
-            _root_ide_package_.effect.domain.EffectMother
-                .effectId()
+        val unknownEffectId = effectId()
         // When
         val storedEffect = searchEffectById(unknownEffectId)
         // Then

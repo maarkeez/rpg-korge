@@ -1,7 +1,7 @@
 package battle.usecases.queries
 
 import battle.adapters.storage.InMemoryBattleRepository
-import battle.domain.BattleMother
+import battle.domain.BattleMother.battle
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -12,9 +12,7 @@ class SearchBattleTest {
     @Test
     fun `should return battle when a battle exists`() {
         // Given
-        val battle =
-            _root_ide_package_.battle.domain.BattleMother
-                .battle()
+        val battle = battle()
         battleRepository.create(battle)
         // When
         val result = searchBattle()
