@@ -16,12 +16,13 @@ class CanMoveTo(
     ): Boolean {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return false
         val currentPosition = searchPosition(battleUnitId) ?: return false
-        val distance = distanceService.manhattanDistance(
-            fromRow = currentPosition.row,
-            fromColumn = currentPosition.column,
-            toRow = moveToRow,
-            toColumn = moveToColumn
-        )
+        val distance =
+            distanceService.manhattanDistance(
+                fromRow = currentPosition.row,
+                fromColumn = currentPosition.column,
+                toRow = moveToRow,
+                toColumn = moveToColumn,
+            )
         return battleUnit.canMoveDistance(distance)
     }
 }

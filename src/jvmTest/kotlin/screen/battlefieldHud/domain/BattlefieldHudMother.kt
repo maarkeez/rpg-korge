@@ -5,10 +5,9 @@ import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import screen.battlefieldHud.domain.BattlefieldHud.Idle
-import kotlin.random.*
+import kotlin.random.Random
 
 object BattlefieldHudMother {
-
     fun idle(): Idle = Idle(emptySet())
 
     fun displayMovementRange(
@@ -59,7 +58,10 @@ object BattlefieldHudMother {
             events = emptySet(),
         )
 
-    fun tile(row: Int, column: Int) = TileDto(row = row, column = column)
+    fun tile(
+        row: Int,
+        column: Int,
+    ) = TileDto(row = row, column = column)
 
     fun battleUnitId() = "battle-unit-${Random.nextInt(1, 10000)}"
 

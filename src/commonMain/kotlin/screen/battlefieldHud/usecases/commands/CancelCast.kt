@@ -1,9 +1,13 @@
 package screen.battlefieldHud.usecases.commands
 
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import screen.battlefieldHud.domain.BattlefieldHud.Idle
+import screen.battlefieldHud.domain.BattlefieldHudError
 import screen.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
-import shared.domain.*
+import screen.battlefieldHud.domain.BattlefieldHudRepository
+import shared.domain.EventBus
 
 class CancelCast(
     private val battlefieldHudRepository: BattlefieldHudRepository,
@@ -11,7 +15,7 @@ class CancelCast(
 ) {
     operator fun invoke() {
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
-        when(battlefieldHud) {
+        when (battlefieldHud) {
             is DisplayAbilityCastPreview -> {
                 val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
@@ -20,7 +24,8 @@ class CancelCast(
 
             is DisplayAbilityCastRange,
             is DisplayMovementRange,
-            is Idle -> throw BattlefieldHudError.InvalidBattlefieldHudState()
+            is Idle,
+            -> throw BattlefieldHudError.InvalidBattlefieldHudState()
         }
     }
 }

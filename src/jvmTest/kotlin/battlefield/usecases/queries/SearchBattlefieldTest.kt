@@ -1,7 +1,7 @@
 package battlefield.usecases.queries
 
-import battlefield.adapters.storage.*
-import battlefield.domain.*
+import battlefield.adapters.storage.InMemoryBattlefieldRepository
+import battlefield.domain.BattlefieldMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

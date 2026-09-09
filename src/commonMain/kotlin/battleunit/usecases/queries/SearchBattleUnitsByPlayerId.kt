@@ -1,11 +1,14 @@
 package battleunit.usecases.queries
 
-import battleunit.domain.*
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitRepository
 
 class SearchBattleUnitsByPlayerId(
-    private val battleUnitRepository: BattleUnitRepository
+    private val battleUnitRepository: BattleUnitRepository,
 ) {
-    operator fun invoke(playerId: String): List<BattleUnit.Dto> = battleUnitRepository.searchByPlayerId(playerId)
-        .filter { !it.isDefeated() }
-        .map { it.toDto() }
+    operator fun invoke(playerId: String): List<BattleUnit.Dto> =
+        battleUnitRepository
+            .searchByPlayerId(playerId)
+            .filter { !it.isDefeated() }
+            .map { it.toDto() }
 }

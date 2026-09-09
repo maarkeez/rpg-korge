@@ -18,19 +18,22 @@ class MoveBattleUnit(
     ) {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
         val currentPosition = searchPosition(battleUnitId) ?: return
-        val distance = distanceService.manhattanDistance(
-            fromRow = currentPosition.row,
-            fromColumn = currentPosition.column,
-            toRow = moveToRow,
-            toColumn = moveToColumn
-        )
-        val (events, battleUnit) = storedBattleUnit.move(
-            distance = distance,
-            fromRow = currentPosition.row,
-            fromColumn = currentPosition.column,
-            toRow = moveToRow,
-            toColumn = moveToColumn,
-        ).pullEvents()
+        val distance =
+            distanceService.manhattanDistance(
+                fromRow = currentPosition.row,
+                fromColumn = currentPosition.column,
+                toRow = moveToRow,
+                toColumn = moveToColumn,
+            )
+        val (events, battleUnit) =
+            storedBattleUnit
+                .move(
+                    distance = distance,
+                    fromRow = currentPosition.row,
+                    fromColumn = currentPosition.column,
+                    toRow = moveToRow,
+                    toColumn = moveToColumn,
+                ).pullEvents()
         battleUnitRepository.create(battleUnit)
         eventBus.publish(events)
     }

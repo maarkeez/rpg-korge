@@ -1,11 +1,10 @@
 package battleunit.usecases.queries
 
-import battleunit.domain.*
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitRepository
 
 class HasAllBattleUnitsDefeated(
     private val battleUnitRepository: BattleUnitRepository,
 ) {
-    operator fun invoke(playerId: String): Boolean {
-        return battleUnitRepository.searchByPlayerId(playerId).all(BattleUnit::isDefeated)
-    }
+    operator fun invoke(playerId: String): Boolean = battleUnitRepository.searchByPlayerId(playerId).all(BattleUnit::isDefeated)
 }

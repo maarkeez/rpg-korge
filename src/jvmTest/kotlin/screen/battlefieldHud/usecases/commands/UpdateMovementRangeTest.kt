@@ -1,17 +1,19 @@
 package screen.battlefieldHud.usecases.commands
 
-import battlefield.adapters.presentation.*
-import battlefield.domain.*
-import battlefield.usecases.queries.*
+import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.domain.Battlefield
+import battlefield.usecases.queries.SearchPosition
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
-import screen.battlefieldHud.usecases.services.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudMother
+import screen.battlefieldHud.usecases.services.MovementService
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class UpdateMovementRangeTest {
@@ -20,12 +22,13 @@ class UpdateMovementRangeTest {
     private val movementService: MovementService = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
-    private val updateMovementRange = UpdateMovementRange(
-        battlefieldApi = battlefieldApi,
-        battlefieldHudRepository = battlefieldHudRepository,
-        eventBus = eventBus,
-        movementService = movementService,
-    )
+    private val updateMovementRange =
+        UpdateMovementRange(
+            battlefieldApi = battlefieldApi,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            movementService = movementService,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -40,7 +43,7 @@ class UpdateMovementRangeTest {
             BattlefieldHudMother.displayMovementRange(
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
-            )
+            ),
         )
         whenever(searchPosition("battle-unit-1")).thenReturn(Battlefield.Dto.PositionDto(row = 3, column = 4))
         whenever(movementService.tilesWhereCanMove("battle-unit-1")).thenReturn(newTiles)
@@ -55,7 +58,7 @@ class UpdateMovementRangeTest {
                 tile = BattlefieldHudMother.tile(3, 4),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = newTiles,
-            )
+            ),
         )
     }
 

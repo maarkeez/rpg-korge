@@ -1,10 +1,10 @@
 package shared.domain
 
-import effect.domain.*
+import effect.domain.EffectEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.adapters.events.*
-import unit.domain.*
+import shared.adapters.events.InMemoryEventBus
+import unit.domain.UnitEvent
 
 class EventBusTest {
     private val eventBus: EventBus = InMemoryEventBus()

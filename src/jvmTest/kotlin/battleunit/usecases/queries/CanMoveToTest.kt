@@ -1,14 +1,15 @@
 package battleunit.usecases.queries
 
 import battlefield.domain.Battlefield.Dto.PositionDto
-import battlefield.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
-import battleunit.usecases.services.*
+import battlefield.usecases.queries.SearchPosition
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.services.DistanceService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import unit.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import unit.domain.UnitMother
 
 class CanMoveToTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()

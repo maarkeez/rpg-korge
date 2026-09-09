@@ -2,20 +2,23 @@ package player.usecases.commands
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.adapters.storage.*
-import player.domain.*
+import player.adapters.storage.InMemoryPlayerRepository
+import player.domain.Player
+import player.domain.PlayerEvent
+import player.domain.PlayerMother
 import player.domain.PlayerMother.id
 import player.domain.PlayerMother.name
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class RequestPlayerCreationTest {
     private val playerRepository = InMemoryPlayerRepository()
     private val eventBus = FakeEventBus()
-    private val requestPlayerCreation = RequestPlayerCreation(
-        playerRepository = playerRepository,
-        eventBus = eventBus
-    )
+    private val requestPlayerCreation =
+        RequestPlayerCreation(
+            playerRepository = playerRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create human player when player type is human`() {
@@ -52,7 +55,7 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(
             id = existingPlayer.toDto().id,
             name = existingPlayer.toDto().name,
-            type = RequestPlayerCreation.PlayerType.HUMAN
+            type = RequestPlayerCreation.PlayerType.HUMAN,
         )
         // Then
         val storedPlayer = playerRepository.searchById(existingPlayer.toDto().id)?.toDto()

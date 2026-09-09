@@ -4,12 +4,12 @@ import ability.domain.Ability
 import ability.usecases.queries.SearchAbilityById
 import battlefield.usecases.queries.SearchOccupant
 import battlefield.usecases.queries.SearchPosition
-import battleunit.domain.*
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
+import battleunit.domain.BattleUnitRepository
 import effect.domain.Effect
 import effect.usecases.queries.SearchEffectById
-import shared.domain.*
+import shared.domain.EventBus
 import unit.usecases.queries.SearchUnitById
 
 class ReceiveAbilityEffects(
@@ -32,59 +32,65 @@ class ReceiveAbilityEffects(
         val effects = ability.effects.map { effectId -> searchEffectById(effectId) ?: throw FailedToReceiveAbilityEffects() }
         // TODO: Implement other target patterns
         val occupantId = searchOccupant(row, column)
-        if(ability.targetPattern == Ability.Dto.TargetPatternDto.ADJACENT_ENEMY) {
-            if(occupantId == null) throw FailedToReceiveAbilityEffects()
+        if (ability.targetPattern == Ability.Dto.TargetPatternDto.ADJACENT_ENEMY) {
+            if (occupantId == null) throw FailedToReceiveAbilityEffects()
             val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: throw FailedToReceiveAbilityEffects()
             val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
-            if(battleUnit.isSamePlayer(occupantBattleUnit)) throw FailedToReceiveAbilityEffects()
+            if (battleUnit.isSamePlayer(occupantBattleUnit)) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
-        if(ability.targetPattern == Ability.Dto.TargetPatternDto.SELF) {
-            if(occupantId == null) throw FailedToReceiveAbilityEffects()
-            if(occupantId != battleUnitId) throw FailedToReceiveAbilityEffects()
+        if (ability.targetPattern == Ability.Dto.TargetPatternDto.SELF) {
+            if (occupantId == null) throw FailedToReceiveAbilityEffects()
+            if (occupantId != battleUnitId) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
-        if(ability.targetPattern == Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT){
-            if(occupantId != null) throw FailedToReceiveAbilityEffects()
+        if (ability.targetPattern == Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT) {
+            if (occupantId != null) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
-						// TODO: refactor receiveImmediateEffect to handle teleport
-            if(effects.any{effect -> effect.type == Effect.Dto.TypeDto.TELEPORT}){
+            // TODO: refactor receiveImmediateEffect to handle teleport
+            if (effects.any { effect -> effect.type == Effect.Dto.TypeDto.TELEPORT }) {
                 val currentPosition = searchPosition(battleUnitId)!!
-                val (events, updatedBattleUnit) = battleUnit.teleport(
-                    fromRow = currentPosition.row,
-                    fromColumn = currentPosition.column,
-                    toRow = row,
-                    toColumn = column,
-                ).pullEvents()
+                val (events, updatedBattleUnit) =
+                    battleUnit
+                        .teleport(
+                            fromRow = currentPosition.row,
+                            fromColumn = currentPosition.column,
+                            toRow = row,
+                            toColumn = column,
+                        ).pullEvents()
                 battleUnitRepository.update(updatedBattleUnit)
                 eventBus.publish(events)
             }
         }
     }
 
-    private fun receiveAbilityEffects(battleUnitId: String, effects: List<Effect.Dto>) {
+    private fun receiveAbilityEffects(
+        battleUnitId: String,
+        effects: List<Effect.Dto>,
+    ) {
         val occupantBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
         val unit = searchUnitById(occupantBattleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
         // TODO: Implement all the effect logic: Probability, modifiers, applications, etc
-        val (events, updatedBattleUnit) = effects.fold(occupantBattleUnit) { battleUnit, effect ->
-            when (effect.application.type) {
-                "IMMEDIATELY" -> {
-                    battleUnit
-                        .receiveImmediateEffect(effectId = effect.id)
-                        .applyImmediateEffect(effect, unit)
-                }
-                "ON_TURN_STARTED" -> {
-                    battleUnit.receiveDelayedEffect(
-                        effectId = effect.id,
-                        turnsLeft = effect.application.onTurnStarted!!.duration
-                    )
-                }
-                else -> {
-                    throw RuntimeException("Unexpected effect $effect")
-                }
-            }
-
-        }.pullEvents()
+        val (events, updatedBattleUnit) =
+            effects
+                .fold(occupantBattleUnit) { battleUnit, effect ->
+                    when (effect.application.type) {
+                        "IMMEDIATELY" -> {
+                            battleUnit
+                                .receiveImmediateEffect(effectId = effect.id)
+                                .applyImmediateEffect(effect, unit)
+                        }
+                        "ON_TURN_STARTED" -> {
+                            battleUnit.receiveDelayedEffect(
+                                effectId = effect.id,
+                                turnsLeft = effect.application.onTurnStarted!!.duration,
+                            )
+                        }
+                        else -> {
+                            throw RuntimeException("Unexpected effect $effect")
+                        }
+                    }
+                }.pullEvents()
         battleUnitRepository.update(updatedBattleUnit)
         eventBus.publish(events)
     }

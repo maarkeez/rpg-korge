@@ -1,13 +1,12 @@
 package battle.usecases.commands
 
-import battle.domain.*
-import shared.domain.*
+import battle.domain.BattleRepository
+import shared.domain.EventBus
 
 class FinishPlayerTurn(
     private val battleRepository: BattleRepository,
     private val eventBus: EventBus,
 ) {
-
     operator fun invoke() {
         val storedBattle = battleRepository.search() ?: return
         val (events, battle) = storedBattle.finishPlayerTurn().pullEvents()

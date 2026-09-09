@@ -1,9 +1,8 @@
 package shared.domain
 
-import kotlin.reflect.*
+import kotlin.reflect.KClass
 
 class FakeEventBus : EventBus {
-
     private val events = mutableListOf<DomainEvent>()
 
     val publishedEvents: List<DomainEvent>
@@ -23,7 +22,6 @@ class FakeEventBus : EventBus {
 
     override fun <T : DomainEvent> subscribe(
         eventType: KClass<T>,
-        handler: (T) -> Unit
-    ): Subscription =
-        Subscription {}
+        handler: (T) -> Unit,
+    ): Subscription = Subscription {}
 }

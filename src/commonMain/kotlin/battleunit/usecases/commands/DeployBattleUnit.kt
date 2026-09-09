@@ -27,14 +27,16 @@ class DeployBattleUnit(
         val unit = searchUnitById(unitId) ?: throw UnitNotFound()
         val player = searchPlayerById(playerId) ?: throw PlayerNotFound()
         val canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied(deployAtRow, deployAtColumn)
-        if(!canBattlefieldTileBeOccupied) throw BattlefieldTileCanNotBeOccupied()
-        val (events, battleUnit) = BattleUnit.deploy(
-            id = battleUnitId,
-            unit = unit,
-            player = player,
-            deployAtRow = deployAtRow,
-            deployAtColumn = deployAtColumn,
-        ).pullEvents()
+        if (!canBattlefieldTileBeOccupied) throw BattlefieldTileCanNotBeOccupied()
+        val (events, battleUnit) =
+            BattleUnit
+                .deploy(
+                    id = battleUnitId,
+                    unit = unit,
+                    player = player,
+                    deployAtRow = deployAtRow,
+                    deployAtColumn = deployAtColumn,
+                ).pullEvents()
         battleUnitRepository.create(battleUnit)
         eventBus.publish(events)
     }

@@ -2,9 +2,8 @@ package battleunit.adapters.storage
 
 import battleunit.domain.BattleUnit
 import battleunit.domain.BattleUnitRepository
-import kotlin.collections.set
 
-class InMemoryBattleUnitRepository: BattleUnitRepository {
+class InMemoryBattleUnitRepository : BattleUnitRepository {
     private val battleUnits = mutableMapOf<String, BattleUnit>()
 
     override fun create(battleUnit: BattleUnit) {
@@ -17,8 +16,9 @@ class InMemoryBattleUnitRepository: BattleUnitRepository {
 
     override fun searchById(id: String) = battleUnits[id]
 
-    override fun searchByPlayerId(playerId: String) = battleUnits.values
-        .filter { it.toDto().playerId == playerId }
+    override fun searchByPlayerId(playerId: String) =
+        battleUnits.values
+            .filter { it.toDto().playerId == playerId }
 
     override fun searchAll(): List<BattleUnit> = battleUnits.values.toList()
 }

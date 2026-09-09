@@ -8,7 +8,6 @@ class StartFirstRound(
     private val battleRepository: BattleRepository,
     private val eventBus: EventBus,
 ) {
-
     operator fun invoke(players: List<String>) {
         val (events, battle) = Battle.startFirstRound(players).pullEvents()
         battleRepository.create(battle)

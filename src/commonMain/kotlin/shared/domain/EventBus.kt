@@ -3,7 +3,6 @@ package shared.domain
 import kotlin.reflect.KClass
 
 interface EventBus {
-
     fun publish(events: Set<DomainEvent>)
 
     fun publish(event: DomainEvent)
@@ -12,11 +11,8 @@ interface EventBus {
 
     fun <T : DomainEvent> subscribe(
         eventType: KClass<T>,
-        handler: (T) -> Unit
+        handler: (T) -> Unit,
     ): Subscription
 }
 
-inline fun <reified T : DomainEvent> EventBus.subscribe(
-    noinline handler: (T) -> Unit
-): Subscription =
-    subscribe(T::class, handler)
+inline fun <reified T : DomainEvent> EventBus.subscribe(noinline handler: (T) -> Unit): Subscription = subscribe(T::class, handler)

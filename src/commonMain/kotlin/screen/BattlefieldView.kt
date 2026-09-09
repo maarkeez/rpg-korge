@@ -12,15 +12,16 @@ import korlibs.korge.ui.uiGridFill
 import korlibs.korge.view.Container
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.image
-import korlibs.math.geom.*
+import korlibs.math.geom.Size
+import korlibs.math.geom.Spacing
 
-class BattlefieldView: Container() {
-
+class BattlefieldView : Container() {
     companion object {
         const val TERRAIN = "TERRAIN"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
     }
+
     private var delegate: Delegate? = null
     private lateinit var sandBitmap: Bitmap
     private lateinit var knightBitmap: Bitmap
@@ -30,12 +31,13 @@ class BattlefieldView: Container() {
     private lateinit var tileSelection3BitMap: Bitmap
     private lateinit var tileSelectionBitMap: Bitmap
 
-    private val battlefieldGrid = uiGridFill(
-        size= Size(width=384, height=384),
-        spacing = Spacing(0.0,0.0),
-        cols = 0,
-        rows = 0)
-
+    private val battlefieldGrid =
+        uiGridFill(
+            size = Size(width = 384, height = 384),
+            spacing = Spacing(0.0, 0.0),
+            cols = 0,
+            rows = 0,
+        )
 
     init {
         addChild(battlefieldGrid)
@@ -75,34 +77,55 @@ class BattlefieldView: Container() {
         }
     }
 
-    private fun tileName(row: Int, column: Int): String = "row-$row-column-$column"
+    private fun tileName(
+        row: Int,
+        column: Int,
+    ): String = "row-$row-column-$column"
 
-    fun displayKnightBattleUnit(row: Int, column: Int) {
+    fun displayKnightBattleUnit(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.addImage(knightBitmap, BATTLE_UNIT)
     }
 
-    fun displayRatBattleUnit(row: Int, column: Int) {
+    fun displayRatBattleUnit(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.addImage(ratBitmap, BATTLE_UNIT)
     }
 
     interface Delegate {
-        fun tileSelected(row: Int, column: Int)
+        fun tileSelected(
+            row: Int,
+            column: Int,
+        )
     }
 
-    fun displayPotentialMovement(row: Int, column: Int) {
+    fun displayPotentialMovement(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.addImage(tileSelection3BitMap, SELECTION)
     }
 
-    fun displayPotentialCast(row: Int, column: Int) {
+    fun displayPotentialCast(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        if(tileButton.findViewByName(SELECTION) != null) return
+        if (tileButton.findViewByName(SELECTION) != null) return
         tileButton.addImage(tileSelection2BitMap, SELECTION)
     }
 
-    fun displayTileSelection(row: Int, column: Int) {
+    fun displayTileSelection(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.findViewByName(SELECTION)?.removeFromParent()
         tileButton.addImage(tileSelectionBitMap, SELECTION)
@@ -115,19 +138,24 @@ class BattlefieldView: Container() {
         }
     }
 
-    fun removeBattleUnit(row: Int, column: Int) {
+    fun removeBattleUnit(
+        row: Int,
+        column: Int,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
     }
 
-    private fun UIButton.addImage(bitmap: Bitmap, viewName: String) {
+    private fun UIButton.addImage(
+        bitmap: Bitmap,
+        viewName: String,
+    ) {
         val button = this
-        button.image(bitmap ){
+        button.image(bitmap) {
             name = viewName
             scale = 3.0
             smoothing = false
             centerOn(button)
         }
     }
-
 }

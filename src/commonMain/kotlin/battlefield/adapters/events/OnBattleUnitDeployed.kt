@@ -1,18 +1,20 @@
 package battlefield.adapters.events
 
-import battlefield.usecases.commands.*
+import battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import battleunit.domain.BattleUnitEvent.BattleUnitDeployed
-import shared.domain.*
+import shared.domain.EventBus
+import shared.domain.subscribe
 
 class OnBattleUnitDeployed(
     updateBattlefieldOccupancy: UpdateBattlefieldOccupancy,
-    eventBus: EventBus
+    eventBus: EventBus,
 ) {
-    val subscription = eventBus.subscribe<BattleUnitDeployed> { event ->
-        updateBattlefieldOccupancy(
-            row = event.row,
-            column = event.column,
-            battleUnitId = event.battleUnitId,
-        )
-    }
+    val subscription =
+        eventBus.subscribe<BattleUnitDeployed> { event ->
+            updateBattlefieldOccupancy(
+                row = event.row,
+                column = event.column,
+                battleUnitId = event.battleUnitId,
+            )
+        }
 }

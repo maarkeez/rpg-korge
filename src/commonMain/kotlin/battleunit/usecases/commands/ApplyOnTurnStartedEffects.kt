@@ -1,9 +1,9 @@
 package battleunit.usecases.commands
 
-import battleunit.domain.*
-import battleunit.usecases.queries.*
-import effect.usecases.queries.*
-import shared.domain.*
+import battleunit.domain.BattleUnitRepository
+import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
+import effect.usecases.queries.SearchEffectById
+import shared.domain.EventBus
 
 class ApplyOnTurnStartedEffects(
     private val searchEffectById: SearchEffectById,
@@ -11,9 +11,7 @@ class ApplyOnTurnStartedEffects(
     private val battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(
-        playerId: String,
-    ) {
+    operator fun invoke(playerId: String) {
         val battleUnits = searchBattleUnitsByPlayerId(playerId).map { battleUnitRepository.searchById(it.id)!! }
         battleUnits
             .filter { battleUnit -> battleUnit.hasDelayedOngoingEffects() }

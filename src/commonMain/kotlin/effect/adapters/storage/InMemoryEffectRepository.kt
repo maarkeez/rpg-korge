@@ -2,7 +2,6 @@ package effect.adapters.storage
 
 import effect.domain.Effect
 import effect.domain.EffectRepository
-import kotlin.collections.set
 
 class InMemoryEffectRepository : EffectRepository {
     private val effects = mutableMapOf<String, Effect>()

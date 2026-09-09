@@ -18,13 +18,14 @@ class BattleSetupApi(
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
 ) {
-    val setupBattle = SetupBattle(
-        playerApi.requestPlayerCreation,
-        battlefieldApi.initializeBattlefield,
-        battleApi.startFirstRound,
-        effectApi.requestEffectCreation,
-        abilityApi.requestAbilityCreation,
-        unitApi.requestUnitCreation,
-        battleUnitApi.deployBattleUnit,
-    )
+    val setupBattle =
+        SetupBattle(
+            playerApi.requestPlayerCreation,
+            battlefieldApi.initializeBattlefield,
+            battleApi.startFirstRound,
+            effectApi.requestEffectCreation,
+            abilityApi.requestAbilityCreation,
+            unitApi.requestUnitCreation,
+            battleUnitApi.deployBattleUnit,
+        )
 }

@@ -3,12 +3,14 @@ package screen
 import korlibs.image.text.TextAlignment
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
+import korlibs.korge.ui.UIContainer
+import korlibs.korge.ui.uiText
+import korlibs.korge.view.setText
+import korlibs.math.geom.Size
 
-class UnitNameView(size: Size): UIContainer(size) {
-
+class UnitNameView(
+    size: Size,
+) : UIContainer(size) {
     private val unitNameLabel = uiText("", size = size)
 
     init {

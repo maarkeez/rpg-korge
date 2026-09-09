@@ -12,37 +12,50 @@ data class Player private constructor(
     private val type: Type,
     private val events: Set<PlayerEvent>,
 ) {
-
     companion object {
-        fun createHuman(id: String, name: String) = Player(
+        fun createHuman(
+            id: String,
+            name: String,
+        ) = Player(
             id = Id(id),
             name = Name(name),
             type = Type.HUMAN,
-            events = setOf(PlayerEvent.PlayerCreated(
-                playerId = id,
-                playerName = name,
-                playerType = Type.HUMAN.toDto()
-            ))
+            events =
+                setOf(
+                    PlayerEvent.PlayerCreated(
+                        playerId = id,
+                        playerName = name,
+                        playerType = Type.HUMAN.toDto(),
+                    ),
+                ),
         )
-        fun createCpu(id: String, name: String) = Player(
+
+        fun createCpu(
+            id: String,
+            name: String,
+        ) = Player(
             id = Id(id),
             name = Name(name),
             type = Type.CPU,
-            events = setOf(PlayerEvent.PlayerCreated(
-                playerId = id,
-                playerName = name,
-                playerType = Type.CPU.toDto()
-            ))
+            events =
+                setOf(
+                    PlayerEvent.PlayerCreated(
+                        playerId = id,
+                        playerName = name,
+                        playerType = Type.CPU.toDto(),
+                    ),
+                ),
         )
     }
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    fun toDto()= Dto(
-        id = id.toDto(),
-        name = name.toDto(),
-        type = type.toDto(),
-    )
+    fun toDto() =
+        Dto(
+            id = id.toDto(),
+            name = name.toDto(),
+            type = type.toDto(),
+        )
 
     data class Dto(
         val id: String,
@@ -51,30 +64,37 @@ data class Player private constructor(
     ) {
         enum class PlayerTypeDto {
             CPU,
-            HUMAN
+            HUMAN,
         }
     }
 
     @JvmInline
-    private value class Id(val value: String){
+    private value class Id(
+        val value: String,
+    ) {
         init {
-            if(value.isEmpty()) throw EmptyPlayerId()
+            if (value.isEmpty()) throw EmptyPlayerId()
         }
+
         fun toDto() = value
     }
+
     @JvmInline
-    private value class Name(val value: String){
-
+    private value class Name(
+        val value: String,
+    ) {
         init {
-            if(value.isEmpty()) throw EmptyPlayerName()
-            if(value.count() > 50) throw PlayerNameLongerThanExpected()
+            if (value.isEmpty()) throw EmptyPlayerName()
+            if (value.count() > 50) throw PlayerNameLongerThanExpected()
         }
 
         fun toDto() = value
     }
+
     private enum class Type {
         CPU,
-        HUMAN;
+        HUMAN,
+        ;
 
         fun toDto() = Dto.PlayerTypeDto.valueOf(name)
     }

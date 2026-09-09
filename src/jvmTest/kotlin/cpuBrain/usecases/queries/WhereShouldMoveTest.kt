@@ -1,16 +1,21 @@
 package cpuBrain.usecases.queries
 
-import battlefield.domain.*
-import battlefield.usecases.queries.*
-import battleunit.domain.*
-import battleunit.usecases.queries.*
+import battlefield.domain.Battlefield
+import battlefield.usecases.queries.SearchPosition
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.queries.SearchBattleUnitById
+import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleunit.usecases.queries.WhereCanMove
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
-import player.usecases.queries.*
-import unit.domain.*
-import unit.usecases.queries.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import player.domain.Player
+import player.domain.PlayerMother
+import player.usecases.queries.SearchEnemyPlayer
+import unit.domain.UnitMother
+import unit.usecases.queries.SearchUnitById
 
 class WhereShouldMoveTest {
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
@@ -19,26 +24,34 @@ class WhereShouldMoveTest {
     private val searchPosition: SearchPosition = mock()
     private val searchEnemyPlayer: SearchEnemyPlayer = mock()
     private val searchUnitById: SearchUnitById = mock()
-    private val whereShouldMove = WhereShouldMove(
-        searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
-        whereCanMove = whereCanMove,
-        searchBattleUnitById = searchBattleUnitById,
-        searchPosition = searchPosition,
-        searchEnemyPlayer = searchEnemyPlayer,
-        searchUnitById = searchUnitById,
-    )
+    private val whereShouldMove =
+        WhereShouldMove(
+            searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
+            whereCanMove = whereCanMove,
+            searchBattleUnitById = searchBattleUnitById,
+            searchPosition = searchPosition,
+            searchEnemyPlayer = searchEnemyPlayer,
+            searchUnitById = searchUnitById,
+        )
 
     private val player = PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
     private val enemyPlayer = PlayerMother.player(id = "player-2")
     private val unit = UnitMother.unit(id = "unit-1", healthPoints = 10)
 
-    private fun battleUnitDto(id: String, playerId: String, remainingHealthPoints: Int): BattleUnit.Dto =
+    private fun battleUnitDto(
+        id: String,
+        playerId: String,
+        remainingHealthPoints: Int,
+    ): BattleUnit.Dto =
         BattleUnitMother
             .battleUnit(unit = unit.toDto(), player = PlayerMother.player(id = playerId).toDto())
             .toDto()
             .copy(id = id, remainingHealthPoints = remainingHealthPoints)
 
-    private fun position(row: Int, column: Int) = Battlefield.Dto.PositionDto(row = row, column = column)
+    private fun position(
+        row: Int,
+        column: Int,
+    ) = Battlefield.Dto.PositionDto(row = row, column = column)
 
     @Test
     fun `should move to the position closest to the enemy when the battle unit is healthy`() {

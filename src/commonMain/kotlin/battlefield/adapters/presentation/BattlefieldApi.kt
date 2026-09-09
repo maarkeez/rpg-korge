@@ -14,12 +14,14 @@ import battlefield.usecases.queries.SearchPosition
 import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import shared.domain.EventBus
 
-class BattlefieldApi(eventBus: EventBus) {
+class BattlefieldApi(
+    eventBus: EventBus,
+) {
     // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
     // Commands
-    val initializeBattlefield = InitializeBattlefield(battlefieldRepository,eventBus)
+    val initializeBattlefield = InitializeBattlefield(battlefieldRepository, eventBus)
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
     val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus)
 

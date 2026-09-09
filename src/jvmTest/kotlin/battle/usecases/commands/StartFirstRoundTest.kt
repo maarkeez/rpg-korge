@@ -1,19 +1,22 @@
 package battle.usecases.commands
 
-import battle.adapters.storage.*
-import battle.domain.*
+import battle.adapters.storage.InMemoryBattleRepository
+import battle.domain.Battle
+import battle.domain.BattleError
+import battle.domain.BattleEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class StartFirstRoundTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val startFirstRound = StartFirstRound(
-        battleRepository = battleRepository,
-        eventBus = eventBus,
-    )
+    private val startFirstRound =
+        StartFirstRound(
+            battleRepository = battleRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create battle when at least two players are provided`() {
@@ -36,9 +39,10 @@ class StartFirstRoundTest {
         // Given
         val players = listOf("player-1")
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            startFirstRound(players = players)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                startFirstRound(players = players)
+            }
         // Then
         assertThat(error)
             .isInstanceOf(BattleError.MinimumTwoPlayersRequired::class.java)

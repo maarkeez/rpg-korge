@@ -1,13 +1,17 @@
 package screen
 
-import battleunit.domain.*
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
-import unit.domain.*
+import battleunit.domain.BattleUnit
+import korlibs.korge.ui.UIText
+import korlibs.korge.ui.uiHorizontalStack
+import korlibs.korge.ui.uiSpacing
+import korlibs.korge.ui.uiText
+import korlibs.korge.ui.uiVerticalStack
+import korlibs.korge.view.Container
+import korlibs.korge.view.setText
+import korlibs.math.geom.Size
+import unit.domain.Unit
 
-class BattleUnitInfoView: Container() {
-
+class BattleUnitInfoView : Container() {
     private lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
     private lateinit var abilityButtons: Array<AbilityButtonView>
@@ -20,7 +24,8 @@ class BattleUnitInfoView: Container() {
         abilityButtons.forEach { abilityButton -> abilityButton.loadAssets() }
     }
 
-    private val battleUnitInfoLayout = uiVerticalStack(padding = 5.0) {
+    private val battleUnitInfoLayout =
+        uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
                 unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
                 addChild(unitPortraitView)
@@ -32,7 +37,7 @@ class BattleUnitInfoView: Container() {
 
                     remainingTurnActionsLabel = uiText("", size = Size(width = 281.5, height = 14)) {}
                     uiSpacing(Size(0, 15))
-                    healthBarView =  HealthBarView(Size(281.5, 16))
+                    healthBarView = HealthBarView(Size(281.5, 16))
                     addChild(healthBarView)
 
                     uiSpacing(Size(0, 4))
@@ -42,18 +47,18 @@ class BattleUnitInfoView: Container() {
             }
             uiHorizontalStack(padding = 2.0) {
                 val abilityButtonSize = Size(width = 48.75, height = 48.75)
-                abilityButtons = arrayOf(
-                    AbilityButtonView(abilityButtonSize),
-                    AbilityButtonView(abilityButtonSize),
-                    AbilityButtonView(abilityButtonSize),
-                    AbilityButtonView(abilityButtonSize),
-                    AbilityButtonView(abilityButtonSize),
-                    AbilityButtonView(abilityButtonSize),
-                )
+                abilityButtons =
+                    arrayOf(
+                        AbilityButtonView(abilityButtonSize),
+                        AbilityButtonView(abilityButtonSize),
+                        AbilityButtonView(abilityButtonSize),
+                        AbilityButtonView(abilityButtonSize),
+                        AbilityButtonView(abilityButtonSize),
+                        AbilityButtonView(abilityButtonSize),
+                    )
                 abilityButtons.forEach(::addChild)
             }
         }
-
 
     init {
         visible = false
@@ -64,7 +69,10 @@ class BattleUnitInfoView: Container() {
         abilityButtons.forEach { abilityButton -> abilityButton.setDelegate(delegate) }
     }
 
-    fun display(battleUnit: BattleUnit.Dto, unit: Unit.Dto) {
+    fun display(
+        battleUnit: BattleUnit.Dto,
+        unit: Unit.Dto,
+    ) {
         abilityButtons.forEach(AbilityButtonView::hide)
         // Avatar
         unitPortraitView.display(battleUnit.unitId)

@@ -1,13 +1,14 @@
 package battleunit.usecases.commands
 
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
-import unit.domain.*
-import unit.usecases.queries.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import player.domain.PlayerMother
+import unit.domain.UnitMother
+import unit.usecases.queries.SearchUnitById
 
 class ReplenishManaTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -19,9 +20,12 @@ class ReplenishManaTest {
         // Given
         val unit = UnitMother.unit(manaPoints = 20, abilities = listOf("ability-1")).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
-        val depletedBattleUnit = BattleUnitMother.battleUnit(unit = unit, player = player)
-            .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, row = 0, column = 0)
-            .pullEvents().second
+        val depletedBattleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, row = 0, column = 0)
+                .pullEvents()
+                .second
         battleUnitRepository.create(depletedBattleUnit)
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         // When
@@ -36,9 +40,12 @@ class ReplenishManaTest {
         // Given
         val unit = UnitMother.unit(manaPoints = 12, abilities = listOf("ability-1")).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
-        val depletedBattleUnit = BattleUnitMother.battleUnit(unit = unit, player = player)
-            .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, row = 0, column = 0)
-            .pullEvents().second
+        val depletedBattleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, row = 0, column = 0)
+                .pullEvents()
+                .second
         battleUnitRepository.create(depletedBattleUnit)
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         // When

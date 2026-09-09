@@ -1,11 +1,11 @@
 package battleunit.usecases.queries
 
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.domain.*
-import unit.domain.*
+import player.domain.PlayerMother
+import unit.domain.UnitMother
 
 class SearchBattleUnitsByPlayerIdTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -30,14 +30,16 @@ class SearchBattleUnitsByPlayerIdTest {
     fun `should not return defeated battle units when the player has defeated battle units`() {
         // Given
         val player = PlayerMother.player(id = "player-1")
-        val aliveBattleUnit = BattleUnitMother.battleUnit(
-            player = player.toDto(),
-            unit = UnitMother.unit(healthPoints = 10).toDto(),
-        )
-        val defeatedBattleUnit = BattleUnitMother.battleUnit(
-            player = player.toDto(),
-            unit = UnitMother.unit(healthPoints = 0).toDto(),
-        )
+        val aliveBattleUnit =
+            BattleUnitMother.battleUnit(
+                player = player.toDto(),
+                unit = UnitMother.unit(healthPoints = 10).toDto(),
+            )
+        val defeatedBattleUnit =
+            BattleUnitMother.battleUnit(
+                player = player.toDto(),
+                unit = UnitMother.unit(healthPoints = 0).toDto(),
+            )
         battleUnitRepository.create(aliveBattleUnit)
         battleUnitRepository.create(defeatedBattleUnit)
         // When

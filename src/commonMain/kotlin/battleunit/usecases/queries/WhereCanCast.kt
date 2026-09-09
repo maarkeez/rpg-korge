@@ -25,7 +25,7 @@ class WhereCanCast(
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return emptyList()
         val currentPosition = searchPosition(battleUnitId) ?: return emptyList()
         val ability = searchAbilityById(abilityId) ?: return emptyList()
-        return when(ability.targetPattern) {
+        return when (ability.targetPattern) {
             Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
             Ability.Dto.TargetPatternDto.SELF -> listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))
             Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
@@ -34,30 +34,36 @@ class WhereCanCast(
 
     private fun searchVacantTilesAdjacentToBattleUnitsExcluding(id: String): List<PositionDto> {
         return buildList {
-            val allBattleUnits = battleUnitRepository.searchAll()
-                .filter { !it.isDefeated() }
-                .filter { it.toDto().id != id }
+            val allBattleUnits =
+                battleUnitRepository
+                    .searchAll()
+                    .filter { !it.isDefeated() }
+                    .filter { it.toDto().id != id }
 
             allBattleUnits.forEach { battleUnit ->
                 val battleUnitPosition = searchPosition(battleUnit.toDto().id) ?: return@forEach
-                val northPosition = PositionDto(
-                    row = battleUnitPosition.row - 1,
-                    column = battleUnitPosition.column,
-                )
-                val southPosition = PositionDto(
-                    row = battleUnitPosition.row + 1,
-                    column = battleUnitPosition.column,
-                )
-                val eastPosition = PositionDto(
-                    row = battleUnitPosition.row,
-                    column = battleUnitPosition.column + 1,
-                )
-                val westPosition = PositionDto(
-                    row = battleUnitPosition.row,
-                    column = battleUnitPosition.column - 1,
-                )
+                val northPosition =
+                    PositionDto(
+                        row = battleUnitPosition.row - 1,
+                        column = battleUnitPosition.column,
+                    )
+                val southPosition =
+                    PositionDto(
+                        row = battleUnitPosition.row + 1,
+                        column = battleUnitPosition.column,
+                    )
+                val eastPosition =
+                    PositionDto(
+                        row = battleUnitPosition.row,
+                        column = battleUnitPosition.column + 1,
+                    )
+                val westPosition =
+                    PositionDto(
+                        row = battleUnitPosition.row,
+                        column = battleUnitPosition.column - 1,
+                    )
                 listOf(northPosition, southPosition, eastPosition, westPosition).forEach { position ->
-                    if(canBattlefieldTileBeOccupied(position.row, position.column)) {
+                    if (canBattlefieldTileBeOccupied(position.row, position.column)) {
                         add(position)
                     }
                 }
@@ -65,26 +71,32 @@ class WhereCanCast(
         }
     }
 
-    fun searchAdjacentEnemyPositions(battleUnit: BattleUnit, currentPosition: Battlefield.Dto.PositionDto) =
-        buildList {
-            val distance = 1
-            for (row in currentPosition.row - distance..currentPosition.row + distance) {
-                for (column in currentPosition.column - distance..currentPosition.column + distance) {
-                    val occupantId = searchOccupant(row = row, column = column) ?: continue
-                    val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
-                    if(occupantBattleUnit.isSamePlayer(battleUnit)) continue
-                    val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
-                    val enemyDistance = distanceService.manhattanDistance(
+    fun searchAdjacentEnemyPositions(
+        battleUnit: BattleUnit,
+        currentPosition: Battlefield.Dto.PositionDto,
+    ) = buildList {
+        val distance = 1
+        for (row in currentPosition.row - distance..currentPosition.row + distance) {
+            for (column in currentPosition.column - distance..currentPosition.column + distance) {
+                val occupantId = searchOccupant(row = row, column = column) ?: continue
+                val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
+                if (occupantBattleUnit.isSamePlayer(battleUnit)) continue
+                val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
+                val enemyDistance =
+                    distanceService.manhattanDistance(
                         fromRow = currentPosition.row,
                         fromColumn = currentPosition.column,
                         toRow = row,
-                        toColumn = column
+                        toColumn = column,
                     )
-                    if(enemyDistance > 1) continue
-                    add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
-                }
+                if (enemyDistance > 1) continue
+                add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
             }
         }
+    }
 
-    data class PositionDto(val row: Int, val column: Int)
+    data class PositionDto(
+        val row: Int,
+        val column: Int,
+    )
 }

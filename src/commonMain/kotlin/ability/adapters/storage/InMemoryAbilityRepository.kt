@@ -3,7 +3,7 @@ package ability.adapters.storage
 import ability.domain.Ability
 import ability.domain.AbilityRepository
 
-class InMemoryAbilityRepository: AbilityRepository {
+class InMemoryAbilityRepository : AbilityRepository {
     private val abilities = mutableMapOf<String, Ability>()
 
     override fun create(ability: Ability) {

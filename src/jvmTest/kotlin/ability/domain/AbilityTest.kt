@@ -1,16 +1,22 @@
 package ability.domain
 
-import ability.domain.AbilityError.*
+import ability.domain.AbilityError.AbilityCooldownAboveLimit
+import ability.domain.AbilityError.AbilityCostAboveLimit
+import ability.domain.AbilityError.AbilityEffectsAboveLimit
+import ability.domain.AbilityError.AbilityEmptyEffects
+import ability.domain.AbilityError.AbilityNameTooLong
+import ability.domain.AbilityError.EmptyAbilityId
+import ability.domain.AbilityError.EmptyAbilityName
+import ability.domain.AbilityError.NegativeAbilityCooldown
+import ability.domain.AbilityError.NegativeAbilityCost
 import ability.domain.AbilityMother.ability
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AbilityTest {
-
     @Nested
     inner class CreateTest {
-
         @Test
         fun `should create ability when the dto is valid`() {
             // Given
@@ -114,7 +120,6 @@ class AbilityTest {
 
     @Nested
     inner class ToDtoTest {
-
         @Test
         fun `should expose the ability data when converted to dto`() {
             // Given
@@ -140,7 +145,6 @@ class AbilityTest {
 
     @Nested
     inner class PullEventsTest {
-
         @Test
         fun `should pull the created event when the ability has pending events`() {
             // Given

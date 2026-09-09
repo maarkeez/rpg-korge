@@ -1,12 +1,16 @@
 package cpuBrain.usecases.commands
 
 import battle.usecases.commands.FinishPlayerTurn
-import battleunit.domain.*
-import battleunit.usecases.commands.*
-import battleunit.usecases.queries.*
+import battleunit.domain.BattleUnit
+import battleunit.usecases.commands.CastAbility
+import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.queries.CanCastAbility
+import battleunit.usecases.queries.SearchBattleUnitById
+import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleunit.usecases.queries.WhereCanCast
 import cpuBrain.usecases.queries.WhereShouldMove
 import player.domain.Player
-import player.usecases.queries.*
+import player.usecases.queries.SearchPlayerById
 
 class PlayTurn(
     private val searchPlayerById: SearchPlayerById,
@@ -21,7 +25,7 @@ class PlayTurn(
 ) {
     operator fun invoke(playerId: String) {
         val player = searchPlayerById(playerId) ?: return
-        if(player.type != Player.Dto.PlayerTypeDto.CPU) return
+        if (player.type != Player.Dto.PlayerTypeDto.CPU) return
         val battleUnits = searchBattleUnitsByPlayerId(playerId)
         battleUnits.forEach { battleUnit ->
             tryToCastAbility(battleUnit)
@@ -36,14 +40,17 @@ class PlayTurn(
     private fun tryToCastAbility(battleUnit: BattleUnit.Dto) {
         val battleUnit = searchBattleUnitById(battleUnit.id) ?: return
         if (battleUnit.remainingTurnActions.remainingCasts > 0) {
-            battleUnit.abilityCooldowns.entries.filter { it.value == 0 }
+            battleUnit.abilityCooldowns.entries
+                .filter { it.value == 0 }
                 .filter { (abilityId, _) -> canCastAbility(battleUnitId = battleUnit.id, abilityId = abilityId) }
-                .randomOrNull()?.key?.let { abilityId ->
+                .randomOrNull()
+                ?.key
+                ?.let { abilityId ->
 
-                whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castPosition ->
-                    castAbility(battleUnitId = battleUnit.id, abilityId = abilityId, row = castPosition.row, column = castPosition.column)
+                    whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castPosition ->
+                        castAbility(battleUnitId = battleUnit.id, abilityId = abilityId, row = castPosition.row, column = castPosition.column)
+                    }
                 }
-            }
         }
     }
 }

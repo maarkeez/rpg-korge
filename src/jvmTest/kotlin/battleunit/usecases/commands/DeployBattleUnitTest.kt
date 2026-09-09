@@ -1,17 +1,19 @@
 package battleunit.usecases.commands
 
-import battlefield.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitError
+import battleunit.domain.BattleUnitEvent
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
-import player.usecases.queries.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import player.domain.PlayerMother
+import player.usecases.queries.SearchPlayerById
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.*
-import unit.usecases.queries.*
+import unit.domain.UnitMother
+import unit.usecases.queries.SearchUnitById
 
 class DeployBattleUnitTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -19,13 +21,14 @@ class DeployBattleUnitTest {
     private val searchUnitById: SearchUnitById = mock()
     private val searchPlayerById: SearchPlayerById = mock()
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
-    private val deployBattleUnit = DeployBattleUnit(
-        battleUnitRepository = battleUnitRepository,
-        eventBus = eventBus,
-        searchUnitById = searchUnitById,
-        searchPlayerById = searchPlayerById,
-        canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
-    )
+    private val deployBattleUnit =
+        DeployBattleUnit(
+            battleUnitRepository = battleUnitRepository,
+            eventBus = eventBus,
+            searchUnitById = searchUnitById,
+            searchPlayerById = searchPlayerById,
+            canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
+        )
 
     @Test
     fun `should deploy battle unit when the battlefield tile can be occupied`() {
@@ -50,7 +53,7 @@ class DeployBattleUnitTest {
         assertThat(storedBattleUnit.unitId).isEqualTo(unit.id)
         assertThat(storedBattleUnit.remainingHealthPoints).isEqualTo(unit.healthPoints)
         assertThat(eventBus).hasPublishedEvents(
-            BattleUnitEvent.BattleUnitDeployed("battle-unit-1", 0, 0)
+            BattleUnitEvent.BattleUnitDeployed("battle-unit-1", 0, 0),
         )
     }
 
@@ -59,9 +62,10 @@ class DeployBattleUnitTest {
         // Given
         whenever(searchUnitById("unknown-unit")).thenReturn(null)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            deployBattleUnit("battle-unit-1", "unknown-unit", "player-1", 0, 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                deployBattleUnit("battle-unit-1", "unknown-unit", "player-1", 0, 0)
+            }
         // Then
         assertThat(error).isInstanceOf(BattleUnitError.UnitNotFound::class.java)
     }
@@ -73,9 +77,10 @@ class DeployBattleUnitTest {
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         whenever(searchPlayerById("unknown-player")).thenReturn(null)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            deployBattleUnit("battle-unit-1", unit.id, "unknown-player", 0, 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                deployBattleUnit("battle-unit-1", unit.id, "unknown-player", 0, 0)
+            }
         // Then
         assertThat(error).isInstanceOf(BattleUnitError.PlayerNotFound::class.java)
     }
@@ -89,9 +94,10 @@ class DeployBattleUnitTest {
         whenever(searchPlayerById(player.id)).thenReturn(player)
         whenever(canBattlefieldTileBeOccupied(0, 0)).thenReturn(false)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            deployBattleUnit("battle-unit-1", unit.id, player.id, 0, 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                deployBattleUnit("battle-unit-1", unit.id, player.id, 0, 0)
+            }
         // Then
         assertThat(error)
             .isInstanceOf(BattleUnitError.BattlefieldTileCanNotBeOccupied::class.java)

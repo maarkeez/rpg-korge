@@ -2,14 +2,15 @@ package screen.battlefieldHud.usecases.commands
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud
 
 class InitializeBattlefieldHudTest {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val initializeBattlefieldHud = InitializeBattlefieldHud(
-        battlefieldHudRepository = battlefieldHudRepository,
-    )
+    private val initializeBattlefieldHud =
+        InitializeBattlefieldHud(
+            battlefieldHudRepository = battlefieldHudRepository,
+        )
 
     @Test
     fun `should create an idle battlefield hud when the battlefield hud is initialized`() {

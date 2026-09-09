@@ -2,19 +2,20 @@ package unit.usecases.commands
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.adapters.storage.*
-import unit.domain.*
+import unit.adapters.storage.InMemoryUnitRepository
+import unit.domain.UnitEvent
 import unit.domain.UnitMother.unit
 
 class RequestUnitCreationTest {
     private val unitRepository = InMemoryUnitRepository()
     private val eventBus = FakeEventBus()
-    private val requestUnitCreation = RequestUnitCreation(
-        unitRepository = unitRepository,
-        eventBus = eventBus
-    )
+    private val requestUnitCreation =
+        RequestUnitCreation(
+            unitRepository = unitRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create unit`() {

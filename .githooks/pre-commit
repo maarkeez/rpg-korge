@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+# (1) auto-fix format in place
+./gradlew formatKotlin --quiet
+
+# re-stage anything the formatter changed
+git add -u
+
+# (2) verify: fail the commit if unfixable violations remain
+if ! ./gradlew lintKotlin --quiet; then
+    echo "ktlint: unfixable style violations found (run ./gradlew lintKotlin to see details)"
+    exit 1
+fi

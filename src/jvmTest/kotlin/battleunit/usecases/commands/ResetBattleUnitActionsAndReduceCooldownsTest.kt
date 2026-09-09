@@ -1,11 +1,11 @@
 package battleunit.usecases.commands
 
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.domain.*
-import unit.domain.*
+import player.domain.PlayerMother
+import unit.domain.UnitMother
 
 class ResetBattleUnitActionsAndReduceCooldownsTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -17,10 +17,13 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         // Given
         val unit = UnitMother.unit(movementRange = 4, abilities = listOf("ability-1")).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
-        val exhaustedBattleUnit = BattleUnitMother.battleUnit(unit = unit, player = player)
-            .move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
-            .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, row = 0, column = 0)
-            .pullEvents().second
+        val exhaustedBattleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, row = 0, column = 0)
+                .pullEvents()
+                .second
         battleUnitRepository.create(exhaustedBattleUnit)
         // When
         resetBattleUnitActionsAndReduceCooldowns("player-1")

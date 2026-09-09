@@ -1,7 +1,7 @@
 package ability.usecases.queries
 
-import ability.domain.*
-import effect.usecases.queries.*
+import ability.domain.AbilityRepository
+import effect.usecases.queries.SearchEffectById
 
 class CalculateImmediateDamage(
     private val abilityRepository: AbilityRepository,
@@ -11,7 +11,7 @@ class CalculateImmediateDamage(
         val ability = abilityRepository.searchById(id)?.toDto() ?: return 0
         val effects = ability.effects.map { effectId -> searchEffectById(effectId)!! }
         return effects
-            .filter{ it.application.type == "IMMEDIATELY" }
+            .filter { it.application.type == "IMMEDIATELY" }
             .sumOf { effect -> effect.power }
     }
 }

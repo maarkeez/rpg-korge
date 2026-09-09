@@ -1,16 +1,20 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.adapters.presentation.*
-import battleunit.usecases.commands.*
+import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.usecases.commands.CastAbility
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud.Idle
+import screen.battlefieldHud.domain.BattlefieldHudError
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudMother
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ConfirmCastTest {
@@ -18,11 +22,12 @@ class ConfirmCastTest {
     private val castAbility: CastAbility = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
-    private val confirmCast = ConfirmCast(
-        battleUnitApi = battleUnitApi,
-        battlefieldHudRepository = battlefieldHudRepository,
-        eventBus = eventBus,
-    )
+    private val confirmCast =
+        ConfirmCast(
+            battleUnitApi = battleUnitApi,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -38,7 +43,7 @@ class ConfirmCastTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castTile = castTile,
-            )
+            ),
         )
         // When
         confirmCast()

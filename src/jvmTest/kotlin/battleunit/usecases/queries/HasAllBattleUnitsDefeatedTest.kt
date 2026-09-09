@@ -1,11 +1,11 @@
 package battleunit.usecases.queries
 
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.domain.*
-import unit.domain.*
+import player.domain.PlayerMother
+import unit.domain.UnitMother
 
 class HasAllBattleUnitsDefeatedTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -20,7 +20,7 @@ class HasAllBattleUnitsDefeatedTest {
                 BattleUnitMother.battleUnit(
                     player = player.toDto(),
                     unit = UnitMother.unit(healthPoints = 0).toDto(),
-                )
+                ),
             )
         }
         // When
@@ -37,13 +37,13 @@ class HasAllBattleUnitsDefeatedTest {
             BattleUnitMother.battleUnit(
                 player = player.toDto(),
                 unit = UnitMother.unit(healthPoints = 0).toDto(),
-            )
+            ),
         )
         battleUnitRepository.create(
             BattleUnitMother.battleUnit(
                 player = player.toDto(),
                 unit = UnitMother.unit(healthPoints = 10).toDto(),
-            )
+            ),
         )
         // When
         val result = hasAllBattleUnitsDefeated("player-1")

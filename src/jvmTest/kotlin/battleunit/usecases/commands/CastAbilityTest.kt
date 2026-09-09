@@ -1,36 +1,41 @@
 package battleunit.usecases.commands
 
-import ability.domain.*
-import ability.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
-import battleunit.usecases.queries.*
+import ability.domain.AbilityMother
+import ability.usecases.queries.SearchAbilityById
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitError
+import battleunit.domain.BattleUnitEvent
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.queries.WhereCanCast
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.*
+import unit.domain.UnitMother
 
 class CastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
     private val whereCanCast: WhereCanCast = mock()
     private val searchAbilityById: SearchAbilityById = mock()
-    private val castAbility = CastAbility(
-        whereCanCast = whereCanCast,
-        searchAbilityById = searchAbilityById,
-        battleUnitRepository = battleUnitRepository,
-        eventBus = eventBus,
-    )
+    private val castAbility =
+        CastAbility(
+            whereCanCast = whereCanCast,
+            searchAbilityById = searchAbilityById,
+            battleUnitRepository = battleUnitRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should cast ability when the position is a valid cast position`() {
         // Given
         val ability = AbilityMother.ability(id = "ability-1", cost = 0, cooldown = 0).toDto()
-        val battleUnit = BattleUnitMother.battleUnit(
-            unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
-        )
+        val battleUnit =
+            BattleUnitMother.battleUnit(
+                unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
@@ -42,7 +47,7 @@ class CastAbilityTest {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
         assertThat(storedBattleUnit!!.remainingTurnActions.remainingCasts).isEqualTo(0)
         assertThat(eventBus).hasPublishedEvents(
-            BattleUnitEvent.AbilityCasted(battleUnitId, "ability-1", 0, 0)
+            BattleUnitEvent.AbilityCasted(battleUnitId, "ability-1", 0, 0),
         )
     }
 
@@ -62,9 +67,10 @@ class CastAbilityTest {
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
+            }
         // Then
         assertThat(error)
             .isInstanceOf(BattleUnitError.AbilityDoesNotExists::class.java)
@@ -74,15 +80,17 @@ class CastAbilityTest {
     fun `should throw can not cast error when the battle unit can not cast the ability`() {
         // Given
         val ability = AbilityMother.ability(id = "ability-1").toDto()
-        val battleUnit = BattleUnitMother.battleUnit(
-            unit = UnitMother.unit(abilities = listOf("other-ability"), manaPoints = 10).toDto(),
-        )
+        val battleUnit =
+            BattleUnitMother.battleUnit(
+                unit = UnitMother.unit(abilities = listOf("other-ability"), manaPoints = 10).toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
+            }
         // Then
         assertThat(error)
             .isInstanceOf(BattleUnitError.BattleUnitCanNotCastAbility::class.java)
@@ -92,18 +100,20 @@ class CastAbilityTest {
     fun `should throw invalid cast position error when the position is not a valid cast position`() {
         // Given
         val ability = AbilityMother.ability(id = "ability-1", cost = 0, cooldown = 0).toDto()
-        val battleUnit = BattleUnitMother.battleUnit(
-            unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
-        )
+        val battleUnit =
+            BattleUnitMother.battleUnit(
+                unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
         whenever(whereCanCast(battleUnitId, "ability-1"))
             .thenReturn(listOf(WhereCanCast.PositionDto(1, 1)))
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
+            }
         // Then
         assertThat(error)
             .isInstanceOf(BattleUnitError.InvalidCastPosition::class.java)

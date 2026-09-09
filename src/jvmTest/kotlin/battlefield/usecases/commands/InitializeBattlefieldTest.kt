@@ -1,19 +1,21 @@
 package battlefield.usecases.commands
 
-import battlefield.adapters.storage.*
-import battlefield.domain.*
+import battlefield.adapters.storage.InMemoryBattlefieldRepository
+import battlefield.domain.BattlefieldEvent
+import battlefield.domain.BattlefieldMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val eventBus = FakeEventBus()
-    private val initializeBattlefield = InitializeBattlefield(
-        battlefieldRepository = battlefieldRepository,
-        eventBus = eventBus,
-    )
+    private val initializeBattlefield =
+        InitializeBattlefield(
+            battlefieldRepository = battlefieldRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create battlefield when no battlefield exists`() {

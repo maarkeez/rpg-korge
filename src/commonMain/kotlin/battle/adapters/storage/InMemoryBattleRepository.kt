@@ -1,9 +1,11 @@
 package battle.adapters.storage
 
-import battle.domain.*
+import battle.domain.Battle
+import battle.domain.BattleRepository
 
-class InMemoryBattleRepository: BattleRepository {
-    private var battle : Battle? = null
+class InMemoryBattleRepository : BattleRepository {
+    private var battle: Battle? = null
+
     override fun create(battle: Battle) {
         this.battle = battle
     }

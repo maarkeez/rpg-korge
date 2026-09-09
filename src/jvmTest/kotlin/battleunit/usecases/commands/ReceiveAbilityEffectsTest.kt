@@ -1,22 +1,26 @@
 package battleunit.usecases.commands
 
-import ability.domain.*
-import ability.usecases.queries.*
-import battlefield.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import ability.domain.Ability
+import ability.domain.AbilityMother
+import ability.usecases.queries.SearchAbilityById
+import battlefield.usecases.queries.SearchOccupant
+import battlefield.usecases.queries.SearchPosition
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.FailedToReceiveAbilityEffects
-import effect.domain.*
-import effect.usecases.queries.*
+import battleunit.domain.BattleUnitEvent
+import battleunit.domain.BattleUnitMother
+import effect.domain.EffectMother
+import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import player.domain.PlayerMother
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
-import unit.domain.*
-import unit.usecases.queries.*
+import unit.domain.UnitMother
+import unit.usecases.queries.SearchUnitById
 
 class ReceiveAbilityEffectsTest {
     private val searchAbilityById: SearchAbilityById = mock()
@@ -26,15 +30,16 @@ class ReceiveAbilityEffectsTest {
     private val searchPosition: SearchPosition = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
-    private val receiveAbilityEffects = ReceiveAbilityEffects(
-        searchAbilityById = searchAbilityById,
-        searchEffectById = searchEffectById,
-        battleUnitRepository = battleUnitRepository,
-        eventBus = eventBus,
-        searchOccupant = searchOccupant,
-        searchUnitById = searchUnitById,
-        searchPosition = searchPosition,
-    )
+    private val receiveAbilityEffects =
+        ReceiveAbilityEffects(
+            searchAbilityById = searchAbilityById,
+            searchEffectById = searchEffectById,
+            battleUnitRepository = battleUnitRepository,
+            eventBus = eventBus,
+            searchOccupant = searchOccupant,
+            searchUnitById = searchUnitById,
+            searchPosition = searchPosition,
+        )
 
     @Test
     fun `should apply immediate effect when the ability targets self`() {
@@ -70,9 +75,10 @@ class ReceiveAbilityEffectsTest {
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
+            }
         // Then
         assertThat(error).isInstanceOf(AbilityDoesNotExists::class.java)
     }
@@ -88,9 +94,10 @@ class ReceiveAbilityEffectsTest {
         whenever(searchEffectById("effect-1")).thenReturn(EffectMother.effect(id = "effect-1").toDto())
         whenever(searchOccupant(0, 0)).thenReturn(null)
         // When
-        val error = org.assertj.core.api.Assertions.catchThrowable {
-            receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
-        }
+        val error =
+            org.assertj.core.api.Assertions.catchThrowable {
+                receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", row = 0, column = 0)
+            }
         // Then
         assertThat(error).isInstanceOf(FailedToReceiveAbilityEffects::class.java)
     }

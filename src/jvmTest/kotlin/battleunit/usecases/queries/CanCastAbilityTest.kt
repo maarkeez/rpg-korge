@@ -1,13 +1,14 @@
 package battleunit.usecases.queries
 
-import ability.domain.*
-import ability.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
+import ability.domain.AbilityMother
+import ability.usecases.queries.SearchAbilityById
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import unit.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import unit.domain.UnitMother
 
 class CanCastAbilityTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -18,9 +19,10 @@ class CanCastAbilityTest {
     fun `should return true when the battle unit can cast the ability`() {
         // Given
         val ability = AbilityMother.ability(id = "ability-1", cost = 0, cooldown = 0).toDto()
-        val battleUnit = BattleUnitMother.battleUnit(
-            unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
-        )
+        val battleUnit =
+            BattleUnitMother.battleUnit(
+                unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
         // When
@@ -45,9 +47,10 @@ class CanCastAbilityTest {
     fun `should return false when the battle unit does not have the ability`() {
         // Given
         val ability = AbilityMother.ability(id = "ability-1").toDto()
-        val battleUnit = BattleUnitMother.battleUnit(
-            unit = UnitMother.unit(abilities = listOf("other-ability"), manaPoints = 10).toDto(),
-        )
+        val battleUnit =
+            BattleUnitMother.battleUnit(
+                unit = UnitMother.unit(abilities = listOf("other-ability"), manaPoints = 10).toDto(),
+            )
         battleUnitRepository.create(battleUnit)
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
         // When

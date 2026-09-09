@@ -1,27 +1,29 @@
 package ability.usecases.queries
 
-import ability.adapters.storage.*
-import ability.domain.*
+import ability.adapters.storage.InMemoryAbilityRepository
+import ability.domain.AbilityMother
 import ability.domain.AbilityMother.ability
-import effect.domain.*
-import effect.usecases.queries.*
+import effect.domain.EffectMother
+import effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class CalculateImmediateDamageTest {
     private val abilityRepository = InMemoryAbilityRepository()
     private val searchEffectById: SearchEffectById = mock()
-    private val calculateImmediateDamage = CalculateImmediateDamage(
-        abilityRepository = abilityRepository,
-        searchEffectById = searchEffectById
-    )
+    private val calculateImmediateDamage =
+        CalculateImmediateDamage(
+            abilityRepository = abilityRepository,
+            searchEffectById = searchEffectById,
+        )
 
     @Test
     fun `should sum power of immediately applied effects when ability has a mix of immediate and non immediate effects`() {
         // Given
-        val immediateEffect = EffectMother.effect(id= "effect-1", power = 4, applicationType = "IMMEDIATELY").toDto()
-        val onTurnStartedEffect = EffectMother.effect(id= "effect-2", power = 10).toDto()
+        val immediateEffect = EffectMother.effect(id = "effect-1", power = 4, applicationType = "IMMEDIATELY").toDto()
+        val onTurnStartedEffect = EffectMother.effect(id = "effect-2", power = 10).toDto()
         val ability = ability(effects = listOf(immediateEffect.id, onTurnStartedEffect.id))
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)

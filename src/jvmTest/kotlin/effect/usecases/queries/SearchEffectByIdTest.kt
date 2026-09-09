@@ -1,7 +1,7 @@
 package effect.usecases.queries
 
-import effect.adapters.storage.*
-import effect.domain.*
+import effect.adapters.storage.InMemoryEffectRepository
+import effect.domain.EffectMother
 import effect.domain.EffectMother.effect
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

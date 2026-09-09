@@ -19,7 +19,7 @@ class BattleApi(
     battleUnitApi: BattleUnitApi,
 ) {
     // Storage
-    private val battleRepository : BattleRepository = InMemoryBattleRepository()
+    private val battleRepository: BattleRepository = InMemoryBattleRepository()
 
     // Commands
     val defeatPlayer = DefeatPlayer(battleUnitApi.hasAllBattleUnitsDefeated, battleRepository, eventBus)

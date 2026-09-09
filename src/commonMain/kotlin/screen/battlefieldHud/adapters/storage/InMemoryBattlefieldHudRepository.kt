@@ -4,7 +4,6 @@ import screen.battlefieldHud.domain.BattlefieldHud
 import screen.battlefieldHud.domain.BattlefieldHudRepository
 
 class InMemoryBattlefieldHudRepository : BattlefieldHudRepository {
-
     private var battlefieldHud: BattlefieldHud? = null
 
     override fun create(battlefieldHud: BattlefieldHud) {

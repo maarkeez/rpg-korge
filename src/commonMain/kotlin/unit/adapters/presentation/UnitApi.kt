@@ -6,8 +6,9 @@ import unit.domain.UnitRepository
 import unit.usecases.commands.RequestUnitCreation
 import unit.usecases.queries.SearchUnitById
 
-class UnitApi(eventBus: EventBus) {
-
+class UnitApi(
+    eventBus: EventBus,
+) {
     // Storage
     private val unitRepository: UnitRepository = InMemoryUnitRepository()
 

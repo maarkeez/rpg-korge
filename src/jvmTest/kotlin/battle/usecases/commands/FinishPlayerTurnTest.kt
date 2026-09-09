@@ -1,19 +1,22 @@
 package battle.usecases.commands
 
-import battle.adapters.storage.*
-import battle.domain.*
+import battle.adapters.storage.InMemoryBattleRepository
+import battle.domain.Battle
+import battle.domain.BattleEvent
+import battle.domain.BattleMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class FinishPlayerTurnTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val finishPlayerTurn = FinishPlayerTurn(
-        battleRepository = battleRepository,
-        eventBus = eventBus,
-    )
+    private val finishPlayerTurn =
+        FinishPlayerTurn(
+            battleRepository = battleRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should start next player turn when another player remains in the queue`() {
@@ -33,7 +36,12 @@ class FinishPlayerTurnTest {
     fun `should finish round when the current player is the last one in the queue`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = BattleMother.battle(players).finishPlayerTurn().pullEvents().second
+        val battle =
+            BattleMother
+                .battle(players)
+                .finishPlayerTurn()
+                .pullEvents()
+                .second
         battleRepository.create(battle)
         // When
         finishPlayerTurn()

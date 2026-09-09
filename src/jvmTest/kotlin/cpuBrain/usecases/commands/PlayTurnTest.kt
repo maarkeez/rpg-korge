@@ -1,16 +1,27 @@
 package cpuBrain.usecases.commands
 
-import battle.usecases.commands.*
-import battlefield.domain.*
-import battleunit.domain.*
-import battleunit.usecases.commands.*
-import battleunit.usecases.queries.*
-import cpuBrain.usecases.queries.*
+import battle.usecases.commands.FinishPlayerTurn
+import battlefield.domain.Battlefield
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.commands.CastAbility
+import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.queries.CanCastAbility
+import battleunit.usecases.queries.SearchBattleUnitById
+import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleunit.usecases.queries.WhereCanCast
+import cpuBrain.usecases.queries.WhereShouldMove
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
-import player.usecases.queries.*
-import unit.domain.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.atLeastOnce
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import player.domain.Player
+import player.domain.PlayerMother
+import player.usecases.queries.SearchPlayerById
+import unit.domain.UnitMother
 
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()
@@ -22,21 +33,25 @@ class PlayTurnTest {
     private val finishPlayerTurn: FinishPlayerTurn = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
     private val whereShouldMove: WhereShouldMove = mock()
-    private val playTurn = PlayTurn(
-        searchPlayerById = searchPlayerById,
-        searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
-        moveBattleUnit = moveBattleUnit,
-        whereCanCast = whereCanCast,
-        canCastAbility = canCastAbility,
-        castAbility = castAbility,
-        finishPlayerTurn = finishPlayerTurn,
-        searchBattleUnitById = searchBattleUnitById,
-        whereShouldMove = whereShouldMove,
-    )
+    private val playTurn =
+        PlayTurn(
+            searchPlayerById = searchPlayerById,
+            searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
+            moveBattleUnit = moveBattleUnit,
+            whereCanCast = whereCanCast,
+            canCastAbility = canCastAbility,
+            castAbility = castAbility,
+            finishPlayerTurn = finishPlayerTurn,
+            searchBattleUnitById = searchBattleUnitById,
+            whereShouldMove = whereShouldMove,
+        )
 
     private val player = PlayerMother.player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
 
-    private fun battleUnitDto(id: String, remainingCasts: Int): BattleUnit.Dto =
+    private fun battleUnitDto(
+        id: String,
+        remainingCasts: Int,
+    ): BattleUnit.Dto =
         BattleUnitMother
             .battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1")).toDto(), player = player.toDto())
             .toDto()

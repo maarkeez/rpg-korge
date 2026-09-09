@@ -2,6 +2,7 @@ import korlibs.korge.gradle.*
 
 plugins {
 	alias(libs.plugins.korge)
+	id("org.jmailen.kotlinter") version "4.5.0"
 }
 
 korge {
@@ -36,5 +37,14 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+tasks.withType<org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask>().configureEach {
+    doFirst {
+        val buildDirAbs = project.layout.buildDirectory.get().asFile.absoluteFile
+        val all = (this as SourceTask).source.files.filter { it.isFile }
+        val filtered = all.filter { !it.absoluteFile.startsWith(buildDirAbs) }
+        if (filtered.size != all.size) setSource(filtered)
+    }
 }
 

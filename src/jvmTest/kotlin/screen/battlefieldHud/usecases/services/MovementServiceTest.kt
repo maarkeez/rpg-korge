@@ -1,16 +1,18 @@
 package screen.battlefieldHud.usecases.services
 
-import battlefield.adapters.presentation.*
-import battlefield.domain.*
-import battlefield.usecases.queries.*
-import battleunit.adapters.presentation.*
-import battleunit.domain.*
-import battleunit.usecases.queries.*
+import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.domain.Battlefield
+import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.queries.CanMoveTo
+import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import screen.battlefieldHud.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 
 class MovementServiceTest {
@@ -19,10 +21,11 @@ class MovementServiceTest {
     private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
     private val canMoveTo: CanMoveTo = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
-    private val movementService = MovementService(
-        battlefieldApi = battlefieldApi,
-        battleUnitApi = battleUnitApi,
-    )
+    private val movementService =
+        MovementService(
+            battlefieldApi = battlefieldApi,
+            battleUnitApi = battleUnitApi,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -34,20 +37,24 @@ class MovementServiceTest {
     @Test
     fun `should return only the tiles the battle unit can move to when computing the tiles where it can move`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit(id = "battle-unit-1").toDto()
-            .copy(
-                remainingTurnActions = BattleUnit.Dto.RemainingTurnActionsDto(
-                    remainingCasts = 1,
-                    remainingSteps = 2,
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(id = "battle-unit-1")
+                .toDto()
+                .copy(
+                    remainingTurnActions =
+                        BattleUnit.Dto.RemainingTurnActionsDto(
+                            remainingCasts = 1,
+                            remainingSteps = 2,
+                        ),
                 )
-            )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
         whenever(searchTilesThatCanBeOccupied("battle-unit-1", 2)).thenReturn(
             listOf(
                 Battlefield.Dto.PositionDto(row = 0, column = 1),
                 Battlefield.Dto.PositionDto(row = 1, column = 0),
                 Battlefield.Dto.PositionDto(row = 0, column = 2),
-            )
+            ),
         )
         whenever(canMoveTo("battle-unit-1", 0, 1)).thenReturn(true)
         whenever(canMoveTo("battle-unit-1", 1, 0)).thenReturn(false)

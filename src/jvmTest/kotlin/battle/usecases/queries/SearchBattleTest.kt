@@ -1,7 +1,7 @@
 package battle.usecases.queries
 
-import battle.adapters.storage.*
-import battle.domain.*
+import battle.adapters.storage.InMemoryBattleRepository
+import battle.domain.BattleMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

@@ -2,13 +2,12 @@ package battleunit.domain
 
 import shared.domain.DomainEvent
 
-sealed interface BattleUnitEvent: DomainEvent{
-
+sealed interface BattleUnitEvent : DomainEvent {
     data class BattleUnitDeployed(
         val battleUnitId: String,
         val row: Int,
-        val column: Int
-    ): BattleUnitEvent
+        val column: Int,
+    ) : BattleUnitEvent
 
     data class BattleUnitMoved(
         val battleUnitId: String,
@@ -16,34 +15,34 @@ sealed interface BattleUnitEvent: DomainEvent{
         val fromColumn: Int,
         val toRow: Int,
         val toColumn: Int,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 
     data class AbilityCasted(
         val battleUnitId: String,
         val abilityId: String,
         val row: Int,
-        val column: Int
-    ): BattleUnitEvent
+        val column: Int,
+    ) : BattleUnitEvent
 
     data class EffectReceived(
         val battleUnitId: String,
         val effectId: String,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 
     data class BattleUnitDamaged(
         val battleUnitId: String,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 
     data class BattleUnitHealed(
         val battleUnitId: String,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 
     data class BattleUnitTeleported(
         val battleUnitId: String,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,
-    ): BattleUnitEvent
+    ) : BattleUnitEvent
 }

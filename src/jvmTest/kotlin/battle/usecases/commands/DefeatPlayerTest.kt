@@ -1,23 +1,27 @@
 package battle.usecases.commands
 
-import battle.adapters.storage.*
-import battle.domain.*
-import battleunit.usecases.queries.*
+import battle.adapters.storage.InMemoryBattleRepository
+import battle.domain.Battle
+import battle.domain.BattleEvent
+import battle.domain.BattleMother
+import battleunit.usecases.queries.HasAllBattleUnitsDefeated
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class DefeatPlayerTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
     private val hasAllBattleUnitsDefeated: HasAllBattleUnitsDefeated = mock()
-    private val defeatPlayer = DefeatPlayer(
-        hasAllBattleUnitsDefeated = hasAllBattleUnitsDefeated,
-        battleRepository = battleRepository,
-        eventBus = eventBus,
-    )
+    private val defeatPlayer =
+        DefeatPlayer(
+            hasAllBattleUnitsDefeated = hasAllBattleUnitsDefeated,
+            battleRepository = battleRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should defeat player when all its battle units are defeated`() {

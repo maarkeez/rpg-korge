@@ -1,16 +1,19 @@
 package screen.battlefieldHud.usecases.commands
 
 import battle.adapters.presentation.BattleApi
-import battlefield.adapters.presentation.*
-import battleunit.adapters.presentation.*
+import battlefield.adapters.presentation.BattlefieldApi
+import battleunit.adapters.presentation.BattleUnitApi
 import player.adapters.presentation.PlayerApi
 import player.domain.Player
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
+import screen.battlefieldHud.domain.BattlefieldHud.Idle
 import screen.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
+import screen.battlefieldHud.domain.BattlefieldHudRepository
 import screen.battlefieldHud.usecases.services.MovementService
-import shared.domain.*
+import shared.domain.EventBus
 
 class ProcessTileSelected(
     private val battlefieldApi: BattlefieldApi,
@@ -21,10 +24,13 @@ class ProcessTileSelected(
     private val eventBus: EventBus,
     private val movementService: MovementService,
 ) {
-    operator fun invoke(row: Int, column: Int) {
+    operator fun invoke(
+        row: Int,
+        column: Int,
+    ) {
         val tile = TileDto(row = row, column = column)
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
-        when(battlefieldHud) {
+        when (battlefieldHud) {
             is Idle -> selectTileWhenIdle(battlefieldHud, tile)
             is DisplayMovementRange -> selectTileWhenDisplayingMovement(battlefieldHud, tile)
             is DisplayAbilityCastRange -> selectTileWhenDisplayingAbilityCastRange(battlefieldHud, tile)
@@ -39,39 +45,40 @@ class ProcessTileSelected(
         tile: TileDto,
     ) {
         val battleUnitId = battlefieldApi.searchOccupant(row = tile.row, column = tile.column)
-        if(battleUnitId == null) {
+        if (battleUnitId == null) {
             val battleUnit = battleUnitApi.searchBattleUnitById(battlefieldHud.battleUnitId)!!
             val selectedTileInMovementRange = battlefieldHud.tilesWhereCanBeMoved.contains(tile)
             val player = playerApi.searchPlayerById(battleUnit.playerId)!!
-            if(player.type != Player.Dto.PlayerTypeDto.HUMAN) {
+            if (player.type != Player.Dto.PlayerTypeDto.HUMAN) {
                 val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
-            }else{
-                if(selectedTileInMovementRange) {
+            } else {
+                if (selectedTileInMovementRange) {
                     battleUnitApi.moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = tile.row, moveToColumn = tile.column)
-                }else{
-                    val (events, updatedBattlefieldHud) = battlefieldHud
-                        .idle()
-                        .pullEvents()
+                } else {
+                    val (events, updatedBattlefieldHud) =
+                        battlefieldHud
+                            .idle()
+                            .pullEvents()
                     battlefieldHudRepository.update(updatedBattlefieldHud)
                     eventBus.publish(events)
                 }
             }
-        }else if(battlefieldHud.battleUnitId == battleUnitId){
+        } else if (battlefieldHud.battleUnitId == battleUnitId) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
         } else {
             val tilesWhereCanBeMoved = movementService.tilesWhereCanMove(battleUnitId)
-            val (events, updatedBattlefieldHud) = battlefieldHud
-                .idle()
-                .selectBattleUnit(
-                    tile = tile,
-                    battleUnitId = battleUnitId,
-                    tilesWhereCanBeMoved = tilesWhereCanBeMoved
-                )
-                .pullEvents()
+            val (events, updatedBattlefieldHud) =
+                battlefieldHud
+                    .idle()
+                    .selectBattleUnit(
+                        tile = tile,
+                        battleUnitId = battleUnitId,
+                        tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                    ).pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
         }
@@ -79,20 +86,22 @@ class ProcessTileSelected(
 
     private fun selectTileWhenIdle(
         battlefieldHud: Idle,
-        tile: TileDto
+        tile: TileDto,
     ) {
         val battleUnitId = battlefieldApi.searchOccupant(row = tile.row, column = tile.column)
-        if(battleUnitId == null) {
+        if (battleUnitId == null) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
-        }else{
+        } else {
             val tilesWhereCanBeMoved = movementService.tilesWhereCanMove(battleUnitId)
-            val (events, updatedBattlefieldHud) = battlefieldHud.selectBattleUnit(
-                tile = tile,
-                battleUnitId = battleUnitId,
-                tilesWhereCanBeMoved = tilesWhereCanBeMoved
-            ).pullEvents()
+            val (events, updatedBattlefieldHud) =
+                battlefieldHud
+                    .selectBattleUnit(
+                        tile = tile,
+                        battleUnitId = battleUnitId,
+                        tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                    ).pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
         }
@@ -100,7 +109,7 @@ class ProcessTileSelected(
 
     private fun selectTileWhenDisplayingAbilityCastRange(
         battlefieldHud: DisplayAbilityCastRange,
-        tile: TileDto
+        tile: TileDto,
     ) {
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(battlefieldHud.battleUnitId)!!
         val currentPlayerId = battleApi.searchBattle()?.currentPlayerTurn ?: return
@@ -111,19 +120,19 @@ class ProcessTileSelected(
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
-
-        }else{
+        } else {
             val targetBattleUnitId = battlefieldApi.searchOccupant(tile.row, tile.column)
             val isSameUnit = casterBattleUnit.id == targetBattleUnitId
             val noTargetBattleUnit = targetBattleUnitId == null
-            if(isSameUnit || noTargetBattleUnit){
+            if (isSameUnit || noTargetBattleUnit) {
                 val (events, updatedBattlefieldHud) = battlefieldHud.previewSelfAbilityCast(castTile = tile).pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
-            }else{
-                val (events, updatedBattlefieldHud) = battlefieldHud
-                    .previewEnemyAbilityCast(castTile = tile, enemyBattleUnitId= targetBattleUnitId)
-                    .pullEvents()
+            } else {
+                val (events, updatedBattlefieldHud) =
+                    battlefieldHud
+                        .previewEnemyAbilityCast(castTile = tile, enemyBattleUnitId = targetBattleUnitId)
+                        .pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             }

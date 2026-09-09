@@ -7,7 +7,6 @@ class StartNextRound(
     private val battleRepository: BattleRepository,
     private val eventBus: EventBus,
 ) {
-
     operator fun invoke() {
         val storedBattle = battleRepository.search() ?: return
         val (events, battle) = storedBattle.startNextRound().pullEvents()

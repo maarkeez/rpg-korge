@@ -1,7 +1,9 @@
 package screen
 
-import korlibs.image.color.*
-import korlibs.math.geom.*
+import korlibs.image.color.RGBA
+import korlibs.math.geom.Size
 import shared.adapters.presentation.BarView
 
-class ManaBarView(size: Size) : BarView(size, RGBA(0, 145, 255))
+class ManaBarView(
+    size: Size,
+) : BarView(size, RGBA(0, 145, 255))

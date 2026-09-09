@@ -6,13 +6,11 @@ import unit.domain.UnitRepository
 
 class RequestUnitCreation(
     private val unitRepository: UnitRepository,
-    private val eventBus: EventBus
+    private val eventBus: EventBus,
 ) {
-
     operator fun invoke(unitDto: Unit.Dto) {
         val (events, unit) = Unit.create(unitDto).pullEvents()
         unitRepository.create(unit)
         eventBus.publish(events)
     }
-
 }

@@ -1,22 +1,25 @@
 package screen
 
-import korlibs.image.bitmap.*
-import korlibs.image.color.*
-import korlibs.image.format.*
-import korlibs.io.file.std.*
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
-import korlibs.korge.view.align.*
-import korlibs.math.geom.*
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.color.Colors
+import korlibs.image.format.readBitmap
+import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.ui.UIContainer
+import korlibs.korge.ui.uiButton
+import korlibs.korge.view.align.centerOn
+import korlibs.korge.view.image
+import korlibs.math.geom.Size
 
-class UnitPortraitView(size: Size): UIContainer(size) {
-
-    private val battleUnitPortrait = uiButton("").also { button ->
-        button.size = size
-        button.bgColorOut = Colors.WHITE
-        button.bgColorOver = Colors.LIGHTSKYBLUE
-        button.background.borderColor = Colors.LIGHTGRAY
-    }
+class UnitPortraitView(
+    size: Size,
+) : UIContainer(size) {
+    private val battleUnitPortrait =
+        uiButton("").also { button ->
+            button.size = size
+            button.bgColorOut = Colors.WHITE
+            button.bgColorOver = Colors.LIGHTSKYBLUE
+            button.background.borderColor = Colors.LIGHTGRAY
+        }
     private lateinit var knightPortrait: Bitmap
     private lateinit var ratPortrait: Bitmap
 
@@ -31,7 +34,7 @@ class UnitPortraitView(size: Size): UIContainer(size) {
 
     fun display(unitId: String) {
         battleUnitPortrait.findViewByName("portrait")?.removeFromParent()
-        when(unitId) {
+        when (unitId) {
             "knight" -> knightPortrait
             "rat" -> ratPortrait
             else -> null

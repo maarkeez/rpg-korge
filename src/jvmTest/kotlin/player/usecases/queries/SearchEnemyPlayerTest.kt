@@ -2,7 +2,7 @@ package player.usecases.queries
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import player.adapters.storage.*
+import player.adapters.storage.InMemoryPlayerRepository
 import player.domain.PlayerMother.player
 
 class SearchEnemyPlayerTest {

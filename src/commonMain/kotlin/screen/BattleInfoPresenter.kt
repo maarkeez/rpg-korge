@@ -14,15 +14,15 @@ class BattleInfoPresenter(
     private val playerApi: PlayerApi,
     eventBus: EventBus,
 ) {
-
-    private val subscriptions = listOf(
-        eventBus.subscribe<PlayerTurnStarted> {
-            updateBattleInfo()
-        },
-        eventBus.subscribe<PlayerVictory> { event ->
-            displayPlayerWin(event.playerId)
-        }
-    )
+    private val subscriptions =
+        listOf(
+            eventBus.subscribe<PlayerTurnStarted> {
+                updateBattleInfo()
+            },
+            eventBus.subscribe<PlayerVictory> { event ->
+                displayPlayerWin(event.playerId)
+            },
+        )
 
     fun updateBattleInfo() {
         val battle = battleApi.searchBattle()!!

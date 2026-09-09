@@ -1,7 +1,8 @@
 package battlefield.usecases.queries
 
-import battlefield.adapters.storage.*
-import battlefield.domain.*
+import battlefield.adapters.storage.InMemoryBattlefieldRepository
+import battlefield.domain.Battlefield
+import battlefield.domain.BattlefieldMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -13,7 +14,12 @@ class SearchTilesThatCanBeOccupiedTest {
     fun `should return tiles that can be occupied when the battle unit is deployed`() {
         // Given
         val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(1, 1, battleUnitId).pullEvents().second
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(1, 1, battleUnitId)
+                .pullEvents()
+                .second
         battlefieldRepository.create(battlefield)
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 1)
@@ -34,7 +40,12 @@ class SearchTilesThatCanBeOccupiedTest {
     fun `should return empty list when distance is less than or equal to zero`() {
         // Given
         val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(1, 1, battleUnitId).pullEvents().second
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(1, 1, battleUnitId)
+                .pullEvents()
+                .second
         battlefieldRepository.create(battlefield)
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 0)

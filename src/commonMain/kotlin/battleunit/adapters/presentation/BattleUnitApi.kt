@@ -33,8 +33,7 @@ class BattleUnitApi(
     playerApi: PlayerApi,
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
-){
-
+) {
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
 
@@ -43,71 +42,81 @@ class BattleUnitApi(
 
     // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
-    val canMoveTo = CanMoveTo(
-        battleUnitRepository,
-        battlefieldApi.searchPosition,
-        distanceService
-    )
-    val whereCanMove = WhereCanMove(
-        battleUnitRepository,
-        battlefieldApi.searchTilesThatCanBeOccupied,
-        canMoveTo,
-    )
-    val whereCanCast = WhereCanCast(
-        battleUnitRepository,
-        battlefieldApi.searchPosition,
-        abilityApi.searchAbilityById,
-        battlefieldApi.searchOccupant,
-        distanceService,
-        battlefieldApi.canBattlefieldTileBeOccupied,
-    )
-    val canCastAbility = CanCastAbility(
-        battleUnitRepository,
-        abilityApi.searchAbilityById,
-    )
+    val canMoveTo =
+        CanMoveTo(
+            battleUnitRepository,
+            battlefieldApi.searchPosition,
+            distanceService,
+        )
+    val whereCanMove =
+        WhereCanMove(
+            battleUnitRepository,
+            battlefieldApi.searchTilesThatCanBeOccupied,
+            canMoveTo,
+        )
+    val whereCanCast =
+        WhereCanCast(
+            battleUnitRepository,
+            battlefieldApi.searchPosition,
+            abilityApi.searchAbilityById,
+            battlefieldApi.searchOccupant,
+            distanceService,
+            battlefieldApi.canBattlefieldTileBeOccupied,
+        )
+    val canCastAbility =
+        CanCastAbility(
+            battleUnitRepository,
+            abilityApi.searchAbilityById,
+        )
 
     // Commands
-    val deployBattleUnit = DeployBattleUnit(
-        battleUnitRepository,
-        eventBus,
-        unitApi.searchUnitById,
-        playerApi.searchPlayerById,
-        battlefieldApi.canBattlefieldTileBeOccupied
-    )
-    val moveBattleUnit = MoveBattleUnit(
-        battleUnitRepository,
-        eventBus,
-        battlefieldApi.searchPosition,
-        distanceService,
-    )
+    val deployBattleUnit =
+        DeployBattleUnit(
+            battleUnitRepository,
+            eventBus,
+            unitApi.searchUnitById,
+            playerApi.searchPlayerById,
+            battlefieldApi.canBattlefieldTileBeOccupied,
+        )
+    val moveBattleUnit =
+        MoveBattleUnit(
+            battleUnitRepository,
+            eventBus,
+            battlefieldApi.searchPosition,
+            distanceService,
+        )
     val resetBattleUnitActionsAndReduceCooldowns = ResetBattleUnitActionsAndReduceCooldowns(battleUnitRepository)
-    val castAbility = CastAbility(
-        whereCanCast,
-        abilityApi.searchAbilityById,
-        battleUnitRepository,
-        eventBus,
-    )
-    val receiveAbilityEffects = ReceiveAbilityEffects(
-        abilityApi.searchAbilityById,
-        effectApi.searchEffectById,
-        battleUnitRepository,
-        eventBus,
-        battlefieldApi.searchOccupant,
-        unitApi.searchUnitById,
-        battlefieldApi.searchPosition,
-    )
+    val castAbility =
+        CastAbility(
+            whereCanCast,
+            abilityApi.searchAbilityById,
+            battleUnitRepository,
+            eventBus,
+        )
+    val receiveAbilityEffects =
+        ReceiveAbilityEffects(
+            abilityApi.searchAbilityById,
+            effectApi.searchEffectById,
+            battleUnitRepository,
+            eventBus,
+            battlefieldApi.searchOccupant,
+            unitApi.searchUnitById,
+            battlefieldApi.searchPosition,
+        )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
-    val applyOnTurnStartedEffects = ApplyOnTurnStartedEffects(
-        effectApi.searchEffectById,
-        searchBattleUnitsByPlayerId,
-        battleUnitRepository,
-        eventBus,
-    )
-    val replenishMana = ReplenishMana(
-        battleUnitRepository,
-        unitApi.searchUnitById,
-    )
+    val applyOnTurnStartedEffects =
+        ApplyOnTurnStartedEffects(
+            effectApi.searchEffectById,
+            searchBattleUnitsByPlayerId,
+            battleUnitRepository,
+            eventBus,
+        )
+    val replenishMana =
+        ReplenishMana(
+            battleUnitRepository,
+            unitApi.searchUnitById,
+        )
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)

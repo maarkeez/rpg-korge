@@ -1,26 +1,36 @@
 package screen.battlefieldHud.usecases.commands
 
-import battle.adapters.presentation.*
-import battle.domain.*
-import battle.usecases.queries.*
-import battlefield.adapters.presentation.*
-import battlefield.usecases.queries.*
-import battleunit.adapters.presentation.*
-import battleunit.domain.*
-import battleunit.usecases.commands.*
-import battleunit.usecases.queries.*
+import battle.adapters.presentation.BattleApi
+import battle.domain.BattleMother
+import battle.usecases.queries.SearchBattle
+import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.usecases.queries.SearchOccupant
+import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.domain.BattleUnit
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.adapters.presentation.*
-import player.domain.*
-import player.usecases.queries.*
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
-import screen.battlefieldHud.usecases.services.*
-import shared.domain.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import player.adapters.presentation.PlayerApi
+import player.domain.Player
+import player.domain.PlayerMother
+import player.usecases.queries.SearchPlayerById
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import screen.battlefieldHud.domain.BattlefieldHud.Idle
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudMother
+import screen.battlefieldHud.usecases.services.MovementService
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ProcessTileSelectedTest {
@@ -36,15 +46,16 @@ class ProcessTileSelectedTest {
     private val movementService: MovementService = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
-    private val processTileSelected = ProcessTileSelected(
-        battlefieldApi = battlefieldApi,
-        battleUnitApi = battleUnitApi,
-        playerApi = playerApi,
-        battleApi = battleApi,
-        battlefieldHudRepository = battlefieldHudRepository,
-        eventBus = eventBus,
-        movementService = movementService,
-    )
+    private val processTileSelected =
+        ProcessTileSelected(
+            battlefieldApi = battlefieldApi,
+            battleUnitApi = battleUnitApi,
+            playerApi = playerApi,
+            battleApi = battleApi,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            movementService = movementService,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -55,8 +66,12 @@ class ProcessTileSelectedTest {
         whenever(battleApi.searchBattle).thenReturn(searchBattle)
     }
 
-    private fun battleUnitDto(id: String, playerId: String): BattleUnit.Dto =
-        BattleUnitMother.battleUnit(player = PlayerMother.player(id = playerId).toDto())
+    private fun battleUnitDto(
+        id: String,
+        playerId: String,
+    ): BattleUnit.Dto =
+        BattleUnitMother
+            .battleUnit(player = PlayerMother.player(id = playerId).toDto())
             .toDto()
             .copy(id = id, playerId = playerId)
 
@@ -79,7 +94,7 @@ class ProcessTileSelectedTest {
                 tile = BattlefieldHudMother.tile(1, 2),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            )
+            ),
         )
     }
 
@@ -98,11 +113,12 @@ class ProcessTileSelectedTest {
     @Test
     fun `should move the battle unit when a tile within the movement range is selected`() {
         // Given
-        val hud = BattlefieldHudMother.displayMovementRange(
-            tile = BattlefieldHudMother.tile(0, 0),
-            battleUnitId = "battle-unit-1",
-            tilesWhereCanBeMoved = setOf(BattlefieldHudMother.tile(2, 3)),
-        )
+        val hud =
+            BattlefieldHudMother.displayMovementRange(
+                tile = BattlefieldHudMother.tile(0, 0),
+                battleUnitId = "battle-unit-1",
+                tilesWhereCanBeMoved = setOf(BattlefieldHudMother.tile(2, 3)),
+            )
         battlefieldHudRepository.create(hud)
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
@@ -123,7 +139,7 @@ class ProcessTileSelectedTest {
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = setOf(BattlefieldHudMother.tile(2, 3)),
-            )
+            ),
         )
         whenever(searchOccupant(5, 5)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
@@ -144,7 +160,7 @@ class ProcessTileSelectedTest {
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = setOf(BattlefieldHudMother.tile(2, 3)),
-            )
+            ),
         )
         whenever(searchOccupant(2, 3)).thenReturn(null)
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
@@ -164,7 +180,7 @@ class ProcessTileSelectedTest {
             BattlefieldHudMother.displayMovementRange(
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
-            )
+            ),
         )
         whenever(searchOccupant(1, 1)).thenReturn("battle-unit-1")
         // When
@@ -182,7 +198,7 @@ class ProcessTileSelectedTest {
             BattlefieldHudMother.displayMovementRange(
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
-            )
+            ),
         )
         whenever(searchOccupant(2, 2)).thenReturn("battle-unit-2")
         whenever(movementService.tilesWhereCanMove("battle-unit-2")).thenReturn(tilesWhereCanBeMoved)
@@ -224,11 +240,11 @@ class ProcessTileSelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = setOf(BattlefieldHudMother.tile(1, 1)),
-            )
+            ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            BattleMother.battle(players = listOf("player-1", "player-2")).toDto()
+            BattleMother.battle(players = listOf("player-1", "player-2")).toDto(),
         )
         whenever(searchOccupant(1, 1)).thenReturn(null)
         // When
@@ -242,7 +258,7 @@ class ProcessTileSelectedTest {
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castTile = BattlefieldHudMother.tile(1, 1),
-            )
+            ),
         )
     }
 
@@ -255,11 +271,11 @@ class ProcessTileSelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = setOf(BattlefieldHudMother.tile(1, 1)),
-            )
+            ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            BattleMother.battle(players = listOf("player-1", "player-2")).toDto()
+            BattleMother.battle(players = listOf("player-1", "player-2")).toDto(),
         )
         whenever(searchOccupant(1, 1)).thenReturn("enemy-battle-unit-1")
         // When
@@ -274,7 +290,7 @@ class ProcessTileSelectedTest {
                 abilityId = "ability-1",
                 castTile = BattlefieldHudMother.tile(1, 1),
                 enemyBattleUnitId = "enemy-battle-unit-1",
-            )
+            ),
         )
     }
 
@@ -287,11 +303,11 @@ class ProcessTileSelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = setOf(BattlefieldHudMother.tile(1, 1)),
-            )
+            ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            BattleMother.battle(players = listOf("player-1", "player-2")).toDto()
+            BattleMother.battle(players = listOf("player-1", "player-2")).toDto(),
         )
         // When
         processTileSelected(4, 4)
@@ -309,11 +325,11 @@ class ProcessTileSelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = setOf(BattlefieldHudMother.tile(1, 1)),
-            )
+            ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
         whenever(searchBattle()).thenReturn(
-            BattleMother.battle(players = listOf("player-1", "player-2")).toDto().copy(currentPlayerTurn = "player-2")
+            BattleMother.battle(players = listOf("player-1", "player-2")).toDto().copy(currentPlayerTurn = "player-2"),
         )
         // When
         processTileSelected(1, 1)

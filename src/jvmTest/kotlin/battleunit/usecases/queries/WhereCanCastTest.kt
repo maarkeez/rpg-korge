@@ -1,16 +1,20 @@
 package battleunit.usecases.queries
 
-import ability.domain.*
-import ability.usecases.queries.*
+import ability.domain.Ability
+import ability.domain.AbilityMother
+import ability.usecases.queries.SearchAbilityById
 import battlefield.domain.Battlefield.Dto.PositionDto
-import battlefield.usecases.queries.*
-import battleunit.adapters.storage.*
-import battleunit.domain.*
-import battleunit.usecases.services.*
+import battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import battlefield.usecases.queries.SearchOccupant
+import battlefield.usecases.queries.SearchPosition
+import battleunit.adapters.storage.InMemoryBattleUnitRepository
+import battleunit.domain.BattleUnitMother
+import battleunit.usecases.services.DistanceService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import player.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import player.domain.PlayerMother
 
 class WhereCanCastTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -19,14 +23,15 @@ class WhereCanCastTest {
     private val searchOccupant: SearchOccupant = mock()
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
     private val distanceService = DistanceService()
-    private val whereCanCast = WhereCanCast(
-        battleUnitRepository = battleUnitRepository,
-        searchPosition = searchPosition,
-        searchAbilityById = searchAbilityById,
-        searchOccupant = searchOccupant,
-        distanceService = distanceService,
-        canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
-    )
+    private val whereCanCast =
+        WhereCanCast(
+            battleUnitRepository = battleUnitRepository,
+            searchPosition = searchPosition,
+            searchAbilityById = searchAbilityById,
+            searchOccupant = searchOccupant,
+            distanceService = distanceService,
+            canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
+        )
 
     @Test
     fun `should return own position when the ability targets self`() {

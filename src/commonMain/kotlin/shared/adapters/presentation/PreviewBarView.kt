@@ -1,12 +1,14 @@
 package shared.adapters.presentation
 
-import korlibs.image.color.*
-import korlibs.korge.style.*
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.korge.ui.UIContainer
 import korlibs.korge.view.align.centerOn
-import korlibs.korge.view.align.centerXOn
-import korlibs.math.geom.*
+import korlibs.korge.view.roundRect
+import korlibs.korge.view.setText
+import korlibs.korge.view.text
+import korlibs.math.geom.RectCorners
+import korlibs.math.geom.Size
 import kotlin.math.max
 
 open class PreviewBarView(
@@ -14,28 +16,31 @@ open class PreviewBarView(
     filledColor: RGBA,
     previewColor: RGBA,
 ) : UIContainer(size) {
+    private val background =
+        roundRect(size, radius = RectCorners(3)) {
+            this.color = Colors.DIMGRAY
+        }
 
-    private val background = roundRect(size, radius = RectCorners(3)) {
-        this.color = Colors.DIMGRAY
-    }
+    private val filled =
+        roundRect(size, radius = RectCorners(3)) {
+            this.color = filledColor
+            this.height = size.height
+        }
 
-    private val filled = roundRect(size, radius = RectCorners(3)) {
-        this.color = filledColor
-        this.height = size.height
-    }
+    private val preview =
+        roundRect(size, radius = RectCorners(3)) {
+            this.color = previewColor
+            this.height = size.height
+        }
 
-    private val preview = roundRect(size, radius = RectCorners(3)) {
-        this.color = previewColor
-        this.height = size.height
-    }
-
-    private val label = text(
-        text = "30 / 500",
-        textSize = 14.0,
-        color = Colors.WHITE
-    ){
-        centerOn(background)
-    }
+    private val label =
+        text(
+            text = "30 / 500",
+            textSize = 14.0,
+            color = Colors.WHITE,
+        ) {
+            centerOn(background)
+        }
 
     init {
         addChild(background)
@@ -47,7 +52,7 @@ open class PreviewBarView(
     fun display(
         remainingBefore: Int,
         remainingAfter: Int,
-        maximum: Int
+        maximum: Int,
     ) {
         val remainingAfter = max(0, remainingAfter)
         val filledPercentage = (remainingAfter.toDouble() / maximum.toDouble())

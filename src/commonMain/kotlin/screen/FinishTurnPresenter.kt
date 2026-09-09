@@ -1,20 +1,22 @@
 package screen
 
-import battle.adapters.presentation.*
+import battle.adapters.presentation.BattleApi
 import battle.domain.BattleEvent.PlayerVictory
-import shared.domain.*
+import shared.domain.EventBus
+import shared.domain.Subscription
+import shared.domain.subscribe
 
 class FinishTurnPresenter(
     private val finishTurnView: FinishTurnView,
     private val battleApi: BattleApi,
     eventBus: EventBus,
 ) : FinishTurnView.Delegate {
-
-    private val subscriptions = listOf(
-        eventBus.subscribe<PlayerVictory> { event ->
-            hideFinishTurn()
-        }
-    )
+    private val subscriptions =
+        listOf(
+            eventBus.subscribe<PlayerVictory> { event ->
+                hideFinishTurn()
+            },
+        )
 
     init {
         finishTurnView.setDelegate(this)

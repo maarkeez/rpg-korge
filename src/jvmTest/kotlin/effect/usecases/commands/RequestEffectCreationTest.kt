@@ -1,20 +1,21 @@
 package effect.usecases.commands
 
-import effect.adapters.storage.*
-import effect.domain.*
+import effect.adapters.storage.InMemoryEffectRepository
+import effect.domain.EffectEvent
 import effect.domain.EffectMother.effect
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import shared.domain.*
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class RequestEffectCreationTest {
     private val effectRepository = InMemoryEffectRepository()
     private val eventBus = FakeEventBus()
-    private val requestEffectCreation = RequestEffectCreation(
-        effectRepository = effectRepository,
-        eventBus = eventBus
-    )
+    private val requestEffectCreation =
+        RequestEffectCreation(
+            effectRepository = effectRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create effect when it does not exist`() {

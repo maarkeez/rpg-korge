@@ -1,13 +1,13 @@
 package battleunit.usecases.commands
 
 import ability.usecases.queries.SearchAbilityById
-import battleunit.domain.*
 import battleunit.domain.BattleUnitError.AbilityDoesNotExists
 import battleunit.domain.BattleUnitError.BattleUnitCanNotCastAbility
 import battleunit.domain.BattleUnitError.InvalidCastPosition
-import battleunit.usecases.queries.*
+import battleunit.domain.BattleUnitRepository
+import battleunit.usecases.queries.WhereCanCast
 import battleunit.usecases.queries.WhereCanCast.PositionDto
-import shared.domain.*
+import shared.domain.EventBus
 
 class CastAbility(
     private val whereCanCast: WhereCanCast,
@@ -23,12 +23,13 @@ class CastAbility(
     ) {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
         val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
-        if(!storedBattleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
+        if (!storedBattleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
         val whereCanCast = whereCanCast(battleUnitId, abilityId)
-        if(!whereCanCast.contains(PositionDto(row, column))) throw InvalidCastPosition()
-        val (events, battleUnit) = storedBattleUnit
-            .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, abilityCost= ability.cost, row = row, column = column)
-            .pullEvents()
+        if (!whereCanCast.contains(PositionDto(row, column))) throw InvalidCastPosition()
+        val (events, battleUnit) =
+            storedBattleUnit
+                .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, abilityCost = ability.cost, row = row, column = column)
+                .pullEvents()
         battleUnitRepository.update(battleUnit)
         eventBus.publish(events)
     }

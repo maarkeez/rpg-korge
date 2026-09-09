@@ -1,15 +1,18 @@
 package screen
 
-import battleunit.domain.*
+import battleunit.domain.BattleUnit
 import korlibs.image.color.Colors
 import korlibs.korge.input.onClick
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
-import korlibs.math.geom.*
-import unit.domain.*
+import korlibs.korge.ui.UIButton
+import korlibs.korge.ui.uiButton
+import korlibs.korge.ui.uiHorizontalStack
+import korlibs.korge.ui.uiSpacing
+import korlibs.korge.ui.uiVerticalStack
+import korlibs.korge.view.Container
+import korlibs.math.geom.Size
+import unit.domain.Unit
 
-class AttackPreviewView: Container() {
-
+class AttackPreviewView : Container() {
     private lateinit var casterUnitNameView: UnitNameView
     private lateinit var casterUnitPortraitView: UnitPortraitView
     private lateinit var casterHealthBarView: HealthBarView
@@ -30,7 +33,8 @@ class AttackPreviewView: Container() {
         receiverUnitPortraitView.loadAssets()
     }
 
-    private val layout = uiVerticalStack(padding = 5.0) {
+    private val layout =
+        uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
                 casterUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
                 addChild(casterUnitPortraitView)
@@ -41,7 +45,7 @@ class AttackPreviewView: Container() {
                     addChild(casterUnitNameView)
 
                     uiSpacing(Size(0, 15))
-                    casterHealthBarView =  HealthBarView(Size(281.5, 16))
+                    casterHealthBarView = HealthBarView(Size(281.5, 16))
                     addChild(casterHealthBarView)
 
                     uiSpacing(Size(0, 4))
@@ -57,7 +61,7 @@ class AttackPreviewView: Container() {
                     addChild(receiverUnitNameView)
 
                     uiSpacing(Size(0, 15))
-                    receiverHealthBarView =  HealthBarPreviewView(Size(281.5, 16))
+                    receiverHealthBarView = HealthBarPreviewView(Size(281.5, 16))
                     addChild(receiverHealthBarView)
 
                     uiSpacing(Size(0, 4))
@@ -67,33 +71,33 @@ class AttackPreviewView: Container() {
                 uiSpacing(Size(10, 0))
                 receiverUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
                 addChild(receiverUnitPortraitView)
-
             }
             uiHorizontalStack {
-                cancelButton = uiButton {
-                    text = "Cancel"
-                    width = 190.0
-                    bgColorOut = Colors.DIMGRAY
-                    bgColorOver = Colors.DIMGRAY
-                    background.borderColor = Colors.LIGHTGRAY
-                    onClick {
-                        delegate.castCancelled()
+                cancelButton =
+                    uiButton {
+                        text = "Cancel"
+                        width = 190.0
+                        bgColorOut = Colors.DIMGRAY
+                        bgColorOver = Colors.DIMGRAY
+                        background.borderColor = Colors.LIGHTGRAY
+                        onClick {
+                            delegate.castCancelled()
+                        }
                     }
-                }
                 uiSpacing(Size(10, 0))
-                confirmButton = uiButton {
-                    text = "Confirm"
-                    width = 190.0
-                    bgColorOut = Colors.DIMGRAY
-                    bgColorOver = Colors.DIMGRAY
-                    background.borderColor = Colors.LIGHTGRAY
-                    onClick {
-                        delegate.castConfirmed()
+                confirmButton =
+                    uiButton {
+                        text = "Confirm"
+                        width = 190.0
+                        bgColorOut = Colors.DIMGRAY
+                        bgColorOver = Colors.DIMGRAY
+                        background.borderColor = Colors.LIGHTGRAY
+                        onClick {
+                            delegate.castConfirmed()
+                        }
                     }
-                }
             }
         }
-
 
     init {
         visible = false
@@ -124,12 +128,12 @@ class AttackPreviewView: Container() {
             maximum = casterUnit.manaPoints,
         )
 
-        if(receiverBattleUnit == null || receiverUnit == null || damage == null) {
+        if (receiverBattleUnit == null || receiverUnit == null || damage == null) {
             receiverUnitPortraitView.hide()
             receiverUnitNameView.hide()
             receiverHealthBarView.hide()
             receiverManaBarView.hide()
-        }else{
+        } else {
             receiverUnitPortraitView.display(receiverBattleUnit.unitId)
             receiverUnitNameView.display(unitName = receiverUnit.name)
             receiverHealthBarView.display(
@@ -151,6 +155,7 @@ class AttackPreviewView: Container() {
 
     interface Delegate {
         fun castConfirmed()
+
         fun castCancelled()
     }
 }

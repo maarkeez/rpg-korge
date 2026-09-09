@@ -2,8 +2,8 @@ package cpuBrain.adapters.presentation
 
 import battle.adapters.presentation.BattleApi
 import battlefield.adapters.presentation.BattlefieldApi
-import cpuBrain.adapters.events.OnPlayerTurnStarted
 import battleunit.adapters.presentation.BattleUnitApi
+import cpuBrain.adapters.events.OnPlayerTurnStarted
 import cpuBrain.usecases.commands.PlayTurn
 import cpuBrain.usecases.queries.WhereShouldMove
 import player.adapters.presentation.PlayerApi
@@ -18,28 +18,30 @@ class CpuBrainApi(
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
 ) {
-
     // Queries
-    val whereShouldMove = WhereShouldMove(
-        battleUnitApi.searchBattleUnitsByPlayerId,
-        battleUnitApi.whereCanMove,
-        battleUnitApi.searchBattleUnitById,
-        battlefieldApi.searchPosition,
-        playerApi.searchEnemyPlayer,
-        unitApi.searchUnitById,
-    )
+    val whereShouldMove =
+        WhereShouldMove(
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            battleUnitApi.whereCanMove,
+            battleUnitApi.searchBattleUnitById,
+            battlefieldApi.searchPosition,
+            playerApi.searchEnemyPlayer,
+            unitApi.searchUnitById,
+        )
+
     // Commands
-    val playTurn = PlayTurn(
-        playerApi.searchPlayerById,
-        battleUnitApi.searchBattleUnitsByPlayerId,
-        battleUnitApi.moveBattleUnit,
-        battleUnitApi.whereCanCast,
-        battleUnitApi.canCastAbility,
-        battleUnitApi.castAbility,
-        battleApi.finishPlayerTurn,
-        battleUnitApi.searchBattleUnitById,
-        whereShouldMove,
-    )
+    val playTurn =
+        PlayTurn(
+            playerApi.searchPlayerById,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            battleUnitApi.moveBattleUnit,
+            battleUnitApi.whereCanCast,
+            battleUnitApi.canCastAbility,
+            battleUnitApi.castAbility,
+            battleApi.finishPlayerTurn,
+            battleUnitApi.searchBattleUnitById,
+            whereShouldMove,
+        )
 
     // Events
     val onPlayerTurnStarted = OnPlayerTurnStarted(eventBus, playTurn)

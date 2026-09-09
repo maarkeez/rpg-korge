@@ -3,19 +3,22 @@ package screen.battlefieldHud.usecases.commands
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
-import shared.domain.*
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud.Idle
+import screen.battlefieldHud.domain.BattlefieldHudError
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudMother
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class CancelCastTest {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
-    private val cancelCast = CancelCast(
-        battlefieldHudRepository = battlefieldHudRepository,
-        eventBus = eventBus,
-    )
+    private val cancelCast =
+        CancelCast(
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should cancel the cast and go idle when the hud is previewing the ability cast`() {

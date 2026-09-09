@@ -1,7 +1,8 @@
 package battlefield.usecases.queries
 
-import battlefield.adapters.storage.*
-import battlefield.domain.*
+import battlefield.adapters.storage.InMemoryBattlefieldRepository
+import battlefield.domain.Battlefield
+import battlefield.domain.BattlefieldMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -13,7 +14,12 @@ class SearchPositionTest {
     fun `should return position when the battle unit is deployed`() {
         // Given
         val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(1, 1, battleUnitId).pullEvents().second
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(1, 1, battleUnitId)
+                .pullEvents()
+                .second
         battlefieldRepository.create(battlefield)
         // When
         val result = searchPosition(battleUnitId)

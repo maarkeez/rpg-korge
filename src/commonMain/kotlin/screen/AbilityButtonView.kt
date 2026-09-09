@@ -1,18 +1,21 @@
 package screen
 
-import korlibs.image.bitmap.*
-import korlibs.image.color.*
-import korlibs.image.format.*
-import korlibs.io.file.std.*
-import korlibs.korge.input.*
-import korlibs.korge.ui.*
-import korlibs.korge.view.*
-import korlibs.korge.view.align.*
-import korlibs.korge.view.filter.*
-import korlibs.math.geom.*
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.color.Colors
+import korlibs.image.format.readBitmap
+import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.input.onClick
+import korlibs.korge.ui.UIButton
+import korlibs.korge.view.align.centerOn
+import korlibs.korge.view.filter.ColorMatrixFilter
+import korlibs.korge.view.filter.filter
+import korlibs.korge.view.image
+import korlibs.math.geom.Matrix4
+import korlibs.math.geom.Size
 
-class AbilityButtonView(size: Size) : UIButton(size) {
-
+class AbilityButtonView(
+    size: Size,
+) : UIButton(size) {
     companion object {
         const val ABILITY = "ABILITY"
         const val ABILITY_SELECTION = "ABILITY_SELECTION"
@@ -58,7 +61,10 @@ class AbilityButtonView(size: Size) : UIButton(size) {
         this.delegate = delegate
     }
 
-    fun display(abilityId: String, canCast: Boolean) {
+    fun display(
+        abilityId: String,
+        canCast: Boolean,
+    ) {
         val abilityButton = this
         this.abilityId = abilityId
         findViewByName(ABILITY)?.removeFromParent()
@@ -87,7 +93,7 @@ class AbilityButtonView(size: Size) : UIButton(size) {
     }
 
     fun select() {
-        if(findViewByName(ABILITY_SELECTION) != null) return
+        if (findViewByName(ABILITY_SELECTION) != null) return
         val abilityButton = this
         abilityButton.image(abilitySelection) {
             name = ABILITY_SELECTION
@@ -101,14 +107,27 @@ class AbilityButtonView(size: Size) : UIButton(size) {
         findViewByName(ABILITY_SELECTION)?.removeFromParent()
     }
 
-    private fun darkFilter(): ColorMatrixFilter = ColorMatrixFilter(
-        Matrix4.fromRows(
-            0.5f, 0f, 0f, 0f,
-            0f, 0.5f, 0f, 0f,
-            0f, 0f, 0.5f, 0f,
-            0f, 0f, 0f, 1f
+    private fun darkFilter(): ColorMatrixFilter =
+        ColorMatrixFilter(
+            Matrix4.fromRows(
+                0.5f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0.5f,
+                0f,
+                0f,
+                0f,
+                0f,
+                0.5f,
+                0f,
+                0f,
+                0f,
+                0f,
+                1f,
+            ),
         )
-    )
 
     fun hide() {
         visible = false

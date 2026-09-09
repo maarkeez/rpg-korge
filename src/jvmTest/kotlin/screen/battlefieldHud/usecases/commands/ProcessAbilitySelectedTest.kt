@@ -1,16 +1,21 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.adapters.presentation.*
-import battleunit.usecases.queries.*
+import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.usecases.queries.CanCastAbility
+import battleunit.usecases.queries.WhereCanCast
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
-import screen.battlefieldHud.adapters.storage.*
-import screen.battlefieldHud.domain.*
-import screen.battlefieldHud.domain.BattlefieldHud.*
-import shared.domain.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import screen.battlefieldHud.domain.BattlefieldHudError
+import screen.battlefieldHud.domain.BattlefieldHudEvent
+import screen.battlefieldHud.domain.BattlefieldHudMother
+import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ProcessAbilitySelectedTest {
@@ -19,11 +24,12 @@ class ProcessAbilitySelectedTest {
     private val whereCanCast: WhereCanCast = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
-    private val processAbilitySelected = ProcessAbilitySelected(
-        battleUnitApi = battleUnitApi,
-        battlefieldHudRepository = battlefieldHudRepository,
-        eventBus = eventBus,
-    )
+    private val processAbilitySelected =
+        ProcessAbilitySelected(
+            battleUnitApi = battleUnitApi,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+        )
 
     @BeforeEach
     fun setUp() {
@@ -39,7 +45,7 @@ class ProcessAbilitySelectedTest {
             BattlefieldHudMother.displayMovementRange(
                 tile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
-            )
+            ),
         )
         whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
         whenever(whereCanCast("battle-unit-1", "ability-1"))
@@ -56,7 +62,7 @@ class ProcessAbilitySelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanCast = tilesWhereCanCast,
-            )
+            ),
         )
     }
 
@@ -83,7 +89,7 @@ class ProcessAbilitySelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            )
+            ),
         )
         // When
         processAbilitySelected("ability-1")
@@ -110,7 +116,7 @@ class ProcessAbilitySelectedTest {
                 casterTile = BattlefieldHudMother.tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-            )
+            ),
         )
         whenever(whereCanCast("battle-unit-1", "ability-2"))
             .thenReturn(newTilesWhereCanCast.map { WhereCanCast.PositionDto(row = it.row, column = it.column) })
@@ -126,7 +132,7 @@ class ProcessAbilitySelectedTest {
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-2",
                 tilesWhereCanCast = newTilesWhereCanCast,
-            )
+            ),
         )
     }
 
