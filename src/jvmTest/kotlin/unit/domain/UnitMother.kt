@@ -12,17 +12,19 @@ object UnitMother {
         manaPoints: Int = manaPoints(),
         abilities: List<String> = abilities(),
         movementRange: Int = movementRange(),
-    ) = Unit.create(
-        unitDto =
-            Unit.Dto(
-                id = id,
-                name = name,
-                healthPoints = healthPoints,
-                manaPoints = manaPoints,
-                abilities = abilities,
-                movementRange = movementRange,
-            ),
-    )
+    ) = Unit
+        .create(
+            unitDto =
+                Unit.Dto(
+                    id = id,
+                    name = name,
+                    healthPoints = healthPoints,
+                    manaPoints = manaPoints,
+                    abilities = abilities,
+                    movementRange = movementRange,
+                ),
+        ).pullEvents()
+        .second
 
     fun id() = "unit-${Random.nextInt(1, 100)}"
 

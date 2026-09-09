@@ -7,7 +7,7 @@ object PlayerMother {
         id: String = id(),
         name: String = name(),
         type: Player.Dto.PlayerTypeDto = type(),
-    ): Player = if (type == Player.Dto.PlayerTypeDto.CPU) Player.createCpu(id, name) else Player.createHuman(id, name)
+    ): Player = (if (type == Player.Dto.PlayerTypeDto.CPU) Player.createCpu(id, name) else Player.createHuman(id, name)).pullEvents().second
 
     fun id() = "player-${Random.nextInt(1, 100)}"
 
