@@ -55,12 +55,12 @@ import org.junit.jupiter.api.Nested
 class MainClassTest {
 
     @Nested
-    class FunctionOneTest {
+    class FunctionOne {
         // Function one tests go here
     }
 
     @Nested
-    class FunctionTwoTest {
+    class FunctionTwo {
         // Function two tests go here
     }
 }

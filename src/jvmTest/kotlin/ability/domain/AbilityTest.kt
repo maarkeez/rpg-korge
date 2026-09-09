@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 
 class AbilityTest {
     @Nested
-    inner class CreateTest {
+    inner class Create {
         @Test
         fun `should create ability when the dto is valid`() {
             // Given
@@ -119,7 +119,7 @@ class AbilityTest {
     }
 
     @Nested
-    inner class ToDtoTest {
+    inner class ToDto {
         @Test
         fun `should expose the ability data when converted to dto`() {
             // Given
@@ -144,7 +144,7 @@ class AbilityTest {
     }
 
     @Nested
-    inner class PullEventsTest {
+    inner class PullEvents {
         @Test
         fun `should pull the created event when the ability has pending events`() {
             // Given
