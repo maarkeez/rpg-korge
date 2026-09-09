@@ -1,0 +1,28 @@
+package player.usecases.queries
+
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import player.adapters.storage.InMemoryPlayerRepository
+import player.domain.PlayerMother.player
+
+class SearchEnemyPlayerTest {
+    private val playerRepository = InMemoryPlayerRepository()
+    private val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
+
+    @Test
+    fun `should return enemy player when another player exists`() {
+        // Given
+        val player =
+            _root_ide_package_.player.domain.PlayerMother
+                .player(id = "player-1")
+        val enemyPlayer =
+            _root_ide_package_.player.domain.PlayerMother
+                .player(id = "player-2")
+        playerRepository.create(player)
+        playerRepository.create(enemyPlayer)
+        // When
+        val storedEnemyPlayer = searchEnemyPlayer(player.toDto().id)
+        // Then
+        assertThat(storedEnemyPlayer).isEqualTo(enemyPlayer.toDto())
+    }
+}
