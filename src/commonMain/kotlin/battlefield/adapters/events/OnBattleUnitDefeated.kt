@@ -1,7 +1,7 @@
 package battlefield.adapters.events
 
+import battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import battlefield.usecases.commands.RemoveOccupant
-import battleunit.domain.BattleUnitEvent.BattleUnitDefeated
 import shared.domain.EventBus
 import shared.domain.subscribe
 

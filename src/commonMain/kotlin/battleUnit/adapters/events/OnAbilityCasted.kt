@@ -1,0 +1,21 @@
+package battleUnit.adapters.events
+
+import battleUnit.domain.BattleUnitEvent
+import battleUnit.usecases.commands.ReceiveAbilityEffects
+import shared.domain.EventBus
+import shared.domain.subscribe
+
+class OnAbilityCasted(
+    receiveAbilityEffects: ReceiveAbilityEffects,
+    eventBus: EventBus,
+) {
+    val subscription =
+        eventBus.subscribe<BattleUnitEvent.AbilityCasted> { event ->
+            receiveAbilityEffects(
+                battleUnitId = event.battleUnitId,
+                abilityId = event.abilityId,
+                row = event.row,
+                column = event.column,
+            )
+        }
+}

@@ -1,7 +1,7 @@
 package battlefield.adapters.events
 
+import battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import battlefield.usecases.commands.UpdateBattlefieldOccupancy
-import battleunit.domain.BattleUnitEvent.BattleUnitMoved
 import shared.domain.EventBus
 import shared.domain.subscribe
 

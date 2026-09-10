@@ -1,6 +1,6 @@
 package screen
 
-import battleunit.domain.BattleUnit
+import battleUnit.domain.BattleUnit
 import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing

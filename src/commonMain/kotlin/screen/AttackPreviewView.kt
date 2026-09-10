@@ -1,6 +1,6 @@
 package screen
 
-import battleunit.domain.BattleUnit
+import battleUnit.domain.BattleUnit
 import korlibs.image.color.Colors
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton

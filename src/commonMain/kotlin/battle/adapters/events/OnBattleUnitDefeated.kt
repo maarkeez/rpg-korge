@@ -1,7 +1,7 @@
 package battle.adapters.events
 
 import battle.usecases.commands.DefeatPlayer
-import battleunit.domain.BattleUnitEvent
+import battleUnit.domain.BattleUnitEvent
 import shared.domain.EventBus
 import shared.domain.subscribe
 

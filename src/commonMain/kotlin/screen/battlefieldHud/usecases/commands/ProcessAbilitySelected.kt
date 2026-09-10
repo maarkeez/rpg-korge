@@ -1,7 +1,7 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.usecases.queries.CanCastAbility
-import battleunit.usecases.queries.WhereCanCast
+import battleUnit.usecases.queries.CanCastAbility
+import battleUnit.usecases.queries.WhereCanCast
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange

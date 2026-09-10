@@ -1,13 +1,13 @@
 package cpuBrain.usecases.commands
 
 import battle.usecases.commands.FinishPlayerTurn
-import battleunit.domain.BattleUnit
-import battleunit.usecases.commands.CastAbility
-import battleunit.usecases.commands.MoveBattleUnit
-import battleunit.usecases.queries.CanCastAbility
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanCast
+import battleUnit.domain.BattleUnit
+import battleUnit.usecases.commands.CastAbility
+import battleUnit.usecases.commands.MoveBattleUnit
+import battleUnit.usecases.queries.CanCastAbility
+import battleUnit.usecases.queries.SearchBattleUnitById
+import battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleUnit.usecases.queries.WhereCanCast
 import cpuBrain.usecases.queries.WhereShouldMove
 import player.domain.Player
 import player.usecases.queries.SearchPlayerById

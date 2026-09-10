@@ -1,10 +1,10 @@
 package battlefieldHud.usecases.commands
 
+import battleUnit.usecases.queries.CanCastAbility
+import battleUnit.usecases.queries.WhereCanCast
 import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import battlefieldHud.domain.BattlefieldHudMother.tile
-import battleunit.usecases.queries.CanCastAbility
-import battleunit.usecases.queries.WhereCanCast
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test

@@ -1,8 +1,8 @@
 package battlefieldHud.usecases.commands
 
+import battleUnit.usecases.commands.CastAbility
 import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import battlefieldHud.domain.BattlefieldHudMother.tile
-import battleunit.usecases.commands.CastAbility
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test

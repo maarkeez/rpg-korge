@@ -11,7 +11,7 @@ import battle.usecases.commands.FinishPlayerTurn
 import battle.usecases.commands.StartFirstRound
 import battle.usecases.commands.StartNextRound
 import battle.usecases.queries.SearchBattle
-import battleunit.adapters.presentation.BattleUnitApi
+import battleUnit.adapters.presentation.BattleUnitApi
 import shared.domain.EventBus
 
 class BattleApi(

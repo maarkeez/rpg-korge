@@ -1,6 +1,6 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.usecases.commands.CastAbility
+import battleUnit.usecases.commands.CastAbility
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange

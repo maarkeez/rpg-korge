@@ -1,7 +1,7 @@
 package battle.usecases.commands
 
 import battle.domain.BattleRepository
-import battleunit.usecases.queries.HasAllBattleUnitsDefeated
+import battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import shared.domain.EventBus
 
 class DefeatPlayer(

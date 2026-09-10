@@ -34,6 +34,7 @@ dependencies {
     add("jvmTestApi", "org.assertj:assertj-core:3.27.7")
     add("jvmTestApi", "org.junit.jupiter:junit-jupiter:6.1.3")
     add("jvmTestApi", "com.tngtech.archunit:archunit:1.5.0")
+    add("jvmTestApi", "com.lemonappdev:konsist:0.13.0")
 }
 
 tasks.withType<Test>().configureEach {

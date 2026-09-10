@@ -1,10 +1,10 @@
 package cpuBrain.usecases.queries
 
+import battleUnit.usecases.queries.SearchBattleUnitById
+import battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleUnit.usecases.queries.WhereCanMove
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchPosition
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanMove
 import player.usecases.queries.SearchEnemyPlayer
 import unit.usecases.queries.SearchUnitById
 import kotlin.math.abs

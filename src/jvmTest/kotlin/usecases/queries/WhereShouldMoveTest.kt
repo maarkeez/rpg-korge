@@ -1,12 +1,12 @@
 package usecases.queries
 
+import battleUnit.domain.BattleUnit
+import battleUnit.domain.BattleUnitMother.battleUnit
+import battleUnit.usecases.queries.SearchBattleUnitById
+import battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleUnit.usecases.queries.WhereCanMove
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchPosition
-import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother.battleUnit
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanMove
 import cpuBrain.usecases.queries.WhereShouldMove
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

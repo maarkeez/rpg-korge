@@ -1,8 +1,8 @@
 package screen.battlefieldHud.usecases.services
 
+import battleUnit.usecases.queries.CanMoveTo
+import battleUnit.usecases.queries.SearchBattleUnitById
 import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
-import battleunit.usecases.queries.CanMoveTo
-import battleunit.usecases.queries.SearchBattleUnitById
 import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 
 class MovementService(

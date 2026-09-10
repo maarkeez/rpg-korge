@@ -2,9 +2,9 @@ package screen
 
 import ability.adapters.presentation.AbilityApi
 import battle.adapters.presentation.BattleApi
+import battleUnit.adapters.presentation.BattleUnitApi
 import battlefield.adapters.presentation.BattlefieldApi
 import battlesetup.adapters.presentation.BattleSetupApi
-import battleunit.adapters.presentation.BattleUnitApi
 import cpuBrain.adapters.presentation.CpuBrainApi
 import effect.adapters.presentation.EffectApi
 import korlibs.korge.scene.Scene

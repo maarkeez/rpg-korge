@@ -1,8 +1,8 @@
 package cpuBrain.adapters.presentation
 
 import battle.adapters.presentation.BattleApi
+import battleUnit.adapters.presentation.BattleUnitApi
 import battlefield.adapters.presentation.BattlefieldApi
-import battleunit.adapters.presentation.BattleUnitApi
 import cpuBrain.adapters.events.OnPlayerTurnStarted
 import cpuBrain.usecases.commands.PlayTurn
 import cpuBrain.usecases.queries.WhereShouldMove

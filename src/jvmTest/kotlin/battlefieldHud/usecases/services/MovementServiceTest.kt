@@ -1,10 +1,10 @@
 package battlefieldHud.usecases.services
 
+import battleUnit.domain.BattleUnit
+import battleUnit.usecases.queries.CanMoveTo
+import battleUnit.usecases.queries.SearchBattleUnitById
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
-import battleunit.domain.BattleUnit
-import battleunit.usecases.queries.CanMoveTo
-import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -27,7 +27,7 @@ class MovementServiceTest {
     fun `should return only the tiles the battle unit can move to when computing the tiles where it can move`() {
         // Given
         val battleUnit =
-            battleunit.domain.BattleUnitMother
+            battleUnit.domain.BattleUnitMother
                 .battleUnit(id = "battle-unit-1")
                 .toDto()
                 .copy(
@@ -61,7 +61,7 @@ class MovementServiceTest {
     fun `should return an empty set when there are no tiles that can be occupied`() {
         // Given
         val battleUnit =
-            battleunit.domain.BattleUnitMother
+            battleUnit.domain.BattleUnitMother
                 .battleUnit(id = "battle-unit-1")
                 .toDto()
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)

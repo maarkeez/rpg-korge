@@ -1,15 +1,15 @@
 package usecases.commands
 
 import battle.usecases.commands.FinishPlayerTurn
+import battleUnit.domain.BattleUnit
+import battleUnit.domain.BattleUnitMother.battleUnit
+import battleUnit.usecases.commands.CastAbility
+import battleUnit.usecases.commands.MoveBattleUnit
+import battleUnit.usecases.queries.CanCastAbility
+import battleUnit.usecases.queries.SearchBattleUnitById
+import battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import battleUnit.usecases.queries.WhereCanCast
 import battlefield.domain.Battlefield
-import battleunit.domain.BattleUnit
-import battleunit.domain.BattleUnitMother.battleUnit
-import battleunit.usecases.commands.CastAbility
-import battleunit.usecases.commands.MoveBattleUnit
-import battleunit.usecases.queries.CanCastAbility
-import battleunit.usecases.queries.SearchBattleUnitById
-import battleunit.usecases.queries.SearchBattleUnitsByPlayerId
-import battleunit.usecases.queries.WhereCanCast
 import cpuBrain.usecases.commands.PlayTurn
 import cpuBrain.usecases.queries.WhereShouldMove
 import org.junit.jupiter.api.Test

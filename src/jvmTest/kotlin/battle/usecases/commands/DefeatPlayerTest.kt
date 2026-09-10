@@ -4,7 +4,7 @@ import battle.adapters.storage.InMemoryBattleRepository
 import battle.domain.Battle
 import battle.domain.BattleEvent
 import battle.domain.BattleMother
-import battleunit.usecases.queries.HasAllBattleUnitsDefeated
+import battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
