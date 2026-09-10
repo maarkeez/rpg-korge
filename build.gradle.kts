@@ -7,6 +7,7 @@ plugins {
 
 korge {
 	id = "com.sample.demo"
+	jvmMainClassName = "com.mkz.rpg.MainKt"
 
 // To enable all targets at once
 

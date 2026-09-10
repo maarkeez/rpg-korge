@@ -1,0 +1,245 @@
+package com.mkz.rpg.battlefield.domain
+
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
+import com.mkz.rpg.battlefield.domain.BattlefieldError.TileIsNotVacant
+import com.mkz.rpg.battlefield.domain.BattlefieldError.TileNotFound
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.OccupantRemoved
+import kotlin.jvm.JvmInline
+
+@ConsistentCopyVisibility
+data class Battlefield private constructor(
+    private val rows: Rows,
+    private val columns: Columns,
+    private val tiles: Tiles,
+    private val events: Set<BattlefieldEvent>,
+) {
+    companion object {
+        /**
+         * Tiles: first are rows, second are columns
+         */
+        fun create(
+            rows: Int,
+            columns: Int,
+            tiles: List<List<String>>,
+        ): Battlefield =
+            Battlefield(
+                rows = Rows(rows),
+                columns = Columns(columns),
+                tiles = Tiles.create(tiles),
+                events = setOf(BattlefieldCreated),
+            )
+    }
+
+    fun toDto() =
+        Dto(
+            rows = rows.value,
+            columns = columns.value,
+            tiles = tiles.toDto(),
+        )
+
+    fun occupy(
+        row: Int,
+        column: Int,
+        battleUnitId: String,
+    ): Battlefield {
+        if (!tiles.isVacant(row, column)) throw TileIsNotVacant()
+        val updatedTiles = tiles.occupy(row, column, battleUnitId)
+        val battlefieldTileOccupiedEvent =
+            BattlefieldTileOccupied(
+                row = row,
+                column = column,
+                battlefieldUnitId = battleUnitId,
+            )
+        return copy(tiles = updatedTiles, events = events + battlefieldTileOccupiedEvent)
+    }
+
+    fun removeOccupant(battleUnitId: String): Battlefield {
+        if (!tiles.isDeployed(battleUnitId)) return this
+        val occupantPosition = tiles.position(battleUnitId)!!
+        val updatedTiles = tiles.removeOccupant(battleUnitId)
+        val occupantRemovedEvent =
+            OccupantRemoved(
+                battleUnitId = battleUnitId,
+                row = occupantPosition.row,
+                column = occupantPosition.column,
+            )
+        return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
+    }
+
+    fun pullEvents() = events to copy(events = emptySet())
+
+    fun canBeOccupied(
+        row: Int,
+        column: Int,
+    ): Boolean = tiles.isVacant(row, column)
+
+    fun occupant(
+        row: Int,
+        column: Int,
+    ): String? = tiles.occupant(row, column)
+
+    fun position(battleUnitId: String): PositionDto? = tiles.position(battleUnitId)
+
+    fun isInBoundaries(
+        row: Int,
+        column: Int,
+    ): Boolean {
+        if (row < 0 || row >= rows.value) return false
+        if (column < 0 || column >= rows.value) return false
+        return true
+    }
+
+    @JvmInline private value class Rows(
+        val value: Int,
+    )
+
+    @JvmInline private value class Columns(
+        val value: Int,
+    )
+
+    @JvmInline private value class Tiles(
+        val tiles: Map<Position, Tile>,
+    ) {
+        fun isVacant(
+            row: Int,
+            column: Int,
+        ): Boolean {
+            val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
+            return tile.isVacant()
+        }
+
+        fun isDeployed(battlefieldUnitId: String) = tiles.values.any { tile -> tile.isOccupiedBy(battlefieldUnitId) }
+
+        fun occupy(
+            row: Int,
+            column: Int,
+            battleUnitId: String,
+        ): Tiles {
+            val tileToBeOccupied = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
+            val occupiedTile = tileToBeOccupied.occupy(battleUnitId)
+            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(battleUnitId) }
+            val vacantTile = previousOccupiedTile?.removeOccupant()
+            val updatedTiles =
+                buildMap {
+                    putAll(tiles)
+                    put(Position(row, column), occupiedTile)
+                    vacantTile?.let {
+                        put(Position(row = vacantTile.row(), column = vacantTile.column()), vacantTile)
+                    }
+                }
+            return Tiles(updatedTiles)
+        }
+
+        fun removeOccupant(battleUnitId: String): Tiles {
+            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(battleUnitId) }
+            val vacantTile = previousOccupiedTile?.removeOccupant()
+            val updatedTiles =
+                buildMap {
+                    putAll(tiles)
+                    vacantTile?.let {
+                        put(Position(row = vacantTile.row(), column = vacantTile.column()), vacantTile)
+                    }
+                }
+            return Tiles(updatedTiles)
+        }
+
+        fun toDto(): Map<PositionDto, TileDto> =
+            this.tiles
+                .map { entry ->
+                    PositionDto(entry.key.row, entry.key.column) to entry.value.toDto()
+                }.toMap()
+
+        fun occupant(
+            row: Int,
+            column: Int,
+        ): String? = tiles[Position(row = row, column = column)]?.toDto()?.battleUnitId
+
+        fun position(battleUnitId: String): PositionDto? =
+            tiles.entries
+                .firstOrNull { (_, tile) -> tile.isOccupiedBy(battleUnitId) }
+                ?.key
+                ?.toDto()
+
+        companion object {
+            fun create(tiles: List<List<String>>): Tiles {
+                val tiles =
+                    tiles
+                        .flatMapIndexed { rowIndex, row ->
+                            row.mapIndexed { columnIndex, terrainId ->
+                                Position(rowIndex, columnIndex) to Tile.create(rowIndex, columnIndex, terrainId)
+                            }
+                        }.toMap()
+                return Tiles(tiles)
+            }
+        }
+
+        @ConsistentCopyVisibility
+        private data class Tile private constructor(
+            private val position: Position,
+            private val occupyingBattleUnitId: OccupyingBattleUnitId?,
+            private val terrainId: TerrainId,
+        ) {
+            companion object {
+                fun create(
+                    row: Int,
+                    column: Int,
+                    terrainId: String,
+                ) = Tile(
+                    position = Position(row = row, column = column),
+                    occupyingBattleUnitId = null,
+                    terrainId = TerrainId(terrainId),
+                )
+            }
+
+            fun isVacant() = occupyingBattleUnitId == null
+
+            fun occupy(battleUnitId: String) = copy(occupyingBattleUnitId = OccupyingBattleUnitId(battleUnitId))
+
+            fun removeOccupant() = copy(occupyingBattleUnitId = null)
+
+            fun isOccupiedBy(battleUnitId: String) = occupyingBattleUnitId?.value == battleUnitId
+
+            fun row() = position.row
+
+            fun column() = position.column
+
+            fun toDto() =
+                TileDto(
+                    battleUnitId = this.occupyingBattleUnitId?.value,
+                )
+        }
+
+        private data class Position(
+            val row: Int,
+            val column: Int,
+        ) {
+            fun toDto() = PositionDto(row = row, column = column)
+        }
+
+        @JvmInline private value class OccupyingBattleUnitId(
+            val value: String,
+        )
+
+        @JvmInline private value class TerrainId(
+            val value: String,
+        )
+    }
+
+    data class Dto(
+        val rows: Int,
+        val columns: Int,
+        val tiles: Map<PositionDto, TileDto>,
+    ) {
+        data class TileDto(
+            val battleUnitId: String?,
+        )
+
+        data class PositionDto(
+            val row: Int,
+            val column: Int,
+        )
+    }
+}
