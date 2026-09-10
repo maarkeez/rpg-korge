@@ -161,7 +161,7 @@ class WhereShouldMove(
         val candidateUtility: Double? = null,
     )
 
-    fun manhattanDistance(
+    private fun manhattanDistance(
         from: Battlefield.Dto.PositionDto,
         to: Battlefield.Dto.PositionDto,
     ): Int = (abs(from.row - to.row) + abs(from.column - to.column))

@@ -71,7 +71,7 @@ class WhereCanCast(
         }
     }
 
-    fun searchAdjacentEnemyPositions(
+    private fun searchAdjacentEnemyPositions(
         battleUnit: BattleUnit,
         currentPosition: Battlefield.Dto.PositionDto,
     ) = buildList {
