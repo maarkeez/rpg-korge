@@ -1,10 +1,11 @@
 package screen.battlefieldHud.usecases.commands
 
-import battle.adapters.presentation.BattleApi
-import battlefield.adapters.presentation.BattlefieldApi
-import battleunit.adapters.presentation.BattleUnitApi
-import player.adapters.presentation.PlayerApi
+import battle.usecases.queries.SearchBattle
+import battlefield.usecases.queries.SearchOccupant
+import battleunit.usecases.commands.MoveBattleUnit
+import battleunit.usecases.queries.SearchBattleUnitById
 import player.domain.Player
+import player.usecases.queries.SearchPlayerById
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -16,10 +17,11 @@ import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.EventBus
 
 class ProcessTileSelected(
-    private val battlefieldApi: BattlefieldApi,
-    private val battleUnitApi: BattleUnitApi,
-    private val playerApi: PlayerApi,
-    private val battleApi: BattleApi,
+    private val searchOccupant: SearchOccupant,
+    private val searchBattleUnitById: SearchBattleUnitById,
+    private val moveBattleUnit: MoveBattleUnit,
+    private val searchPlayerById: SearchPlayerById,
+    private val searchBattle: SearchBattle,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
     private val movementService: MovementService,
@@ -44,18 +46,18 @@ class ProcessTileSelected(
         battlefieldHud: DisplayMovementRange,
         tile: TileDto,
     ) {
-        val battleUnitId = battlefieldApi.searchOccupant(row = tile.row, column = tile.column)
+        val battleUnitId = searchOccupant(row = tile.row, column = tile.column)
         if (battleUnitId == null) {
-            val battleUnit = battleUnitApi.searchBattleUnitById(battlefieldHud.battleUnitId)!!
+            val battleUnit = searchBattleUnitById(battlefieldHud.battleUnitId)!!
             val selectedTileInMovementRange = battlefieldHud.tilesWhereCanBeMoved.contains(tile)
-            val player = playerApi.searchPlayerById(battleUnit.playerId)!!
+            val player = searchPlayerById(battleUnit.playerId)!!
             if (player.type != Player.Dto.PlayerTypeDto.HUMAN) {
                 val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             } else {
                 if (selectedTileInMovementRange) {
-                    battleUnitApi.moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = tile.row, moveToColumn = tile.column)
+                    moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = tile.row, moveToColumn = tile.column)
                 } else {
                     val (events, updatedBattlefieldHud) =
                         battlefieldHud
@@ -88,7 +90,7 @@ class ProcessTileSelected(
         battlefieldHud: Idle,
         tile: TileDto,
     ) {
-        val battleUnitId = battlefieldApi.searchOccupant(row = tile.row, column = tile.column)
+        val battleUnitId = searchOccupant(row = tile.row, column = tile.column)
         if (battleUnitId == null) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
@@ -111,8 +113,8 @@ class ProcessTileSelected(
         battlefieldHud: DisplayAbilityCastRange,
         tile: TileDto,
     ) {
-        val casterBattleUnit = battleUnitApi.searchBattleUnitById(battlefieldHud.battleUnitId)!!
-        val currentPlayerId = battleApi.searchBattle()?.currentPlayerTurn ?: return
+        val casterBattleUnit = searchBattleUnitById(battlefieldHud.battleUnitId)!!
+        val currentPlayerId = searchBattle()?.currentPlayerTurn ?: return
 
         val tileIsACastPosition = battlefieldHud.tilesWhereCanCast.contains(tile)
         val isPlayerBattleUnit = currentPlayerId == casterBattleUnit.playerId
@@ -121,7 +123,7 @@ class ProcessTileSelected(
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
         } else {
-            val targetBattleUnitId = battlefieldApi.searchOccupant(tile.row, tile.column)
+            val targetBattleUnitId = searchOccupant(tile.row, tile.column)
             val isSameUnit = casterBattleUnit.id == targetBattleUnitId
             val noTargetBattleUnit = targetBattleUnitId == null
             if (isSameUnit || noTargetBattleUnit) {

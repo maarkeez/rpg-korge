@@ -41,43 +41,46 @@ class BattlefieldPresenter(
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val movementService =
         MovementService(
-            battlefieldApi,
-            battleUnitApi,
+            searchBattleUnitById = battleUnitApi.searchBattleUnitById,
+            searchTilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied,
+            canMoveTo = battleUnitApi.canMoveTo,
         )
     private val initializeBattlefieldHud = InitializeBattlefieldHud(battlefieldHudRepository)
     private val processTileSelected =
         ProcessTileSelected(
-            battlefieldApi,
-            battleUnitApi,
-            playerApi,
-            battleApi,
-            battlefieldHudRepository,
-            eventBus,
-            movementService,
+            searchOccupant = battlefieldApi.searchOccupant,
+            searchBattleUnitById = battleUnitApi.searchBattleUnitById,
+            moveBattleUnit = battleUnitApi.moveBattleUnit,
+            searchPlayerById = playerApi.searchPlayerById,
+            searchBattle = battleApi.searchBattle,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            movementService = movementService,
         )
     private val processAbilitySelected =
         ProcessAbilitySelected(
-            battleUnitApi,
-            battlefieldHudRepository,
-            eventBus,
+            canCastAbility = battleUnitApi.canCastAbility,
+            whereCanCast = battleUnitApi.whereCanCast,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
         )
     private val confirmCast =
         ConfirmCast(
-            battleUnitApi,
-            battlefieldHudRepository,
-            eventBus,
+            castAbility = battleUnitApi.castAbility,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
         )
     private val cancelCast =
         CancelCast(
-            battlefieldHudRepository,
-            eventBus,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
         )
     private val updateMovementRange =
         UpdateMovementRange(
-            battlefieldApi,
-            battlefieldHudRepository,
-            eventBus,
-            movementService,
+            searchPosition = battlefieldApi.searchPosition,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            movementService = movementService,
         )
 
     private val subscriptions =

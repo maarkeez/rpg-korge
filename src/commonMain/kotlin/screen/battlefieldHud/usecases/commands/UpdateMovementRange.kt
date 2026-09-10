@@ -1,6 +1,6 @@
 package screen.battlefieldHud.usecases.commands
 
-import battlefield.adapters.presentation.BattlefieldApi
+import battlefield.usecases.queries.SearchPosition
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -12,7 +12,7 @@ import screen.battlefieldHud.usecases.services.MovementService
 import shared.domain.EventBus
 
 class UpdateMovementRange(
-    private val battlefieldApi: BattlefieldApi,
+    private val searchPosition: SearchPosition,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
     private val movementService: MovementService,
@@ -22,7 +22,7 @@ class UpdateMovementRange(
         when (battlefieldHud) {
             is DisplayMovementRange -> {
                 if (battleUnitId != battlefieldHud.battleUnitId) return
-                val position = battlefieldApi.searchPosition(battleUnitId)!!
+                val position = searchPosition(battleUnitId)!!
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
                         .tilesWhereCanBeMoved(

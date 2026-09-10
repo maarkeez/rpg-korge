@@ -6,7 +6,6 @@ import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -50,7 +49,6 @@ class ArchitectureTest {
     }
 
     @Test
-    @Disabled("battlefieldHud usecases still depend on adapters (e.g. ProcessTileSelected, MovementService). To be fixed.")
     fun `should only depend on usecases and domain classes when class is declared in a usecases folder`() {
         // Given
         val rule: ArchRule =

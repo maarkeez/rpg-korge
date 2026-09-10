@@ -2,15 +2,12 @@ package battlefieldHud.usecases.commands
 
 import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import battlefieldHud.domain.BattlefieldHudMother.tile
-import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.usecases.commands.CastAbility
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import screen.battlefieldHud.domain.BattlefieldHud.Idle
 import screen.battlefieldHud.domain.BattlefieldHudError
@@ -20,21 +17,15 @@ import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ConfirmCastTest {
-    private val battleUnitApi: BattleUnitApi = mock()
     private val castAbility: CastAbility = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val confirmCast =
         ConfirmCast(
-            battleUnitApi = battleUnitApi,
+            castAbility = castAbility,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
-
-    @BeforeEach
-    fun setUp() {
-        whenever(battleUnitApi.castAbility).thenReturn(castAbility)
-    }
 
     @Test
     fun `should cast the ability and go idle when the hud is previewing the ability cast`() {

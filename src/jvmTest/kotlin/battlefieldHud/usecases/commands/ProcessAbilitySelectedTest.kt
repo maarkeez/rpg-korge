@@ -3,12 +3,10 @@ package battlefieldHud.usecases.commands
 import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import battlefieldHud.domain.BattlefieldHudMother.tile
-import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.usecases.queries.CanCastAbility
 import battleunit.usecases.queries.WhereCanCast
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -22,23 +20,17 @@ import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ProcessAbilitySelectedTest {
-    private val battleUnitApi: BattleUnitApi = mock()
     private val canCastAbility: CanCastAbility = mock()
     private val whereCanCast: WhereCanCast = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val processAbilitySelected =
         ProcessAbilitySelected(
-            battleUnitApi = battleUnitApi,
+            canCastAbility = canCastAbility,
+            whereCanCast = whereCanCast,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
-
-    @BeforeEach
-    fun setUp() {
-        whenever(battleUnitApi.canCastAbility).thenReturn(canCastAbility)
-        whenever(battleUnitApi.whereCanCast).thenReturn(whereCanCast)
-    }
 
     @Test
     fun `should select the ability when the hud is displaying the movement range and the battle unit can cast`() {

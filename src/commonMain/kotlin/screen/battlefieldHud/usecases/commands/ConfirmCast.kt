@@ -1,6 +1,6 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.usecases.commands.CastAbility
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -11,7 +11,7 @@ import screen.battlefieldHud.domain.BattlefieldHudRepository
 import shared.domain.EventBus
 
 class ConfirmCast(
-    private val battleUnitApi: BattleUnitApi,
+    private val castAbility: CastAbility,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
 ) {
@@ -19,7 +19,7 @@ class ConfirmCast(
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayAbilityCastPreview -> {
-                battleUnitApi.castAbility(
+                castAbility(
                     battleUnitId = battlefieldHud.battleUnitId,
                     abilityId = battlefieldHud.abilityId,
                     row = battlefieldHud.castTile.row,

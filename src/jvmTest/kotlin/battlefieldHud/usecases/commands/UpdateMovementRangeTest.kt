@@ -1,12 +1,10 @@
 package battlefieldHud.usecases.commands
 
-import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchPosition
 import battlefieldHud.domain.BattlefieldHudMother
 import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -19,23 +17,17 @@ import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class UpdateMovementRangeTest {
-    private val battlefieldApi: BattlefieldApi = mock()
     private val searchPosition: SearchPosition = mock()
     private val movementService: MovementService = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val updateMovementRange =
         UpdateMovementRange(
-            battlefieldApi = battlefieldApi,
+            searchPosition = searchPosition,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = movementService,
         )
-
-    @BeforeEach
-    fun setUp() {
-        whenever(battlefieldApi.searchPosition).thenReturn(searchPosition)
-    }
 
     @Test
     fun `should update the movement range when the hud is displaying the movement range of the same battle unit`() {

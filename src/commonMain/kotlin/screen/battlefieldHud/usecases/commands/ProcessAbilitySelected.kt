@@ -1,6 +1,7 @@
 package screen.battlefieldHud.usecases.commands
 
-import battleunit.adapters.presentation.BattleUnitApi
+import battleunit.usecases.queries.CanCastAbility
+import battleunit.usecases.queries.WhereCanCast
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -12,7 +13,8 @@ import screen.battlefieldHud.domain.BattlefieldHudRepository
 import shared.domain.EventBus
 
 class ProcessAbilitySelected(
-    private val battleUnitApi: BattleUnitApi,
+    private val canCastAbility: CanCastAbility,
+    private val whereCanCast: WhereCanCast,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
 ) {
@@ -20,8 +22,8 @@ class ProcessAbilitySelected(
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayMovementRange -> {
-                val canCastAbility = battleUnitApi.canCastAbility(battlefieldHud.battleUnitId, abilityId)
-                if (!canCastAbility) return
+                val canCast = canCastAbility(battlefieldHud.battleUnitId, abilityId)
+                if (!canCast) return
                 val tilesWhereCanCast = tilesWhereCanCast(battlefieldHud.battleUnitId, abilityId)
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
@@ -61,7 +63,7 @@ class ProcessAbilitySelected(
         battleUnitId: String,
         abilityId: String,
     ): Set<TileDto> {
-        val castPositions = battleUnitApi.whereCanCast(battleUnitId, abilityId)
+        val castPositions = whereCanCast(battleUnitId, abilityId)
         val tilesWhereCanCast =
             castPositions
                 .map { position ->

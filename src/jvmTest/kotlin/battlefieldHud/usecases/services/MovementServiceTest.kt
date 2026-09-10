@@ -1,14 +1,11 @@
 package battlefieldHud.usecases.services
 
-import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.domain.Battlefield
 import battlefield.usecases.queries.SearchTilesThatCanBeOccupied
-import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnit
 import battleunit.usecases.queries.CanMoveTo
 import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -16,23 +13,15 @@ import screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import screen.battlefieldHud.usecases.services.MovementService
 
 class MovementServiceTest {
-    private val battlefieldApi: BattlefieldApi = mock()
-    private val battleUnitApi: BattleUnitApi = mock()
     private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
     private val canMoveTo: CanMoveTo = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
     private val movementService =
         MovementService(
-            battlefieldApi = battlefieldApi,
-            battleUnitApi = battleUnitApi,
+            searchBattleUnitById = searchBattleUnitById,
+            searchTilesThatCanBeOccupied = searchTilesThatCanBeOccupied,
+            canMoveTo = canMoveTo,
         )
-
-    @BeforeEach
-    fun setUp() {
-        whenever(battlefieldApi.searchTilesThatCanBeOccupied).thenReturn(searchTilesThatCanBeOccupied)
-        whenever(battleUnitApi.canMoveTo).thenReturn(canMoveTo)
-        whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
-    }
 
     @Test
     fun `should return only the tiles the battle unit can move to when computing the tiles where it can move`() {

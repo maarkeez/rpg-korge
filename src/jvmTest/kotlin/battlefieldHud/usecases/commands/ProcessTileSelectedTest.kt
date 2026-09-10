@@ -1,19 +1,15 @@
 package battlefieldHud.usecases.commands
 
-import battle.adapters.presentation.BattleApi
 import battle.usecases.queries.SearchBattle
-import battlefield.adapters.presentation.BattlefieldApi
 import battlefield.usecases.queries.SearchOccupant
 import battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import battlefieldHud.domain.BattlefieldHudMother.tile
-import battleunit.adapters.presentation.BattleUnitApi
 import battleunit.domain.BattleUnit
 import battleunit.domain.BattleUnitMother.battleUnit
 import battleunit.usecases.commands.MoveBattleUnit
 import battleunit.usecases.queries.SearchBattleUnitById
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -21,7 +17,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import player.adapters.presentation.PlayerApi
 import player.domain.Player
 import player.usecases.queries.SearchPlayerById
 import screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -35,10 +30,6 @@ import shared.domain.FakeEventBus
 import shared.domain.assertThat
 
 class ProcessTileSelectedTest {
-    private val battlefieldApi: BattlefieldApi = mock()
-    private val battleUnitApi: BattleUnitApi = mock()
-    private val playerApi: PlayerApi = mock()
-    private val battleApi: BattleApi = mock()
     private val searchOccupant: SearchOccupant = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
     private val moveBattleUnit: MoveBattleUnit = mock()
@@ -49,23 +40,15 @@ class ProcessTileSelectedTest {
     private val eventBus = FakeEventBus()
     private val processTileSelected =
         ProcessTileSelected(
-            battlefieldApi = battlefieldApi,
-            battleUnitApi = battleUnitApi,
-            playerApi = playerApi,
-            battleApi = battleApi,
+            searchOccupant = searchOccupant,
+            searchBattleUnitById = searchBattleUnitById,
+            moveBattleUnit = moveBattleUnit,
+            searchPlayerById = searchPlayerById,
+            searchBattle = searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = movementService,
         )
-
-    @BeforeEach
-    fun setUp() {
-        whenever(battlefieldApi.searchOccupant).thenReturn(searchOccupant)
-        whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
-        whenever(battleUnitApi.moveBattleUnit).thenReturn(moveBattleUnit)
-        whenever(playerApi.searchPlayerById).thenReturn(searchPlayerById)
-        whenever(battleApi.searchBattle).thenReturn(searchBattle)
-    }
 
     private fun battleUnitDto(
         id: String,
