@@ -24,10 +24,9 @@ korge {
     // To selectively enable targets
     targetJvm()
     targetJs()
-    targetWasm()
-    targetDesktop()
-    targetIos()
-    targetAndroid()
+    //targetWasmJs()
+    //targetIos()
+    //targetAndroid()
 
     serializationJson()
 }
@@ -59,6 +58,16 @@ tasks.withType<ConfigurableKtLintTask>().configureEach {
             setSource(filtered)
         }
     }
+}
+
+tasks.register("allTargetTests") {
+    group = "verification"
+    description = "Runs tests for all enabled targets."
+
+    dependsOn(
+        tasks.named("jvmTest"),
+        tasks.named("jsTest")
+    )
 }
 
 val pitestReport = tasks.register<JavaExec>("pitest") {
