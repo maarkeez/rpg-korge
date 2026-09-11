@@ -21,19 +21,19 @@ open class PreviewBarView(
             this.color = Colors.DIMGRAY
         }
 
-    private val filled =
+    val filled =
         roundRect(size, radius = RectCorners(3)) {
             this.color = filledColor
             this.height = size.height
         }
 
-    private val preview =
+    val preview =
         roundRect(size, radius = RectCorners(3)) {
             this.color = previewColor
             this.height = size.height
         }
 
-    private val label =
+    val label =
         text(
             text = "30 / 500",
             textSize = 14.0,

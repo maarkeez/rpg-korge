@@ -1,6 +1,5 @@
-package com.mkz.rpg.screen
+package com.mkz.rpg.shared.adapters.presentation
 
-import com.mkz.rpg.shared.adapters.presentation.BarView
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
