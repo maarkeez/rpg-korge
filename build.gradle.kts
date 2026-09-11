@@ -116,7 +116,6 @@ val pitestReport = tasks.register<JavaExec>("pitest") {
         "--reportDir=$reportDir",
         "--targetClasses=com.mkz.rpg.*",
         "--targetTests=com.mkz.rpg.*",
-        "--excludedClasses=com.mkz.rpg.shared.*",
         "--excludedClasses=com.mkz.rpg.*.adapters.presentation.*",
         "--excludedTestClasses=com.mkz.rpg.shared.adapters.architecture.*",
         "--sourceDirs=${commonMainSources.absolutePath},${jvmMainSources.absolutePath}",

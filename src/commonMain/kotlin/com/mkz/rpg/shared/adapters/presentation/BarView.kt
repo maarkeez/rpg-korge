@@ -17,12 +17,12 @@ open class BarView(
     size: Size,
     color: RGBA,
 ) : UIContainer(size) {
-    private val progressBar: UIProgressBar =
+    val progressBar: UIProgressBar =
         uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
             progressBar.styles.uiSelectedColor = color
             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
         }
-    private val label =
+    val label =
         text(
             text = "",
             textSize = 14.0,
@@ -32,21 +32,28 @@ open class BarView(
     init {
         addChild(progressBar)
         addChild(label)
+        visible(false)
     }
 
     fun display(
         remaining: Int,
         maximum: Int,
     ) {
-        val healthPercentage = (remaining.toDouble() / maximum.toDouble()) * 100
+        val percentage = (remaining.toDouble() / maximum.toDouble()) * 100
         label.setText("$remaining / $maximum")
-        progressBar.current = healthPercentage
+        progressBar.current = percentage
         label.centerXOn(progressBar)
         label.y = (progressBar.height - label.height) / 2 + 1
-        visible = true
+        visible(true)
     }
 
     fun hide() {
-        visible = false
+        visible(false)
+    }
+
+    private fun visible(value: Boolean) {
+        visible = value
+        progressBar.visible = value
+        label.visible = value
     }
 }
