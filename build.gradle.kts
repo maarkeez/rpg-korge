@@ -6,6 +6,8 @@ import org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask
 
 plugins {
     alias(libs.plugins.korge)
+    id("io.kotest.multiplatform") version "5.9.1"
+    id("dev.mokkery") version "2.5.1"
     id("org.jmailen.kotlinter") version "4.5.0"
 }
 
@@ -33,6 +35,12 @@ korge {
 
 dependencies {
     add("commonMainApi", project(":deps"))
+
+    add("commonTestImplementation", "io.kotest:kotest-framework-engine:5.9.1")
+    add("commonTestImplementation", "io.kotest:kotest-assertions-core:5.9.1")
+    add("commonTestImplementation", "dev.mokkery:mokkery-core:2.5.1")
+
+    add("jvmTestImplementation", "io.kotest:kotest-runner-junit5:5.9.1")
 
     add("jvmTestApi", "org.mockito.kotlin:mockito-kotlin:6.3.0")
     add("jvmTestApi", "org.assertj:assertj-core:3.27.7")
