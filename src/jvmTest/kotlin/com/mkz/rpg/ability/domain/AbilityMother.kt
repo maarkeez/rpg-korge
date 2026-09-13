@@ -24,7 +24,7 @@ object AbilityMother {
             ),
     )
 
-    fun id() = "ability-${Random.nextInt(1, 100)}"
+    fun id() = "ability-${UUID.randomUUID()}"
 
     fun name() = "Ability ${UUID.randomUUID().toString().takeLast(5)}"
 

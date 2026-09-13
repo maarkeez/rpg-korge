@@ -26,7 +26,7 @@ object UnitMother {
         ).pullEvents()
         .second
 
-    fun id() = "unit-${Random.nextInt(1, 100)}"
+    fun id() = "unit-${UUID.randomUUID()}"
 
     fun name() = "Unit ${UUID.randomUUID().toString().takeLast(5)}"
 

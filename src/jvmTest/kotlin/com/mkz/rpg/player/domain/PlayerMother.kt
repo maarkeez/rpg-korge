@@ -1,5 +1,6 @@
 package com.mkz.rpg.player.domain
 
+import korlibs.io.util.UUID
 import kotlin.random.Random
 
 object PlayerMother {
@@ -9,7 +10,7 @@ object PlayerMother {
         type: Player.Dto.PlayerTypeDto = type(),
     ): Player = (if (type == Player.Dto.PlayerTypeDto.CPU) Player.createCpu(id, name) else Player.createHuman(id, name)).pullEvents().second
 
-    fun id() = "player-${Random.nextInt(1, 100)}"
+    fun id() = "player-${UUID.randomUUID()}"
 
     fun name() = "Player ${Random.nextInt(1, 999)}"
 

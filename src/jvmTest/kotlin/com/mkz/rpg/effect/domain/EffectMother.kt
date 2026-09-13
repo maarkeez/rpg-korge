@@ -2,7 +2,7 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import kotlin.random.Random
+import korlibs.io.util.UUID
 
 object EffectMother {
     fun effect(
@@ -38,5 +38,5 @@ object EffectMother {
         ).pullEvents()
         .second
 
-    fun effectId(): String = "effect-${Random.nextInt(1, 100)}"
+    fun effectId(): String = "effect-${UUID.randomUUID()}"
 }
