@@ -6,6 +6,7 @@ import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother
+import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
@@ -179,8 +180,13 @@ class SimpleBattleAcceptanceTest {
         battleUnitApi.castAbility(
             battleUnitId = humanBattleUnitId,
             abilityId = swordAbilityId,
-            row = 1,
-            column = 2,
+            castGroup =
+                WhereCanCast.CastGroup(
+                    positions =
+                        listOf(
+                            WhereCanCast.PositionDto(row = 1, column = 2),
+                        ),
+                ),
         )
         // When
         eventBus.dispatch()
@@ -199,8 +205,13 @@ class SimpleBattleAcceptanceTest {
         battleUnitApi.castAbility(
             battleUnitId = humanBattleUnitId,
             abilityId = swordAbilityId,
-            row = 1,
-            column = 2,
+            castGroup =
+                WhereCanCast.CastGroup(
+                    positions =
+                        listOf(
+                            WhereCanCast.PositionDto(row = 1, column = 2),
+                        ),
+                ),
         )
         // When
         eventBus.dispatch()

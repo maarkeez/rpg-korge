@@ -1,6 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
@@ -26,7 +27,7 @@ class ReplenishManaTest {
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, row = 0, column = 0)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)
@@ -46,7 +47,7 @@ class ReplenishManaTest {
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, row = 0, column = 0)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)

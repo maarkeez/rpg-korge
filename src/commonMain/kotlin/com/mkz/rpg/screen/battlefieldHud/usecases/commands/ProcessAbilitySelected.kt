@@ -5,6 +5,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Idle
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
@@ -24,12 +25,12 @@ class ProcessAbilitySelected(
             is DisplayMovementRange -> {
                 val canCast = canCastAbility(battlefieldHud.battleUnitId, abilityId)
                 if (!canCast) return
-                val tilesWhereCanCast = tilesWhereCanCast(battlefieldHud.battleUnitId, abilityId)
+                val castGroupsWhereCanCast = castGroupsWhereCanCast(battlefieldHud.battleUnitId, abilityId)
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
                         .selectAbility(
                             abilityId = abilityId,
-                            tilesWhereCanCast = tilesWhereCanCast,
+                            castGroupsWhereCanCast = castGroupsWhereCanCast,
                         ).pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
@@ -41,12 +42,12 @@ class ProcessAbilitySelected(
                     battlefieldHudRepository.update(updatedBattlefieldHud)
                     eventBus.publish(events)
                 } else {
-                    val tilesWhereCanCast = tilesWhereCanCast(battlefieldHud.battleUnitId, abilityId)
+                    val castGroupsWhereCanCast = castGroupsWhereCanCast(battlefieldHud.battleUnitId, abilityId)
                     val (events, updatedBattlefieldHud) =
                         battlefieldHud
                             .selectAbility(
                                 abilityId = abilityId,
-                                tilesWhereCanCast = tilesWhereCanCast,
+                                castGroupsWhereCanCast = castGroupsWhereCanCast,
                             ).pullEvents()
                     battlefieldHudRepository.update(updatedBattlefieldHud)
                     eventBus.publish(events)
@@ -59,16 +60,18 @@ class ProcessAbilitySelected(
         }
     }
 
-    private fun tilesWhereCanCast(
+    private fun castGroupsWhereCanCast(
         battleUnitId: String,
         abilityId: String,
-    ): Set<TileDto> {
-        val castPositions = whereCanCast(battleUnitId, abilityId)
-        val tilesWhereCanCast =
-            castPositions
-                .map { position ->
-                    TileDto(row = position.row, column = position.column)
-                }.toSet()
-        return tilesWhereCanCast
+    ): List<Dto.CastGroupDto> {
+        val castGroups = whereCanCast(battleUnitId, abilityId)
+        return castGroups
+            .map { castGroup ->
+                Dto.CastGroupDto(
+                    tiles =
+                        castGroup.positions
+                            .map { position -> TileDto(row = position.row, column = position.column) },
+                )
+            }.distinct()
     }
 }

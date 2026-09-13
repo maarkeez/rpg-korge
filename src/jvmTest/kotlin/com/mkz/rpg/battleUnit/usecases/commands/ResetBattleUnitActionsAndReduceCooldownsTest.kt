@@ -1,6 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import org.assertj.core.api.Assertions.assertThat
@@ -20,7 +21,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
                 .move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, row = 0, column = 0)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(exhaustedBattleUnit)

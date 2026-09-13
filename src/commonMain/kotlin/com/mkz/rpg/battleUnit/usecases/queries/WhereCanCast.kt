@@ -21,18 +21,18 @@ class WhereCanCast(
     operator fun invoke(
         battleUnitId: String,
         abilityId: String,
-    ): List<PositionDto> {
+    ): List<CastGroup> {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return emptyList()
         val currentPosition = searchPosition(battleUnitId) ?: return emptyList()
         val ability = searchAbilityById(abilityId) ?: return emptyList()
         return when (ability.targetPattern) {
             Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
-            Ability.Dto.TargetPatternDto.SELF -> listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))
+            Ability.Dto.TargetPatternDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
             Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
         }
     }
 
-    private fun searchVacantTilesAdjacentToBattleUnitsExcluding(id: String): List<PositionDto> {
+    private fun searchVacantTilesAdjacentToBattleUnitsExcluding(id: String): List<CastGroup> {
         return buildList {
             val allBattleUnits =
                 battleUnitRepository
@@ -64,7 +64,7 @@ class WhereCanCast(
                     )
                 listOf(northPosition, southPosition, eastPosition, westPosition).forEach { position ->
                     if (canBattlefieldTileBeOccupied(position.row, position.column)) {
-                        add(position)
+                        add(CastGroup(listOf(position)))
                     }
                 }
             }
@@ -74,26 +74,31 @@ class WhereCanCast(
     private fun searchAdjacentEnemyPositions(
         battleUnit: BattleUnit,
         currentPosition: Battlefield.Dto.PositionDto,
-    ) = buildList {
-        val distance = 1
-        for (row in currentPosition.row - distance..currentPosition.row + distance) {
-            for (column in currentPosition.column - distance..currentPosition.column + distance) {
-                val occupantId = searchOccupant(row = row, column = column) ?: continue
-                val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
-                if (occupantBattleUnit.isSamePlayer(battleUnit)) continue
-                val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
-                val enemyDistance =
-                    distanceService.manhattanDistance(
-                        fromRow = currentPosition.row,
-                        fromColumn = currentPosition.column,
-                        toRow = row,
-                        toColumn = column,
-                    )
-                if (enemyDistance > 1) continue
-                add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
+    ): List<CastGroup> =
+        buildList {
+            val distance = 1
+            for (row in currentPosition.row - distance..currentPosition.row + distance) {
+                for (column in currentPosition.column - distance..currentPosition.column + distance) {
+                    val occupantId = searchOccupant(row = row, column = column) ?: continue
+                    val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
+                    if (occupantBattleUnit.isSamePlayer(battleUnit)) continue
+                    val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
+                    val enemyDistance =
+                        distanceService.manhattanDistance(
+                            fromRow = currentPosition.row,
+                            fromColumn = currentPosition.column,
+                            toRow = row,
+                            toColumn = column,
+                        )
+                    if (enemyDistance > 1) continue
+                    add(CastGroup(listOf(PositionDto(row = enemyPosition.row, column = enemyPosition.column))))
+                }
             }
         }
-    }
+
+    data class CastGroup(
+        val positions: List<PositionDto>,
+    )
 
     data class PositionDto(
         val row: Int,

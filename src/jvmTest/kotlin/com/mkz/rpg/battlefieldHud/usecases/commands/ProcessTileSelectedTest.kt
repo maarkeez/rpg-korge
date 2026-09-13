@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
+import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.tile
@@ -269,14 +270,15 @@ class ProcessTileSelectedTest {
     }
 
     @Test
-    fun `should preview the self ability cast when the selected tile is a cast position with no occupant`() {
+    fun `should preview the self ability cast when the selected tile belongs to a cast group with no occupant`() {
         // Given
+        val castGroup = castGroup(tile(1, 1))
         battlefieldHudRepository.create(
             displayAbilityCastRange(
                 casterTile = tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast = setOf(tile(1, 1)),
+                castGroupsWhereCanCast = listOf(castGroup),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
@@ -290,16 +292,13 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
-        assertThat(storedHud.castTile).isEqualTo(
-            tile(1, 1),
-        )
+        assertThat(storedHud.castGroup).isEqualTo(castGroup)
         assertThat(storedHud.enemyBattleUnitId).isNull()
         assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelfAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                castTile =
-                    tile(1, 1),
+                castGroup = castGroup,
             ),
         )
     }
@@ -307,15 +306,16 @@ class ProcessTileSelectedTest {
     @Test
     fun `should preview the enemy ability cast when the selected tile is occupied by an enemy battle unit`() {
         // Given
+        val castGroup = castGroup(tile(1, 1))
         battlefieldHudRepository.create(
             displayAbilityCastRange(
                 casterTile =
                     tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast =
-                    setOf(
-                        tile(1, 1),
+                castGroupsWhereCanCast =
+                    listOf(
+                        castGroup,
                     ),
             ),
         )
@@ -330,23 +330,20 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
-        assertThat(storedHud.castTile).isEqualTo(
-            tile(1, 1),
-        )
+        assertThat(storedHud.castGroup).isEqualTo(castGroup)
         assertThat(storedHud.enemyBattleUnitId).isEqualTo("enemy-battle-unit-1")
         assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                castTile =
-                    tile(1, 1),
+                castGroup = castGroup,
                 enemyBattleUnitId = "enemy-battle-unit-1",
             ),
         )
     }
 
     @Test
-    fun `should go idle when the selected tile is not a cast position`() {
+    fun `should go idle when the selected tile does not belong to any cast group`() {
         // Given
         battlefieldHudRepository.create(
             displayAbilityCastRange(
@@ -354,9 +351,9 @@ class ProcessTileSelectedTest {
                     tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast =
-                    setOf(
-                        tile(1, 1),
+                castGroupsWhereCanCast =
+                    listOf(
+                        castGroup(tile(1, 1)),
                     ),
             ),
         )
@@ -383,9 +380,9 @@ class ProcessTileSelectedTest {
                     tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast =
-                    setOf(
-                        tile(1, 1),
+                castGroupsWhereCanCast =
+                    listOf(
+                        castGroup(tile(1, 1)),
                     ),
             ),
         )

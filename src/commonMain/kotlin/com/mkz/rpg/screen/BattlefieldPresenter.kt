@@ -188,11 +188,13 @@ class BattlefieldPresenter(
         val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
         battleUnitInfoView.displayAbilitySelected(abilityIndex)
         battleHudView.displayBattleUnitInfoView()
-        event.tilesWhereCanCast.forEach { tilePosition ->
-            battlefieldView.displayPotentialCast(
-                row = tilePosition.row,
-                column = tilePosition.column,
-            )
+        event.castGroupsWhereCanCast.forEach { castGroup ->
+            castGroup.tiles.forEach { tilePosition ->
+                battlefieldView.displayPotentialCast(
+                    row = tilePosition.row,
+                    column = tilePosition.column,
+                )
+            }
         }
     }
 
@@ -208,10 +210,12 @@ class BattlefieldPresenter(
             receiverUnit = null,
             damage = null,
         )
-        battlefieldView.displayTileSelection(
-            row = event.castTile.row,
-            column = event.castTile.column,
-        )
+        event.castGroup.tiles.forEach { tilePosition ->
+            battlefieldView.displayTileSelection(
+                row = tilePosition.row,
+                column = tilePosition.column,
+            )
+        }
         battleHudView.displayAttackPreviewView()
     }
 
@@ -231,10 +235,12 @@ class BattlefieldPresenter(
             receiverUnit = targetUnit,
             damage = damage,
         )
-        battlefieldView.displayTileSelection(
-            row = event.castTile.row,
-            column = event.castTile.column,
-        )
+        event.castGroup.tiles.forEach { tilePosition ->
+            battlefieldView.displayTileSelection(
+                row = tilePosition.row,
+                column = tilePosition.column,
+            )
+        }
         battleHudView.displayAttackPreviewView()
     }
 

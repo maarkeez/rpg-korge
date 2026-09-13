@@ -35,10 +35,12 @@ class ProcessAbilitySelectedTest {
     @Test
     fun `should select the ability when the hud is displaying the movement range and the battle unit can cast`() {
         // Given
-        val tilesWhereCanCast =
-            setOf(
-                tile(1, 1),
-                tile(2, 2),
+        val castGroupsWhereCanCast =
+            listOf(
+                com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto
+                    .CastGroupDto(tiles = listOf(tile(1, 1))),
+                com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto
+                    .CastGroupDto(tiles = listOf(tile(2, 2))),
             )
         battlefieldHudRepository.create(
             displayMovementRange(
@@ -49,20 +51,28 @@ class ProcessAbilitySelectedTest {
         )
         whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
         whenever(whereCanCast("battle-unit-1", "ability-1"))
-            .thenReturn(tilesWhereCanCast.map { WhereCanCast.PositionDto(row = it.row, column = it.column) })
+            .thenReturn(
+                castGroupsWhereCanCast.map { castGroup ->
+                    WhereCanCast.CastGroup(
+                        positions =
+                            castGroup.tiles
+                                .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
+                    )
+                },
+            )
         // When
         processAbilitySelected("ability-1")
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
         assertThat(storedHud.abilityId).isEqualTo("ability-1")
-        assertThat(storedHud.tilesWhereCanCast).isEqualTo(tilesWhereCanCast)
+        assertThat(storedHud.castGroupsWhereCanCast).isEqualTo(castGroupsWhereCanCast)
         assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
                     tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                tilesWhereCanCast = tilesWhereCanCast,
+                castGroupsWhereCanCast = castGroupsWhereCanCast,
             ),
         )
     }
@@ -119,9 +129,10 @@ class ProcessAbilitySelectedTest {
     @Test
     fun `should switch to the new ability when a different ability is selected while displaying the ability cast range`() {
         // Given
-        val newTilesWhereCanCast =
-            setOf(
-                tile(2, 2),
+        val newCastGroupsWhereCanCast =
+            listOf(
+                com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto
+                    .CastGroupDto(tiles = listOf(tile(2, 2))),
             )
         battlefieldHudRepository.create(
             displayAbilityCastRange(
@@ -132,20 +143,28 @@ class ProcessAbilitySelectedTest {
             ),
         )
         whenever(whereCanCast("battle-unit-1", "ability-2"))
-            .thenReturn(newTilesWhereCanCast.map { WhereCanCast.PositionDto(row = it.row, column = it.column) })
+            .thenReturn(
+                newCastGroupsWhereCanCast.map { castGroup ->
+                    WhereCanCast.CastGroup(
+                        positions =
+                            castGroup.tiles
+                                .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
+                    )
+                },
+            )
         // When
         processAbilitySelected("ability-2")
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
         assertThat(storedHud.abilityId).isEqualTo("ability-2")
-        assertThat(storedHud.tilesWhereCanCast).isEqualTo(newTilesWhereCanCast)
+        assertThat(storedHud.castGroupsWhereCanCast).isEqualTo(newCastGroupsWhereCanCast)
         assertThat(eventBus).hasPublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
                     tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-2",
-                tilesWhereCanCast = newTilesWhereCanCast,
+                castGroupsWhereCanCast = newCastGroupsWhereCanCast,
             ),
         )
     }

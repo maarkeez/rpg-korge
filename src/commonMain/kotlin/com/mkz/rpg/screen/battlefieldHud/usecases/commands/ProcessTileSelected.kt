@@ -116,9 +116,9 @@ class ProcessTileSelected(
         val casterBattleUnit = searchBattleUnitById(battlefieldHud.battleUnitId)!!
         val currentPlayerId = searchBattle()?.currentPlayerTurn ?: return
 
-        val tileIsACastPosition = battlefieldHud.tilesWhereCanCast.contains(tile)
+        val selectedCastGroup = battlefieldHud.castGroupsWhereCanCast.firstOrNull { castGroup -> castGroup.tiles.contains(tile) }
         val isPlayerBattleUnit = currentPlayerId == casterBattleUnit.playerId
-        if (!tileIsACastPosition || !isPlayerBattleUnit) {
+        if (selectedCastGroup == null || !isPlayerBattleUnit) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
@@ -127,13 +127,13 @@ class ProcessTileSelected(
             val isSameUnit = casterBattleUnit.id == targetBattleUnitId
             val noTargetBattleUnit = targetBattleUnitId == null
             if (isSameUnit || noTargetBattleUnit) {
-                val (events, updatedBattlefieldHud) = battlefieldHud.previewSelfAbilityCast(castTile = tile).pullEvents()
+                val (events, updatedBattlefieldHud) = battlefieldHud.previewSelfAbilityCast(castGroup = selectedCastGroup).pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             } else {
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
-                        .previewEnemyAbilityCast(castTile = tile, enemyBattleUnitId = targetBattleUnitId)
+                        .previewEnemyAbilityCast(castGroup = selectedCastGroup, enemyBattleUnitId = targetBattleUnitId)
                         .pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)

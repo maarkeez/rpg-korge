@@ -47,8 +47,8 @@ class PlayTurn(
                 ?.key
                 ?.let { abilityId ->
 
-                    whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castPosition ->
-                        castAbility(battleUnitId = battleUnit.id, abilityId = abilityId, row = castPosition.row, column = castPosition.column)
+                    whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castGroup ->
+                        castAbility(battleUnitId = battleUnit.id, abilityId = abilityId, castGroup = castGroup)
                     }
                 }
         }

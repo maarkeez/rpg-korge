@@ -49,7 +49,7 @@ class WhereCanCastTest {
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
         assertThat(result)
-            .containsExactly(WhereCanCast.PositionDto(2, 2))
+            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 2))))
     }
 
     @Test
@@ -72,7 +72,7 @@ class WhereCanCastTest {
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
         assertThat(result)
-            .containsExactly(WhereCanCast.PositionDto(1, 2))
+            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))))
     }
 
     @Test
@@ -96,8 +96,8 @@ class WhereCanCastTest {
         val result = whereCanCast(casterId, "ability-1")
         // Then
         assertThat(result).containsExactlyInAnyOrder(
-            WhereCanCast.PositionDto(1, 2),
-            WhereCanCast.PositionDto(2, 1),
+            WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))),
+            WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 1))),
         )
     }
 

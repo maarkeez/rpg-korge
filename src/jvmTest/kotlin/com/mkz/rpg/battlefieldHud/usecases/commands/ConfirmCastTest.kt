@@ -1,6 +1,8 @@
 package com.mkz.rpg.battlefieldHud.usecases.commands
 
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
+import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
+import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -30,12 +32,12 @@ class ConfirmCastTest {
     @Test
     fun `should cast the ability and go idle when the hud is previewing the ability cast`() {
         // Given
-        val castTile = tile(1, 1)
+        val castGroup = castGroup(tile(1, 1))
         battlefieldHudRepository.create(
             displayAbilityCastPreview(
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                castTile = castTile,
+                castGroup = castGroup,
             ),
         )
         // When
@@ -44,8 +46,12 @@ class ConfirmCastTest {
         verify(castAbility).invoke(
             battleUnitId = "battle-unit-1",
             abilityId = "ability-1",
-            row = castTile.row,
-            column = castTile.column,
+            castGroup =
+                WhereCanCast.CastGroup(
+                    positions =
+                        castGroup.tiles
+                            .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
+                ),
         )
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
         assertThat(eventBus)

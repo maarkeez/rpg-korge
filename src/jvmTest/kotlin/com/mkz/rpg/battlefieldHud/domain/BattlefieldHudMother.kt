@@ -3,6 +3,7 @@ package com.mkz.rpg.battlefieldHud.domain
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Idle
 import kotlin.random.Random
@@ -27,14 +28,14 @@ object BattlefieldHudMother {
         battleUnitId: String = battleUnitId(),
         abilityId: String = abilityId(),
         tilesWhereCanBeMoved: Set<TileDto> = setOf(tile(0, 1)),
-        tilesWhereCanCast: Set<TileDto> = setOf(tile(1, 1)),
+        castGroupsWhereCanCast: List<CastGroupDto> = listOf(castGroup(tile(1, 1))),
     ): DisplayAbilityCastRange =
         DisplayAbilityCastRange(
             casterTile = casterTile,
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            tilesWhereCanCast = tilesWhereCanCast,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
             events = emptySet(),
         )
 
@@ -43,8 +44,8 @@ object BattlefieldHudMother {
         battleUnitId: String = battleUnitId(),
         abilityId: String = abilityId(),
         tilesWhereCanBeMoved: Set<TileDto> = setOf(tile(0, 1)),
-        tilesWhereCanCast: Set<TileDto> = setOf(tile(1, 1)),
-        castTile: TileDto = tile(1, 1),
+        castGroupsWhereCanCast: List<CastGroupDto> = listOf(castGroup(tile(1, 1))),
+        castGroup: CastGroupDto = castGroup(tile(1, 1)),
         enemyBattleUnitId: String? = null,
     ): DisplayAbilityCastPreview =
         DisplayAbilityCastPreview(
@@ -52,8 +53,8 @@ object BattlefieldHudMother {
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            tilesWhereCanCast = tilesWhereCanCast,
-            castTile = castTile,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
+            castGroup = castGroup,
             enemyBattleUnitId = enemyBattleUnitId,
             events = emptySet(),
         )
@@ -62,6 +63,8 @@ object BattlefieldHudMother {
         row: Int,
         column: Int,
     ) = TileDto(row = row, column = column)
+
+    fun castGroup(vararg tiles: TileDto) = CastGroupDto(tiles = tiles.toList())
 
     fun battleUnitId() = "battle-unit-${Random.nextInt(1, 10000)}"
 

@@ -13,6 +13,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.unit.domain.Unit
@@ -137,8 +138,7 @@ data class BattleUnit private constructor(
         abilityId: String,
         abilityCooldown: Int,
         abilityCost: Int,
-        row: Int,
-        column: Int,
+        castGroup: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
         val remainingTurnActions = remainingTurnActions.castAbility()
         val abilityCooldowns = abilityCooldowns.castAbility(abilityId, abilityCooldown)
@@ -146,8 +146,7 @@ data class BattleUnit private constructor(
             BattleUnitEvent.AbilityCasted(
                 battleUnitId = id.value,
                 abilityId = abilityId,
-                row = row,
-                column = column,
+                castGroup = castGroup,
             )
         return copy(
             remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityCost),

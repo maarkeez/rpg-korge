@@ -11,11 +11,13 @@ class OnAbilityCasted(
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitEvent.AbilityCasted> { event ->
-            receiveAbilityEffects(
-                battleUnitId = event.battleUnitId,
-                abilityId = event.abilityId,
-                row = event.row,
-                column = event.column,
-            )
+            event.castGroup.forEach { position ->
+                receiveAbilityEffects(
+                    battleUnitId = event.battleUnitId,
+                    abilityId = event.abilityId,
+                    row = position.row,
+                    column = position.column,
+                )
+            }
         }
 }

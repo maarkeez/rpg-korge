@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.battlefieldHud.domain
 
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.shared.domain.DomainEvent
 
@@ -16,7 +17,7 @@ sealed interface BattlefieldHudEvent : DomainEvent {
         val casterTile: TileDto,
         val battleUnitId: String,
         val abilityId: String,
-        val tilesWhereCanCast: Set<TileDto>,
+        val castGroupsWhereCanCast: List<CastGroupDto>,
     ) : BattlefieldHudEvent
 
     data class AbilityDeselected(
@@ -26,13 +27,13 @@ sealed interface BattlefieldHudEvent : DomainEvent {
     data class SelfAbilityCastPreviewed(
         val casterBattleUnitId: String,
         val abilityId: String,
-        val castTile: TileDto,
+        val castGroup: CastGroupDto,
     ) : BattlefieldHudEvent
 
     data class EnemyAbilityCastPreviewed(
         val casterBattleUnitId: String,
         val abilityId: String,
-        val castTile: TileDto,
+        val castGroup: CastGroupDto,
         val enemyBattleUnitId: String,
     ) : BattlefieldHudEvent
 }

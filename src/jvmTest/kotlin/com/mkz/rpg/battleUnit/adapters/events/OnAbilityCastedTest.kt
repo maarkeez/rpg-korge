@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.usecases.commands.ReceiveAbilityEffects
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,18 +20,20 @@ class OnAbilityCastedTest {
         )
 
     @Test
-    fun `should receive ability effects when an ability is casted`() {
+    fun `should receive ability effects for all the positions in the cast group when an ability is casted`() {
         // Given
         val battleUnitId = "battle-unit-1"
         val abilityId = "ability-1"
-        val row = 1
-        val column = 2
+        val castGroup =
+            listOf(
+                Battlefield.Dto.PositionDto(row = 1, column = 2),
+                Battlefield.Dto.PositionDto(row = 2, column = 1),
+            )
         eventBus.publish(
             BattleUnitEvent.AbilityCasted(
                 battleUnitId = battleUnitId,
                 abilityId = abilityId,
-                row = row,
-                column = column,
+                castGroup = castGroup,
             ),
         )
         // When
@@ -39,8 +42,14 @@ class OnAbilityCastedTest {
         verify(receiveAbilityEffects).invoke(
             battleUnitId = battleUnitId,
             abilityId = abilityId,
-            row = row,
-            column = column,
+            row = 1,
+            column = 2,
+        )
+        verify(receiveAbilityEffects).invoke(
+            battleUnitId = battleUnitId,
+            abilityId = abilityId,
+            row = 2,
+            column = 1,
         )
     }
 

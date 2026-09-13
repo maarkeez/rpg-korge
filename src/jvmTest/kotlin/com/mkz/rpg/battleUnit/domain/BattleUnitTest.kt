@@ -1,6 +1,7 @@
 package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.AbilityMother
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.domain.PlayerMother
@@ -136,7 +137,7 @@ class BattleUnitTest {
         fun `should reduce the ability cooldowns when the turn passes`() {
             // Given
             val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1")).toDto())
-            val battleUnitWithCooldown = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, row = 0, column = 0)
+            val battleUnitWithCooldown = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
             // When
             val updatedBattleUnit = battleUnitWithCooldown.reduceCoolDowns()
             // Then
@@ -153,7 +154,7 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = unit)
-                    .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, row = 0, column = 0)
+                    .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
             // When
             val replenishedBattleUnit = battleUnit.replenishMana(unit = unit)
             // Then
@@ -230,7 +231,7 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
-                    .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 0, row = 0, column = 0)
+                    .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
@@ -244,7 +245,7 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1", "ability-2"), manaPoints = 10).toDto())
-                    .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 0, row = 0, column = 0)
+                    .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
@@ -270,7 +271,8 @@ class BattleUnitTest {
             // Given
             val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
             // When
-            val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 3, row = 1, column = 1)
+            val castGroup = listOf(Battlefield.Dto.PositionDto(1, 1))
+            val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 3, castGroup = castGroup)
             // Then
             val battleUnitDto = updatedBattleUnit.toDto()
             assertThat(battleUnitDto.remainingManaPoints).isEqualTo(7)
@@ -278,7 +280,7 @@ class BattleUnitTest {
             assertThat(battleUnitDto.abilityCooldowns).containsEntry("ability-1", 2)
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events)
-                .containsExactly(BattleUnitEvent.AbilityCasted(battleUnitId = battleUnitDto.id, abilityId = "ability-1", row = 1, column = 1))
+                .containsExactly(BattleUnitEvent.AbilityCasted(battleUnitId = battleUnitDto.id, abilityId = "ability-1", castGroup = castGroup))
         }
     }
 

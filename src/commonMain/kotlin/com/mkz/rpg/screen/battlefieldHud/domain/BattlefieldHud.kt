@@ -47,20 +47,20 @@ sealed interface BattlefieldHud {
 
         fun selectAbility(
             abilityId: String,
-            tilesWhereCanCast: Set<Dto.TileDto>,
+            castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         ) = DisplayAbilityCastRange(
             casterTile = tile,
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            tilesWhereCanCast = tilesWhereCanCast,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
             events =
                 events +
                     SelectedBattleUnitAbility(
                         casterTile = tile,
                         battleUnitId = battleUnitId,
                         abilityId = abilityId,
-                        tilesWhereCanCast = tilesWhereCanCast,
+                        castGroupsWhereCanCast = castGroupsWhereCanCast,
                     ),
         )
 
@@ -85,24 +85,24 @@ sealed interface BattlefieldHud {
         val battleUnitId: String,
         val abilityId: String,
         val tilesWhereCanBeMoved: Set<Dto.TileDto>,
-        val tilesWhereCanCast: Set<Dto.TileDto>,
+        val castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         private val events: Set<BattlefieldHudEvent>,
     ) : BattlefieldHud {
         fun pullEvents() = events to copy(events = emptySet())
 
         fun selectAbility(
             abilityId: String,
-            tilesWhereCanCast: Set<Dto.TileDto>,
+            castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         ) = copy(
             abilityId = abilityId,
-            tilesWhereCanCast = tilesWhereCanCast,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
             events =
                 events +
                     SelectedBattleUnitAbility(
                         casterTile = casterTile,
                         battleUnitId = battleUnitId,
                         abilityId = abilityId,
-                        tilesWhereCanCast = tilesWhereCanCast,
+                        castGroupsWhereCanCast = castGroupsWhereCanCast,
                     ),
         )
 
@@ -121,43 +121,43 @@ sealed interface BattlefieldHud {
                         ),
             )
 
-        fun previewSelfAbilityCast(castTile: Dto.TileDto) =
+        fun previewSelfAbilityCast(castGroup: Dto.CastGroupDto) =
             DisplayAbilityCastPreview(
                 casterTile = casterTile,
                 battleUnitId = battleUnitId,
                 abilityId = abilityId,
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-                tilesWhereCanCast = tilesWhereCanCast,
-                castTile = castTile,
+                castGroupsWhereCanCast = castGroupsWhereCanCast,
+                castGroup = castGroup,
                 enemyBattleUnitId = null,
                 events =
                     events +
                         SelfAbilityCastPreviewed(
                             casterBattleUnitId = battleUnitId,
                             abilityId = abilityId,
-                            castTile = castTile,
+                            castGroup = castGroup,
                         ),
             )
 
         fun idle() = Idle(events + BattlefieldHudEvent.Idle)
 
         fun previewEnemyAbilityCast(
-            castTile: Dto.TileDto,
+            castGroup: Dto.CastGroupDto,
             enemyBattleUnitId: String,
         ) = DisplayAbilityCastPreview(
             casterTile = casterTile,
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            tilesWhereCanCast = tilesWhereCanCast,
-            castTile = castTile,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
+            castGroup = castGroup,
             enemyBattleUnitId = enemyBattleUnitId,
             events =
                 events +
                     BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                         casterBattleUnitId = battleUnitId,
                         abilityId = abilityId,
-                        castTile = castTile,
+                        castGroup = castGroup,
                         enemyBattleUnitId = enemyBattleUnitId,
                     ),
         )
@@ -168,8 +168,8 @@ sealed interface BattlefieldHud {
         val battleUnitId: String,
         val abilityId: String,
         val tilesWhereCanBeMoved: Set<Dto.TileDto>,
-        val tilesWhereCanCast: Set<Dto.TileDto>,
-        val castTile: Dto.TileDto,
+        val castGroupsWhereCanCast: List<Dto.CastGroupDto>,
+        val castGroup: Dto.CastGroupDto,
         val enemyBattleUnitId: String?,
         private val events: Set<BattlefieldHudEvent>,
     ) : BattlefieldHud {
@@ -182,6 +182,10 @@ sealed interface BattlefieldHud {
         data class TileDto(
             val row: Int,
             val column: Int,
+        )
+
+        data class CastGroupDto(
+            val tiles: List<TileDto>,
         )
     }
 }

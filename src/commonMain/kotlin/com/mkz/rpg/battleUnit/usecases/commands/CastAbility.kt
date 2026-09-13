@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattleUnitCanNotCastAbility
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidCastPosition
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast.PositionDto
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.shared.domain.EventBus
 
 class CastAbility(
@@ -18,18 +18,21 @@ class CastAbility(
     operator fun invoke(
         battleUnitId: String,
         abilityId: String,
-        row: Int,
-        column: Int,
+        castGroup: WhereCanCast.CastGroup,
     ) {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
         val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
         if (!storedBattleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
-        val whereCanCast = whereCanCast(battleUnitId, abilityId)
-        if (!whereCanCast.contains(PositionDto(row, column))) throw InvalidCastPosition()
+        val castGroupsWhereCanCast = whereCanCast(battleUnitId, abilityId)
+        if (!castGroupsWhereCanCast.contains(castGroup)) throw InvalidCastPosition()
         val (events, battleUnit) =
             storedBattleUnit
-                .castAbility(abilityId = abilityId, abilityCooldown = ability.cooldown, abilityCost = ability.cost, row = row, column = column)
-                .pullEvents()
+                .castAbility(
+                    abilityId = abilityId,
+                    abilityCooldown = ability.cooldown,
+                    abilityCost = ability.cost,
+                    castGroup = castGroup.positions.map { position -> Battlefield.Dto.PositionDto(row = position.row, column = position.column) },
+                ).pullEvents()
         battleUnitRepository.update(battleUnit)
         eventBus.publish(events)
     }

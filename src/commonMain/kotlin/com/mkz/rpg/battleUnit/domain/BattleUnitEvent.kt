@@ -1,5 +1,6 @@
 package com.mkz.rpg.battleUnit.domain
 
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface BattleUnitEvent : DomainEvent {
@@ -20,8 +21,7 @@ sealed interface BattleUnitEvent : DomainEvent {
     data class AbilityCasted(
         val battleUnitId: String,
         val abilityId: String,
-        val row: Int,
-        val column: Int,
+        val castGroup: List<Battlefield.Dto.PositionDto>,
     ) : BattleUnitEvent
 
     data class EffectReceived(

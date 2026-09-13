@@ -105,13 +105,14 @@ class PlayTurnTest {
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit))
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
         whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
+        val castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 0, column = 0)))
         whenever(whereCanCast("battle-unit-1", "ability-1"))
-            .thenReturn(listOf(WhereCanCast.PositionDto(row = 0, column = 0)))
+            .thenReturn(listOf(castGroup))
         whenever(whereShouldMove("battle-unit-1")).thenReturn(null)
         // When
         playTurn("player-1")
         // Then
-        verify(castAbility, atLeastOnce()).invoke("battle-unit-1", "ability-1", 0, 0)
+        verify(castAbility, atLeastOnce()).invoke("battle-unit-1", "ability-1", castGroup)
     }
 
     @Test
@@ -140,6 +141,6 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        verify(castAbility, never()).invoke(any(), any(), any(), any())
+        verify(castAbility, never()).invoke(any(), any(), any())
     }
 }
