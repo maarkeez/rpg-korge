@@ -214,6 +214,62 @@ class BarViewTest : ViewsForTesting() {
 }
 ```
 
+## Test example - Use case acceptance test
+
+- Use case acceptance tests MUST test new features that integrates multiple subdomains.
+- They MUST test the happy path.
+- They MUST NOT test corner cases.
+- They MUST NOT test integrations with the presentation layer.
+- They MUST request the actions through use cases.
+- They MUST assert state.
+- They MUST NOT assert that events are being triggered.
+- They MUST be implemented under `com.mkz.rpg.shared.usecases.acceptance` test package
+- They SHOULD use each subdomain API declared under `com.mkz.rpg.<subdomain>.adapters.presentation.<subdomain>Api`. E.g.: use `com.mkz.rpg.effect.adapters.presentation.EffectApi` to interact with the effect subdomain use cases.
+- They SHOULD use `require` to validate preconditions about the common setup for the acceptance test scenario. E.g.: before moving a battle unit, require that the initial position is the one needed by the test.
+- They MUST only invoke `eventBus.dispatch()` in the `// When` section
+
+For example: Requesting to move a battle unit
+
+- Requesting to move a battle unit is triggered from `battleUnit` subdomain, but has consequences on `battlefield` subdomain too.
+- Requesting to move a battle unit to a valid tile is a good fit.
+- Requesting to move a battle unit to an invalid tile (e.g.: out of battlefield boundaries) is NOT a good fit.
+
+Here is a test example 
+
+```kotlin
+package com.mkz.rpg.shared.usecases.acceptance
+
+// Imports goes here
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class SimpleBattleAcceptanceTest {
+
+    // Subdomain APIs setup goes here
+
+    @BeforeEach
+    fun setup() {
+        // Common setup for the acceptance test scenario goes here
+    }
+
+    @Test
+    fun `should occupy a tile when unit was moved`() {
+        // Given
+        require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
+        battleUnitApi.moveBattleUnit(battleUnitId = humanBattleUnitId, moveToRow = 2, moveToColumn = 1)
+        // When
+        eventBus.dispatch()
+        // Then
+        val previousTileOccupantId = battlefieldApi.searchOccupant(row = 1, column = 1)
+        assertThat(previousTileOccupantId).isNull()
+        val newTileOccupantId = battlefieldApi.searchOccupant(row = 2, column = 1)
+        assertThat(newTileOccupantId).isEqualTo(humanBattleUnitId)
+    }
+}
+```
+
+
 ## Run tests
 
 All the project tests can be run using `./gradlew clean jvmTest`
