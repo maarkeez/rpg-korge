@@ -43,9 +43,7 @@ class ReceiveAbilityEffects(
             receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
         }
         if (ability.targetPattern == Ability.Dto.TargetPatternDto.SELF) {
-            if (occupantId == null) throw FailedToReceiveAbilityEffects()
-            if (occupantId != battleUnitId) throw FailedToReceiveAbilityEffects()
-            receiveAbilityEffects(battleUnitId = occupantId, effects = effects)
+            receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
         }
         if (ability.targetPattern == Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT) {
             if (occupantId != null) throw FailedToReceiveAbilityEffects()

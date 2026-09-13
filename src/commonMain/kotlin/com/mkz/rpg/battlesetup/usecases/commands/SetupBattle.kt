@@ -130,7 +130,7 @@ class SetupBattle(
                 cost = 10,
                 cooldown = 0,
                 effects = listOf(venomDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES,
             )
         val skull =
             Ability.Dto(

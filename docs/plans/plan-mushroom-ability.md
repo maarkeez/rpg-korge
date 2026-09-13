@@ -60,7 +60,7 @@ We need to introduce a new ability target pattern called `ALL_ADJACENT_ENEMIES`.
 
 An ability with the target pattern `ALL_ADJACENT_ENEMIES` have 1 cast group with all the adjacent enemies (enemies at manhattan distance 1)
 
-# Step 4 - Modify setup battle
+# Step 4 - Modify setup battle (done)
 
 Modify setup battle use case [SetupBattle.kt](../../src/commonMain/kotlin/com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt) to apply `ALL_ADJACENT_ENEMIES` new target pattern to the `mushroom` ability.
 Add a new use case acceptance test following our guidelines [how-to-add-a-new-test.md](../testing/how-to-add-a-new-test.md) to confirm that when the ability is cast, multiple adjacent enemy battle unit have received the effect. 
