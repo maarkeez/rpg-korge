@@ -129,7 +129,7 @@ class SetupBattle(
                 name = "Mushroom",
                 cost = 10,
                 cooldown = 0,
-                effects = listOf(lowPhysicalDamage.id),
+                effects = listOf(venomDamage.id),
                 targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
             )
         val skull =
