@@ -24,7 +24,7 @@ Following our testing guidelines [how-to-add-a-new-test.md](../testing/how-to-ad
 - [UnitNameView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/UnitNameView.kt)
 - [UnitPortraitView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/UnitPortraitView.kt)
 
-# Step 3 - Refactor to allow cast group
+# Step 2- Refactor to allow cast group
 
 At the moment abilities can be cast only over a single tile position.
 
@@ -54,13 +54,13 @@ Some of the affected files will be
 - [BattlefieldPresenter.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/BattlefieldPresenter.kt)
 - [BattlefieldView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/BattlefieldView.kt)
 
-# Step 2 - Introduce new ability target pattern
+# Step 3 - Introduce new ability target pattern
 
 We need to introduce a new ability target pattern called `ALL_ADJACENT_ENEMIES`.
 
 An ability with the target pattern `ALL_ADJACENT_ENEMIES` have 1 cast group with all the adjacent enemies (enemies at manhattan distance 1)
 
-# Step 3 - Modify setup battle
+# Step 4 - Modify setup battle
 
 Modify setup battle use case [SetupBattle.kt](../../src/commonMain/kotlin/com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt) to apply `ALL_ADJACENT_ENEMIES` new target pattern to the `mushroom` ability.
 Add a new use case acceptance test following our guidelines [how-to-add-a-new-test.md](../testing/how-to-add-a-new-test.md) to confirm that when the ability is cast, multiple adjacent enemy battle unit have received the effect. 
