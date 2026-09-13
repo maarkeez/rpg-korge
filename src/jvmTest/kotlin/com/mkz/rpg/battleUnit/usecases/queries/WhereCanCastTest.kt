@@ -76,6 +76,59 @@ class WhereCanCastTest {
     }
 
     @Test
+    fun `should return a single cast group with all adjacent enemy positions when the ability targets all adjacent enemies`() {
+        // Given
+        val player = player(id = "player-1")
+        val enemyPlayer = player(id = "player-2")
+        val battleUnit = battleUnit(player = player.toDto())
+        val adjacentEnemyBattleUnit1 = battleUnit(player = enemyPlayer.toDto())
+        val adjacentEnemyBattleUnit2 = battleUnit(player = enemyPlayer.toDto())
+        val farEnemyBattleUnit = battleUnit(player = enemyPlayer.toDto())
+        val allyBattleUnit = battleUnit(player = player.toDto())
+        battleUnitRepository.create(battleUnit)
+        battleUnitRepository.create(adjacentEnemyBattleUnit1)
+        battleUnitRepository.create(adjacentEnemyBattleUnit2)
+        battleUnitRepository.create(farEnemyBattleUnit)
+        battleUnitRepository.create(allyBattleUnit)
+        val battleUnitId = battleUnit.toDto().id
+        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES).toDto(),
+        )
+        whenever(searchOccupant(1, 2)).thenReturn(adjacentEnemyBattleUnit1.toDto().id)
+        whenever(searchPosition(adjacentEnemyBattleUnit1.toDto().id)).thenReturn(PositionDto(1, 2))
+        whenever(searchOccupant(2, 1)).thenReturn(adjacentEnemyBattleUnit2.toDto().id)
+        whenever(searchPosition(adjacentEnemyBattleUnit2.toDto().id)).thenReturn(PositionDto(2, 1))
+        whenever(searchOccupant(2, 2)).thenReturn(farEnemyBattleUnit.toDto().id)
+        whenever(searchPosition(farEnemyBattleUnit.toDto().id)).thenReturn(PositionDto(2, 2))
+        whenever(searchOccupant(1, 0)).thenReturn(allyBattleUnit.toDto().id)
+        whenever(searchPosition(allyBattleUnit.toDto().id)).thenReturn(PositionDto(1, 0))
+        // When
+        val result = whereCanCast(battleUnitId, "ability-1")
+        // Then
+        assertThat(result).hasSize(1)
+        assertThat(result.first().positions).containsExactlyInAnyOrder(
+            WhereCanCast.PositionDto(1, 2),
+            WhereCanCast.PositionDto(2, 1),
+        )
+    }
+
+    @Test
+    fun `should return empty list when the ability targets all adjacent enemies and there are no adjacent enemies`() {
+        // Given
+        val battleUnit = battleUnit()
+        battleUnitRepository.create(battleUnit)
+        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(1, 1))
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES).toDto(),
+        )
+        // When
+        val result = whereCanCast(battleUnit.toDto().id, "ability-1")
+        // Then
+        assertThat(result).isEmpty()
+    }
+
+    @Test
     fun `should return vacant tiles adjacent to other battle units when the ability targets vacant adjacent tiles`() {
         // Given
         val caster = battleUnit()

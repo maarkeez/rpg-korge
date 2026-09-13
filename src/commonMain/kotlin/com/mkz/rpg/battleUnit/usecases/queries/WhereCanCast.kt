@@ -26,7 +26,11 @@ class WhereCanCast(
         val currentPosition = searchPosition(battleUnitId) ?: return emptyList()
         val ability = searchAbilityById(abilityId) ?: return emptyList()
         return when (ability.targetPattern) {
-            Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition)
+            Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition).map { position -> CastGroup(listOf(position)) }
+            Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES -> {
+                val positions = searchAdjacentEnemyPositions(battleUnit, currentPosition)
+                if (positions.isEmpty()) emptyList() else listOf(CastGroup(positions))
+            }
             Ability.Dto.TargetPatternDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
             Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
         }
@@ -74,7 +78,7 @@ class WhereCanCast(
     private fun searchAdjacentEnemyPositions(
         battleUnit: BattleUnit,
         currentPosition: Battlefield.Dto.PositionDto,
-    ): List<CastGroup> =
+    ): List<PositionDto> =
         buildList {
             val distance = 1
             for (row in currentPosition.row - distance..currentPosition.row + distance) {
@@ -91,7 +95,7 @@ class WhereCanCast(
                             toColumn = column,
                         )
                     if (enemyDistance > 1) continue
-                    add(CastGroup(listOf(PositionDto(row = enemyPosition.row, column = enemyPosition.column))))
+                    add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
                 }
             }
         }

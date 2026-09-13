@@ -32,7 +32,10 @@ class ReceiveAbilityEffects(
         val effects = ability.effects.map { effectId -> searchEffectById(effectId) ?: throw FailedToReceiveAbilityEffects() }
         // TODO: Implement other target patterns
         val occupantId = searchOccupant(row, column)
-        if (ability.targetPattern == Ability.Dto.TargetPatternDto.ADJACENT_ENEMY) {
+        if (
+            ability.targetPattern == Ability.Dto.TargetPatternDto.ADJACENT_ENEMY ||
+            ability.targetPattern == Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES
+        ) {
             if (occupantId == null) throw FailedToReceiveAbilityEffects()
             val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: throw FailedToReceiveAbilityEffects()
             val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()

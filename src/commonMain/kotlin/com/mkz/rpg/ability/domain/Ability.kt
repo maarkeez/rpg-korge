@@ -95,6 +95,7 @@ data class Ability private constructor(
     private enum class TargetPattern {
         SELF,
         ADJACENT_ENEMY,
+        ALL_ADJACENT_ENEMIES,
         VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
         ;
 
@@ -116,6 +117,7 @@ data class Ability private constructor(
         enum class TargetPatternDto {
             SELF,
             ADJACENT_ENEMY,
+            ALL_ADJACENT_ENEMIES,
             VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
         }
     }

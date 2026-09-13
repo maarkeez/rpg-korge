@@ -3,7 +3,7 @@
 Currently, mushroom ability is a placeholder that deals low physical damage.
 Instead, we want the mushroom ability to apply the venom damage effect to all the adjacent enemies when is cast.
 
-# Step 1 - Add missing unit tests
+# Step 1 - Add missing unit tests (done)
 
 Following our testing guidelines [how-to-add-a-new-test.md](../testing/how-to-add-a-new-test.md) add unit tests for the following classes
 
@@ -24,7 +24,7 @@ Following our testing guidelines [how-to-add-a-new-test.md](../testing/how-to-ad
 - [UnitNameView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/UnitNameView.kt)
 - [UnitPortraitView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/UnitPortraitView.kt)
 
-# Step 2- Refactor to allow cast group
+# Step 2- Refactor to allow cast group (done)
 
 At the moment abilities can be cast only over a single tile position.
 
@@ -54,7 +54,7 @@ Some of the affected files will be
 - [BattlefieldPresenter.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/BattlefieldPresenter.kt)
 - [BattlefieldView.kt](../../src/commonMain/kotlin/com/mkz/rpg/screen/BattlefieldView.kt)
 
-# Step 3 - Introduce new ability target pattern
+# Step 3 - Introduce new ability target pattern (done)
 
 We need to introduce a new ability target pattern called `ALL_ADJACENT_ENEMIES`.
 

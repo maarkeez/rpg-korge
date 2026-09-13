@@ -71,6 +71,38 @@ class ReceiveAbilityEffectsTest {
     }
 
     @Test
+    fun `should apply immediate effect to the enemy occupant when the ability targets all adjacent enemies`() {
+        // Given
+        val effectId = "effect-1"
+        val effect = effect(id = effectId, power = 3, applicationType = "IMMEDIATELY").toDto()
+        val enemyUnit = unit(healthPoints = 10).toDto()
+        val player = player(id = "player-1").toDto()
+        val enemyPlayer = player(id = "player-2").toDto()
+        val battleUnit = battleUnit(player = player)
+        val enemyBattleUnit = battleUnit(unit = enemyUnit, player = enemyPlayer)
+        battleUnitRepository.create(battleUnit)
+        battleUnitRepository.create(enemyBattleUnit)
+        val battleUnitId = battleUnit.toDto().id
+        val enemyBattleUnitId = enemyBattleUnit.toDto().id
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES, effects = listOf(effectId))
+                .toDto(),
+        )
+        whenever(searchEffectById(effectId)).thenReturn(effect)
+        whenever(searchOccupant(1, 1)).thenReturn(enemyBattleUnitId)
+        whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
+        // When
+        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        // Then
+        val storedEnemyBattleUnit = battleUnitRepository.searchById(enemyBattleUnitId)?.toDto()
+        assertThat(storedEnemyBattleUnit!!.remainingHealthPoints).isEqualTo(7)
+        assertThat(eventBus).hasPublishedEvents(
+            BattleUnitEvent.EffectReceived(enemyBattleUnitId, effectId),
+            BattleUnitEvent.BattleUnitDamaged(enemyBattleUnitId),
+        )
+    }
+
+    @Test
     fun `should throw ability does not exist when the ability is unknown`() {
         // Given
         val battleUnit = battleUnit()
