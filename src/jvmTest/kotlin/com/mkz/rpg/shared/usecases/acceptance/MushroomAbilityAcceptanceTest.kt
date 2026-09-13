@@ -1,20 +1,25 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.domain.PlayerMother
+import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
+import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import com.mkz.rpg.unit.domain.UnitMother
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.math.abs
 
 class MushroomAbilityAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -26,99 +31,101 @@ class MushroomAbilityAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, battleUnitApi)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battleApi, battlefieldApi, eventBus)
-    private val battleSetupApi =
-        BattleSetupApi(
-            playerApi,
-            battleApi,
-            effectApi,
-            abilityApi,
-            unitApi,
-            battleUnitApi,
-            battlefieldApi,
-        )
+
+    private val humanPlayerId = PlayerMother.id()
+    private val cpuPlayerId = PlayerMother.id()
+    private val venomEffectId = EffectMother.effectId()
+    private val mushroomAbilityId = AbilityMother.id()
+    private val knightUnitId = UnitMother.id()
+    private val ratUnitId = UnitMother.id()
+    private val humanBattleUnitId = BattleUnitMother.id()
+    private val firstRatBattleUnitId = BattleUnitMother.id()
+    private val secondRatBattleUnitId = BattleUnitMother.id()
 
     @BeforeEach
     fun setup() {
-        battleSetupApi.setupBattle()
+        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
+        battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } })
+
+        val venomEffect = EffectMother.effect(id = venomEffectId)
+        effectApi.requestEffectCreation(venomEffect.toDto())
+
+        val mushroomAbility =
+            AbilityMother.ability(
+                id = mushroomAbilityId,
+                cost = 10,
+                cooldown = 0,
+                effects = listOf(venomEffectId),
+                targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES,
+            )
+        abilityApi.requestAbilityCreation(mushroomAbility.toDto())
+
+        val knight =
+            UnitMother.unit(
+                id = knightUnitId,
+                healthPoints = 100,
+                manaPoints = 30,
+                abilities = listOf(mushroomAbilityId),
+                movementRange = 3,
+            )
+        val rat =
+            UnitMother.unit(
+                id = ratUnitId,
+                healthPoints = 20,
+                manaPoints = 10,
+                abilities = emptyList(),
+                movementRange = 3,
+            )
+        unitApi.requestUnitCreation(knight.toDto())
+        unitApi.requestUnitCreation(rat.toDto())
+
+        // Deploy the two enemy rats adjacent to the human knight so the knight
+        // can cast the mushroom ability without moving
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = firstRatBattleUnitId,
+            unitId = ratUnitId,
+            playerId = cpuPlayerId,
+            deployAtRow = 1,
+            deployAtColumn = 0,
+        )
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = secondRatBattleUnitId,
+            unitId = ratUnitId,
+            playerId = cpuPlayerId,
+            deployAtRow = 0,
+            deployAtColumn = 1,
+        )
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = humanBattleUnitId,
+            unitId = knightUnitId,
+            playerId = humanPlayerId,
+            deployAtRow = 1,
+            deployAtColumn = 1,
+        )
+        battleApi.startFirstRound(listOf(humanPlayerId, cpuPlayerId))
         eventBus.dispatch()
     }
 
     @Test
     fun `should apply the venom effect to all adjacent enemy battle units when the mushroom ability is cast`() {
         // Given
-        val humanKnightId = "player-1-unit-1"
-        val enemyRatIds =
-            listOf(
-                "player-2-unit-1",
-                "player-2-unit-2",
-            )
-        require(battlefieldApi.searchPosition(humanKnightId) == PositionDto(6, 6))
-        require(battlefieldApi.searchPosition("player-2-unit-1") == PositionDto(0, 0))
-        require(battlefieldApi.searchPosition("player-2-unit-2") == PositionDto(1, 1))
-        require(battleApi.searchBattle()!!.currentPlayerTurn == "player-one")
-        approachEnemyBattleUnits(humanKnightId, enemyRatIds)
-        // When
-        val castGroup = battleUnitApi.whereCanCast(humanKnightId, "mushroom").single()
+        require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
+        require(battlefieldApi.searchOccupant(row = 1, column = 0) == firstRatBattleUnitId)
+        require(battlefieldApi.searchOccupant(row = 0, column = 1) == secondRatBattleUnitId)
+        require(battleApi.searchBattle()!!.currentPlayerTurn == humanPlayerId)
+        val castGroup = battleUnitApi.whereCanCast(humanBattleUnitId, mushroomAbilityId).single()
         battleUnitApi.castAbility(
-            battleUnitId = humanKnightId,
-            abilityId = "mushroom",
+            battleUnitId = humanBattleUnitId,
+            abilityId = mushroomAbilityId,
             castGroup = castGroup,
         )
+        // When
         eventBus.dispatch()
         // Then
-        val adjacentEnemyRatIds = adjacentEnemyBattleUnitIds(humanKnightId, enemyRatIds)
-        assertThat(adjacentEnemyRatIds).hasSize(2)
-        adjacentEnemyRatIds.forEach { ratId ->
-            val rat = battleUnitApi.searchBattleUnitById(ratId)!!
-            assertThat(rat.ongoingEffects.delayedEffects).contains("venom-damage")
-        }
+        val firstRat = battleUnitApi.searchBattleUnitById(firstRatBattleUnitId)!!
+        assertThat(firstRat.ongoingEffects.delayedEffects).contains(venomEffectId)
+        val secondRat = battleUnitApi.searchBattleUnitById(secondRatBattleUnitId)!!
+        assertThat(secondRat.ongoingEffects.delayedEffects).contains(venomEffectId)
     }
-
-    private fun approachEnemyBattleUnits(
-        battleUnitId: String,
-        enemyBattleUnitIds: List<String>,
-    ) {
-        var rounds = 0
-        while (adjacentEnemyBattleUnitIds(battleUnitId, enemyBattleUnitIds).size < 2) {
-            require(++rounds < 20) { "The battle unit did not get adjacent to two enemy battle units" }
-            val position = battlefieldApi.searchPosition(battleUnitId)!!
-            val nearestEnemyPosition =
-                enemyBattleUnitIds
-                    .map { enemyBattleUnitId -> battlefieldApi.searchPosition(enemyBattleUnitId)!! }
-                    .minByOrNull { enemyPosition -> manhattanDistance(position, enemyPosition) }!!
-            val currentDistanceToNearestEnemy = manhattanDistance(position, nearestEnemyPosition)
-            val candidatePositions =
-                battleUnitApi
-                    .whereCanMove(battleUnitId)
-                    .filter { candidate ->
-                        candidate != position && manhattanDistance(candidate, nearestEnemyPosition) < currentDistanceToNearestEnemy
-                    }
-            val closerPosition = candidatePositions.minByOrNull { candidate -> manhattanDistance(candidate, nearestEnemyPosition) }
-            if (closerPosition != null) {
-                battleUnitApi.moveBattleUnit(
-                    battleUnitId = battleUnitId,
-                    moveToRow = closerPosition.row,
-                    moveToColumn = closerPosition.column,
-                )
-            }
-            battleApi.finishPlayerTurn()
-            eventBus.dispatch()
-        }
-    }
-
-    private fun adjacentEnemyBattleUnitIds(
-        battleUnitId: String,
-        candidateBattleUnitIds: List<String>,
-    ): List<String> {
-        val position = battlefieldApi.searchPosition(battleUnitId)!!
-        return candidateBattleUnitIds.filter { candidateId ->
-            val candidatePosition = battlefieldApi.searchPosition(candidateId)!!
-            manhattanDistance(position, candidatePosition) == 1
-        }
-    }
-
-    private fun manhattanDistance(
-        from: PositionDto,
-        to: PositionDto,
-    ): Int = abs(from.row - to.row) + abs(from.column - to.column)
 }
