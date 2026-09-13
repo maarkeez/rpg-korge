@@ -37,7 +37,6 @@ class SetupBattle(
                 id = "venom-damage",
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
                 power = 3,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     ApplicationDto(
@@ -54,7 +53,6 @@ class SetupBattle(
                 id = "low-physical-damage",
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
                 power = 10,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     ApplicationDto(
@@ -68,7 +66,6 @@ class SetupBattle(
                 id = "low-damage-heal",
                 type = Effect.Dto.TypeDto.INCREASE_HEALTH,
                 power = 20,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     ApplicationDto(
@@ -82,7 +79,6 @@ class SetupBattle(
                 id = "teleport",
                 type = Effect.Dto.TypeDto.TELEPORT,
                 power = 0,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     ApplicationDto(

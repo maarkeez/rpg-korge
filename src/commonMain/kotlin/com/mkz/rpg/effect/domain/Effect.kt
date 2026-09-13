@@ -13,9 +13,7 @@ import com.mkz.rpg.effect.domain.EffectError.InvalidEffectType
 import com.mkz.rpg.effect.domain.EffectError.MissingEffectApplicationDetails
 import com.mkz.rpg.effect.domain.EffectError.NegativeApplicationDuration
 import com.mkz.rpg.effect.domain.EffectError.NegativePower
-import com.mkz.rpg.effect.domain.EffectError.NegativeProbability
 import com.mkz.rpg.effect.domain.EffectError.PowerAboveLimit
-import com.mkz.rpg.effect.domain.EffectError.ProbabilityAboveLimit
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -23,7 +21,6 @@ data class Effect private constructor(
     private val id: Id,
     private val type: Type,
     private val power: Power,
-    private val probability: Probability,
     private val modifiers: Modifiers,
     private val application: Application,
     private val events: Set<EffectEvent>,
@@ -34,7 +31,6 @@ data class Effect private constructor(
                 id = Id(dto.id),
                 type = Type(dto.type),
                 power = Power(dto.power),
-                probability = Probability(dto.probability),
                 modifiers = Modifiers(dto.modifiers),
                 application = Application(dto.application),
                 events = setOf(EffectEvent.EffectCreated(dto.id)),
@@ -48,7 +44,6 @@ data class Effect private constructor(
             id = id.value,
             type = type.toDto(),
             power = power.value,
-            probability = probability.value,
             modifiers = modifiers.value.map(Modifier::toDto),
             application = application.toDto(),
         )
@@ -67,15 +62,6 @@ data class Effect private constructor(
         init {
             if (value < 0) throw NegativePower()
             if (value > 999) throw PowerAboveLimit()
-        }
-    }
-
-    @JvmInline private value class Probability(
-        val value: Int,
-    ) {
-        init {
-            if (value < 0) throw NegativeProbability()
-            if (value > 100) throw ProbabilityAboveLimit()
         }
     }
 
@@ -190,7 +176,6 @@ data class Effect private constructor(
         val id: String,
         val type: TypeDto,
         val power: Int,
-        val probability: Int,
         val modifiers: List<ModifierDto>,
         val application: ApplicationDto,
     ) {

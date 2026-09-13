@@ -15,7 +15,6 @@ object EffectMother {
                 id = id,
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
                 power = power,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     if (applicationType == "IMMEDIATELY") {

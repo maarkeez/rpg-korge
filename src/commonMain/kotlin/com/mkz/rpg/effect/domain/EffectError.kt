@@ -20,8 +20,4 @@ sealed class EffectError(
     class NegativePower : EffectError("Power cannot be negative")
 
     class PowerAboveLimit : EffectError("Power cannot be higher than 999")
-
-    class NegativeProbability : EffectError("Probability cannot be negative")
-
-    class ProbabilityAboveLimit : EffectError("Probability cannot be higher than 100")
 }

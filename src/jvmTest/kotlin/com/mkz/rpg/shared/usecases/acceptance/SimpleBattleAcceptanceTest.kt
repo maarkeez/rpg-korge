@@ -65,7 +65,6 @@ class SimpleBattleAcceptanceTest {
                 id = "low-physical-damage",
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
                 power = 10,
-                probability = 100,
                 modifiers = emptyList(),
                 application =
                     ApplicationDto(

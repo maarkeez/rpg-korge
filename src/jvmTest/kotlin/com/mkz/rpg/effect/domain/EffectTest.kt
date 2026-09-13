@@ -52,26 +52,6 @@ class EffectTest {
         }
 
         @Test
-        fun `should fail when the probability is negative`() {
-            // Given
-            val effectDto = EffectMother.effect().toDto().copy(probability = -1)
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.NegativeProbability::class.java)
-        }
-
-        @Test
-        fun `should fail when the probability is above the limit`() {
-            // Given
-            val effectDto = EffectMother.effect().toDto().copy(probability = 101)
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.ProbabilityAboveLimit::class.java)
-        }
-
-        @Test
         fun `should fail when the modifier type is not supported`() {
             // Given
             val effectDto =
@@ -168,7 +148,6 @@ class EffectTest {
             assertThat(result.id).isEqualTo("effect-1")
             assertThat(result.type).isEqualTo(Effect.Dto.TypeDto.DECREASE_HEALTH)
             assertThat(result.power).isEqualTo(3)
-            assertThat(result.probability).isEqualTo(100)
         }
 
         @Test
