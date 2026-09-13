@@ -28,7 +28,7 @@ class StartNextRoundTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2))
+            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false))
         assertThat(eventBus).hasPublishedEvents(
             BattleEvent.BattleRoundStarted(2),
             BattleEvent.PlayerTurnStarted(players.first()),

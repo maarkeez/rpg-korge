@@ -34,6 +34,7 @@ data class Battle private constructor(
         Dto(
             currentPlayerTurn = currentPlayerTurn.value,
             currentRound = currentRound.value,
+            isFinished = isFinished.value,
         )
 
     fun startNextRound(): Battle {
@@ -105,5 +106,6 @@ data class Battle private constructor(
     data class Dto(
         val currentPlayerTurn: String,
         val currentRound: Int,
+        val isFinished: Boolean,
     )
 }

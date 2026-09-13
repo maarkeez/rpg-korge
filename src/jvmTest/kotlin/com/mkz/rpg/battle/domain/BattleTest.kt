@@ -16,7 +16,7 @@ class BattleTest {
             // When
             val battle = Battle.startFirstRound(players)
             // Then
-            assertThat(battle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
+            assertThat(battle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
         }
 
         @Test
@@ -51,7 +51,7 @@ class BattleTest {
             // When
             val result = battle.toDto()
             // Then
-            assertThat(result).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
+            assertThat(result).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
         }
     }
 
@@ -65,7 +65,7 @@ class BattleTest {
             // When
             val nextBattle = battle.startNextRound()
             // Then
-            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2))
+            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false))
             val (events, _) = nextBattle.pullEvents()
             assertThat(events).containsExactly(BattleEvent.BattleRoundStarted(2), BattleEvent.PlayerTurnStarted(players.first()))
         }
@@ -81,7 +81,7 @@ class BattleTest {
             // When
             val nextBattle = battle.finishPlayerTurn()
             // Then
-            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
+            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
             val (events, _) = nextBattle.pullEvents()
             assertThat(events).containsExactly(BattleEvent.PlayerTurnStarted(players[1]))
         }
@@ -98,7 +98,7 @@ class BattleTest {
             // When
             val nextBattle = battle.finishPlayerTurn()
             // Then
-            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
+            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
             val (events, _) = nextBattle.pullEvents()
             assertThat(events).containsExactly(BattleEvent.BattleRoundFinished(1))
         }
@@ -156,7 +156,7 @@ class BattleTest {
             // When
             val nextBattle = battle.defeatPlayer(defeatedPlayer)
             // Then
-            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1))
+            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
             val (events, _) = nextBattle.pullEvents()
             assertThat(events).containsExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
         }
@@ -170,7 +170,7 @@ class BattleTest {
             // When
             val nextBattle = battle.defeatPlayer(defeatedPlayer)
             // Then
-            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
+            assertThat(nextBattle.toDto()).isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
             val (events, _) = nextBattle.pullEvents()
             assertThat(events).containsExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
         }

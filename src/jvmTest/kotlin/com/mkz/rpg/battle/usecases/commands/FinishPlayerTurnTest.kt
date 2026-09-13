@@ -28,7 +28,7 @@ class FinishPlayerTurnTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
+            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
         assertThat(eventBus)
             .hasPublishedEvents(BattleEvent.PlayerTurnStarted(players[1]))
     }
@@ -48,7 +48,7 @@ class FinishPlayerTurnTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1))
+            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
         assertThat(eventBus)
             .hasPublishedEvents(BattleEvent.BattleRoundFinished(1))
     }

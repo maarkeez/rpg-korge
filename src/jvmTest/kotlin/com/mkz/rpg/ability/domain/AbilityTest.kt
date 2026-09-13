@@ -20,9 +20,7 @@ class AbilityTest {
         @Test
         fun `should create ability when the dto is valid`() {
             // Given
-            val dto =
-                ability()
-                    .toDto()
+            val dto = ability().toDto()
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
