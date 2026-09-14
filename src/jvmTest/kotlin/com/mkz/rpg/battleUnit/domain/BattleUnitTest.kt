@@ -300,6 +300,22 @@ class BattleUnitTest {
     }
 
     @Nested
+    inner class ReceiveOnDefeatedEffect {
+        @Test
+        fun `should add the on defeated effect and publish the received event when the battle unit receives it`() {
+            // Given
+            val battleUnit = BattleUnitMother.battleUnit()
+            val effectId = "effect-1"
+            // When
+            val updatedBattleUnit = battleUnit.receiveOnDefeatedEffect(effectId = effectId)
+            // Then
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).containsExactly(effectId)
+            val (events, _) = updatedBattleUnit.pullEvents()
+            assertThat(events).containsExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
+        }
+    }
+
+    @Nested
     inner class IsDefeated {
         @Test
         fun `should be false when the battle unit still has health points`() {

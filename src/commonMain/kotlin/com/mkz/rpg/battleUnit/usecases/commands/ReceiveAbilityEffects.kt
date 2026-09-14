@@ -88,6 +88,9 @@ class ReceiveAbilityEffects(
                                 turnsLeft = effect.application.onTurnStarted!!.duration,
                             )
                         }
+                        "ON_DEFEATED" -> {
+                            battleUnit.receiveOnDefeatedEffect(effectId = effect.id)
+                        }
                         else -> {
                             throw RuntimeException("Unexpected effect $effect")
                         }

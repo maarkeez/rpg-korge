@@ -10,6 +10,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -99,6 +100,37 @@ class ReceiveAbilityEffectsTest {
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.EffectReceived(enemyBattleUnitId, effectId),
             BattleUnitEvent.BattleUnitDamaged(enemyBattleUnitId),
+        )
+    }
+
+    @Test
+    fun `should receive on defeated effect when the effect application type is on defeated`() {
+        // Given
+        val effectId = "effect-1"
+        val effect =
+            decreaseHealthEffect(id = effectId, damage = 3)
+                .toDto()
+                .copy(application = ApplicationDto(type = "ON_DEFEATED", onTurnStarted = null, beforeApplyingEffect = null))
+        val unit = unit(healthPoints = 10).toDto()
+        val player = player(id = "player-1").toDto()
+        val battleUnit = battleUnit(unit = unit, player = player)
+        battleUnitRepository.create(battleUnit)
+        val battleUnitId = battleUnit.toDto().id
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(id = "ability-1", targetPattern = Ability.Dto.TargetPatternDto.SELF, effects = listOf(effectId))
+                .toDto(),
+        )
+        whenever(searchEffectById(effectId)).thenReturn(effect)
+        whenever(searchOccupant(0, 0)).thenReturn(battleUnitId)
+        whenever(searchUnitById(unit.id)).thenReturn(unit)
+        // When
+        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
+        assertThat(storedBattleUnit!!.ongoingEffects.onDefeatedEffects).containsExactly(effectId)
+        assertThat(storedBattleUnit.remainingHealthPoints).isEqualTo(10)
+        assertThat(eventBus).hasPublishedEvents(
+            BattleUnitEvent.EffectReceived(battleUnitId, effectId),
         )
     }
 

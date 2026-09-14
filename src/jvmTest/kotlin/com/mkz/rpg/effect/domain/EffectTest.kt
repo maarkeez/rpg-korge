@@ -21,6 +21,20 @@ class EffectTest {
         }
 
         @Test
+        fun `should create effect when the application type is on defeated`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(application = ApplicationDto(type = "ON_DEFEATED", onTurnStarted = null, beforeApplyingEffect = null))
+            // When
+            val createdEffect = Effect.create(effectDto)
+            // Then
+            assertThat(createdEffect.toDto()).isEqualTo(effectDto)
+        }
+
+        @Test
         fun `should fail when the effect id is blank`() {
             // Given
             val effectDto = EffectMother.decreaseHealthEffect().toDto().copy(id = "  ")

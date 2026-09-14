@@ -121,12 +121,14 @@ data class Effect private constructor(
             const val IMMEDIATELY = "IMMEDIATELY"
             const val ON_TURN_STARTED = "ON_TURN_STARTED"
             const val BEFORE_APPLYING_EFFECT = "BEFORE_APPLYING_EFFECT"
+            const val ON_DEFEATED = "ON_DEFEATED"
 
             operator fun invoke(dto: ApplicationDto): Application =
                 when (dto.type) {
                     IMMEDIATELY -> Immediately
                     ON_TURN_STARTED -> OnTurnStarted(dto.onTurnStarted ?: throw MissingEffectApplicationDetails())
                     BEFORE_APPLYING_EFFECT -> BeforeApplyingEffect(dto.beforeApplyingEffect ?: throw MissingEffectApplicationDetails())
+                    ON_DEFEATED -> OnDefeated
                     else -> throw InvalidEffectApplication()
                 }
         }
@@ -138,12 +140,15 @@ data class Effect private constructor(
                         is Immediately -> IMMEDIATELY
                         is OnTurnStarted -> ON_TURN_STARTED
                         is BeforeApplyingEffect -> BEFORE_APPLYING_EFFECT
+                        is OnDefeated -> ON_DEFEATED
                     },
                 onTurnStarted = if (this is OnTurnStarted) toTurnStartedDto() else null,
                 beforeApplyingEffect = if (this is BeforeApplyingEffect) toBeforeApplyingEffectDto() else null,
             )
 
         private object Immediately : Application
+
+        private object OnDefeated : Application
 
         private data class OnTurnStarted(
             val duration: Int,

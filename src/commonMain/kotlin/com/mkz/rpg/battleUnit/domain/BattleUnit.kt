@@ -189,6 +189,19 @@ data class BattleUnit private constructor(
         )
     }
 
+    fun receiveOnDefeatedEffect(effectId: String): BattleUnit {
+        val ongoingEffects = ongoingEffects.receiveOnDefeatedEffect(effectId)
+        val effectReceivedEvent =
+            EffectReceived(
+                battleUnitId = id.value,
+                effectId = effectId,
+            )
+        return copy(
+            ongoingEffects = ongoingEffects,
+            events = events + effectReceivedEvent,
+        )
+    }
+
     fun isDefeated(): Boolean = remainingHealthPoints.value <= 0
 
     fun applyImmediateEffect(
@@ -396,6 +409,11 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
+        fun receiveOnDefeatedEffect(effectId: String): OngoingEffects {
+            val newEffect = Effect(EffectId(effectId), ApplicationStatus.onDefeated())
+            return OngoingEffects(value + newEffect)
+        }
+
         fun applyPendingEffect(effectId: String): OngoingEffects {
             // TODO: Validate type
             return OngoingEffects(value.filter { it.effectId.value != effectId })
@@ -427,6 +445,7 @@ data class BattleUnit private constructor(
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
                 delayedEffects = value.filter { it.applicationStatus.isDelayed() }.map { it.effectId.value },
+                onDefeatedEffects = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value },
             )
 
         constructor() : this(emptyList())
@@ -444,6 +463,8 @@ data class BattleUnit private constructor(
         private sealed interface ApplicationStatus {
             object Pending : ApplicationStatus
 
+            object OnDefeated : ApplicationStatus
+
             @JvmInline value class TurnsLeft(
                 val value: Int,
             ) : ApplicationStatus {
@@ -453,10 +474,14 @@ data class BattleUnit private constructor(
             companion object {
                 fun pending(): ApplicationStatus = Pending
 
+                fun onDefeated(): ApplicationStatus = OnDefeated
+
                 fun delayed(turnsLeft: Int): ApplicationStatus = TurnsLeft(turnsLeft)
             }
 
             fun isDelayed() = this is TurnsLeft
+
+            fun isOnDefeated() = this is OnDefeated
         }
     }
 
@@ -477,6 +502,7 @@ data class BattleUnit private constructor(
 
         data class OngoingEffectsDto(
             val delayedEffects: List<String>,
+            val onDefeatedEffects: List<String>,
         )
     }
 }
