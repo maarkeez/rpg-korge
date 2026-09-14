@@ -8,7 +8,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
@@ -50,7 +50,7 @@ class ReceiveAbilityEffects(
             if (occupantId != null) throw FailedToReceiveAbilityEffects()
             receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
             // TODO: refactor receiveImmediateEffect to handle teleport
-            if (effects.any { effect -> effect.type.type == TELEPORT }) {
+            if (effects.any { effect -> effect.outcome.type == TELEPORT }) {
                 val currentPosition = searchPosition(battleUnitId)!!
                 val (events, updatedBattleUnit) =
                     battleUnit

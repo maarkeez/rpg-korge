@@ -3,10 +3,10 @@ package com.mkz.rpg.effect.domain
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.NEGATE_INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.EffectError.ApplicationDurationAboveLimit
 import com.mkz.rpg.effect.domain.EffectError.EmptyEffectId
 import com.mkz.rpg.effect.domain.EffectError.InvalidEffectApplication
@@ -19,7 +19,7 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class Effect private constructor(
     private val id: Id,
-    private val type: Type,
+    private val outcome: Outcome,
     private val application: Application,
     private val events: Set<EffectEvent>,
 ) {
@@ -27,7 +27,7 @@ data class Effect private constructor(
         fun create(dto: Dto): Effect =
             Effect(
                 id = Id(dto.id),
-                type = Type(dto.type),
+                outcome = Outcome(dto.outcome),
                 application = Application(dto.application),
                 events = setOf(EffectEvent.EffectCreated(dto.id)),
             )
@@ -38,7 +38,7 @@ data class Effect private constructor(
     fun toDto() =
         Dto(
             id = id.value,
-            type = type.toDto(),
+            outcome = outcome.toDto(),
             application = application.toDto(),
         )
 
@@ -50,9 +50,9 @@ data class Effect private constructor(
         }
     }
 
-    private sealed interface Type {
+    private sealed interface Outcome {
         companion object {
-            operator fun invoke(dto: Dto.EffectTypeDto): Type =
+            operator fun invoke(dto: Dto.EffectOutcomeDto): Outcome =
                 when (dto.type) {
                     DECREASE_HEALTH -> DecreaseHealth(dto.decreaseHealth!!.damage)
                     INCREASE_HEALTH -> IncreaseHealth(dto.increaseHealth!!.healing)
@@ -64,25 +64,25 @@ data class Effect private constructor(
         fun toDto() =
             when (this) {
                 is DecreaseHealth ->
-                    Dto.EffectTypeDto(
+                    Dto.EffectOutcomeDto(
                         type = DECREASE_HEALTH,
                         increaseHealth = null,
                         decreaseHealth = this.toDecreaseHealthDto(),
                     )
                 is IncreaseHealth ->
-                    Dto.EffectTypeDto(
+                    Dto.EffectOutcomeDto(
                         type = INCREASE_HEALTH,
                         increaseHealth = this.toIncreaseHealthDto(),
                         decreaseHealth = null,
                     )
                 NegateIncreaseHealth ->
-                    Dto.EffectTypeDto(
+                    Dto.EffectOutcomeDto(
                         type = NEGATE_INCREASE_HEALTH,
                         increaseHealth = null,
                         decreaseHealth = null,
                     )
                 Teleport ->
-                    Dto.EffectTypeDto(
+                    Dto.EffectOutcomeDto(
                         type = TELEPORT,
                         increaseHealth = null,
                         decreaseHealth = null,
@@ -91,29 +91,29 @@ data class Effect private constructor(
 
         @JvmInline private value class DecreaseHealth(
             val damage: Int,
-        ) : Type {
+        ) : Outcome {
             init {
                 if (damage < 0) throw NegativePower()
                 if (damage > 999) throw PowerAboveLimit()
             }
 
-            fun toDecreaseHealthDto() = Dto.EffectTypeDto.DecreaseHealthDto(damage = damage)
+            fun toDecreaseHealthDto() = Dto.EffectOutcomeDto.DecreaseHealthDto(damage = damage)
         }
 
         @JvmInline private value class IncreaseHealth(
             val healing: Int,
-        ) : Type {
+        ) : Outcome {
             init {
                 if (healing < 0) throw NegativePower()
                 if (healing > 999) throw PowerAboveLimit()
             }
 
-            fun toIncreaseHealthDto() = Dto.EffectTypeDto.IncreaseHealthDto(healing = healing)
+            fun toIncreaseHealthDto() = Dto.EffectOutcomeDto.IncreaseHealthDto(healing = healing)
         }
 
-        private object NegateIncreaseHealth : Type
+        private object NegateIncreaseHealth : Outcome
 
-        private object Teleport : Type
+        private object Teleport : Outcome
     }
 
     private sealed interface Application {
@@ -174,10 +174,10 @@ data class Effect private constructor(
 
     data class Dto(
         val id: String,
-        val type: EffectTypeDto,
+        val outcome: EffectOutcomeDto,
         val application: ApplicationDto,
     ) {
-        data class EffectTypeDto(
+        data class EffectOutcomeDto(
             val type: TypeDto,
             val decreaseHealth: DecreaseHealthDto?,
             val increaseHealth: IncreaseHealthDto?,

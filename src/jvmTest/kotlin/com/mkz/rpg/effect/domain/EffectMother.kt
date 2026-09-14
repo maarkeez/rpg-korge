@@ -2,11 +2,11 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.DecreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.IncreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import korlibs.io.util.UUID
 
 object EffectMother {
@@ -18,8 +18,8 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                type =
-                    Effect.Dto.EffectTypeDto(
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
                         type = DECREASE_HEALTH,
                         decreaseHealth = DecreaseHealthDto(damage = damage),
                         increaseHealth = null,
@@ -52,8 +52,8 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                type =
-                    Effect.Dto.EffectTypeDto(
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
                         type = INCREASE_HEALTH,
                         decreaseHealth = null,
                         increaseHealth = IncreaseHealthDto(healing = healing),
@@ -73,8 +73,8 @@ object EffectMother {
             .create(
                 Effect.Dto(
                     id = id,
-                    type =
-                        Effect.Dto.EffectTypeDto(
+                    outcome =
+                        Effect.Dto.EffectOutcomeDto(
                             type = TELEPORT,
                             decreaseHealth = null,
                             increaseHealth = null,

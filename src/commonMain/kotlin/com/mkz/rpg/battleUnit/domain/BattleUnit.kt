@@ -15,9 +15,9 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.unit.domain.Unit
 import kotlin.jvm.JvmInline
@@ -196,13 +196,13 @@ data class BattleUnit private constructor(
         unit: Unit.Dto,
     ): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
-        return when (effect.type.type) {
+        return when (effect.outcome.type) {
             DECREASE_HEALTH -> {
                 applyDecreaseHealthEffect(effect, ongoingEffects)
             }
             INCREASE_HEALTH -> {
                 val remainingHealthPoints =
-                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.type.increaseHealth!!.healing))
+                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.outcome.increaseHealth!!.healing))
                 val healedEvent = BattleUnitHealed(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
@@ -227,7 +227,7 @@ data class BattleUnit private constructor(
     // TODO: Rename to "on turn started"
     fun applyDelayedEffect(effect: Effect.Dto): BattleUnit {
         val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
-        return if (effect.type.type == DECREASE_HEALTH) {
+        return if (effect.outcome.type == DECREASE_HEALTH) {
             applyDecreaseHealthEffect(effect, ongoingEffects)
         } else {
             TODO("Not implemented yet")
@@ -238,7 +238,7 @@ data class BattleUnit private constructor(
         effect: Effect.Dto,
         ongoingEffects: OngoingEffects,
     ): BattleUnit {
-        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.type.decreaseHealth!!.damage))
+        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.outcome.decreaseHealth!!.damage))
         val newEvents =
             buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))
