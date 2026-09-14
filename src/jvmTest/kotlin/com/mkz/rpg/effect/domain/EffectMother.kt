@@ -2,8 +2,10 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
@@ -23,6 +25,7 @@ object EffectMother {
                         type = DECREASE_HEALTH,
                         decreaseHealth = DecreaseHealthDto(damage = damage),
                         increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     if (applicationType == "IMMEDIATELY") {
@@ -57,6 +60,7 @@ object EffectMother {
                         type = INCREASE_HEALTH,
                         decreaseHealth = null,
                         increaseHealth = IncreaseHealthDto(healing = healing),
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     ApplicationDto(
@@ -78,6 +82,7 @@ object EffectMother {
                             type = TELEPORT,
                             decreaseHealth = null,
                             increaseHealth = null,
+                            applyEffectOnNearbyAllies = null,
                         ),
                     application =
                         ApplicationDto(
@@ -88,6 +93,30 @@ object EffectMother {
                 ),
             ).pullEvents()
             .second
+
+    fun applyEffectOnNearbyAlliesEffect(
+        id: String = effectId(),
+        effectId: String = "effect-nearby",
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = APPLY_EFFECT_ON_NEARBY_ALLIES,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = ApplyEffectOnNearbyAlliesDto(effectId = effectId),
+                    ),
+                application =
+                    ApplicationDto(
+                        type = "ON_DEFEATED",
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            ),
+        ).pullEvents()
+        .second
 
     fun effectId(): String = "effect-${UUID.randomUUID()}"
 }

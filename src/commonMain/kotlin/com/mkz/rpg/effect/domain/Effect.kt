@@ -3,6 +3,7 @@ package com.mkz.rpg.effect.domain
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
@@ -58,6 +59,7 @@ data class Effect private constructor(
                     INCREASE_HEALTH -> IncreaseHealth(dto.increaseHealth!!.healing)
                     NEGATE_INCREASE_HEALTH -> NegateIncreaseHealth
                     TELEPORT -> Teleport
+                    APPLY_EFFECT_ON_NEARBY_ALLIES -> ApplyEffectOnNearbyAllies(dto.applyEffectOnNearbyAllies!!.effectId)
                 }
         }
 
@@ -68,24 +70,35 @@ data class Effect private constructor(
                         type = DECREASE_HEALTH,
                         increaseHealth = null,
                         decreaseHealth = this.toDecreaseHealthDto(),
+                        applyEffectOnNearbyAllies = null,
                     )
                 is IncreaseHealth ->
                     Dto.EffectOutcomeDto(
                         type = INCREASE_HEALTH,
                         increaseHealth = this.toIncreaseHealthDto(),
                         decreaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     )
                 NegateIncreaseHealth ->
                     Dto.EffectOutcomeDto(
                         type = NEGATE_INCREASE_HEALTH,
                         increaseHealth = null,
                         decreaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     )
                 Teleport ->
                     Dto.EffectOutcomeDto(
                         type = TELEPORT,
                         increaseHealth = null,
                         decreaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                    )
+                is ApplyEffectOnNearbyAllies ->
+                    Dto.EffectOutcomeDto(
+                        type = APPLY_EFFECT_ON_NEARBY_ALLIES,
+                        increaseHealth = null,
+                        decreaseHealth = null,
+                        applyEffectOnNearbyAllies = this.toApplyEffectOnNearbyAlliesDto(),
                     )
             }
 
@@ -109,6 +122,12 @@ data class Effect private constructor(
             }
 
             fun toIncreaseHealthDto() = Dto.EffectOutcomeDto.IncreaseHealthDto(healing = healing)
+        }
+
+        @JvmInline private value class ApplyEffectOnNearbyAllies(
+            val effectId: String,
+        ) : Outcome {
+            fun toApplyEffectOnNearbyAlliesDto() = Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto(effectId = effectId)
         }
 
         private object NegateIncreaseHealth : Outcome
@@ -186,12 +205,14 @@ data class Effect private constructor(
             val type: TypeDto,
             val decreaseHealth: DecreaseHealthDto?,
             val increaseHealth: IncreaseHealthDto?,
+            val applyEffectOnNearbyAllies: ApplyEffectOnNearbyAlliesDto?,
         ) {
             enum class TypeDto {
                 DECREASE_HEALTH,
                 INCREASE_HEALTH,
                 NEGATE_INCREASE_HEALTH,
                 TELEPORT,
+                APPLY_EFFECT_ON_NEARBY_ALLIES,
             }
 
             data class DecreaseHealthDto(
@@ -200,6 +221,10 @@ data class Effect private constructor(
 
             data class IncreaseHealthDto(
                 val healing: Int,
+            )
+
+            data class ApplyEffectOnNearbyAlliesDto(
+                val effectId: String,
             )
         }
 

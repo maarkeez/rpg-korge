@@ -45,6 +45,7 @@ class SetupBattle(
                         type = DECREASE_HEALTH,
                         decreaseHealth = DecreaseHealthDto(damage = 3),
                         increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     ApplicationDto(
@@ -64,6 +65,7 @@ class SetupBattle(
                         type = DECREASE_HEALTH,
                         decreaseHealth = DecreaseHealthDto(damage = 10),
                         increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     ApplicationDto(
@@ -80,6 +82,7 @@ class SetupBattle(
                         type = INCREASE_HEALTH,
                         decreaseHealth = null,
                         increaseHealth = IncreaseHealthDto(healing = 20),
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     ApplicationDto(
@@ -96,6 +99,7 @@ class SetupBattle(
                         type = TELEPORT,
                         decreaseHealth = null,
                         increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
                     ),
                 application =
                     ApplicationDto(

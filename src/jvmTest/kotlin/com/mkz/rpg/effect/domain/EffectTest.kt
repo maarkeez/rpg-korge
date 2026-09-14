@@ -2,6 +2,7 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -148,6 +149,17 @@ class EffectTest {
             assertThat(result.id).isEqualTo("effect-1")
             assertThat(result.outcome.type).isEqualTo(DECREASE_HEALTH)
             assertThat(result.outcome.decreaseHealth!!.damage).isEqualTo(3)
+        }
+
+        @Test
+        fun `should expose the apply effect on nearby allies outcome when converted to dto`() {
+            // Given
+            val effect = EffectMother.applyEffectOnNearbyAlliesEffect(effectId = "venom-damage")
+            // When
+            val result = effect.toDto()
+            // Then
+            assertThat(result.outcome.type).isEqualTo(APPLY_EFFECT_ON_NEARBY_ALLIES)
+            assertThat(result.outcome.applyEffectOnNearbyAllies!!.effectId).isEqualTo("venom-damage")
         }
     }
 
