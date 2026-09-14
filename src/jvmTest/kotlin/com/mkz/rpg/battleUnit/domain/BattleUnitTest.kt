@@ -2,7 +2,6 @@ package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.unit.domain.UnitMother
@@ -384,7 +383,7 @@ class BattleUnitTest {
             // Given
             val unit = UnitMother.unit(healthPoints = 10).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit)
-            val teleportEffect = EffectMother.decreaseHealthEffect(damage = 0).toDto().copy(type = Effect.Dto.TypeDto.TELEPORT)
+            val teleportEffect = EffectMother.teleportEffect().toDto()
             // When
             val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = teleportEffect, unit = unit)
             // Then

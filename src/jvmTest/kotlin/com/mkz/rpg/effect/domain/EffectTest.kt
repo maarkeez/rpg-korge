@@ -2,6 +2,7 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -131,8 +132,8 @@ class EffectTest {
             val result = effect.toDto()
             // Then
             assertThat(result.id).isEqualTo("effect-1")
-            assertThat(result.type).isEqualTo(Effect.Dto.TypeDto.DECREASE_HEALTH)
-            assertThat(result.decreaseHealth!!.damage).isEqualTo(3)
+            assertThat(result.type.type).isEqualTo(DECREASE_HEALTH)
+            assertThat(result.type.decreaseHealth!!.damage).isEqualTo(3)
         }
     }
 

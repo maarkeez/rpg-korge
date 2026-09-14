@@ -8,6 +8,11 @@ import com.mkz.rpg.battlefield.usecases.commands.InitializeBattlefield
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.DecreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.usecases.commands.RequestEffectCreation
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
@@ -35,9 +40,12 @@ class SetupBattle(
         val venomDamage =
             Effect.Dto(
                 id = "venom-damage",
-                type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                increaseHealth = null,
-                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage = 3),
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = DECREASE_HEALTH,
+                        decreaseHealth = DecreaseHealthDto(damage = 3),
+                        increaseHealth = null,
+                    ),
                 application =
                     ApplicationDto(
                         "ON_TURN_STARTED",
@@ -51,9 +59,12 @@ class SetupBattle(
         val lowPhysicalDamage =
             Effect.Dto(
                 id = "low-physical-damage",
-                type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                increaseHealth = null,
-                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage = 10),
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = DECREASE_HEALTH,
+                        decreaseHealth = DecreaseHealthDto(damage = 10),
+                        increaseHealth = null,
+                    ),
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",
@@ -64,9 +75,12 @@ class SetupBattle(
         val lowDamageHeal =
             Effect.Dto(
                 id = "low-damage-heal",
-                type = Effect.Dto.TypeDto.INCREASE_HEALTH,
-                increaseHealth = Effect.Dto.IncreaseHealthDto(healing = 20),
-                decreaseHealth = null,
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = INCREASE_HEALTH,
+                        decreaseHealth = null,
+                        increaseHealth = IncreaseHealthDto(healing = 20),
+                    ),
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",
@@ -77,9 +91,12 @@ class SetupBattle(
         val teleportEffect =
             Effect.Dto(
                 id = "teleport",
-                type = Effect.Dto.TypeDto.TELEPORT,
-                increaseHealth = null,
-                decreaseHealth = null,
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = TELEPORT,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                    ),
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",

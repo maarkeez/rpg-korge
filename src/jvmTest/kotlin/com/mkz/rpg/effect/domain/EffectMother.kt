@@ -2,6 +2,11 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.DecreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTypeDto.TypeDto.TELEPORT
 import korlibs.io.util.UUID
 
 object EffectMother {
@@ -13,9 +18,12 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                increaseHealth = null,
-                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage),
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = DECREASE_HEALTH,
+                        decreaseHealth = DecreaseHealthDto(damage = damage),
+                        increaseHealth = null,
+                    ),
                 application =
                     if (applicationType == "IMMEDIATELY") {
                         ApplicationDto(
@@ -44,9 +52,12 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                type = Effect.Dto.TypeDto.INCREASE_HEALTH,
-                increaseHealth = Effect.Dto.IncreaseHealthDto(healing),
-                decreaseHealth = null,
+                type =
+                    Effect.Dto.EffectTypeDto(
+                        type = INCREASE_HEALTH,
+                        decreaseHealth = null,
+                        increaseHealth = IncreaseHealthDto(healing = healing),
+                    ),
                 application =
                     ApplicationDto(
                         type = "IMMEDIATELY",
@@ -56,6 +67,27 @@ object EffectMother {
             ),
         ).pullEvents()
         .second
+
+    fun teleportEffect(id: String = effectId()) =
+        Effect
+            .create(
+                Effect.Dto(
+                    id = id,
+                    type =
+                        Effect.Dto.EffectTypeDto(
+                            type = TELEPORT,
+                            decreaseHealth = null,
+                            increaseHealth = null,
+                        ),
+                    application =
+                        ApplicationDto(
+                            type = "IMMEDIATELY",
+                            onTurnStarted = null,
+                            beforeApplyingEffect = null,
+                        ),
+                ),
+            ).pullEvents()
+            .second
 
     fun effectId(): String = "effect-${UUID.randomUUID()}"
 }
