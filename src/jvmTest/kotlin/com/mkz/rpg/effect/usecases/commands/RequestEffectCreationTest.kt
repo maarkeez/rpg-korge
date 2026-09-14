@@ -2,7 +2,7 @@ package com.mkz.rpg.effect.usecases.commands
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectEvent
-import com.mkz.rpg.effect.domain.EffectMother.effect
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.assertThat
 import org.assertj.core.api.Assertions.assertThat
@@ -20,7 +20,7 @@ class RequestEffectCreationTest {
     @Test
     fun `should create effect when it does not exist`() {
         // Given
-        val effect = effect().toDto()
+        val effect = decreaseHealthEffect().toDto()
         // When
         requestEffectCreation(effectDto = effect)
         // Then
@@ -33,8 +33,8 @@ class RequestEffectCreationTest {
     @Test
     fun `should not create effect when it already exists`() {
         // Given
-        val existingEffect = effect(power = 3)
-        val duplicateEffect = effect(existingEffect.toDto().id, power = 10)
+        val existingEffect = decreaseHealthEffect(damage = 3)
+        val duplicateEffect = decreaseHealthEffect(existingEffect.toDto().id, damage = 10)
         effectRepository.create(existingEffect)
         // When
         requestEffectCreation(effectDto = duplicateEffect.toDto())

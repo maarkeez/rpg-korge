@@ -3,13 +3,9 @@ package com.mkz.rpg.effect.domain
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ModifierDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ModifierDto.StackDto
 import com.mkz.rpg.effect.domain.EffectError.ApplicationDurationAboveLimit
 import com.mkz.rpg.effect.domain.EffectError.EmptyEffectId
 import com.mkz.rpg.effect.domain.EffectError.InvalidEffectApplication
-import com.mkz.rpg.effect.domain.EffectError.InvalidEffectModifier
-import com.mkz.rpg.effect.domain.EffectError.InvalidEffectType
 import com.mkz.rpg.effect.domain.EffectError.MissingEffectApplicationDetails
 import com.mkz.rpg.effect.domain.EffectError.NegativeApplicationDuration
 import com.mkz.rpg.effect.domain.EffectError.NegativePower
@@ -19,9 +15,7 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class Effect private constructor(
     private val id: Id,
-    private val type: Type,
-    private val power: Power,
-    private val modifiers: Modifiers,
+    private val type2: Type2,
     private val application: Application,
     private val events: Set<EffectEvent>,
 ) {
@@ -29,9 +23,13 @@ data class Effect private constructor(
         fun create(dto: Dto): Effect =
             Effect(
                 id = Id(dto.id),
-                type = Type(dto.type),
-                power = Power(dto.power),
-                modifiers = Modifiers(dto.modifiers),
+                type2 =
+                    when (dto.type) {
+                        Dto.TypeDto.DECREASE_HEALTH -> Type2.DecreaseHealth(dto.decreaseHealth!!.damage)
+                        Dto.TypeDto.INCREASE_HEALTH -> Type2.IncreaseHealth(dto.increaseHealth!!.healing)
+                        Dto.TypeDto.NEGATE_INCREASE_HEALTH -> Type2.NegateIncreaseHealth
+                        Dto.TypeDto.TELEPORT -> Type2.Teleport
+                    },
                 application = Application(dto.application),
                 events = setOf(EffectEvent.EffectCreated(dto.id)),
             )
@@ -42,9 +40,15 @@ data class Effect private constructor(
     fun toDto() =
         Dto(
             id = id.value,
-            type = type.toDto(),
-            power = power.value,
-            modifiers = modifiers.value.map(Modifier::toDto),
+            type =
+                when (type2) {
+                    is Type2.DecreaseHealth -> Dto.TypeDto.DECREASE_HEALTH
+                    is Type2.IncreaseHealth -> Dto.TypeDto.INCREASE_HEALTH
+                    Type2.NegateIncreaseHealth -> Dto.TypeDto.NEGATE_INCREASE_HEALTH
+                    Type2.Teleport -> Dto.TypeDto.TELEPORT
+                },
+            decreaseHealth = if (type2 is Type2.DecreaseHealth) type2.toDto() else null,
+            increaseHealth = if (type2 is Type2.IncreaseHealth) type2.toDto() else null,
             application = application.toDto(),
         )
 
@@ -56,64 +60,32 @@ data class Effect private constructor(
         }
     }
 
-    @JvmInline private value class Power(
-        val value: Int,
-    ) {
-        init {
-            if (value < 0) throw NegativePower()
-            if (value > 999) throw PowerAboveLimit()
-        }
-    }
+    private sealed interface Type2 {
+        @JvmInline value class DecreaseHealth(
+            val damage: Int,
+        ) : Type2 {
+            init {
+                if (damage < 0) throw NegativePower()
+                if (damage > 999) throw PowerAboveLimit()
+            }
 
-    @JvmInline private value class Modifiers(
-        val value: List<Modifier>,
-    ) {
-        companion object {
-            operator fun invoke(modifiers: List<ModifierDto>) = Modifiers(modifiers.map { Modifier.create(it) })
-        }
-    }
-
-    private enum class Type {
-        DECREASE_HEALTH,
-        INCREASE_HEALTH,
-        NEGATE_INCREASE_HEALTH,
-        TELEPORT,
-        ;
-
-        companion object {
-            operator fun invoke(type: Dto.TypeDto): Type = runCatching { valueOf(type.name) }.getOrElse { throw InvalidEffectType() }
+            fun toDto() = Dto.DecreaseHealthDto(damage = damage)
         }
 
-        fun toDto() = Dto.TypeDto.valueOf(name)
-    }
+        @JvmInline value class IncreaseHealth(
+            val healing: Int,
+        ) : Type2 {
+            init {
+                if (healing < 0) throw NegativePower()
+                if (healing > 999) throw PowerAboveLimit()
+            }
 
-    private sealed interface Modifier {
-        companion object {
-            const val STACK = "STACK"
-
-            fun create(dto: ModifierDto): Modifier =
-                when (dto.type) {
-                    STACK -> Stack(dto.stack!!)
-                    else -> throw InvalidEffectModifier()
-                }
+            fun toDto() = Dto.IncreaseHealthDto(healing = healing)
         }
 
-        fun toDto() =
-            ModifierDto(
-                type =
-                    when (this) {
-                        is Stack -> STACK
-                    },
-                stack = if (this is Stack) toStackDto() else null,
-            )
+        object NegateIncreaseHealth : Type2
 
-        private data class Stack(
-            val maximum: Int,
-        ) : Modifier {
-            constructor(dto: StackDto) : this(maximum = dto.maximum)
-
-            fun toStackDto() = StackDto(maximum = maximum)
-        }
+        object Teleport : Type2
     }
 
     private sealed interface Application {
@@ -175,8 +147,8 @@ data class Effect private constructor(
     data class Dto(
         val id: String,
         val type: TypeDto,
-        val power: Int,
-        val modifiers: List<ModifierDto>,
+        val decreaseHealth: DecreaseHealthDto?,
+        val increaseHealth: IncreaseHealthDto?,
         val application: ApplicationDto,
     ) {
         enum class TypeDto {
@@ -185,6 +157,14 @@ data class Effect private constructor(
             NEGATE_INCREASE_HEALTH,
             TELEPORT,
         }
+
+        data class DecreaseHealthDto(
+            val damage: Int,
+        )
+
+        data class IncreaseHealthDto(
+            val healing: Int,
+        )
 
         data class ModifierDto(
             val type: String,

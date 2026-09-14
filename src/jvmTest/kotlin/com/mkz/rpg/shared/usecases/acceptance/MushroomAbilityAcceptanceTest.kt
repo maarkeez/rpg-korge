@@ -48,7 +48,7 @@ class MushroomAbilityAcceptanceTest {
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
         battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } })
 
-        val venomEffect = EffectMother.effect(id = venomEffectId)
+        val venomEffect = EffectMother.decreaseHealthEffect(id = venomEffectId)
         effectApi.requestEffectCreation(venomEffect.toDto())
 
         val mushroomAbility =

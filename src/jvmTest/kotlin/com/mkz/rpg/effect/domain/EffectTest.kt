@@ -2,8 +2,6 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ModifierDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ModifierDto.StackDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -14,7 +12,7 @@ class EffectTest {
         @Test
         fun `should create effect when the dto is valid`() {
             // Given
-            val effectDto = EffectMother.effect().toDto()
+            val effectDto = EffectMother.decreaseHealthEffect().toDto()
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
@@ -24,7 +22,7 @@ class EffectTest {
         @Test
         fun `should fail when the effect id is blank`() {
             // Given
-            val effectDto = EffectMother.effect().toDto().copy(id = "  ")
+            val effectDto = EffectMother.decreaseHealthEffect().toDto().copy(id = "  ")
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
@@ -32,47 +30,34 @@ class EffectTest {
         }
 
         @Test
-        fun `should fail when the power is negative`() {
+        fun `should fail when the damage is negative`() {
             // Given
-            val effectDto = EffectMother.effect().toDto().copy(power = -1)
+            val damage = -1
             // When
-            val result = runCatching { Effect.create(effectDto) }
+            val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
             // Then
             assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.NegativePower::class.java)
         }
 
         @Test
-        fun `should fail when the power is above the limit`() {
+        fun `should fail when the damage is above the limit`() {
             // Given
-            val effectDto = EffectMother.effect().toDto().copy(power = 1000)
+            val damage = 1000
             // When
-            val result = runCatching { Effect.create(effectDto) }
+            val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
             // Then
             assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.PowerAboveLimit::class.java)
         }
 
         @Test
-        fun `should fail when the modifier type is not supported`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .effect()
-                    .toDto()
-                    .copy(modifiers = listOf(ModifierDto(type = "UNKNOWN", stack = null)))
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.InvalidEffectModifier::class.java)
-        }
-
-        @Test
         fun `should fail when the application type is not supported`() {
             // Given
+            val applicationType = "UNKNOWN"
             val effectDto =
                 EffectMother
-                    .effect()
+                    .decreaseHealthEffect()
                     .toDto()
-                    .copy(application = ApplicationDto(type = "UNKNOWN", onTurnStarted = null, beforeApplyingEffect = null))
+                    .copy(application = ApplicationDto(type = applicationType, onTurnStarted = null, beforeApplyingEffect = null))
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
@@ -84,7 +69,7 @@ class EffectTest {
             // Given
             val effectDto =
                 EffectMother
-                    .effect()
+                    .decreaseHealthEffect()
                     .toDto()
                     .copy(application = ApplicationDto(type = "ON_TURN_STARTED", onTurnStarted = null, beforeApplyingEffect = null))
             // When
@@ -98,7 +83,7 @@ class EffectTest {
             // Given
             val effectDto =
                 EffectMother
-                    .effect()
+                    .decreaseHealthEffect()
                     .toDto()
                     .copy(
                         application =
@@ -119,7 +104,7 @@ class EffectTest {
             // Given
             val effectDto =
                 EffectMother
-                    .effect()
+                    .decreaseHealthEffect()
                     .toDto()
                     .copy(
                         application =
@@ -141,28 +126,13 @@ class EffectTest {
         @Test
         fun `should expose the effect data when converted to dto`() {
             // Given
-            val effect = EffectMother.effect(id = "effect-1", power = 3)
+            val effect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3)
             // When
             val result = effect.toDto()
             // Then
             assertThat(result.id).isEqualTo("effect-1")
             assertThat(result.type).isEqualTo(Effect.Dto.TypeDto.DECREASE_HEALTH)
-            assertThat(result.power).isEqualTo(3)
-        }
-
-        @Test
-        fun `should expose the stack modifier as its dto representation`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .effect()
-                    .toDto()
-                    .copy(modifiers = listOf(ModifierDto(type = "STACK", stack = StackDto(maximum = 3))))
-            val effect = Effect.create(effectDto)
-            // When
-            val result = effect.toDto()
-            // Then
-            assertThat(result.modifiers).containsExactly(ModifierDto(type = "STACK", stack = StackDto(maximum = 3)))
+            assertThat(result.decreaseHealth!!.damage).isEqualTo(3)
         }
     }
 
@@ -171,7 +141,7 @@ class EffectTest {
         @Test
         fun `should pull the created event when the effect has pending events`() {
             // Given
-            val createdEffect = Effect.create(EffectMother.effect().toDto())
+            val createdEffect = Effect.create(EffectMother.decreaseHealthEffect().toDto())
             // When
             val (events, _) = createdEffect.pullEvents()
             // Then
@@ -181,7 +151,7 @@ class EffectTest {
         @Test
         fun `should not pull events when there are no pending events`() {
             // Given
-            val effect = EffectMother.effect()
+            val effect = EffectMother.decreaseHealthEffect()
             // When
             val (events, _) = effect.pullEvents()
             // Then

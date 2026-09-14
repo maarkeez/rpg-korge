@@ -199,7 +199,7 @@ data class BattleUnit private constructor(
             }
             Effect.Dto.TypeDto.INCREASE_HEALTH -> {
                 val remainingHealthPoints =
-                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.power))
+                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.increaseHealth!!.healing))
                 val healedEvent = BattleUnitHealed(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
@@ -235,7 +235,7 @@ data class BattleUnit private constructor(
         effect: Effect.Dto,
         ongoingEffects: OngoingEffects,
     ): BattleUnit {
-        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.power))
+        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.decreaseHealth!!.damage))
         val newEvents =
             buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))

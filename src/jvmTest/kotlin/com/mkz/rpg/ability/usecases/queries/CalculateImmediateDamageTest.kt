@@ -2,7 +2,7 @@ package com.mkz.rpg.ability.usecases.queries
 
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.effect.domain.EffectMother.effect
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -21,8 +21,8 @@ class CalculateImmediateDamageTest {
     @Test
     fun `should sum power of immediately applied effects when ability has a mix of immediate and non immediate effects`() {
         // Given
-        val immediateEffect = effect(id = "effect-1", power = 4, applicationType = "IMMEDIATELY").toDto()
-        val onTurnStartedEffect = effect(id = "effect-2", power = 10).toDto()
+        val immediateEffect = decreaseHealthEffect(id = "effect-1", damage = 4, applicationType = "IMMEDIATELY").toDto()
+        val onTurnStartedEffect = decreaseHealthEffect(id = "effect-2", damage = 10).toDto()
         val ability = ability(effects = listOf(immediateEffect.id, onTurnStartedEffect.id))
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)

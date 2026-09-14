@@ -4,7 +4,7 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
-import com.mkz.rpg.effect.domain.EffectMother.effect
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -32,7 +32,7 @@ class ApplyOnTurnStartedEffectsTest {
     fun `should apply delayed effect when the battle unit has a delayed ongoing effect`() {
         // Given
         val effectId = "effect-1"
-        val effect = effect(id = effectId, power = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "ON_TURN_STARTED").toDto()
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit =

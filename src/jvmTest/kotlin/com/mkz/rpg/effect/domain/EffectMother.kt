@@ -5,17 +5,17 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import korlibs.io.util.UUID
 
 object EffectMother {
-    fun effect(
+    fun decreaseHealthEffect(
         id: String = effectId(),
-        power: Int = 3,
+        damage: Int = 3,
         applicationType: String = "ON_TURN_STARTED",
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                power = power,
-                modifiers = emptyList(),
+                increaseHealth = null,
+                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage),
                 application =
                     if (applicationType == "IMMEDIATELY") {
                         ApplicationDto(
@@ -33,6 +33,26 @@ object EffectMother {
                             beforeApplyingEffect = null,
                         )
                     },
+            ),
+        ).pullEvents()
+        .second
+
+    fun increaseHealthEffect(
+        id: String = effectId(),
+        healing: Int = 3,
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                type = Effect.Dto.TypeDto.INCREASE_HEALTH,
+                increaseHealth = Effect.Dto.IncreaseHealthDto(healing),
+                decreaseHealth = null,
+                application =
+                    ApplicationDto(
+                        type = "IMMEDIATELY",
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
             ),
         ).pullEvents()
         .second

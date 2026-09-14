@@ -1,6 +1,7 @@
 package com.mkz.rpg.ability.usecases.queries
 
 import com.mkz.rpg.ability.domain.AbilityRepository
+import com.mkz.rpg.effect.domain.Effect.Dto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 class CalculateImmediateDamage(
@@ -12,6 +13,7 @@ class CalculateImmediateDamage(
         val effects = ability.effects.map { effectId -> searchEffectById(effectId)!! }
         return effects
             .filter { it.application.type == "IMMEDIATELY" }
-            .sumOf { effect -> effect.power }
+            .filter { effect -> effect.type == DECREASE_HEALTH }
+            .sumOf { effect -> effect.decreaseHealth!!.damage }
     }
 }

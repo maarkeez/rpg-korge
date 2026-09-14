@@ -1,7 +1,7 @@
 package com.mkz.rpg.effect.usecases.queries
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.effect
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.effectId
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -13,7 +13,7 @@ class SearchEffectByIdTest {
     @Test
     fun `should return effect when it exists`() {
         // Given
-        val effect = effect()
+        val effect = decreaseHealthEffect()
         val effectDto = effect.toDto()
         effectRepository.create(effect)
         // When

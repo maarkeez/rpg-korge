@@ -11,8 +11,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
-import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
@@ -61,18 +60,12 @@ class SimpleBattleAcceptanceTest {
         battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } })
 
         val lowPhysicalDamage =
-            Effect.Dto(
-                id = "low-physical-damage",
-                type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                power = 10,
-                modifiers = emptyList(),
-                application =
-                    ApplicationDto(
-                        "IMMEDIATELY",
-                        onTurnStarted = null,
-                        beforeApplyingEffect = null,
-                    ),
-            )
+            EffectMother
+                .decreaseHealthEffect(
+                    id = "low-physical-damage",
+                    damage = 10,
+                    applicationType = "IMMEDIATELY",
+                ).toDto()
         effectApi.requestEffectCreation(lowPhysicalDamage)
 
         val sword =

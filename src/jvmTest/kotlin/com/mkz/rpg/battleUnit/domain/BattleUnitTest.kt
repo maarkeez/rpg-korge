@@ -319,7 +319,7 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = unit)
-                    .applyImmediateEffect(effect = EffectMother.effect(power = 1).toDto(), unit = unit)
+                    .applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 1).toDto(), unit = unit)
             // When
             val result = battleUnit.isDefeated()
             // Then
@@ -335,7 +335,7 @@ class BattleUnitTest {
             val unit = UnitMother.unit(healthPoints = 10).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit)
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.effect(power = 3).toDto(), unit = unit)
+            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(), unit = unit)
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             val (events, _) = updatedBattleUnit.pullEvents()
@@ -349,7 +349,7 @@ class BattleUnitTest {
             val player = PlayerMother.player(id = "player-1").toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit, player = player)
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.effect(power = 3).toDto(), unit = unit)
+            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(), unit = unit)
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(0)
             val (events, _) = updatedBattleUnit.pullEvents()
@@ -367,10 +367,10 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = unit)
-                    .applyImmediateEffect(effect = EffectMother.effect(power = 4).toDto(), unit = unit)
+                    .applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 4).toDto(), unit = unit)
                     .pullEvents()
                     .second
-            val healingEffect = EffectMother.effect(power = 20).toDto().copy(type = Effect.Dto.TypeDto.INCREASE_HEALTH)
+            val healingEffect = EffectMother.increaseHealthEffect(healing = 20).toDto()
             // When
             val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = healingEffect, unit = unit)
             // Then
@@ -384,7 +384,7 @@ class BattleUnitTest {
             // Given
             val unit = UnitMother.unit(healthPoints = 10).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit)
-            val teleportEffect = EffectMother.effect(power = 0).toDto().copy(type = Effect.Dto.TypeDto.TELEPORT)
+            val teleportEffect = EffectMother.decreaseHealthEffect(damage = 0).toDto().copy(type = Effect.Dto.TypeDto.TELEPORT)
             // When
             val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = teleportEffect, unit = unit)
             // Then
@@ -422,7 +422,7 @@ class BattleUnitTest {
         fun `should reduce the health points and remove the delayed effect when the effect decreases health`() {
             // Given
             val unit = UnitMother.unit(healthPoints = 10).toDto()
-            val delayedEffect = EffectMother.effect(power = 3).toDto()
+            val delayedEffect = EffectMother.decreaseHealthEffect(damage = 3).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveDelayedEffect(effectId = delayedEffect.id, turnsLeft = 1)
             // When
             val updatedBattleUnit = battleUnit.applyDelayedEffect(effect = delayedEffect)

@@ -36,8 +36,8 @@ class SetupBattle(
             Effect.Dto(
                 id = "venom-damage",
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                power = 3,
-                modifiers = emptyList(),
+                increaseHealth = null,
+                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage = 3),
                 application =
                     ApplicationDto(
                         "ON_TURN_STARTED",
@@ -52,8 +52,8 @@ class SetupBattle(
             Effect.Dto(
                 id = "low-physical-damage",
                 type = Effect.Dto.TypeDto.DECREASE_HEALTH,
-                power = 10,
-                modifiers = emptyList(),
+                increaseHealth = null,
+                decreaseHealth = Effect.Dto.DecreaseHealthDto(damage = 10),
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",
@@ -65,8 +65,8 @@ class SetupBattle(
             Effect.Dto(
                 id = "low-damage-heal",
                 type = Effect.Dto.TypeDto.INCREASE_HEALTH,
-                power = 20,
-                modifiers = emptyList(),
+                increaseHealth = Effect.Dto.IncreaseHealthDto(healing = 20),
+                decreaseHealth = null,
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",
@@ -78,8 +78,8 @@ class SetupBattle(
             Effect.Dto(
                 id = "teleport",
                 type = Effect.Dto.TypeDto.TELEPORT,
-                power = 0,
-                modifiers = emptyList(),
+                increaseHealth = null,
+                decreaseHealth = null,
                 application =
                     ApplicationDto(
                         "IMMEDIATELY",

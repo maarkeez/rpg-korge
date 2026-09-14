@@ -10,7 +10,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.effect.domain.EffectMother.effect
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -46,7 +46,7 @@ class ReceiveAbilityEffectsTest {
     fun `should apply immediate effect when the ability targets self`() {
         // Given
         val effectId = "effect-1"
-        val effect = effect(id = effectId, power = 3, applicationType = "IMMEDIATELY").toDto()
+        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "IMMEDIATELY").toDto()
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
@@ -74,7 +74,7 @@ class ReceiveAbilityEffectsTest {
     fun `should apply immediate effect to the enemy occupant when the ability targets all adjacent enemies`() {
         // Given
         val effectId = "effect-1"
-        val effect = effect(id = effectId, power = 3, applicationType = "IMMEDIATELY").toDto()
+        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "IMMEDIATELY").toDto()
         val enemyUnit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val enemyPlayer = player(id = "player-2").toDto()
@@ -127,7 +127,7 @@ class ReceiveAbilityEffectsTest {
                 .toDto(),
         )
         whenever(searchEffectById("effect-1")).thenReturn(
-            effect(id = "effect-1")
+            decreaseHealthEffect(id = "effect-1")
                 .toDto(),
         )
         whenever(searchOccupant(0, 0)).thenReturn(null)
