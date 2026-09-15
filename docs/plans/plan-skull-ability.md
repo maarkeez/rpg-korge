@@ -23,7 +23,9 @@ This new effect outcome requires of an effect id. Which will be the effect to ap
 Add the battle unit position (row and column ) to the OnBattleUnitDefeated event.
 
 > Note: `BattleUnit` does not store its battlefield position, so the position could not be attached to the `BattleUnitDefeated` domain event at emission. Instead, the on-defeated spread is triggered synchronously from the effect-application use cases (while the position is still resolvable), which also avoids the position-removal race with the battlefield's `removeOccupant` handler. See the note under the "cast on defeated effects" step.
-## [to-do] Step - Add cast on defeated effects use cases
+## [done] Step - Add cast on defeated effects use cases
+
+> Note: Implemented as `ApplyOnDefeatedEffectsToNearbyAllies`, triggered synchronously from `ReceiveAbilityEffects` and `ApplyOnTurnStartedEffects` right after a battle unit is defeated (while its battlefield position is still resolvable). A dedicated `OnBattleUnitDefeated` listener would run after the battlefield's `removeOccupant` handler and could no longer resolve the position.
 
 We need to implement a use case similar to
 - src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/CastAbility.kt
@@ -37,7 +39,7 @@ And the related effect outcome is apply effect on nearby allies
 When the battle unit is defeated
 Then the effect to be applied will be casted to all the nearby allies 
 
-## [to-do] Step - Add a use case acceptance test
+## [done] Step - Add a use case acceptance test
 
 Add a new use case acceptance test class, similar to src/jvmTest/kotlin/com/mkz/rpg/shared/usecases/acceptance/MushroomAbilityAcceptanceTest.kt , in order to test an effect that
 - has application type on defeated
@@ -51,7 +53,7 @@ In order to make it easier to implement, you can
 - Assert: the living rat should be affected by the mage effect
 
 
-## [to-do] Step - Modify setup battle
+## [done] Step - Modify setup battle
 
 Add a new effect named
 - venom on death: this new effect will be applied “on defeated” and it will have the outcome “apply effect to nearby allies” related to the venom-damage effect already defined in the SetupBattle usecase
