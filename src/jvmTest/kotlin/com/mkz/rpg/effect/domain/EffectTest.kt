@@ -4,6 +4,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -160,6 +161,17 @@ class EffectTest {
             // Then
             assertThat(result.outcome.type).isEqualTo(APPLY_EFFECT_ON_NEARBY_ALLIES)
             assertThat(result.outcome.applyEffectOnNearbyAllies!!.effectId).isEqualTo("venom-damage")
+        }
+
+        @Test
+        fun `should expose the deploy battle unit outcome when converted to dto`() {
+            // Given
+            val effect = EffectMother.deployBattleUnitEffect(unitId = "summoned-rat")
+            // When
+            val result = effect.toDto()
+            // Then
+            assertThat(result.outcome.type).isEqualTo(DEPLOY_BATTLE_UNIT)
+            assertThat(result.outcome.deployBattleUnit!!.unitId).isEqualTo("summoned-rat")
         }
     }
 

@@ -114,6 +114,7 @@ class BattleUnitApi(
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
             applyOnDefeatedEffectsToNearbyAllies,
+            deployBattleUnit,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)

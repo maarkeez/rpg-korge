@@ -8,10 +8,12 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
+import kotlin.random.Random
 
 class ReceiveAbilityEffects(
     private val searchAbilityById: SearchAbilityById,
@@ -22,6 +24,7 @@ class ReceiveAbilityEffects(
     private val searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
     private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies,
+    private val deployBattleUnit: DeployBattleUnit,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -49,6 +52,16 @@ class ReceiveAbilityEffects(
         }
         if (ability.targetPattern == Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT) {
             if (occupantId != null) throw FailedToReceiveAbilityEffects()
+            effects.filter { effect -> effect.outcome.type == DEPLOY_BATTLE_UNIT }.forEach { effect ->
+                val caster = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
+                deployBattleUnit(
+                    battleUnitId = "deployed-unit-${Random.nextLong()}",
+                    unitId = effect.outcome.deployBattleUnit!!.unitId,
+                    playerId = caster.toDto().playerId,
+                    deployAtRow = row,
+                    deployAtColumn = column,
+                )
+            }
             receiveAbilityEffects(battleUnitId = battleUnitId, effects = effects)
             // TODO: refactor receiveImmediateEffect to handle teleport
             if (effects.any { effect -> effect.outcome.type == TELEPORT }) {
@@ -73,9 +86,11 @@ class ReceiveAbilityEffects(
     ) {
         val occupantBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
         val unit = searchUnitById(occupantBattleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
+        // Deployment effects create a new battle unit and never modify the caster, so they are skipped here
+        val applicableEffects = effects.filter { effect -> effect.outcome.type != DEPLOY_BATTLE_UNIT }
         // TODO: Implement all the effect logic: Probability, modifiers, applications, etc
         val (events, updatedBattleUnit) =
-            effects
+            applicableEffects
                 .fold(occupantBattleUnit) { battleUnit, effect ->
                     when (effect.application.type) {
                         "IMMEDIATELY" -> {

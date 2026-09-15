@@ -12,6 +12,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -21,7 +22,10 @@ import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class ReceiveAbilityEffectsTest {
@@ -31,6 +35,7 @@ class ReceiveAbilityEffectsTest {
     private val searchUnitById: SearchUnitById = mock()
     private val searchPosition: SearchPosition = mock()
     private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies = mock()
+    private val deployBattleUnit: DeployBattleUnit = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
     private val receiveAbilityEffects =
@@ -43,6 +48,7 @@ class ReceiveAbilityEffectsTest {
             searchUnitById = searchUnitById,
             searchPosition = searchPosition,
             applyOnDefeatedEffectsToNearbyAllies = applyOnDefeatedEffectsToNearbyAllies,
+            deployBattleUnit = deployBattleUnit,
         )
 
     @Test
@@ -70,6 +76,38 @@ class ReceiveAbilityEffectsTest {
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.EffectReceived(battleUnitId, effectId),
             BattleUnitEvent.BattleUnitDamaged(battleUnitId),
+        )
+    }
+
+    @Test
+    fun `should deploy a new battle unit for the caster player when the effect outcome is deploy battle unit`() {
+        // Given
+        val effectId = "effect-1"
+        val effect = deployBattleUnitEffect(id = effectId, unitId = "summoned-unit").toDto()
+        val unit = unit(healthPoints = 10).toDto()
+        val player = player(id = "player-1").toDto()
+        val battleUnit = battleUnit(unit = unit, player = player)
+        battleUnitRepository.create(battleUnit)
+        val battleUnitId = battleUnit.toDto().id
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(
+                id = "ability-1",
+                targetPattern = Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                effects = listOf(effectId),
+            ).toDto(),
+        )
+        whenever(searchEffectById(effectId)).thenReturn(effect)
+        whenever(searchOccupant(1, 1)).thenReturn(null)
+        whenever(searchUnitById(unit.id)).thenReturn(unit)
+        // When
+        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        // Then
+        verify(deployBattleUnit).invoke(
+            battleUnitId = any(),
+            unitId = eq("summoned-unit"),
+            playerId = eq("player-1"),
+            deployAtRow = eq(1),
+            deployAtColumn = eq(1),
         )
     }
 
