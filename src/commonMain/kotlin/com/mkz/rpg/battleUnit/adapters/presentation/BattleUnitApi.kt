@@ -5,6 +5,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnAbilityCasted
 import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
+import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToNearbyAllies
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
@@ -93,6 +94,16 @@ class BattleUnitApi(
             battleUnitRepository,
             eventBus,
         )
+    val applyOnDefeatedEffectsToNearbyAllies =
+        ApplyOnDefeatedEffectsToNearbyAllies(
+            battleUnitRepository,
+            effectApi.searchEffectById,
+            battlefieldApi.searchPosition,
+            battlefieldApi.searchOccupant,
+            distanceService,
+            unitApi.searchUnitById,
+            eventBus,
+        )
     val receiveAbilityEffects =
         ReceiveAbilityEffects(
             abilityApi.searchAbilityById,
@@ -102,6 +113,7 @@ class BattleUnitApi(
             battlefieldApi.searchOccupant,
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
+            applyOnDefeatedEffectsToNearbyAllies,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
@@ -111,6 +123,7 @@ class BattleUnitApi(
             searchBattleUnitsByPlayerId,
             battleUnitRepository,
             eventBus,
+            applyOnDefeatedEffectsToNearbyAllies,
         )
     val replenishMana =
         ReplenishMana(

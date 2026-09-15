@@ -30,6 +30,7 @@ class ReceiveAbilityEffectsTest {
     private val searchOccupant: SearchOccupant = mock()
     private val searchUnitById: SearchUnitById = mock()
     private val searchPosition: SearchPosition = mock()
+    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
     private val receiveAbilityEffects =
@@ -41,6 +42,7 @@ class ReceiveAbilityEffectsTest {
             searchOccupant = searchOccupant,
             searchUnitById = searchUnitById,
             searchPosition = searchPosition,
+            applyOnDefeatedEffectsToNearbyAllies = applyOnDefeatedEffectsToNearbyAllies,
         )
 
     @Test

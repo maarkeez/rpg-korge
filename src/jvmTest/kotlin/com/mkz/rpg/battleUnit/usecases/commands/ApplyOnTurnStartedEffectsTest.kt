@@ -20,12 +20,14 @@ class ApplyOnTurnStartedEffectsTest {
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
+    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies = mock()
     private val applyOnTurnStartedEffects =
         ApplyOnTurnStartedEffects(
             searchEffectById = searchEffectById,
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
             battleUnitRepository = battleUnitRepository,
             eventBus = eventBus,
+            applyOnDefeatedEffectsToNearbyAllies = applyOnDefeatedEffectsToNearbyAllies,
         )
 
     @Test

@@ -343,6 +343,34 @@ class BattleUnitTest {
     }
 
     @Nested
+    inner class ApplyOnDefeatedEffects {
+        @Test
+        fun `should remove the on defeated effects when the on defeated effects are applied`() {
+            // Given
+            val battleUnit = BattleUnitMother.battleUnit().receiveOnDefeatedEffect(effectId = "effect-1")
+            // When
+            val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
+            // Then
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).isEmpty()
+        }
+
+        @Test
+        fun `should keep the delayed effects when the on defeated effects are applied`() {
+            // Given
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit()
+                    .receiveOnDefeatedEffect(effectId = "effect-1")
+                    .receiveDelayedEffect(effectId = "effect-2", turnsLeft = 2)
+            // When
+            val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
+            // Then
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).isEmpty()
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).containsExactly("effect-2")
+        }
+    }
+
+    @Nested
     inner class ApplyImmediateEffect {
         @Test
         fun `should reduce the health points and publish the damaged event when the effect decreases health`() {

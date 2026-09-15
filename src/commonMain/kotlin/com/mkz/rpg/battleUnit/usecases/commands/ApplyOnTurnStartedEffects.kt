@@ -10,6 +10,7 @@ class ApplyOnTurnStartedEffects(
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
+    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies,
 ) {
     operator fun invoke(playerId: String) {
         val battleUnits = searchBattleUnitsByPlayerId(playerId).map { battleUnitRepository.searchById(it.id)!! }
@@ -21,6 +22,9 @@ class ApplyOnTurnStartedEffects(
                     val effect = searchEffectById(delayedEffectId)!!
                     val (events, updatedBattleUnit) = battleUnit.applyDelayedEffect(effect).pullEvents()
                     battleUnitRepository.update(updatedBattleUnit)
+                    if (updatedBattleUnit.isDefeated()) {
+                        applyOnDefeatedEffectsToNearbyAllies(battleUnitId = updatedBattleUnit.toDto().id)
+                    }
                     eventBus.publish(events)
                 }
             }

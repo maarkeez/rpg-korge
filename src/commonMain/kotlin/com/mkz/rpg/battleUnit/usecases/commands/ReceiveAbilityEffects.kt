@@ -21,6 +21,7 @@ class ReceiveAbilityEffects(
     private val searchOccupant: SearchOccupant,
     private val searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
+    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -97,6 +98,9 @@ class ReceiveAbilityEffects(
                     }
                 }.pullEvents()
         battleUnitRepository.update(updatedBattleUnit)
+        if (updatedBattleUnit.isDefeated()) {
+            applyOnDefeatedEffectsToNearbyAllies(battleUnitId = battleUnitId)
+        }
         eventBus.publish(events)
     }
 }

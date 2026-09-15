@@ -6,21 +6,23 @@ We want to implement the skull ability.
 The idea is that the ability applies a effect to an enemy. When that enemy dies (eg, player 2 battle unit), another effect will be spread to its nearby allies (player 2 battle units)
 
 Implement the following steps in order to introduce the new feature 
-## [to-do] Step - Add on defeated effect application type
+## [done] Step - Add on defeated effect application type
 
 Add a new application type “on defeated” to the Effect class and dto defined in src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt
 
 You will need to update the related use cases too.
 For example; the use case src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/ReceiveAbilityEffects.kt will need to be modified in order to handle the new effect application type. And the BattleUnit domain class will need to be modified to introduce a new ongoing effect application status  and keep track of the ongoing “On defeated” effects 
 
-## [to-do] Step - Add effect outcome: apply effect on nearby allies
+## [done] Step - Add effect outcome: apply effect on nearby allies
 
 Add a new effect outcome “apply effect on nearby allies” to the Effect class and dto defined in src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt 
 This new effect outcome requires of an effect id. Which will be the effect to apply to the nearby allies.
 
-## [to-do] Step - Modify OnBattleUnitDefeated
+## [done] Step - Modify OnBattleUnitDefeated
 
 Add the battle unit position (row and column ) to the OnBattleUnitDefeated event.
+
+> Note: `BattleUnit` does not store its battlefield position, so the position could not be attached to the `BattleUnitDefeated` domain event at emission. Instead, the on-defeated spread is triggered synchronously from the effect-application use cases (while the position is still resolvable), which also avoids the position-removal race with the battlefield's `removeOccupant` handler. See the note under the "cast on defeated effects" step.
 ## [to-do] Step - Add cast on defeated effects use cases
 
 We need to implement a use case similar to

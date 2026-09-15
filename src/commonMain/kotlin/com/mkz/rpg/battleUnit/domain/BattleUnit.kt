@@ -204,6 +204,11 @@ data class BattleUnit private constructor(
 
     fun isDefeated(): Boolean = remainingHealthPoints.value <= 0
 
+    fun applyOnDefeatedEffects(): BattleUnit {
+        val ongoingEffects = ongoingEffects.clearOnDefeatedEffects()
+        return copy(ongoingEffects = ongoingEffects)
+    }
+
     fun applyImmediateEffect(
         effect: Effect.Dto,
         unit: Unit.Dto,
@@ -441,6 +446,10 @@ data class BattleUnit private constructor(
         }
 
         fun hasDelayedOngoingEffects(): Boolean = value.any { it.applicationStatus.isDelayed() }
+
+        fun onDefeatedEffectIds(): List<String> = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value }
+
+        fun clearOnDefeatedEffects(): OngoingEffects = OngoingEffects(value.filter { !it.applicationStatus.isOnDefeated() })
 
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
