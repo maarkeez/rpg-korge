@@ -21,6 +21,8 @@ sealed class BattleUnitError(
 
     class FailedToReceiveAbilityEffects : BattleUnitError("Failed to receive ability effects")
 
+    class FailedToResolveEffectTarget : BattleUnitError("Failed to resolve effect target")
+
     class RemainingManaPointsBelowZero : BattleUnitError("Remaining mana points must be greater than zero")
 
     class EffectNotFound : BattleUnitError("Effect not found")

@@ -124,7 +124,7 @@ class AbilityTest {
             val dto =
                 ability()
                     .toDto()
-                    .copy(effects = emptyList())
+                    .copy(effectSpecs = emptyList())
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
@@ -137,7 +137,7 @@ class AbilityTest {
             val dto =
                 ability()
                     .toDto()
-                    .copy(effects = List(4) { "effect-$it" })
+                    .copy(effectSpecs = List(4) { "effect-$it" }.map { effectId -> AbilityMother.effectSpec(effectId = effectId) })
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
@@ -161,16 +161,16 @@ class AbilityTest {
         }
 
         @Test
-        fun `should expose the target pattern as its dto representation`() {
+        fun `should expose the targeting as its dto representation`() {
             // Given
             val dto =
-                ability(targetPattern = Ability.Dto.TargetPatternDto.SELF)
+                ability(targeting = Ability.Dto.TargetingDto.SELF)
                     .toDto()
             val createdAbility = Ability.create(dto = dto)
             // When
             val result = createdAbility.toDto()
             // Then
-            assertThat(result.targetPattern).isEqualTo(Ability.Dto.TargetPatternDto.SELF)
+            assertThat(result.targeting).isEqualTo(Ability.Dto.TargetingDto.SELF)
         }
     }
 

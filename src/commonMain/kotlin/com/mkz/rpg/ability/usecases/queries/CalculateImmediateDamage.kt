@@ -10,7 +10,7 @@ class CalculateImmediateDamage(
 ) {
     operator fun invoke(id: String): Int {
         val ability = abilityRepository.searchById(id)?.toDto() ?: return 0
-        val effects = ability.effects.map { effectId -> searchEffectById(effectId)!! }
+        val effects = ability.effectSpecs.map { effectSpec -> searchEffectById(effectSpec.effectId)!! }
         return effects
             .filter { it.application.type == "IMMEDIATELY" }
             .filter { effect -> effect.outcome.type == DECREASE_HEALTH }

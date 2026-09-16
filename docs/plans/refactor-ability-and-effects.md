@@ -1297,33 +1297,33 @@ Do not skip ahead to ECS or a generic ability DSL during this refactor.
 
 The refactor is complete when all of the following are true:
 
-- [ ] `Ability` no longer implies that all effects affect its selected target.
-- [ ] Ability targeting is separate from effect targeting.
-- [ ] `Effect` describes what happens, not who receives it.
-- [ ] `EffectSpec` associates an effect with a target expression.
-- [ ] `EffectApplication` contains a concrete target.
-- [ ] `EffectApplication` contains the source of the effect.
-- [ ] Units and tiles can both be effect targets.
-- [ ] Self effects work.
-- [ ] Selected-target effects work.
-- [ ] Area effects work.
-- [ ] Vacant-tile effects work.
-- [ ] Teleport still works.
-- [ ] Deployment still works.
-- [ ] Nearby-allies effects still work.
-- [ ] Immediate effects still work.
-- [ ] Turn-start effects still work.
-- [ ] Before-applying effects still work.
-- [ ] On-defeated effects still work.
-- [ ] Ability cost still works.
-- [ ] Ability cooldown still works.
-- [ ] Existing target patterns still work.
-- [ ] Existing domain events still work.
-- [ ] Cross-subdomain reactions use event listeners where appropriate.
-- [ ] `SetupBattle` still creates a valid playable scenario.
-- [ ] Existing tests pass.
-- [ ] New tests protect the target/effect separation.
-- [ ] No use case relies on the implicit rule `ability target == effect target`.
+- [x] `Ability` no longer implies that all effects affect its selected target.
+- [x] Ability targeting is separate from effect targeting.
+- [x] `Effect` describes what happens, not who receives it.
+- [x] `EffectSpec` associates an effect with a target expression.
+- [x] `EffectApplication` contains a concrete target.
+- [x] `EffectApplication` contains the source of the effect.
+- [x] Units and tiles can both be effect targets.
+- [x] Self effects work.
+- [x] Selected-target effects work.
+- [x] Area effects work.
+- [x] Vacant-tile effects work.
+- [x] Teleport still works.
+- [x] Deployment still works.
+- [x] Nearby-allies effects still work.
+- [x] Immediate effects still work.
+- [x] Turn-start effects still work.
+- [x] Before-applying effects still work.
+- [x] On-defeated effects still work.
+- [x] Ability cost still works.
+- [x] Ability cooldown still works.
+- [x] Existing target patterns still work.
+- [x] Existing domain events still work.
+- [x] Cross-subdomain reactions use event listeners where appropriate.
+- [x] `SetupBattle` still creates a valid playable scenario.
+- [x] Existing tests pass.
+- [x] New tests protect the target/effect separation.
+- [x] No use case relies on the implicit rule `ability target == effect target`.
 
 ---
 

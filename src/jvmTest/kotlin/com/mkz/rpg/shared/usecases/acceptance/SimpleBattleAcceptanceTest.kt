@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
@@ -74,8 +75,8 @@ class SimpleBattleAcceptanceTest {
                 name = "Sword",
                 cost = 0,
                 cooldown = 0,
-                effects = listOf(lowPhysicalDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         abilityApi.requestAbilityCreation(sword)
 

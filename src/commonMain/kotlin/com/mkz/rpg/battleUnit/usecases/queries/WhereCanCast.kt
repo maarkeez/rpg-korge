@@ -25,14 +25,14 @@ class WhereCanCast(
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return emptyList()
         val currentPosition = searchPosition(battleUnitId) ?: return emptyList()
         val ability = searchAbilityById(abilityId) ?: return emptyList()
-        return when (ability.targetPattern) {
-            Ability.Dto.TargetPatternDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition).map { position -> CastGroup(listOf(position)) }
-            Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES -> {
+        return when (ability.targeting) {
+            Ability.Dto.TargetingDto.ADJACENT_ENEMY -> searchAdjacentEnemyPositions(battleUnit, currentPosition).map { position -> CastGroup(listOf(position)) }
+            Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES -> {
                 val positions = searchAdjacentEnemyPositions(battleUnit, currentPosition)
                 if (positions.isEmpty()) emptyList() else listOf(CastGroup(positions))
             }
-            Ability.Dto.TargetPatternDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
-            Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
+            Ability.Dto.TargetingDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
         }
     }
 

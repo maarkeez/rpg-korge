@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
@@ -55,8 +56,8 @@ class DeployBattleUnitEffectAcceptanceTest {
                 id = deployAbilityId,
                 cost = 0,
                 cooldown = 0,
-                effects = listOf(deployEffectId),
-                targetPattern = Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                effectSpecs = listOf(AbilityMother.effectSpec(effectId = deployEffectId, target = TargetExpressionDto.Type.SELECTED_TILE)),
+                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
             )
         abilityApi.requestAbilityCreation(deployAbility.toDto())
 

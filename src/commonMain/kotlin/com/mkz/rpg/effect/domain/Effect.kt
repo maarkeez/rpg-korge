@@ -217,6 +217,24 @@ data class Effect private constructor(
         }
     }
 
+    sealed interface EffectTarget {
+        data class Unit(
+            val id: String,
+        ) : EffectTarget
+
+        data class Tile(
+            val row: Int,
+            val column: Int,
+        ) : EffectTarget
+    }
+
+    data class EffectApplication(
+        val source: String,
+        val target: EffectTarget,
+        val effectId: String,
+        val destination: EffectTarget? = null,
+    )
+
     data class Dto(
         val id: String,
         val outcome: EffectOutcomeDto,

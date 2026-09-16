@@ -3,7 +3,7 @@ package com.mkz.rpg.ability.domain
 sealed class AbilityError(
     message: String,
 ) : Throwable(message = message) {
-    class InvalidTargetPattern : AbilityError(message = "Invalid target pattern")
+    class InvalidTargeting : AbilityError(message = "Invalid targeting")
 
     class AbilityEffectDoesNotExist : AbilityError(message = "Ability effect does not exist")
 

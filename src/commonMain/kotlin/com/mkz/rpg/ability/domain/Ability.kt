@@ -7,7 +7,7 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
 import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
-import com.mkz.rpg.ability.domain.AbilityError.InvalidTargetPattern
+import com.mkz.rpg.ability.domain.AbilityError.InvalidTargeting
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
@@ -19,8 +19,8 @@ data class Ability private constructor(
     private val name: Name,
     private val cost: Cost,
     private val cooldown: Cooldown,
-    private val effects: Effects,
-    private val targetPattern: TargetPattern,
+    private val targeting: Targeting,
+    private val effectSpecs: EffectSpecs,
     private val events: Set<AbilityEvent>,
 ) {
     companion object {
@@ -30,8 +30,8 @@ data class Ability private constructor(
                 name = Name(dto.name),
                 cost = Cost(dto.cost),
                 cooldown = Cooldown(dto.cooldown),
-                effects = Effects(dto.effects),
-                targetPattern = TargetPattern(dto.targetPattern),
+                targeting = Targeting(dto.targeting),
+                effectSpecs = EffectSpecs.fromDtos(dto.effectSpecs),
                 events = setOf(AbilityCreated(abilityId = dto.id)),
             )
     }
@@ -42,8 +42,8 @@ data class Ability private constructor(
             name = name.value,
             cost = cost.value,
             cooldown = cooldown.value,
-            effects = effects.value,
-            targetPattern = targetPattern.toDto(),
+            targeting = targeting.toDto(),
+            effectSpecs = effectSpecs.toDto(),
         )
 
     fun pullEvents() = events to copy(events = emptySet())
@@ -83,16 +83,70 @@ data class Ability private constructor(
         }
     }
 
-    @JvmInline private value class Effects(
-        val value: List<String>,
+    private data class EffectSpecs(
+        val value: List<EffectSpec>,
     ) {
         init {
             if (value.isEmpty()) throw AbilityEmptyEffects()
             if (value.size > 3) throw AbilityEffectsAboveLimit()
         }
+
+        companion object {
+            fun fromDtos(dtos: List<Dto.EffectSpecDto>): EffectSpecs = EffectSpecs(dtos.map { effectSpec -> EffectSpec(effectSpec) })
+        }
+
+        fun toDto(): List<Dto.EffectSpecDto> = value.map { effectSpec -> effectSpec.toDto() }
+
+        private data class EffectSpec(
+            val effectId: EffectId,
+            val target: TargetExpression,
+        ) {
+            constructor(dto: Dto.EffectSpecDto) : this(EffectId(dto.effectId), TargetExpression(dto.target))
+
+            fun toDto() = Dto.EffectSpecDto(effectId = effectId.value, target = TargetExpression.of(target))
+
+            @JvmInline private value class EffectId(
+                val value: String,
+            )
+        }
     }
 
-    private enum class TargetPattern {
+    sealed interface TargetExpression {
+        data object Caster : TargetExpression
+
+        data object SelectedTarget : TargetExpression
+
+        data object SelectedTile : TargetExpression
+
+        data object CasterTile : TargetExpression
+
+        data object NearbyAllies : TargetExpression
+
+        companion object {
+            operator fun invoke(dto: Dto.TargetExpressionDto): TargetExpression =
+                when (dto.type) {
+                    Dto.TargetExpressionDto.Type.CASTER -> Caster
+                    Dto.TargetExpressionDto.Type.SELECTED_TARGET -> SelectedTarget
+                    Dto.TargetExpressionDto.Type.SELECTED_TILE -> SelectedTile
+                    Dto.TargetExpressionDto.Type.CASTER_TILE -> CasterTile
+                    Dto.TargetExpressionDto.Type.NEARBY_ALLIES -> NearbyAllies
+                }
+
+            fun of(expression: TargetExpression): Dto.TargetExpressionDto =
+                Dto.TargetExpressionDto(
+                    type =
+                        when (expression) {
+                            is Caster -> Dto.TargetExpressionDto.Type.CASTER
+                            is SelectedTarget -> Dto.TargetExpressionDto.Type.SELECTED_TARGET
+                            is SelectedTile -> Dto.TargetExpressionDto.Type.SELECTED_TILE
+                            is CasterTile -> Dto.TargetExpressionDto.Type.CASTER_TILE
+                            is NearbyAllies -> Dto.TargetExpressionDto.Type.NEARBY_ALLIES
+                        },
+                )
+        }
+    }
+
+    private enum class Targeting {
         SELF,
         ADJACENT_ENEMY,
         ALL_ADJACENT_ENEMIES,
@@ -100,10 +154,10 @@ data class Ability private constructor(
         ;
 
         companion object {
-            operator fun invoke(targetPattern: Dto.TargetPatternDto): TargetPattern = runCatching { valueOf(targetPattern.name) }.getOrElse { throw InvalidTargetPattern() }
+            operator fun invoke(targeting: Dto.TargetingDto): Targeting = runCatching { valueOf(targeting.name) }.getOrElse { throw InvalidTargeting() }
         }
 
-        fun toDto() = Dto.TargetPatternDto.valueOf(name)
+        fun toDto() = Dto.TargetingDto.valueOf(name)
     }
 
     data class Dto(
@@ -111,14 +165,31 @@ data class Ability private constructor(
         val name: String,
         val cost: Int,
         val cooldown: Int,
-        val effects: List<String>,
-        val targetPattern: TargetPatternDto,
+        val targeting: TargetingDto,
+        val effectSpecs: List<EffectSpecDto>,
     ) {
-        enum class TargetPatternDto {
+        enum class TargetingDto {
             SELF,
             ADJACENT_ENEMY,
             ALL_ADJACENT_ENEMIES,
             VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+        }
+
+        data class EffectSpecDto(
+            val effectId: String,
+            val target: TargetExpressionDto,
+        )
+
+        data class TargetExpressionDto(
+            val type: Type,
+        ) {
+            enum class Type {
+                CASTER,
+                SELECTED_TARGET,
+                SELECTED_TILE,
+                CASTER_TILE,
+                NEARBY_ALLIES,
+            }
         }
     }
 }

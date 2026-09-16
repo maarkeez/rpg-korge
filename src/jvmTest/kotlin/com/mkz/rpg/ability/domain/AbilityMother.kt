@@ -1,5 +1,6 @@
 package com.mkz.rpg.ability.domain
 
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.effect.domain.EffectMother.effectId
 import korlibs.io.util.UUID
 import kotlin.random.Random
@@ -10,8 +11,8 @@ object AbilityMother {
         name: String = name(),
         cost: Int = cost(),
         cooldown: Int = cooldown(),
-        effects: List<String> = effects(),
-        targetPattern: Ability.Dto.TargetPatternDto = targetPattern(),
+        effectSpecs: List<Ability.Dto.EffectSpecDto> = effectSpecs(),
+        targeting: Ability.Dto.TargetingDto = targeting(),
     ) = Ability.create(
         dto =
             Ability.Dto(
@@ -19,8 +20,8 @@ object AbilityMother {
                 name = name,
                 cost = cost,
                 cooldown = cooldown,
-                effects = effects,
-                targetPattern = targetPattern,
+                effectSpecs = effectSpecs,
+                targeting = targeting,
             ),
     )
 
@@ -32,13 +33,17 @@ object AbilityMother {
 
     fun cooldown() = Random.nextInt(0, 99)
 
-    fun effects() =
-        List(Random.nextInt(1, 4)) {
-            effectId()
-        }
+    fun effectSpecs() = List(Random.nextInt(1, 4)) { effectSpec() }
 
-    fun targetPattern() =
-        Ability.Dto.TargetPatternDto
+    fun effectSpec(
+        effectId: String = effectId(),
+        target: TargetExpressionDto.Type = targetExpression(),
+    ) = Ability.Dto.EffectSpecDto(effectId = effectId, target = TargetExpressionDto(type = target))
+
+    fun targetExpression() = TargetExpressionDto.Type.values().random()
+
+    fun targeting() =
+        Ability.Dto.TargetingDto
             .values()
             .random()
 }

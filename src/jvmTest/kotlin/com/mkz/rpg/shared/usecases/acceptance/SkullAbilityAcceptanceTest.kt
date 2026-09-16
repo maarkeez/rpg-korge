@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
@@ -70,24 +71,24 @@ class SkullAbilityAcceptanceTest {
                 id = skullAbilityId,
                 cost = 0,
                 cooldown = 0,
-                effects = listOf(skullEffectId),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(AbilityMother.effectSpec(effectId = skullEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val swordAbility =
             AbilityMother.ability(
                 id = swordAbilityId,
                 cost = 0,
                 cooldown = 0,
-                effects = listOf(swordDamageEffectId),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(AbilityMother.effectSpec(effectId = swordDamageEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val healAbility =
             AbilityMother.ability(
                 id = healAbilityId,
                 cost = 10,
                 cooldown = 2,
-                effects = listOf(healEffectId),
-                targetPattern = Ability.Dto.TargetPatternDto.SELF,
+                effectSpecs = listOf(AbilityMother.effectSpec(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
+                targeting = Ability.Dto.TargetingDto.SELF,
             )
         abilityApi.requestAbilityCreation(skullAbility.toDto())
         abilityApi.requestAbilityCreation(swordAbility.toDto())

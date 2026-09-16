@@ -1,6 +1,7 @@
 package com.mkz.rpg.battlesetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.usecases.commands.RequestAbilityCreation
 import com.mkz.rpg.battle.usecases.commands.StartFirstRound
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
@@ -142,8 +143,8 @@ class SetupBattle(
                 name = "Poisoned Sword",
                 cost = 5,
                 cooldown = 1,
-                effects = listOf(venomDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
             )
         val sword =
             Ability.Dto(
@@ -151,8 +152,8 @@ class SetupBattle(
                 name = "Sword",
                 cost = 0,
                 cooldown = 0,
-                effects = listOf(lowPhysicalDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
             )
         val heal =
             Ability.Dto(
@@ -160,8 +161,8 @@ class SetupBattle(
                 name = "Heal",
                 cost = 10,
                 cooldown = 2,
-                effects = listOf(lowDamageHeal.id),
-                targetPattern = Ability.Dto.TargetPatternDto.SELF,
+                targeting = Ability.Dto.TargetingDto.SELF,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowDamageHeal.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.CASTER))),
             )
         val mushroom =
             Ability.Dto(
@@ -169,8 +170,8 @@ class SetupBattle(
                 name = "Mushroom",
                 cost = 10,
                 cooldown = 0,
-                effects = listOf(venomDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES,
+                targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
             )
         val skull =
             Ability.Dto(
@@ -178,8 +179,12 @@ class SetupBattle(
                 name = "Skull",
                 cost = 10,
                 cooldown = 0,
-                effects = listOf(lowPhysicalDamage.id, venomOnDeath.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                effectSpecs =
+                    listOf(
+                        Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET)),
+                        Ability.Dto.EffectSpecDto(effectId = venomOnDeath.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET)),
+                    ),
             )
         val teleport =
             Ability.Dto(
@@ -187,8 +192,8 @@ class SetupBattle(
                 name = "Teleport",
                 cost = 5,
                 cooldown = 1,
-                effects = listOf(teleportEffect.id),
-                targetPattern = Ability.Dto.TargetPatternDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = teleportEffect.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.CASTER))),
             )
         val bee =
             Ability.Dto(
@@ -196,8 +201,8 @@ class SetupBattle(
                 name = "Bee",
                 cost = 10,
                 cooldown = 0,
-                effects = listOf(lowPhysicalDamage.id),
-                targetPattern = Ability.Dto.TargetPatternDto.ADJACENT_ENEMY,
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
             )
         requestAbilityCreation(poisonedSword)
         requestAbilityCreation(sword)

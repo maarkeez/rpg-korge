@@ -3,6 +3,7 @@ package com.mkz.rpg.ability.usecases.commands
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -27,7 +28,7 @@ class RequestAbilityCreationTest {
     fun `should create ability`() {
         // Given
         val effect = decreaseHealthEffect().toDto()
-        val ability = ability(effects = listOf(effect.id)).toDto()
+        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.id))).toDto()
         whenever(searchEffectById(effect.id)).thenReturn(effect)
         // When
         requestAbilityCreation(abilityDto = ability)

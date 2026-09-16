@@ -13,7 +13,7 @@ class RequestAbilityCreation(
 ) {
     operator fun invoke(abilityDto: Ability.Dto) {
         if (abilityRepository.searchById(abilityDto.id) != null) return
-        val allEffectsExist = abilityDto.effects.all { effectId -> searchEffectById(effectId) != null }
+        val allEffectsExist = abilityDto.effectSpecs.all { effectSpec -> searchEffectById(effectSpec.effectId) != null }
         if (!allEffectsExist) throw AbilityEffectDoesNotExist()
         val (events, ability) = Ability.create(abilityDto).pullEvents()
         abilityRepository.create(ability)

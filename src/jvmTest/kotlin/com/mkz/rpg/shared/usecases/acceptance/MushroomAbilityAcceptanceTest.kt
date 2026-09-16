@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
@@ -56,8 +57,8 @@ class MushroomAbilityAcceptanceTest {
                 id = mushroomAbilityId,
                 cost = 10,
                 cooldown = 0,
-                effects = listOf(venomEffectId),
-                targetPattern = Ability.Dto.TargetPatternDto.ALL_ADJACENT_ENEMIES,
+                effectSpecs = listOf(AbilityMother.effectSpec(effectId = venomEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
             )
         abilityApi.requestAbilityCreation(mushroomAbility.toDto())
 

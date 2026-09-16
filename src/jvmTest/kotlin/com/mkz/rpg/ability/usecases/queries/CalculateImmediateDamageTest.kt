@@ -2,6 +2,7 @@ package com.mkz.rpg.ability.usecases.queries
 
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import org.assertj.core.api.Assertions.assertThat
@@ -23,7 +24,14 @@ class CalculateImmediateDamageTest {
         // Given
         val immediateEffect = decreaseHealthEffect(id = "effect-1", damage = 4, applicationType = "IMMEDIATELY").toDto()
         val onTurnStartedEffect = decreaseHealthEffect(id = "effect-2", damage = 10).toDto()
-        val ability = ability(effects = listOf(immediateEffect.id, onTurnStartedEffect.id))
+        val ability =
+            ability(
+                effectSpecs =
+                    listOf(
+                        effectSpec(effectId = immediateEffect.id),
+                        effectSpec(effectId = onTurnStartedEffect.id),
+                    ),
+            )
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)
         whenever(searchEffectById(immediateEffect.id)).thenReturn(immediateEffect)

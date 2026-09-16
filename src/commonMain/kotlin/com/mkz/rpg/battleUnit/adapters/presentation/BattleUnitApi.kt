@@ -5,6 +5,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnAbilityCasted
 import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
+import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToNearbyAllies
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
@@ -20,6 +21,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
+import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
@@ -70,6 +72,16 @@ class BattleUnitApi(
             abilityApi.searchAbilityById,
         )
 
+    // Services
+    val abilityExecution =
+        AbilityExecution(
+            battleUnitRepository,
+            battlefieldApi.searchPosition,
+            battlefieldApi.searchOccupant,
+            effectApi.searchEffectById,
+            distanceService,
+        )
+
     // Commands
     val deployBattleUnit =
         DeployBattleUnit(
@@ -94,6 +106,15 @@ class BattleUnitApi(
             battleUnitRepository,
             eventBus,
         )
+    val applyEffect =
+        ApplyEffect(
+            battleUnitRepository,
+            eventBus,
+            effectApi.searchEffectById,
+            unitApi.searchUnitById,
+            battlefieldApi.searchPosition,
+            deployBattleUnit,
+        )
     val applyOnDefeatedEffectsToNearbyAllies =
         ApplyOnDefeatedEffectsToNearbyAllies(
             battleUnitRepository,
@@ -101,20 +122,16 @@ class BattleUnitApi(
             battlefieldApi.searchPosition,
             battlefieldApi.searchOccupant,
             distanceService,
-            unitApi.searchUnitById,
             eventBus,
+            applyEffect,
         )
     val receiveAbilityEffects =
         ReceiveAbilityEffects(
             abilityApi.searchAbilityById,
-            effectApi.searchEffectById,
             battleUnitRepository,
-            eventBus,
-            battlefieldApi.searchOccupant,
-            unitApi.searchUnitById,
-            battlefieldApi.searchPosition,
+            abilityExecution,
+            applyEffect,
             applyOnDefeatedEffectsToNearbyAllies,
-            deployBattleUnit,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
