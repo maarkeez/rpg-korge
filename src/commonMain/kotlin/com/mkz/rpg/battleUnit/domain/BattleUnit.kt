@@ -212,11 +212,13 @@ data class BattleUnit private constructor(
     fun applyImmediateEffect(
         effect: Effect.Dto,
         unit: Unit.Dto,
+        currentRow: Int,
+        currentColumn: Int,
     ): BattleUnit {
         val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
         return when (effect.outcome.type) {
             DECREASE_HEALTH -> {
-                applyDecreaseHealthEffect(effect, ongoingEffects)
+                applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
             }
             INCREASE_HEALTH -> {
                 val remainingHealthPoints =
@@ -243,10 +245,14 @@ data class BattleUnit private constructor(
     fun hasDelayedOngoingEffects(): Boolean = ongoingEffects.hasDelayedOngoingEffects()
 
     // TODO: Rename to "on turn started"
-    fun applyDelayedEffect(effect: Effect.Dto): BattleUnit {
+    fun applyDelayedEffect(
+        effect: Effect.Dto,
+        currentRow: Int,
+        currentColumn: Int,
+    ): BattleUnit {
         val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
         return if (effect.outcome.type == DECREASE_HEALTH) {
-            applyDecreaseHealthEffect(effect, ongoingEffects)
+            applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
         } else {
             TODO("Not implemented yet")
         }
@@ -255,6 +261,8 @@ data class BattleUnit private constructor(
     private fun applyDecreaseHealthEffect(
         effect: Effect.Dto,
         ongoingEffects: OngoingEffects,
+        currentRow: Int,
+        currentColumn: Int,
     ): BattleUnit {
         val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.outcome.decreaseHealth!!.damage))
         val newEvents =
@@ -265,6 +273,8 @@ data class BattleUnit private constructor(
                         BattleUnitDefeated(
                             playerId = playerId.value,
                             battleUnitId = id.value,
+                            defeatedAtRow = currentRow,
+                            defeatedAtColumn = currentColumn,
                         ),
                     )
                 }

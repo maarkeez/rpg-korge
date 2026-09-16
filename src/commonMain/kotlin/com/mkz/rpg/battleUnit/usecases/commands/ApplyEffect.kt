@@ -54,14 +54,19 @@ class ApplyEffect(
     ) {
         val target = application.target as EffectTarget.Unit
         val battleUnit = battleUnitRepository.searchById(target.id) ?: throw FailedToReceiveAbilityEffects()
+        val position = searchPosition(battleUnit.toDto().id) ?: throw FailedToReceiveAbilityEffects()
         val unit = searchUnitById(battleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
         val (events, appliedBattleUnit) =
             when (effect.application.type) {
                 "IMMEDIATELY" ->
                     battleUnit
                         .receiveImmediateEffect(effectId = effect.id)
-                        .applyImmediateEffect(effect, unit)
-                        .pullEvents()
+                        .applyImmediateEffect(
+                            effect = effect,
+                            unit = unit,
+                            currentRow = position.row,
+                            currentColumn = position.column,
+                        ).pullEvents()
                 "ON_TURN_STARTED" ->
                     battleUnit
                         .receiveDelayedEffect(

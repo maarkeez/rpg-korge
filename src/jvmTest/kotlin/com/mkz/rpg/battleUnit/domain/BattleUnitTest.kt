@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.unit.domain.UnitMother
@@ -334,7 +335,12 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = unit)
-                    .applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 1).toDto(), unit = unit)
+                    .applyImmediateEffect(
+                        effect = EffectMother.decreaseHealthEffect(damage = 1).toDto(),
+                        unit = unit,
+                        currentRow = position().row,
+                        currentColumn = position().column,
+                    )
             // When
             val result = battleUnit.isDefeated()
             // Then
@@ -378,7 +384,13 @@ class BattleUnitTest {
             val unit = UnitMother.unit(healthPoints = 10).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit)
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(), unit = unit)
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             val (events, _) = updatedBattleUnit.pullEvents()
@@ -391,15 +403,27 @@ class BattleUnitTest {
             val unit = UnitMother.unit(healthPoints = 3).toDto()
             val player = PlayerMother.player(id = "player-1").toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit, player = player)
+            val defeatedAtPosition = position()
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(), unit = unit)
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
+                    unit = unit,
+                    currentRow = defeatedAtPosition.row,
+                    currentColumn = defeatedAtPosition.column,
+                )
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(0)
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events)
                 .containsExactly(
                     BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
-                    BattleUnitEvent.BattleUnitDefeated(playerId = player.id, battleUnitId = updatedBattleUnit.toDto().id),
+                    BattleUnitEvent.BattleUnitDefeated(
+                        playerId = player.id,
+                        battleUnitId = updatedBattleUnit.toDto().id,
+                        defeatedAtRow = defeatedAtPosition.row,
+                        defeatedAtColumn = defeatedAtPosition.column,
+                    ),
                 )
         }
 
@@ -410,12 +434,22 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = unit)
-                    .applyImmediateEffect(effect = EffectMother.decreaseHealthEffect(damage = 4).toDto(), unit = unit)
-                    .pullEvents()
+                    .applyImmediateEffect(
+                        effect = EffectMother.decreaseHealthEffect(damage = 4).toDto(),
+                        unit = unit,
+                        currentRow = position().row,
+                        currentColumn = position().column,
+                    ).pullEvents()
                     .second
             val healingEffect = EffectMother.increaseHealthEffect(healing = 20).toDto()
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = healingEffect, unit = unit)
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = healingEffect,
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(10)
             val (events, _) = updatedBattleUnit.pullEvents()
@@ -429,7 +463,13 @@ class BattleUnitTest {
             val battleUnit = BattleUnitMother.battleUnit(unit = unit)
             val teleportEffect = EffectMother.teleportEffect().toDto()
             // When
-            val updatedBattleUnit = battleUnit.applyImmediateEffect(effect = teleportEffect, unit = unit)
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = teleportEffect,
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
             // Then
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events).containsExactly(BattleUnitEvent.BattleUnitTeleported(battleUnitId = updatedBattleUnit.toDto().id))
@@ -468,7 +508,12 @@ class BattleUnitTest {
             val delayedEffect = EffectMother.decreaseHealthEffect(damage = 3).toDto()
             val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveDelayedEffect(effectId = delayedEffect.id, turnsLeft = 1)
             // When
-            val updatedBattleUnit = battleUnit.applyDelayedEffect(effect = delayedEffect)
+            val updatedBattleUnit =
+                battleUnit.applyDelayedEffect(
+                    effect = delayedEffect,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).isEmpty()

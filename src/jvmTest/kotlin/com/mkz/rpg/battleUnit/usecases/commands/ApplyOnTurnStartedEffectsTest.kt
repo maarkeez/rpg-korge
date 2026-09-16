@@ -4,6 +4,8 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
+import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -18,16 +20,16 @@ import org.mockito.kotlin.whenever
 class ApplyOnTurnStartedEffectsTest {
     private val searchEffectById: SearchEffectById = mock()
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
+    private val searchPosition: SearchPosition = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
-    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies = mock()
     private val applyOnTurnStartedEffects =
         ApplyOnTurnStartedEffects(
             searchEffectById = searchEffectById,
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
             battleUnitRepository = battleUnitRepository,
+            searchPosition = searchPosition,
             eventBus = eventBus,
-            applyOnDefeatedEffectsToNearbyAllies = applyOnDefeatedEffectsToNearbyAllies,
         )
 
     @Test
@@ -45,6 +47,7 @@ class ApplyOnTurnStartedEffectsTest {
         battleUnitRepository.create(battleUnit)
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit.toDto()))
         whenever(searchEffectById(effectId)).thenReturn(effect)
+        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(position())
         // When
         applyOnTurnStartedEffects("player-1")
         // Then

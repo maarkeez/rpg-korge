@@ -13,6 +13,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldMother
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
@@ -43,7 +45,6 @@ class ReceiveAbilityEffectsTest {
     private val searchOccupant: SearchOccupant = mock()
     private val searchUnitById: SearchUnitById = mock()
     private val searchPosition: SearchPosition = mock()
-    private val applyOnDefeatedEffectsToNearbyAllies: ApplyOnDefeatedEffectsToNearbyAllies = mock()
     private val deployBattleUnit: DeployBattleUnit = mock()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val eventBus = FakeEventBus()
@@ -70,7 +71,6 @@ class ReceiveAbilityEffectsTest {
             battleUnitRepository = battleUnitRepository,
             abilityExecution = abilityExecution,
             applyEffect = applyEffect,
-            applyOnDefeatedEffectsToNearbyAllies = applyOnDefeatedEffectsToNearbyAllies,
         )
 
     @Test
@@ -89,6 +89,7 @@ class ReceiveAbilityEffectsTest {
         )
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchUnitById(unit.id)).thenReturn(unit)
+        whenever(searchPosition(battleUnitId)).thenReturn(position())
         // When
         receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
@@ -155,6 +156,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchOccupant(1, 1)).thenReturn(enemyBattleUnitId)
         whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
+        whenever(searchPosition(enemyBattleUnitId)).thenReturn(position())
         // When
         receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
@@ -185,6 +187,7 @@ class ReceiveAbilityEffectsTest {
         )
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchUnitById(unit.id)).thenReturn(unit)
+        whenever(searchPosition(battleUnitId)).thenReturn(position())
         // When
         receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
@@ -241,6 +244,7 @@ class ReceiveAbilityEffectsTest {
         battleUnitRepository.create(enemyBattleUnit)
         val battleUnitId = battleUnit.toDto().id
         val enemyBattleUnitId = enemyBattleUnit.toDto().id
+        val enemyPosition = BattlefieldMother.position()
         whenever(searchAbilityById("ability-1")).thenReturn(
             ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY, effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.SELECTED_TARGET)))
                 .toDto(),
@@ -248,12 +252,20 @@ class ReceiveAbilityEffectsTest {
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchOccupant(1, 1)).thenReturn(enemyBattleUnitId)
         whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
+        whenever(searchPosition(enemyBattleUnitId)).thenReturn(enemyPosition)
         // When
         receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         val storedEnemyBattleUnit = battleUnitRepository.searchById(enemyBattleUnitId)?.toDto()
         assertThat(storedEnemyBattleUnit!!.remainingHealthPoints).isEqualTo(0)
-        verify(applyOnDefeatedEffectsToNearbyAllies).invoke(battleUnitId = enemyBattleUnitId)
+        assertThat(eventBus).publishedEventsContains(
+            BattleUnitEvent.BattleUnitDefeated(
+                playerId = enemyBattleUnit.toDto().playerId,
+                battleUnitId = enemyBattleUnit.toDto().id,
+                defeatedAtRow = enemyPosition.row,
+                defeatedAtColumn = enemyPosition.column,
+            ),
+        )
     }
 
     @Test
@@ -296,8 +308,10 @@ class ReceiveAbilityEffectsTest {
     @Test
     fun `should not receive effects when the battle unit does not exist`() {
         // Given
+        val ability = ability().toDto()
+        whenever(searchAbilityById(ability.id)).thenReturn(ability)
         // When
-        receiveAbilityEffects(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", row = 0, column = 0)
+        receiveAbilityEffects(battleUnitId = "unknown-battle-unit", abilityId = ability.id, row = 0, column = 0)
         // Then
         assertThat(eventBus.publishedEvents).isEmpty()
     }
@@ -335,6 +349,8 @@ class ReceiveAbilityEffectsTest {
         whenever(searchOccupant(1, 1)).thenReturn(enemyId)
         whenever(searchUnitById(casterUnit.id)).thenReturn(casterUnit)
         whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
+        whenever(searchPosition(casterId)).thenReturn(position())
+        whenever(searchPosition(enemyId)).thenReturn(position())
         // When
         receiveAbilityEffects(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
         // Then
@@ -363,6 +379,7 @@ class ReceiveAbilityEffectsTest {
         val enemyId = enemy.toDto().id
         whenever(searchEffectById(setupDamageEffectId)).thenReturn(setupDamageEffect)
         whenever(searchUnitById(casterUnit.id)).thenReturn(casterUnit)
+        whenever(searchPosition(casterId)).thenReturn(position())
         applyEffect(
             EffectApplication(
                 source = casterId,
@@ -407,6 +424,8 @@ class ReceiveAbilityEffectsTest {
         battleUnitRepository.create(enemy)
         val casterId = caster.toDto().id
         val enemyId = enemy.toDto().id
+        whenever(searchPosition(casterId)).thenReturn(position())
+        whenever(searchPosition(enemyId)).thenReturn(position())
         whenever(searchEffectById(setupDamageEffectId)).thenReturn(setupDamageEffect)
         whenever(searchUnitById(casterUnit.id)).thenReturn(casterUnit)
         applyEffect(

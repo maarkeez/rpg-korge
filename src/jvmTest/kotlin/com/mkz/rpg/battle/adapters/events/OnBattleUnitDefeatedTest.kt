@@ -23,7 +23,9 @@ class OnBattleUnitDefeatedTest {
         // Given
         val defeatedPlayer = "player-1"
         val defeatedBattleUnit = "battle-unit-1"
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(defeatedPlayer, defeatedBattleUnit))
+        val defeatedAtRow = 1
+        val defeatedAtColumn = 2
+        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(defeatedPlayer, defeatedBattleUnit, defeatedAtRow, defeatedAtColumn))
         // When
         eventBus.dispatch()
         // Then

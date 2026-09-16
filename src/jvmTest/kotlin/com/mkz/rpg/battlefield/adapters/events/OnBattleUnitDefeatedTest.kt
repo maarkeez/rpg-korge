@@ -1,6 +1,7 @@
 package com.mkz.rpg.battlefield.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import org.junit.jupiter.api.Test
@@ -22,7 +23,14 @@ class OnBattleUnitDefeatedTest {
     fun `should remove occupant when a battle unit is defeated`() {
         // Given
         val battleUnitId = "battle-unit-1"
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "player-1", battleUnitId = battleUnitId))
+        eventBus.publish(
+            BattleUnitEvent.BattleUnitDefeated(
+                playerId = "player-1",
+                battleUnitId = battleUnitId,
+                defeatedAtRow = position().row,
+                defeatedAtColumn = position().column,
+            ),
+        )
         // When
         eventBus.dispatch()
         // Then

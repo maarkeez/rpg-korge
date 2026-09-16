@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import org.assertj.core.api.SoftAssertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class CommandUseCaseArchitectureTest {
@@ -50,6 +51,40 @@ class CommandUseCaseArchitectureTest {
                         useCase.name,
                         returnTypeName,
                     ).isEqualTo("Unit")
+            }
+        }
+    }
+
+    @Test
+    @Disabled("Disabled until the rest of the project follow this new architecture rule")
+    fun `commands should not depend on other commands`() {
+        val useCaseClasses =
+            Konsist
+                .scopeFromProduction()
+                .classes()
+                .filter { it.resideInPackage("..usecases.commands..") }
+                .filter { it.isTopLevel }
+
+        val commandNames = useCaseClasses.map { it.name }.toSet()
+
+        SoftAssertions.assertSoftly { softly ->
+            useCaseClasses.forEach { useCase ->
+                val commandProperties =
+                    useCase
+                        .properties()
+                        .filter { property ->
+                            property.type?.name in commandNames
+                        }
+
+                softly
+                    .assertThat(commandProperties)
+                    .withFailMessage(
+                        "Command '%s' must not depend on other commands. Publish and listen to events instead. Found command dependencies: %s",
+                        useCase.name,
+                        commandProperties.map {
+                            "${it.name}: ${it.type?.name}"
+                        },
+                    ).isEmpty()
             }
         }
     }

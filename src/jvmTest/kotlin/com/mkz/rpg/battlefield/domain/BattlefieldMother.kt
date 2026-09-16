@@ -14,4 +14,9 @@ object BattlefieldMother {
         rows: Int,
         columns: Int,
     ): List<List<String>> = List(rows) { List(columns) { terrainId() } }
+
+    fun position(
+        row: Int = Random.nextInt(0, 100),
+        column: Int = Random.nextInt(0, 100),
+    ) = Battlefield.Dto.PositionDto(row = row, column = column)
 }

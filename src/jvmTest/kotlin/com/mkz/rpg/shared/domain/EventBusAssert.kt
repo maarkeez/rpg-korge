@@ -17,6 +17,15 @@ class EventBusAssert(
 
         return this
     }
+
+    fun publishedEventsContains(expected: DomainEvent): EventBusAssert {
+        isNotNull
+
+        assertThat(actual.publishedEvents)
+            .contains(expected)
+
+        return this
+    }
 }
 
 fun assertThat(eventBus: FakeEventBus): EventBusAssert = EventBusAssert(eventBus)

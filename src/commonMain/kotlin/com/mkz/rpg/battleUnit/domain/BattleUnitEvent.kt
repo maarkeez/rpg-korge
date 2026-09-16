@@ -44,5 +44,7 @@ sealed interface BattleUnitEvent : DomainEvent {
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,
+        val defeatedAtRow: Int,
+        val defeatedAtColumn: Int,
     ) : BattleUnitEvent
 }
