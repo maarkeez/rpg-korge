@@ -23,6 +23,7 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.usecases.commands.RequestUnitCreation
 
+// TODO: Publish command events instead of direct dependency
 class SetupBattle(
     private val requestPlayerCreation: RequestPlayerCreation,
     private val initializeBattlefield: InitializeBattlefield,

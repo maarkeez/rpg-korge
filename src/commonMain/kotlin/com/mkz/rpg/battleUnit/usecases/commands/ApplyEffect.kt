@@ -39,6 +39,7 @@ class ApplyEffect(
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(application.source) ?: throw FailedToReceiveAbilityEffects()
         val target = application.target as EffectTarget.Tile
+        // TODO: Publish BattleUnitEvent.RequestDeployBattleUnit event
         deployBattleUnit(
             battleUnitId = "deployed-unit-${Random.nextLong()}",
             unitId = effect.outcome.deployBattleUnit!!.unitId,

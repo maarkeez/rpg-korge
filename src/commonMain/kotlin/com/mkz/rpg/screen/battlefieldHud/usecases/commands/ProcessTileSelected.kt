@@ -57,6 +57,7 @@ class ProcessTileSelected(
                 eventBus.publish(events)
             } else {
                 if (selectedTileInMovementRange) {
+                    // TODO: Publish a BattleUnitEvent.RequestMoveBattleUnit command event
                     moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = tile.row, moveToColumn = tile.column)
                 } else {
                     val (events, updatedBattlefieldHud) =

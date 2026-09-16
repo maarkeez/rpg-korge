@@ -20,6 +20,7 @@ class ConfirmCast(
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayAbilityCastPreview -> {
+                // TODO: Publish a BattleUnit.RequestCastAbility command event
                 castAbility(
                     battleUnitId = battlefieldHud.battleUnitId,
                     abilityId = battlefieldHud.abilityId,
