@@ -15,8 +15,11 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.unit.domain.Unit
@@ -235,9 +238,10 @@ data class BattleUnit private constructor(
                     events = events + BattleUnitTeleported(battleUnitId = id.value),
                 )
             }
-            else -> {
-                TODO("Not implemented yet")
-            }
+            NEGATE_INCREASE_HEALTH,
+            APPLY_EFFECT_ON_NEARBY_ALLIES,
+            DEPLOY_BATTLE_UNIT,
+            -> TODO("Not implemented")
         }
     }
 
