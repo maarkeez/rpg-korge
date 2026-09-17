@@ -4,6 +4,10 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.events.OnAbilityCasted
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestDeployBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
@@ -114,7 +118,6 @@ class BattleUnitApi(
             effectApi.searchEffectById,
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
-            deployBattleUnit,
         )
     val applyOnDefeatedEffectsToNearbyAllies =
         ApplyOnDefeatedEffectsToNearbyAllies(
@@ -123,14 +126,13 @@ class BattleUnitApi(
             battlefieldApi.searchOccupant,
             distanceService,
             eventBus,
-            applyEffect,
         )
     val receiveAbilityEffects =
         ReceiveAbilityEffects(
             abilityApi.searchAbilityById,
             battleUnitRepository,
             abilityExecution,
-            applyEffect,
+            eventBus,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
@@ -152,4 +154,8 @@ class BattleUnitApi(
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
     private val onAbilityCasted = OnAbilityCasted(receiveAbilityEffects, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToNearbyAllies, eventBus)
+    private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
+    private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
+    private val onRequestDeployBattleUnit = OnRequestDeployBattleUnit(deployBattleUnit, eventBus)
+    private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
 }

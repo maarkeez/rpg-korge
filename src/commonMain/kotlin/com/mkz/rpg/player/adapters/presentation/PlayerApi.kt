@@ -1,5 +1,6 @@
 package com.mkz.rpg.player.adapters.presentation
 
+import com.mkz.rpg.player.adapters.events.OnRequestPlayerCreation
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerRepository
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation
@@ -19,4 +20,7 @@ class PlayerApi(
     // Queries
     val searchPlayerById = SearchPlayerById(playerRepository)
     val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
+
+    // Events
+    private val onRequestPlayerCreation = OnRequestPlayerCreation(requestPlayerCreation, eventBus)
 }

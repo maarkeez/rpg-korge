@@ -50,7 +50,6 @@ class BattlefieldPresenter(
         ProcessTileSelected(
             searchOccupant = battlefieldApi.searchOccupant,
             searchBattleUnitById = battleUnitApi.searchBattleUnitById,
-            moveBattleUnit = battleUnitApi.moveBattleUnit,
             searchPlayerById = playerApi.searchPlayerById,
             searchBattle = battleApi.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
@@ -66,7 +65,6 @@ class BattlefieldPresenter(
         )
     private val confirmCast =
         ConfirmCast(
-            castAbility = battleUnitApi.castAbility,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )

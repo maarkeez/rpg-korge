@@ -1,10 +1,9 @@
 package com.mkz.rpg.usecases.commands
 
-import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
-import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
@@ -15,10 +14,11 @@ import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.shared.domain.FakeEventBus
+import com.mkz.rpg.shared.domain.assertThat
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -27,24 +27,20 @@ import org.mockito.kotlin.whenever
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
-    private val moveBattleUnit: MoveBattleUnit = mock()
     private val whereCanCast: WhereCanCast = mock()
     private val canCastAbility: CanCastAbility = mock()
-    private val castAbility: CastAbility = mock()
-    private val finishPlayerTurn: FinishPlayerTurn = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
     private val whereShouldMove: WhereShouldMove = mock()
+    private val eventBus = FakeEventBus()
     private val playTurn =
         PlayTurn(
             searchPlayerById = searchPlayerById,
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
-            moveBattleUnit = moveBattleUnit,
             whereCanCast = whereCanCast,
             canCastAbility = canCastAbility,
-            castAbility = castAbility,
-            finishPlayerTurn = finishPlayerTurn,
             searchBattleUnitById = searchBattleUnitById,
             whereShouldMove = whereShouldMove,
+            eventBus = eventBus,
         )
 
     private val player = player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
@@ -70,7 +66,7 @@ class PlayTurnTest {
         playTurn("player-1")
         // Then
         verify(searchBattleUnitsByPlayerId, never()).invoke(any())
-        verify(finishPlayerTurn, never()).invoke()
+        assertThat(eventBus).hasNotPublishedEvents()
     }
 
     @Test
@@ -83,7 +79,7 @@ class PlayTurnTest {
         playTurn("player-1")
         // Then
         verify(searchBattleUnitsByPlayerId, never()).invoke(any())
-        verify(finishPlayerTurn, never()).invoke()
+        assertThat(eventBus).hasNotPublishedEvents()
     }
 
     @Test
@@ -94,7 +90,7 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        verify(finishPlayerTurn).invoke()
+        assertThat(eventBus).hasPublishedEvents(BattleEvent.RequestFinishPlayerTurn)
     }
 
     @Test
@@ -112,7 +108,14 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        verify(castAbility, atLeastOnce()).invoke("battle-unit-1", "ability-1", castGroup)
+        assertThat(eventBus).hasPublishedEvents(
+            BattleUnitEvent.RequestCastAbility(
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0)),
+            ),
+            BattleEvent.RequestFinishPlayerTurn,
+        )
     }
 
     @Test
@@ -126,7 +129,14 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        verify(moveBattleUnit).invoke("battle-unit-1", 1, 1)
+        assertThat(eventBus).hasPublishedEvents(
+            BattleUnitEvent.RequestMoveBattleUnit(
+                battleUnitId = "battle-unit-1",
+                moveToRow = 1,
+                moveToColumn = 1,
+            ),
+            BattleEvent.RequestFinishPlayerTurn,
+        )
     }
 
     @Test
@@ -141,6 +151,6 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        verify(castAbility, never()).invoke(any(), any(), any())
+        assertThat(eventBus).hasPublishedEvents(BattleEvent.RequestFinishPlayerTurn)
     }
 }

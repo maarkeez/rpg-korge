@@ -8,4 +8,10 @@ sealed interface PlayerEvent : DomainEvent {
         val playerName: String,
         val playerType: Player.Dto.PlayerTypeDto,
     ) : PlayerEvent
+
+    data class RequestPlayerCreation(
+        val id: String,
+        val name: String,
+        val type: Player.Dto.PlayerTypeDto,
+    ) : PlayerEvent
 }

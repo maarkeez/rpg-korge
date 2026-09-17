@@ -26,6 +26,12 @@ class EventBusAssert(
 
         return this
     }
+
+    fun hasNotPublishedEvents(): EventBusAssert {
+        isNotNull
+        assertThat(actual.publishedEvents).isEmpty()
+        return this
+    }
 }
 
 fun assertThat(eventBus: FakeEventBus): EventBusAssert = EventBusAssert(eventBus)

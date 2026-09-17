@@ -1,6 +1,7 @@
 package com.mkz.rpg.unit.adapters.presentation
 
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.unit.adapters.events.OnRequestUnitCreation
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitRepository
 import com.mkz.rpg.unit.usecases.commands.RequestUnitCreation
@@ -17,4 +18,7 @@ class UnitApi(
 
     // Queries
     val searchUnitById: SearchUnitById = SearchUnitById(unitRepository)
+
+    // Events
+    private val onRequestUnitCreation = OnRequestUnitCreation(requestUnitCreation, eventBus)
 }

@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -12,7 +12,6 @@ import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudRepository
 import com.mkz.rpg.shared.domain.EventBus
 
 class ConfirmCast(
-    private val castAbility: CastAbility,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
 ) {
@@ -20,16 +19,14 @@ class ConfirmCast(
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayAbilityCastPreview -> {
-                // TODO: Publish a BattleUnit.RequestCastAbility command event
-                castAbility(
-                    battleUnitId = battlefieldHud.battleUnitId,
-                    abilityId = battlefieldHud.abilityId,
-                    castGroup =
-                        WhereCanCast.CastGroup(
-                            positions =
-                                battlefieldHud.castGroup.tiles
-                                    .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
-                        ),
+                eventBus.publish(
+                    BattleUnitEvent.RequestCastAbility(
+                        battleUnitId = battlefieldHud.battleUnitId,
+                        abilityId = battlefieldHud.abilityId,
+                        castGroup =
+                            battlefieldHud.castGroup.tiles
+                                .map { tile -> Battlefield.Dto.PositionDto(row = tile.row, column = tile.column) },
+                    ),
                 )
                 val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)

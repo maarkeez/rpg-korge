@@ -2,8 +2,8 @@ package com.mkz.rpg.battlefieldHud.usecases.commands
 
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.castGroup
@@ -24,16 +24,12 @@ import com.mkz.rpg.shared.domain.assertThat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class ProcessTileSelectedTest {
     private val searchOccupant: SearchOccupant = mock()
     private val searchBattleUnitById: SearchBattleUnitById = mock()
-    private val moveBattleUnit: MoveBattleUnit = mock()
     private val searchPlayerById: SearchPlayerById = mock()
     private val searchBattle: SearchBattle = mock()
     private val movementService: MovementService = mock()
@@ -43,7 +39,6 @@ class ProcessTileSelectedTest {
         ProcessTileSelected(
             searchOccupant = searchOccupant,
             searchBattleUnitById = searchBattleUnitById,
-            moveBattleUnit = moveBattleUnit,
             searchPlayerById = searchPlayerById,
             searchBattle = searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
@@ -135,9 +130,14 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(2, 3)
         // Then
-        verify(moveBattleUnit).invoke(battleUnitId = "battle-unit-1", moveToRow = 2, moveToColumn = 3)
         assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus).hasPublishedEvents(
+            BattleUnitEvent.RequestMoveBattleUnit(
+                battleUnitId = "battle-unit-1",
+                moveToRow = 2,
+                moveToColumn = 3,
+            ),
+        )
     }
 
     @Test
@@ -164,7 +164,6 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(5, 5)
         // Then
-        verify(moveBattleUnit, never()).invoke(eq("battle-unit-1"), eq(5), eq(5))
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
         assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)
@@ -194,7 +193,6 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(2, 3)
         // Then
-        verify(moveBattleUnit, never()).invoke(eq("battle-unit-1"), eq(2), eq(3))
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
         assertThat(eventBus)
             .hasPublishedEvents(BattlefieldHudEvent.Idle)

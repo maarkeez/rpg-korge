@@ -2,10 +2,10 @@ package com.mkz.rpg.battlesetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
-import com.mkz.rpg.ability.usecases.commands.RequestAbilityCreation
-import com.mkz.rpg.battle.usecases.commands.StartFirstRound
-import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
-import com.mkz.rpg.battlefield.usecases.commands.InitializeBattlefield
+import com.mkz.rpg.ability.domain.AbilityEvent
+import com.mkz.rpg.battle.domain.BattleEvent
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
@@ -16,30 +16,23 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFEC
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.usecases.commands.RequestEffectCreation
-import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation
-import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
-import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
+import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.player.domain.Player
+import com.mkz.rpg.player.domain.PlayerEvent
+import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.domain.Unit
-import com.mkz.rpg.unit.usecases.commands.RequestUnitCreation
+import com.mkz.rpg.unit.domain.UnitEvent
 
-// TODO: Publish command events instead of direct dependency
 class SetupBattle(
-    private val requestPlayerCreation: RequestPlayerCreation,
-    private val initializeBattlefield: InitializeBattlefield,
-    private val startFirstRound: StartFirstRound,
-    private val requestEffectCreation: RequestEffectCreation,
-    private val requestAbilityCreation: RequestAbilityCreation,
-    private val requestUnitCreation: RequestUnitCreation,
-    private val deployBattleUnit: DeployBattleUnit,
+    private val eventBus: EventBus,
 ) {
     operator fun invoke() {
         val playerOneId = "player-one"
         val playerTwoId = "player-two"
-        requestPlayerCreation(playerOneId, "Human", HUMAN)
-        requestPlayerCreation(playerTwoId, "CPU", CPU)
+        eventBus.publish(PlayerEvent.RequestPlayerCreation(playerOneId, "Human", Player.Dto.PlayerTypeDto.HUMAN))
+        eventBus.publish(PlayerEvent.RequestPlayerCreation(playerTwoId, "CPU", Player.Dto.PlayerTypeDto.CPU))
 
-        initializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } })
+        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } }))
 
         val venomDamage =
             Effect.Dto(
@@ -132,11 +125,11 @@ class SetupBattle(
                         beforeApplyingEffect = null,
                     ),
             )
-        requestEffectCreation(venomDamage)
-        requestEffectCreation(lowPhysicalDamage)
-        requestEffectCreation(lowDamageHeal)
-        requestEffectCreation(teleportEffect)
-        requestEffectCreation(venomOnDeath)
+        eventBus.publish(EffectEvent.RequestEffectCreation(venomDamage))
+        eventBus.publish(EffectEvent.RequestEffectCreation(lowPhysicalDamage))
+        eventBus.publish(EffectEvent.RequestEffectCreation(lowDamageHeal))
+        eventBus.publish(EffectEvent.RequestEffectCreation(teleportEffect))
+        eventBus.publish(EffectEvent.RequestEffectCreation(venomOnDeath))
 
         val poisonedSword =
             Ability.Dto(
@@ -205,13 +198,13 @@ class SetupBattle(
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
                 effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
             )
-        requestAbilityCreation(poisonedSword)
-        requestAbilityCreation(sword)
-        requestAbilityCreation(heal)
-        requestAbilityCreation(mushroom)
-        requestAbilityCreation(skull)
-        requestAbilityCreation(teleport)
-        requestAbilityCreation(bee)
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(poisonedSword))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(sword))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(heal))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(mushroom))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(skull))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(teleport))
+        eventBus.publish(AbilityEvent.RequestAbilityCreation(bee))
 
         val ratUnit =
             Unit.Dto(
@@ -239,39 +232,47 @@ class SetupBattle(
                     ),
                 movementRange = 3,
             )
-        requestUnitCreation(ratUnit)
-        requestUnitCreation(knight)
+        eventBus.publish(UnitEvent.RequestUnitCreation(ratUnit))
+        eventBus.publish(UnitEvent.RequestUnitCreation(knight))
 
-        deployBattleUnit(
-            battleUnitId = "player-2-unit-1",
-            unitId = ratUnit.id,
-            playerId = playerTwoId,
-            deployAtRow = 0,
-            deployAtColumn = 0,
+        eventBus.publish(
+            BattleUnitEvent.RequestDeployBattleUnit(
+                battleUnitId = "player-2-unit-1",
+                unitId = ratUnit.id,
+                playerId = playerTwoId,
+                deployAtRow = 0,
+                deployAtColumn = 0,
+            ),
         )
-        deployBattleUnit(
-            battleUnitId = "player-2-unit-2",
-            unitId = ratUnit.id,
-            playerId = playerTwoId,
-            deployAtRow = 1,
-            deployAtColumn = 1,
-        )
-
-        deployBattleUnit(
-            battleUnitId = "player-1-unit-1",
-            unitId = knight.id,
-            playerId = playerOneId,
-            deployAtRow = 6,
-            deployAtColumn = 6,
-        )
-        deployBattleUnit(
-            battleUnitId = "player-1-unit-2",
-            unitId = knight.id,
-            playerId = playerOneId,
-            deployAtRow = 7,
-            deployAtColumn = 7,
+        eventBus.publish(
+            BattleUnitEvent.RequestDeployBattleUnit(
+                battleUnitId = "player-2-unit-2",
+                unitId = ratUnit.id,
+                playerId = playerTwoId,
+                deployAtRow = 1,
+                deployAtColumn = 1,
+            ),
         )
 
-        startFirstRound(listOf(playerOneId, playerTwoId))
+        eventBus.publish(
+            BattleUnitEvent.RequestDeployBattleUnit(
+                battleUnitId = "player-1-unit-1",
+                unitId = knight.id,
+                playerId = playerOneId,
+                deployAtRow = 6,
+                deployAtColumn = 6,
+            ),
+        )
+        eventBus.publish(
+            BattleUnitEvent.RequestDeployBattleUnit(
+                battleUnitId = "player-1-unit-2",
+                unitId = knight.id,
+                playerId = playerOneId,
+                deployAtRow = 7,
+                deployAtColumn = 7,
+            ),
+        )
+
+        eventBus.publish(BattleEvent.RequestStartFirstRound(listOf(playerOneId, playerTwoId)))
     }
 }

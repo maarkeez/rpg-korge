@@ -5,6 +5,12 @@ import com.mkz.rpg.shared.domain.DomainEvent
 sealed interface BattleEvent : DomainEvent {
     object BattleStarted : BattleEvent
 
+    data class RequestStartFirstRound(
+        val players: List<String>,
+    ) : BattleEvent
+
+    object RequestFinishPlayerTurn : BattleEvent
+
     data class BattleRoundStarted(
         val round: Int,
     ) : BattleEvent

@@ -6,4 +6,8 @@ sealed interface UnitEvent : DomainEvent {
     data class UnitCreated(
         val unitId: String,
     ) : UnitEvent
+
+    data class RequestUnitCreation(
+        val unitDto: Unit.Dto,
+    ) : UnitEvent
 }

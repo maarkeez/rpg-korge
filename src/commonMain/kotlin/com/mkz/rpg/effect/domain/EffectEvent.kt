@@ -6,4 +6,8 @@ sealed interface EffectEvent : DomainEvent {
     data class EffectCreated(
         val effectId: String,
     ) : EffectEvent
+
+    data class RequestEffectCreation(
+        val effectDto: Effect.Dto,
+    ) : EffectEvent
 }

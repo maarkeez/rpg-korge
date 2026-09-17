@@ -1,7 +1,7 @@
 package com.mkz.rpg.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.tile
@@ -15,16 +15,12 @@ import com.mkz.rpg.shared.domain.assertThat
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 class ConfirmCastTest {
-    private val castAbility: CastAbility = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val confirmCast =
         ConfirmCast(
-            castAbility = castAbility,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
@@ -43,19 +39,18 @@ class ConfirmCastTest {
         // When
         confirmCast()
         // Then
-        verify(castAbility).invoke(
-            battleUnitId = "battle-unit-1",
-            abilityId = "ability-1",
-            castGroup =
-                WhereCanCast.CastGroup(
-                    positions =
-                        castGroup.tiles
-                            .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
-                ),
-        )
         assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
         assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+            .hasPublishedEvents(
+                BattleUnitEvent.RequestCastAbility(
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "ability-1",
+                    castGroup =
+                        castGroup.tiles
+                            .map { tile -> Battlefield.Dto.PositionDto(row = tile.row, column = tile.column) },
+                ),
+                BattlefieldHudEvent.Idle,
+            )
     }
 
     @Test

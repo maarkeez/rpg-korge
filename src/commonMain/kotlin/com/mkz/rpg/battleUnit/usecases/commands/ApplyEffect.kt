@@ -21,7 +21,6 @@ class ApplyEffect(
     private val searchEffectById: SearchEffectById,
     private val searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
-    private val deployBattleUnit: DeployBattleUnit,
 ) {
     operator fun invoke(application: EffectApplication) {
         val effect = searchEffectById(application.effectId) ?: throw FailedToReceiveAbilityEffects()
@@ -39,13 +38,14 @@ class ApplyEffect(
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(application.source) ?: throw FailedToReceiveAbilityEffects()
         val target = application.target as EffectTarget.Tile
-        // TODO: Publish BattleUnitEvent.RequestDeployBattleUnit event
-        deployBattleUnit(
-            battleUnitId = "deployed-unit-${Random.nextLong()}",
-            unitId = effect.outcome.deployBattleUnit!!.unitId,
-            playerId = caster.toDto().playerId,
-            deployAtRow = target.row,
-            deployAtColumn = target.column,
+        eventBus.publish(
+            BattleUnitEvent.RequestDeployBattleUnit(
+                battleUnitId = "deployed-unit-${Random.nextLong()}",
+                unitId = effect.outcome.deployBattleUnit!!.unitId,
+                playerId = caster.toDto().playerId,
+                deployAtRow = target.row,
+                deployAtColumn = target.column,
+            ),
         )
     }
 

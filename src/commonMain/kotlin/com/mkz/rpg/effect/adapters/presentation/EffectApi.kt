@@ -1,5 +1,6 @@
 package com.mkz.rpg.effect.adapters.presentation
 
+import com.mkz.rpg.effect.adapters.events.OnRequestEffectCreation
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.commands.RequestEffectCreation
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
@@ -16,4 +17,7 @@ class EffectApi(
 
     // Queries
     val searchEffectById = SearchEffectById(effectRepository)
+
+    // Events
+    private val onRequestEffectCreation = OnRequestEffectCreation(requestEffectCreation, eventBus)
 }

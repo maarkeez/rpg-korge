@@ -1,6 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
@@ -16,7 +17,6 @@ class ApplyOnDefeatedEffectsToNearbyAllies(
     private val searchOccupant: SearchOccupant,
     private val distanceService: DistanceService,
     private val eventBus: EventBus,
-    private val applyEffect: ApplyEffect,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -32,11 +32,14 @@ class ApplyOnDefeatedEffectsToNearbyAllies(
             val appliedEffectId = onDefeatedEffect.outcome.applyEffectOnNearbyAllies!!.effectId
             searchNearbyAllies(battleUnit = battleUnit, defeatedAtRow = defeatedAtRow, defeatedAtColumn = defeatedAtColumn)
                 .forEach { nearbyAlly ->
-                    applyEffect(
-                        EffectApplication(
-                            source = battleUnitId,
-                            target = EffectTarget.Unit(id = nearbyAlly.toDto().id),
-                            effectId = appliedEffectId,
+                    eventBus.publish(
+                        BattleUnitEvent.RequestApplyEffect(
+                            application =
+                                EffectApplication(
+                                    source = battleUnitId,
+                                    target = EffectTarget.Unit(id = nearbyAlly.toDto().id),
+                                    effectId = appliedEffectId,
+                                ),
                         ),
                     )
                 }

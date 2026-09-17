@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.battlefieldHud.usecases.commands
 
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
-import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.player.domain.Player
@@ -19,7 +19,6 @@ import com.mkz.rpg.shared.domain.EventBus
 class ProcessTileSelected(
     private val searchOccupant: SearchOccupant,
     private val searchBattleUnitById: SearchBattleUnitById,
-    private val moveBattleUnit: MoveBattleUnit,
     private val searchPlayerById: SearchPlayerById,
     private val searchBattle: SearchBattle,
     private val battlefieldHudRepository: BattlefieldHudRepository,
@@ -57,8 +56,13 @@ class ProcessTileSelected(
                 eventBus.publish(events)
             } else {
                 if (selectedTileInMovementRange) {
-                    // TODO: Publish a BattleUnitEvent.RequestMoveBattleUnit command event
-                    moveBattleUnit(battleUnitId = battleUnit.id, moveToRow = tile.row, moveToColumn = tile.column)
+                    eventBus.publish(
+                        BattleUnitEvent.RequestMoveBattleUnit(
+                            battleUnitId = battleUnit.id,
+                            moveToRow = tile.row,
+                            moveToColumn = tile.column,
+                        ),
+                    )
                 } else {
                     val (events, updatedBattlefieldHud) =
                         battlefieldHud

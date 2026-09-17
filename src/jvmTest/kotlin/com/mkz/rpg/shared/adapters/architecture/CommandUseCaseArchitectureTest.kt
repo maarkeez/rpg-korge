@@ -2,7 +2,6 @@ package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class CommandUseCaseArchitectureTest {
@@ -56,7 +55,6 @@ class CommandUseCaseArchitectureTest {
     }
 
     @Test
-    @Disabled("Disabled until the rest of the project follow this new architecture rule")
     fun `commands should not depend on other commands`() {
         val useCaseClasses =
             Konsist

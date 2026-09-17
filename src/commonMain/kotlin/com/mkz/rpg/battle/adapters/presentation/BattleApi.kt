@@ -2,6 +2,8 @@ package com.mkz.rpg.battle.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battle.adapters.events.OnPlayerDefeated
+import com.mkz.rpg.battle.adapters.events.OnRequestFinishPlayerTurn
+import com.mkz.rpg.battle.adapters.events.OnRequestStartFirstRound
 import com.mkz.rpg.battle.adapters.events.OnRoundFinished
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleRepository
@@ -35,4 +37,6 @@ class BattleApi(
     val onTurnFinished = OnRoundFinished(eventBus, startNextRound)
     val onBattleUnitDefeated = OnBattleUnitDefeated(eventBus, defeatPlayer)
     val onPlayerDefeated = OnPlayerDefeated(eventBus, finishBattle)
+    private val onRequestStartFirstRound = OnRequestStartFirstRound(startFirstRound, eventBus)
+    private val onRequestFinishPlayerTurn = OnRequestFinishPlayerTurn(finishPlayerTurn, eventBus)
 }

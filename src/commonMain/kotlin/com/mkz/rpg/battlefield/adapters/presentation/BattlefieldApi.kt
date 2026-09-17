@@ -3,6 +3,7 @@ package com.mkz.rpg.battlefield.adapters.presentation
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitMoved
+import com.mkz.rpg.battlefield.adapters.events.OnRequestInitializeBattlefield
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.InitializeBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
@@ -36,4 +37,5 @@ class BattlefieldApi(
     private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
+    private val onRequestInitializeBattlefield = OnRequestInitializeBattlefield(initializeBattlefield, eventBus)
 }
