@@ -218,7 +218,7 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.applyPendingEffect(effect.id)
+        val ongoingEffects = ongoingEffects.applyImmediateEffect(effect.id)
         return when (effect.outcome.type) {
             DECREASE_HEALTH -> {
                 applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
@@ -247,7 +247,6 @@ data class BattleUnit private constructor(
 
     fun hasOnTurnStartedEffects(): Boolean = ongoingEffects.hasOnTurnStartedEffects()
 
-    // TODO: Rename to "on turn started"
     fun applyOnTurnStartedEffect(
         effect: Effect.Dto,
         currentRow: Int,
@@ -432,7 +431,7 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
-        fun applyPendingEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isPending() && it.hasEffectId(effectId) })
+        fun applyImmediateEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isImmediate() && it.hasEffectId(effectId) })
 
         fun applyOnTurnStartedEffect(effectId: String): OngoingEffects {
             val effect = value.firstOrNull { it.hasEffectId(effectId) } ?: throw EffectNotFound()
@@ -473,7 +472,7 @@ data class BattleUnit private constructor(
             private val applicationStatus: ApplicationStatus,
         ) {
             companion object {
-                fun immediate(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.pending())
+                fun immediate(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.immediate())
 
                 fun onTurnStarted(
                     effectId: String,
@@ -487,7 +486,7 @@ data class BattleUnit private constructor(
 
             fun isOnDefeated() = applicationStatus.isOnDefeated()
 
-            fun isPending() = applicationStatus.isPending()
+            fun isImmediate() = applicationStatus.isImmediate()
 
             fun applyOnTurnStarted(): Effect? {
                 if (!isOnTurnStarted()) throw InvalidEffectApplicationStatus()
@@ -505,7 +504,7 @@ data class BattleUnit private constructor(
         )
 
         private sealed interface ApplicationStatus {
-            object Pending : ApplicationStatus
+            object Immediate : ApplicationStatus
 
             object OnDefeated : ApplicationStatus
 
@@ -516,7 +515,7 @@ data class BattleUnit private constructor(
             }
 
             companion object {
-                fun pending(): ApplicationStatus = Pending
+                fun immediate(): ApplicationStatus = Immediate
 
                 fun onDefeated(): ApplicationStatus = OnDefeated
 
@@ -527,7 +526,7 @@ data class BattleUnit private constructor(
 
             fun isOnDefeated() = this is OnDefeated
 
-            fun isPending() = this is Pending
+            fun isImmediate() = this is Immediate
         }
     }
 
