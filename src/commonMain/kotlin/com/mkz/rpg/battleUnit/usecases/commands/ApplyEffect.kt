@@ -70,7 +70,7 @@ class ApplyEffect(
                         ).pullEvents()
                 "ON_TURN_STARTED" ->
                     battleUnit
-                        .receiveDelayedEffect(
+                        .receiveOnTurnStartedEffect(
                             effectId = effect.id,
                             turnsLeft = effect.application.onTurnStarted!!.duration,
                         ).pullEvents()

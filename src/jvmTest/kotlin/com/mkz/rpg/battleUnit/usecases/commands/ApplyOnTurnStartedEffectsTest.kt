@@ -33,7 +33,7 @@ class ApplyOnTurnStartedEffectsTest {
         )
 
     @Test
-    fun `should apply delayed effect when the battle unit has a delayed ongoing effect`() {
+    fun `should apply on turn started effect when the battle unit has a delayed ongoing effect`() {
         // Given
         val effectId = "effect-1"
         val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "ON_TURN_STARTED").toDto()
@@ -41,7 +41,7 @@ class ApplyOnTurnStartedEffectsTest {
         val player = player(id = "player-1").toDto()
         val battleUnit =
             battleUnit(unit = unit, player = player)
-                .receiveDelayedEffect(effectId = effectId, turnsLeft = 1)
+                .receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 1)
                 .pullEvents()
                 .second
         battleUnitRepository.create(battleUnit)

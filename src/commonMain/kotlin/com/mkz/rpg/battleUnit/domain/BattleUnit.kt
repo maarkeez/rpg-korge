@@ -175,12 +175,11 @@ data class BattleUnit private constructor(
         )
     }
 
-    // TODO: Rename to "on turn started"
-    fun receiveDelayedEffect(
+    fun receiveOnTurnStartedEffect(
         effectId: String,
         turnsLeft: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.receiveDelayedEffect(effectId, turnsLeft)
+        val ongoingEffects = ongoingEffects.receiveOnTurnStartedEffect(effectId, turnsLeft)
         val effectReceivedEvent =
             EffectReceived(
                 battleUnitId = id.value,
@@ -420,11 +419,11 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
-        fun receiveDelayedEffect(
+        fun receiveOnTurnStartedEffect(
             effectId: String,
             turnsLeft: Int,
         ): OngoingEffects {
-            val newEffect = Effect(EffectId(effectId), ApplicationStatus.delayed(turnsLeft))
+            val newEffect = Effect(EffectId(effectId), ApplicationStatus.onTurnStarted(turnsLeft))
             return OngoingEffects(value + newEffect)
         }
 
@@ -440,14 +439,14 @@ data class BattleUnit private constructor(
 
         fun applyDelayedEffect(effectId: String): OngoingEffects {
             val effect = value.firstOrNull { it.effectId.value == effectId } ?: throw EffectNotFound()
-            if (!effect.applicationStatus.isDelayed()) throw NotDelayedEffect()
-            val turnsLeft = (effect.applicationStatus as ApplicationStatus.TurnsLeft).apply()
+            if (!effect.applicationStatus.isOnTurnStarted()) throw NotDelayedEffect()
+            val onTurnStarted = (effect.applicationStatus as ApplicationStatus.OnTurnStarted).apply()
             val ongoingEffects =
-                if (turnsLeft != null) {
+                if (onTurnStarted != null) {
                     buildList {
                         value.forEach { ongoingEffect ->
                             if (ongoingEffect.effectId.value == effectId) {
-                                add(ongoingEffect.copy(applicationStatus = turnsLeft))
+                                add(ongoingEffect.copy(applicationStatus = onTurnStarted))
                             } else {
                                 add(ongoingEffect)
                             }
@@ -459,7 +458,7 @@ data class BattleUnit private constructor(
             return OngoingEffects(ongoingEffects)
         }
 
-        fun hasDelayedOngoingEffects(): Boolean = value.any { it.applicationStatus.isDelayed() }
+        fun hasDelayedOngoingEffects(): Boolean = value.any { it.applicationStatus.isOnTurnStarted() }
 
         fun onDefeatedEffectIds(): List<String> = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value }
 
@@ -467,7 +466,7 @@ data class BattleUnit private constructor(
 
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
-                delayedEffects = value.filter { it.applicationStatus.isDelayed() }.map { it.effectId.value },
+                delayedEffects = value.filter { it.applicationStatus.isOnTurnStarted() }.map { it.effectId.value },
                 onDefeatedEffects = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value },
             )
 
@@ -488,10 +487,10 @@ data class BattleUnit private constructor(
 
             object OnDefeated : ApplicationStatus
 
-            @JvmInline value class TurnsLeft(
-                val value: Int,
+            @JvmInline value class OnTurnStarted(
+                val turnsLeft: Int,
             ) : ApplicationStatus {
-                fun apply(): TurnsLeft? = if (value - 1 == 0) null else TurnsLeft(value - 1)
+                fun apply(): OnTurnStarted? = if (turnsLeft - 1 == 0) null else OnTurnStarted(turnsLeft - 1)
             }
 
             companion object {
@@ -499,10 +498,10 @@ data class BattleUnit private constructor(
 
                 fun onDefeated(): ApplicationStatus = OnDefeated
 
-                fun delayed(turnsLeft: Int): ApplicationStatus = TurnsLeft(turnsLeft)
+                fun onTurnStarted(turnsLeft: Int): ApplicationStatus = OnTurnStarted(turnsLeft)
             }
 
-            fun isDelayed() = this is TurnsLeft
+            fun isOnTurnStarted() = this is OnTurnStarted
 
             fun isOnDefeated() = this is OnDefeated
         }

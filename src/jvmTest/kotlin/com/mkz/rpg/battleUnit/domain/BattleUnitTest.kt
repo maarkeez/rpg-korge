@@ -298,12 +298,12 @@ class BattleUnitTest {
     @Nested
     inner class ReceiveDelayedEffect {
         @Test
-        fun `should add the delayed effect and publish the received event when the battle unit receives it`() {
+        fun `should add the on turn started effect and publish the received event when the battle unit receives it`() {
             // Given
             val battleUnit = BattleUnitMother.battleUnit()
             val effectId = "effect-1"
             // When
-            val updatedBattleUnit = battleUnit.receiveDelayedEffect(effectId = effectId, turnsLeft = 2)
+            val updatedBattleUnit = battleUnit.receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 2)
             // Then
             assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).containsExactly(effectId)
             val (events, _) = updatedBattleUnit.pullEvents()
@@ -372,13 +372,13 @@ class BattleUnitTest {
         }
 
         @Test
-        fun `should keep the delayed effects when the on defeated effects are applied`() {
+        fun `should keep the on turn started effects when the on defeated effects are applied`() {
             // Given
             val battleUnit =
                 BattleUnitMother
                     .battleUnit()
                     .receiveOnDefeatedEffect(effectId = "effect-1")
-                    .receiveDelayedEffect(effectId = "effect-2", turnsLeft = 2)
+                    .receiveOnTurnStartedEffect(effectId = "effect-2", turnsLeft = 2)
             // When
             val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
             // Then
@@ -490,9 +490,9 @@ class BattleUnitTest {
     @Nested
     inner class HasDelayedOngoingEffects {
         @Test
-        fun `should be true when the battle unit has delayed effects`() {
+        fun `should be true when the battle unit has on turn started effects`() {
             // Given
-            val battleUnit = BattleUnitMother.battleUnit().receiveDelayedEffect(effectId = "effect-1", turnsLeft = 2)
+            val battleUnit = BattleUnitMother.battleUnit().receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
             // When
             val result = battleUnit.hasDelayedOngoingEffects()
             // Then
@@ -513,15 +513,15 @@ class BattleUnitTest {
     @Nested
     inner class ApplyDelayedEffect {
         @Test
-        fun `should reduce the health points and remove the delayed effect when the effect decreases health`() {
+        fun `should reduce the health points and remove the on turn started effect when the effect decreases health`() {
             // Given
             val unit = UnitMother.unit(healthPoints = 10).toDto()
-            val delayedEffect = EffectMother.decreaseHealthEffect(damage = 3).toDto()
-            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveDelayedEffect(effectId = delayedEffect.id, turnsLeft = 1)
+            val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
             // When
             val updatedBattleUnit =
                 battleUnit.applyDelayedEffect(
-                    effect = delayedEffect,
+                    effect = onTurnStartedEffect,
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
