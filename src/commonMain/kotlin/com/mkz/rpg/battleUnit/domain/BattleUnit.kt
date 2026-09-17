@@ -432,10 +432,7 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
-        fun applyPendingEffect(effectId: String): OngoingEffects {
-            // TODO: Validate type
-            return OngoingEffects(value.filterNot { it.hasEffectId(effectId) })
-        }
+        fun applyPendingEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isPending() && it.hasEffectId(effectId) })
 
         fun applyOnTurnStartedEffect(effectId: String): OngoingEffects {
             val effect = value.firstOrNull { it.hasEffectId(effectId) } ?: throw EffectNotFound()
@@ -490,6 +487,8 @@ data class BattleUnit private constructor(
 
             fun isOnDefeated() = applicationStatus.isOnDefeated()
 
+            fun isPending() = applicationStatus.isPending()
+
             fun applyOnTurnStarted(): Effect? {
                 if (!isOnTurnStarted()) throw InvalidEffectApplicationStatus()
                 val updatedApplicationStatus = (applicationStatus as ApplicationStatus.OnTurnStarted).apply()
@@ -527,6 +526,8 @@ data class BattleUnit private constructor(
             fun isOnTurnStarted() = this is OnTurnStarted
 
             fun isOnDefeated() = this is OnDefeated
+
+            fun isPending() = this is Pending
         }
     }
 
