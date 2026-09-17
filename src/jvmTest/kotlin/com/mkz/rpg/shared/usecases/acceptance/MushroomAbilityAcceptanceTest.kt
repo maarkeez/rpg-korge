@@ -125,8 +125,8 @@ class MushroomAbilityAcceptanceTest {
         eventBus.dispatch()
         // Then
         val firstRat = battleUnitApi.searchBattleUnitById(firstRatBattleUnitId)!!
-        assertThat(firstRat.ongoingEffects.delayedEffects).contains(venomEffectId)
+        assertThat(firstRat.ongoingEffects.onTurnStarted).contains(venomEffectId)
         val secondRat = battleUnitApi.searchBattleUnitById(secondRatBattleUnitId)!!
-        assertThat(secondRat.ongoingEffects.delayedEffects).contains(venomEffectId)
+        assertThat(secondRat.ongoingEffects.onTurnStarted).contains(venomEffectId)
     }
 }

@@ -305,7 +305,7 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnit.receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 2)
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).containsExactly(effectId)
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly(effectId)
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events).containsExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
         }
@@ -383,7 +383,7 @@ class BattleUnitTest {
             val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
             // Then
             assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).isEmpty()
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).containsExactly("effect-2")
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-2")
         }
     }
 
@@ -494,17 +494,17 @@ class BattleUnitTest {
             // Given
             val battleUnit = BattleUnitMother.battleUnit().receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
             // When
-            val result = battleUnit.hasDelayedOngoingEffects()
+            val result = battleUnit.hasOnTurnStartedEffects()
             // Then
             assertThat(result).isTrue
         }
 
         @Test
-        fun `should be false when the battle unit has no delayed effects`() {
+        fun `should be false when the battle unit has no on turn started effects`() {
             // Given
             val battleUnit = BattleUnitMother.battleUnit()
             // When
-            val result = battleUnit.hasDelayedOngoingEffects()
+            val result = battleUnit.hasOnTurnStartedEffects()
             // Then
             assertThat(result).isFalse
         }
@@ -520,14 +520,14 @@ class BattleUnitTest {
             val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
             // When
             val updatedBattleUnit =
-                battleUnit.applyDelayedEffect(
+                battleUnit.applyOnTurnStartedEffect(
                     effect = onTurnStartedEffect,
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.delayedEffects).isEmpty()
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events).contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
         }

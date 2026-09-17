@@ -16,15 +16,15 @@ class ApplyOnTurnStartedEffects(
     operator fun invoke(playerId: String) {
         val battleUnits = searchBattleUnitsByPlayerId(playerId).map { battleUnitRepository.searchById(it.id)!! }
         battleUnits
-            .filter { battleUnit -> battleUnit.hasDelayedOngoingEffects() }
+            .filter { battleUnit -> battleUnit.hasOnTurnStartedEffects() }
             .forEach { battleUnit ->
-                val delayedEffects = battleUnit.toDto().ongoingEffects.delayedEffects
-                delayedEffects.forEach { delayedEffectId ->
-                    val effect = searchEffectById(delayedEffectId)!!
+                val onTurnStartedEffects = battleUnit.toDto().ongoingEffects.onTurnStarted
+                onTurnStartedEffects.forEach { onTurnStartedEffectId ->
+                    val effect = searchEffectById(onTurnStartedEffectId)!!
                     val position = searchPosition(battleUnitId = battleUnit.toDto().id)!!
                     val (events, updatedBattleUnit) =
                         battleUnit
-                            .applyDelayedEffect(
+                            .applyOnTurnStartedEffect(
                                 effect = effect,
                                 currentRow = position.row,
                                 currentColumn = position.column,

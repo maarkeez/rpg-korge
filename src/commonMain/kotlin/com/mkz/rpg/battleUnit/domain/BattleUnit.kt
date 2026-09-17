@@ -244,11 +244,10 @@ data class BattleUnit private constructor(
         }
     }
 
-    // TODO: Rename to "on turn started"
-    fun hasDelayedOngoingEffects(): Boolean = ongoingEffects.hasDelayedOngoingEffects()
+    fun hasOnTurnStartedEffects(): Boolean = ongoingEffects.hasOnTurnStartedEffects()
 
     // TODO: Rename to "on turn started"
-    fun applyDelayedEffect(
+    fun applyOnTurnStartedEffect(
         effect: Effect.Dto,
         currentRow: Int,
         currentColumn: Int,
@@ -458,7 +457,7 @@ data class BattleUnit private constructor(
             return OngoingEffects(ongoingEffects)
         }
 
-        fun hasDelayedOngoingEffects(): Boolean = value.any { it.applicationStatus.isOnTurnStarted() }
+        fun hasOnTurnStartedEffects(): Boolean = value.any { it.applicationStatus.isOnTurnStarted() }
 
         fun onDefeatedEffectIds(): List<String> = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value }
 
@@ -466,7 +465,7 @@ data class BattleUnit private constructor(
 
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
-                delayedEffects = value.filter { it.applicationStatus.isOnTurnStarted() }.map { it.effectId.value },
+                onTurnStarted = value.filter { it.applicationStatus.isOnTurnStarted() }.map { it.effectId.value },
                 onDefeatedEffects = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value },
             )
 
@@ -523,7 +522,7 @@ data class BattleUnit private constructor(
         )
 
         data class OngoingEffectsDto(
-            val delayedEffects: List<String>,
+            val onTurnStarted: List<String>,
             val onDefeatedEffects: List<String>,
         )
     }

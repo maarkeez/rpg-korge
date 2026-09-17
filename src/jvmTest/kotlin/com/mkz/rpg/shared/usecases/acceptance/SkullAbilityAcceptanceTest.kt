@@ -189,6 +189,6 @@ class SkullAbilityAcceptanceTest {
         val enemy = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
         assertThat(enemy.remainingHealthPoints).isEqualTo(0)
         val ally = battleUnitApi.searchBattleUnitById(allyBattleUnitId)!!
-        assertThat(ally.ongoingEffects.delayedEffects).contains(venomEffectId)
+        assertThat(ally.ongoingEffects.onTurnStarted).contains(venomEffectId)
     }
 }
