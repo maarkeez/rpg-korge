@@ -138,7 +138,7 @@ data class BattleUnit private constructor(
     fun canCastAbility(ability: Ability.Dto): Boolean =
         remainingTurnActions.canCastAbility() &&
             abilityCooldowns.canCastAbility(ability.id) &&
-            remainingManaPoints.value >= ability.cooldown
+            remainingManaPoints.value >= ability.cost
 
     fun castAbility(
         abilityId: String,

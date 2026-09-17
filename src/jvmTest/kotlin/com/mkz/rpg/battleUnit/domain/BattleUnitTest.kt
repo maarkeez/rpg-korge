@@ -262,6 +262,17 @@ class BattleUnitTest {
             // Then
             assertThat(result).isFalse
         }
+
+        @Test
+        fun `should not be able to cast when the battle unit has no enough mana`() {
+            // Given
+            val ability = AbilityMother.ability(cost = 3).toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf(ability.id), manaPoints = 0).toDto())
+            // When
+            val result = battleUnit.canCastAbility(ability = ability)
+            // Then
+            assertThat(result).isFalse
+        }
     }
 
     @Nested

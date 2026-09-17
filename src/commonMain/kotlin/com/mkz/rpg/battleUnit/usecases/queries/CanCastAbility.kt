@@ -13,7 +13,6 @@ class CanCastAbility(
     ): Boolean {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return false
         val ability = searchAbilityById(abilityId) ?: return false
-        // TODO: Consider ability cost
         return battleUnit.canCastAbility(ability)
     }
 }
