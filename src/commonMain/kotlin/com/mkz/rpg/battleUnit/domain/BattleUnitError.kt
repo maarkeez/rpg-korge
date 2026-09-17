@@ -27,5 +27,7 @@ sealed class BattleUnitError(
 
     class EffectNotFound : BattleUnitError("Effect not found")
 
-    class NotDelayedEffect : BattleUnitError("Not delayed effect")
+    class NotOnTurnStarted : BattleUnitError("Not on turn started effect")
+
+    class InvalidEffectApplicationStatus : BattleUnitError("Invalid effect application status")
 }

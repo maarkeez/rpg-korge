@@ -2,9 +2,10 @@ package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EffectNotFound
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidEffectApplicationStatus
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotDelayedEffect
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotOnTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.RemainingManaPointsBelowZero
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDamaged
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
@@ -252,7 +253,7 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.applyDelayedEffect(effect.id)
+        val ongoingEffects = ongoingEffects.applyOnTurnStartedEffect(effect.id)
         return if (effect.outcome.type == DECREASE_HEALTH) {
             applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
         } else {
@@ -414,7 +415,7 @@ data class BattleUnit private constructor(
         val value: List<Effect>,
     ) {
         fun receiveImmediateEffect(effectId: String): OngoingEffects {
-            val newEffect = Effect(EffectId(effectId), ApplicationStatus.pending())
+            val newEffect = Effect.immediate(effectId)
             return OngoingEffects(value + newEffect)
         }
 
@@ -422,60 +423,83 @@ data class BattleUnit private constructor(
             effectId: String,
             turnsLeft: Int,
         ): OngoingEffects {
-            val newEffect = Effect(EffectId(effectId), ApplicationStatus.onTurnStarted(turnsLeft))
+            val newEffect = Effect.onTurnStarted(effectId, turnsLeft)
             return OngoingEffects(value + newEffect)
         }
 
         fun receiveOnDefeatedEffect(effectId: String): OngoingEffects {
-            val newEffect = Effect(EffectId(effectId), ApplicationStatus.onDefeated())
+            val newEffect = Effect.onDefeated(effectId)
             return OngoingEffects(value + newEffect)
         }
 
         fun applyPendingEffect(effectId: String): OngoingEffects {
             // TODO: Validate type
-            return OngoingEffects(value.filter { it.effectId.value != effectId })
+            return OngoingEffects(value.filterNot { it.hasEffectId(effectId) })
         }
 
-        fun applyDelayedEffect(effectId: String): OngoingEffects {
-            val effect = value.firstOrNull { it.effectId.value == effectId } ?: throw EffectNotFound()
-            if (!effect.applicationStatus.isOnTurnStarted()) throw NotDelayedEffect()
-            val onTurnStarted = (effect.applicationStatus as ApplicationStatus.OnTurnStarted).apply()
+        fun applyOnTurnStartedEffect(effectId: String): OngoingEffects {
+            val effect = value.firstOrNull { it.hasEffectId(effectId) } ?: throw EffectNotFound()
+            if (!effect.isOnTurnStarted()) throw NotOnTurnStarted()
+            val effectAfterApplication = effect.applyOnTurnStarted()
             val ongoingEffects =
-                if (onTurnStarted != null) {
+                if (effectAfterApplication != null) {
                     buildList {
                         value.forEach { ongoingEffect ->
-                            if (ongoingEffect.effectId.value == effectId) {
-                                add(ongoingEffect.copy(applicationStatus = onTurnStarted))
+                            if (ongoingEffect.hasEffectId(effectId)) {
+                                add(effectAfterApplication)
                             } else {
                                 add(ongoingEffect)
                             }
                         }
                     }
                 } else {
-                    value.filter { it.effectId.value != effectId }
+                    value.filterNot { it.hasEffectId(effectId) }
                 }
             return OngoingEffects(ongoingEffects)
         }
 
-        fun hasOnTurnStartedEffects(): Boolean = value.any { it.applicationStatus.isOnTurnStarted() }
+        fun hasOnTurnStartedEffects(): Boolean = value.any { it.isOnTurnStarted() }
 
-        fun onDefeatedEffectIds(): List<String> = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value }
-
-        fun clearOnDefeatedEffects(): OngoingEffects = OngoingEffects(value.filter { !it.applicationStatus.isOnDefeated() })
+        fun clearOnDefeatedEffects(): OngoingEffects = OngoingEffects(value.filter { !it.isOnDefeated() })
 
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
-                onTurnStarted = value.filter { it.applicationStatus.isOnTurnStarted() }.map { it.effectId.value },
-                onDefeatedEffects = value.filter { it.applicationStatus.isOnDefeated() }.map { it.effectId.value },
+                onTurnStarted = value.filter { it.isOnTurnStarted() }.map { it.effectId() },
+                onDefeatedEffects = value.filter { it.isOnDefeated() }.map { it.effectId() },
             )
 
         constructor() : this(emptyList())
 
-        // TODO: Refactor Effect class to have private constructor
-        private data class Effect(
-            val effectId: EffectId,
-            val applicationStatus: ApplicationStatus,
-        )
+        @ConsistentCopyVisibility
+        private data class Effect private constructor(
+            private val effectId: EffectId,
+            private val applicationStatus: ApplicationStatus,
+        ) {
+            companion object {
+                fun immediate(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.pending())
+
+                fun onTurnStarted(
+                    effectId: String,
+                    turnsLeft: Int,
+                ) = Effect(EffectId(effectId), ApplicationStatus.onTurnStarted(turnsLeft))
+
+                fun onDefeated(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.onDefeated())
+            }
+
+            fun isOnTurnStarted() = applicationStatus.isOnTurnStarted()
+
+            fun isOnDefeated() = applicationStatus.isOnDefeated()
+
+            fun applyOnTurnStarted(): Effect? {
+                if (!isOnTurnStarted()) throw InvalidEffectApplicationStatus()
+                val updatedApplicationStatus = (applicationStatus as ApplicationStatus.OnTurnStarted).apply()
+                return updatedApplicationStatus?.let { copy(applicationStatus = updatedApplicationStatus) }
+            }
+
+            fun hasEffectId(effectId: String) = effectId == this.effectId.value
+
+            fun effectId() = effectId.value
+        }
 
         @JvmInline private value class EffectId(
             val value: String,
