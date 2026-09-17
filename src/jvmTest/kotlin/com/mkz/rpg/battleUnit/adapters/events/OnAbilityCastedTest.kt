@@ -1,7 +1,7 @@
 package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.battleUnit.usecases.commands.ReceiveAbilityEffects
+import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import org.junit.jupiter.api.Test
@@ -12,10 +12,10 @@ import org.mockito.kotlin.verify
 
 class OnAbilityCastedTest {
     private val eventBus = InMemoryEventBus()
-    private val receiveAbilityEffects: ReceiveAbilityEffects = mock()
+    private val requestEffectApplicationToCastTargets: RequestEffectApplicationToCastTargets = mock()
     private val onAbilityCasted =
         OnAbilityCasted(
-            receiveAbilityEffects = receiveAbilityEffects,
+            requestEffectApplicationToCastTargets = requestEffectApplicationToCastTargets,
             eventBus = eventBus,
         )
 
@@ -39,13 +39,13 @@ class OnAbilityCastedTest {
         // When
         eventBus.dispatch()
         // Then
-        verify(receiveAbilityEffects).invoke(
+        verify(requestEffectApplicationToCastTargets).invoke(
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             row = 1,
             column = 2,
         )
-        verify(receiveAbilityEffects).invoke(
+        verify(requestEffectApplicationToCastTargets).invoke(
             battleUnitId = battleUnitId,
             abilityId = abilityId,
             row = 2,
@@ -60,6 +60,6 @@ class OnAbilityCastedTest {
         // When
         eventBus.dispatch()
         // Then
-        verify(receiveAbilityEffects, never()).invoke(any(), any(), any(), any())
+        verify(requestEffectApplicationToCastTargets, never()).invoke(any(), any(), any(), any())
     }
 }

@@ -147,8 +147,9 @@ data class BattleUnit private constructor(
         abilityCost: Int,
         castGroup: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
-        val remainingTurnActions = remainingTurnActions.castAbility()
-        val abilityCooldowns = abilityCooldowns.castAbility(abilityId, abilityCooldown)
+        val remainingTurnActions = remainingTurnActions.reduceRemainingCasts()
+        val abilityCooldowns = abilityCooldowns.setAbilityCooldown(abilityId, abilityCooldown)
+        val remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityCost)
         val abilityCastedEvent =
             BattleUnitEvent.AbilityCasted(
                 battleUnitId = id.value,
@@ -156,7 +157,7 @@ data class BattleUnit private constructor(
                 castGroup = castGroup,
             )
         return copy(
-            remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityCost),
+            remainingManaPoints = remainingManaPoints,
             remainingTurnActions = remainingTurnActions,
             abilityCooldowns = abilityCooldowns,
             events = events + abilityCastedEvent,
@@ -353,7 +354,7 @@ data class BattleUnit private constructor(
 
         fun canCastAbility(): Boolean = remainingCasts.value > 0
 
-        fun castAbility() = copy(remainingCasts = RemainingCasts(remainingCasts.value - 1))
+        fun reduceRemainingCasts() = copy(remainingCasts = RemainingCasts(remainingCasts.value - 1))
     }
 
     @JvmInline private value class AbilityCooldowns(
@@ -382,7 +383,7 @@ data class BattleUnit private constructor(
             return cooldownTurnsLeft.value == 0
         }
 
-        fun castAbility(
+        fun setAbilityCooldown(
             abilityId: String,
             abilityCooldown: Int,
         ): AbilityCooldowns {

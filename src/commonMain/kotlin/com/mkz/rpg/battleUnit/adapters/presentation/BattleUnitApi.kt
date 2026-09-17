@@ -16,8 +16,8 @@ import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
-import com.mkz.rpg.battleUnit.usecases.commands.ReceiveAbilityEffects
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
+import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
@@ -127,8 +127,8 @@ class BattleUnitApi(
             distanceService,
             eventBus,
         )
-    val receiveAbilityEffects =
-        ReceiveAbilityEffects(
+    val requestEffectApplicationToCastTargets =
+        RequestEffectApplicationToCastTargets(
             abilityApi.searchAbilityById,
             battleUnitRepository,
             abilityExecution,
@@ -152,7 +152,7 @@ class BattleUnitApi(
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
-    private val onAbilityCasted = OnAbilityCasted(receiveAbilityEffects, eventBus)
+    private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToNearbyAllies, eventBus)
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)

@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattleUnitDoesNotExists
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -12,6 +13,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.assertThat
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -54,9 +56,9 @@ class CastAbilityTest {
     fun `should not cast ability when the battle unit does not exist`() {
         // Given
         // When
-        castAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0))))
+        val error = catchThrowable { castAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0)))) }
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(error).isInstanceOf(BattleUnitDoesNotExists::class.java)
     }
 
     @Test

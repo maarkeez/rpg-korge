@@ -3,6 +3,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilityDoesNotExists
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattleUnitCanNotCastAbility
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattleUnitDoesNotExists
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidCastPosition
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -20,20 +21,20 @@ class CastAbility(
         abilityId: String,
         castGroup: WhereCanCast.CastGroup,
     ) {
-        val storedBattleUnit = battleUnitRepository.searchById(battleUnitId) ?: return
+        val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw BattleUnitDoesNotExists()
         val ability = searchAbilityById(abilityId) ?: throw AbilityDoesNotExists()
-        if (!storedBattleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
+        if (!battleUnit.canCastAbility(ability)) throw BattleUnitCanNotCastAbility()
         val castGroupsWhereCanCast = whereCanCast(battleUnitId, abilityId)
         if (!castGroupsWhereCanCast.contains(castGroup)) throw InvalidCastPosition()
-        val (events, battleUnit) =
-            storedBattleUnit
+        val (events, updatedBattleUnit) =
+            battleUnit
                 .castAbility(
                     abilityId = abilityId,
                     abilityCooldown = ability.cooldown,
                     abilityCost = ability.cost,
                     castGroup = castGroup.positions.map { position -> Battlefield.Dto.PositionDto(row = position.row, column = position.column) },
                 ).pullEvents()
-        battleUnitRepository.update(battleUnit)
+        battleUnitRepository.update(updatedBattleUnit)
         eventBus.publish(events)
     }
 }

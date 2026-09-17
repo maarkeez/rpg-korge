@@ -211,6 +211,8 @@ data class Effect private constructor(
         }
     }
 
+    // TODO: Should be a private class with a Dto
+    // TODO: Revisit boundaries, is owned by effect, by ability or by battleUnit?
     sealed interface EffectTarget {
         data class Unit(
             val id: String,
@@ -222,6 +224,8 @@ data class Effect private constructor(
         ) : EffectTarget
     }
 
+    // TODO: Should be a private class with a Dto
+    // TODO: Revisit boundaries, is owned by effect, by ability or by battleUnit?
     data class EffectApplication(
         val source: String,
         val target: EffectTarget,

@@ -30,4 +30,6 @@ sealed class BattleUnitError(
     class NotOnTurnStarted : BattleUnitError("Not on turn started effect")
 
     class InvalidEffectApplicationStatus : BattleUnitError("Invalid effect application status")
+
+    class BattleUnitDoesNotExists : BattleUnitError("Battle unit does not exist")
 }

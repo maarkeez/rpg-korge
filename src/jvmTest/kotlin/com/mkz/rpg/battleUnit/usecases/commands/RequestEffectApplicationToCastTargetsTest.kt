@@ -6,6 +6,7 @@ import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilityDoesNotExists
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
@@ -36,7 +37,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class ReceiveAbilityEffectsTest {
+class RequestEffectApplicationToCastTargetsTest {
     private val searchAbilityById: SearchAbilityById = mock()
     private val searchEffectById: SearchEffectById = mock()
     private val searchOccupant: SearchOccupant = mock()
@@ -52,8 +53,8 @@ class ReceiveAbilityEffectsTest {
             searchEffectById = searchEffectById,
             distanceService = DistanceService(),
         )
-    private val receiveAbilityEffects =
-        ReceiveAbilityEffects(
+    private val requestEffectApplicationToCastTargets =
+        RequestEffectApplicationToCastTargets(
             searchAbilityById = searchAbilityById,
             battleUnitRepository = battleUnitRepository,
             abilityExecution = abilityExecution,
@@ -78,7 +79,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         whenever(searchPosition(battleUnitId)).thenReturn(position())
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -107,7 +108,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchEffectById(effectId)).thenReturn(effect)
         whenever(searchOccupant(1, 1)).thenReturn(null)
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -142,7 +143,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
         whenever(searchPosition(enemyBattleUnitId)).thenReturn(position())
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -172,7 +173,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         whenever(searchPosition(battleUnitId)).thenReturn(position())
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 0, column = 0)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -203,7 +204,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchUnitById(unit.id)).thenReturn(unit)
         whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(0, 0))
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -242,7 +243,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchUnitById(enemyUnit.id)).thenReturn(enemyUnit)
         whenever(searchPosition(enemyBattleUnitId)).thenReturn(enemyPosition)
         // When
-        receiveAbilityEffects(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -260,7 +261,7 @@ class ReceiveAbilityEffectsTest {
         // When
         val error =
             catchThrowable {
-                receiveAbilityEffects(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
+                requestEffectApplicationToCastTargets(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", row = 0, column = 0)
             }
         // Then
         assertThat(error).isInstanceOf(AbilityDoesNotExists::class.java)
@@ -272,9 +273,9 @@ class ReceiveAbilityEffectsTest {
         val ability = ability().toDto()
         whenever(searchAbilityById(ability.id)).thenReturn(ability)
         // When
-        receiveAbilityEffects(battleUnitId = "unknown-battle-unit", abilityId = ability.id, row = 0, column = 0)
+        val error = catchThrowable { requestEffectApplicationToCastTargets(battleUnitId = "unknown-battle-unit", abilityId = ability.id, row = 0, column = 0) }
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(error).isInstanceOf(BattleUnitError.BattleUnitDoesNotExists::class.java)
     }
 
     @Test
@@ -313,7 +314,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchPosition(casterId)).thenReturn(position())
         whenever(searchPosition(enemyId)).thenReturn(position())
         // When
-        receiveAbilityEffects(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -351,7 +352,7 @@ class ReceiveAbilityEffectsTest {
         whenever(searchOccupant(1, 1)).thenReturn(enemyId)
         whenever(searchUnitById(casterUnit.id)).thenReturn(casterUnit)
         // When
-        receiveAbilityEffects(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -396,7 +397,7 @@ class ReceiveAbilityEffectsTest {
             ).toDto(),
         )
         // When
-        receiveAbilityEffects(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
+        requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", row = 1, column = 1)
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(

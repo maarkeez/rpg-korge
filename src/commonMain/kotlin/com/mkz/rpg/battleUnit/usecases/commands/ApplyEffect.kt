@@ -36,9 +36,10 @@ class ApplyEffect(
         application: EffectApplication,
         effect: Effect.Dto,
     ) {
+        // TODO: Revisit this policy, should we include/exclude other effect outcome types?
+        val target = application.target as? EffectTarget.Tile ?: throw FailedToReceiveAbilityEffects()
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(application.source) ?: throw FailedToReceiveAbilityEffects()
-        val target = application.target as EffectTarget.Tile
         eventBus.publish(
             BattleUnitEvent.RequestDeployBattleUnit(
                 battleUnitId = "deployed-unit-${Random.nextLong()}",
@@ -54,7 +55,7 @@ class ApplyEffect(
         application: EffectApplication,
         effect: Effect.Dto,
     ) {
-        val target = application.target as EffectTarget.Unit
+        val target = application.target as? EffectTarget.Unit ?: throw FailedToReceiveAbilityEffects()
         val battleUnit = battleUnitRepository.searchById(target.id) ?: throw FailedToReceiveAbilityEffects()
         val position = searchPosition(battleUnit.toDto().id) ?: throw FailedToReceiveAbilityEffects()
         val unit = searchUnitById(battleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
@@ -79,7 +80,7 @@ class ApplyEffect(
                     battleUnit.receiveOnDefeatedEffect(effectId = effect.id).pullEvents()
                 }
                 ApplicationTypeDto.BEFORE_APPLYING_EFFECT -> {
-                    // TODO: Review if this is intended or we are missing business logic
+                    // TODO: We are missing business logic, this application type is not yet implemented
                     throw FailedToReceiveAbilityEffects()
                 }
             }
