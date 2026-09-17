@@ -1,6 +1,7 @@
 package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
@@ -11,7 +12,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCR
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.EffectError.ApplicationDurationAboveLimit
 import com.mkz.rpg.effect.domain.EffectError.EmptyEffectId
-import com.mkz.rpg.effect.domain.EffectError.InvalidEffectApplication
 import com.mkz.rpg.effect.domain.EffectError.MissingEffectApplicationDetails
 import com.mkz.rpg.effect.domain.EffectError.NegativeApplicationDuration
 import com.mkz.rpg.effect.domain.EffectError.NegativePower
@@ -158,18 +158,12 @@ data class Effect private constructor(
 
     private sealed interface Application {
         companion object {
-            const val IMMEDIATELY = "IMMEDIATELY"
-            const val ON_TURN_STARTED = "ON_TURN_STARTED"
-            const val BEFORE_APPLYING_EFFECT = "BEFORE_APPLYING_EFFECT"
-            const val ON_DEFEATED = "ON_DEFEATED"
-
             operator fun invoke(dto: ApplicationDto): Application =
                 when (dto.type) {
-                    IMMEDIATELY -> Immediately
-                    ON_TURN_STARTED -> OnTurnStarted(dto.onTurnStarted ?: throw MissingEffectApplicationDetails())
-                    BEFORE_APPLYING_EFFECT -> BeforeApplyingEffect(dto.beforeApplyingEffect ?: throw MissingEffectApplicationDetails())
-                    ON_DEFEATED -> OnDefeated
-                    else -> throw InvalidEffectApplication()
+                    ApplicationTypeDto.IMMEDIATELY -> Immediately
+                    ApplicationTypeDto.ON_TURN_STARTED -> OnTurnStarted(dto.onTurnStarted ?: throw MissingEffectApplicationDetails())
+                    ApplicationTypeDto.BEFORE_APPLYING_EFFECT -> BeforeApplyingEffect(dto.beforeApplyingEffect ?: throw MissingEffectApplicationDetails())
+                    ApplicationTypeDto.ON_DEFEATED -> OnDefeated
                 }
         }
 
@@ -177,10 +171,10 @@ data class Effect private constructor(
             ApplicationDto(
                 type =
                     when (this) {
-                        is Immediately -> IMMEDIATELY
-                        is OnTurnStarted -> ON_TURN_STARTED
-                        is BeforeApplyingEffect -> BEFORE_APPLYING_EFFECT
-                        is OnDefeated -> ON_DEFEATED
+                        is Immediately -> ApplicationTypeDto.IMMEDIATELY
+                        is OnTurnStarted -> ApplicationTypeDto.ON_TURN_STARTED
+                        is BeforeApplyingEffect -> ApplicationTypeDto.BEFORE_APPLYING_EFFECT
+                        is OnDefeated -> ApplicationTypeDto.ON_DEFEATED
                     },
                 onTurnStarted = if (this is OnTurnStarted) toTurnStartedDto() else null,
                 beforeApplyingEffect = if (this is BeforeApplyingEffect) toBeforeApplyingEffectDto() else null,
@@ -274,10 +268,17 @@ data class Effect private constructor(
         }
 
         data class ApplicationDto(
-            val type: String,
+            val type: ApplicationTypeDto,
             val onTurnStarted: OnTurnStartedDto?,
             val beforeApplyingEffect: BeforeApplyingEffectDto?,
         ) {
+            enum class ApplicationTypeDto {
+                IMMEDIATELY,
+                ON_TURN_STARTED,
+                BEFORE_APPLYING_EFFECT,
+                ON_DEFEATED,
+            }
+
             data class OnTurnStartedDto(
                 val duration: Int,
             )

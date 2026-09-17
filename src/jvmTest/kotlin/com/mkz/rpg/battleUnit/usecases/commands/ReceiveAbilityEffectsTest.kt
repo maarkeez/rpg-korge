@@ -17,6 +17,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.EffectApplication
 import com.mkz.rpg.effect.domain.Effect.EffectTarget
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
@@ -157,7 +158,7 @@ class ReceiveAbilityEffectsTest {
         val effect =
             decreaseHealthEffect(id = effectId, damage = 3)
                 .toDto()
-                .copy(application = ApplicationDto(type = "ON_DEFEATED", onTurnStarted = null, beforeApplyingEffect = null))
+                .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_DEFEATED, onTurnStarted = null, beforeApplyingEffect = null))
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)

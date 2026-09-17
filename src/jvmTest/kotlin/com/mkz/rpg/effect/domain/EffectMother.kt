@@ -1,6 +1,7 @@
 package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
@@ -32,13 +33,13 @@ object EffectMother {
                 application =
                     if (applicationType == "IMMEDIATELY") {
                         ApplicationDto(
-                            type = "IMMEDIATELY",
+                            type = ApplicationTypeDto.IMMEDIATELY,
                             onTurnStarted = null,
                             beforeApplyingEffect = null,
                         )
                     } else {
                         ApplicationDto(
-                            type = "ON_TURN_STARTED",
+                            type = ApplicationTypeDto.ON_TURN_STARTED,
                             onTurnStarted =
                                 OnTurnStartedDto(
                                     duration = 5,
@@ -66,7 +67,7 @@ object EffectMother {
                     ),
                 application =
                     ApplicationDto(
-                        type = "IMMEDIATELY",
+                        type = ApplicationTypeDto.IMMEDIATELY,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
@@ -88,7 +89,7 @@ object EffectMother {
                         ),
                     application =
                         ApplicationDto(
-                            type = "IMMEDIATELY",
+                            type = ApplicationTypeDto.IMMEDIATELY,
                             onTurnStarted = null,
                             beforeApplyingEffect = null,
                         ),
@@ -112,7 +113,7 @@ object EffectMother {
                     ),
                 application =
                     ApplicationDto(
-                        type = "ON_DEFEATED",
+                        type = ApplicationTypeDto.ON_DEFEATED,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
@@ -137,7 +138,7 @@ object EffectMother {
                     ),
                 application =
                     ApplicationDto(
-                        type = "IMMEDIATELY",
+                        type = ApplicationTypeDto.IMMEDIATELY,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),

@@ -6,7 +6,6 @@ Examples of existing outcomes are:
 
 - `DECREASE_HEALTH`
 - `INCREASE_HEALTH`
-- `NEGATE_INCREASE_HEALTH`
 - `TELEPORT`
 
 Adding a new outcome requires more than adding an enum value. The new outcome must be represented by the effect domain, handled by the code that applies effects, be usable by abilities, and be covered by tests.
@@ -93,7 +92,6 @@ Find the code that interprets an effect and applies its outcome. Search for the 
 ```text
 DECREASE_HEALTH
 INCREASE_HEALTH
-NEGATE_INCREASE_HEALTH
 TELEPORT
 ```
 
@@ -105,7 +103,6 @@ For example, if the existing application logic contains a dispatch such as:
 when (effect.outcome.type) {
     DECREASE_HEALTH -> ...
     INCREASE_HEALTH -> ...
-    NEGATE_INCREASE_HEALTH -> ...
     TELEPORT -> ...
 }
 ```

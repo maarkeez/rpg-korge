@@ -1,6 +1,7 @@
 package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
@@ -29,7 +30,7 @@ class EffectTest {
                 EffectMother
                     .decreaseHealthEffect()
                     .toDto()
-                    .copy(application = ApplicationDto(type = "ON_DEFEATED", onTurnStarted = null, beforeApplyingEffect = null))
+                    .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_DEFEATED, onTurnStarted = null, beforeApplyingEffect = null))
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
@@ -67,28 +68,13 @@ class EffectTest {
         }
 
         @Test
-        fun `should fail when the application type is not supported`() {
-            // Given
-            val applicationType = "UNKNOWN"
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(application = ApplicationDto(type = applicationType, onTurnStarted = null, beforeApplyingEffect = null))
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.InvalidEffectApplication::class.java)
-        }
-
-        @Test
         fun `should fail when the application is missing its details`() {
             // Given
             val effectDto =
                 EffectMother
                     .decreaseHealthEffect()
                     .toDto()
-                    .copy(application = ApplicationDto(type = "ON_TURN_STARTED", onTurnStarted = null, beforeApplyingEffect = null))
+                    .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_TURN_STARTED, onTurnStarted = null, beforeApplyingEffect = null))
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
@@ -105,7 +91,7 @@ class EffectTest {
                     .copy(
                         application =
                             ApplicationDto(
-                                type = "ON_TURN_STARTED",
+                                type = ApplicationTypeDto.ON_TURN_STARTED,
                                 onTurnStarted = OnTurnStartedDto(duration = -1),
                                 beforeApplyingEffect = null,
                             ),
@@ -126,7 +112,7 @@ class EffectTest {
                     .copy(
                         application =
                             ApplicationDto(
-                                type = "ON_TURN_STARTED",
+                                type = ApplicationTypeDto.ON_TURN_STARTED,
                                 onTurnStarted = OnTurnStartedDto(duration = 100),
                                 beforeApplyingEffect = null,
                             ),

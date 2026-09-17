@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
@@ -46,7 +47,7 @@ class SetupBattle(
                     ),
                 application =
                     ApplicationDto(
-                        "ON_TURN_STARTED",
+                        ApplicationTypeDto.ON_TURN_STARTED,
                         onTurnStarted =
                             OnTurnStartedDto(
                                 duration = 5,
@@ -66,7 +67,7 @@ class SetupBattle(
                     ),
                 application =
                     ApplicationDto(
-                        "IMMEDIATELY",
+                        ApplicationTypeDto.IMMEDIATELY,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
@@ -83,7 +84,7 @@ class SetupBattle(
                     ),
                 application =
                     ApplicationDto(
-                        "IMMEDIATELY",
+                        ApplicationTypeDto.IMMEDIATELY,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
@@ -100,7 +101,7 @@ class SetupBattle(
                     ),
                 application =
                     ApplicationDto(
-                        "IMMEDIATELY",
+                        ApplicationTypeDto.IMMEDIATELY,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
@@ -120,7 +121,7 @@ class SetupBattle(
                     ),
                 application =
                     ApplicationDto(
-                        "ON_DEFEATED",
+                        ApplicationTypeDto.ON_DEFEATED,
                         onTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),

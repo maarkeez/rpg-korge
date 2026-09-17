@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.EffectApplication
@@ -59,7 +60,7 @@ class ApplyEffect(
         val unit = searchUnitById(battleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
         val (events, appliedBattleUnit) =
             when (effect.application.type) {
-                "IMMEDIATELY" ->
+                ApplicationTypeDto.IMMEDIATELY ->
                     battleUnit
                         .receiveImmediateEffect(effectId = effect.id)
                         .applyImmediateEffect(
@@ -68,16 +69,17 @@ class ApplyEffect(
                             currentRow = position.row,
                             currentColumn = position.column,
                         ).pullEvents()
-                "ON_TURN_STARTED" ->
+                ApplicationTypeDto.ON_TURN_STARTED ->
                     battleUnit
                         .receiveOnTurnStartedEffect(
                             effectId = effect.id,
                             turnsLeft = effect.application.onTurnStarted!!.duration,
                         ).pullEvents()
-                "ON_DEFEATED" -> {
+                ApplicationTypeDto.ON_DEFEATED -> {
                     battleUnit.receiveOnDefeatedEffect(effectId = effect.id).pullEvents()
                 }
-                else -> {
+                ApplicationTypeDto.BEFORE_APPLYING_EFFECT -> {
+                    // TODO: Review if this is intended or we are missing business logic
                     throw FailedToReceiveAbilityEffects()
                 }
             }
