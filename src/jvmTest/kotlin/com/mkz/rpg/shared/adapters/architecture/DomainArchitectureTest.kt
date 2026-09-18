@@ -2,7 +2,6 @@ package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import org.assertj.core.api.SoftAssertions
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 class DomainArchitectureTest {
@@ -53,9 +52,7 @@ class DomainArchitectureTest {
         }
     }
 
-    // TODO: Refactor code to met the new architecture rule
     @Test
-    @Disabled("Requires refactor before it pass")
     fun `should follow domain encapsulation rules when is the aggregate root`() {
         val allClasses = Konsist.scopeFromProduction().classes()
 
