@@ -5,9 +5,9 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
-import com.mkz.rpg.effect.domain.Effect.EffectApplication
-import com.mkz.rpg.effect.domain.Effect.EffectTarget
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -35,9 +35,9 @@ class ApplyOnDefeatedEffectsToNearbyAllies(
                     eventBus.publish(
                         BattleUnitEvent.RequestApplyEffect(
                             application =
-                                EffectApplication(
+                                EffectApplicationDto(
                                     source = battleUnitId,
-                                    target = EffectTarget.Unit(id = nearbyAlly.toDto().id),
+                                    target = EffectTargetDto.Unit(id = nearbyAlly.toDto().id),
                                     effectId = appliedEffectId,
                                 ),
                         ),

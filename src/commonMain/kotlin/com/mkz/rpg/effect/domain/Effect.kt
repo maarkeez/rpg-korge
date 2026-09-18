@@ -211,33 +211,29 @@ data class Effect private constructor(
         }
     }
 
-    // TODO: Should be a private class with a Dto
-    // TODO: Revisit boundaries, is owned by effect, by ability or by battleUnit?
-    sealed interface EffectTarget {
-        data class Unit(
-            val id: String,
-        ) : EffectTarget
-
-        data class Tile(
-            val row: Int,
-            val column: Int,
-        ) : EffectTarget
-    }
-
-    // TODO: Should be a private class with a Dto
-    // TODO: Revisit boundaries, is owned by effect, by ability or by battleUnit?
-    data class EffectApplication(
-        val source: String,
-        val target: EffectTarget,
-        val effectId: String,
-        val destination: EffectTarget? = null,
-    )
-
     data class Dto(
         val id: String,
         val outcome: EffectOutcomeDto,
         val application: ApplicationDto,
     ) {
+        data class EffectApplicationDto(
+            val source: String,
+            val target: EffectTargetDto,
+            val effectId: String,
+            val destination: EffectTargetDto? = null,
+        )
+
+        sealed interface EffectTargetDto {
+            data class Unit(
+                val id: String,
+            ) : EffectTargetDto
+
+            data class Tile(
+                val row: Int,
+                val column: Int,
+            ) : EffectTargetDto
+        }
+
         data class EffectOutcomeDto(
             val type: TypeDto,
             val decreaseHealth: DecreaseHealthDto?,

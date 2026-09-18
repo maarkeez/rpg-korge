@@ -32,7 +32,7 @@ sealed interface BattleUnitEvent : DomainEvent {
     ) : BattleUnitEvent
 
     data class RequestApplyEffect(
-        val application: Effect.EffectApplication,
+        val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent
 
     data class BattleUnitMoved(

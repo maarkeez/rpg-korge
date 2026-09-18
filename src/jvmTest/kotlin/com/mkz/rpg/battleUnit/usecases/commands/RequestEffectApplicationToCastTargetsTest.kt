@@ -19,8 +19,8 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
-import com.mkz.rpg.effect.domain.Effect.EffectApplication
-import com.mkz.rpg.effect.domain.Effect.EffectTarget
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
@@ -83,7 +83,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = battleUnitId, target = EffectTarget.Unit(id = battleUnitId), effectId = effectId),
+                application = EffectApplicationDto(source = battleUnitId, target = EffectTargetDto.Unit(id = battleUnitId), effectId = effectId),
             ),
         )
     }
@@ -112,7 +112,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = battleUnitId, target = EffectTarget.Tile(row = 1, column = 1), effectId = effectId),
+                application = EffectApplicationDto(source = battleUnitId, target = EffectTargetDto.Tile(row = 1, column = 1), effectId = effectId),
             ),
         )
     }
@@ -147,7 +147,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = battleUnitId, target = EffectTarget.Unit(id = enemyBattleUnitId), effectId = effectId),
+                application = EffectApplicationDto(source = battleUnitId, target = EffectTargetDto.Unit(id = enemyBattleUnitId), effectId = effectId),
             ),
         )
     }
@@ -177,7 +177,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = battleUnitId, target = EffectTarget.Unit(id = battleUnitId), effectId = effectId),
+                application = EffectApplicationDto(source = battleUnitId, target = EffectTargetDto.Unit(id = battleUnitId), effectId = effectId),
             ),
         )
     }
@@ -209,11 +209,11 @@ class RequestEffectApplicationToCastTargetsTest {
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application =
-                    EffectApplication(
+                    EffectApplicationDto(
                         source = battleUnitId,
-                        target = EffectTarget.Unit(id = battleUnitId),
+                        target = EffectTargetDto.Unit(id = battleUnitId),
                         effectId = effectId,
-                        destination = EffectTarget.Tile(row = 1, column = 1),
+                        destination = EffectTargetDto.Tile(row = 1, column = 1),
                     ),
             ),
         )
@@ -247,7 +247,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = battleUnitId, target = EffectTarget.Unit(id = enemyBattleUnitId), effectId = effectId),
+                application = EffectApplicationDto(source = battleUnitId, target = EffectTargetDto.Unit(id = enemyBattleUnitId), effectId = effectId),
             ),
         )
     }
@@ -318,10 +318,10 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = casterId, target = EffectTarget.Unit(id = enemyId), effectId = enemyDamageEffectId),
+                application = EffectApplicationDto(source = casterId, target = EffectTargetDto.Unit(id = enemyId), effectId = enemyDamageEffectId),
             ),
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = casterId, target = EffectTarget.Unit(id = casterId), effectId = casterDamageEffectId),
+                application = EffectApplicationDto(source = casterId, target = EffectTargetDto.Unit(id = casterId), effectId = casterDamageEffectId),
             ),
         )
     }
@@ -356,7 +356,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = casterId, target = EffectTarget.Unit(id = casterId), effectId = healEffectId),
+                application = EffectApplicationDto(source = casterId, target = EffectTargetDto.Unit(id = casterId), effectId = healEffectId),
             ),
         )
     }
@@ -401,10 +401,10 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         assertThat(eventBus).hasPublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = casterId, target = EffectTarget.Unit(id = enemyId), effectId = damageEffectId),
+                application = EffectApplicationDto(source = casterId, target = EffectTargetDto.Unit(id = enemyId), effectId = damageEffectId),
             ),
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplication(source = casterId, target = EffectTarget.Unit(id = casterId), effectId = healEffectId),
+                application = EffectApplicationDto(source = casterId, target = EffectTargetDto.Unit(id = casterId), effectId = healEffectId),
             ),
         )
     }

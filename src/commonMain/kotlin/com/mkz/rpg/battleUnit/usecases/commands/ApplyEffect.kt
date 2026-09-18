@@ -7,10 +7,10 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.Effect.EffectApplication
-import com.mkz.rpg.effect.domain.Effect.EffectTarget
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
@@ -23,9 +23,9 @@ class ApplyEffect(
     private val searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
 ) {
-    operator fun invoke(application: EffectApplication) {
+    operator fun invoke(application: EffectApplicationDto) {
         val effect = searchEffectById(application.effectId) ?: throw FailedToReceiveAbilityEffects()
-        if (application.target is EffectTarget.Tile) {
+        if (application.target is EffectTargetDto.Tile) {
             applyToTile(application = application, effect = effect)
         } else {
             applyToUnit(application = application, effect = effect)
@@ -33,11 +33,11 @@ class ApplyEffect(
     }
 
     private fun applyToTile(
-        application: EffectApplication,
+        application: EffectApplicationDto,
         effect: Effect.Dto,
     ) {
         // TODO: Revisit this policy, should we include/exclude other effect outcome types?
-        val target = application.target as? EffectTarget.Tile ?: throw FailedToReceiveAbilityEffects()
+        val target = application.target as? EffectTargetDto.Tile ?: throw FailedToReceiveAbilityEffects()
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(application.source) ?: throw FailedToReceiveAbilityEffects()
         eventBus.publish(
@@ -52,10 +52,10 @@ class ApplyEffect(
     }
 
     private fun applyToUnit(
-        application: EffectApplication,
+        application: EffectApplicationDto,
         effect: Effect.Dto,
     ) {
-        val target = application.target as? EffectTarget.Unit ?: throw FailedToReceiveAbilityEffects()
+        val target = application.target as? EffectTargetDto.Unit ?: throw FailedToReceiveAbilityEffects()
         val battleUnit = battleUnitRepository.searchById(target.id) ?: throw FailedToReceiveAbilityEffects()
         val position = searchPosition(battleUnit.toDto().id) ?: throw FailedToReceiveAbilityEffects()
         val unit = searchUnitById(battleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
@@ -86,7 +86,7 @@ class ApplyEffect(
             }
         var pendingEvents: Set<BattleUnitEvent> = events
         var updatedBattleUnit: BattleUnit = appliedBattleUnit
-        if (effect.outcome.type == TELEPORT && application.destination is EffectTarget.Tile) {
+        if (effect.outcome.type == TELEPORT && application.destination is EffectTargetDto.Tile) {
             val currentPosition = searchPosition(target.id) ?: throw FailedToReceiveAbilityEffects()
             val destination = application.destination
             val (teleportEvents, teleportedBattleUnit) =

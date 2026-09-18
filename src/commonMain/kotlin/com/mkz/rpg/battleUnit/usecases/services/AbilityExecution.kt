@@ -11,11 +11,11 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToResolveEffectTarget
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.Effect.EffectApplication
-import com.mkz.rpg.effect.domain.Effect.EffectTarget
-import com.mkz.rpg.effect.domain.Effect.EffectTarget.Tile
-import com.mkz.rpg.effect.domain.Effect.EffectTarget.Unit
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.Tile
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.Unit
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 class AbilityExecution(
@@ -30,7 +30,7 @@ class AbilityExecution(
         ability: Ability.Dto,
         selectedRow: Int,
         selectedColumn: Int,
-    ): List<EffectApplication> {
+    ): List<EffectApplicationDto> {
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToResolveEffectTarget()
         validateTargeting(ability = ability, caster = caster, selectedRow = selectedRow, selectedColumn = selectedColumn)
         return ability.effectSpecs.flatMap { effectSpec ->
@@ -40,7 +40,7 @@ class AbilityExecution(
                 selectedRow = selectedRow,
                 selectedColumn = selectedColumn,
             ).map { target ->
-                EffectApplication(
+                EffectApplicationDto(
                     source = casterId,
                     target = target,
                     effectId = effectSpec.effectId,
@@ -78,7 +78,7 @@ class AbilityExecution(
         caster: BattleUnit,
         selectedRow: Int,
         selectedColumn: Int,
-    ): List<EffectTarget> =
+    ): List<EffectTargetDto> =
         when (effectSpec.target.type) {
             CASTER -> listOf(Unit(id = caster.toDto().id))
             SELECTED_TARGET -> {
@@ -100,7 +100,7 @@ class AbilityExecution(
         effectId: String,
         selectedRow: Int,
         selectedColumn: Int,
-    ): EffectTarget? {
+    ): EffectTargetDto? {
         val effect = searchEffectById(effectId) ?: return null
         return if (effect.outcome.type == TELEPORT) {
             Tile(row = selectedRow, column = selectedColumn)
