@@ -1,8 +1,17 @@
 package com.mkz.rpg.battlesetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectSpecDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
-import com.mkz.rpg.ability.domain.AbilityEvent
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.AbilityEvent.RequestAbilityCreation
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -12,17 +21,19 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DeployBattleUnitDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.effect.domain.EffectEvent.RequestEffectCreation
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.domain.Unit
-import com.mkz.rpg.unit.domain.UnitEvent
+import com.mkz.rpg.unit.domain.UnitEvent.RequestUnitCreation
 
 class SetupBattle(
     private val eventBus: EventBus,
@@ -126,11 +137,30 @@ class SetupBattle(
                         beforeApplyingEffect = null,
                     ),
             )
-        eventBus.publish(EffectEvent.RequestEffectCreation(venomDamage))
-        eventBus.publish(EffectEvent.RequestEffectCreation(lowPhysicalDamage))
-        eventBus.publish(EffectEvent.RequestEffectCreation(lowDamageHeal))
-        eventBus.publish(EffectEvent.RequestEffectCreation(teleportEffect))
-        eventBus.publish(EffectEvent.RequestEffectCreation(venomOnDeath))
+        val deployBeeEffect =
+            Effect.Dto(
+                id = "deploy-bee",
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = DEPLOY_BATTLE_UNIT,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        deployBattleUnit = DeployBattleUnitDto(unitId = "bee"),
+                    ),
+                application =
+                    ApplicationDto(
+                        ApplicationTypeDto.IMMEDIATELY,
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            )
+        eventBus.publish(RequestEffectCreation(venomDamage))
+        eventBus.publish(RequestEffectCreation(lowPhysicalDamage))
+        eventBus.publish(RequestEffectCreation(lowDamageHeal))
+        eventBus.publish(RequestEffectCreation(teleportEffect))
+        eventBus.publish(RequestEffectCreation(venomOnDeath))
+        eventBus.publish(RequestEffectCreation(deployBeeEffect))
 
         val poisonedSword =
             Ability.Dto(
@@ -138,8 +168,8 @@ class SetupBattle(
                 name = "Poisoned Sword",
                 cost = 5,
                 cooldown = 1,
-                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                targeting = ADJACENT_ENEMY,
+                effectSpecs = listOf(EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = SELECTED_TARGET))),
             )
         val sword =
             Ability.Dto(
@@ -147,8 +177,8 @@ class SetupBattle(
                 name = "Sword",
                 cost = 0,
                 cooldown = 0,
-                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                targeting = ADJACENT_ENEMY,
+                effectSpecs = listOf(EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = SELECTED_TARGET))),
             )
         val heal =
             Ability.Dto(
@@ -156,8 +186,8 @@ class SetupBattle(
                 name = "Heal",
                 cost = 10,
                 cooldown = 2,
-                targeting = Ability.Dto.TargetingDto.SELF,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowDamageHeal.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.CASTER))),
+                targeting = SELF,
+                effectSpecs = listOf(EffectSpecDto(effectId = lowDamageHeal.id, target = TargetExpressionDto(type = CASTER))),
             )
         val mushroom =
             Ability.Dto(
@@ -165,8 +195,8 @@ class SetupBattle(
                 name = "Mushroom",
                 cost = 10,
                 cooldown = 0,
-                targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                targeting = ALL_ADJACENT_ENEMIES,
+                effectSpecs = listOf(EffectSpecDto(effectId = venomDamage.id, target = TargetExpressionDto(type = SELECTED_TARGET))),
             )
         val skull =
             Ability.Dto(
@@ -174,11 +204,11 @@ class SetupBattle(
                 name = "Skull",
                 cost = 10,
                 cooldown = 0,
-                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                targeting = ADJACENT_ENEMY,
                 effectSpecs =
                     listOf(
-                        Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET)),
-                        Ability.Dto.EffectSpecDto(effectId = venomOnDeath.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET)),
+                        EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = SELECTED_TARGET)),
+                        EffectSpecDto(effectId = venomOnDeath.id, target = TargetExpressionDto(type = SELECTED_TARGET)),
                     ),
             )
         val teleport =
@@ -187,25 +217,25 @@ class SetupBattle(
                 name = "Teleport",
                 cost = 5,
                 cooldown = 1,
-                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = teleportEffect.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.CASTER))),
+                targeting = VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                effectSpecs = listOf(EffectSpecDto(effectId = teleportEffect.id, target = TargetExpressionDto(type = CASTER))),
             )
-        val bee =
+        val beeAbility =
             Ability.Dto(
                 id = "bee",
                 name = "Bee",
                 cost = 10,
                 cooldown = 0,
-                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                targeting = VACANT_TILE_ADJACENT_TO_SELF,
+                effectSpecs = listOf(EffectSpecDto(effectId = deployBeeEffect.id, target = TargetExpressionDto(type = SELECTED_TILE))),
             )
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(poisonedSword))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(sword))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(heal))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(mushroom))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(skull))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(teleport))
-        eventBus.publish(AbilityEvent.RequestAbilityCreation(bee))
+        eventBus.publish(RequestAbilityCreation(poisonedSword))
+        eventBus.publish(RequestAbilityCreation(sword))
+        eventBus.publish(RequestAbilityCreation(heal))
+        eventBus.publish(RequestAbilityCreation(mushroom))
+        eventBus.publish(RequestAbilityCreation(skull))
+        eventBus.publish(RequestAbilityCreation(teleport))
+        eventBus.publish(RequestAbilityCreation(beeAbility))
 
         val ratUnit =
             Unit.Dto(
@@ -228,13 +258,24 @@ class SetupBattle(
                         mushroom.id,
                         skull.id,
                         teleport.id,
-                        bee.id,
+                        beeAbility.id,
                         heal.id,
                     ),
                 movementRange = 3,
             )
-        eventBus.publish(UnitEvent.RequestUnitCreation(ratUnit))
-        eventBus.publish(UnitEvent.RequestUnitCreation(knight))
+        val beeUnit =
+            Unit.Dto(
+                id = "bee",
+                name = "Bee",
+                healthPoints = 10,
+                manaPoints = 0,
+                abilities =
+                    listOf(sword.id),
+                movementRange = 5,
+            )
+        eventBus.publish(RequestUnitCreation(ratUnit))
+        eventBus.publish(RequestUnitCreation(knight))
+        eventBus.publish(RequestUnitCreation(beeUnit))
 
         eventBus.publish(
             BattleUnitEvent.RequestDeployBattleUnit(

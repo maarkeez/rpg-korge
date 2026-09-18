@@ -68,6 +68,7 @@ class BattleUnitApi(
             battlefieldApi.searchPosition,
             abilityApi.searchAbilityById,
             battlefieldApi.searchOccupant,
+            battlefieldApi.searchTilesThatCanBeOccupied,
             distanceService,
             battlefieldApi.canBattlefieldTileBeOccupied,
         )

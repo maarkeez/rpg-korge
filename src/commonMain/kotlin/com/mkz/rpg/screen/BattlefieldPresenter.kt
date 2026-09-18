@@ -146,6 +146,9 @@ class BattlefieldPresenter(
         if (battleUnit.unitId == "rat") {
             battlefieldView.displayRatBattleUnit(row, column)
         }
+        if (battleUnit.unitId == "bee") {
+            battlefieldView.displayBeeBattleUnit(row, column)
+        }
     }
 
     fun removeUnit(

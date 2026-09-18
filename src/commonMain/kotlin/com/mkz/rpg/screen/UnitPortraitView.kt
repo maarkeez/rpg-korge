@@ -21,9 +21,11 @@ class UnitPortraitView(
             button.background.borderColor = Colors.LIGHTGRAY
         }
     private lateinit var knightPortrait: Bitmap
+    private lateinit var beePortrait: Bitmap
     private lateinit var ratPortrait: Bitmap
 
     suspend fun loadAssets() {
+        beePortrait = resourcesVfs["unit/bee_portrait.png"].readBitmap()
         knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
         ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
     }
@@ -37,6 +39,7 @@ class UnitPortraitView(
         when (unitId) {
             "knight" -> knightPortrait
             "rat" -> ratPortrait
+            "bee" -> beePortrait
             else -> null
         }?.let { avatarBitmap ->
             battleUnitPortrait.image(avatarBitmap) {

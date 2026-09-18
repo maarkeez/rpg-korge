@@ -26,6 +26,7 @@ class BattlefieldView : Container() {
     private lateinit var sandBitmap: Bitmap
     private lateinit var knightBitmap: Bitmap
     private lateinit var ratBitmap: Bitmap
+    private lateinit var beeBitmap: Bitmap
     private lateinit var tileSelection1BitMap: Bitmap
     private lateinit var tileSelection2BitMap: Bitmap
     private lateinit var tileSelection3BitMap: Bitmap
@@ -51,6 +52,7 @@ class BattlefieldView : Container() {
         sandBitmap = resourcesVfs["terrain/sand.png"].readBitmap()
         knightBitmap = resourcesVfs["unit/knight.png"].readBitmap()
         ratBitmap = resourcesVfs["unit/rat.png"].readBitmap()
+        beeBitmap = resourcesVfs["unit/bee.png"].readBitmap()
         tileSelection1BitMap = resourcesVfs["battlefield/tile_selection_1.png"].readBitmap()
         tileSelection2BitMap = resourcesVfs["battlefield/tile_selection_2.png"].readBitmap()
         tileSelection3BitMap = resourcesVfs["battlefield/tile_selection_3.png"].readBitmap()
@@ -86,16 +88,30 @@ class BattlefieldView : Container() {
         row: Int,
         column: Int,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(knightBitmap, BATTLE_UNIT)
+        displayUnit(row, column, knightBitmap)
     }
 
     fun displayRatBattleUnit(
         row: Int,
         column: Int,
     ) {
+        displayUnit(row, column, ratBitmap)
+    }
+
+    fun displayBeeBattleUnit(
+        row: Int,
+        column: Int,
+    ) {
+        displayUnit(row, column, beeBitmap)
+    }
+
+    private fun displayUnit(
+        row: Int,
+        column: Int,
+        beeBitmap: Bitmap,
+    ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(ratBitmap, BATTLE_UNIT)
+        tileButton.addImage(beeBitmap, BATTLE_UNIT)
     }
 
     interface Delegate {

@@ -9,12 +9,14 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 
 class WhereCanCast(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val searchAbilityById: SearchAbilityById,
     private val searchOccupant: SearchOccupant,
+    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied,
     private val distanceService: DistanceService,
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
 ) {
@@ -33,6 +35,12 @@ class WhereCanCast(
             }
             Ability.Dto.TargetingDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF ->
+                searchTilesThatCanBeOccupied(battleUnitId = battleUnit.toDto().id, distance = 1)
+                    .filterNot { tilePosition ->
+                        distanceService.manhattanDistance(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = tilePosition.row, toColumn = tilePosition.column) >
+                            1
+                    }.map { tilePosition -> CastGroup(listOf(PositionDto(row = tilePosition.row, column = tilePosition.column))) }
         }
     }
 

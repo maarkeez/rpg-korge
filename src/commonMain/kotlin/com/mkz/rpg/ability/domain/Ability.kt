@@ -7,7 +7,6 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
 import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
-import com.mkz.rpg.ability.domain.AbilityError.InvalidTargeting
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
@@ -151,13 +150,28 @@ data class Ability private constructor(
         ADJACENT_ENEMY,
         ALL_ADJACENT_ENEMIES,
         VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+        VACANT_TILE_ADJACENT_TO_SELF,
         ;
 
         companion object {
-            operator fun invoke(targeting: Dto.TargetingDto): Targeting = runCatching { valueOf(targeting.name) }.getOrElse { throw InvalidTargeting() }
+            operator fun invoke(targeting: Dto.TargetingDto): Targeting =
+                when (targeting) {
+                    Dto.TargetingDto.SELF -> SELF
+                    Dto.TargetingDto.ADJACENT_ENEMY -> ADJACENT_ENEMY
+                    Dto.TargetingDto.ALL_ADJACENT_ENEMIES -> ALL_ADJACENT_ENEMIES
+                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
+                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF -> VACANT_TILE_ADJACENT_TO_SELF
+                }
         }
 
-        fun toDto() = Dto.TargetingDto.valueOf(name)
+        fun toDto() =
+            when (this) {
+                SELF -> Dto.TargetingDto.SELF
+                ADJACENT_ENEMY -> Dto.TargetingDto.ADJACENT_ENEMY
+                ALL_ADJACENT_ENEMIES -> Dto.TargetingDto.ALL_ADJACENT_ENEMIES
+                VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
+                VACANT_TILE_ADJACENT_TO_SELF -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+            }
     }
 
     data class Dto(
@@ -173,6 +187,7 @@ data class Ability private constructor(
             ADJACENT_ENEMY,
             ALL_ADJACENT_ENEMIES,
             VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+            VACANT_TILE_ADJACENT_TO_SELF,
         }
 
         data class EffectSpecDto(

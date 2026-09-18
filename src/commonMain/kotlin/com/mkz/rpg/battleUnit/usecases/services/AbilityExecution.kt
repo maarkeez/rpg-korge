@@ -64,7 +64,9 @@ class AbilityExecution(
                 val occupant = battleUnitRepository.searchById(occupantId) ?: throw FailedToResolveEffectTarget()
                 if (caster.isSamePlayer(occupant)) throw FailedToResolveEffectTarget()
             }
-            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> {
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF,
+            -> {
                 if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
             }
             Ability.Dto.TargetingDto.SELF -> Unit

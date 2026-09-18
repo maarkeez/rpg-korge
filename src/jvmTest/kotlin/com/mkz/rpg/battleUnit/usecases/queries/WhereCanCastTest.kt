@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.player.domain.PlayerMother.player
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -22,6 +23,7 @@ class WhereCanCastTest {
     private val searchAbilityById: SearchAbilityById = mock()
     private val searchOccupant: SearchOccupant = mock()
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
+    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
     private val distanceService = DistanceService()
     private val whereCanCast =
         WhereCanCast(
@@ -31,6 +33,7 @@ class WhereCanCastTest {
             searchOccupant = searchOccupant,
             distanceService = distanceService,
             canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
+            searchTilesThatCanBeOccupied = searchTilesThatCanBeOccupied,
         )
 
     @Test
@@ -174,5 +177,29 @@ class WhereCanCastTest {
         val result = whereCanCast("unknown-battle-unit", "ability-1")
         // Then
         assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `should return adjacent vacant tiles when the ability targets vacant adjacent tiles to self`() {
+        // Given
+        val caster = battleUnit()
+        val otherBattleUnit = battleUnit()
+        battleUnitRepository.create(caster)
+        battleUnitRepository.create(otherBattleUnit)
+        val casterId = caster.toDto().id
+        val casterPosition = PositionDto(0, 0)
+        val adjacentPosition = PositionDto(row = 0, column = 1)
+        val nonAdjacentPosition = PositionDto(row = 1, column = 1)
+        whenever(searchPosition(casterId)).thenReturn(casterPosition)
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF).toDto(),
+        )
+        whenever(searchTilesThatCanBeOccupied(casterId, 1)).thenReturn(listOf(adjacentPosition, nonAdjacentPosition))
+        // When
+        val result = whereCanCast(casterId, "ability-1")
+        // Then
+        assertThat(result).containsExactly(
+            WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = adjacentPosition.row, column = adjacentPosition.column))),
+        )
     }
 }
