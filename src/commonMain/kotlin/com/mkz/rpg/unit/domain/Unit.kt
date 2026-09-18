@@ -38,27 +38,27 @@ data class Unit private constructor(
             movementRange = movementRange.value,
         )
 
-    @JvmInline value class Id(
+    @JvmInline private value class Id(
         val value: String,
     )
 
-    @JvmInline value class Name(
+    @JvmInline private value class Name(
         val value: String,
     )
 
-    @JvmInline value class HealthPoints(
+    @JvmInline private value class HealthPoints(
         val value: Int,
     )
 
-    @JvmInline value class ManaPoints(
+    @JvmInline private value class ManaPoints(
         val value: Int,
     )
 
-    @JvmInline value class Abilities(
+    @JvmInline private value class Abilities(
         val value: List<String>,
     )
 
-    @JvmInline value class MovementRange(
+    @JvmInline private value class MovementRange(
         val value: Int,
     )
 
