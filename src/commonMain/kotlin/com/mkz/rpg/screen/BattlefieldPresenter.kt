@@ -27,6 +27,7 @@ class BattlefieldPresenter(
     private val battlefieldView: BattlefieldView,
     private val battleUnitInfoView: BattleUnitInfoView,
     private val attackPreviewView: AttackPreviewView,
+    private val playerCallToActionView: PlayerCallToActionView,
     private val battleHudView: BattleHudView,
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
@@ -36,8 +37,7 @@ class BattlefieldPresenter(
     battleApi: BattleApi,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
-    AbilityButtonView.Delegate,
-    AttackPreviewView.Delegate {
+    AbilityButtonView.Delegate {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val movementService =
         MovementService(
@@ -126,7 +126,6 @@ class BattlefieldPresenter(
         initializeBattlefieldHud.invoke()
         battlefieldView.setDelegate(this)
         battleUnitInfoView.setDelegate(this)
-        attackPreviewView.setDelegate(this)
     }
 
     fun displayBattlefield() {
@@ -217,7 +216,7 @@ class BattlefieldPresenter(
                 column = tilePosition.column,
             )
         }
-        battleHudView.displayAttackPreviewView()
+        displayAttackPreview()
     }
 
     private fun displayEnemyAbilityCastPreview(event: BattlefieldHudEvent.EnemyAbilityCastPreviewed) {
@@ -242,7 +241,15 @@ class BattlefieldPresenter(
                 column = tilePosition.column,
             )
         }
+        displayAttackPreview()
+    }
+
+    private fun displayAttackPreview() {
         battleHudView.displayAttackPreviewView()
+        playerCallToActionView.displayCancelAndConfirm(
+            onCancelled = { cancelCast() },
+            onConfirmed = { confirmCast() },
+        )
     }
 
     // Delegates
@@ -252,8 +259,4 @@ class BattlefieldPresenter(
     ) = processTileSelected(row = row, column = column)
 
     override fun abilitySelected(abilityId: String) = processAbilitySelected(abilityId)
-
-    override fun castConfirmed() = confirmCast()
-
-    override fun castCancelled() = cancelCast()
 }

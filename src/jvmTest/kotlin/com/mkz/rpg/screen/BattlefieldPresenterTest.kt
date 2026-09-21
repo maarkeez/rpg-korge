@@ -50,6 +50,7 @@ class BattlefieldPresenterTest {
             battlefieldView = battlefieldView,
             battleUnitInfoView = battleUnitInfoView,
             attackPreviewView = attackPreviewView,
+            playerCallToActionView = mock(),
             battleHudView = battleHudView,
             battlefieldApi = battlefieldApi,
             battleUnitApi = battleUnitApi,

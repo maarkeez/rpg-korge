@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class PlayerCallToActionPresenter(
+class FinishTurnPresenter(
     private val playerCallToActionView: PlayerCallToActionView,
     private val battleApi: BattleApi,
     eventBus: EventBus,

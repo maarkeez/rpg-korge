@@ -3,14 +3,11 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
 import korlibs.korge.view.View
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 class AttackPreviewViewTest : ViewsForTesting() {
     @Nested
@@ -107,64 +104,6 @@ class AttackPreviewViewTest : ViewsForTesting() {
                 attackPreviewView.hide()
                 // Then
                 assertThat(attackPreviewView.isVisibleToUser()).isFalse
-            }
-    }
-
-    @Nested
-    inner class ConfirmButtonClick {
-        @Test
-        fun `should notify delegate when confirm button is clicked`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
-                val delegate = mock<AttackPreviewView.Delegate>()
-                attackPreviewView.setDelegate(delegate)
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = null,
-                    receiverUnit = null,
-                    damage = null,
-                )
-                addChild(attackPreviewView)
-                val confirmButton = attackPreviewView.allViews().filterIsInstance<UIButton>().single { it.text == "Confirm" }
-                // When
-                confirmButton.simulateClick()
-                // Then
-                verify(delegate).castConfirmed()
-            }
-    }
-
-    @Nested
-    inner class CancelButtonClick {
-        @Test
-        fun `should notify delegate when cancel button is clicked`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
-                val delegate = mock<AttackPreviewView.Delegate>()
-                attackPreviewView.setDelegate(delegate)
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = null,
-                    receiverUnit = null,
-                    damage = null,
-                )
-                addChild(attackPreviewView)
-                val cancelButton = attackPreviewView.allViews().filterIsInstance<UIButton>().single { it.text == "Cancel" }
-                // When
-                cancelButton.simulateClick()
-                // Then
-                verify(delegate).castCancelled()
             }
     }
 }

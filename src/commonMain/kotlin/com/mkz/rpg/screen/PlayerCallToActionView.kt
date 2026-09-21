@@ -4,11 +4,14 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
 class PlayerCallToActionView : Container() {
+    private var onTurnFinished: (() -> Unit)? = null
+
     fun hide() {
         visible = false
     }
 
     fun displayFinishTurn(onTurnFinished: () -> Unit) {
+        this.onTurnFinished = onTurnFinished
         val finishTurnView = FinishTurnView(onTurnFinished = onTurnFinished)
         display(finishTurnView)
     }
@@ -19,8 +22,14 @@ class PlayerCallToActionView : Container() {
     ) {
         val cancelAndConfirmView =
             CancelAndConfirmView(
-                onCancelled = onCancelled,
-                onConfirmed = onConfirmed,
+                onCancelled = {
+                    onCancelled()
+                    displayFinishTurn(onTurnFinished = onTurnFinished!!)
+                },
+                onConfirmed = {
+                    onConfirmed()
+                    displayFinishTurn(onTurnFinished = onTurnFinished!!)
+                },
             )
         display(cancelAndConfirmView)
     }

@@ -27,6 +27,7 @@ class BattleScene : Scene() {
             battleUnitInfoView,
             attackPreviewView,
         )
+    val playerCallToActionView = PlayerCallToActionView()
 
     override suspend fun SContainer.sceneInit() {
         battlefieldView.loadAssets()
@@ -58,6 +59,7 @@ class BattleScene : Scene() {
                 battlefieldView,
                 battleUnitInfoView,
                 attackPreviewView,
+                playerCallToActionView,
                 battleHudView,
                 battlefieldApi,
                 battleUnitApi,
@@ -89,9 +91,8 @@ class BattleScene : Scene() {
                 // val finishTurnView = FinishTurnView()
                 // addChild(finishTurnView)
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
-                val playerCallToActionView = PlayerCallToActionView()
                 addChild(playerCallToActionView)
-                PlayerCallToActionPresenter(playerCallToActionView, battleApi, eventBus)
+                FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
             }
         }
 
