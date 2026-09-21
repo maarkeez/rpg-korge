@@ -86,9 +86,12 @@ class BattleScene : Scene() {
                 uiSpacing(Size(0, 10))
                 addChild(battleHudView)
                 uiSpacing(Size(0, 5))
-                val finishTurnView = FinishTurnView()
-                addChild(finishTurnView)
-                val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
+                // val finishTurnView = FinishTurnView()
+                // addChild(finishTurnView)
+                // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
+                val playerCallToActionView = PlayerCallToActionView()
+                addChild(playerCallToActionView)
+                PlayerCallToActionPresenter(playerCallToActionView, battleApi, eventBus)
             }
         }
 
