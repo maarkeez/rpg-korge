@@ -1,6 +1,7 @@
 package com.mkz.rpg.unit.domain
 
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -62,6 +63,7 @@ data class Unit private constructor(
         val value: Int,
     )
 
+    @Serializable
     data class Dto(
         val id: String,
         val name: String,

@@ -1,0 +1,23 @@
+[[unit]]
+id = "rat"
+name = "Rat"
+healthPoints = 20
+manaPoints = 10
+abilities = ["sword", "heal"]
+movementRange = 3
+
+[[unit]]
+id = "knight"
+name = "Knight"
+healthPoints = 100
+manaPoints = 30
+abilities = ["poisoned-sword", "mushroom", "skull", "teleport", "bee", "heal"]
+movementRange = 3
+
+[[unit]]
+id = "bee"
+name = "Bee"
+healthPoints = 10
+manaPoints = 0
+abilities = ["sword"]
+movementRange = 5

@@ -3,6 +3,7 @@ package com.mkz.rpg.player.domain
 import com.mkz.rpg.player.domain.PlayerError.EmptyPlayerId
 import com.mkz.rpg.player.domain.PlayerError.EmptyPlayerName
 import com.mkz.rpg.player.domain.PlayerError.PlayerNameLongerThanExpected
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -57,6 +58,7 @@ data class Player private constructor(
             type = type.toDto(),
         )
 
+    @Serializable
     data class Dto(
         val id: String,
         val name: String,

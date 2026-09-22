@@ -1,6 +1,7 @@
 package com.mkz.rpg.terrain.domain
 
 import com.mkz.rpg.terrain.domain.TerrainEvent.TerrainCreated
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -34,6 +35,7 @@ data class Terrain private constructor(
         val value: Boolean,
     )
 
+    @Serializable
     data class Dto(
         val id: String,
         val canBeOccupied: Boolean,

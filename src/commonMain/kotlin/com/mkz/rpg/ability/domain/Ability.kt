@@ -10,6 +10,7 @@ import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -174,6 +175,7 @@ data class Ability private constructor(
             }
     }
 
+    @Serializable
     data class Dto(
         val id: String,
         val name: String,
@@ -190,11 +192,13 @@ data class Ability private constructor(
             VACANT_TILE_ADJACENT_TO_SELF,
         }
 
+        @Serializable
         data class EffectSpecDto(
             val effectId: String,
             val target: TargetExpressionDto,
         )
 
+        @Serializable
         data class TargetExpressionDto(
             val type: Type,
         ) {

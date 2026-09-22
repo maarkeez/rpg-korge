@@ -1,0 +1,96 @@
+[poisonedSword]
+id = "poisoned-sword"
+name = "Poisoned Sword"
+cost = 5
+cooldown = 1
+targeting = "ADJACENT_ENEMY"
+
+    [[poisonedSword.effectSpecs]]
+    effectId = "venom-damage"
+
+        [poisonedSword.effectSpecs.target]
+        type = "SELECTED_TARGET"
+
+[sword]
+id = "sword"
+name = "Sword"
+cost = 0
+cooldown = 0
+targeting = "ADJACENT_ENEMY"
+
+    [[sword.effectSpecs]]
+    effectId = "low-physical-damage"
+
+        [sword.effectSpecs.target]
+        type = "SELECTED_TARGET"
+
+[heal]
+id = "heal"
+name = "Heal"
+cost = 10
+cooldown = 2
+targeting = "SELF"
+
+    [[heal.effectSpecs]]
+    effectId = "low-damage-heal"
+
+        [heal.effectSpecs.target]
+        type = "CASTER"
+
+[mushroom]
+id = "mushroom"
+name = "Mushroom"
+cost = 10
+cooldown = 0
+targeting = "ALL_ADJACENT_ENEMIES"
+
+    [[mushroom.effectSpecs]]
+    effectId = "venom-damage"
+
+        [mushroom.effectSpecs.target]
+        type = "SELECTED_TARGET"
+
+[skull]
+id = "skull"
+name = "Skull"
+cost = 10
+cooldown = 0
+targeting = "ADJACENT_ENEMY"
+
+    [[skull.effectSpecs]]
+    effectId = "low-physical-damage"
+
+        [skull.effectSpecs.target]
+        type = "SELECTED_TARGET"
+
+    [[skull.effectSpecs]]
+    effectId = "venom-on-death"
+
+        [skull.effectSpecs.target]
+        type = "SELECTED_TARGET"
+
+[teleport]
+id = "teleport"
+name = "Teleport"
+cost = 5
+cooldown = 1
+targeting = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"
+
+    [[teleport.effectSpecs]]
+    effectId = "teleport"
+
+        [teleport.effectSpecs.target]
+        type = "CASTER"
+
+[bee]
+id = "bee"
+name = "Bee"
+cost = 10
+cooldown = 0
+targeting = "VACANT_TILE_ADJACENT_TO_SELF"
+
+    [[bee.effectSpecs]]
+    effectId = "deploy-bee"
+
+        [bee.effectSpecs.target]
+        type = "SELECTED_TILE"

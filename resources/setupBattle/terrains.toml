@@ -1,0 +1,7 @@
+[[terrain]]
+id = "sand"
+canBeOccupied = true
+
+[[terrain]]
+id = "void"
+canBeOccupied = false

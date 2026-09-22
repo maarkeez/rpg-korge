@@ -1,0 +1,9 @@
+[[player]]
+id = "player-one"
+name = "Human"
+type = "HUMAN"
+
+[[player]]
+id = "player-two"
+name = "CPU"
+type = "CPU"

@@ -1,0 +1,13 @@
+rows = 8
+columns = 8
+
+tiles = [
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+    ["sand", "sand", "void", "void", "void", "void", "sand", "sand"],
+    ["sand", "sand", "void", "void", "void", "void", "sand", "sand"],
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+    ["sand", "sand", "sand", "sand", "sand", "sand", "sand", "sand"],
+]

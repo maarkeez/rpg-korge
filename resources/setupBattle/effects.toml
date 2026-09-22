@@ -1,0 +1,71 @@
+[venomDamage]
+id = "venom-damage"
+
+    [venomDamage.outcome]
+    type = "DECREASE_HEALTH"
+
+        [venomDamage.outcome.decreaseHealth]
+        damage = 3
+
+    [venomDamage.application]
+    type = "ON_TURN_STARTED"
+
+        [venomDamage.application.onTurnStarted]
+        duration = 5
+
+[lowPhysicalDamage]
+id = "low-physical-damage"
+
+    [lowPhysicalDamage.outcome]
+    type = "DECREASE_HEALTH"
+
+        [lowPhysicalDamage.outcome.decreaseHealth]
+        damage = 10
+
+    [lowPhysicalDamage.application]
+    type = "IMMEDIATELY"
+
+[lowDamageHeal]
+id = "low-damage-heal"
+
+    [lowDamageHeal.outcome]
+    type = "INCREASE_HEALTH"
+
+        [lowDamageHeal.outcome.increaseHealth]
+        healing = 20
+
+    [lowDamageHeal.application]
+    type = "IMMEDIATELY"
+
+[teleport]
+id = "teleport"
+
+    [teleport.outcome]
+    type = "TELEPORT"
+
+    [teleport.application]
+    type = "IMMEDIATELY"
+
+[venomOnDeath]
+id = "venom-on-death"
+
+    [venomOnDeath.outcome]
+    type = "APPLY_EFFECT_ON_NEARBY_ALLIES"
+
+        [venomOnDeath.outcome.applyEffectOnNearbyAllies]
+        effectId = "venom-damage"
+
+    [venomOnDeath.application]
+    type = "ON_DEFEATED"
+
+[deployBee]
+id = "deploy-bee"
+
+    [deployBee.outcome]
+    type = "DEPLOY_BATTLE_UNIT"
+
+        [deployBee.outcome.deployBattleUnit]
+        unitId = "bee"
+
+    [deployBee.application]
+    type = "IMMEDIATELY"

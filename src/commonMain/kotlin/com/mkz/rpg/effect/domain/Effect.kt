@@ -16,6 +16,7 @@ import com.mkz.rpg.effect.domain.EffectError.MissingEffectApplicationDetails
 import com.mkz.rpg.effect.domain.EffectError.NegativeApplicationDuration
 import com.mkz.rpg.effect.domain.EffectError.NegativePower
 import com.mkz.rpg.effect.domain.EffectError.PowerAboveLimit
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -211,6 +212,7 @@ data class Effect private constructor(
         }
     }
 
+    @Serializable
     data class Dto(
         val id: String,
         val outcome: EffectOutcomeDto,
@@ -234,11 +236,12 @@ data class Effect private constructor(
             ) : EffectTargetDto
         }
 
+        @Serializable
         data class EffectOutcomeDto(
             val type: TypeDto,
-            val decreaseHealth: DecreaseHealthDto?,
-            val increaseHealth: IncreaseHealthDto?,
-            val applyEffectOnNearbyAllies: ApplyEffectOnNearbyAlliesDto?,
+            val decreaseHealth: DecreaseHealthDto? = null,
+            val increaseHealth: IncreaseHealthDto? = null,
+            val applyEffectOnNearbyAllies: ApplyEffectOnNearbyAlliesDto? = null,
             val deployBattleUnit: DeployBattleUnitDto? = null,
         ) {
             enum class TypeDto {
@@ -250,27 +253,32 @@ data class Effect private constructor(
                 DEPLOY_BATTLE_UNIT,
             }
 
+            @Serializable
             data class DecreaseHealthDto(
                 val damage: Int,
             )
 
+            @Serializable
             data class IncreaseHealthDto(
                 val healing: Int,
             )
 
+            @Serializable
             data class ApplyEffectOnNearbyAlliesDto(
                 val effectId: String,
             )
 
+            @Serializable
             data class DeployBattleUnitDto(
                 val unitId: String,
             )
         }
 
+        @Serializable
         data class ApplicationDto(
             val type: ApplicationTypeDto,
-            val onTurnStarted: OnTurnStartedDto?,
-            val beforeApplyingEffect: BeforeApplyingEffectDto?,
+            val onTurnStarted: OnTurnStartedDto? = null,
+            val beforeApplyingEffect: BeforeApplyingEffectDto? = null,
         ) {
             enum class ApplicationTypeDto {
                 IMMEDIATELY,
@@ -279,10 +287,12 @@ data class Effect private constructor(
                 ON_DEFEATED,
             }
 
+            @Serializable
             data class OnTurnStartedDto(
                 val duration: Int,
             )
 
+            @Serializable
             data class BeforeApplyingEffectDto(
                 val duration: Int,
             )

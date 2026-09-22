@@ -1,0 +1,29 @@
+firstRoundPlayers = ["player-one", "player-two"]
+
+[[deployment]]
+battleUnitId = "player-2-unit-1"
+unitId = "rat"
+playerId = "player-two"
+deployAtRow = 0
+deployAtColumn = 0
+
+[[deployment]]
+battleUnitId = "player-2-unit-2"
+unitId = "rat"
+playerId = "player-two"
+deployAtRow = 1
+deployAtColumn = 1
+
+[[deployment]]
+battleUnitId = "player-1-unit-1"
+unitId = "knight"
+playerId = "player-one"
+deployAtRow = 6
+deployAtColumn = 6
+
+[[deployment]]
+battleUnitId = "player-1-unit-2"
+unitId = "knight"
+playerId = "player-one"
+deployAtRow = 7
+deployAtColumn = 7
