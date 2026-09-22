@@ -208,7 +208,8 @@ data class Battlefield private constructor(
 
             fun toDto() =
                 TileDto(
-                    battleUnitId = this.occupyingBattleUnitId?.value,
+                    battleUnitId = occupyingBattleUnitId?.value,
+                    terrainId = terrainId.value,
                 )
         }
 
@@ -235,6 +236,7 @@ data class Battlefield private constructor(
     ) {
         data class TileDto(
             val battleUnitId: String?,
+            val terrainId: String,
         )
 
         data class PositionDto(

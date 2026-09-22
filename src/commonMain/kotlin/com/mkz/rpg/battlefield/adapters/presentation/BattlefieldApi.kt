@@ -14,8 +14,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 
 class BattlefieldApi(
+    terrainApi: TerrainApi,
     eventBus: EventBus,
 ) {
     // Storage
@@ -29,8 +31,8 @@ class BattlefieldApi(
     // Queries
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
     val searchOccupant = SearchOccupant(battlefieldRepository)
-    val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
-    val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(battlefieldRepository)
+    val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(terrainApi.searchTerrainById, battlefieldRepository)
+    val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
 
     // Event Listeners

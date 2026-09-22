@@ -6,5 +6,6 @@ import com.mkz.rpg.shared.domain.EventBus
 class BattleSetupApi(
     eventBus: EventBus,
 ) {
+    // Commands
     val setupBattle = SetupBattle(eventBus)
 }

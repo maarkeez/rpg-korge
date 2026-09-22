@@ -5,10 +5,14 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class SearchTilesThatCanBeOccupiedTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(battlefieldRepository)
+    private val canBattlefieldTileBeOccupied = mock<CanBattlefieldTileBeOccupied>()
+    private val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
 
     @Test
     fun `should return tiles that can be occupied when the battle unit is deployed`() {
@@ -20,6 +24,8 @@ class SearchTilesThatCanBeOccupiedTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(battlefield)
+        whenever(canBattlefieldTileBeOccupied(any(), any())).thenReturn(true)
+        whenever(canBattlefieldTileBeOccupied(1, 1)).thenReturn(false)
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 1)
         // Then

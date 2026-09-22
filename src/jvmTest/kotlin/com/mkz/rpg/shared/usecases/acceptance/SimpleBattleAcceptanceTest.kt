@@ -18,6 +18,8 @@ import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.domain.UnitMother
@@ -27,9 +29,10 @@ import org.junit.jupiter.api.Test
 
 class SimpleBattleAcceptanceTest {
     private val eventBus = InMemoryEventBus()
+    private val terrainApi = TerrainApi(eventBus)
     private val unitApi = UnitApi(eventBus)
     private val playerApi = PlayerApi(eventBus)
-    private val battlefieldApi = BattlefieldApi(eventBus)
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
@@ -49,7 +52,8 @@ class SimpleBattleAcceptanceTest {
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
-        battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } })
+        terrainApi.requestTerrainCreation(Terrain.Dto(id = "sand", canBeOccupied = true))
+        battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "sand" } })
 
         val lowPhysicalDamage =
             EffectMother

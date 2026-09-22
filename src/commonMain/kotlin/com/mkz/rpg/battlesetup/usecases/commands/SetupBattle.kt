@@ -32,6 +32,8 @@ import com.mkz.rpg.effect.domain.EffectEvent.RequestEffectCreation
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.domain.UnitEvent.RequestUnitCreation
 
@@ -44,7 +46,23 @@ class SetupBattle(
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerOneId, "Human", Player.Dto.PlayerTypeDto.HUMAN))
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerTwoId, "CPU", Player.Dto.PlayerTypeDto.CPU))
 
-        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(8, 8, List(8) { List(8) { "tile-id-$it" } }))
+        val sandTerrain = Terrain.Dto(id = "sand", canBeOccupied = true)
+        val voidTerrain = Terrain.Dto(id = "void", canBeOccupied = false)
+        listOf(sandTerrain).forEach { terrain ->
+            eventBus.publish(TerrainEvent.RequestTerrainCreation(terrain))
+        }
+        val tiles =
+            listOf(
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+            )
+        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(8, 8, tiles))
 
         val venomDamage =
             Effect.Dto(

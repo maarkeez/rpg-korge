@@ -4,6 +4,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 
 class SearchTilesThatCanBeOccupied(
+    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
     private val battlefieldRepository: BattlefieldRepository,
 ) {
     operator fun invoke(
@@ -17,7 +18,7 @@ class SearchTilesThatCanBeOccupied(
             buildList {
                 for (row in position.row - distance..position.row + distance) {
                     for (column in position.column - distance..position.column + distance) {
-                        if (battlefield.isInBoundaries(row, column) && battlefield.canBeOccupied(row, column)) {
+                        if (canBattlefieldTileBeOccupied(row, column)) {
                             add(PositionDto(row, column))
                         }
                     }

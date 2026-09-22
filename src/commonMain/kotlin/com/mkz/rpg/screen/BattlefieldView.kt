@@ -23,7 +23,7 @@ class BattlefieldView : Container() {
     }
 
     private var delegate: Delegate? = null
-    private lateinit var sandBitmap: Bitmap
+    private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var knightBitmap: Bitmap
     private lateinit var ratBitmap: Bitmap
     private lateinit var beeBitmap: Bitmap
@@ -49,7 +49,11 @@ class BattlefieldView : Container() {
     }
 
     suspend fun loadAssets() {
-        sandBitmap = resourcesVfs["terrain/sand.png"].readBitmap()
+        terrainBitMaps =
+            buildMap {
+                put("sand", resourcesVfs["terrain/sand.png"].readBitmap())
+                put("void", resourcesVfs["terrain/void.png"].readBitmap())
+            }
         knightBitmap = resourcesVfs["unit/knight.png"].readBitmap()
         ratBitmap = resourcesVfs["unit/rat.png"].readBitmap()
         beeBitmap = resourcesVfs["unit/bee.png"].readBitmap()
@@ -59,18 +63,20 @@ class BattlefieldView : Container() {
         tileSelectionBitMap = resourcesVfs["battlefield/tile_selection_4.png"].readBitmap()
     }
 
-    fun displayBattlefield(dto: Battlefield.Dto) {
-        battlefieldGrid.rows = dto.rows
-        battlefieldGrid.cols = dto.columns
-        for (row in 0 until dto.rows) {
-            for (column in 0 until dto.columns) {
+    fun displayBattlefield(battlefield: Battlefield.Dto) {
+        battlefieldGrid.rows = battlefield.rows
+        battlefieldGrid.cols = battlefield.columns
+        for (row in 0 until battlefield.rows) {
+            for (column in 0 until battlefield.columns) {
                 battlefieldGrid.uiButton(label = "").also { tileButton ->
                     tileButton.bgColorOut = Colors.TRANSPARENT
                     tileButton.bgColorOver = Colors.TRANSPARENT
                     tileButton.background.borderColor = Colors.TRANSPARENT
                     tileButton.background.bgColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
-                    tileButton.addImage(sandBitmap, TERRAIN)
+                    val terrainId = battlefield.tiles[Battlefield.Dto.PositionDto(row, column)]!!.terrainId
+                    val terrainBitMap = terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+                    tileButton.addImage(terrainBitMap, TERRAIN)
                     tileButton.onClick {
                         delegate?.tileSelected(row, column)
                     }

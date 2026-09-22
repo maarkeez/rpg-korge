@@ -9,6 +9,7 @@ import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import korlibs.korge.scene.Scene
 import korlibs.korge.ui.uiSpacing
@@ -43,9 +44,10 @@ class BattleScene : Scene() {
         }
 
         // Backend APIs
+        val terrainApi = TerrainApi(eventBus)
         val unitApi = UnitApi(eventBus)
         val playerApi = PlayerApi(eventBus)
-        val battlefieldApi = BattlefieldApi(eventBus)
+        val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
