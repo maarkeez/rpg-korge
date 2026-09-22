@@ -55,6 +55,16 @@ class PlayerTest {
         }
 
         @Test
+        fun `should create a human player when the name has exactly 50 characters`() {
+            // Given
+            val playerName = "a".repeat(50)
+            // When
+            val createdPlayer = Player.createHuman("player-1", playerName)
+            // Then
+            assertThat(createdPlayer.toDto().name).isEqualTo(playerName)
+        }
+
+        @Test
         fun `should fail when the player name is longer than 50 characters`() {
             // Given
             val playerName = "a".repeat(51)

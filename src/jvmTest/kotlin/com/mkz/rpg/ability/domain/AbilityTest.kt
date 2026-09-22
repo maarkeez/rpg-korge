@@ -54,6 +54,19 @@ class AbilityTest {
         }
 
         @Test
+        fun `should create ability when the name has exactly 50 characters`() {
+            // Given
+            val dto =
+                ability()
+                    .toDto()
+                    .copy(name = "a".repeat(50))
+            // When
+            val createdAbility = Ability.create(dto = dto)
+            // Then
+            assertThat(createdAbility.toDto().name).isEqualTo("a".repeat(50))
+        }
+
+        @Test
         fun `should fail when the name is longer than 50 characters`() {
             // Given
             val dto =
@@ -80,6 +93,32 @@ class AbilityTest {
         }
 
         @Test
+        fun `should create ability when the cost is zero`() {
+            // Given
+            val dto =
+                ability()
+                    .toDto()
+                    .copy(cost = 0)
+            // When
+            val createdAbility = Ability.create(dto = dto)
+            // Then
+            assertThat(createdAbility.toDto().cost).isEqualTo(0)
+        }
+
+        @Test
+        fun `should create ability when the cost is at the limit`() {
+            // Given
+            val dto =
+                ability()
+                    .toDto()
+                    .copy(cost = 999)
+            // When
+            val createdAbility = Ability.create(dto = dto)
+            // Then
+            assertThat(createdAbility.toDto().cost).isEqualTo(999)
+        }
+
+        @Test
         fun `should fail when the cost is above the limit`() {
             // Given
             val dto =
@@ -90,6 +129,32 @@ class AbilityTest {
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
             assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityCostAboveLimit::class.java)
+        }
+
+        @Test
+        fun `should create ability when the cooldown is zero`() {
+            // Given
+            val dto =
+                ability()
+                    .toDto()
+                    .copy(cooldown = 0)
+            // When
+            val createdAbility = Ability.create(dto = dto)
+            // Then
+            assertThat(createdAbility.toDto().cooldown).isEqualTo(0)
+        }
+
+        @Test
+        fun `should create ability when the cooldown is at the limit`() {
+            // Given
+            val dto =
+                ability()
+                    .toDto()
+                    .copy(cooldown = 99)
+            // When
+            val createdAbility = Ability.create(dto = dto)
+            // Then
+            assertThat(createdAbility.toDto().cooldown).isEqualTo(99)
         }
 
         @Test

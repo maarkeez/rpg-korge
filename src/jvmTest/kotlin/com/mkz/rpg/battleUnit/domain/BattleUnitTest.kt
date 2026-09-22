@@ -508,6 +508,16 @@ class BattleUnitTest {
             // Then
             assertThat(result).isFalse
         }
+
+        @Test
+        fun `should be false when the battle unit only has on defeated effects`() {
+            // Given
+            val battleUnit = BattleUnitMother.battleUnit().receiveOnDefeatedEffect(effectId = "effect-1")
+            // When
+            val result = battleUnit.hasOnTurnStartedEffects()
+            // Then
+            assertThat(result).isFalse
+        }
     }
 
     @Nested
@@ -530,6 +540,91 @@ class BattleUnitTest {
             assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events).contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
+        }
+
+        @Test
+        fun `should keep the on turn started effect with one turn less when the effect has more turns left`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val onTurnStartedEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 2)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyOnTurnStartedEffect(
+                    effect = onTurnStartedEffect,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1")
+        }
+
+        @Test
+        fun `should remove the on turn started effect when it is applied for its last turn`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val onTurnStartedEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 2)
+            // When
+            val updatedBattleUnit =
+                battleUnit
+                    .applyOnTurnStartedEffect(
+                        effect = onTurnStartedEffect,
+                        currentRow = position().row,
+                        currentColumn = position().column,
+                    ).applyOnTurnStartedEffect(
+                        effect = onTurnStartedEffect,
+                        currentRow = position().row,
+                        currentColumn = position().column,
+                    )
+            // Then
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
+        }
+
+        @Test
+        fun `should only update the matching on turn started effect when the battle unit has several effects`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val appliedEffect = EffectMother.decreaseHealthEffect(id = "effect-2", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit(unit = unit)
+                    .receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
+                    .receiveOnTurnStartedEffect(effectId = appliedEffect.id, turnsLeft = 2)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyOnTurnStartedEffect(
+                    effect = appliedEffect,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1", "effect-2")
+        }
+
+        @Test
+        fun `should keep the on turn started effect when an immediate effect with the same id is applied`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val immediateEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "IMMEDIATELY").toDto()
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit(unit = unit)
+                    .receiveOnTurnStartedEffect(effectId = immediateEffect.id, turnsLeft = 2)
+                    .receiveImmediateEffect(effectId = immediateEffect.id)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = immediateEffect,
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1")
         }
     }
 }

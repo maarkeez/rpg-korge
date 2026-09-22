@@ -53,6 +53,27 @@ class BattleTest {
             // Then
             assertThat(result).isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
         }
+
+        @Test
+        fun `should expose the finished state as false when the battle has not finished`() {
+            // Given
+            val battle = battle()
+            // When
+            val result = battle.toDto().isFinished
+            // Then
+            assertThat(result).isFalse
+        }
+
+        @Test
+        fun `should expose the finished state as true when the battle has finished`() {
+            // Given
+            val players = listOf("player-1", "player-2")
+            val battle = battle(players).defeatPlayer(players[1]).finishBattle()
+            // When
+            val result = battle.toDto().isFinished
+            // Then
+            assertThat(result).isTrue
+        }
     }
 
     @Nested

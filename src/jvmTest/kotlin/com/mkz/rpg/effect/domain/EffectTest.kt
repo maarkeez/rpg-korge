@@ -2,6 +2,7 @@ package com.mkz.rpg.effect.domain
 
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
@@ -122,6 +123,275 @@ class EffectTest {
             // Then
             assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.ApplicationDurationAboveLimit::class.java)
         }
+
+        @Test
+        fun `should create effect when the damage is zero`() {
+            // Given
+            val damage = 0
+            // When
+            val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .outcome.decreaseHealth!!
+                    .damage,
+            ).isEqualTo(damage)
+        }
+
+        @Test
+        fun `should create effect when the damage is at the limit`() {
+            // Given
+            val damage = 999
+            // When
+            val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .outcome.decreaseHealth!!
+                    .damage,
+            ).isEqualTo(damage)
+        }
+
+        @Test
+        fun `should create effect when the healing is zero`() {
+            // Given
+            val healing = 0
+            // When
+            val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .outcome.increaseHealth!!
+                    .healing,
+            ).isEqualTo(healing)
+        }
+
+        @Test
+        fun `should create effect when the healing is at the limit`() {
+            // Given
+            val healing = 999
+            // When
+            val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .outcome.increaseHealth!!
+                    .healing,
+            ).isEqualTo(healing)
+        }
+
+        @Test
+        fun `should create effect when the on turn started duration is zero`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        application =
+                            ApplicationDto(
+                                type = ApplicationTypeDto.ON_TURN_STARTED,
+                                onTurnStarted = OnTurnStartedDto(duration = 0),
+                                beforeApplyingEffect = null,
+                            ),
+                    )
+            // When
+            val createdEffect = Effect.create(effectDto)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .application.onTurnStarted!!
+                    .duration,
+            ).isEqualTo(0)
+        }
+
+        @Test
+        fun `should create effect when the on turn started duration is at the limit`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        application =
+                            ApplicationDto(
+                                type = ApplicationTypeDto.ON_TURN_STARTED,
+                                onTurnStarted = OnTurnStartedDto(duration = 99),
+                                beforeApplyingEffect = null,
+                            ),
+                    )
+            // When
+            val createdEffect = Effect.create(effectDto)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .application.onTurnStarted!!
+                    .duration,
+            ).isEqualTo(99)
+        }
+
+        @Test
+        fun `should create effect when the before applying effect duration is zero`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        application =
+                            ApplicationDto(
+                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                                onTurnStarted = null,
+                                beforeApplyingEffect = BeforeApplyingEffectDto(duration = 0),
+                            ),
+                    )
+            // When
+            val createdEffect = Effect.create(effectDto)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .application.beforeApplyingEffect!!
+                    .duration,
+            ).isEqualTo(0)
+        }
+
+        @Test
+        fun `should create effect when the before applying effect duration is at the limit`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        application =
+                            ApplicationDto(
+                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                                onTurnStarted = null,
+                                beforeApplyingEffect = BeforeApplyingEffectDto(duration = 99),
+                            ),
+                    )
+            // When
+            val createdEffect = Effect.create(effectDto)
+            // Then
+            assertThat(
+                createdEffect
+                    .toDto()
+                    .application.beforeApplyingEffect!!
+                    .duration,
+            ).isEqualTo(99)
+        }
+
+        @Test
+        fun `should fail when the before applying effect is missing its details`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        application =
+                            ApplicationDto(
+                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                                onTurnStarted = null,
+                                beforeApplyingEffect = null,
+                            ),
+                    )
+            // When
+            val result = runCatching { Effect.create(effectDto) }
+            // Then
+            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.MissingEffectApplicationDetails::class.java)
+        }
+
+        @Test
+        fun `should fail when the decrease health outcome is missing its details`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .decreaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        outcome =
+                            EffectMother
+                                .decreaseHealthEffect()
+                                .toDto()
+                                .outcome
+                                .copy(decreaseHealth = null),
+                    )
+            // When
+            val result = runCatching { Effect.create(effectDto) }
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+        }
+
+        @Test
+        fun `should fail when the increase health outcome is missing its details`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .increaseHealthEffect()
+                    .toDto()
+                    .copy(
+                        outcome =
+                            EffectMother
+                                .increaseHealthEffect()
+                                .toDto()
+                                .outcome
+                                .copy(increaseHealth = null),
+                    )
+            // When
+            val result = runCatching { Effect.create(effectDto) }
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+        }
+
+        @Test
+        fun `should fail when the apply effect on nearby allies outcome is missing its details`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .applyEffectOnNearbyAlliesEffect()
+                    .toDto()
+                    .copy(
+                        outcome =
+                            EffectMother
+                                .applyEffectOnNearbyAlliesEffect()
+                                .toDto()
+                                .outcome
+                                .copy(applyEffectOnNearbyAllies = null),
+                    )
+            // When
+            val result = runCatching { Effect.create(effectDto) }
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+        }
+
+        @Test
+        fun `should fail when the deploy battle unit outcome is missing its details`() {
+            // Given
+            val effectDto =
+                EffectMother
+                    .deployBattleUnitEffect()
+                    .toDto()
+                    .copy(
+                        outcome =
+                            EffectMother
+                                .deployBattleUnitEffect()
+                                .toDto()
+                                .outcome
+                                .copy(deployBattleUnit = null),
+                    )
+            // When
+            val result = runCatching { Effect.create(effectDto) }
+            // Then
+            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+        }
     }
 
     @Nested
@@ -158,6 +428,38 @@ class EffectTest {
             // Then
             assertThat(result.outcome.type).isEqualTo(DEPLOY_BATTLE_UNIT)
             assertThat(result.outcome.deployBattleUnit!!.unitId).isEqualTo("summoned-rat")
+        }
+
+        @Test
+        fun `should expose the destination when the effect application targets a tile`() {
+            // Given
+            val destination = Effect.Dto.EffectTargetDto.Tile(row = 2, column = 3)
+            // When
+            val effectApplication =
+                Effect.Dto.EffectApplicationDto(
+                    source = "battle-unit-1",
+                    target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-2"),
+                    effectId = "effect-1",
+                    destination = destination,
+                )
+            // Then
+            assertThat(effectApplication.destination).isEqualTo(destination)
+        }
+
+        @Test
+        fun `should expose the before applying effect details when the application type is before applying effect`() {
+            // Given
+            val beforeApplyingEffect = BeforeApplyingEffectDto(duration = 3)
+            // When
+            val application =
+                ApplicationDto(
+                    type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                    onTurnStarted = null,
+                    beforeApplyingEffect = beforeApplyingEffect,
+                )
+            // Then
+            assertThat(application.beforeApplyingEffect).isEqualTo(beforeApplyingEffect)
+            assertThat(application.onTurnStarted).isNull()
         }
     }
 
