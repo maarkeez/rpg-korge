@@ -79,6 +79,29 @@ class WhereCanCastTest {
     }
 
     @Test
+    fun `should find enemy in the northern tile when the ability targets adjacent enemy`() {
+        // Given
+        val player = player(id = "player-1")
+        val enemyPlayer = player(id = "player-2")
+        val battleUnit = battleUnit(player = player.toDto())
+        val enemyBattleUnit = battleUnit(player = enemyPlayer.toDto())
+        battleUnitRepository.create(battleUnit)
+        battleUnitRepository.create(enemyBattleUnit)
+        val battleUnitId = battleUnit.toDto().id
+        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
+        whenever(searchAbilityById("ability-1")).thenReturn(
+            ability(targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY).toDto(),
+        )
+        whenever(searchOccupant(0, 1)).thenReturn(enemyBattleUnit.toDto().id)
+        whenever(searchPosition(enemyBattleUnit.toDto().id)).thenReturn(PositionDto(0, 1))
+        // When
+        val result = whereCanCast(battleUnitId, "ability-1")
+        // Then
+        assertThat(result)
+            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 1))))
+    }
+
+    @Test
     fun `should return a single cast group with all adjacent enemy positions when the ability targets all adjacent enemies`() {
         // Given
         val player = player(id = "player-1")
