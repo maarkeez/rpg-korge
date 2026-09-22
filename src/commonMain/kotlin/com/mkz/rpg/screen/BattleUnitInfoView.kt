@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.effect.adapters.presentation.EffectView
 import com.mkz.rpg.unit.domain.Unit
 import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiHorizontalStack
@@ -15,6 +16,7 @@ class BattleUnitInfoView : Container() {
     private lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
     private lateinit var abilityButtons: Array<AbilityButtonView>
+    private lateinit var effectViews: Array<EffectView>
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
     private lateinit var unitPortraitView: UnitPortraitView
@@ -22,6 +24,7 @@ class BattleUnitInfoView : Container() {
     suspend fun loadAssets() {
         unitPortraitView.loadAssets()
         abilityButtons.forEach { abilityButton -> abilityButton.loadAssets() }
+        effectViews.forEach { effectView -> effectView.loadAssets() }
     }
 
     private val battleUnitInfoLayout =
@@ -43,6 +46,25 @@ class BattleUnitInfoView : Container() {
                     uiSpacing(Size(0, 4))
                     manaBarView = ManaBarView(Size(281.5, 16))
                     addChild(manaBarView)
+
+                    uiSpacing(Size(0, 4))
+                    uiHorizontalStack(padding = 2.0) {
+                        val effectViewSize = Size(width = 16, height = 16)
+                        effectViews =
+                            arrayOf(
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                                EffectView(effectViewSize),
+                            )
+                        effectViews.forEach(::addChild)
+                    }
                 }
             }
             uiHorizontalStack(padding = 2.0) {
@@ -98,6 +120,14 @@ class BattleUnitInfoView : Container() {
             val canUseAbility = canCast && !isInCooldown
             abilityButton.display(abilityId = abilityId, canCast = canUseAbility)
         }
+        // Effects
+        // TODO: Display more than 10
+        effectViews.forEach { effectView -> effectView.hide() }
+        val effectIds = (battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects).take(10)
+        effectIds.forEachIndexed { index, effectId ->
+            effectViews[index].displayEffect(effectId)
+        }
+
         visible = true
     }
 
