@@ -13,15 +13,19 @@ class AttackPreviewView : Container() {
     private lateinit var casterUnitPortraitView: UnitPortraitView
     private lateinit var casterHealthBarView: HealthBarView
     private lateinit var casterManaBarView: ManaBarPreviewView
+    private lateinit var casterEffectsView: EffectsView
 
     private lateinit var receiverUnitNameView: UnitNameView
     private lateinit var receiverUnitPortraitView: UnitPortraitView
     private lateinit var receiverHealthBarView: HealthBarPreviewView
     private lateinit var receiverManaBarView: ManaBarView
+    private lateinit var receiverEffectsView: EffectsView
 
     suspend fun loadAssets() {
         casterUnitPortraitView.loadAssets()
         receiverUnitPortraitView.loadAssets()
+        casterEffectsView.loadAssets()
+        receiverEffectsView.loadAssets()
     }
 
     private val layout =
@@ -42,6 +46,10 @@ class AttackPreviewView : Container() {
                     uiSpacing(Size(0, 4))
                     casterManaBarView = ManaBarPreviewView(Size(281.5, 16))
                     addChild(casterManaBarView)
+
+                    uiSpacing(Size(0, 4))
+                    casterEffectsView = EffectsView()
+                    addChild(casterEffectsView)
                 }
             }
             uiSpacing(Size(0, 10))
@@ -58,6 +66,10 @@ class AttackPreviewView : Container() {
                     uiSpacing(Size(0, 4))
                     receiverManaBarView = ManaBarView(Size(281.5, 16))
                     addChild(receiverManaBarView)
+
+                    uiSpacing(Size(0, 4))
+                    receiverEffectsView = EffectsView()
+                    addChild(receiverEffectsView)
                 }
                 uiSpacing(Size(10, 0))
                 receiverUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
@@ -89,12 +101,14 @@ class AttackPreviewView : Container() {
             remainingAfter = casterBattleUnit.remainingManaPoints - manaCost,
             maximum = casterUnit.manaPoints,
         )
+        casterEffectsView.display(casterBattleUnit.ongoingEffects.onTurnStarted + casterBattleUnit.ongoingEffects.onDefeatedEffects)
 
         if (receiverBattleUnit == null || receiverUnit == null || damage == null) {
             receiverUnitPortraitView.hide()
             receiverUnitNameView.hide()
             receiverHealthBarView.hide()
             receiverManaBarView.hide()
+            receiverEffectsView.hide()
         } else {
             receiverUnitPortraitView.display(receiverBattleUnit.unitId)
             receiverUnitNameView.display(unitName = receiverUnit.name)
@@ -107,6 +121,7 @@ class AttackPreviewView : Container() {
                 remaining = receiverBattleUnit.remainingManaPoints,
                 maximum = receiverUnit.manaPoints,
             )
+            receiverEffectsView.display(receiverBattleUnit.ongoingEffects.onTurnStarted + receiverBattleUnit.ongoingEffects.onDefeatedEffects)
         }
         visible = true
     }

@@ -223,9 +223,9 @@ class BattlefieldPresenter(
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
-
         val targetBattleUnit = battleUnitApi.searchBattleUnitById(event.enemyBattleUnitId)!!
         val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
+        // TODO: Preview effect applications and display them instead of only calculating damage
         val damage = abilityApi.calculateImmediateDamage(ability.id)
         attackPreviewView.display(
             casterBattleUnit = casterBattleUnit,
