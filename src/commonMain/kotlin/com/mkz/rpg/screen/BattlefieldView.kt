@@ -5,6 +5,9 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.Colors
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
+import korlibs.korge.animate.Animator
+import korlibs.korge.animate.animator
+import korlibs.korge.animate.moveTo
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onMouseDrag
 import korlibs.korge.ui.UIButton
@@ -18,6 +21,9 @@ import korlibs.korge.view.image
 import korlibs.math.clamp
 import korlibs.math.geom.Size
 import korlibs.math.geom.Spacing
+import korlibs.math.interpolation.EASE_OUT_QUAD
+import korlibs.math.interpolation.Easing
+import korlibs.time.milliseconds
 
 class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
     companion object {
@@ -40,6 +46,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     private lateinit var tileSelection2BitMap: Bitmap
     private lateinit var tileSelection3BitMap: Bitmap
     private lateinit var tileSelectionBitMap: Bitmap
+    private lateinit var battlefieldAnimator: Animator
 
     private val viewport =
         clipContainer(
@@ -80,6 +87,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
                 cols = 0,
                 rows = 0,
             )
+        battlefieldAnimator = battlefieldGrid.animator(parallel = true)
         viewport.onMouseDrag { event ->
             val dx = event.dx
             val dy = event.dy
@@ -89,8 +97,15 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
 
             val newX = (battlefieldGrid.x + dx).clamp(minX, 0.0)
             val newY = (battlefieldGrid.y + dy).clamp(minY, 0.0)
-            battlefieldGrid.x = newX
-            battlefieldGrid.y = newY
+            battlefieldAnimator
+                .cancel()
+                .moveTo(
+                    view = battlefieldGrid,
+                    x = { newX },
+                    y = { newY },
+                    time = 300.milliseconds,
+                    easing = Easing.EASE_OUT_QUAD,
+                )
         }
         battlefieldGrid.rows = battlefield.rows
         battlefieldGrid.cols = battlefield.columns
