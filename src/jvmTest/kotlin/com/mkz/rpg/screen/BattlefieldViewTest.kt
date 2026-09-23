@@ -23,7 +23,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                val battlefieldGrid = battlefieldView.children[0] as Container
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
                 assertThat(battlefieldGrid.children.size).isEqualTo(6)
             }
 
@@ -37,7 +37,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.TERRAIN)).isNotNull
             }
     }
@@ -54,7 +54,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayKnightBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
             }
     }
@@ -71,7 +71,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayRatBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
             }
     }
@@ -88,7 +88,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayPotentialMovement(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNotNull
             }
     }
@@ -105,7 +105,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNotNull
             }
 
@@ -120,7 +120,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 val selectionCount = tileButton.children.count { child -> child.name == BattlefieldView.SELECTION }
                 assertThat(selectionCount).isEqualTo(1)
             }
@@ -138,7 +138,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayTileSelection(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNotNull
             }
 
@@ -153,7 +153,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayTileSelection(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 val selectionCount = tileButton.children.count { child -> child.name == BattlefieldView.SELECTION }
                 assertThat(selectionCount).isEqualTo(1)
             }
@@ -173,7 +173,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.resetTiles()
                 // Then
-                val battlefieldGrid = battlefieldView.children[0] as Container
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
                 val selections =
                     battlefieldGrid.children.count { tile ->
                         (tile as UIButton).findViewByName(BattlefieldView.SELECTION) != null
@@ -195,7 +195,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.removeBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNull()
             }
     }
@@ -212,11 +212,17 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.setDelegate(delegate)
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 addChild(battlefieldView)
-                val tileButton = battlefieldView.children[0].findViewByName("row-0-column-0") as UIButton
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 // When
                 tileButton.simulateClick()
                 // Then
                 verify(delegate).tileSelected(row = 0, column = 0)
             }
+    }
+
+    private fun getBattlefieldGrid(battlefieldView: BattlefieldView): Container {
+        val viewport = battlefieldView.children[0] as Container
+        val battlefieldGrid = viewport.children[0] as Container
+        return battlefieldGrid
     }
 }

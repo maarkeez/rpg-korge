@@ -53,16 +53,18 @@ class SetupBattle(
         }
         val tiles =
             listOf(
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
             )
-        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(8, 8, tiles))
+        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(10, 10, tiles))
 
         val venomDamage =
             Effect.Dto(
