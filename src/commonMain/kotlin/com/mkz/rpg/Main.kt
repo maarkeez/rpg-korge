@@ -12,9 +12,3 @@ suspend fun main() =
 
         sceneContainer.changeTo { BattleScene() }
     }
-
-// Korge(windowSize = Size(width = 2560, height = 1440), backgroundColor = LevelDesignColors.BLACK) {
-//    val sceneContainer = sceneContainer()
-//
-//    sceneContainer.changeTo { LevelDesignScene() }
-// }
