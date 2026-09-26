@@ -10,5 +10,9 @@ class InMemoryTerrainRepository : TerrainRepository {
         terrains[terrain.toDto().id] = terrain
     }
 
+    override fun update(terrain: Terrain) {
+        terrains[terrain.toDto().id] = terrain
+    }
+
     override fun searchById(id: String): Terrain? = terrains[id]
 }

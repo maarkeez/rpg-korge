@@ -10,4 +10,6 @@ sealed interface TerrainEvent : DomainEvent {
     data class RequestTerrainCreation(
         val terrainDto: Terrain.Dto,
     ) : TerrainEvent
+
+    object RequestAllowedTransitionsInitialization : TerrainEvent
 }

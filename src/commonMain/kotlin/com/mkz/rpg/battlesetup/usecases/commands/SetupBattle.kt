@@ -48,9 +48,10 @@ class SetupBattle(
 
         val sandTerrain = Terrain.Dto(id = "sand", canBeOccupied = true)
         val voidTerrain = Terrain.Dto(id = "void", canBeOccupied = false)
-        listOf(sandTerrain).forEach { terrain ->
+        listOf(sandTerrain, voidTerrain).forEach { terrain ->
             eventBus.publish(TerrainEvent.RequestTerrainCreation(terrain))
         }
+        eventBus.publish(TerrainEvent.RequestAllowedTransitionsInitialization)
         val tiles =
             listOf(
                 listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
