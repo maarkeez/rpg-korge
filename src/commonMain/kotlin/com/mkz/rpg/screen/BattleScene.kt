@@ -45,6 +45,7 @@ class BattleScene : Scene() {
 
         // Backend APIs
         val terrainApi = TerrainApi(eventBus)
+        terrainApi.init()
         val unitApi = UnitApi(eventBus)
         val playerApi = PlayerApi(eventBus)
         val battlefieldApi = BattlefieldApi(terrainApi, eventBus)

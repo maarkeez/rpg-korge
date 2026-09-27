@@ -3,19 +3,20 @@ package com.mkz.rpg.terrain.adapters.resources
 import com.mkz.rpg.terrain.usecases.services.TerrainTransitionsService
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
-import kotlinx.coroutines.runBlocking
 
 class ResourceTerrainTransitionsService(
     private val transitionsRoot: VfsFile = resourcesVfs["terrain/transitions"],
 ) : TerrainTransitionsService {
+    private var transitionFileNames: List<String> = emptyList()
+
+    suspend fun initResources() {
+        transitionFileNames =
+            if (transitionsRoot.exists()) transitionsRoot.listNames() else emptyList()
+    }
+
     override fun searchTransitions(): Map<String, Set<String>> {
-        val fileNames =
-            runBlocking {
-                if (!transitionsRoot.exists()) return@runBlocking emptyList()
-                transitionsRoot.listNames()
-            }
         val transitions = mutableMapOf<String, MutableSet<String>>()
-        fileNames
+        transitionFileNames
             .filter { it.endsWith(".png") }
             .mapNotNull { fileName -> parseTransition(fileName) }
             .forEach { (terrainId, transitionToTerrainId) ->

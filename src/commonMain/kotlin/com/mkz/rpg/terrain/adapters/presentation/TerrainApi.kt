@@ -10,7 +10,6 @@ import com.mkz.rpg.terrain.usecases.commands.InitialiseAllowedTransitions
 import com.mkz.rpg.terrain.usecases.commands.RequestTerrainCreation
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
-import com.mkz.rpg.terrain.usecases.services.TerrainTransitionsService
 
 class TerrainApi(
     eventBus: EventBus,
@@ -19,7 +18,7 @@ class TerrainApi(
     private val terrainRepository: TerrainRepository = InMemoryTerrainRepository()
 
     // Services
-    private val terrainTransitionsService: TerrainTransitionsService = ResourceTerrainTransitionsService()
+    private val terrainTransitionsService = ResourceTerrainTransitionsService()
 
     // Commands
     val requestTerrainCreation = RequestTerrainCreation(terrainRepository, eventBus)
@@ -33,4 +32,8 @@ class TerrainApi(
     private val onRequestTerrainCreation = OnRequestTerrainCreation(requestTerrainCreation, eventBus)
     private val onRequestAllowedTransitionsInitialization =
         OnRequestAllowedTransitionsInitialization(initialiseAllowedTransitions, eventBus)
+
+    suspend fun init() {
+        terrainTransitionsService.initResources()
+    }
 }

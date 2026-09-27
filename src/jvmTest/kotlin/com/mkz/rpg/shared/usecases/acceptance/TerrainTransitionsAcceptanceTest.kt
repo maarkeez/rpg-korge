@@ -3,13 +3,20 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class TerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
+
+    @BeforeEach
+    fun setup() {
+        runBlocking { terrainApi.init() }
+    }
 
     @Test
     fun `should allow the sand to void transition when the battle is set up`() {
