@@ -24,7 +24,7 @@ class BattlefieldApi(
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
     // Commands
-    val initializeBattlefield = InitializeBattlefield(battlefieldRepository, eventBus)
+    val initializeBattlefield = InitializeBattlefield(battlefieldRepository, terrainApi.isTransitionAllowed, eventBus)
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
     val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus)
 

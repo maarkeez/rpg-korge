@@ -1,24 +1,33 @@
 package com.mkz.rpg.battlefield.usecases.commands
 
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.domain.BattlefieldError
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
+import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
+    private val isTransitionAllowed: IsTransitionAllowed = mock()
     private val eventBus = FakeEventBus()
     private val initializeBattlefield =
         InitializeBattlefield(
             battlefieldRepository = battlefieldRepository,
+            isTransitionAllowed = isTransitionAllowed,
             eventBus = eventBus,
         )
 
     @Test
-    fun `should create battlefield when no battlefield exists`() {
+    fun `should create battlefield when no battlefield exists and tile terrain transitions are allowed`() {
         // Given
         val rows = 3
         val columns = 4
@@ -28,6 +37,7 @@ class InitializeBattlefieldTest {
                     terrainId()
                 }
             }
+        whenever(isTransitionAllowed(any(), any())).thenReturn(true)
         // When
         initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
         // Then
@@ -46,7 +56,7 @@ class InitializeBattlefieldTest {
     fun `should not create battlefield when a battlefield already exists`() {
         // Given
         val existingBattlefield =
-            com.mkz.rpg.battlefield.domain.BattlefieldMother
+            BattlefieldMother
                 .battlefield()
         battlefieldRepository.create(existingBattlefield)
         // When
@@ -54,6 +64,26 @@ class InitializeBattlefieldTest {
         // Then
         assertThat(battlefieldRepository.search()?.toDto())
             .isEqualTo(existingBattlefield.toDto())
+        assertThat(eventBus.publishedEvents).isEmpty()
+    }
+
+    @Test
+    fun `should throw BattlefieldError when a tile terrain transition is not allowed`() {
+        // Given
+        val rows = 1
+        val columns = 2
+        val tiles =
+            listOf(
+                listOf("sand", "void"),
+            )
+        whenever(isTransitionAllowed("sand", "void")).thenReturn(false)
+        // When
+        val error = catchThrowable { initializeBattlefield(rows = rows, columns = columns, tiles = tiles) }
+        // Then
+        val tileTerrainTransitionNotAllowed = error as BattlefieldError.TileTerrainTransitionNotAllowed
+        assertThat(tileTerrainTransitionNotAllowed.terrainId).isEqualTo("sand")
+        assertThat(tileTerrainTransitionNotAllowed.transitionToTerrainId).isEqualTo("void")
+        assertThat(battlefieldRepository.search()).isNull()
         assertThat(eventBus.publishedEvents).isEmpty()
     }
 }

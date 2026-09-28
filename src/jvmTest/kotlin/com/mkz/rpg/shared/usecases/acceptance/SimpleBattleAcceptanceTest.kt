@@ -52,7 +52,7 @@ class SimpleBattleAcceptanceTest {
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
-        terrainApi.requestTerrainCreation(Terrain.Dto(id = "sand", canBeOccupied = true))
+        terrainApi.requestTerrainCreation(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand")))
         battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "sand" } })
 
         val lowPhysicalDamage =
