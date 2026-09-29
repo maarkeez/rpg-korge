@@ -8,6 +8,12 @@ object BattlefieldMother {
         columns: Int = 3,
     ): Battlefield = Battlefield.create(rows, columns, tileMatrix(rows, columns)).pullEvents().second
 
+    fun battlefield(
+        rows: Int,
+        columns: Int,
+        tiles: List<List<String>>,
+    ): Battlefield = Battlefield.create(rows, columns, tiles).pullEvents().second
+
     fun terrainId() = listOf("sand", "void").random()
 
     private fun tileMatrix(

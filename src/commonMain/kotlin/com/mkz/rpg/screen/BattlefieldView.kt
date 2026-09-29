@@ -1,7 +1,10 @@
 package com.mkz.rpg.screen
 
 import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
 import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.Colors
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
@@ -32,13 +35,23 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         const val SELECTION = "SELECTION"
 
         const val TILE_SIZE = 48
+        const val TILE_PIXEL_SIZE = 16
         const val VISIBLE_TILES = 8
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
+
+        private const val VOID_TERRAIN_ID = "void"
+        private const val WANG_INDEX_NO_VOID_EDGES = 0
+        private const val WANG_INDEX_ALL_VOID_EDGES = 15
+        private const val NORTH_VOID_WEIGHT = 1
+        private const val EAST_VOID_WEIGHT = 2
+        private const val SOUTH_VOID_WEIGHT = 4
+        private const val WEST_VOID_WEIGHT = 8
     }
 
     private var delegate: Delegate? = null
     private lateinit var terrainBitMaps: Map<String, Bitmap>
+    private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
     private lateinit var knightBitmap: Bitmap
     private lateinit var ratBitmap: Bitmap
     private lateinit var beeBitmap: Bitmap
@@ -67,6 +80,24 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
             buildMap {
                 put("sand", resourcesVfs["terrain/sand.png"].readBitmap())
                 put("void", resourcesVfs["terrain/void.png"].readBitmap())
+            }
+        transitionBitMaps =
+            buildMap {
+                val transitionsRoot = resourcesVfs["terrain/transitions"]
+                if (transitionsRoot.exists()) {
+                    transitionsRoot
+                        .listNames()
+                        .filter { it.endsWith(".png") }
+                        .forEach { fileName ->
+                            val transitionBitmap = transitionsRoot[fileName].readBitmap()
+                            put(
+                                fileName.removeSuffix(".png"),
+                                List(transitionBitmap.width / TILE_PIXEL_SIZE) { index ->
+                                    transitionBitmap.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
+                                },
+                            )
+                        }
+                }
             }
         knightBitmap = resourcesVfs["unit/knight.png"].readBitmap()
         ratBitmap = resourcesVfs["unit/rat.png"].readBitmap()
@@ -117,9 +148,9 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
                     tileButton.background.borderColor = Colors.TRANSPARENT
                     tileButton.background.bgColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
-                    val terrainId = battlefield.tiles[Battlefield.Dto.PositionDto(row, column)]!!.terrainId
-                    val terrainBitMap = terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
-                    tileButton.addImage(terrainBitMap, TERRAIN)
+                    val terrainId = battlefield.tiles[PositionDto(row, column)]!!.terrainId
+                    val wangIndex = terrainWangIndex(row, column, battlefield.tiles)
+                    tileButton.addImage(terrainTileBitmap(terrainId, wangIndex), TERRAIN)
                     tileButton.onClick {
                         delegate?.tileSelected(row, column)
                     }
@@ -127,6 +158,37 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
             }
         }
     }
+
+    fun terrainWangIndex(
+        row: Int,
+        column: Int,
+        tiles: Map<PositionDto, TileDto>,
+    ): Int {
+        var wangIndex = WANG_INDEX_NO_VOID_EDGES
+        if (isVoidTile(tiles, row - 1, column)) wangIndex += NORTH_VOID_WEIGHT
+        if (isVoidTile(tiles, row, column + 1)) wangIndex += EAST_VOID_WEIGHT
+        if (isVoidTile(tiles, row + 1, column)) wangIndex += SOUTH_VOID_WEIGHT
+        if (isVoidTile(tiles, row, column - 1)) wangIndex += WEST_VOID_WEIGHT
+        return wangIndex
+    }
+
+    fun terrainTileBitmap(
+        terrainId: String,
+        wangIndex: Int,
+    ): Bitmap {
+        val terrainBitMap = terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+        if (wangIndex == WANG_INDEX_NO_VOID_EDGES) return terrainBitMap
+        if (wangIndex == WANG_INDEX_ALL_VOID_EDGES) return terrainBitMaps.getValue(VOID_TERRAIN_ID)
+        val transitionBitMap =
+            listOf("${terrainId}_to_$VOID_TERRAIN_ID", "${VOID_TERRAIN_ID}_to_$terrainId").firstNotNullOfOrNull { transitionBitMaps[it] }
+        return transitionBitMap?.getOrNull(wangIndex - 1) ?: terrainBitMap
+    }
+
+    private fun isVoidTile(
+        tiles: Map<PositionDto, TileDto>,
+        row: Int,
+        column: Int,
+    ): Boolean = tiles[PositionDto(row, column)]?.terrainId == VOID_TERRAIN_ID
 
     private fun tileName(
         row: Int,
@@ -222,5 +284,20 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
             smoothing = false
             centerOn(button)
         }
+    }
+
+    private fun Bitmap.crop(
+        x: Int,
+        y: Int,
+        width: Int,
+        height: Int,
+    ): Bitmap {
+        val croppedBitmap = Bitmap32(width, height, premultiplied = premultiplied)
+        for (cropY in 0 until height) {
+            for (cropX in 0 until width) {
+                croppedBitmap.setRgba(cropX, cropY, getRgba(x + cropX, y + cropY))
+            }
+        }
+        return croppedBitmap
     }
 }
