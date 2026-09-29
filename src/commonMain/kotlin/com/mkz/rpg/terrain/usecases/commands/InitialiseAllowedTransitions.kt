@@ -20,6 +20,9 @@ class InitialiseAllowedTransitions(
                 updateAllowedTransition(transitionToTerrainId, terrainId)
             }
         }
+        (transitions.keys + transitions.values.flatten().distinct()).forEach { terrainId ->
+            updateAllowedTransition(terrainId, terrainId)
+        }
     }
 
     private fun updateAllowedTransition(

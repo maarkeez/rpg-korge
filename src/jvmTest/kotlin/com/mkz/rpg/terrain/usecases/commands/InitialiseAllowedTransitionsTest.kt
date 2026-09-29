@@ -43,9 +43,9 @@ class InitialiseAllowedTransitionsTest {
         // When
         initialiseAllowedTransitions()
         // Then
-        assertThat(terrainRepository.searchById("sand")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("void", "forest")
-        assertThat(terrainRepository.searchById("void")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("sand", "forest")
-        assertThat(terrainRepository.searchById("forest")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void")
+        assertThat(terrainRepository.searchById("sand")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void", "forest")
+        assertThat(terrainRepository.searchById("void")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("void", "sand", "forest")
+        assertThat(terrainRepository.searchById("forest")?.toDto()?.allowedTransitionTo).containsExactlyInAnyOrder("forest", "sand", "void")
     }
 
     @Test
