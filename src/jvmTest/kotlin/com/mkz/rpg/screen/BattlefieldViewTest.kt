@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen
 
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.matchContents
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
@@ -172,13 +173,13 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Given
                 val battlefieldView = BattlefieldView()
                 battlefieldView.loadAssets()
-                val terrainBitmap = resourcesVfs["terrain/sand.png"].readBitmap()
+                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", wangIndex = 9)
                 // Then
                 assertThat(tileBitmap.width).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
                 assertThat(tileBitmap.height).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(tileBitmap.matchContents(terrainBitmap)).isTrue
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, wangIndex = 9)).isTrue
             }
     }
 
@@ -364,5 +365,20 @@ class BattlefieldViewTest : ViewsForTesting() {
         val viewport = battlefieldView.children[0] as Container
         val battlefieldGrid = viewport.children[0] as Container
         return battlefieldGrid
+    }
+
+    private fun matchesWangTile(
+        tile: Bitmap,
+        transitionStrip: Bitmap,
+        wangIndex: Int,
+    ): Boolean {
+        val tileSize = BattlefieldView.TILE_PIXEL_SIZE
+        val stripOffset = (wangIndex - 1) * tileSize
+        for (y in 0 until tileSize) {
+            for (x in 0 until tileSize) {
+                if (tile.getRgba(x, y) != transitionStrip.getRgba(stripOffset + x, y)) return false
+            }
+        }
+        return true
     }
 }
