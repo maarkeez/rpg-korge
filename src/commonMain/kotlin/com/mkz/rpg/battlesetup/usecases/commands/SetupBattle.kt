@@ -32,7 +32,6 @@ import com.mkz.rpg.effect.domain.EffectEvent.RequestEffectCreation
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.domain.UnitEvent.RequestUnitCreation
@@ -46,24 +45,23 @@ class SetupBattle(
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerOneId, "Human", Player.Dto.PlayerTypeDto.HUMAN))
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerTwoId, "CPU", Player.Dto.PlayerTypeDto.CPU))
 
-        val sandTerrain = Terrain.Dto(id = "sand", canBeOccupied = true)
-        val voidTerrain = Terrain.Dto(id = "void", canBeOccupied = false)
-        listOf(sandTerrain, voidTerrain).forEach { terrain ->
-            eventBus.publish(TerrainEvent.RequestTerrainCreation(terrain))
-        }
-        eventBus.publish(TerrainEvent.RequestAllowedTransitionsInitialization)
+        eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
+        val sandTerrainId = "sand"
+        val voidTerrainId = "void"
+        val sandRow = List(10) { sandTerrainId }
+        val rowWithVoid = listOf(sandTerrainId, sandTerrainId) + List(4) { voidTerrainId } + List(6) { sandTerrainId }
         val tiles =
             listOf(
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, voidTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
-                listOf(sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id, sandTerrain.id),
+                sandRow,
+                sandRow,
+                sandRow,
+                rowWithVoid,
+                rowWithVoid,
+                sandRow,
+                sandRow,
+                sandRow,
+                sandRow,
+                sandRow,
             )
         eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(10, 10, tiles))
 

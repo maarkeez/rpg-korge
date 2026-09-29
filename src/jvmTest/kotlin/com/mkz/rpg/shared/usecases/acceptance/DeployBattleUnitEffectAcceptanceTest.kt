@@ -17,9 +17,9 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
-import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,7 +49,8 @@ class DeployBattleUnitEffectAcceptanceTest {
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
-        terrainApi.requestTerrainCreation(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand")))
+        runBlocking { terrainApi.init() }
+        terrainApi.initialiseTerrains()
         battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "sand" } })
 
         val deployEffect = EffectMother.deployBattleUnitEffect(id = deployEffectId, unitId = summonUnitId)

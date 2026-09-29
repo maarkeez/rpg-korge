@@ -73,40 +73,6 @@ class TerrainTest {
     }
 
     @Nested
-    inner class AddAllowedTransition {
-        @Test
-        fun `should return a terrain allowing the transition when a transition is added`() {
-            // Given
-            val terrain = TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("forest"))
-            // When
-            val updatedTerrain = terrain.addAllowedTransition("void")
-            // Then
-            assertThat(updatedTerrain.canTransitionTo("void")).isTrue()
-            assertThat(updatedTerrain.canTransitionTo("forest")).isTrue()
-        }
-
-        @Test
-        fun `should not modify the original terrain when a transition is added`() {
-            // Given
-            val terrain = TerrainMother.occupiableTerrain(id = "sand")
-            // When
-            terrain.addAllowedTransition("void")
-            // Then
-            assertThat(terrain.canTransitionTo("void")).isFalse()
-        }
-
-        @Test
-        fun `should not duplicate the transition when the same transition is added twice`() {
-            // Given
-            val terrain = TerrainMother.occupiableTerrain(id = "sand")
-            // When
-            val updatedTerrain = terrain.addAllowedTransition("void").addAllowedTransition("void")
-            // Then
-            assertThat(updatedTerrain.toDto().allowedTransitionTo).containsExactly("void")
-        }
-    }
-
-    @Nested
     inner class ToDto {
         @Test
         fun `should expose the terrain data when converted to dto`() {

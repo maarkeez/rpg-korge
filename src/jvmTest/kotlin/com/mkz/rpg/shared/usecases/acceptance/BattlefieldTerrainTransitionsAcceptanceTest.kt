@@ -3,7 +3,6 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
-import com.mkz.rpg.terrain.domain.Terrain
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -17,9 +16,7 @@ class BattlefieldTerrainTransitionsAcceptanceTest {
     @BeforeEach
     fun setup() {
         runBlocking { terrainApi.init() }
-        terrainApi.requestTerrainCreation(Terrain.Dto(id = "sand", canBeOccupied = true))
-        terrainApi.requestTerrainCreation(Terrain.Dto(id = "void", canBeOccupied = false))
-        terrainApi.initialiseAllowedTransitions()
+        terrainApi.initialiseTerrains()
     }
 
     @Test

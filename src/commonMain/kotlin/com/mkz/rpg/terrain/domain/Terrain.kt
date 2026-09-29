@@ -22,11 +22,6 @@ data class Terrain private constructor(
 
     fun canTransitionTo(terrainId: String): Boolean = allowedTransitionTo.value.contains(terrainId)
 
-    fun addAllowedTransition(terrainId: String): Terrain =
-        copy(
-            allowedTransitionTo = AllowedTransitionTo(allowedTransitionTo.value + terrainId),
-        )
-
     fun toDto() =
         Dto(
             id = id.value,
