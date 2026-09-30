@@ -24,14 +24,20 @@ class BattlefieldApi(
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
     // Commands
-    val initializeBattlefield = InitializeBattlefield(battlefieldRepository, terrainApi.isTransitionAllowed, eventBus)
+    val initializeBattlefield =
+        InitializeBattlefield(
+            battlefieldRepository = battlefieldRepository,
+            isTransitionAllowed = terrainApi.isTransitionAllowed,
+            searchTerrainById = terrainApi.searchTerrainById,
+            eventBus = eventBus,
+        )
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
     val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus)
 
     // Queries
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
     val searchOccupant = SearchOccupant(battlefieldRepository)
-    val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(terrainApi.searchTerrainById, battlefieldRepository)
+    val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
 

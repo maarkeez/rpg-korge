@@ -6,23 +6,29 @@ object BattlefieldMother {
     fun battlefield(
         rows: Int = 3,
         columns: Int = 3,
-    ): Battlefield = Battlefield.create(rows, columns, tileMatrix(rows, columns)).pullEvents().second
+    ): Battlefield = battlefield(rows, columns, List(rows) { List(columns) { "sand" } })
 
     fun battlefield(
         rows: Int,
         columns: Int,
         tiles: List<List<String>>,
-    ): Battlefield = Battlefield.create(rows, columns, tiles).pullEvents().second
+    ): Battlefield = Battlefield.create(rows, columns, tiles, terrainOccupancy(tiles)).pullEvents().second
 
     fun terrainId() = listOf("sand", "void").random()
-
-    private fun tileMatrix(
-        rows: Int,
-        columns: Int,
-    ): List<List<String>> = List(rows) { List(columns) { terrainId() } }
 
     fun position(
         row: Int = Random.nextInt(0, 100),
         column: Int = Random.nextInt(0, 100),
     ) = Battlefield.Dto.PositionDto(row = row, column = column)
+
+    fun terrainOccupancy(tiles: List<List<String>>): Map<String, Boolean> =
+        tiles
+            .flatten()
+            .distinct()
+            .associateWith { terrainId ->
+                when (terrainId) {
+                    "void" -> false
+                    else -> true
+                }
+            }
 }

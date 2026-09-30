@@ -14,7 +14,7 @@ class BattlefieldTest {
             val columns = 3
             val tiles = List(rows) { List(columns) { BattlefieldMother.terrainId() } }
             // When
-            val createdBattlefield = Battlefield.create(rows, columns, tiles)
+            val createdBattlefield = Battlefield.create(rows, columns, tiles, BattlefieldMother.terrainOccupancy(tiles))
             // Then
             val battlefieldDto = createdBattlefield.toDto()
             assertThat(battlefieldDto.rows).isEqualTo(rows)
@@ -27,7 +27,7 @@ class BattlefieldTest {
             // Given
             val tiles = List(3) { List(3) { BattlefieldMother.terrainId() } }
             // When
-            val createdBattlefield = Battlefield.create(3, 3, tiles)
+            val createdBattlefield = Battlefield.create(3, 3, tiles, BattlefieldMother.terrainOccupancy(tiles))
             // Then
             val (events, _) = createdBattlefield.pullEvents()
             assertThat(events).containsExactly(BattlefieldEvent.BattlefieldCreated)
@@ -148,6 +148,59 @@ class BattlefieldTest {
             val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
             // When
             val result = battlefield.canBeOccupied(row = 0, column = 0)
+            // Then
+            assertThat(result).isFalse
+        }
+
+        @Test
+        fun `should be true when the tile terrain can be occupied and has a single non occupiable adjacent terrain`() {
+            // Given
+            val battlefield =
+                BattlefieldMother.battlefield(
+                    rows = 2,
+                    columns = 2,
+                    tiles =
+                        listOf(
+                            listOf("void", "sand"),
+                            listOf("sand", "sand"),
+                        ),
+                )
+            // When
+            val result = battlefield.canBeOccupied(row = 1, column = 0)
+            // Then
+            assertThat(result).isTrue
+        }
+
+        @Test
+        fun `should be false when the tile terrain can not be occupied`() {
+            // Given
+            val battlefield =
+                BattlefieldMother.battlefield(
+                    rows = 1,
+                    columns = 1,
+                    tiles = listOf(listOf("void")),
+                )
+            // When
+            val result = battlefield.canBeOccupied(row = 0, column = 0)
+            // Then
+            assertThat(result).isFalse
+        }
+
+        @Test
+        fun `should be false when the tile terrain transition can not be occupied`() {
+            // Given
+            val battlefield =
+                BattlefieldMother.battlefield(
+                    rows = 2,
+                    columns = 2,
+                    tiles =
+                        listOf(
+                            listOf("void", "void"),
+                            listOf("sand", "void"),
+                        ),
+                )
+            // When
+            val result = battlefield.canBeOccupied(row = 1, column = 0)
             // Then
             assertThat(result).isFalse
         }

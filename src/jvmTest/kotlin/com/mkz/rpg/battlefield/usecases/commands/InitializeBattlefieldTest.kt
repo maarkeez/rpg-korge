@@ -7,7 +7,9 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.terrain.domain.TerrainMother
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
+import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
@@ -18,11 +20,13 @@ import org.mockito.kotlin.whenever
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val isTransitionAllowed: IsTransitionAllowed = mock()
+    private val searchTerrainById: SearchTerrainById = mock()
     private val eventBus = FakeEventBus()
     private val initializeBattlefield =
         InitializeBattlefield(
             battlefieldRepository = battlefieldRepository,
             isTransitionAllowed = isTransitionAllowed,
+            searchTerrainById = searchTerrainById,
             eventBus = eventBus,
         )
 
@@ -38,6 +42,7 @@ class InitializeBattlefieldTest {
                 }
             }
         whenever(isTransitionAllowed(any(), any())).thenReturn(true)
+        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
         // When
         initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
         // Then
@@ -85,5 +90,26 @@ class InitializeBattlefieldTest {
         assertThat(tileTerrainTransitionNotAllowed.transitionToTerrainId).isEqualTo("void")
         assertThat(battlefieldRepository.search()).isNull()
         assertThat(eventBus.publishedEvents).isEmpty()
+    }
+
+    @Test
+    fun `should create battlefield tiles that can not be occupied when the tile terrain can not be occupied`() {
+        // Given
+        val rows = 1
+        val columns = 2
+        val tiles =
+            listOf(
+                listOf("void", "sand"),
+            )
+        whenever(isTransitionAllowed(any(), any())).thenReturn(true)
+        whenever(searchTerrainById("void")).thenReturn(TerrainMother.nonOccupiableTerrain(id = "void").toDto())
+        whenever(searchTerrainById("sand")).thenReturn(TerrainMother.occupiableTerrain(id = "sand").toDto())
+        // When
+        initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
+        // Then
+        val storedBattlefield = battlefieldRepository.search()
+        assertThat(storedBattlefield).isNotNull
+        assertThat(storedBattlefield!!.canBeOccupied(row = 0, column = 0)).isFalse()
+        assertThat(storedBattlefield.canBeOccupied(row = 0, column = 1)).isTrue()
     }
 }

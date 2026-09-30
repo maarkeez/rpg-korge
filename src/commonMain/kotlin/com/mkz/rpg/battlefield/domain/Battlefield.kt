@@ -24,11 +24,12 @@ data class Battlefield private constructor(
             rows: Int,
             columns: Int,
             tiles: List<List<String>>,
+            terrainCanBeOccupied: Map<String, Boolean>,
         ): Battlefield =
             Battlefield(
                 rows = Rows(rows),
                 columns = Columns(columns),
-                tiles = Tiles.create(tiles),
+                tiles = Tiles.create(tiles, terrainCanBeOccupied),
                 events = setOf(BattlefieldCreated),
             )
     }
@@ -74,7 +75,7 @@ data class Battlefield private constructor(
     fun canBeOccupied(
         row: Int,
         column: Int,
-    ): Boolean = tiles.isVacant(row, column)
+    ): Boolean = tiles.isVacant(row, column) && tiles.isTerrainOccupiable(row, column)
 
     fun occupant(
         row: Int,
@@ -109,6 +110,14 @@ data class Battlefield private constructor(
         ): Boolean {
             val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
             return tile.isVacant()
+        }
+
+        fun isTerrainOccupiable(
+            row: Int,
+            column: Int,
+        ): Boolean {
+            val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
+            return tile.isTerrainOccupiable()
         }
 
         fun isDeployed(battlefieldUnitId: String) = tiles.values.any { tile -> tile.isOccupiedBy(battlefieldUnitId) }
@@ -164,16 +173,81 @@ data class Battlefield private constructor(
                 ?.toDto()
 
         companion object {
-            fun create(tiles: List<List<String>>): Tiles {
+            fun create(
+                tiles: List<List<String>>,
+                terrainCanBeOccupied: Map<String, Boolean>,
+            ): Tiles {
                 val tiles =
                     tiles
                         .flatMapIndexed { rowIndex, row ->
                             row.mapIndexed { columnIndex, terrainId ->
-                                Position(rowIndex, columnIndex) to Tile.create(rowIndex, columnIndex, terrainId)
+                                val position = Position(rowIndex, columnIndex)
+                                position to
+                                    Tile.create(
+                                        position = position,
+                                        terrainId = terrainId,
+                                        terrainCanBeOccupied =
+                                            isTerrainOccupiable(
+                                                tiles = tiles,
+                                                terrainCanBeOccupied = terrainCanBeOccupied,
+                                                row = rowIndex,
+                                                column = columnIndex,
+                                                terrainId = terrainId,
+                                            ),
+                                    )
                             }
                         }.toMap()
                 return Tiles(tiles)
             }
+
+            private fun isTerrainOccupiable(
+                tiles: List<List<String>>,
+                terrainCanBeOccupied: Map<String, Boolean>,
+                row: Int,
+                column: Int,
+                terrainId: String,
+            ): Boolean {
+                if (terrainCanBeOccupied[terrainId] != true) return false
+                return OCCUPIABLE_TERRAIN_TRANSITION_WANG_INDICES.contains(
+                    terrainTransitionWangIndex(
+                        tiles = tiles,
+                        terrainCanBeOccupied = terrainCanBeOccupied,
+                        row = row,
+                        column = column,
+                    ),
+                )
+            }
+
+            private fun terrainTransitionWangIndex(
+                tiles: List<List<String>>,
+                terrainCanBeOccupied: Map<String, Boolean>,
+                row: Int,
+                column: Int,
+            ): Int {
+                var wangIndex = NO_TERRAIN_TRANSITION
+                if (hasNonOccupiableAdjacentTerrain(tiles, terrainCanBeOccupied, row - 1, column)) wangIndex += NORTH_TERRAIN_TRANSITION_WEIGHT
+                if (hasNonOccupiableAdjacentTerrain(tiles, terrainCanBeOccupied, row, column + 1)) wangIndex += EAST_TERRAIN_TRANSITION_WEIGHT
+                if (hasNonOccupiableAdjacentTerrain(tiles, terrainCanBeOccupied, row + 1, column)) wangIndex += SOUTH_TERRAIN_TRANSITION_WEIGHT
+                if (hasNonOccupiableAdjacentTerrain(tiles, terrainCanBeOccupied, row, column - 1)) wangIndex += WEST_TERRAIN_TRANSITION_WEIGHT
+                return wangIndex
+            }
+
+            private fun hasNonOccupiableAdjacentTerrain(
+                tiles: List<List<String>>,
+                terrainCanBeOccupied: Map<String, Boolean>,
+                row: Int,
+                column: Int,
+            ): Boolean {
+                val adjacentTerrainId = tiles.getOrNull(row)?.getOrNull(column) ?: return false
+                return terrainCanBeOccupied[adjacentTerrainId] != true
+            }
+
+            private const val NO_TERRAIN_TRANSITION = 0
+            private const val NORTH_TERRAIN_TRANSITION_WEIGHT = 1
+            private const val EAST_TERRAIN_TRANSITION_WEIGHT = 2
+            private const val SOUTH_TERRAIN_TRANSITION_WEIGHT = 4
+            private const val WEST_TERRAIN_TRANSITION_WEIGHT = 8
+            private val OCCUPIABLE_TERRAIN_TRANSITION_WANG_INDICES = setOf(0, 1, 2, 4, 5, 8, 10)
         }
 
         @ConsistentCopyVisibility
@@ -181,20 +255,24 @@ data class Battlefield private constructor(
             private val position: Position,
             private val occupyingBattleUnitId: OccupyingBattleUnitId?,
             private val terrainId: TerrainId,
+            private val terrainCanBeOccupied: TerrainCanBeOccupied,
         ) {
             companion object {
                 fun create(
-                    row: Int,
-                    column: Int,
+                    position: Position,
                     terrainId: String,
+                    terrainCanBeOccupied: Boolean,
                 ) = Tile(
-                    position = Position(row = row, column = column),
+                    position = position,
                     occupyingBattleUnitId = null,
                     terrainId = TerrainId(terrainId),
+                    terrainCanBeOccupied = TerrainCanBeOccupied(terrainCanBeOccupied),
                 )
             }
 
             fun isVacant() = occupyingBattleUnitId == null
+
+            fun isTerrainOccupiable() = terrainCanBeOccupied.value
 
             fun occupy(battleUnitId: String) = copy(occupyingBattleUnitId = OccupyingBattleUnitId(battleUnitId))
 
@@ -226,6 +304,10 @@ data class Battlefield private constructor(
 
         @JvmInline private value class TerrainId(
             val value: String,
+        )
+
+        @JvmInline private value class TerrainCanBeOccupied(
+            val value: Boolean,
         )
     }
 
