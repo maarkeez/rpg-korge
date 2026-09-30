@@ -2,7 +2,6 @@ package com.mkz.rpg.screen
 
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.matchContents
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
@@ -71,7 +70,7 @@ class BattlefieldViewTest : ViewsForTesting() {
     @Nested
     inner class TerrainWangIndex {
         @Test
-        fun `should return 0 when tile is not adjacent to void tiles`() =
+        fun `should return 0 when tile is not adjacent to different terrain tiles`() =
             viewsTest {
                 // Given
                 val battlefieldView = BattlefieldView()
@@ -137,38 +136,84 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 assertThat(wangIndex).isEqualTo(8)
             }
+
+        @Test
+        fun `should return 15 when void tile is adjacent to different terrain tiles on all its sides`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                val tiles =
+                    battlefield(
+                        rows = 3,
+                        columns = 3,
+                        tiles =
+                            listOf(
+                                listOf("sand", "sand", "sand"),
+                                listOf("sand", "void", "sand"),
+                                listOf("sand", "sand", "sand"),
+                            ),
+                    ).toDto().tiles
+                // When
+                val wangIndex = battlefieldView.terrainWangIndex(row = 1, column = 1, tiles = tiles)
+                // Then
+                assertThat(wangIndex).isEqualTo(15)
+            }
+
+        @Test
+        fun `should return 9 when void tile is adjacent to sand tiles on north and west`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                val tiles =
+                    battlefield(
+                        rows = 3,
+                        columns = 3,
+                        tiles =
+                            listOf(
+                                listOf("void", "sand", "void"),
+                                listOf("sand", "void", "void"),
+                                listOf("void", "void", "void"),
+                            ),
+                    ).toDto().tiles
+                // When
+                val wangIndex = battlefieldView.terrainWangIndex(row = 1, column = 1, tiles = tiles)
+                // Then
+                assertThat(wangIndex).isEqualTo(9)
+            }
     }
 
     @Nested
     inner class TerrainTileBitmap {
         @Test
-        fun `should return terrain bitmap when wang index has no void edges`() =
+        fun `should return the first tile of the transition strip when wang index has no terrain edges`() =
             viewsTest {
                 // Given
                 val battlefieldView = BattlefieldView()
                 battlefieldView.loadAssets()
-                val terrainBitmap = resourcesVfs["terrain/sand.png"].readBitmap()
+                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", wangIndex = 0)
                 // Then
-                assertThat(tileBitmap.matchContents(terrainBitmap)).isTrue
+                assertThat(tileBitmap.width).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
+                assertThat(tileBitmap.height).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0)).isTrue
             }
 
         @Test
-        fun `should return void bitmap when wang index has all void edges`() =
+        fun `should return the last tile of the transition strip when wang index has all terrain edges`() =
             viewsTest {
                 // Given
                 val battlefieldView = BattlefieldView()
                 battlefieldView.loadAssets()
-                val voidBitmap = resourcesVfs["terrain/void.png"].readBitmap()
+                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", wangIndex = 15)
                 // Then
-                assertThat(tileBitmap.matchContents(voidBitmap)).isTrue
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15)).isTrue
             }
 
         @Test
-        fun `should return transition tile bitmap when wang index has some void edges`() =
+        fun `should return the transition tile of the strip when wang index has some terrain edges`() =
             viewsTest {
                 // Given
                 val battlefieldView = BattlefieldView()
@@ -179,7 +224,33 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 assertThat(tileBitmap.width).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
                 assertThat(tileBitmap.height).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(matchesWangTile(tileBitmap, transitionStrip, wangIndex = 9)).isTrue
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9)).isTrue
+            }
+
+        @Test
+        fun `should return the mirrored transition tile of the strip when the terrain is the second terrain of the transition`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+                // When
+                val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", wangIndex = 9)
+                // Then
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 6)).isTrue
+            }
+
+        @Test
+        fun `should return the last tile of the transition strip when the second terrain wang index has all terrain edges`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+                // When
+                val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", wangIndex = 15)
+                // Then
+                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15)).isTrue
             }
     }
 
@@ -370,10 +441,10 @@ class BattlefieldViewTest : ViewsForTesting() {
     private fun matchesWangTile(
         tile: Bitmap,
         transitionStrip: Bitmap,
-        wangIndex: Int,
+        stripIndex: Int,
     ): Boolean {
         val tileSize = BattlefieldView.TILE_PIXEL_SIZE
-        val stripOffset = (wangIndex - 1) * tileSize
+        val stripOffset = stripIndex * tileSize
         for (y in 0 until tileSize) {
             for (x in 0 until tileSize) {
                 if (tile.getRgba(x, y) != transitionStrip.getRgba(stripOffset + x, y)) return false

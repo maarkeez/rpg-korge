@@ -40,17 +40,16 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
-        private const val VOID_TERRAIN_ID = "void"
-        private const val WANG_INDEX_NO_VOID_EDGES = 0
-        private const val WANG_INDEX_ALL_VOID_EDGES = 15
-        private const val NORTH_VOID_WEIGHT = 1
-        private const val EAST_VOID_WEIGHT = 2
-        private const val SOUTH_VOID_WEIGHT = 4
-        private const val WEST_VOID_WEIGHT = 8
+        private const val TRANSITION_NAME_SEPARATOR = "_to_"
+        private const val WANG_INDEX_NO_TERRAIN_EDGES = 0
+        private const val WANG_INDEX_ALL_TERRAIN_EDGES = 15
+        private const val NORTH_TERRAIN_WEIGHT = 1
+        private const val EAST_TERRAIN_WEIGHT = 2
+        private const val SOUTH_TERRAIN_WEIGHT = 4
+        private const val WEST_TERRAIN_WEIGHT = 8
     }
 
     private var delegate: Delegate? = null
-    private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
     private lateinit var knightBitmap: Bitmap
     private lateinit var ratBitmap: Bitmap
@@ -76,11 +75,6 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     }
 
     suspend fun loadAssets() {
-        terrainBitMaps =
-            buildMap {
-                put("sand", resourcesVfs["terrain/sand.png"].readBitmap())
-                put("void", resourcesVfs["terrain/void.png"].readBitmap())
-            }
         transitionBitMaps =
             buildMap {
                 val transitionsRoot = resourcesVfs["terrain/transitions"]
@@ -164,11 +158,12 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         column: Int,
         tiles: Map<PositionDto, TileDto>,
     ): Int {
-        var wangIndex = WANG_INDEX_NO_VOID_EDGES
-        if (isVoidTile(tiles, row - 1, column)) wangIndex += NORTH_VOID_WEIGHT
-        if (isVoidTile(tiles, row, column + 1)) wangIndex += EAST_VOID_WEIGHT
-        if (isVoidTile(tiles, row + 1, column)) wangIndex += SOUTH_VOID_WEIGHT
-        if (isVoidTile(tiles, row, column - 1)) wangIndex += WEST_VOID_WEIGHT
+        val terrainId = tiles.getValue(PositionDto(row, column)).terrainId
+        var wangIndex = WANG_INDEX_NO_TERRAIN_EDGES
+        if (hasDifferentAdjacentTerrain(tiles, terrainId, row - 1, column)) wangIndex += NORTH_TERRAIN_WEIGHT
+        if (hasDifferentAdjacentTerrain(tiles, terrainId, row, column + 1)) wangIndex += EAST_TERRAIN_WEIGHT
+        if (hasDifferentAdjacentTerrain(tiles, terrainId, row + 1, column)) wangIndex += SOUTH_TERRAIN_WEIGHT
+        if (hasDifferentAdjacentTerrain(tiles, terrainId, row, column - 1)) wangIndex += WEST_TERRAIN_WEIGHT
         return wangIndex
     }
 
@@ -176,19 +171,29 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         terrainId: String,
         wangIndex: Int,
     ): Bitmap {
-        val terrainBitMap = terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
-        if (wangIndex == WANG_INDEX_NO_VOID_EDGES) return terrainBitMap
-        if (wangIndex == WANG_INDEX_ALL_VOID_EDGES) return terrainBitMaps.getValue(VOID_TERRAIN_ID)
-        val transitionBitMap =
-            listOf("${terrainId}_to_$VOID_TERRAIN_ID", "${VOID_TERRAIN_ID}_to_$terrainId").firstNotNullOfOrNull { transitionBitMaps[it] }
-        return transitionBitMap?.getOrNull(wangIndex - 1) ?: terrainBitMap
+        val transition =
+            transitionBitMaps.entries.firstOrNull { (transitionName, _) ->
+                transitionName.split(TRANSITION_NAME_SEPARATOR).contains(terrainId)
+            } ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+        val (transitionName, transitionBitMap) = transition
+        val bitmapIndex =
+            if (transitionName.split(TRANSITION_NAME_SEPARATOR).first() == terrainId) {
+                wangIndex
+            } else {
+                if (wangIndex == WANG_INDEX_ALL_TERRAIN_EDGES) WANG_INDEX_ALL_TERRAIN_EDGES else WANG_INDEX_ALL_TERRAIN_EDGES - wangIndex
+            }
+        return transitionBitMap[bitmapIndex]
     }
 
-    private fun isVoidTile(
+    private fun hasDifferentAdjacentTerrain(
         tiles: Map<PositionDto, TileDto>,
+        terrainId: String,
         row: Int,
         column: Int,
-    ): Boolean = tiles[PositionDto(row, column)]?.terrainId == VOID_TERRAIN_ID
+    ): Boolean {
+        val adjacentTile = tiles[PositionDto(row, column)] ?: return false
+        return adjacentTile.terrainId != terrainId
+    }
 
     private fun tileName(
         row: Int,
