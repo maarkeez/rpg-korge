@@ -27,7 +27,6 @@ class BattlefieldApi(
     val initializeBattlefield =
         InitializeBattlefield(
             battlefieldRepository = battlefieldRepository,
-            isTransitionAllowed = terrainApi.isTransitionAllowed,
             searchTerrainById = terrainApi.searchTerrainById,
             eventBus = eventBus,
         )

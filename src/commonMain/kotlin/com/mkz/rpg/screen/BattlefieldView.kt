@@ -2,7 +2,7 @@ package com.mkz.rpg.screen
 
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.Colors
@@ -41,15 +41,10 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
-        private const val WANG_INDEX_NO_TERRAIN_EDGES = 0
-        private const val WANG_INDEX_ALL_TERRAIN_EDGES = 15
-        private const val NORTH_TERRAIN_WEIGHT = 1
-        private const val EAST_TERRAIN_WEIGHT = 2
-        private const val SOUTH_TERRAIN_WEIGHT = 4
-        private const val WEST_TERRAIN_WEIGHT = 8
     }
 
     private var delegate: Delegate? = null
+    private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
     private lateinit var knightBitmap: Bitmap
     private lateinit var ratBitmap: Bitmap
@@ -75,6 +70,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     }
 
     suspend fun loadAssets() {
+        val builtTerrainBitMaps = mutableMapOf<String, Bitmap>()
         transitionBitMaps =
             buildMap {
                 val transitionsRoot = resourcesVfs["terrain/transitions"]
@@ -83,16 +79,20 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
                         .listNames()
                         .filter { it.endsWith(".png") }
                         .forEach { fileName ->
+                            val transitionName = fileName.removeSuffix(".png")
                             val transitionBitmap = transitionsRoot[fileName].readBitmap()
-                            put(
-                                fileName.removeSuffix(".png"),
+                            val transitionTiles =
                                 List(transitionBitmap.width / TILE_PIXEL_SIZE) { index ->
                                     transitionBitmap.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
-                                },
-                            )
+                                }
+                            val (fromTerrainId, toTerrainId) = transitionName.split(TRANSITION_NAME_SEPARATOR)
+                            builtTerrainBitMaps[fromTerrainId] = transitionTiles.first()
+                            builtTerrainBitMaps[toTerrainId] = transitionTiles.last()
+                            put(transitionName, transitionTiles)
                         }
                 }
             }
+        terrainBitMaps = builtTerrainBitMaps
         knightBitmap = resourcesVfs["unit/knight.png"].readBitmap()
         ratBitmap = resourcesVfs["unit/rat.png"].readBitmap()
         beeBitmap = resourcesVfs["unit/bee.png"].readBitmap()
@@ -142,9 +142,8 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
                     tileButton.background.borderColor = Colors.TRANSPARENT
                     tileButton.background.bgColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
-                    val terrainId = battlefield.tiles[PositionDto(row, column)]!!.terrainId
-                    val wangIndex = terrainWangIndex(row, column, battlefield.tiles)
-                    tileButton.addImage(terrainTileBitmap(terrainId, wangIndex), TERRAIN)
+                    val tileDto = battlefield.tiles[PositionDto(row, column)]!!
+                    tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
                     tileButton.onClick {
                         delegate?.tileSelected(row, column)
                     }
@@ -153,46 +152,17 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         }
     }
 
-    fun terrainWangIndex(
-        row: Int,
-        column: Int,
-        tiles: Map<PositionDto, TileDto>,
-    ): Int {
-        val terrainId = tiles.getValue(PositionDto(row, column)).terrainId
-        var wangIndex = WANG_INDEX_NO_TERRAIN_EDGES
-        if (hasDifferentAdjacentTerrain(tiles, terrainId, row - 1, column)) wangIndex += NORTH_TERRAIN_WEIGHT
-        if (hasDifferentAdjacentTerrain(tiles, terrainId, row, column + 1)) wangIndex += EAST_TERRAIN_WEIGHT
-        if (hasDifferentAdjacentTerrain(tiles, terrainId, row + 1, column)) wangIndex += SOUTH_TERRAIN_WEIGHT
-        if (hasDifferentAdjacentTerrain(tiles, terrainId, row, column - 1)) wangIndex += WEST_TERRAIN_WEIGHT
-        return wangIndex
-    }
-
     fun terrainTileBitmap(
         terrainId: String,
-        wangIndex: Int,
+        terrainTransition: TerrainTransitionDto?,
     ): Bitmap {
-        val transition =
-            transitionBitMaps.entries.firstOrNull { (transitionName, _) ->
-                transitionName.split(TRANSITION_NAME_SEPARATOR).contains(terrainId)
-            } ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
-        val (transitionName, transitionBitMap) = transition
-        val bitmapIndex =
-            if (transitionName.split(TRANSITION_NAME_SEPARATOR).first() == terrainId) {
-                wangIndex
-            } else {
-                if (wangIndex == WANG_INDEX_ALL_TERRAIN_EDGES) WANG_INDEX_ALL_TERRAIN_EDGES else WANG_INDEX_ALL_TERRAIN_EDGES - wangIndex
-            }
-        return transitionBitMap[bitmapIndex]
-    }
-
-    private fun hasDifferentAdjacentTerrain(
-        tiles: Map<PositionDto, TileDto>,
-        terrainId: String,
-        row: Int,
-        column: Int,
-    ): Boolean {
-        val adjacentTile = tiles[PositionDto(row, column)] ?: return false
-        return adjacentTile.terrainId != terrainId
+        val transition = terrainTransition
+        return if (transition != null) {
+            val transitionName = "${transition.fromTerrainId}$TRANSITION_NAME_SEPARATOR${transition.toTerrainId}"
+            transitionBitMaps.getValue(transitionName)[transition.wangIndex]
+        } else {
+            terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+        }
     }
 
     private fun tileName(

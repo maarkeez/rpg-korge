@@ -2,6 +2,7 @@ package com.mkz.rpg.battlefield.usecases.queries
 
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainTransitionRule
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -60,6 +61,7 @@ class CanBattlefieldTileBeOccupiedTest {
                         listOf("void", "sand"),
                         listOf("sand", "sand"),
                     ),
+                terrainTransitionRules = setOf(terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
             ),
         )
         // When
@@ -96,6 +98,7 @@ class CanBattlefieldTileBeOccupiedTest {
                         listOf("void", "void"),
                         listOf("sand", "void"),
                     ),
+                terrainTransitionRules = setOf(terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
             ),
         )
         // When

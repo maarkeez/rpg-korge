@@ -1,5 +1,6 @@
 package com.mkz.rpg.battlefield.domain
 
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import kotlin.random.Random
 
 object BattlefieldMother {
@@ -12,7 +13,12 @@ object BattlefieldMother {
         rows: Int,
         columns: Int,
         tiles: List<List<String>>,
-    ): Battlefield = Battlefield.create(rows, columns, tiles, terrainOccupancy(tiles)).pullEvents().second
+        terrainTransitionRules: Set<TerrainTransitionRuleDto> = emptySet(),
+    ): Battlefield =
+        Battlefield
+            .create(rows, columns, tiles, terrainOccupancy(tiles), terrainTransitionRules)
+            .pullEvents()
+            .second
 
     fun terrainId() = listOf("sand", "void").random()
 
@@ -31,4 +37,19 @@ object BattlefieldMother {
                     else -> true
                 }
             }
+
+    fun terrainTransitionRule(
+        fromTerrainId: String,
+        toTerrainId: String,
+    ): TerrainTransitionRuleDto = TerrainTransitionRuleDto(fromTerrainId, toTerrainId)
+
+    fun terrainTransitionRules(tiles: List<List<String>>): Set<TerrainTransitionRuleDto> {
+        val terrainIds = tiles.flatten().distinct()
+        return terrainIds
+            .flatMap { fromTerrainId ->
+                terrainIds
+                    .filter { it != fromTerrainId }
+                    .map { toTerrainId -> terrainTransitionRule(fromTerrainId, toTerrainId) }
+            }.toSet()
+    }
 }

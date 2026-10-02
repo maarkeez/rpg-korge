@@ -8,7 +8,6 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.assertThat
 import com.mkz.rpg.terrain.domain.TerrainMother
-import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -19,13 +18,11 @@ import org.mockito.kotlin.whenever
 
 class InitializeBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val isTransitionAllowed: IsTransitionAllowed = mock()
     private val searchTerrainById: SearchTerrainById = mock()
     private val eventBus = FakeEventBus()
     private val initializeBattlefield =
         InitializeBattlefield(
             battlefieldRepository = battlefieldRepository,
-            isTransitionAllowed = isTransitionAllowed,
             searchTerrainById = searchTerrainById,
             eventBus = eventBus,
         )
@@ -41,8 +38,7 @@ class InitializeBattlefieldTest {
                     terrainId()
                 }
             }
-        whenever(isTransitionAllowed(any(), any())).thenReturn(true)
-        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
+        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain(allowedTransitionTo = setOf("sand", "void")).toDto())
         // When
         initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
         // Then
@@ -81,7 +77,7 @@ class InitializeBattlefieldTest {
             listOf(
                 listOf("sand", "void"),
             )
-        whenever(isTransitionAllowed("sand", "void")).thenReturn(false)
+        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
         // When
         val error = catchThrowable { initializeBattlefield(rows = rows, columns = columns, tiles = tiles) }
         // Then
@@ -101,9 +97,12 @@ class InitializeBattlefieldTest {
             listOf(
                 listOf("void", "sand"),
             )
-        whenever(isTransitionAllowed(any(), any())).thenReturn(true)
         whenever(searchTerrainById("void")).thenReturn(TerrainMother.nonOccupiableTerrain(id = "void").toDto())
-        whenever(searchTerrainById("sand")).thenReturn(TerrainMother.occupiableTerrain(id = "sand").toDto())
+        whenever(searchTerrainById("sand")).thenReturn(
+            TerrainMother
+                .occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void"))
+                .toDto(),
+        )
         // When
         initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
         // Then

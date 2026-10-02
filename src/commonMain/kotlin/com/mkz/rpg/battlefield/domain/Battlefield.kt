@@ -1,9 +1,12 @@
 package com.mkz.rpg.battlefield.domain
 
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileIsNotVacant
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileNotFound
+import com.mkz.rpg.battlefield.domain.BattlefieldError.TileTerrainTransitionNotAllowed
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.OccupantRemoved
@@ -25,11 +28,12 @@ data class Battlefield private constructor(
             columns: Int,
             tiles: List<List<String>>,
             terrainCanBeOccupied: Map<String, Boolean>,
+            terrainTransitionRules: Set<TerrainTransitionRuleDto>,
         ): Battlefield =
             Battlefield(
                 rows = Rows(rows),
                 columns = Columns(columns),
-                tiles = Tiles.create(tiles, terrainCanBeOccupied),
+                tiles = Tiles.create(tiles, terrainCanBeOccupied, terrainTransitionRules),
                 events = setOf(BattlefieldCreated),
             )
     }
@@ -176,7 +180,9 @@ data class Battlefield private constructor(
             fun create(
                 tiles: List<List<String>>,
                 terrainCanBeOccupied: Map<String, Boolean>,
+                terrainTransitionRules: Set<TerrainTransitionRuleDto>,
             ): Tiles {
+                validateTileTerrainTransitions(tiles, terrainTransitionRules)
                 val tiles =
                     tiles
                         .flatMapIndexed { rowIndex, row ->
@@ -194,10 +200,80 @@ data class Battlefield private constructor(
                                                 column = columnIndex,
                                                 terrainId = terrainId,
                                             ),
+                                        terrainTransition =
+                                            terrainTransition(
+                                                tiles = tiles,
+                                                terrainTransitionRules = terrainTransitionRules,
+                                                row = rowIndex,
+                                                column = columnIndex,
+                                            ),
                                     )
                             }
                         }.toMap()
                 return Tiles(tiles)
+            }
+
+            private fun validateTileTerrainTransitions(
+                tiles: List<List<String>>,
+                terrainTransitionRules: Set<TerrainTransitionRuleDto>,
+            ) {
+                tiles.forEachIndexed { rowIndex, row ->
+                    row.forEachIndexed { columnIndex, terrainId ->
+                        adjacentTerrainIds(tiles, rowIndex, columnIndex).forEach { adjacentTerrainId ->
+                            if (terrainId == adjacentTerrainId) return@forEach
+                            if (!hasTerrainTransition(terrainTransitionRules, terrainId, adjacentTerrainId)) {
+                                throw TileTerrainTransitionNotAllowed(terrainId, adjacentTerrainId)
+                            }
+                        }
+                    }
+                }
+            }
+
+            private fun hasTerrainTransition(
+                terrainTransitionRules: Set<TerrainTransitionRuleDto>,
+                terrainId: String,
+                adjacentTerrainId: String,
+            ): Boolean =
+                terrainTransitionRules.any { it.fromTerrainId == terrainId && it.toTerrainId == adjacentTerrainId } ||
+                    terrainTransitionRules.any { it.fromTerrainId == adjacentTerrainId && it.toTerrainId == terrainId }
+
+            private fun adjacentTerrainIds(
+                tiles: List<List<String>>,
+                rowIndex: Int,
+                columnIndex: Int,
+            ): List<String> =
+                listOfNotNull(
+                    tiles.getOrNull(rowIndex - 1)?.getOrNull(columnIndex),
+                    tiles.getOrNull(rowIndex)?.getOrNull(columnIndex + 1),
+                    tiles.getOrNull(rowIndex + 1)?.getOrNull(columnIndex),
+                    tiles.getOrNull(rowIndex)?.getOrNull(columnIndex - 1),
+                )
+
+            private fun terrainTransition(
+                tiles: List<List<String>>,
+                terrainTransitionRules: Set<TerrainTransitionRuleDto>,
+                row: Int,
+                column: Int,
+            ): TerrainTransition? {
+                val terrainId = tiles[row][column]
+                val rule = terrainTransitionRules.firstOrNull { it.fromTerrainId == terrainId } ?: return null
+                val targetTerrainId = rule.toTerrainId
+                var wangIndex = NO_TERRAIN_TRANSITION
+                if (hasAdjacentTerrain(tiles, targetTerrainId, row - 1, column)) wangIndex += NORTH_TERRAIN_TRANSITION_WEIGHT
+                if (hasAdjacentTerrain(tiles, targetTerrainId, row, column + 1)) wangIndex += EAST_TERRAIN_TRANSITION_WEIGHT
+                if (hasAdjacentTerrain(tiles, targetTerrainId, row + 1, column)) wangIndex += SOUTH_TERRAIN_TRANSITION_WEIGHT
+                if (hasAdjacentTerrain(tiles, targetTerrainId, row, column - 1)) wangIndex += WEST_TERRAIN_TRANSITION_WEIGHT
+                return TerrainTransition(terrainId, targetTerrainId, wangIndex)
+            }
+
+            private fun hasAdjacentTerrain(
+                tiles: List<List<String>>,
+                terrainId: String,
+                row: Int,
+                column: Int,
+            ): Boolean {
+                val adjacentTerrainId = tiles.getOrNull(row)?.getOrNull(column) ?: return false
+                return adjacentTerrainId == terrainId
             }
 
             private fun isTerrainOccupiable(
@@ -256,17 +332,20 @@ data class Battlefield private constructor(
             private val occupyingBattleUnitId: OccupyingBattleUnitId?,
             private val terrainId: TerrainId,
             private val terrainCanBeOccupied: TerrainCanBeOccupied,
+            private val terrainTransition: TerrainTransition?,
         ) {
             companion object {
                 fun create(
                     position: Position,
                     terrainId: String,
                     terrainCanBeOccupied: Boolean,
+                    terrainTransition: TerrainTransition?,
                 ) = Tile(
                     position = position,
                     occupyingBattleUnitId = null,
                     terrainId = TerrainId(terrainId),
                     terrainCanBeOccupied = TerrainCanBeOccupied(terrainCanBeOccupied),
+                    terrainTransition = terrainTransition,
                 )
             }
 
@@ -288,6 +367,20 @@ data class Battlefield private constructor(
                 TileDto(
                     battleUnitId = occupyingBattleUnitId?.value,
                     terrainId = terrainId.value,
+                    terrainTransition = terrainTransition?.toDto(),
+                )
+        }
+
+        private data class TerrainTransition(
+            val fromTerrainId: String,
+            val toTerrainId: String,
+            val wangIndex: Int,
+        ) {
+            fun toDto() =
+                TerrainTransitionDto(
+                    fromTerrainId = fromTerrainId,
+                    toTerrainId = toTerrainId,
+                    wangIndex = wangIndex,
                 )
         }
 
@@ -319,11 +412,23 @@ data class Battlefield private constructor(
         data class TileDto(
             val battleUnitId: String?,
             val terrainId: String,
+            val terrainTransition: TerrainTransitionDto? = null,
+        )
+
+        data class TerrainTransitionDto(
+            val fromTerrainId: String,
+            val toTerrainId: String,
+            val wangIndex: Int,
         )
 
         data class PositionDto(
             val row: Int,
             val column: Int,
+        )
+
+        data class TerrainTransitionRuleDto(
+            val fromTerrainId: String,
+            val toTerrainId: String,
         )
     }
 }

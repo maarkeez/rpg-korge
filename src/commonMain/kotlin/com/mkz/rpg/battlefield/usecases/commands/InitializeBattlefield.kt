@@ -1,15 +1,13 @@
 package com.mkz.rpg.battlefield.usecases.commands
 
 import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.domain.BattlefieldError
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
 class InitializeBattlefield(
     private val battlefieldRepository: BattlefieldRepository,
-    private val isTransitionAllowed: IsTransitionAllowed,
     private val searchTerrainById: SearchTerrainById,
     private val eventBus: EventBus,
 ) {
@@ -19,8 +17,15 @@ class InitializeBattlefield(
         tiles: List<List<String>>,
     ) {
         if (battlefieldRepository.search() != null) return
-        validateTileTerrainTransitions(tiles)
-        val (events, battlefield) = Battlefield.create(rows, columns, tiles, terrainOccupancy(tiles)).pullEvents()
+        val (events, battlefield) =
+            Battlefield
+                .create(
+                    rows = rows,
+                    columns = columns,
+                    tiles = tiles,
+                    terrainCanBeOccupied = terrainOccupancy(tiles),
+                    terrainTransitionRules = terrainTransitionRules(tiles),
+                ).pullEvents()
         battlefieldRepository.create(battlefield)
         eventBus.publish(events)
     }
@@ -31,26 +36,13 @@ class InitializeBattlefield(
             .distinct()
             .associateWith { terrainId -> searchTerrainById(terrainId)?.canBeOccupied ?: false }
 
-    private fun validateTileTerrainTransitions(tiles: List<List<String>>) {
-        tiles.forEachIndexed { rowIndex, row ->
-            row.forEachIndexed { columnIndex, terrainId ->
-                adjacentTerrainIds(tiles, rowIndex, columnIndex).forEach { adjacentTerrainId ->
-                    if (!isTransitionAllowed(terrainId, adjacentTerrainId)) {
-                        throw BattlefieldError.TileTerrainTransitionNotAllowed(terrainId, adjacentTerrainId)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun adjacentTerrainIds(
-        tiles: List<List<String>>,
-        rowIndex: Int,
-        columnIndex: Int,
-    ) = listOfNotNull(
-        tiles.getOrNull(rowIndex - 1)?.getOrNull(columnIndex),
-        tiles.getOrNull(rowIndex)?.getOrNull(columnIndex + 1),
-        tiles.getOrNull(rowIndex + 1)?.getOrNull(columnIndex),
-        tiles.getOrNull(rowIndex)?.getOrNull(columnIndex - 1),
-    )
+    private fun terrainTransitionRules(tiles: List<List<String>>): Set<TerrainTransitionRuleDto> =
+        tiles
+            .flatten()
+            .distinct()
+            .flatMap { terrainId ->
+                (searchTerrainById(terrainId)?.allowedTransitionTo ?: emptySet())
+                    .filter { it != terrainId }
+                    .map { TerrainTransitionRuleDto(terrainId, it) }
+            }.toSet()
 }

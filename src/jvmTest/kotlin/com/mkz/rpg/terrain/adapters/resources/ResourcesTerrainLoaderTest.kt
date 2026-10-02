@@ -74,7 +74,7 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
-        fun `should allow the transition to the counterpart terrain when a transition asset exists`() {
+        fun `should allow the transition only to the target terrain when a transition asset exists`() {
             // Given
             val terrainRoot =
                 MemoryVfsMix(
@@ -88,7 +88,7 @@ class ResourcesTerrainLoaderTest {
             val terrains = loader.loadTerrains()
             // Then
             assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void")
-            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactlyInAnyOrder("void", "sand")
+            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactly("void")
         }
 
         @Test
@@ -120,7 +120,7 @@ class ResourcesTerrainLoaderTest {
             val terrains = loader.loadTerrains()
             // Then
             assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void", "forest")
-            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactlyInAnyOrder("void", "sand")
+            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactly("void")
         }
 
         @Test
@@ -186,7 +186,7 @@ class ResourcesTerrainLoaderTest {
             // Then
             assertThat(terrains).containsExactlyInAnyOrder(
                 Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void")),
-                Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand")),
+                Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void")),
             )
         }
     }

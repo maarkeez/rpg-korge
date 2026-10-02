@@ -19,7 +19,7 @@ class TerrainTransitionsAcceptanceTest {
     }
 
     @Test
-    fun `should allow the sand to void transition when the battle is set up`() {
+    fun `should allow only the sand to void transition when the battle is set up`() {
         // Given
         battleSetupApi.setupBattle()
         // When
@@ -28,6 +28,6 @@ class TerrainTransitionsAcceptanceTest {
         require(terrainApi.searchTerrainById("sand") != null)
         require(terrainApi.searchTerrainById("void") != null)
         assertThat(terrainApi.isTransitionAllowed(terrainId = "sand", transitionToTerrainId = "void")).isTrue()
-        assertThat(terrainApi.isTransitionAllowed(terrainId = "void", transitionToTerrainId = "sand")).isTrue()
+        assertThat(terrainApi.isTransitionAllowed(terrainId = "void", transitionToTerrainId = "sand")).isFalse()
     }
 }

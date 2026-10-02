@@ -54,11 +54,6 @@ class ResourcesTerrainLoader(
             if (transitionFrom == terrainId) {
                 allowedTransitions += transitionTo
             }
-            transitionTo.forEach { counterpart ->
-                if (counterpart == terrainId) {
-                    allowedTransitions += transitionFrom
-                }
-            }
         }
         return allowedTransitions
     }

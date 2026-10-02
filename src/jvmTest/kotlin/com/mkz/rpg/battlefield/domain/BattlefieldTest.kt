@@ -14,7 +14,15 @@ class BattlefieldTest {
             val columns = 3
             val tiles = List(rows) { List(columns) { BattlefieldMother.terrainId() } }
             // When
-            val createdBattlefield = Battlefield.create(rows, columns, tiles, BattlefieldMother.terrainOccupancy(tiles))
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = rows,
+                        columns = columns,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles),
+                    )
             // Then
             val battlefieldDto = createdBattlefield.toDto()
             assertThat(battlefieldDto.rows).isEqualTo(rows)
@@ -27,10 +35,139 @@ class BattlefieldTest {
             // Given
             val tiles = List(3) { List(3) { BattlefieldMother.terrainId() } }
             // When
-            val createdBattlefield = Battlefield.create(3, 3, tiles, BattlefieldMother.terrainOccupancy(tiles))
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 3,
+                        columns = 3,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles),
+                    )
             // Then
             val (events, _) = createdBattlefield.pullEvents()
             assertThat(events).containsExactly(BattlefieldEvent.BattlefieldCreated)
+        }
+
+        @Test
+        fun `should store the terrain transition on the tile when the tile terrain has a transition rule and is adjacent to the target terrain`() {
+            // Given
+            val tiles = listOf(listOf("void", "sand"))
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 1,
+                        columns = 2,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
+                    )
+            // Then
+            val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 1))
+            assertThat(sandTile.terrainTransition)
+                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 8))
+        }
+
+        @Test
+        fun `should store the terrain transition wang index with the target terrain sides when the tile is adjacent to the target terrain on multiple sides`() {
+            // Given
+            val tiles =
+                listOf(
+                    listOf("void", "void", "sand"),
+                    listOf("void", "sand", "sand"),
+                    listOf("sand", "sand", "sand"),
+                )
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 3,
+                        columns = 3,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
+                    )
+            // Then
+            val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 1, column = 1))
+            assertThat(sandTile.terrainTransition?.wangIndex).isEqualTo(9)
+        }
+
+        @Test
+        fun `should store the terrain transition with no target terrain edges when the tile is not adjacent to the target terrain`() {
+            // Given
+            val tiles = listOf(listOf("sand", "sand"))
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 1,
+                        columns = 2,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
+                    )
+            // Then
+            val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 0))
+            assertThat(sandTile.terrainTransition)
+                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 0))
+        }
+
+        @Test
+        fun `should store no terrain transition on the tile when the tile terrain has no transition rule`() {
+            // Given
+            val tiles = listOf(listOf("void", "sand"))
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 1,
+                        columns = 2,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
+                    )
+            // Then
+            val voidTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 0))
+            assertThat(voidTile.terrainTransition).isNull()
+        }
+
+        @Test
+        fun `should fail when the tile is adjacent to a different terrain and no transition rule exists`() {
+            // Given
+            val tiles = listOf(listOf("sand", "void"))
+            // When
+            val result =
+                runCatching {
+                    Battlefield
+                        .create(
+                            rows = 1,
+                            columns = 2,
+                            tiles = tiles,
+                            terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                            terrainTransitionRules = emptySet(),
+                        )
+                }
+            // Then
+            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattlefieldError.TileTerrainTransitionNotAllowed::class.java)
+        }
+
+        @Test
+        fun `should create the battlefield when the tile is adjacent to a different terrain and a transition rule exists in the reverse direction`() {
+            // Given
+            val tiles = listOf(listOf("sand", "void"))
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 1,
+                        columns = 2,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "void", toTerrainId = "sand")),
+                    )
+            // Then
+            assertThat(createdBattlefield.toDto().tiles).hasSize(2)
         }
     }
 
@@ -155,16 +292,14 @@ class BattlefieldTest {
         @Test
         fun `should be true when the tile terrain can be occupied and has a single non occupiable adjacent terrain`() {
             // Given
-            val battlefield =
-                BattlefieldMother.battlefield(
-                    rows = 2,
-                    columns = 2,
-                    tiles =
-                        listOf(
-                            listOf("void", "sand"),
-                            listOf("sand", "sand"),
-                        ),
+            val tiles =
+                listOf(
+                    listOf("void", "sand"),
+                    listOf("sand", "sand"),
                 )
+            val battlefield =
+                BattlefieldMother
+                    .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
             // When
             val result = battlefield.canBeOccupied(row = 1, column = 0)
             // Then
@@ -189,16 +324,14 @@ class BattlefieldTest {
         @Test
         fun `should be false when the tile terrain transition can not be occupied`() {
             // Given
-            val battlefield =
-                BattlefieldMother.battlefield(
-                    rows = 2,
-                    columns = 2,
-                    tiles =
-                        listOf(
-                            listOf("void", "void"),
-                            listOf("sand", "void"),
-                        ),
+            val tiles =
+                listOf(
+                    listOf("void", "void"),
+                    listOf("sand", "void"),
                 )
+            val battlefield =
+                BattlefieldMother
+                    .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
             // When
             val result = battlefield.canBeOccupied(row = 1, column = 0)
             // Then
