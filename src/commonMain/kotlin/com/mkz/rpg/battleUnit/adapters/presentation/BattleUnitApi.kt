@@ -54,7 +54,7 @@ class BattleUnitApi(
         CanMoveTo(
             battleUnitRepository,
             battlefieldApi.searchPosition,
-            distanceService,
+            battlefieldApi.canBattlefieldTileBeOccupied,
         )
     val whereCanMove =
         WhereCanMove(
