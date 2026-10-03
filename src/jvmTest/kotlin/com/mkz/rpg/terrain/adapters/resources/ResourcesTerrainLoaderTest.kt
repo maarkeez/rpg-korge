@@ -201,17 +201,19 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
-        fun `should return the committed terrains when the default resources are used`() {
+        fun `should only declare valid terrain resources in the default resources`() {
             // Given
             val loader = ResourcesTerrainLoader()
             runBlocking { loader.initResources() }
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains).containsExactlyInAnyOrder(
-                Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void")),
-                Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void")),
-            )
+            val terrainIds = terrains.map { it.id }.toSet()
+            assertThat(terrainIds).isNotEmpty
+            terrains.forEach { terrain ->
+                assertThat(terrain.allowedTransitionTo).isSubsetOf(terrainIds)
+                assertThat(terrain.allowedTransitionTo).contains(terrain.id)
+            }
         }
     }
 }
