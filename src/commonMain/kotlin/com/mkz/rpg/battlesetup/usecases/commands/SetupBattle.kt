@@ -48,22 +48,31 @@ class SetupBattle(
         eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
         val sandTerrainId = "sand"
         val voidTerrainId = "void"
-        val sandRow = List(10) { sandTerrainId }
-        val rowWithVoid = listOf(sandTerrainId, sandTerrainId) + List(4) { voidTerrainId } + List(6) { sandTerrainId }
+        val grassTerrainId = "grass"
+        val battlefieldSize = 16
+        val sandRow = List(battlefieldSize) { sandTerrainId }
+        val rowWithVoid = List(6) { sandTerrainId } + List(4) { voidTerrainId } + List(6) { sandTerrainId }
+        val rowWithGrassAt = { grassColumns: List<Int> -> List(battlefieldSize) { column -> if (column in grassColumns) grassTerrainId else sandTerrainId } }
         val tiles =
             listOf(
                 sandRow,
                 sandRow,
-                sandRow,
                 rowWithVoid,
                 rowWithVoid,
                 sandRow,
                 sandRow,
                 sandRow,
+                rowWithGrassAt(listOf(6, 7)),
+                rowWithGrassAt(listOf(5, 8)),
+                rowWithGrassAt(listOf(2, 4, 9, 11)),
+                rowWithGrassAt(listOf(5, 8)),
+                rowWithGrassAt(listOf(6, 7)),
+                sandRow,
+                rowWithGrassAt(listOf(7)),
                 sandRow,
                 sandRow,
             )
-        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(10, 10, tiles))
+        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(battlefieldSize, battlefieldSize, tiles))
 
         val venomDamage =
             Effect.Dto(
