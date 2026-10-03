@@ -15,7 +15,7 @@ class ResourcesTerrainLoader(
     private var terrainDefinitions = emptyMap<String, TerrainDefinition>()
     private var transitions = emptyMap<String, Set<String>>()
 
-    suspend fun initResources() {
+    override suspend fun initResources() {
         terrainDefinitions =
             if (terrainRoot.exists()) {
                 terrainRoot
@@ -44,6 +44,7 @@ class ResourcesTerrainLoader(
                     id = terrainId,
                     canBeOccupied = definition.canBeOccupied,
                     allowedTransitionTo = computeAllowedTransitions(terrainId),
+                    effectId = definition.effectId,
                 )
             }
     }
@@ -82,6 +83,7 @@ class ResourcesTerrainLoader(
     @Serializable
     data class TerrainDefinition(
         val canBeOccupied: Boolean,
+        val effectId: String? = null,
     )
 
     private companion object {

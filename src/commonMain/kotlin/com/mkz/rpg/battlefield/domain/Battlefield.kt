@@ -86,6 +86,8 @@ data class Battlefield private constructor(
         column: Int,
     ): String? = tiles.occupant(row, column)
 
+    fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> = tiles.effectApplicationsToOccupants(terrainEffectIds)
+
     fun position(battleUnitId: String): PositionDto? = tiles.position(battleUnitId)
 
     fun isInBoundaries(
@@ -169,6 +171,23 @@ data class Battlefield private constructor(
             row: Int,
             column: Int,
         ): String? = tiles[Position(row = row, column = column)]?.toDto()?.battleUnitId
+
+        fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> =
+            tiles.values
+                .sortedWith(compareBy({ it.row() }, { it.column() }))
+                .mapNotNull { tile ->
+                    val terrainId = tile.terrainIdValue()
+                    val occupantBattleUnitId = tile.occupantBattleUnitId()
+                    if (occupantBattleUnitId != null && terrainId in terrainEffectIds) {
+                        Dto.EffectApplicationToOccupantDto(
+                            occupantBattleUnitId = occupantBattleUnitId,
+                            terrainId = terrainId,
+                            effectId = terrainEffectIds.getValue(terrainId),
+                        )
+                    } else {
+                        null
+                    }
+                }
 
         fun position(battleUnitId: String): PositionDto? =
             tiles.entries
@@ -351,6 +370,8 @@ data class Battlefield private constructor(
 
             fun isVacant() = occupyingBattleUnitId == null
 
+            fun isOccupied() = occupyingBattleUnitId != null
+
             fun isTerrainOccupiable() = terrainCanBeOccupied.value
 
             fun occupy(battleUnitId: String) = copy(occupyingBattleUnitId = OccupyingBattleUnitId(battleUnitId))
@@ -358,6 +379,10 @@ data class Battlefield private constructor(
             fun removeOccupant() = copy(occupyingBattleUnitId = null)
 
             fun isOccupiedBy(battleUnitId: String) = occupyingBattleUnitId?.value == battleUnitId
+
+            fun terrainIdValue() = terrainId.value
+
+            fun occupantBattleUnitId(): String? = occupyingBattleUnitId?.value
 
             fun row() = position.row
 
@@ -429,6 +454,12 @@ data class Battlefield private constructor(
         data class TerrainTransitionRuleDto(
             val fromTerrainId: String,
             val toTerrainId: String,
+        )
+
+        data class EffectApplicationToOccupantDto(
+            val occupantBattleUnitId: String,
+            val terrainId: String,
+            val effectId: String,
         )
     }
 }

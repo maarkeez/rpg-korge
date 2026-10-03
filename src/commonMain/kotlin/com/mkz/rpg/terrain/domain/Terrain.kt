@@ -8,6 +8,7 @@ data class Terrain private constructor(
     private val id: Id,
     private val canBeOccupied: CanBeOccupied,
     private val allowedTransitionTo: AllowedTransitionTo,
+    private val effectId: EffectId?,
     private val events: Set<TerrainEvent>,
 ) {
     companion object {
@@ -16,6 +17,7 @@ data class Terrain private constructor(
                 Id(terrain.id),
                 CanBeOccupied(terrain.canBeOccupied),
                 AllowedTransitionTo(terrain.allowedTransitionTo),
+                terrain.effectId?.let { EffectId(it) },
                 setOf(TerrainCreated(terrainId = terrain.id)),
             )
     }
@@ -27,6 +29,7 @@ data class Terrain private constructor(
             id = id.value,
             canBeOccupied = canBeOccupied.value,
             allowedTransitionTo = allowedTransitionTo.value,
+            effectId = effectId?.value,
         )
 
     fun pullEvents() = events to copy(events = emptySet())
@@ -43,9 +46,14 @@ data class Terrain private constructor(
         val value: Set<String>,
     )
 
+    @JvmInline private value class EffectId(
+        val value: String,
+    )
+
     data class Dto(
         val id: String,
         val canBeOccupied: Boolean,
         val allowedTransitionTo: Set<String> = emptySet(),
+        val effectId: String? = null,
     )
 }

@@ -8,15 +8,17 @@ import com.mkz.rpg.terrain.domain.TerrainRepository
 import com.mkz.rpg.terrain.usecases.commands.InitialiseTerrains
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
+import com.mkz.rpg.terrain.usecases.services.TerrainLoader
 
 class TerrainApi(
     eventBus: EventBus,
+    terrainLoader: TerrainLoader = ResourcesTerrainLoader(),
 ) {
     // Storage
     private val terrainRepository: TerrainRepository = InMemoryTerrainRepository()
 
     // Services
-    private val terrainLoader = ResourcesTerrainLoader()
+    private val terrainLoader = terrainLoader
 
     // Commands
     val initialiseTerrains = InitialiseTerrains(terrainLoader, terrainRepository, eventBus)

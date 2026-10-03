@@ -4,6 +4,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
@@ -437,7 +438,7 @@ class EffectTest {
             // When
             val effectApplication =
                 Effect.Dto.EffectApplicationDto(
-                    source = "battle-unit-1",
+                    source = ApplicationSourceDto.battleUnit("battle-unit-1"),
                     target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-2"),
                     effectId = "effect-1",
                     destination = destination,

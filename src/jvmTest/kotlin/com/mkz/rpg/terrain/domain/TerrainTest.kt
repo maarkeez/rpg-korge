@@ -28,6 +28,27 @@ class TerrainTest {
         }
 
         @Test
+        fun `should create terrain with the effect id when the dto contains an effect id`() {
+            // Given
+            val id = "swamp"
+            val effectId = "swamp-effect"
+            // When
+            val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, effectId = effectId))
+            // Then
+            assertThat(terrain.toDto().effectId).isEqualTo(effectId)
+        }
+
+        @Test
+        fun `should create terrain without an effect id when the dto does not contain an effect id`() {
+            // Given
+            val id = "sand"
+            // When
+            val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true))
+            // Then
+            assertThat(terrain.toDto().effectId).isNull()
+        }
+
+        @Test
         fun `should publish the terrain created event when a terrain is created`() {
             // Given
             val id = "sand"
@@ -82,6 +103,16 @@ class TerrainTest {
             val dto = terrain.toDto()
             // Then
             assertThat(dto).isEqualTo(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("void")))
+        }
+
+        @Test
+        fun `should expose the effect id when the terrain has an effect assigned`() {
+            // Given
+            val terrain = Terrain.create(Terrain.Dto(id = "swamp", canBeOccupied = true, effectId = "swamp-effect"))
+            // When
+            val dto = terrain.toDto()
+            // Then
+            assertThat(dto.effectId).isEqualTo("swamp-effect")
         }
     }
 

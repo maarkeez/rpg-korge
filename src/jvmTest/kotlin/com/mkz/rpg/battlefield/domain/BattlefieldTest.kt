@@ -388,6 +388,65 @@ class BattlefieldTest {
     }
 
     @Nested
+    inner class EffectApplicationsToOccupants {
+        @Test
+        fun `should return an application per occupied tile when the tile terrain has an effect assigned`() {
+            // Given
+            val battlefield =
+                BattlefieldMother
+                    .battlefield()
+                    .occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+                    .occupy(row = 2, column = 1, battleUnitId = "battle-unit-2")
+            // When
+            val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+            // Then
+            assertThat(result)
+                .containsExactly(
+                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
+                )
+        }
+
+        @Test
+        fun `should not return an application when the tile is vacant`() {
+            // Given
+            val battlefield = BattlefieldMother.battlefield()
+            // When
+            val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+            // Then
+            assertThat(result).isEmpty()
+        }
+
+        @Test
+        fun `should not return an application when the tile terrain has no effect assigned`() {
+            // Given
+            val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+            // When
+            val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = emptyMap())
+            // Then
+            assertThat(result).isEmpty()
+        }
+
+        @Test
+        fun `should return only the applications of the tiles on the terrains with an effect assigned when the battlefield has multiple terrains`() {
+            // Given
+            val tiles = listOf(listOf("sand", "forest"), listOf("sand", "forest"))
+            val battlefield =
+                BattlefieldMother
+                    .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
+                    .occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+                    .occupy(row = 0, column = 1, battleUnitId = "battle-unit-2")
+            // When
+            val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+            // Then
+            assertThat(result)
+                .containsExactly(
+                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+                )
+        }
+    }
+
+    @Nested
     inner class IsInBoundaries {
         @Test
         fun `should be true when the position is within the battlefield`() {

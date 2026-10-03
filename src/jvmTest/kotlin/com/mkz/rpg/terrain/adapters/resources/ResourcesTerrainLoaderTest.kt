@@ -177,6 +177,30 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
+        fun `should load the effect id when the terrain definition contains an effect id`() {
+            // Given
+            val terrainRoot = MemoryVfsMix("terrain/swamp.toml" to "canBeOccupied = true\neffectId = \"swamp-effect\"")["terrain"]
+            val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
+            runBlocking { loader.initResources() }
+            // When
+            val terrains = loader.loadTerrains()
+            // Then
+            assertThat(terrains.first { it.id == "swamp" }.effectId).isEqualTo("swamp-effect")
+        }
+
+        @Test
+        fun `should load no effect id when the terrain definition does not contain an effect id`() {
+            // Given
+            val terrainRoot = MemoryVfsMix("terrain/sand.toml" to "canBeOccupied = true")["terrain"]
+            val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
+            runBlocking { loader.initResources() }
+            // When
+            val terrains = loader.loadTerrains()
+            // Then
+            assertThat(terrains.first { it.id == "sand" }.effectId).isNull()
+        }
+
+        @Test
         fun `should return the committed terrains when the default resources are used`() {
             // Given
             val loader = ResourcesTerrainLoader()

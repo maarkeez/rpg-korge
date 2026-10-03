@@ -39,7 +39,8 @@ class ApplyEffect(
         // TODO: Revisit this policy, should we include/exclude other effect outcome types?
         val target = application.target as? EffectTargetDto.Tile ?: throw FailedToReceiveAbilityEffects()
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
-        val caster = battleUnitRepository.searchById(application.source) ?: throw FailedToReceiveAbilityEffects()
+        val casterId = application.source.battleUnitId ?: throw FailedToReceiveAbilityEffects()
+        val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToReceiveAbilityEffects()
         eventBus.publish(
             BattleUnitEvent.RequestDeployBattleUnit(
                 battleUnitId = "deployed-unit-${Random.nextLong()}",

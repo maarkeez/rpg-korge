@@ -217,11 +217,38 @@ data class Effect private constructor(
         val application: ApplicationDto,
     ) {
         data class EffectApplicationDto(
-            val source: String,
+            val source: ApplicationSourceDto,
             val target: EffectTargetDto,
             val effectId: String,
             val destination: EffectTargetDto? = null,
-        )
+        ) {
+            data class ApplicationSourceDto(
+                val type: SourceTypeDto,
+                val battleUnitId: String? = null,
+                val terrainId: String? = null,
+            ) {
+                enum class SourceTypeDto {
+                    BATTLE_UNIT,
+                    TERRAIN,
+                }
+
+                companion object {
+                    fun battleUnit(battleUnitId: String) =
+                        ApplicationSourceDto(
+                            type = SourceTypeDto.BATTLE_UNIT,
+                            battleUnitId = battleUnitId,
+                            terrainId = null,
+                        )
+
+                    fun terrain(terrainId: String) =
+                        ApplicationSourceDto(
+                            type = SourceTypeDto.TERRAIN,
+                            battleUnitId = null,
+                            terrainId = terrainId,
+                        )
+                }
+            }
+        }
 
         sealed interface EffectTargetDto {
             data class Unit(
