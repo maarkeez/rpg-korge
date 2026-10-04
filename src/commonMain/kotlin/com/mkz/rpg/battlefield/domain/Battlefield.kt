@@ -275,7 +275,11 @@ data class Battlefield private constructor(
                 column: Int,
             ): TerrainTransition? {
                 val terrainId = tiles[row][column]
-                val rule = terrainTransitionRules.firstOrNull { it.fromTerrainId == terrainId } ?: return null
+                val adjacentTerrainIds = adjacentTerrainIds(tiles, row, column).filter { it != terrainId }
+                val rule =
+                    terrainTransitionRules.firstOrNull { candidateRule ->
+                        candidateRule.fromTerrainId == terrainId && adjacentTerrainIds.contains(candidateRule.toTerrainId)
+                    } ?: return null
                 val targetTerrainId = rule.toTerrainId
                 var wangIndex = NO_TERRAIN_TRANSITION
                 if (hasAdjacentTerrain(tiles, targetTerrainId, row - 1, column)) wangIndex += NORTH_TERRAIN_TRANSITION_WEIGHT

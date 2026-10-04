@@ -94,7 +94,31 @@ class BattlefieldTest {
         }
 
         @Test
-        fun `should store the terrain transition with no target terrain edges when the tile is not adjacent to the target terrain`() {
+        fun `should store the terrain transition to the adjacent target terrain when the tile terrain has multiple transition rules`() {
+            // Given
+            val tiles = listOf(listOf("grass", "sand"))
+            // When
+            val createdBattlefield =
+                Battlefield
+                    .create(
+                        rows = 1,
+                        columns = 2,
+                        tiles = tiles,
+                        terrainCanBeOccupied = BattlefieldMother.terrainOccupancy(tiles),
+                        terrainTransitionRules =
+                            setOf(
+                                BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void"),
+                                BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "grass"),
+                            ),
+                    )
+            // Then
+            val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 1))
+            assertThat(sandTile.terrainTransition)
+                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "grass", wangIndex = 8))
+        }
+
+        @Test
+        fun `should store no terrain transition on the tile when the tile is not adjacent to the target terrain`() {
             // Given
             val tiles = listOf(listOf("sand", "sand"))
             // When
@@ -109,8 +133,7 @@ class BattlefieldTest {
                     )
             // Then
             val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 0))
-            assertThat(sandTile.terrainTransition)
-                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 0))
+            assertThat(sandTile.terrainTransition).isNull()
         }
 
         @Test
