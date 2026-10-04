@@ -4,9 +4,12 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBrain.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
+import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
+import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class CpuBrainApi(
@@ -14,9 +17,17 @@ class CpuBrainApi(
     playerApi: PlayerApi,
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
+    terrainApi: TerrainApi,
+    effectApi: EffectApi,
     eventBus: EventBus,
 ) {
     // Queries
+    val healingNeed =
+        HealingNeed(
+            battleUnitApi.searchBattleUnitById,
+            unitApi.searchUnitById,
+        )
+
     val whereShouldMove =
         WhereShouldMove(
             battleUnitApi.searchBattleUnitsByPlayerId,
@@ -25,6 +36,10 @@ class CpuBrainApi(
             battlefieldApi.searchPosition,
             playerApi.searchEnemyPlayer,
             unitApi.searchUnitById,
+            healingNeed,
+            battlefieldApi.searchBattlefield,
+            terrainApi.searchTerrainById,
+            effectApi.searchEffectById,
         )
 
     // Commands

@@ -4,8 +4,13 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.math.abs
 
@@ -16,6 +21,10 @@ class WhereShouldMove(
     private val searchPosition: SearchPosition,
     private val searchEnemyPlayer: SearchEnemyPlayer,
     private val searchUnitById: SearchUnitById,
+    private val healingNeed: HealingNeed,
+    private val searchBattlefield: SearchBattlefield,
+    private val searchTerrainById: SearchTerrainById,
+    private val searchEffectById: SearchEffectById,
 ) {
     operator fun invoke(battleUnitId: String): Battlefield.Dto.PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId)!!
@@ -115,7 +124,16 @@ class WhereShouldMove(
                     )
             }
         }
+        // Evaluate the health effect of the terrain of every candidate
+        val battlefield = searchBattlefield()
+        candidatePositions.forEach { position ->
+            utilityData[position] =
+                utilityData[position]!!.copy(
+                    terrainHealthEffect = terrainHealthEffect(battlefield, position),
+                )
+        }
         // Calculate utility contribution
+        val currentHealingNeed = healingNeed(battleUnitId = battleUnit.id)
         utilityData.entries.forEach { (position, evaluationData) ->
             val enemyContribution =
                 if (evaluationData.nearestEnemyDistanceNormalized != null) {
@@ -129,11 +147,18 @@ class WhereShouldMove(
                 } else {
                     0.0
                 }
+            val terrainContribution =
+                terrainHealthContribution(
+                    terrainHealthEffect = evaluationData.terrainHealthEffect,
+                    healingNeed = currentHealingNeed,
+                    maxHealth = unit.healthPoints,
+                )
             utilityData[position] =
                 evaluationData.copy(
                     enemyContribution = enemyContribution,
                     allyContribution = allyContribution,
-                    candidateUtility = enemyContribution + allyContribution,
+                    terrainContribution = terrainContribution,
+                    candidateUtility = enemyContribution + allyContribution + terrainContribution,
                 )
         }
         // Calculate the best candidate
@@ -156,8 +181,10 @@ class WhereShouldMove(
         val nearestAllyDistance: Int? = null,
         val nearestEnemyDistanceNormalized: Double? = null,
         val nearestAllyDistanceNormalized: Double? = null,
+        val terrainHealthEffect: Int? = null,
         val enemyContribution: Double? = null,
         val allyContribution: Double? = null,
+        val terrainContribution: Double? = null,
         val candidateUtility: Double? = null,
     )
 
@@ -165,4 +192,27 @@ class WhereShouldMove(
         from: Battlefield.Dto.PositionDto,
         to: Battlefield.Dto.PositionDto,
     ): Int = (abs(from.row - to.row) + abs(from.column - to.column))
+
+    private fun terrainHealthEffect(
+        battlefield: Battlefield.Dto?,
+        position: Battlefield.Dto.PositionDto,
+    ): Int {
+        val terrainId = battlefield?.tiles?.get(position)?.terrainId ?: return 0
+        val effectId = searchTerrainById(terrainId)?.effectId ?: return 0
+        val effect = searchEffectById(effectId) ?: return 0
+        return when (effect.outcome.type) {
+            INCREASE_HEALTH -> effect.outcome.increaseHealth!!.healing
+            DECREASE_HEALTH -> -effect.outcome.decreaseHealth!!.damage
+            else -> 0
+        }
+    }
+
+    private fun terrainHealthContribution(
+        terrainHealthEffect: Int?,
+        healingNeed: Double,
+        maxHealth: Int,
+    ): Double {
+        if (terrainHealthEffect == null || terrainHealthEffect == 0 || maxHealth <= 0) return 0.0
+        return healingNeed * terrainHealthEffect / maxHealth.toDouble()
+    }
 }
