@@ -74,6 +74,40 @@ class SetupBattle(
             )
         eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(battlefieldSize, battlefieldSize, tiles))
 
+        val lavaDamage =
+            Effect.Dto(
+                id = "lava-damage",
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = DECREASE_HEALTH,
+                        decreaseHealth = DecreaseHealthDto(damage = 5),
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                    ),
+                application =
+                    ApplicationDto(
+                        ApplicationTypeDto.IMMEDIATELY,
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            )
+        val waterHeal =
+            Effect.Dto(
+                id = "water-heal",
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = INCREASE_HEALTH,
+                        decreaseHealth = null,
+                        increaseHealth = IncreaseHealthDto(healing = 5),
+                        applyEffectOnNearbyAllies = null,
+                    ),
+                application =
+                    ApplicationDto(
+                        ApplicationTypeDto.IMMEDIATELY,
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            )
         val venomDamage =
             Effect.Dto(
                 id = "venom-damage",
@@ -183,6 +217,8 @@ class SetupBattle(
                         beforeApplyingEffect = null,
                     ),
             )
+        eventBus.publish(RequestEffectCreation(lavaDamage))
+        eventBus.publish(RequestEffectCreation(waterHeal))
         eventBus.publish(RequestEffectCreation(venomDamage))
         eventBus.publish(RequestEffectCreation(lowPhysicalDamage))
         eventBus.publish(RequestEffectCreation(lowDamageHeal))
