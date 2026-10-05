@@ -47,12 +47,16 @@ class SetupBattle(
 
         eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
         val sandTerrainId = "sand"
+        val waterTerrainId = "water"
+        val lavaTerrainId = "lava"
         val voidTerrainId = "void"
         val grassTerrainId = "grass"
         val battlefieldSize = 16
         val sandRow = List(battlefieldSize) { sandTerrainId }
         val rowWithVoid = List(6) { sandTerrainId } + List(4) { voidTerrainId } + List(6) { sandTerrainId }
         val rowWithGrassAt = { grassColumns: List<Int> -> List(battlefieldSize) { column -> if (column in grassColumns) grassTerrainId else sandTerrainId } }
+        val rowWithWaterAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) waterTerrainId else sandTerrainId } }
+        val rowWithLavaAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) lavaTerrainId else sandTerrainId } }
         val tiles =
             listOf(
                 sandRow,
@@ -60,8 +64,9 @@ class SetupBattle(
                 rowWithVoid,
                 rowWithVoid,
                 sandRow,
+                rowWithLavaAt(listOf(1, 2, 3, 4)),
                 sandRow,
-                sandRow,
+                rowWithWaterAt(listOf(0, 1, 2)),
                 rowWithGrassAt(listOf(6, 7)),
                 rowWithGrassAt(listOf(5, 8)),
                 rowWithGrassAt(listOf(2, 4, 9, 11)),
@@ -69,7 +74,6 @@ class SetupBattle(
                 rowWithGrassAt(listOf(6, 7)),
                 sandRow,
                 rowWithGrassAt(listOf(7)),
-                sandRow,
                 sandRow,
             )
         eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(battlefieldSize, battlefieldSize, tiles))
