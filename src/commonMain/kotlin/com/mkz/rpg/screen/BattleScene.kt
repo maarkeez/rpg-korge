@@ -76,7 +76,8 @@ class BattleScene : Scene() {
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
             // Battle info
-            val battleInfoView = BattleInfoView(this)
+            val battleInfoView = BattleInfoView()
+            addChild(battleInfoView)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
