@@ -17,8 +17,11 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
+import kotlin.random.Random
 
-class BattleScene : Scene() {
+class BattleScene(
+    val seed: Long? = null,
+) : Scene() {
     val battlefieldView = BattlefieldView()
     val battleUnitInfoView = BattleUnitInfoView()
     val attackPreviewView = AttackPreviewView()
@@ -37,6 +40,8 @@ class BattleScene : Scene() {
     }
 
     override suspend fun SContainer.sceneMain() {
+        val random = seed?.let { Random(it) } ?: Random(System.nanoTime())
+
         // Event bus
         val eventBus = InMemoryEventBus()
         addUpdater {
@@ -51,9 +56,9 @@ class BattleScene : Scene() {
         val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
-        val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+        val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, random)
         val battleApi = BattleApi(eventBus, battleUnitApi)
-        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, eventBus)
+        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, eventBus, random)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Main scene

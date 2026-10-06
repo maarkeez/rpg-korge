@@ -11,6 +11,7 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import kotlin.random.Random
 
 class CpuBrainApi(
     unitApi: UnitApi,
@@ -20,6 +21,7 @@ class CpuBrainApi(
     terrainApi: TerrainApi,
     effectApi: EffectApi,
     eventBus: EventBus,
+    random: Random = Random.Default,
 ) {
     // Queries
     val healingNeed =
@@ -52,6 +54,7 @@ class CpuBrainApi(
             battleUnitApi.searchBattleUnitById,
             whereShouldMove,
             eventBus,
+            random,
         )
 
     // Events

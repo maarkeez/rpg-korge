@@ -23,6 +23,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import kotlin.random.Random
 
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()
@@ -152,5 +153,59 @@ class PlayTurnTest {
         playTurn("player-1")
         // Then
         assertThat(eventBus).hasPublishedEvents(BattleEvent.RequestFinishPlayerTurn)
+    }
+
+    @Test
+    fun `should cast the same ability and target when the same seed is used`() {
+        // Given
+        whenever(searchPlayerById("player-1")).thenReturn(player.toDto())
+        val battleUnit =
+            battleUnit(
+                unit = unit(abilities = listOf("ability-1", "ability-2")).toDto(),
+                player = player.toDto(),
+            ).toDto()
+                .copy(
+                    id = "battle-unit-1",
+                    remainingTurnActions = BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3),
+                )
+        whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit))
+        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
+        whenever(canCastAbility(any(), any())).thenReturn(true)
+        val castGroups =
+            listOf(
+                WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 0, column = 0))),
+                WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 1, column = 1))),
+                WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 2, column = 2))),
+            )
+        whenever(whereCanCast(any(), any())).thenReturn(castGroups)
+        whenever(whereShouldMove(any())).thenReturn(null)
+        val firstEventBus = FakeEventBus()
+        val secondEventBus = FakeEventBus()
+        // When
+        playTurnWithSeed(firstEventBus, seed = 42)
+        playTurnWithSeed(secondEventBus, seed = 42)
+        // Then
+        org.assertj.core.api.Assertions
+            .assertThat(firstEventBus.publishedEvents)
+            .isEqualTo(secondEventBus.publishedEvents)
+        org.assertj.core.api.Assertions
+            .assertThat(firstEventBus.publishedEvents)
+            .hasSize(2)
+    }
+
+    private fun playTurnWithSeed(
+        eventBus: FakeEventBus,
+        seed: Long,
+    ) {
+        PlayTurn(
+            searchPlayerById = searchPlayerById,
+            searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
+            whereCanCast = whereCanCast,
+            canCastAbility = canCastAbility,
+            searchBattleUnitById = searchBattleUnitById,
+            whereShouldMove = whereShouldMove,
+            eventBus = eventBus,
+            random = Random(seed = seed),
+        )("player-1")
     }
 }

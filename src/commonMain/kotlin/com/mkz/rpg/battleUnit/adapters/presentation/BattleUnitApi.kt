@@ -33,6 +33,7 @@ import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import kotlin.random.Random
 
 class BattleUnitApi(
     effectApi: EffectApi,
@@ -41,6 +42,7 @@ class BattleUnitApi(
     playerApi: PlayerApi,
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
+    random: Random = Random.Default,
 ) {
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
@@ -119,6 +121,7 @@ class BattleUnitApi(
             effectApi.searchEffectById,
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
+            random,
         )
     val applyOnDefeatedEffectsToNearbyAllies =
         ApplyOnDefeatedEffectsToNearbyAllies(

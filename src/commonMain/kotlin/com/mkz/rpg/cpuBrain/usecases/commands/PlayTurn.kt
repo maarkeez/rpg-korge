@@ -12,6 +12,7 @@ import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.EventBus
+import kotlin.random.Random
 
 class PlayTurn(
     private val searchPlayerById: SearchPlayerById,
@@ -21,6 +22,7 @@ class PlayTurn(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val whereShouldMove: WhereShouldMove,
     private val eventBus: EventBus,
+    private val random: Random = Random.Default,
 ) {
     operator fun invoke(playerId: String) {
         val player = searchPlayerById(playerId) ?: return
@@ -47,11 +49,11 @@ class PlayTurn(
             battleUnit.abilityCooldowns.entries
                 .filter { it.value == 0 }
                 .filter { (abilityId, _) -> canCastAbility(battleUnitId = battleUnit.id, abilityId = abilityId) }
-                .randomOrNull()
+                .pick(random)
                 ?.key
                 ?.let { abilityId ->
 
-                    whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).randomOrNull()?.let { castGroup ->
+                    whereCanCast(battleUnitId = battleUnit.id, abilityId = abilityId).pick(random)?.let { castGroup ->
                         eventBus.publish(
                             BattleUnitEvent.RequestCastAbility(
                                 battleUnitId = battleUnit.id,
@@ -66,4 +68,6 @@ class PlayTurn(
                 }
         }
     }
+
+    private fun <T> List<T>.pick(random: Random): T? = if (isEmpty()) null else this[random.nextInt(size)]
 }
