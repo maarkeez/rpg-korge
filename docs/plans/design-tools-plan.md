@@ -32,9 +32,23 @@ and in-game debug affordances — without touching game design or gameplay rules
 
 Until these are injected, identical inputs do not produce identical battles, which blocks replay, visual regression, and reproducible UI E2E.
 
+## Progress
+
+| Tool | Status | Notes |
+| --- | --- | --- |
+| T1 — Deterministic battle harness | **Done** | Seeded `Random` in `PlayTurn`/`ApplyEffect`, `BattleScene(seed)`, `RecordingEventBus`, deterministic acceptance tests |
+| T2 — Snapshot testing | **Done** | 3 goldens (initial layout, unit selected, ability selected), `updateSnapshots` gradle task, strict pixel compare |
+| T3 — UI end-to-end tests | **Done** | `BattleUiScript` + `BattleUiScriptTest`: real views/presenters on a deterministic API graph, simulated clicks, CPU turn settles in one `dispatch()` |
+| T5 — File-based battle scenarios | Not started | |
+| T6 — Palette / asset checks | Not started | |
+| T4 — Debug overlay + shortcuts | Not started | |
+| T7 — VFX sandbox | Not started | |
+| T8 — Iteration polish | Not started | |
+| T9 — Turn scrubber | Not started | |
+
 ## The tools
 
-### T1 — Deterministic battle harness (foundation)
+### T1 — Deterministic battle harness (foundation) — done
 
 **Goal**: identical setup + seed + command sequence ⇒ identical battle, every time, on every platform.
 
@@ -53,7 +67,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 
 **Acceptance criteria**: two runs with seed N produce byte-identical event logs; a recorded command log replayed against a fresh graph produces the same end state.
 
-### T2 — Snapshot (visual regression) testing
+### T2 — Snapshot (visual regression) testing — done
 
 **Goal**: pixel-exact golden images for the main UI states, diffed in CI locally; one command to update goldens.
 
@@ -70,7 +84,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 
 **Acceptance criteria**: `./gradlew jvmTest` fails with a clear message + diff image path when a scene changes; one gradle invocation regenerates goldens.
 
-### T3 — UI end-to-end tests (simulated input)
+### T3 — UI end-to-end tests (simulated input) — done
 
 **Goal**: script real player interactions (tap unit → tap ability → tap target) headlessly to guard the interaction flow, not just state.
 
