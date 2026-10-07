@@ -90,6 +90,23 @@ tasks.register("allTargetTests") {
     )
 }
 
+tasks.register<Test>("updateSnapshots") {
+    group = "verification"
+    description = "Regenerates the visual regression golden images under src/jvmTest/resources/snapshots."
+
+    dependsOn("compileTestKotlinJvm")
+
+    val jvmTest = tasks.named("jvmTest").get() as Test
+    testClassesDirs = jvmTest.testClassesDirs
+    classpath = jvmTest.classpath
+
+    useJUnitPlatform()
+
+    filter {
+        includeTestsMatching("com.mkz.rpg.screen.BattleSceneSnapshotUpdateTest")
+    }
+}
+
 val pitestReport = tasks.register<JavaExec>("pitest") {
     group = "verification"
     description = "Runs PIT mutation testing against the JVM test suite."
