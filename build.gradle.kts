@@ -68,6 +68,15 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+tasks.withType<JavaExec>().configureEach {
+    if (name.startsWith("runJvm")) {
+        project.findProperty("scenario")?.toString()?.let { scenario ->
+            val fileName = if (scenario.endsWith(".json")) scenario else "$scenario.json"
+            args("scenarios/$fileName")
+        }
+    }
+}
+
 tasks.withType<ConfigurableKtLintTask>().configureEach {
     doFirst {
         val buildDirAbs = project.layout.buildDirectory.get().asFile.absoluteFile

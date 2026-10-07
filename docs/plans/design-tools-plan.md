@@ -39,7 +39,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 | T1 — Deterministic battle harness | **Done** | Seeded `Random` in `PlayTurn`/`ApplyEffect`, `BattleScene(seed)`, `RecordingEventBus`, deterministic acceptance tests |
 | T2 — Snapshot testing | **Done** | 3 goldens (initial layout, unit selected, ability selected), `updateSnapshots` gradle task, strict pixel compare |
 | T3 — UI end-to-end tests | **Done** | `BattleUiScript` + `BattleUiScriptTest`: real views/presenters on a deterministic API graph, simulated clicks, CPU turn settles in one `dispatch()` |
-| T5 — File-based battle scenarios | Not started | |
+| T5 — File-based battle scenarios | **Done** | `Battlesetup` aggregate + `BattleScenarioLoader`, 3 starter scenarios in `resources/scenarios/`, `-Pscenario=` dev run, loader + acceptance tests |
 | T6 — Palette / asset checks | Not started | |
 | T4 — Debug overlay + shortcuts | Not started | |
 | T7 — VFX sandbox | Not started | |
@@ -111,7 +111,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 
 **Acceptance criteria**: pressing `F3` in the dev run shows the overlay; it never appears in the JS build.
 
-### T5 — File-based battle scenarios
+### T5 — File-based battle scenarios — done
 
 **Goal**: describe a battle (units, positions, abilities, seed) in a data file and load it from the game or tests — the same file drives T1 replay, T2 snapshots, and T3 UI E2E.
 

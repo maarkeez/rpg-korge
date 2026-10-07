@@ -6,9 +6,9 @@ import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer
 import korlibs.math.geom.Size
 
-suspend fun main() =
-    Korge(windowSize = Size(390, 844), backgroundColor = Colors["#2b2b2b"]) {
+suspend fun main(args: Array<String>) =
+    Korge(windowSize = Size(390, 844), backgroundColor = Colors["#2b2b2b"], args = args) {
         val sceneContainer = sceneContainer()
-
-        sceneContainer.changeTo { BattleScene() }
+        val scenarioPath = args.firstOrNull { it.endsWith(".json") }
+        sceneContainer.changeTo { BattleScene(scenarioPath = scenarioPath) }
     }

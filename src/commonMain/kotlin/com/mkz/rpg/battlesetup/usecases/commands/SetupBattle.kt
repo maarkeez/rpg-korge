@@ -15,6 +15,7 @@ import com.mkz.rpg.ability.domain.AbilityEvent.RequestAbilityCreation
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
+import com.mkz.rpg.battlesetup.domain.Battlesetup
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
@@ -39,44 +40,16 @@ import com.mkz.rpg.unit.domain.UnitEvent.RequestUnitCreation
 class SetupBattle(
     private val eventBus: EventBus,
 ) {
-    operator fun invoke() {
+    operator fun invoke(scenario: Battlesetup? = null) {
         val playerOneId = "player-one"
         val playerTwoId = "player-two"
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerOneId, "Human", Player.Dto.PlayerTypeDto.HUMAN))
         eventBus.publish(PlayerEvent.RequestPlayerCreation(playerTwoId, "CPU", Player.Dto.PlayerTypeDto.CPU))
 
         eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
-        val sandTerrainId = "sand"
-        val waterTerrainId = "water"
-        val lavaTerrainId = "lava"
-        val voidTerrainId = "void"
-        val grassTerrainId = "grass"
-        val battlefieldSize = 16
-        val sandRow = List(battlefieldSize) { sandTerrainId }
-        val rowWithVoid = List(6) { sandTerrainId } + List(4) { voidTerrainId } + List(6) { sandTerrainId }
-        val rowWithGrassAt = { grassColumns: List<Int> -> List(battlefieldSize) { column -> if (column in grassColumns) grassTerrainId else sandTerrainId } }
-        val rowWithWaterAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) waterTerrainId else sandTerrainId } }
-        val rowWithLavaAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) lavaTerrainId else sandTerrainId } }
-        val tiles =
-            listOf(
-                sandRow,
-                sandRow,
-                rowWithVoid,
-                rowWithVoid,
-                sandRow,
-                rowWithLavaAt(listOf(1, 2, 3, 4)),
-                sandRow,
-                rowWithWaterAt(listOf(0, 1, 2)),
-                rowWithGrassAt(listOf(6, 7)),
-                rowWithGrassAt(listOf(5, 8)),
-                rowWithGrassAt(listOf(2, 4, 9, 11)),
-                rowWithGrassAt(listOf(5, 8)),
-                rowWithGrassAt(listOf(6, 7)),
-                sandRow,
-                rowWithGrassAt(listOf(7)),
-                sandRow,
-            )
-        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(battlefieldSize, battlefieldSize, tiles))
+        val scenarioDto = scenario?.toDto()
+        val battlefield = scenarioDto?.battlefield ?: defaultBattlefield()
+        eventBus.publish(BattlefieldEvent.RequestInitializeBattlefield(battlefield.rows, battlefield.columns, battlefield.tiles))
 
         val lavaDamage =
             Effect.Dto(
@@ -345,44 +318,66 @@ class SetupBattle(
         eventBus.publish(RequestUnitCreation(knight))
         eventBus.publish(RequestUnitCreation(beeUnit))
 
-        eventBus.publish(
-            BattleUnitEvent.RequestDeployBattleUnit(
-                battleUnitId = "player-2-unit-1",
-                unitId = ratUnit.id,
-                playerId = playerTwoId,
-                deployAtRow = 0,
-                deployAtColumn = 0,
-            ),
-        )
-        eventBus.publish(
-            BattleUnitEvent.RequestDeployBattleUnit(
-                battleUnitId = "player-2-unit-2",
-                unitId = ratUnit.id,
-                playerId = playerTwoId,
-                deployAtRow = 1,
-                deployAtColumn = 1,
-            ),
-        )
-
-        eventBus.publish(
-            BattleUnitEvent.RequestDeployBattleUnit(
-                battleUnitId = "player-1-unit-1",
-                unitId = knight.id,
-                playerId = playerOneId,
-                deployAtRow = 6,
-                deployAtColumn = 6,
-            ),
-        )
-        eventBus.publish(
-            BattleUnitEvent.RequestDeployBattleUnit(
-                battleUnitId = "player-1-unit-2",
-                unitId = knight.id,
-                playerId = playerOneId,
-                deployAtRow = 7,
-                deployAtColumn = 7,
-            ),
-        )
+        val deployments = scenarioDto?.deployments ?: defaultDeployments(ratUnit.id, knight.id, playerOneId, playerTwoId)
+        deployments.forEach { deployment ->
+            eventBus.publish(
+                BattleUnitEvent.RequestDeployBattleUnit(
+                    battleUnitId = deployment.battleUnitId,
+                    unitId = deployment.unitId,
+                    playerId = deployment.playerId,
+                    deployAtRow = deployment.row,
+                    deployAtColumn = deployment.column,
+                ),
+            )
+        }
 
         eventBus.publish(BattleEvent.RequestStartFirstRound(listOf(playerOneId, playerTwoId)))
     }
+
+    private fun defaultBattlefield(): Battlesetup.Dto.BattlefieldDto {
+        val sandTerrainId = "sand"
+        val waterTerrainId = "water"
+        val lavaTerrainId = "lava"
+        val voidTerrainId = "void"
+        val grassTerrainId = "grass"
+        val battlefieldSize = 16
+        val sandRow = List(battlefieldSize) { sandTerrainId }
+        val rowWithVoid = List(6) { sandTerrainId } + List(4) { voidTerrainId } + List(6) { sandTerrainId }
+        val rowWithGrassAt = { grassColumns: List<Int> -> List(battlefieldSize) { column -> if (column in grassColumns) grassTerrainId else sandTerrainId } }
+        val rowWithWaterAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) waterTerrainId else sandTerrainId } }
+        val rowWithLavaAt = { columns: List<Int> -> List(battlefieldSize) { column -> if (column in columns) lavaTerrainId else sandTerrainId } }
+        val tiles =
+            listOf(
+                sandRow,
+                sandRow,
+                rowWithVoid,
+                rowWithVoid,
+                sandRow,
+                rowWithLavaAt(listOf(1, 2, 3, 4)),
+                sandRow,
+                rowWithWaterAt(listOf(0, 1, 2)),
+                rowWithGrassAt(listOf(6, 7)),
+                rowWithGrassAt(listOf(5, 8)),
+                rowWithGrassAt(listOf(2, 4, 9, 11)),
+                rowWithGrassAt(listOf(5, 8)),
+                rowWithGrassAt(listOf(6, 7)),
+                sandRow,
+                rowWithGrassAt(listOf(7)),
+                sandRow,
+            )
+        return Battlesetup.Dto.BattlefieldDto(battlefieldSize, battlefieldSize, tiles)
+    }
+
+    private fun defaultDeployments(
+        ratUnitId: String,
+        knightUnitId: String,
+        playerOneId: String,
+        playerTwoId: String,
+    ): List<Battlesetup.Dto.DeploymentDto> =
+        listOf(
+            Battlesetup.Dto.DeploymentDto(battleUnitId = "player-2-unit-1", unitId = ratUnitId, playerId = playerTwoId, row = 0, column = 0),
+            Battlesetup.Dto.DeploymentDto(battleUnitId = "player-2-unit-2", unitId = ratUnitId, playerId = playerTwoId, row = 1, column = 1),
+            Battlesetup.Dto.DeploymentDto(battleUnitId = "player-1-unit-1", unitId = knightUnitId, playerId = playerOneId, row = 6, column = 6),
+            Battlesetup.Dto.DeploymentDto(battleUnitId = "player-1-unit-2", unitId = knightUnitId, playerId = playerOneId, row = 7, column = 7),
+        )
 }

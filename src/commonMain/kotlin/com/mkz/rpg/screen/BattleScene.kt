@@ -5,6 +5,7 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.battlesetup.adapters.serialization.BattleScenarioLoader
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -21,6 +22,7 @@ import kotlin.random.Random
 
 class BattleScene(
     val seed: Long? = null,
+    val scenarioPath: String? = null,
 ) : Scene() {
     val battlefieldView = BattlefieldView()
     val battleUnitInfoView = BattleUnitInfoView()
@@ -40,7 +42,8 @@ class BattleScene(
     }
 
     override suspend fun SContainer.sceneMain() {
-        val random = seed?.let { Random(it) } ?: Random(System.nanoTime())
+        val scenario = scenarioPath?.let { BattleScenarioLoader().load(it) }
+        val random = (seed ?: scenario?.toDto()?.seed)?.let { Random(it) } ?: Random(System.nanoTime())
 
         // Event bus
         val eventBus = InMemoryEventBus()
@@ -106,6 +109,6 @@ class BattleScene(
         }
 
         // Start game
-        battleSetupApi.setupBattle()
+        battleSetupApi.setupBattle(scenario)
     }
 }
