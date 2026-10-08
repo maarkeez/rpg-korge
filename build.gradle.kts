@@ -116,6 +116,23 @@ tasks.register<Test>("updateSnapshots") {
     }
 }
 
+tasks.register<Test>("generateContactSheet") {
+    group = "verification"
+    description = "Regenerates build/contact-sheet.png with every game asset drawn on a single grid."
+
+    dependsOn("compileTestKotlinJvm")
+
+    val jvmTest = tasks.named("jvmTest").get() as Test
+    testClassesDirs = jvmTest.testClassesDirs
+    classpath = jvmTest.classpath
+
+    useJUnitPlatform()
+
+    filter {
+        includeTestsMatching("com.mkz.rpg.assets.AssetContactSheetTest")
+    }
+}
+
 val pitestReport = tasks.register<JavaExec>("pitest") {
     group = "verification"
     description = "Runs PIT mutation testing against the JVM test suite."

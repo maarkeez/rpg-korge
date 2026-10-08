@@ -40,7 +40,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 | T2 — Snapshot testing | **Done** | 3 goldens (initial layout, unit selected, ability selected), `updateSnapshots` gradle task, strict pixel compare |
 | T3 — UI end-to-end tests | **Done** | `BattleUiScript` + `BattleUiScriptTest`: real views/presenters on a deterministic API graph, simulated clicks, CPU turn settles in one `dispatch()` |
 | T5 — File-based battle scenarios | **Done** | `Battlesetup` aggregate + `BattleScenarioLoader`, 3 starter scenarios in `resources/scenarios/`, `-Pscenario=` dev run, loader + acceptance tests |
-| T6 — Palette / asset checks | Not started | |
+| T6 — Palette / asset checks | **Done** | `PaletteCheckerTest` (4 tests), `AssetContactSheetTest` + `generateContactSheet` task; 8 legacy assets remapped on-palette |
 | T4 — Debug overlay + shortcuts | Not started | |
 | T7 — VFX sandbox | Not started | |
 | T8 — Iteration polish | Not started | |
@@ -125,7 +125,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 
 **Acceptance criteria**: `./gradlew` dev run with `-Pscenario=chain.json` starts that battle; snapshot tests can target any scenario.
 
-### T6 — Palette checker + asset contact sheet
+### T6 — Palette checker + asset contact sheet — done
 
 **Goal**: enforce the Famicube palette for new pixel art and see all assets at a glance.
 
