@@ -41,6 +41,18 @@ class BattleUiScript(
 
     fun reachableTiles(battleUnitId: String) = battleUnitApi.whereCanMove(battleUnitId).map { it.row to it.column }.toSet()
 
+    /** Tiles currently drawn as valid cast tiles, with the kind of glyph each one shows. */
+    fun highlightedCastTiles(): Map<Pair<Int, Int>, CastTargetKind> =
+        battlefieldView
+            .descendantsWith { it is CastTargetTileView }
+            .associate { view ->
+                val name = view.parent!!.name!!
+                val (row, column) = Regex("row-(\\d+)-column-(\\d+)").matchEntire(name)!!.destructured
+                (row.toInt() to column.toInt()) to (view as CastTargetTileView).kind
+            }
+
+    fun dimmedTileCount() = battlefieldView.descendantsWith { it is DimTileView }.size
+
     fun isConfirmAndCancelDisplayed() =
         playerCallToActionView.findViewByName("call-to-action")?.let { callToAction ->
             descendants(callToAction, ConfirmButton::class).isNotEmpty() && descendants(callToAction, CancelButton::class).isNotEmpty()

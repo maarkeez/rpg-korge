@@ -284,6 +284,32 @@ class BattlefieldPresenterTest {
         }
     }
 
+    @Nested
+    inner class SelectAbility {
+        @Test
+        fun `should explain that there is no valid target when the selected ability has no cast group`() {
+            // Given
+            val unit = unit(id = "knight").toDto()
+            val player = player(type = Player.Dto.PlayerTypeDto.HUMAN).toDto()
+            val allyBattleUnit = battleUnit(unit = unit, player = player).toDto()
+            givenBattleUnit(allyBattleUnit, unit, player)
+            whenever(abilityApi.searchAbilityById).thenReturn(mock())
+            // When
+            eventBus.publish(
+                BattlefieldHudEvent.SelectedBattleUnitAbility(
+                    casterTile = TileDto(row = 1, column = 1),
+                    battleUnitId = allyBattleUnit.id,
+                    abilityId = "ability-1",
+                    castGroupsWhereCanCast = emptyList(),
+                ),
+            )
+            eventBus.dispatch()
+            // Then
+            verify(battleUnitInfoView).displayAbilityLine("No valid target in reach")
+            verify(battlefieldView).dimOutside(emptySet())
+        }
+    }
+
     private fun givenBattleUnit(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,

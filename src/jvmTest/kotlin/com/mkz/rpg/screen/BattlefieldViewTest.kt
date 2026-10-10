@@ -284,6 +284,54 @@ class BattlefieldViewTest : ViewsForTesting() {
             }
 
         @Test
+        fun `should display a crosshair glyph when the cast target is an occupied tile`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayPotentialCast(row = 0, column = 0, kind = CastTargetKind.TARGET_UNIT)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                val castTile = tileButton.findViewByName(BattlefieldView.SELECTION) as CastTargetTileView
+                assertThat(castTile.kind).isEqualTo(CastTargetKind.TARGET_UNIT)
+                assertThat(castTile.findViewByName(CastTargetTileView.GLYPH)).isNotNull
+            }
+
+        @Test
+        fun `should omit the border on joined sides when the cast tile belongs to a group`() =
+            viewsTest {
+                // Given
+                val open = CastTargetTileView(CastTargetKind.TARGET_TILE, emptySet())
+                // When
+                val joined = CastTargetTileView(CastTargetKind.TARGET_TILE, setOf(CastEdge.RIGHT))
+                // Then
+                assertThat(joined.numChildren).isLessThan(open.numChildren)
+            }
+
+        @Test
+        fun `should dim only the tiles outside the valid ones and clear the dim when it is cleared`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+                // When
+                battlefieldView.dimOutside(setOf(0 to 1))
+
+                // Then
+                fun dimmed(column: Int) =
+                    (getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-$column") as UIButton)
+                        .findViewByName(BattlefieldView.DIM) != null
+                assertThat(listOf(dimmed(0), dimmed(1), dimmed(2))).containsExactly(true, false, true)
+                // When
+                battlefieldView.clearDim()
+                // Then
+                assertThat(listOf(dimmed(0), dimmed(1), dimmed(2))).containsOnly(false)
+            }
+
+        @Test
         fun `should not display duplicated selection when potential cast is displayed twice`() =
             viewsTest {
                 // Given

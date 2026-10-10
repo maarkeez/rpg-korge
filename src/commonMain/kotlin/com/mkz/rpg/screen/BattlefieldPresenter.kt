@@ -14,6 +14,7 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHud
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudRepository
 import com.mkz.rpg.screen.battlefieldHud.usecases.commands.CancelCast
@@ -285,14 +286,33 @@ class BattlefieldPresenter(
             battleUnitInfoView.displayAbilityLine("${ability.name} - ${ability.cost} MP - ${abilitySummary(ability)}")
         }
         battleHudView.displayBattleUnitInfoView()
-        event.castGroupsWhereCanCast.forEach { castGroup ->
-            castGroup.tiles.forEach { tilePosition ->
+        displayCastTargets(event.castGroupsWhereCanCast)
+        if (event.castGroupsWhereCanCast.isEmpty()) {
+            battleUnitInfoView.displayAbilityLine(NO_VALID_TARGET_MESSAGE)
+        }
+    }
+
+    private fun displayCastTargets(castGroups: List<BattlefieldHud.Dto.CastGroupDto>) {
+        val validTiles = castGroups.flatMap { it.tiles }.map { it.row to it.column }.toSet()
+        castGroups.forEach { castGroup ->
+            val groupTiles = castGroup.tiles.map { it.row to it.column }.toSet()
+            groupTiles.forEach { (row, column) ->
+                val isOccupied = battlefieldApi.searchOccupant(row, column) != null
                 battlefieldView.displayPotentialCast(
-                    row = tilePosition.row,
-                    column = tilePosition.column,
+                    row = row,
+                    column = column,
+                    kind = if (isOccupied) CastTargetKind.TARGET_UNIT else CastTargetKind.TARGET_TILE,
+                    groupEdges =
+                        buildSet {
+                            if ((row - 1 to column) in groupTiles) add(CastEdge.TOP)
+                            if ((row + 1 to column) in groupTiles) add(CastEdge.BOTTOM)
+                            if ((row to column - 1) in groupTiles) add(CastEdge.LEFT)
+                            if ((row to column + 1) in groupTiles) add(CastEdge.RIGHT)
+                        },
                 )
             }
         }
+        battlefieldView.dimOutside(validTiles)
     }
 
     private fun unavailableReason(reason: BattlefieldHudEvent.AbilityUnavailable.Reason): String =
@@ -354,6 +374,10 @@ class BattlefieldPresenter(
             onCancelled = { cancelCast() },
             onConfirmed = { confirmCast() },
         )
+    }
+
+    private companion object {
+        const val NO_VALID_TARGET_MESSAGE = "No valid target in reach"
     }
 
     // Delegates

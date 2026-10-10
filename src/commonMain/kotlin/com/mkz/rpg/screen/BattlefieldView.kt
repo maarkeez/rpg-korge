@@ -36,6 +36,7 @@ class BattlefieldView(
         const val SELECTION = "SELECTION"
         const val UNIT_OVERLAY = "UNIT_OVERLAY"
         const val INSPECT_GLYPH = "INSPECT_GLYPH"
+        const val DIM = "DIM"
 
         const val TILE_PIXEL_SIZE = 16
         const val TILE_SIZE = TILE_PIXEL_SIZE * PIXEL_SCALE
@@ -54,6 +55,8 @@ class BattlefieldView(
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
     private var mapWidth = 0.0
     private var mapHeight = 0.0
+    private var mapRows = 0
+    private var mapColumns = 0
     private var scrollX = 0.0
     private var scrollY = 0.0
     private var gestureIsDrag = false
@@ -97,6 +100,8 @@ class BattlefieldView(
     }
 
     fun displayBattlefield(battlefield: Battlefield.Dto) {
+        mapRows = battlefield.rows
+        mapColumns = battlefield.columns
         mapHeight = (TILE_SIZE * battlefield.rows).toDouble()
         mapWidth = (TILE_SIZE * battlefield.columns).toDouble()
         battlefieldGrid =
@@ -241,10 +246,29 @@ class BattlefieldView(
     fun displayPotentialCast(
         row: Int,
         column: Int,
+        kind: CastTargetKind = CastTargetKind.TARGET_TILE,
+        groupEdges: Set<CastEdge> = emptySet(),
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         if (tileButton.findViewByName(SELECTION) != null) return
-        tileButton.addImage(sprites.highlight(SpriteRegistry.Highlight.CAST), SELECTION)
+        tileButton.addChild(CastTargetTileView(kind, groupEdges).also { it.name = SELECTION })
+    }
+
+    /** Dims every tile that isn't in [validTiles], so valid and invalid tiles differ by pattern and not only by color. */
+    fun dimOutside(validTiles: Set<Pair<Int, Int>>) {
+        clearDim()
+        for (row in 0 until mapRows) {
+            for (column in 0 until mapColumns) {
+                if ((row to column) in validTiles) continue
+                (battlefieldGrid.findViewByName(tileName(row, column)) as? UIButton)?.addChild(DimTileView().also { it.name = DIM })
+            }
+        }
+    }
+
+    fun clearDim() {
+        battlefieldGrid.children.forEach { view ->
+            (view as UIButton).findViewByName(DIM)?.removeFromParent()
+        }
     }
 
     fun displayTileSelection(
@@ -260,6 +284,7 @@ class BattlefieldView(
         battlefieldGrid.children.forEach { view ->
             val tileButton = view as UIButton
             tileButton.findViewByName(SELECTION)?.removeFromParent()
+            tileButton.findViewByName(DIM)?.removeFromParent()
         }
     }
 

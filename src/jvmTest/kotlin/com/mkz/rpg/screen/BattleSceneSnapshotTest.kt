@@ -87,4 +87,18 @@ class BattleSceneSnapshotTest {
             assertMatchesGolden(ABILITY_COOLDOWNS, actual)
         }
     }
+
+    @Test
+    fun `should render the cast targets state matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            selectKnightAbility(scene, MUSHROOM_ABILITY_INDEX)
+            val actual = capture()
+            assertMatchesGolden(CAST_TARGETS, actual)
+        }
+    }
 }

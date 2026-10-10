@@ -123,10 +123,12 @@ class ProcessTileSelected(
 
         val selectedCastGroup = battlefieldHud.castGroupsWhereCanCast.firstOrNull { castGroup -> castGroup.tiles.contains(tile) }
         val isPlayerBattleUnit = currentPlayerId == casterBattleUnit.playerId
-        if (selectedCastGroup == null || !isPlayerBattleUnit) {
+        if (!isPlayerBattleUnit) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)
             eventBus.publish(events)
+        } else if (selectedCastGroup == null) {
+            selectOutsideCastGroups(battlefieldHud, casterBattleUnit.playerId, tile)
         } else {
             val targetBattleUnitId = searchOccupant(tile.row, tile.column)
             val isSameUnit = casterBattleUnit.id == targetBattleUnitId
@@ -144,5 +146,33 @@ class ProcessTileSelected(
                 eventBus.publish(events)
             }
         }
+    }
+
+    /** An invalid tap never loses the unit selection: it switches to another ally or goes back to the movement range. */
+    private fun selectOutsideCastGroups(
+        battlefieldHud: DisplayAbilityCastRange,
+        casterPlayerId: String,
+        tile: TileDto,
+    ) {
+        val occupantId = searchOccupant(row = tile.row, column = tile.column)
+        val otherAlly =
+            occupantId
+                ?.takeIf { it != battlefieldHud.battleUnitId }
+                ?.takeIf { searchBattleUnitById(it)?.playerId == casterPlayerId }
+        val updatedHud =
+            if (otherAlly != null) {
+                battlefieldHud
+                    .idle()
+                    .selectBattleUnit(
+                        tile = tile,
+                        battleUnitId = otherAlly,
+                        tilesWhereCanBeMoved = movementService.tilesWhereCanMove(otherAlly),
+                    )
+            } else {
+                battlefieldHud.deselectAbility()
+            }
+        val (events, updatedBattlefieldHud) = updatedHud.pullEvents()
+        battlefieldHudRepository.update(updatedBattlefieldHud)
+        eventBus.publish(events)
     }
 }

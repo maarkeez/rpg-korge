@@ -286,9 +286,9 @@ class BattleUiScriptTest : ViewsForTesting() {
                 val script = setupBattleUiScript()
                 script.selectUnit(playerOneKnightId)
                 // When
-                script.selectAbility(0)
+                script.selectAbility(HEAL_ABILITY_INDEX)
                 // Then
-                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Poisoned Sword - 5 MP - 3 dmg /turn ×5")
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Heal - 10 MP - +20 HP")
             }
 
         @Test
@@ -335,6 +335,71 @@ class BattleUiScriptTest : ViewsForTesting() {
                 assertThat(script.currentPlayerTurn()).isEqualTo(playerOneId)
                 val ratEnd = script.positionOf(playerTwoRatId)
                 assertThat(ratEnd.row != ratStart.row || ratEnd.column != ratStart.column).isTrue()
+            }
+    }
+
+    @Nested
+    inner class CastTargetHighlighting {
+        @Test
+        fun `should highlight exactly the tiles where the ability can be cast when player selects an ability`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(TELEPORT_ABILITY_INDEX)
+                // Then
+                val expected = script.castTargets(battleUnitId = playerOneKnightId, abilityId = "teleport").map { it.row to it.column }.toSet()
+                assertThat(script.highlightedCastTiles().keys).isEqualTo(expected)
+                assertThat(script.highlightedCastTiles().values).containsOnly(CastTargetKind.TARGET_TILE)
+            }
+
+        @Test
+        fun `should dim every tile that is not a valid cast tile when player selects an ability`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(TELEPORT_ABILITY_INDEX)
+                // Then
+                val validCount = script.highlightedCastTiles().size
+                assertThat(script.dimmedTileCount()).isEqualTo(BATTLEFIELD_TILE_COUNT - validCount)
+            }
+
+        @Test
+        fun `should explain there is no valid target and keep the ability selected when nothing is in reach`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(0)
+                // Then
+                assertThat(script.castTargets(battleUnitId = playerOneKnightId, abilityId = "poisoned-sword")).isEmpty()
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("No valid target in reach")
+                assertThat(battleUnitInfoView.abilitySlots[0].findViewByName(AbilityButtonView.ABILITY_SELECTION)).isNotNull
+            }
+
+        @Test
+        fun `should return to the movement range and keep the unit selected when player taps an invalid tile while targeting`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(TELEPORT_ABILITY_INDEX)
+                val validTiles = script.highlightedCastTiles().keys
+                val invalidTile =
+                    (0 until BATTLEFIELD_SIZE)
+                        .flatMap { row -> (0 until BATTLEFIELD_SIZE).map { row to it } }
+                        .first { it !in validTiles && script.occupantAt(it.first, it.second) == null }
+                // When
+                script.tapTile(row = invalidTile.first, column = invalidTile.second)
+                // Then
+                assertThat(script.highlightedCastTiles()).isEmpty()
+                assertThat(script.dimmedTileCount()).isZero()
+                assertThat(script.reachableTiles(playerOneKnightId)).isNotEmpty
+                assertThat(battleUnitInfoView.visibleAbilityButtonCount).isGreaterThan(0)
             }
     }
 
@@ -415,5 +480,7 @@ class BattleUiScriptTest : ViewsForTesting() {
     companion object {
         private const val TELEPORT_ABILITY_INDEX = 3
         private const val HEAL_ABILITY_INDEX = 5
+        private const val BATTLEFIELD_SIZE = 16
+        private const val BATTLEFIELD_TILE_COUNT = BATTLEFIELD_SIZE * BATTLEFIELD_SIZE
     }
 }

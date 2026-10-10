@@ -341,18 +341,14 @@ class ProcessTileSelectedTest {
     }
 
     @Test
-    fun `should go idle when the selected tile does not belong to any cast group`() {
+    fun `should return to unit selection when player taps a tile outside every cast group`() {
         // Given
         battlefieldHudRepository.create(
             displayAbilityCastRange(
-                casterTile =
-                    tile(0, 0),
+                casterTile = tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
-                castGroupsWhereCanCast =
-                    listOf(
-                        castGroup(tile(1, 1)),
-                    ),
+                castGroupsWhereCanCast = listOf(castGroup(tile(1, 1))),
             ),
         )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
@@ -364,9 +360,65 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(4, 4)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
+        assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-1")
+        assertThat(eventBus.publishedEvents).contains(BattlefieldHudEvent.AbilityDeselected("ability-1"))
+        assertThat(eventBus.publishedEvents).doesNotContain(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should select the other allied unit when player taps it outside every cast group`() {
+        // Given
+        val tilesWhereCanBeMoved = setOf(tile(3, 4))
+        battlefieldHudRepository.create(
+            displayAbilityCastRange(
+                casterTile = tile(0, 0),
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroupsWhereCanCast = listOf(castGroup(tile(1, 1))),
+            ),
+        )
+        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
+        whenever(searchBattleUnitById("battle-unit-2")).thenReturn(battleUnitDto("battle-unit-2", "player-1"))
+        whenever(searchBattle()).thenReturn(
+            com.mkz.rpg.battle.domain.BattleMother
+                .battle(players = listOf("player-1", "player-2"))
+                .toDto(),
+        )
+        whenever(searchOccupant(3, 3)).thenReturn("battle-unit-2")
+        whenever(movementService.tilesWhereCanMove("battle-unit-2")).thenReturn(tilesWhereCanBeMoved)
+        // When
+        processTileSelected(3, 3)
+        // Then
+        val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
+        assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-2")
+        assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
+    }
+
+    @Test
+    fun `should return to unit selection when player taps an enemy outside every cast group`() {
+        // Given
+        battlefieldHudRepository.create(
+            displayAbilityCastRange(
+                casterTile = tile(0, 0),
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroupsWhereCanCast = listOf(castGroup(tile(1, 1))),
+            ),
+        )
+        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
+        whenever(searchBattleUnitById("battle-unit-9")).thenReturn(battleUnitDto("battle-unit-9", "player-2"))
+        whenever(searchBattle()).thenReturn(
+            com.mkz.rpg.battle.domain.BattleMother
+                .battle(players = listOf("player-1", "player-2"))
+                .toDto(),
+        )
+        whenever(searchOccupant(5, 5)).thenReturn("battle-unit-9")
+        // When
+        processTileSelected(5, 5)
+        // Then
+        val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
+        assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-1")
     }
 
     @Test
