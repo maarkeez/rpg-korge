@@ -8,13 +8,14 @@ Test tooling that validates game art and renders assets for review. Used by the 
 
 ## Checked assets
 
-`GAME_ART_ASSET_PATHS` in `FamicubePaletteChecker.kt` lists the game-art PNGs that must be fully on-palette (34 files):
+`GAME_ART_ASSET_PATHS` in `FamicubePaletteChecker.kt` lists the game-art PNGs that must be fully on-palette (38 files):
 
 | Folder | Files |
 | --- | --- |
 | `resources/ability/` | `bee`, `heal`, `mushroom`, `poisoned_sword`, `skull`, `sword`, `teleport` |
 | `resources/battlefield/` | `tile_selection_4` |
 | `resources/effect/` | `venom-damage`, `venom-on-death`, `fx_defeat`, `fx_heal`, `fx_hit`, `fx_spread`, `fx_venom` |
+| `resources/terrain/dual/` | `sand_to_grass`, `sand_to_lava`, `sand_to_void`, `sand_to_water` (corner overlays) |
 | `resources/terrain/transitions/` | `sand_to_grass`, `sand_to_lava`, `sand_to_void`, `sand_to_water` |
 | `resources/terrain/variants/` | `grass`, `sand`, `water` |
 | `resources/unit/` | `<id>`, `<id>_idle`, `<id>_walk`, `<id>_portrait` for `bee`, `knight`, `rat` |

@@ -242,6 +242,18 @@ Answered by the owner after this plan was written. L2 still records the final ar
 | Corner-aware transitions touch terrain loading | Presentation-only dual grid in a new folder; gameplay index untouched; optional (L4b) |
 | Copyright | References guide style only; no copying, tracing or recoloring ALttP assets |
 
+## 12. Result after L1–L7
+
+| Area | Now |
+| --- | --- |
+| Rendering | `BattlefieldView` layers: terrain (plain tiles plus corner overlays), units (32×32 frames standing on their tile, lower rows in front), tile buttons (highlights, dim, HP bars, selection, taps), effects. The map scrolls above row 0 by the tallest unit's overhang |
+| Units | Knight (24 px soldier), rat, bee: 32×32 frames, idle 2–4 frames, walk 4 frames, left/right facing by mirroring |
+| Terrain | ALttP grass and dirt, teal water with foam and bank, molten lava, void as a chasm with a cliff face; corner overlays in `terrain/dual/`; variants for sand, grass, water |
+| Rules | Terrain adjacency in `terrain/<id>.toml` (`transitionsTo`); transition PNGs are art only |
+| Icons and FX | Poison family purple, arcane plate teal, others unchanged in shape |
+| Fallbacks kept | `terrain/transitions/` strips still provide the plain sand and terrain tiles (tiles 0 and 15) and the edge tiles for any pair without corner art; tiles 1–14 are unused while every pair has corner art |
+| Not done | Up/down facing (needs back views); props (need a design note); the manual UI checklist (owner) |
+
 ## 11. Checklist
 
 - [x] **L1** Layers and 32×32 frames; goldens unchanged except the removed tile-button drop shadow (see L1 notes).
@@ -253,4 +265,4 @@ Answered by the owner after this plan was written. L2 still records the final ar
 - [x] **L5** Units v2 with animation: rat (side view, 2-frame idle, 4-frame walk) and bee (hovering, 4-frame wing flap for idle and walk) in 32×32 frames; knight from L3.
 - [x] **L6** Portraits, icons, FX v2: venom icons, venom FX and poison ability plates moved to the purple ramp; teleport (arcane) plate moved to deep teal so it stays distinct from poison; knight portrait skin and cheek guards use the v2 ramps.
 - [x] **L7** (optional) Facing, left/right only: units look the way they last walked, by mirroring. Up/down facing is not done: it needs back-view art for every unit and animation, a separate art batch to schedule if wanted.
-- [ ] **L8** Cleanup, docs, manual checklist.
+- [ ] **L8** Cleanup, docs, manual checklist. *(Docs, inventory and consistency review done; the manual `ui-regression-checklist.md` pass on `ui-showcase`, `terrain-mix` and `chain-showcase` is still to be run by the owner.)*
