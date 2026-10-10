@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen
 
-import com.mkz.rpg.screen.feedback.FeedbackTiming
 import korlibs.korge.testing.korgeScreenshotTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
@@ -141,7 +140,7 @@ class BattleSceneSnapshotUpdateTest {
             windowSize = SNAPSHOT_WINDOW_SIZE,
             virtualSize = SNAPSHOT_WINDOW_SIZE,
         ) {
-            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO, feedbackTiming = FeedbackTiming.Standard)
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO, feedbackTiming = PLAYBACK_TIMING)
             awaitBattleReady(scene)
             finishTurnAndAwaitPlayback(scene)
             writeGolden(AFTER_CPU_PLAYBACK, capture())

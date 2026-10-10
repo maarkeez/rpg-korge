@@ -47,6 +47,9 @@ private const val READY_TIMEOUT_MS = 10_000L
 private const val POLL_DELAY_MS = 10L
 private const val SETTLE_DELAY_MS = 200L
 
+/** Real playback timing with idle animation frozen on frame 0, so goldens do not depend on how long playback took. */
+internal val PLAYBACK_TIMING: FeedbackTiming = FeedbackTiming.Standard.copy(idleFrameMs = 0)
+
 internal suspend fun OffscreenStage.createBattleScene(
     scenarioPath: String? = null,
     feedbackTiming: FeedbackTiming = FeedbackTiming.Instant,

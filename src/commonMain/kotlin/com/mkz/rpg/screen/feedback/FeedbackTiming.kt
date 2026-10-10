@@ -17,6 +17,8 @@ data class FeedbackTiming(
     val cameraMs: Int,
     /** A backlog longer than this is played faster, so a CPU turn stays short. */
     val turnBudgetMs: Int,
+    /** How long each idle frame of a standing unit is shown. Zero keeps every unit on frame 0. */
+    val idleFrameMs: Int = 0,
 ) {
     val isInstant: Boolean get() = this == Instant
 
@@ -67,6 +69,7 @@ data class FeedbackTiming(
                 deployMs = 140,
                 cameraMs = 120,
                 turnBudgetMs = 3_000,
+                idleFrameMs = 500,
             )
     }
 }

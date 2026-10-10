@@ -31,11 +31,17 @@ internal val GAME_ART_ASSET_PATHS: List<String> =
         "terrain/transitions/sand_to_void.png",
         "terrain/transitions/sand_to_water.png",
         "unit/bee.png",
+        "unit/bee_idle.png",
         "unit/bee_portrait.png",
+        "unit/bee_walk.png",
         "unit/knight.png",
+        "unit/knight_idle.png",
         "unit/knight_portrait.png",
+        "unit/knight_walk.png",
         "unit/rat.png",
+        "unit/rat_idle.png",
         "unit/rat_portrait.png",
+        "unit/rat_walk.png",
     )
 
 internal val CONTACT_SHEET_ASSET_PATHS: List<String> =

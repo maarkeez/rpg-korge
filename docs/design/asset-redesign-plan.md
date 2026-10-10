@@ -492,7 +492,7 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 - [x] **M2** Prototype (knight, sand_to_grass + sand tile 0 in all strips, venom-damage, defeat FX) merged; goldens reviewed and updated; **owner approved**.
 - [x] **M3** Lava, water, void strips redrawn; readability sheet and terrain-mix reviewed.
 - [x] **M4** Rat, bee, three portraits redrawn; portraits palette-checked.
-- [ ] **M5** Idle and walk strips with registry fallback; snapshots deterministic.
+- [x] **M5** Idle and walk strips with registry fallback; snapshots deterministic.
 - [ ] **M6a** Ability icons reviewed / polished.
 - [ ] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).
 - [ ] **M6c** Authored hit, heal, venom, spread FX.

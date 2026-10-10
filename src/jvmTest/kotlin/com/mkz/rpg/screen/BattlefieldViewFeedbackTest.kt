@@ -3,6 +3,7 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.feedback.FxViews
 import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
+import korlibs.image.bitmap.BmpSlice
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
@@ -188,6 +189,20 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 assertThat(battlefieldView.isWalking("walker-1")).isFalse()
                 assertThat(battlefieldView.fxNamed(FxViews.WALKER_NAME)).isEmpty()
             }
+
+        @Test
+        fun `should show the next walk frame when the walker reaches the next tile`() =
+            viewsTest {
+                // Given
+                val battlefieldView = displayedBattlefieldView()
+                battlefieldView.showWalker(unitType = "knight", row = 0, column = 0)
+                val walker = battlefieldView.fxNamed(FxViews.WALKER_NAME).single() as Container
+                val firstStep = ((walker.firstChild as Image).bitmap as BmpSlice).base
+                // When
+                battlefieldView.showWalker(unitType = "knight", row = 0, column = 1)
+                // Then
+                assertThat(((walker.firstChild as Image).bitmap as BmpSlice).base).isNotSameAs(firstStep)
+            }
     }
 
     @Nested
@@ -246,6 +261,42 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 val tile = battlefieldView.tile(10, 10)
                 assertThat(flash.parent!!.x + flash.x).isEqualTo(tile.parent!!.x + tile.x)
                 assertThat(flash.parent!!.y + flash.y).isEqualTo(tile.parent!!.y + tile.y)
+            }
+    }
+
+    @Nested
+    inner class IdleAnimation {
+        private suspend fun displayedKnight(idleFrameMs: Int): Pair<BattlefieldView, Image> {
+            val battlefieldView = BattlefieldView(idleFrameMs = idleFrameMs)
+            battlefieldView.loadAssets()
+            battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 4).toDto())
+            battlefieldView.displayKnightBattleUnit(row = 1, column = 1)
+            val knight = battlefieldView.tile(1, 1).descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }.single() as Image
+            return battlefieldView to knight
+        }
+
+        @Test
+        fun `should show the next idle frame when an idle frame time has passed`() =
+            viewsTest {
+                // Given
+                val (battlefieldView, knight) = displayedKnight(idleFrameMs = 500)
+                val firstFrame = (knight.bitmap as BmpSlice).base
+                // When
+                battlefieldView.advanceFx(deltaMs = 500.0)
+                // Then
+                assertThat((knight.bitmap as BmpSlice).base).isNotSameAs(firstFrame)
+            }
+
+        @Test
+        fun `should keep the unit on frame 0 when idle animation is disabled`() =
+            viewsTest {
+                // Given
+                val (battlefieldView, knight) = displayedKnight(idleFrameMs = 0)
+                val firstFrame = (knight.bitmap as BmpSlice).base
+                // When
+                battlefieldView.advanceFx(deltaMs = 5_000.0)
+                // Then
+                assertThat((knight.bitmap as BmpSlice).base).isSameAs(firstFrame)
             }
     }
 }

@@ -75,4 +75,31 @@ class SpriteRegistryTest : ViewsForTesting() {
                 assertThat(frames).isNull()
             }
     }
+
+    @Nested
+    inner class UnitFrames {
+        @Test
+        fun `should return every frame of the strip when the unit has an animation strip`() =
+            viewsTest {
+                // Given
+                spriteRegistry.load()
+                // When
+                val frames = spriteRegistry.unitFrames("knight", SpriteRegistry.IDLE)
+                // Then
+                assertThat(frames).hasSize(2)
+                assertThat(frames.map { it.width to it.height }).containsOnly(16 to 16)
+            }
+
+        @Test
+        fun `should return the single unit sprite when the unit has no animation strip`() =
+            viewsTest {
+                // Given
+                spriteRegistry.load()
+                // When
+                val frames = spriteRegistry.unitFrames("dragon", SpriteRegistry.IDLE)
+                // Then
+                assertThat(frames).hasSize(1)
+                assertThat(frames.single().toBMP32()[0, 0]).isEqualTo(UiPalette.placeholder)
+            }
+    }
 }

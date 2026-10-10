@@ -19,6 +19,7 @@ class SpriteRegistry {
     private var highlights: Map<Highlight, Bitmap> = emptyMap()
     private var abilitySelection: Bitmap? = null
     private var fxStrips: Map<String, List<Bitmap>> = emptyMap()
+    private var unitAnimations: Map<Pair<String, String>, List<Bitmap>> = emptyMap()
     private val silhouettes = mutableMapOf<String, Bitmap>()
     private var loaded = false
 
@@ -40,15 +41,28 @@ class SpriteRegistry {
         effects = EFFECT_IDS.associateWith { resourcesVfs[effectPath(it)].readBitmap() }
         highlights = Highlight.entries.associateWith { resourcesVfs[it.path].readBitmap() }
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
-        fxStrips = FX_IDS.mapNotNull { fxId -> loadFxStrip(fxId)?.let { fxId to it } }.toMap()
+        fxStrips = FX_IDS.mapNotNull { fxId -> loadStrip(fxPath(fxId))?.let { fxId to it } }.toMap()
+        unitAnimations =
+            UNIT_IDS
+                .flatMap { unitId ->
+                    UNIT_ANIMATIONS.mapNotNull { animation ->
+                        loadStrip(unitAnimationPath(unitId, animation))?.let { (unitId to animation) to it }
+                    }
+                }.toMap()
         loaded = true
     }
 
     /** Frames of an authored FX strip, or null when the strip file does not exist yet (callers draw the procedural fallback). */
     fun fxFrames(fxId: String): List<Bitmap>? = fxStrips[fxId]
 
-    private suspend fun loadFxStrip(fxId: String): List<Bitmap>? {
-        val file = resourcesVfs[fxPath(fxId)]
+    /** Frames of a unit animation, or just the unit sprite when the strip does not exist. */
+    fun unitFrames(
+        unitId: String,
+        animation: String,
+    ): List<Bitmap> = unitAnimations[unitId to animation] ?: listOf(unit(unitId))
+
+    private suspend fun loadStrip(path: String): List<Bitmap>? {
+        val file = resourcesVfs[path]
         if (!file.exists()) return null
         val strip = file.readBitmap().toBMP32()
         return List(strip.width / ART_SIZE) { index ->
@@ -62,7 +76,7 @@ class SpriteRegistry {
 
     fun unit(unitId: String): Bitmap = units[unitId] ?: placeholder(ART_SIZE)
 
-    /** White copy of the unit sprite, used for hit flashes. */
+    /** White copy of the unit sprite, used for hit flashes. Built from frame 0, so it is the same for every idle frame. */
     fun silhouette(unitId: String): Bitmap = silhouettes.getOrPut(unitId) { FxViews.silhouette(unit(unitId)) }
 
     fun portrait(unitId: String): Bitmap = portraits[unitId] ?: placeholder(PORTRAIT_SIZE)
@@ -96,6 +110,15 @@ class SpriteRegistry {
         internal val FX_IDS = listOf(FX_DEFEAT)
 
         internal fun fxPath(fxId: String): String = "effect/$fxId.png"
+
+        const val IDLE = "idle"
+        const val WALK = "walk"
+        internal val UNIT_ANIMATIONS = listOf(IDLE, WALK)
+
+        internal fun unitAnimationPath(
+            unitId: String,
+            animation: String,
+        ): String = "unit/${unitId}_$animation.png"
 
         internal fun unitPath(unitId: String): String = "unit/$unitId.png"
 

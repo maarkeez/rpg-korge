@@ -35,6 +35,7 @@ class BattleScene(
         BattlefieldView(
             sprites,
             viewportSize = Size(BattleLayout.SCREEN_WIDTH, BattleLayout.BATTLEFIELD_HEIGHT),
+            idleFrameMs = feedbackTiming.idleFrameMs,
         )
     val battleUnitInfoView = BattleUnitInfoView(sprites)
     val attackPreviewView = AttackPreviewView(sprites)

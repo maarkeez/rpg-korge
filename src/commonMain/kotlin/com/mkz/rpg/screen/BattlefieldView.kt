@@ -9,6 +9,7 @@ import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import com.mkz.rpg.shared.adapters.presentation.snapToArtPixel
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
+import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
@@ -34,6 +35,8 @@ import kotlin.math.hypot
 class BattlefieldView(
     private val sprites: SpriteRegistry = SpriteRegistry(),
     private val viewportSize: Size = Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT),
+    /** How long each idle frame is shown. Zero keeps standing units on frame 0, which keeps snapshots deterministic. */
+    private val idleFrameMs: Int = 0,
 ) : UIContainer(viewportSize) {
     companion object {
         const val TERRAIN = "TERRAIN"
@@ -72,6 +75,10 @@ class BattlefieldView(
     private lateinit var battlefieldGrid: UIGridFill
     private val fxLayer = FxLayer()
     private val walkers = mutableMapOf<String, View>()
+    private val walkerSteps = mutableMapOf<String, Int>()
+    private val idleImages = mutableMapOf<Image, List<Bitmap>>()
+    private var idleClockMs = 0.0
+    private var idleFrame = 0
 
     init {
         addChild(viewport)
@@ -212,30 +219,32 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        displayUnit(row, column, sprites.unit("knight"))
+        displayUnit(row, column, "knight")
     }
 
     fun displayRatBattleUnit(
         row: Int,
         column: Int,
     ) {
-        displayUnit(row, column, sprites.unit("rat"))
+        displayUnit(row, column, "rat")
     }
 
     fun displayBeeBattleUnit(
         row: Int,
         column: Int,
     ) {
-        displayUnit(row, column, sprites.unit("bee"))
+        displayUnit(row, column, "bee")
     }
 
     private fun displayUnit(
         row: Int,
         column: Int,
-        unitBitmap: Bitmap,
+        unitId: String,
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(unitBitmap, BATTLE_UNIT)
+        val frames = sprites.unitFrames(unitId, SpriteRegistry.IDLE)
+        val image = tileButton.addImage(frames[idleFrame % frames.size], BATTLE_UNIT)
+        if (frames.size > 1) idleImages[image] = frames
     }
 
     interface Delegate {
@@ -378,12 +387,27 @@ class BattlefieldView(
     /** Number of feedback effects still playing. */
     val activeFxCount: Int get() = fxLayer.activeCount
 
-    fun advanceFx(deltaMs: Double) = fxLayer.advance(deltaMs)
+    fun advanceFx(deltaMs: Double) {
+        fxLayer.advance(deltaMs)
+        advanceIdle(deltaMs)
+    }
+
+    /** Steps every standing unit through its idle frames. All units share one clock, so they move together. */
+    private fun advanceIdle(deltaMs: Double) {
+        if (idleFrameMs <= 0) return
+        idleClockMs += deltaMs
+        val frame = (idleClockMs / idleFrameMs).toInt()
+        if (frame == idleFrame) return
+        idleFrame = frame
+        idleImages.keys.removeAll { it.parent == null }
+        idleImages.forEach { (image, frames) -> image.bitmap = frames[frame % frames.size].slice() }
+    }
 
     fun clearFx() {
         fxLayer.clearEffects()
         walkers.values.forEach { it.removeFromParent() }
         walkers.clear()
+        walkerSteps.clear()
     }
 
     /** The unit sprite turns white for a moment. */
@@ -487,30 +511,38 @@ class BattlefieldView(
         }
     }
 
-    /** Shows a unit that is walking through [row], [column], without touching the unit that stands on that tile. */
+    /**
+     * Shows a unit that is walking through [row], [column], without touching the unit that stands on that tile.
+     * Every hop shows the next walk frame, so the steps follow the movement instead of the clock.
+     */
     fun showWalker(
         unitType: String,
         row: Int,
         column: Int,
         walkerId: String = unitType,
     ) {
+        val frames = sprites.unitFrames(unitType, SpriteRegistry.WALK)
+        val step = walkerSteps[walkerId]?.plus(1) ?: 0
+        walkerSteps[walkerId] = step
         val walker =
             walkers.getOrPut(walkerId) {
                 Container().also { container ->
                     container.name = FxViews.WALKER_NAME
-                    container.image(sprites.unit(unitType)) {
+                    container.image(frames.first()) {
                         scale = PIXEL_SCALE.toDouble()
                         smoothing = false
                     }
                     fxLayer.addChild(container)
                 }
             }
+        (walker as Container).firstChild.let { it as Image }.bitmap = frames[step % frames.size].slice()
         walker.x = column * TILE_SIZE.toDouble()
         walker.y = row * TILE_SIZE.toDouble()
     }
 
     fun hideWalker(unitId: String) {
         walkers.remove(unitId)?.removeFromParent()
+        walkerSteps.remove(unitId)
     }
 
     /** True when the unit sprite of [unitId] is currently drawn as a walker. */
@@ -541,9 +573,9 @@ class BattlefieldView(
     private fun UIButton.addImage(
         bitmap: Bitmap,
         viewName: String,
-    ) {
+    ): Image {
         val button = this
-        button.image(bitmap) {
+        return button.image(bitmap) {
             name = viewName
             scale = PIXEL_SCALE.toDouble()
             smoothing = false

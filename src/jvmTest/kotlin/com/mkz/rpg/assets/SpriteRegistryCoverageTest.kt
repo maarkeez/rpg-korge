@@ -6,8 +6,8 @@ import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
-// Animation strips are optional (M5). When present they must follow the strip convention; when absent the registry uses the single frame.
-private val UNIT_ANIMATIONS = listOf("idle", "walk")
+// Animation strips are optional. When present they must follow the strip convention; when absent the registry uses the single frame.
+private val UNIT_ANIMATIONS = SpriteRegistry.UNIT_ANIMATIONS
 
 class SpriteRegistryCoverageTest {
     @Test
@@ -31,7 +31,7 @@ class SpriteRegistryCoverageTest {
     }
 
     @Test
-    fun `should keep frame 0 equal to the unit sprite and width a multiple of 16 when a unit animation strip exists`() {
+    fun `should be a row of 16x16 frames starting with the unit sprite when a unit animation strip exists`() {
         // Given
         val unitIds = SpriteRegistry.UNIT_IDS
         // When
@@ -45,7 +45,9 @@ class SpriteRegistryCoverageTest {
                     if (strip.height != TILE_PIXEL_SIZE || strip.width % TILE_PIXEL_SIZE != 0) {
                         violations += "$stripPath: expected N x 16 x 16, was ${strip.width}x${strip.height}"
                     }
-                    if (strip.width >= TILE_PIXEL_SIZE && !strip.tile(0).isPixelIdentical(loadBitmap32(SpriteRegistry.unitPath(unitId)))) {
+                    // Only idle must start on the standing sprite (art direction §1); walk frames are mid-step poses.
+                    val startsOnSprite = animation == SpriteRegistry.IDLE
+                    if (startsOnSprite && strip.width >= TILE_PIXEL_SIZE && !strip.tile(0).isPixelIdentical(loadBitmap32(SpriteRegistry.unitPath(unitId)))) {
                         violations += "$stripPath: frame 0 differs from ${SpriteRegistry.unitPath(unitId)}"
                     }
                 }
