@@ -11,13 +11,14 @@ import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import korlibs.korge.scene.Scene
-import korlibs.korge.ui.uiSpacing
-import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
+import korlibs.korge.view.SolidRect
 import korlibs.korge.view.addUpdater
+import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
@@ -27,14 +28,20 @@ class BattleScene(
     val debugEnabled: Boolean = false,
 ) : Scene() {
     private val sprites = SpriteRegistry()
-    val battlefieldView = BattlefieldView(sprites)
+    val battlefieldView =
+        BattlefieldView(
+            sprites,
+            viewportSize = Size(BattleLayout.SCREEN_WIDTH, BattleLayout.BATTLEFIELD_HEIGHT),
+        )
     val battleUnitInfoView = BattleUnitInfoView(sprites)
     val attackPreviewView = AttackPreviewView(sprites)
+    private val sheetPanel = SolidRect(Size(BattleLayout.SCREEN_WIDTH, BattleLayout.SHEET_HEIGHT), UiPalette.panel)
     val battleHudView =
         BattleHudView(
-            Size(390, 300),
+            Size(BattleLayout.SCREEN_WIDTH, BattleLayout.SHEET_HEIGHT),
             battleUnitInfoView,
             attackPreviewView,
+            sheetPanel,
         )
     val playerCallToActionView = PlayerCallToActionView()
 
@@ -87,32 +94,30 @@ class BattleScene(
                 battlefieldHudRepository,
             )
 
-        uiVerticalStack(padding = 2.0) {
-            uiSpacing(Size(0, 10))
-            // Battle info
-            val battleInfoView = BattleInfoView()
-            addChild(battleInfoView)
-            val battleInfoPresenter =
-                BattleInfoPresenter(
-                    battleInfoView,
-                    battleApi,
-                    playerApi,
-                    eventBus,
-                )
-            // Battlefield
-            addChild(battlefieldView)
+        // Battlefield fills the screen. The sheet and the action bar overlay it, and the top strip sits above it.
+        addChild(battlefieldView)
+        battlefieldView.y = BattleLayout.BATTLEFIELD_Y.toDouble()
 
-            uiVerticalStack(padding = 5.0) {
-                uiSpacing(Size(0, 10))
-                addChild(battleHudView)
-                uiSpacing(Size(0, 5))
-                // val finishTurnView = FinishTurnView()
-                // addChild(finishTurnView)
-                // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
-                addChild(playerCallToActionView)
-                FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
-            }
-        }
+        sheetPanel.y = BattleLayout.SHEET_Y.toDouble()
+        addChild(sheetPanel)
+        addChild(battleHudView)
+        battleHudView.y = BattleLayout.SHEET_Y.toDouble()
+
+        addChild(playerCallToActionView)
+        playerCallToActionView.y = BattleLayout.ACTION_BAR_Y.toDouble()
+        FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
+
+        solidRect(BattleLayout.SCREEN_WIDTH, BattleLayout.BATTLEFIELD_Y, UiPalette.panel)
+        val battleInfoView = BattleInfoView()
+        battleInfoView.x = BattleLayout.TOP_STRIP_PADDING.toDouble()
+        battleInfoView.y = (BattleLayout.SAFE_AREA_TOP + (BattleLayout.TOP_STRIP_HEIGHT - battleInfoView.height) / 2)
+        addChild(battleInfoView)
+        BattleInfoPresenter(
+            battleInfoView,
+            battleApi,
+            playerApi,
+            eventBus,
+        )
 
         // Start game
         battleSetupApi.setupBattle(scenario)

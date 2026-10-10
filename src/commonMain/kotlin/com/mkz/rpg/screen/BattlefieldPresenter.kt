@@ -9,6 +9,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudRepository
@@ -32,7 +33,7 @@ class BattlefieldPresenter(
     private val battleHudView: BattleHudView,
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
-    playerApi: PlayerApi,
+    private val playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
     battleApi: BattleApi,
@@ -97,8 +98,9 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
             },
-            eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
+            eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
                 clearSelection()
+                centerOnFirstHumanUnit(event.playerId)
             },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 displayMovementRange(event)
@@ -175,6 +177,14 @@ class BattlefieldPresenter(
             row = selectedBattleUnitEvent.tile.row,
             column = selectedBattleUnitEvent.tile.column,
         )
+    }
+
+    private fun centerOnFirstHumanUnit(playerId: String) {
+        val player = playerApi.searchPlayerById(playerId) ?: return
+        if (player.type != Player.Dto.PlayerTypeDto.HUMAN) return
+        val firstUnit = battleUnitApi.searchBattleUnitsByPlayerId(playerId).firstOrNull() ?: return
+        val position = battlefieldApi.searchPosition(firstUnit.id) ?: return
+        battlefieldView.centerOn(row = position.row, column = position.column)
     }
 
     private fun clearSelection() {

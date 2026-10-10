@@ -13,6 +13,7 @@ class CancelButton(
         uiButton {
             text = "Cancel"
             width = 190.0
+            height = BattleLayout.ACTION_BAR_HEIGHT.toDouble()
             bgColorOut = UiPalette.secondaryButton
             bgColorOver = UiPalette.secondaryButtonOver
             background.borderColor = UiPalette.panelBorder

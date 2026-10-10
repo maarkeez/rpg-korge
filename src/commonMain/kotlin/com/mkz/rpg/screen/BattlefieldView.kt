@@ -4,14 +4,12 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
+import com.mkz.rpg.shared.adapters.presentation.snapToArtPixel
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.Colors
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
-import korlibs.korge.animate.Animator
-import korlibs.korge.animate.animator
-import korlibs.korge.animate.moveTo
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onMouseDrag
 import korlibs.korge.ui.UIButton
@@ -25,13 +23,13 @@ import korlibs.korge.view.image
 import korlibs.math.clamp
 import korlibs.math.geom.Size
 import korlibs.math.geom.Spacing
-import korlibs.math.interpolation.EASE_OUT_QUAD
-import korlibs.math.interpolation.Easing
-import korlibs.time.milliseconds
+import kotlin.math.floor
+import kotlin.math.hypot
 
 class BattlefieldView(
     private val sprites: SpriteRegistry = SpriteRegistry(),
-) : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
+    private val viewportSize: Size = Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT),
+) : UIContainer(viewportSize) {
     companion object {
         const val TERRAIN = "TERRAIN"
         const val BATTLE_UNIT = "BATTLE_UNIT"
@@ -43,18 +41,22 @@ class BattlefieldView(
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
+        /** Pointer travel (pt) beyond which a gesture is a drag and must not select a tile. */
+        const val TAP_DRAG_THRESHOLD = 8.0
+
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
     }
 
     private var delegate: Delegate? = null
     private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
-    private lateinit var battlefieldAnimator: Animator
+    private var mapWidth = 0.0
+    private var mapHeight = 0.0
+    private var scrollX = 0.0
+    private var scrollY = 0.0
+    private var gestureIsDrag = false
 
-    private val viewport =
-        clipContainer(
-            size = Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
-        )
+    private val viewport = clipContainer(size = viewportSize)
     private lateinit var battlefieldGrid: UIGridFill
 
     init {
@@ -93,8 +95,8 @@ class BattlefieldView(
     }
 
     fun displayBattlefield(battlefield: Battlefield.Dto) {
-        val mapHeight = TILE_SIZE * battlefield.rows
-        val mapWidth = TILE_SIZE * battlefield.columns
+        mapHeight = (TILE_SIZE * battlefield.rows).toDouble()
+        mapWidth = (TILE_SIZE * battlefield.columns).toDouble()
         battlefieldGrid =
             viewport.uiGridFill(
                 size = Size(width = mapWidth, height = mapHeight),
@@ -102,26 +104,8 @@ class BattlefieldView(
                 cols = 0,
                 rows = 0,
             )
-        battlefieldAnimator = battlefieldGrid.animator(parallel = true)
-        viewport.onMouseDrag { event ->
-            val dx = event.dx
-            val dy = event.dy
-
-            val minX = -(mapWidth - VIEWPORT_WIDTH).toDouble()
-            val minY = -(mapHeight - VIEWPORT_HEIGHT).toDouble()
-
-            val newX = (battlefieldGrid.x + dx).clamp(minX, 0.0)
-            val newY = (battlefieldGrid.y + dy).clamp(minY, 0.0)
-            battlefieldAnimator
-                .cancel()
-                .moveTo(
-                    view = battlefieldGrid,
-                    x = { newX },
-                    y = { newY },
-                    time = 300.milliseconds,
-                    easing = Easing.EASE_OUT_QUAD,
-                )
-        }
+        scrollTo(0.0, 0.0)
+        installDragScrolling()
         battlefieldGrid.rows = battlefield.rows
         battlefieldGrid.cols = battlefield.columns
         for (row in 0 until battlefield.rows) {
@@ -135,11 +119,56 @@ class BattlefieldView(
                     val tileDto = battlefield.tiles[PositionDto(row, column)]!!
                     tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
                     tileButton.onClick {
-                        delegate?.tileSelected(row, column)
+                        if (!gestureIsDrag) delegate?.tileSelected(row, column)
                     }
                 }
             }
         }
+    }
+
+    /** Scrolls so the tile is as close to the viewport center as the map bounds allow. */
+    fun centerOn(
+        row: Int,
+        column: Int,
+    ) {
+        val tileCenterX = column * TILE_SIZE + TILE_SIZE / 2.0
+        val tileCenterY = row * TILE_SIZE + TILE_SIZE / 2.0
+        scrollTo(viewportSize.width / 2.0 - tileCenterX, viewportSize.height / 2.0 - tileCenterY)
+    }
+
+    private fun installDragScrolling() {
+        var gestureStartScrollX = 0.0
+        var gestureStartScrollY = 0.0
+        viewport.onMouseDrag { drag ->
+            if (drag.start) {
+                gestureIsDrag = false
+                gestureStartScrollX = scrollX
+                gestureStartScrollY = scrollY
+            }
+            if (hypot(drag.dx, drag.dy) > TAP_DRAG_THRESHOLD) gestureIsDrag = true
+            if (gestureIsDrag) scrollTo(gestureStartScrollX + drag.dx, gestureStartScrollY + drag.dy)
+        }
+    }
+
+    /** Keeps the requested offset unsnapped so slow drags accumulate, and shows it snapped to whole art pixels. */
+    private fun scrollTo(
+        x: Double,
+        y: Double,
+    ) {
+        scrollX = clampScroll(x, viewportSize.width, mapWidth)
+        scrollY = clampScroll(y, viewportSize.height, mapHeight)
+        battlefieldGrid.x = snapToArtPixel(scrollX)
+        battlefieldGrid.y = snapToArtPixel(scrollY)
+    }
+
+    private fun clampScroll(
+        offset: Double,
+        viewportLength: Double,
+        mapLength: Double,
+    ): Double {
+        if (mapLength <= viewportLength) return snapToArtPixel((viewportLength - mapLength) / 2.0)
+        val minOffset = -floor((mapLength - viewportLength) / PIXEL_SCALE) * PIXEL_SCALE
+        return offset.clamp(minOffset, 0.0)
     }
 
     fun terrainTileBitmap(

@@ -3,16 +3,20 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.shared.adapters.presentation.snapToArtPixel
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
+import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 
 class BattlefieldViewTest : ViewsForTesting() {
@@ -327,6 +331,141 @@ class BattlefieldViewTest : ViewsForTesting() {
                 tileButton.simulateClick()
                 // Then
                 verify(delegate).tileSelected(row = 0, column = 0)
+            }
+    }
+
+    @Nested
+    inner class Drag {
+        @Test
+        fun `should not select a tile when the pointer is dragged beyond the tap threshold`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val delegate = mock<BattlefieldView.Delegate>()
+                battlefieldView.setDelegate(delegate)
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                mouseMoveTo(100, 100)
+                mouseDown()
+                mouseMoveTo(100, 106)
+                mouseMoveTo(100, 112)
+                mouseUp()
+                // Then
+                verify(delegate, never()).tileSelected(any(), any())
+            }
+
+        @Test
+        fun `should select a tile when the pointer moves less than the tap threshold`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val delegate = mock<BattlefieldView.Delegate>()
+                battlefieldView.setDelegate(delegate)
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                mouseMoveTo(100, 100)
+                mouseDown()
+                mouseMoveTo(102, 103)
+                mouseUp()
+                // Then
+                verify(delegate).tileSelected(row = 2, column = 2)
+            }
+
+        @Test
+        fun `should keep the scroll offset on art pixel multiples when the pointer is dragged`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                mouseMoveTo(200, 200)
+                mouseDown()
+                mouseMoveTo(177, 183)
+                mouseMoveTo(151, 161)
+                mouseUp()
+                // Then
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
+                assertThat(battlefieldGrid.x).isNotZero().isEqualTo(snapToArtPixel(battlefieldGrid.x))
+                assertThat(battlefieldGrid.y).isNotZero().isEqualTo(snapToArtPixel(battlefieldGrid.y))
+            }
+
+        @Test
+        fun `should not scroll beyond the map bounds when the pointer is dragged past the map edge`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                mouseMoveTo(200, 200)
+                mouseDown()
+                mouseMoveTo(-3000, -3000)
+                mouseUp()
+                // Then
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
+                assertThat(battlefieldGrid.x).isGreaterThanOrEqualTo(-(16.0 * BattlefieldView.TILE_SIZE - BattlefieldView.VIEWPORT_WIDTH))
+                assertThat(battlefieldGrid.y).isGreaterThanOrEqualTo(-(16.0 * BattlefieldView.TILE_SIZE - BattlefieldView.VIEWPORT_HEIGHT))
+            }
+    }
+
+    @Nested
+    inner class Viewport {
+        @Test
+        fun `should use the injected viewport size when it is provided`() =
+            viewsTest {
+                // Given
+                val viewportSize = Size(390, 800)
+                // When
+                val battlefieldView = BattlefieldView(viewportSize = viewportSize)
+                // Then
+                assertThat(battlefieldView.width).isEqualTo(390.0)
+                assertThat(battlefieldView.height).isEqualTo(800.0)
+            }
+    }
+
+    @Nested
+    inner class CenterOn {
+        @Test
+        fun `should scroll so the tile is centered on an art pixel multiple when it is centered`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                battlefieldView.centerOn(row = 8, column = 8)
+                // Then
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
+                val tileCenterX = battlefieldGrid.x + 8 * BattlefieldView.TILE_SIZE + BattlefieldView.TILE_SIZE / 2.0
+                val tileCenterY = battlefieldGrid.y + 8 * BattlefieldView.TILE_SIZE + BattlefieldView.TILE_SIZE / 2.0
+                assertThat(tileCenterX).isBetween(BattlefieldView.VIEWPORT_WIDTH / 2.0 - 3, BattlefieldView.VIEWPORT_WIDTH / 2.0 + 3)
+                assertThat(tileCenterY).isBetween(BattlefieldView.VIEWPORT_HEIGHT / 2.0 - 3, BattlefieldView.VIEWPORT_HEIGHT / 2.0 + 3)
+                assertThat(battlefieldGrid.x).isEqualTo(snapToArtPixel(battlefieldGrid.x))
+                assertThat(battlefieldGrid.y).isEqualTo(snapToArtPixel(battlefieldGrid.y))
+            }
+
+        @Test
+        fun `should clamp the scroll to the map bounds when the tile is near the map corner`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                battlefieldView.centerOn(row = 0, column = 0)
+                // Then
+                val battlefieldGrid = getBattlefieldGrid(battlefieldView)
+                assertThat(battlefieldGrid.x).isEqualTo(0.0)
+                assertThat(battlefieldGrid.y).isEqualTo(0.0)
             }
     }
 

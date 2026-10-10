@@ -13,6 +13,7 @@ class ConfirmButton(
         uiButton {
             text = "Confirm"
             width = 190.0
+            height = BattleLayout.ACTION_BAR_HEIGHT.toDouble()
             bgColorOut = UiPalette.primaryButton
             bgColorOver = UiPalette.primaryButtonOver
             background.borderColor = UiPalette.panelBorder
