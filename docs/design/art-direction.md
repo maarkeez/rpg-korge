@@ -2,7 +2,7 @@
 
 Standards for the pixel-art asset redesign. Derived from [`asset-redesign-plan.md`](asset-redesign-plan.md) §6 and [`design-brief.md`](design-brief.md). Read it before drawing or changing any file under `resources/`.
 
-**Status: DRAFT — awaiting owner approval (M1 gate).** Every value below is a proposal until the owner signs off. The open questions in §5 need written owner answers before M2 starts.
+**Status: APPROVED by owner (M1 gate), with Q2 amended to taller units.** Q2 is 16×24, not the 16×16 originally proposed. See §5.1 for the follow-on changes.
 
 Every color is one of the 64 entries of `resources/famicube-palette.png` (enforced by `PaletteCheckerTest`). Luma `Y` is `0.299 R + 0.587 G + 0.114 B` on a 0–255 scale, used for the grayscale check in §4.
 
@@ -15,7 +15,7 @@ Final for M1. Do not invent other sizes; add a family here first.
 | Family | Art size | Drawn at | Rules |
 | --- | --- | --- | --- |
 | Terrain tile | 16×16; strips 256×16 (16 tiles, Wang order) | ×3 = 48 pt | Fully opaque. Tile 0 = pure `from` terrain; tile 15 = pure `to` terrain. Tile 0 identical across all `sand_to_*` strips. |
-| Unit sprite | 16×16 frame; body ≈ 12–15 px tall, feet on rows 13–15 | ×3 | Transparent background, no partial alpha. Frame 0 is `unit/<id>.png`. |
+| Unit sprite | **16×24** frame (owner decision Q2); body ≈ 20–23 px tall, feet on the bottom rows (21–23), ground shadow inside the frame | ×3 = 48 × 72 pt | Transparent background, no partial alpha. Frame 0 is `unit/<id>.png`. Units may overhang the tile above; the frame never exceeds 24 px. |
 | Unit animation strip | N × 16×16, `unit/<id>_<anim>.png` | ×3 | Frame 0 of `idle` equals `unit/<id>.png`. |
 | Portrait | 32×32 | ×3 = 96 pt | On-palette pixel bust, same light direction as the sprite. |
 | Ability icon | 16×16 full square | ×3 = 48 pt | Opaque plate allowed. One clear symbol, readable in grayscale. |
@@ -106,20 +106,29 @@ The failures are the reason M3 and M4 exist. They are recorded here so they are 
 
 ## 5. Open questions (owner decisions)
 
-Proposed answers are recommendations only. None is approved yet.
+Q1, Q3 and Q5 are approved as proposed. Q2 is approved with the owner's change: units may be taller.
+
+### 5.1 Consequences of the Q2 decision
+
+- **Unit frame is 16×24, not 16×16.** Plan §6.1 and §6.2 (silhouette at 16×16, feet on rows 13–15) are superseded for units by this document.
+- **Code changes are needed, not only redrawn files.** The battlefield tile is 16 px (48 pt). A 24 px unit overhangs the tile above it, which affects `BattlefieldView` draw order, `UnitOverlayView` placement (team plate, HP bar) and the hit/selection areas. These changes belong to M2 when the knight is drawn, and must be in the same commit as the asset (plan §11).
+- **Plan M2 conflicts with this decision.** M2 says "same paths and sizes" for `unit/knight.png`. Under Q2 the knight must become 16×24, so M2's wording must be corrected before M2 starts. Frame 0 of `knight.png` is the 16×24 frame.
+- **Registry and tests:** the M0 unit-strip rule (width a multiple of 16, frame 0 equal to `unit/<id>.png`) still holds with a 24 px height. The asset spec test (plan M0 item 1) must be updated to accept 16×24 for `unit/`.
+- **Portraits** (32×32) and ability icons are unaffected.
+
 
 | Q | Question | Proposed answer | Owner decision |
 | --- | --- | --- | --- |
-| Q1 | Accept on-screen size larger than ALttP (48 pt tiles), matching only in proportion? | **Yes.** Keep 48 pt tiles; match proportion, not pixel size. | _pending_ |
-| Q2 | Unit frame 16×16 or taller (16×24) with foot anchoring? | **16×16.** Taller frames need code changes to the tile layout (§13 risk). | _pending_ |
-| Q3 | One facing direction or mirrored left/right? | **One direction in M5.** Mirroring later is cheap. | _pending_ |
-| Q5 | Status icons at 1 pt per art pixel, or integer scale? | **×2 = 32 pt.** Keeps the integer-scale rule and avoids the crowded status icons the design brief (§8) rules out. `EffectView` and `StatusListView` layout must be checked in M6b. | _pending_ |
+| Q1 | Accept on-screen size larger than ALttP (48 pt tiles), matching only in proportion? | **Yes.** Keep 48 pt tiles; match proportion, not pixel size. | Approved |
+| Q2 | Unit frame 16×16 or taller (16×24) with foot anchoring? | **Taller: 16×24**, foot anchored, overhang allowed. Supersedes the 16×16 proposal. Needs code changes (§5.1). | Approved (owner: units may be taller) |
+| Q3 | One facing direction or mirrored left/right? | **One direction in M5.** Mirroring later is cheap. | Approved |
+| Q5 | Status icons at 1 pt per art pixel, or integer scale? | **×2 = 32 pt.** Keeps the integer-scale rule and avoids the crowded status icons the design brief (§8) rules out. `EffectView` and `StatusListView` layout must be checked in M6b. | Approved |
 
 Q4 (new terrain pairs), Q6 (pixel UI font), Q7 (`unit/goblins/` location) and Q8 (approved editor) are not decided here. They stay as listed in the plan.
 
 ## 6. Approval record
 
-- [ ] Owner has approved this document.
-- [ ] Q1, Q2, Q3, Q5 answers are written into §5 above.
+- [x] Owner has approved this document (owner confirmed alignment with all proposals, Q2 amended to taller units).
+- [x] Q1, Q2, Q3, Q5 answers are written into §5 above.
 
-Until both boxes are ticked, M2 does not start.
+M2 may start once the M2 wording conflict in §5.1 is corrected.
