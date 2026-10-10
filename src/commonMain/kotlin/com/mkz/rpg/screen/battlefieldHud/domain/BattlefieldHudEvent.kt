@@ -42,16 +42,10 @@ sealed interface BattlefieldHudEvent : DomainEvent {
         }
     }
 
-    data class SelfAbilityCastPreviewed(
+    /** The player tapped a valid cast group. The preview query decides which units and tiles it affects. */
+    data class AbilityCastPreviewed(
         val casterBattleUnitId: String,
         val abilityId: String,
         val castGroup: CastGroupDto,
-    ) : BattlefieldHudEvent
-
-    data class EnemyAbilityCastPreviewed(
-        val casterBattleUnitId: String,
-        val abilityId: String,
-        val castGroup: CastGroupDto,
-        val enemyBattleUnitId: String,
     ) : BattlefieldHudEvent
 }

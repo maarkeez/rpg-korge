@@ -35,9 +35,7 @@ class ProcessTileSelected(
             is Idle -> selectTileWhenIdle(battlefieldHud, tile)
             is DisplayMovementRange -> selectTileWhenDisplayingMovement(battlefieldHud, tile)
             is DisplayAbilityCastRange -> selectTileWhenDisplayingAbilityCastRange(battlefieldHud, tile)
-            is DisplayAbilityCastPreview -> {
-                // Do nothing
-            }
+            is DisplayAbilityCastPreview -> selectTileWhenPreviewingAbilityCast(battlefieldHud, tile)
         }
     }
 
@@ -130,22 +128,23 @@ class ProcessTileSelected(
         } else if (selectedCastGroup == null) {
             selectOutsideCastGroups(battlefieldHud, casterBattleUnit.playerId, tile)
         } else {
-            val targetBattleUnitId = searchOccupant(tile.row, tile.column)
-            val isSameUnit = casterBattleUnit.id == targetBattleUnitId
-            val noTargetBattleUnit = targetBattleUnitId == null
-            if (isSameUnit || noTargetBattleUnit) {
-                val (events, updatedBattlefieldHud) = battlefieldHud.previewSelfAbilityCast(castGroup = selectedCastGroup).pullEvents()
-                battlefieldHudRepository.update(updatedBattlefieldHud)
-                eventBus.publish(events)
-            } else {
-                val (events, updatedBattlefieldHud) =
-                    battlefieldHud
-                        .previewEnemyAbilityCast(castGroup = selectedCastGroup, enemyBattleUnitId = targetBattleUnitId)
-                        .pullEvents()
-                battlefieldHudRepository.update(updatedBattlefieldHud)
-                eventBus.publish(events)
-            }
+            val (events, updatedBattlefieldHud) = battlefieldHud.previewAbilityCast(castGroup = selectedCastGroup).pullEvents()
+            battlefieldHudRepository.update(updatedBattlefieldHud)
+            eventBus.publish(events)
         }
+    }
+
+    /** A tap on another valid cast group switches the preview. Any other tap, including the previewed group, does nothing. */
+    private fun selectTileWhenPreviewingAbilityCast(
+        battlefieldHud: DisplayAbilityCastPreview,
+        tile: TileDto,
+    ) {
+        val otherCastGroup =
+            battlefieldHud.castGroupsWhereCanCast.firstOrNull { castGroup -> castGroup.tiles.contains(tile) } ?: return
+        if (otherCastGroup == battlefieldHud.castGroup) return
+        val (events, updatedBattlefieldHud) = battlefieldHud.previewAbilityCast(newCastGroup = otherCastGroup).pullEvents()
+        battlefieldHudRepository.update(updatedBattlefieldHud)
+        eventBus.publish(events)
     }
 
     /** An invalid tap never loses the unit selection: it switches to another ally or goes back to the movement range. */

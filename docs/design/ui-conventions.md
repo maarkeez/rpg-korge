@@ -26,7 +26,10 @@ Short set of visual conventions for the battle UI. Source of truth in code: `UiP
 | Selected unit | `selection` | corner brackets marker |
 | Movement range | `move` | dotted fill |
 | Valid target | `castValid` | solid border |
-| Preview target | `castPreview` | crosshair |
+| Preview target | `castPreview` | reticle (corner brackets and side ticks, `CastPreviewTileView`) |
+| Predicted HP change | `hpLoss` / `hpGain` | checkered ghost segment on the unit's HP bar |
+| Predicted lethal hit | `textPrimary` | skull glyph |
+| Status to be applied | `conditional` / `danger` | pip preceded by a "+" badge |
 | Cooldown | `textMuted` | turns-left number |
 | Unavailable ability | `textMuted` | lock glyph |
 

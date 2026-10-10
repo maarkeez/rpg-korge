@@ -26,6 +26,7 @@ internal const val INITIAL_LAYOUT: String = "battle-initial-layout"
 internal const val UNIT_SELECTED: String = "battle-unit-selected"
 internal const val ABILITY_SELECTED: String = "battle-ability-selected"
 internal const val CAST_TARGETS: String = "battle-cast-targets"
+internal const val CAST_PREVIEW: String = "battle-cast-preview"
 internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
 internal const val MOVEMENT_RANGE: String = "battle-movement-range"
 internal const val ABILITY_COOLDOWNS: String = "battle-ability-cooldowns"
@@ -34,6 +35,9 @@ internal const val SHOWCASE_SCENARIO: String = "scenarios/ui-showcase.json"
 private const val HUMAN_KNIGHT_TILE = "row-6-column-6"
 private const val HEAL_ABILITY_INDEX = 5
 internal const val MUSHROOM_ABILITY_INDEX = 1
+internal const val SKULL_ABILITY_INDEX = 2
+private const val ENEMY_RAT_A_TILE = "row-6-column-7"
+private const val SELECTION_VIEW = BattlefieldView.SELECTION
 private const val ENEMY_RAT_TILE = "row-6-column-7"
 private const val EXPECTED_UNIT_COUNT = 4
 private const val READY_TIMEOUT_MS = 10_000L
@@ -76,6 +80,13 @@ internal suspend fun OffscreenStage.selectKnightAbility(
     val button = scene.battleUnitInfoView.descendantsWith { it is AbilityButtonView && it.visible }[abilityIndex] as UIButton
     button.simulateClick(views)
     awaitUntil { namedViewCount(scene.battleUnitInfoView, AbilityButtonView.ABILITY_SELECTION) == 1 }
+}
+
+/** Selects the knight's skull and taps rat A, so the cast preview is displayed. */
+internal suspend fun OffscreenStage.previewKnightSkullOnRat(scene: BattleScene) {
+    selectKnightAbility(scene, SKULL_ABILITY_INDEX)
+    clickView(scene.battlefieldView, ENEMY_RAT_A_TILE)
+    awaitUntil { namedViewCount(scene.battlefieldView, SELECTION_VIEW) > 0 && scene.attackPreviewView.displayedLines.isNotEmpty() }
 }
 
 /** Casts the knight's heal on itself, passes the turn and reselects the knight, so the heal slot shows its cooldown. */

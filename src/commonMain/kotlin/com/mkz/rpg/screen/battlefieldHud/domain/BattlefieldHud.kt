@@ -1,9 +1,9 @@
 package com.mkz.rpg.screen.battlefieldHud.domain
 
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent.AbilityCastPreviewed
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent.AbilityDeselected
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnitAbility
-import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent.SelfAbilityCastPreviewed
 
 sealed interface BattlefieldHud {
     data class Idle(
@@ -121,7 +121,7 @@ sealed interface BattlefieldHud {
                         ),
             )
 
-        fun previewSelfAbilityCast(castGroup: Dto.CastGroupDto) =
+        fun previewAbilityCast(castGroup: Dto.CastGroupDto) =
             DisplayAbilityCastPreview(
                 casterTile = casterTile,
                 battleUnitId = battleUnitId,
@@ -129,10 +129,9 @@ sealed interface BattlefieldHud {
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
                 castGroupsWhereCanCast = castGroupsWhereCanCast,
                 castGroup = castGroup,
-                enemyBattleUnitId = null,
                 events =
                     events +
-                        SelfAbilityCastPreviewed(
+                        AbilityCastPreviewed(
                             casterBattleUnitId = battleUnitId,
                             abilityId = abilityId,
                             castGroup = castGroup,
@@ -140,27 +139,6 @@ sealed interface BattlefieldHud {
             )
 
         fun idle() = Idle(events + BattlefieldHudEvent.Idle)
-
-        fun previewEnemyAbilityCast(
-            castGroup: Dto.CastGroupDto,
-            enemyBattleUnitId: String,
-        ) = DisplayAbilityCastPreview(
-            casterTile = casterTile,
-            battleUnitId = battleUnitId,
-            abilityId = abilityId,
-            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-            castGroupsWhereCanCast = castGroupsWhereCanCast,
-            castGroup = castGroup,
-            enemyBattleUnitId = enemyBattleUnitId,
-            events =
-                events +
-                    BattlefieldHudEvent.EnemyAbilityCastPreviewed(
-                        casterBattleUnitId = battleUnitId,
-                        abilityId = abilityId,
-                        castGroup = castGroup,
-                        enemyBattleUnitId = enemyBattleUnitId,
-                    ),
-        )
     }
 
     data class DisplayAbilityCastPreview(
@@ -170,12 +148,24 @@ sealed interface BattlefieldHud {
         val tilesWhereCanBeMoved: Set<Dto.TileDto>,
         val castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         val castGroup: Dto.CastGroupDto,
-        val enemyBattleUnitId: String?,
         private val events: Set<BattlefieldHudEvent>,
     ) : BattlefieldHud {
         fun pullEvents() = events to copy(events = emptySet())
 
         fun idle() = Idle(events + BattlefieldHudEvent.Idle)
+
+        /** Switches the preview to another valid cast group. */
+        fun previewAbilityCast(newCastGroup: Dto.CastGroupDto): DisplayAbilityCastPreview =
+            copy(
+                castGroup = newCastGroup,
+                events =
+                    events +
+                        AbilityCastPreviewed(
+                            casterBattleUnitId = battleUnitId,
+                            abilityId = abilityId,
+                            castGroup = newCastGroup,
+                        ),
+            )
     }
 
     interface Dto {

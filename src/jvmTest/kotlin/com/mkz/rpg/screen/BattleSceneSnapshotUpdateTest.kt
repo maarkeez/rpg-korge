@@ -105,4 +105,18 @@ class BattleSceneSnapshotUpdateTest {
         }
         assertThat(File(SNAPSHOT_GOLDEN_DIR, "$CAST_TARGETS.png")).exists()
     }
+
+    @Test
+    fun `should write the cast preview golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            previewKnightSkullOnRat(scene)
+            writeGolden(CAST_PREVIEW, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$CAST_PREVIEW.png")).exists()
+    }
 }

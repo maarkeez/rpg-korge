@@ -173,51 +173,25 @@ class BattlefieldHudTest {
         }
 
         @Test
-        fun `should preview the self ability cast and publish the event when a cast group is chosen`() {
+        fun `should preview the ability cast and publish the event when a cast group is chosen`() {
             // Given
             val hud = BattlefieldHudMother.displayAbilityCastRange()
             val castGroup = castGroup(tile(1, 1))
             // When
-            val updatedHud = hud.previewSelfAbilityCast(castGroup = castGroup)
+            val updatedHud = hud.previewAbilityCast(castGroup = castGroup)
             // Then
             assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayAbilityCastPreview::class.java)
             val preview = updatedHud as BattlefieldHud.DisplayAbilityCastPreview
             assertThat(preview.casterTile).isEqualTo(hud.casterTile)
             assertThat(preview.abilityId).isEqualTo(hud.abilityId)
             assertThat(preview.castGroup).isEqualTo(castGroup)
-            assertThat(preview.enemyBattleUnitId).isNull()
             val (events, _) = updatedHud.pullEvents()
             assertThat(events)
                 .containsExactly(
-                    BattlefieldHudEvent.SelfAbilityCastPreviewed(
+                    BattlefieldHudEvent.AbilityCastPreviewed(
                         casterBattleUnitId = hud.battleUnitId,
                         abilityId = hud.abilityId,
                         castGroup = castGroup,
-                    ),
-                )
-        }
-
-        @Test
-        fun `should preview the enemy ability cast and publish the event when an enemy cast group is chosen`() {
-            // Given
-            val hud = BattlefieldHudMother.displayAbilityCastRange()
-            val castGroup = castGroup(tile(2, 2))
-            val enemyBattleUnitId = "battle-unit-2"
-            // When
-            val updatedHud = hud.previewEnemyAbilityCast(castGroup = castGroup, enemyBattleUnitId = enemyBattleUnitId)
-            // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayAbilityCastPreview::class.java)
-            val preview = updatedHud as BattlefieldHud.DisplayAbilityCastPreview
-            assertThat(preview.castGroup).isEqualTo(castGroup)
-            assertThat(preview.enemyBattleUnitId).isEqualTo(enemyBattleUnitId)
-            val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.EnemyAbilityCastPreviewed(
-                        casterBattleUnitId = hud.battleUnitId,
-                        abilityId = hud.abilityId,
-                        castGroup = castGroup,
-                        enemyBattleUnitId = enemyBattleUnitId,
                     ),
                 )
         }
@@ -238,6 +212,31 @@ class BattlefieldHudTest {
     @Nested
     inner class DisplayAbilityCastPreview {
         @Test
+        fun `should switch the previewed cast group and publish the event when another cast group is chosen`() {
+            // Given
+            val firstCastGroup = castGroup(tile(1, 1))
+            val otherCastGroup = castGroup(tile(2, 2))
+            val hud =
+                BattlefieldHudMother.displayAbilityCastPreview(
+                    castGroupsWhereCanCast = listOf(firstCastGroup, otherCastGroup),
+                    castGroup = firstCastGroup,
+                )
+            // When
+            val updatedHud = hud.previewAbilityCast(newCastGroup = otherCastGroup)
+            // Then
+            assertThat(updatedHud.castGroup).isEqualTo(otherCastGroup)
+            val (events, _) = updatedHud.pullEvents()
+            assertThat(events)
+                .containsExactly(
+                    BattlefieldHudEvent.AbilityCastPreviewed(
+                        casterBattleUnitId = hud.battleUnitId,
+                        abilityId = hud.abilityId,
+                        castGroup = otherCastGroup,
+                    ),
+                )
+        }
+
+        @Test
         fun `should return to idle and publish the idle event when idle is invoked`() {
             // Given
             val hud = BattlefieldHudMother.displayAbilityCastPreview()
@@ -252,7 +251,7 @@ class BattlefieldHudTest {
         @Test
         fun `should pull the pending events and clear them when the preview has events`() {
             // Given
-            val hud = BattlefieldHudMother.displayAbilityCastRange().previewSelfAbilityCast(castGroup = castGroup(tile(1, 1)))
+            val hud = BattlefieldHudMother.displayAbilityCastRange().previewAbilityCast(castGroup = castGroup(tile(1, 1)))
             // When
             val (events, clearedHud) = hud.pullEvents()
             // Then

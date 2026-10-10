@@ -51,6 +51,21 @@ class BattleUiScript(
                 (row.toInt() to column.toInt()) to (view as CastTargetTileView).kind
             }
 
+    /** Tiles currently drawn with the preview reticle. */
+    fun previewedTiles(): Set<Pair<Int, Int>> =
+        battlefieldView
+            .descendantsWith { it is CastPreviewTileView }
+            .map { view ->
+                val (row, column) = Regex("row-(\\d+)-column-(\\d+)").matchEntire(view.parent!!.name!!)!!.destructured
+                row.toInt() to column.toInt()
+            }.toSet()
+
+    /** The unit overlay drawn on the tile, or null when the tile has none. */
+    fun overlayAt(
+        row: Int,
+        column: Int,
+    ): UnitOverlayView? = battlefieldView.descendantsWith { it.name == "row-$row-column-$column" }.firstOrNull()?.findViewByName(BattlefieldView.UNIT_OVERLAY) as? UnitOverlayView
+
     fun dimmedTileCount() = battlefieldView.descendantsWith { it is DimTileView }.size
 
     fun isConfirmAndCancelDisplayed() =

@@ -6,6 +6,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -91,6 +92,8 @@ class BattlefieldPresenter(
             movementService = movementService,
         )
 
+    private var previewedBattleUnitIds: Set<String> = emptySet()
+
     private val subscriptions =
         listOf(
             eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -135,11 +138,8 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldHudEvent.AbilityUnavailable> { event ->
                 battleUnitInfoView.displayAbilityMessage(unavailableReason(event.reason))
             },
-            eventBus.subscribe<BattlefieldHudEvent.SelfAbilityCastPreviewed> { event ->
-                displaySelfAbilityCastPreview(event)
-            },
-            eventBus.subscribe<BattlefieldHudEvent.EnemyAbilityCastPreviewed> { event ->
-                displayEnemyAbilityCastPreview(event)
+            eventBus.subscribe<BattlefieldHudEvent.AbilityCastPreviewed> { event ->
+                displayAbilityCastPreview(event)
             },
         )
 
@@ -245,6 +245,7 @@ class BattlefieldPresenter(
         row: Int,
         column: Int,
         battleUnit: BattleUnit.Dto,
+        preview: UnitPreviewState? = null,
     ) {
         val unit = unitApi.searchUnitById(battleUnit.unitId) ?: return
         battlefieldView.displayUnitOverlay(
@@ -257,6 +258,7 @@ class BattlefieldPresenter(
                     isEnemy = isEnemy(battleUnit),
                     onTurnStartedEffectCount = battleUnit.ongoingEffects.onTurnStarted.size,
                     onDefeatedEffectCount = battleUnit.ongoingEffects.onDefeatedEffects.size,
+                    preview = preview,
                 ),
         )
     }
@@ -272,6 +274,7 @@ class BattlefieldPresenter(
     }
 
     private fun clearSelection() {
+        clearPreviewMarks()
         battleUnitInfoView.hide()
         battlefieldView.resetTiles()
         battleHudView.hide()
@@ -322,50 +325,55 @@ class BattlefieldPresenter(
             BattlefieldHudEvent.AbilityUnavailable.Reason.NoCastsLeft -> "Already acted"
         }
 
-    private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed) {
+    /** Asks the read-only preview query what the cast would do and draws it. Nothing in the battle changes. */
+    private fun displayAbilityCastPreview(event: BattlefieldHudEvent.AbilityCastPreviewed) {
+        clearPreviewMarks()
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
-        val ability = abilityApi.searchAbilityById(event.abilityId)!!
+        val preview =
+            battleUnitApi.previewAbilityCast(
+                casterId = event.casterBattleUnitId,
+                abilityId = event.abilityId,
+                castGroup = event.castGroup.tiles.map { tile -> PositionDto(row = tile.row, column = tile.column) },
+            )
+        // Other valid cast groups stay highlighted, so tapping one of them to switch the preview is discoverable.
+        battlefieldView.resetTiles()
+        (battlefieldHudRepository.search() as? BattlefieldHud.DisplayAbilityCastPreview)?.let { displayCastTargets(it.castGroupsWhereCanCast) }
+        val affectedTiles =
+            event.castGroup.tiles
+                .map { it.row to it.column }
+                .toMutableSet()
+        preview.targets.forEach { target ->
+            val position = battlefieldApi.searchPosition(target.battleUnitId) ?: return@forEach
+            val battleUnit = battleUnitApi.searchBattleUnitById(target.battleUnitId) ?: return@forEach
+            affectedTiles += position.row to position.column
+            displayOverlay(position.row, position.column, battleUnit, preview = unitPreviewState(target))
+        }
+        previewedBattleUnitIds = preview.targets.map { it.battleUnitId }.toSet()
+        affectedTiles.forEach { (row, column) -> battlefieldView.displayCastPreviewTile(row = row, column = column) }
+        val summary = CastPreviewSummary { battleUnitId -> battleUnitApi.searchBattleUnitById(battleUnitId)?.let { unitApi.searchUnitById(it.unitId)?.name } }
         attackPreviewView.display(
             casterBattleUnit = casterBattleUnit,
             casterUnit = casterUnit,
-            manaCost = ability.cost,
-            receiverBattleUnit = null,
-            receiverUnit = null,
-            damage = null,
+            manaAfter = preview.manaAfter,
+            cooldownAfter = preview.cooldownAfter,
+            lines = summary(preview),
         )
-        event.castGroup.tiles.forEach { tilePosition ->
-            battlefieldView.displayTileSelection(
-                row = tilePosition.row,
-                column = tilePosition.column,
-            )
-        }
         displayAttackPreview()
     }
 
-    private fun displayEnemyAbilityCastPreview(event: BattlefieldHudEvent.EnemyAbilityCastPreviewed) {
-        val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
-        val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
-        val ability = abilityApi.searchAbilityById(event.abilityId)!!
-        val targetBattleUnit = battleUnitApi.searchBattleUnitById(event.enemyBattleUnitId)!!
-        val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
-        // TODO: Preview effect applications and display them instead of only calculating damage
-        val damage = abilityApi.calculateImmediateDamage(ability.id)
-        attackPreviewView.display(
-            casterBattleUnit = casterBattleUnit,
-            casterUnit = casterUnit,
-            manaCost = ability.cost,
-            receiverBattleUnit = targetBattleUnit,
-            receiverUnit = targetUnit,
-            damage = damage,
+    private fun unitPreviewState(target: PreviewAbilityCast.TargetPreview) =
+        UnitPreviewState(
+            hpAfter = target.hpAfter,
+            isLethal = target.isLethal,
+            pendingOnTurnCount = target.appliedEffects.count { it.timing == PreviewAbilityCast.AppliedEffectPreview.Timing.OVER_TIME },
+            pendingOnDefeatCount = target.appliedEffects.count { it.timing == PreviewAbilityCast.AppliedEffectPreview.Timing.ON_DEATH },
         )
-        event.castGroup.tiles.forEach { tilePosition ->
-            battlefieldView.displayTileSelection(
-                row = tilePosition.row,
-                column = tilePosition.column,
-            )
-        }
-        displayAttackPreview()
+
+    /** Redraws the units that showed predicted changes, now without them. */
+    private fun clearPreviewMarks() {
+        previewedBattleUnitIds.forEach(::refreshOverlay)
+        previewedBattleUnitIds = emptySet()
     }
 
     private fun displayAttackPreview() {

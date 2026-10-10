@@ -254,11 +254,11 @@ class ProcessTileSelectedTest {
     }
 
     @Test
-    fun `should do nothing when the hud is previewing the ability cast`() {
+    fun `should do nothing when the hud is previewing and the selected tile belongs to the previewed cast group`() {
         // Given
         val hud =
             com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother
-                .displayAbilityCastPreview()
+                .displayAbilityCastPreview(castGroupsWhereCanCast = listOf(castGroup(tile(1, 1)), castGroup(tile(2, 2))), castGroup = castGroup(tile(1, 1)))
         battlefieldHudRepository.create(hud)
         // When
         processTileSelected(1, 1)
@@ -268,7 +268,49 @@ class ProcessTileSelectedTest {
     }
 
     @Test
-    fun `should preview the self ability cast when the selected tile belongs to a cast group with no occupant`() {
+    fun `should do nothing when the hud is previewing and the selected tile is outside every cast group`() {
+        // Given
+        val hud =
+            com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother
+                .displayAbilityCastPreview(castGroupsWhereCanCast = listOf(castGroup(tile(1, 1))), castGroup = castGroup(tile(1, 1)))
+        battlefieldHudRepository.create(hud)
+        // When
+        processTileSelected(5, 5)
+        // Then
+        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
+        assertThat(eventBus.publishedEvents).isEmpty()
+    }
+
+    @Test
+    fun `should switch the preview when the hud is previewing and the selected tile belongs to another cast group`() {
+        // Given
+        val previewedCastGroup = castGroup(tile(1, 1))
+        val otherCastGroup = castGroup(tile(2, 2))
+        val hud =
+            com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother
+                .displayAbilityCastPreview(
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "ability-1",
+                    castGroupsWhereCanCast = listOf(previewedCastGroup, otherCastGroup),
+                    castGroup = previewedCastGroup,
+                )
+        battlefieldHudRepository.create(hud)
+        // When
+        processTileSelected(2, 2)
+        // Then
+        val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
+        assertThat(storedHud.castGroup).isEqualTo(otherCastGroup)
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldHudEvent.AbilityCastPreviewed(
+                casterBattleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroup = otherCastGroup,
+            ),
+        )
+    }
+
+    @Test
+    fun `should preview the ability cast when the selected tile belongs to a cast group`() {
         // Given
         val castGroup = castGroup(tile(1, 1))
         battlefieldHudRepository.create(
@@ -285,57 +327,16 @@ class ProcessTileSelectedTest {
                 .battle(players = listOf("player-1", "player-2"))
                 .toDto(),
         )
-        whenever(searchOccupant(1, 1)).thenReturn(null)
         // When
         processTileSelected(1, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         assertThat(storedHud.castGroup).isEqualTo(castGroup)
-        assertThat(storedHud.enemyBattleUnitId).isNull()
         assertThat(eventBus).hasPublishedEvents(
-            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+            BattlefieldHudEvent.AbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castGroup = castGroup,
-            ),
-        )
-    }
-
-    @Test
-    fun `should preview the enemy ability cast when the selected tile is occupied by an enemy battle unit`() {
-        // Given
-        val castGroup = castGroup(tile(1, 1))
-        battlefieldHudRepository.create(
-            displayAbilityCastRange(
-                casterTile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroupsWhereCanCast =
-                    listOf(
-                        castGroup,
-                    ),
-            ),
-        )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(
-            com.mkz.rpg.battle.domain.BattleMother
-                .battle(players = listOf("player-1", "player-2"))
-                .toDto(),
-        )
-        whenever(searchOccupant(1, 1)).thenReturn("enemy-battle-unit-1")
-        // When
-        processTileSelected(1, 1)
-        // Then
-        val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
-        assertThat(storedHud.castGroup).isEqualTo(castGroup)
-        assertThat(storedHud.enemyBattleUnitId).isEqualTo("enemy-battle-unit-1")
-        assertThat(eventBus).hasPublishedEvents(
-            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
-                casterBattleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroup = castGroup,
-                enemyBattleUnitId = "enemy-battle-unit-1",
             ),
         )
     }

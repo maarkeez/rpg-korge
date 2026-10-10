@@ -22,6 +22,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceC
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
@@ -143,6 +144,15 @@ class BattleUnitApi(
             battleUnitRepository,
             abilityExecution,
             eventBus,
+        )
+    val previewAbilityCast =
+        PreviewAbilityCast(
+            battleUnitRepository,
+            abilityApi.searchAbilityById,
+            effectApi.searchEffectById,
+            unitApi.searchUnitById,
+            battlefieldApi.searchPosition,
+            abilityExecution,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)

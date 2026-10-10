@@ -101,4 +101,18 @@ class BattleSceneSnapshotTest {
             assertMatchesGolden(CAST_TARGETS, actual)
         }
     }
+
+    @Test
+    fun `should render the cast preview state matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            previewKnightSkullOnRat(scene)
+            val actual = capture()
+            assertMatchesGolden(CAST_PREVIEW, actual)
+        }
+    }
 }

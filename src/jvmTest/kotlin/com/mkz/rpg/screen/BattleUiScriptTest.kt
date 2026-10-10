@@ -6,10 +6,12 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.battlesetup.adapters.serialization.BattleScenarioLoader
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.usecases.acceptance.BattleStateFingerprint
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import korlibs.korge.tests.ViewsForTesting
@@ -231,6 +233,89 @@ class BattleUiScriptTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class CastPreview {
+        @Test
+        fun `should preview the damage the on death effect and the lethal marks when player taps a skull target`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                // When
+                script.tapTile(row = 6, column = 7)
+                // Then
+                assertThat(script.previewedTiles()).containsExactly(6 to 7)
+                assertThat(attackPreviewView.displayedLines).containsExactly("Rat: 20 -> 10 HP, +Venom on death")
+                assertThat(script.overlayAt(row = 6, column = 7)!!.ghostPixelCount).isGreaterThan(0)
+                assertThat(script.overlayAt(row = 6, column = 7)!!.pendingPipCount).isEqualTo(1)
+                assertThat(script.isConfirmAndCancelDisplayed()).isTrue()
+            }
+
+        @Test
+        fun `should switch the preview when player taps another valid target while previewing`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(TELEPORT_ABILITY_INDEX)
+                val (firstTarget, secondTarget) = script.castTargets(battleUnitId = playerOneKnightId, abilityId = "teleport").take(2)
+                script.tapTile(row = firstTarget.row, column = firstTarget.column)
+                // When
+                script.tapTile(row = secondTarget.row, column = secondTarget.column)
+                // Then
+                assertThat(script.previewedTiles()).contains(secondTarget.row to secondTarget.column)
+                assertThat(script.previewedTiles()).doesNotContain(firstTarget.row to firstTarget.column)
+                assertThat(script.isConfirmAndCancelDisplayed()).isTrue()
+            }
+
+        @Test
+        fun `should keep the preview when player taps a tile that is not a valid target while previewing`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                script.tapTile(row = 6, column = 7)
+                // When
+                script.tapTile(row = 0, column = 0)
+                // Then
+                assertThat(script.previewedTiles()).containsExactly(6 to 7)
+                assertThat(script.isConfirmAndCancelDisplayed()).isTrue()
+            }
+
+        @Test
+        fun `should clear every preview mark when player cancels the preview`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                script.tapTile(row = 6, column = 7)
+                // When
+                script.cancelCast()
+                // Then
+                assertThat(script.previewedTiles()).isEmpty()
+                assertThat(script.overlayAt(row = 6, column = 7)!!.ghostPixelCount).isZero()
+                assertThat(script.overlayAt(row = 6, column = 7)!!.pendingPipCount).isZero()
+            }
+
+        @Test
+        fun `should leave the battle state identical when player previews and cancels`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                val fingerprintBefore = fingerprint()
+                // When
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                script.tapTile(row = 6, column = 7)
+                script.cancelCast()
+                // Then
+                assertThat(fingerprint()).isEqualTo(fingerprintBefore)
+            }
+    }
+
+    @Nested
     inner class AbilityAvailability {
         @Test
         fun `should show the heal slot on cooldown with the turns left when the knight reselected after healing`() =
@@ -403,7 +488,15 @@ class BattleUiScriptTest : ViewsForTesting() {
             }
     }
 
-    private suspend fun Stage.setupBattleUiScript(): BattleUiScript {
+    private fun fingerprint() =
+        BattleStateFingerprint.capture(
+            playerIds = listOf(playerOneId, "player-two"),
+            battleUnitApi = battleUnitApi,
+            battlefieldApi = battlefieldApi,
+            battleApi = battleApi,
+        )
+
+    private suspend fun Stage.setupBattleUiScript(scenarioPath: String? = null): BattleUiScript {
         battlefieldView.loadAssets()
         battleUnitInfoView.loadAssets()
         attackPreviewView.loadAssets()
@@ -436,7 +529,7 @@ class BattleUiScriptTest : ViewsForTesting() {
         }
 
         terrainApi.init()
-        battleSetupApi.setupBattle()
+        battleSetupApi.setupBattle(scenarioPath?.let { BattleScenarioLoader().load(it) })
         eventBus.dispatch()
 
         return BattleUiScript(
@@ -478,6 +571,7 @@ class BattleUiScriptTest : ViewsForTesting() {
             ?: false
 
     companion object {
+        private const val SKULL_ABILITY_INDEX = 2
         private const val TELEPORT_ABILITY_INDEX = 3
         private const val HEAL_ABILITY_INDEX = 5
         private const val BATTLEFIELD_SIZE = 16

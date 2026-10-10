@@ -271,6 +271,16 @@ class BattlefieldView(
         }
     }
 
+    /** Marks a tile affected by the previewed cast with a reticle, replacing the valid-target border it had. */
+    fun displayCastPreviewTile(
+        row: Int,
+        column: Int,
+    ) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.findViewByName(SELECTION)?.removeFromParent()
+        tileButton.addChild(CastPreviewTileView().also { it.name = SELECTION })
+    }
+
     fun displayTileSelection(
         row: Int,
         column: Int,
