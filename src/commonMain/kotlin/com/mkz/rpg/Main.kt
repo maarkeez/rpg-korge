@@ -1,6 +1,6 @@
 package com.mkz.rpg
 
-import com.mkz.rpg.screen.BattleScene
+import com.mkz.rpg.screen.adapters.presentation.BattleScene
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer

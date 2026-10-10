@@ -145,7 +145,11 @@ val pitestReport = tasks.register<JavaExec>("pitest") {
         "--reportDir=$reportDir",
         "--targetClasses=com.mkz.rpg.*",
         "--targetTests=com.mkz.rpg.*",
-        "--excludedClasses=com.mkz.rpg.*.adapters.presentation.*",
+        // A leading '~' makes PIT read the pattern as a regex. Only classes declared directly in a
+        // `<subdomain>.adapters.presentation` package are excluded, so nested presentation subdomains
+        // (e.g.: `screen.adapters.presentation.battlefieldHud`) are still mutation tested.
+        // Note: PIT escapes '+' and the CLI splits on ',', so neither can be used in the regex.
+        """--excludedClasses=~com\.mkz\.rpg\.[^.]*\.adapters\.presentation\.[^.]*""",
         "--excludedTestClasses=com.mkz.rpg.shared.adapters.architecture.*",
         "--sourceDirs=${commonMainSources.absolutePath},${jvmMainSources.absolutePath}",
         "--mutableCodePaths=${jvmMainClasses.absolutePath}",
