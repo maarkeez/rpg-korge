@@ -494,7 +494,7 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 - [x] **M4** Rat, bee, three portraits redrawn; portraits palette-checked.
 - [x] **M5** Idle and walk strips with registry fallback; snapshots deterministic.
 - [x] **M6a** Ability icons reviewed / polished.
-- [ ] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).
+- [x] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).
 - [ ] **M6c** Authored hit, heal, venom, spread FX.
 - [ ] **M7** (optional) Terrain variants / props.
 - [ ] **M8** Unused assets retired after verification; docs and inventory updated; full manual checklist passed.

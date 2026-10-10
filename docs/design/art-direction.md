@@ -118,7 +118,7 @@ Q1, Q2, Q3 and Q5 are approved as proposed. Units keep the 16×16 frame for now,
 | Q1 | Accept on-screen size larger than ALttP (48 pt tiles), matching only in proportion? | **Yes.** Keep 48 pt tiles; match proportion, not pixel size. | Approved |
 | Q2 | Unit frame 16×16 or taller (16×24) with foot anchoring? | **16×16.** Taller frames would need code changes to the tile layout (§13 risk); revisit only if needed later. | Approved |
 | Q3 | One facing direction or mirrored left/right? | **One direction in M5.** Mirroring later is cheap. | Approved |
-| Q5 | Status icons at 1 pt per art pixel, or integer scale? | **×2 = 32 pt.** Keeps the integer-scale rule and avoids the crowded status icons the design brief (§8) rules out. `EffectView` and `StatusListView` layout must be checked in M6b. | Approved |
+| Q5 | Status icons at 1 pt per art pixel, or integer scale? | **×2 = 32 pt.** Keeps the integer-scale rule and avoids the crowded status icons the design brief (§8) rules out. Applied in M6b: `StatusListView` shows up to three statuses side by side (icon with name and turns beside it) so the 34 pt row still fits the sheet. | Approved |
 
 Q4 (new terrain pairs), Q6 (pixel UI font), Q7 (`unit/goblins/` location) and Q8 (approved editor) are not decided here. They stay as listed in the plan.
 

@@ -2,6 +2,7 @@ package com.mkz.rpg.screen
 
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIText
+import korlibs.korge.view.Image
 import korlibs.korge.view.descendantsWith
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -43,6 +44,19 @@ class StatusListViewTest : ViewsForTesting() {
                 // Then
                 assertThat(labels(statusListView)).containsExactly("On death")
                 assertThat(statusListView.descendantsWith { it.name == StatusListView.STATUS_ON_DEATH_GLYPH }).hasSize(1)
+            }
+
+        @Test
+        fun `should draw the status icon at twice its art size when a status is displayed`() =
+            viewsTest {
+                // Given
+                val statusListView = StatusListView(korlibs.math.geom.Size(390, StatusListView.ROW_HEIGHT))
+                // When
+                statusListView.display(listOf(StatusListView.Status(effectId = "venom-damage", turnsLeft = 2)))
+                // Then
+                val icon = statusListView.descendantsWith { it is Image }.single()
+                assertThat(icon.scaledWidth).isEqualTo(32.0)
+                assertThat(icon.scaledHeight).isEqualTo(32.0)
             }
 
         @Test

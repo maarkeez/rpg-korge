@@ -16,7 +16,7 @@ class EffectsView(
 
     private val effectViewsLayout =
         uiHorizontalStack(padding = 2.0) {
-            val effectViewSize = Size(width = 16, height = 16)
+            val effectViewSize = Size(width = 32, height = 32)
             effectViews =
                 arrayOf(
                     EffectView(effectViewSize, sprites),

@@ -26,7 +26,7 @@ class BattleUnitInfoView(
     private lateinit var unitNameView: UnitNameView
     private lateinit var turnPipsView: TurnPipsView
     private lateinit var abilityButtons: Array<AbilityButtonView>
-    private val statusListView = StatusListView(Size(width = 390.0, height = StatusListView.MAX_ROWS * StatusListView.ROW_HEIGHT.toDouble()), sprites)
+    private val statusListView = StatusListView(Size(width = 390.0, height = StatusListView.ROW_HEIGHT.toDouble()), sprites)
     private val readOnlyAbilities = Container()
     private val abilityLine =
         uiText("", size = Size(width = 390.0, height = ABILITY_LINE_HEIGHT)) {
