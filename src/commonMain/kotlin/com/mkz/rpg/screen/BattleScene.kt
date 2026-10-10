@@ -9,6 +9,7 @@ import com.mkz.rpg.battlesetup.adapters.serialization.BattleScenarioLoader
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
@@ -23,6 +24,7 @@ import kotlin.random.Random
 class BattleScene(
     val seed: Long? = null,
     val scenarioPath: String? = null,
+    val debugEnabled: Boolean = false,
 ) : Scene() {
     val battlefieldView = BattlefieldView()
     val battleUnitInfoView = BattleUnitInfoView()
@@ -43,7 +45,8 @@ class BattleScene(
 
     override suspend fun SContainer.sceneMain() {
         val scenario = scenarioPath?.let { BattleScenarioLoader().load(it) }
-        val random = (seed ?: scenario?.toDto()?.seed)?.let { Random(it) } ?: Random(System.nanoTime())
+        val effectiveSeed = seed ?: scenario?.toDto()?.seed
+        val random = effectiveSeed?.let { Random(it) } ?: Random(System.nanoTime())
 
         // Event bus
         val eventBus = InMemoryEventBus()
@@ -65,6 +68,7 @@ class BattleScene(
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Main scene
+        val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
         val battlefieldPresenter =
             BattlefieldPresenter(
                 battlefieldView,
@@ -79,6 +83,7 @@ class BattleScene(
                 abilityApi,
                 battleApi,
                 eventBus,
+                battlefieldHudRepository,
             )
 
         uiVerticalStack(padding = 2.0) {
@@ -110,5 +115,13 @@ class BattleScene(
 
         // Start game
         battleSetupApi.setupBattle(scenario)
+
+        installDebugSupport(
+            battleApi = battleApi,
+            playerApi = playerApi,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            effectiveSeed = effectiveSeed,
+        )
     }
 }

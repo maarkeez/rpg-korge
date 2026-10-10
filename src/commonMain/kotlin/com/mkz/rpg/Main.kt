@@ -10,5 +10,10 @@ suspend fun main(args: Array<String>) =
     Korge(windowSize = Size(390, 844), backgroundColor = Colors["#2b2b2b"], args = args) {
         val sceneContainer = sceneContainer()
         val scenarioPath = args.firstOrNull { it.endsWith(".json") }
-        sceneContainer.changeTo { BattleScene(scenarioPath = scenarioPath) }
+        sceneContainer.changeTo {
+            BattleScene(
+                scenarioPath = scenarioPath,
+                debugEnabled = true,
+            )
+        }
     }

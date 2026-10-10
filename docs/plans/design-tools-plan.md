@@ -41,7 +41,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 | T3 — UI end-to-end tests | **Done** | `BattleUiScript` + `BattleUiScriptTest`: real views/presenters on a deterministic API graph, simulated clicks, CPU turn settles in one `dispatch()` |
 | T5 — File-based battle scenarios | **Done** | `Battlesetup` aggregate + `BattleScenarioLoader`, 3 starter scenarios in `resources/scenarios/`, `-Pscenario=` dev run, loader + acceptance tests |
 | T6 — Palette / asset checks | **Done** | `PaletteCheckerTest` (4 tests), `AssetContactSheetTest` + `generateContactSheet` task; 8 legacy assets remapped on-palette |
-| T4 — Debug overlay + shortcuts | Not started | |
+| T4 — Debug overlay + shortcuts | **Done** | `DebugOverlay` (jvm) + no-op `actual` (js); `F3` toggle, `R`/`N` restart via `changeToAsync` + injector factory (no `BuildersKt`); `InMemoryEventBus.queueDepth`/`lastEvents`; 6 overlay tests |
 | T7 — VFX sandbox | Not started | |
 | T8 — Iteration polish | Not started | |
 | T9 — Turn scrubber | Not started | |
@@ -97,7 +97,7 @@ Until these are injected, identical inputs do not produce identical battles, whi
 
 **Acceptance criteria**: a full CPU-vs-CPU turn cycle executes purely through simulated input and ends in the expected state.
 
-### T4 — In-game debug overlay + shortcuts (gated)
+### T4 — In-game debug overlay + shortcuts (gated) — done
 
 **Goal**: while running `runJvmAutoreload`, see what the game sees.
 

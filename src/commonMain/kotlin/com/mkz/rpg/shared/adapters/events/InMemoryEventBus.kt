@@ -12,6 +12,15 @@ class InMemoryEventBus : EventBus {
     private val queue =
         ArrayDeque<DomainEvent>()
 
+    private val lastDispatched =
+        ArrayDeque<DomainEvent>()
+
+    val queueDepth: Int
+        get() = queue.size
+
+    val lastEvents: List<DomainEvent>
+        get() = lastDispatched.toList()
+
     override fun publish(events: Set<DomainEvent>) {
         events.forEach(::publish)
     }
@@ -28,6 +37,11 @@ class InMemoryEventBus : EventBus {
             handlers[event::class]
                 ?.toList()
                 ?.forEach { it(event) }
+
+            lastDispatched += event
+            if (lastDispatched.size > MAX_LAST_EVENTS) {
+                lastDispatched.removeFirst()
+            }
 
             println("[EVENT] Dispatched: ${event::class.simpleName}")
         }
@@ -52,5 +66,9 @@ class InMemoryEventBus : EventBus {
         return Subscription {
             list -= wrapper
         }
+    }
+
+    private companion object {
+        private const val MAX_LAST_EVENTS = 32
     }
 }

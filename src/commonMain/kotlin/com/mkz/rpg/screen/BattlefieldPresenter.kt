@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.screen.battlefieldHud.domain.BattlefieldHudRepository
 import com.mkz.rpg.screen.battlefieldHud.usecases.commands.CancelCast
 import com.mkz.rpg.screen.battlefieldHud.usecases.commands.ConfirmCast
 import com.mkz.rpg.screen.battlefieldHud.usecases.commands.InitializeBattlefieldHud
@@ -36,9 +37,9 @@ class BattlefieldPresenter(
     private val abilityApi: AbilityApi,
     battleApi: BattleApi,
     eventBus: EventBus,
+    private val battlefieldHudRepository: BattlefieldHudRepository = InMemoryBattlefieldHudRepository(),
 ) : BattlefieldView.Delegate,
     AbilityButtonView.Delegate {
-    private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val movementService =
         MovementService(
             searchBattleUnitById = battleUnitApi.searchBattleUnitById,
