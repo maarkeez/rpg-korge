@@ -7,6 +7,7 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -24,6 +25,7 @@ import com.mkz.rpg.screen.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class BattlefieldPresenter(
@@ -37,9 +39,10 @@ class BattlefieldPresenter(
     private val playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
-    battleApi: BattleApi,
+    private val battleApi: BattleApi,
     eventBus: EventBus,
     private val battlefieldHudRepository: BattlefieldHudRepository = InMemoryBattlefieldHudRepository(),
+    private val searchTerrainById: SearchTerrainById? = null,
 ) : BattlefieldView.Delegate,
     AbilityButtonView.Delegate {
     private val movementService =
@@ -182,14 +185,38 @@ class BattlefieldPresenter(
         battlefieldView.resetTiles()
         battleUnitInfoView.display(battleUnit, unit, interactive = !isEnemy(battleUnit))
         battleHudView.displayBattleUnitInfoView()
+        val style = movementStyle(battleUnit)
+        val hazardousTiles = hazardousTiles(selectedBattleUnitEvent.tilesWhereCanBeMoved.map { it.row to it.column })
         selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
-            battlefieldView.displayPotentialMovement(row = tile.row, column = tile.column)
+            battlefieldView.displayPotentialMovement(
+                row = tile.row,
+                column = tile.column,
+                style = style,
+                hazard = (tile.row to tile.column) in hazardousTiles,
+            )
         }
         battlefieldView.displayUnitSelection(
             row = selectedBattleUnitEvent.tile.row,
             column = selectedBattleUnitEvent.tile.column,
             isEnemy = isEnemy(battleUnit),
         )
+    }
+
+    /** Allies that can be commanded now get the dotted style. Everything else is only inspected. */
+    private fun movementStyle(battleUnit: BattleUnit.Dto): MovementStyle {
+        val isCommandable = !isEnemy(battleUnit) && battleApi.searchBattle()?.currentPlayerTurn == battleUnit.playerId
+        return if (isCommandable) MovementStyle.ALLY else MovementStyle.INSPECT
+    }
+
+    private fun hazardousTiles(positions: List<Pair<Int, Int>>): Set<Pair<Int, Int>> {
+        val searchTerrain = searchTerrainById ?: return emptySet()
+        if (positions.isEmpty()) return emptySet()
+        val tiles = battlefieldApi.searchBattlefield()?.tiles ?: return emptySet()
+        return positions
+            .filter { (row, column) ->
+                val terrainId = tiles[PositionDto(row, column)]?.terrainId ?: return@filter false
+                searchTerrain(terrainId)?.effectId != null
+            }.toSet()
     }
 
     private fun refreshOverlay(battleUnitId: String) {

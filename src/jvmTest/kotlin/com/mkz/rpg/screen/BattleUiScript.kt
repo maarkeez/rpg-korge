@@ -39,6 +39,8 @@ class BattleUiScript(
         abilityId: String,
     ) = battleUnitApi.whereCanCast(battleUnitId = battleUnitId, abilityId = abilityId).flatMap { castGroup -> castGroup.positions }
 
+    fun reachableTiles(battleUnitId: String) = battleUnitApi.whereCanMove(battleUnitId).map { it.row to it.column }.toSet()
+
     fun isConfirmAndCancelDisplayed() =
         playerCallToActionView.findViewByName("call-to-action")?.let { callToAction ->
             descendants(callToAction, ConfirmButton::class).isNotEmpty() && descendants(callToAction, CancelButton::class).isNotEmpty()

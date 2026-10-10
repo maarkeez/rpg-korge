@@ -63,4 +63,18 @@ class BattleSceneSnapshotUpdateTest {
         }
         assertThat(File(SNAPSHOT_GOLDEN_DIR, "$ENEMY_INSPECTED.png")).exists()
     }
+
+    @Test
+    fun `should write the movement range state golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            selectHumanKnight(scene)
+            writeGolden(MOVEMENT_RANGE, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$MOVEMENT_RANGE.png")).exists()
+    }
 }

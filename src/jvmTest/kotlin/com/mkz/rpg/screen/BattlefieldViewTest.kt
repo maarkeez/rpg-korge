@@ -206,6 +206,65 @@ class BattlefieldViewTest : ViewsForTesting() {
                 val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNotNull
             }
+
+        @Test
+        fun `should display a dotted ally range tile without hazard glyph when ally movement is displayed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayPotentialMovement(row = 0, column = 0, style = MovementStyle.ALLY, hazard = false)
+                // Then
+                val rangeTile = movementRangeTile(battlefieldView)
+                assertThat(rangeTile.style).isEqualTo(MovementStyle.ALLY)
+                assertThat(rangeTile.descendantsWith { it.name == MovementRangeTileView.HAZARD_GLYPH }).isEmpty()
+            }
+
+        @Test
+        fun `should draw different shapes when ally and inspect movement are displayed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+                // When
+                battlefieldView.displayPotentialMovement(row = 0, column = 0, style = MovementStyle.ALLY)
+                battlefieldView.displayPotentialMovement(row = 0, column = 1, style = MovementStyle.INSPECT)
+                // Then
+                val allyShape = pixelPositions(movementRangeTile(battlefieldView, column = 0))
+                val inspectShape = pixelPositions(movementRangeTile(battlefieldView, column = 1))
+                assertThat(allyShape).isNotEqualTo(inspectShape)
+            }
+
+        @Test
+        fun `should display the hazard glyph when the movement tile is hazardous`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayPotentialMovement(row = 0, column = 0, style = MovementStyle.ALLY, hazard = true)
+                // Then
+                val rangeTile = movementRangeTile(battlefieldView)
+                assertThat(rangeTile.descendantsWith { it.name == MovementRangeTileView.HAZARD_GLYPH }).hasSize(1)
+            }
+
+        private fun movementRangeTile(
+            battlefieldView: BattlefieldView,
+            column: Int = 0,
+        ): MovementRangeTileView {
+            val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-$column") as UIButton
+            return tileButton.children.filterIsInstance<MovementRangeTileView>().single()
+        }
+
+        private fun pixelPositions(rangeTile: MovementRangeTileView): Set<Pair<Double, Double>> =
+            rangeTile
+                .descendantsWith { it is korlibs.korge.view.SolidRect }
+                .map { it.x to it.y }
+                .toSet()
     }
 
     @Nested

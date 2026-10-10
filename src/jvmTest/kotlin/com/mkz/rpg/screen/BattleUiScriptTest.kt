@@ -21,6 +21,7 @@ import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 import kotlin.random.Random
 
 class BattleUiScriptTest : ViewsForTesting() {
@@ -83,6 +84,73 @@ class BattleUiScriptTest : ViewsForTesting() {
                 assertThat(script.occupantAt(row = 5, column = 6)).isEqualTo(playerOneKnightId)
             }
     }
+
+    @Nested
+    inner class MovementRange {
+        @Test
+        fun `should highlight exactly the tiles returned by whereCanMove when player selects a knight`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                // When
+                script.selectUnit(playerOneKnightId)
+                // Then
+                assertThat(movementTiles(MovementStyle.ALLY)).isEqualTo(script.reachableTiles(playerOneKnightId))
+                assertThat(movementTiles(MovementStyle.INSPECT)).isEmpty()
+            }
+
+        @Test
+        fun `should highlight the movement range with the inspect style when player taps an enemy unit`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                // When
+                script.selectUnit(playerTwoRatId)
+                // Then
+                assertThat(movementTiles(MovementStyle.INSPECT)).isEqualTo(script.reachableTiles(playerTwoRatId))
+                assertThat(movementTiles(MovementStyle.ALLY)).isEmpty()
+            }
+
+        @Test
+        fun `should keep the unit selected and refresh the range with the remaining steps when it moves`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                val rangeBeforeMoving = movementTiles(MovementStyle.ALLY)
+                // When
+                script.tapTile(row = 5, column = 6)
+                // Then
+                val rangeAfterMoving = movementTiles(MovementStyle.ALLY)
+                assertThat(rangeAfterMoving).isEqualTo(script.reachableTiles(playerOneKnightId))
+                assertThat(rangeAfterMoving.size).isLessThan(rangeBeforeMoving.size)
+                assertThat(battleUnitInfoView.visible).isTrue()
+            }
+
+        @Test
+        fun `should show no movement range when the selected knight has no steps left`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                val farthestTile = script.reachableTiles(playerOneKnightId).maxBy { (row, column) -> abs(row - 6) + abs(column - 6) }
+                script.tapTile(row = farthestTile.first, column = farthestTile.second)
+                // When
+                val tilesLeft = movementTiles(MovementStyle.ALLY)
+                // Then
+                assertThat(script.battleUnit(playerOneKnightId).remainingTurnActions.remainingSteps).isZero()
+                assertThat(tilesLeft).isEmpty()
+            }
+    }
+
+    private fun movementTiles(style: MovementStyle): Set<Pair<Int, Int>> =
+        battlefieldView
+            .descendantsWith { it.name?.startsWith("row-") ?: false }
+            .filter { tile -> tile.descendantsWith { it is MovementRangeTileView && it.style == style }.isNotEmpty() }
+            .map { tile ->
+                val (row, column) = Regex("row-(\\d+)-column-(\\d+)").matchEntire(tile.name!!)!!.destructured
+                row.toInt() to column.toInt()
+            }.toSet()
 
     @Nested
     inner class EnemyInspection {
@@ -196,6 +264,7 @@ class BattleUiScriptTest : ViewsForTesting() {
             abilityApi,
             battleApi,
             eventBus,
+            searchTerrainById = terrainApi.searchTerrainById,
         )
         FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
 

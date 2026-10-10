@@ -25,6 +25,7 @@ internal const val INITIAL_LAYOUT: String = "battle-initial-layout"
 internal const val UNIT_SELECTED: String = "battle-unit-selected"
 internal const val ABILITY_SELECTED: String = "battle-ability-selected"
 internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
+internal const val MOVEMENT_RANGE: String = "battle-movement-range"
 internal const val SHOWCASE_SCENARIO: String = "scenarios/ui-showcase.json"
 
 private const val HUMAN_KNIGHT_TILE = "row-6-column-6"

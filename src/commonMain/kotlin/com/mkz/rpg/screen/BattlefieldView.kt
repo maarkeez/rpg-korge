@@ -231,9 +231,11 @@ class BattlefieldView(
     fun displayPotentialMovement(
         row: Int,
         column: Int,
+        style: MovementStyle = MovementStyle.ALLY,
+        hazard: Boolean = false,
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(sprites.highlight(SpriteRegistry.Highlight.MOVEMENT), SELECTION)
+        tileButton.addChild(MovementRangeTileView(style, hazard).also { it.name = SELECTION })
     }
 
     fun displayPotentialCast(
