@@ -54,7 +54,7 @@ class ApplyOnTurnStartedEffectsTest {
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
         assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
         assertThat(eventBus)
-            .hasPublishedEvents(BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id))
+            .hasPublishedEvents(BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id, amount = 3, remainingHealthPoints = 7))
     }
 
     @Test

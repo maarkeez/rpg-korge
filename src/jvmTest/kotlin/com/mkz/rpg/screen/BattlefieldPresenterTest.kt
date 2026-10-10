@@ -205,7 +205,7 @@ class BattlefieldPresenterTest {
             whenever(battlefieldApi.searchPosition).thenReturn(searchPosition)
             whenever(searchPosition(damagedBattleUnit.id)).thenReturn(Battlefield.Dto.PositionDto(row = 3, column = 4))
             // When
-            eventBus.publish(BattleUnitEvent.BattleUnitDamaged(battleUnitId = damagedBattleUnit.id))
+            eventBus.publish(BattleUnitEvent.BattleUnitDamaged(battleUnitId = damagedBattleUnit.id, amount = 60, remainingHealthPoints = 40))
             eventBus.dispatch()
             // Then
             val state = argumentCaptor<UnitOverlayState>()
@@ -225,7 +225,7 @@ class BattlefieldPresenterTest {
             whenever(battlefieldApi.searchPosition).thenReturn(searchPosition)
             whenever(searchPosition(healedBattleUnit.id)).thenReturn(Battlefield.Dto.PositionDto(row = 0, column = 0))
             // When
-            eventBus.publish(BattleUnitEvent.BattleUnitHealed(battleUnitId = healedBattleUnit.id))
+            eventBus.publish(BattleUnitEvent.BattleUnitHealed(battleUnitId = healedBattleUnit.id, amount = 5, remainingHealthPoints = 10))
             eventBus.dispatch()
             // Then
             val state = argumentCaptor<UnitOverlayState>()

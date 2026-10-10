@@ -56,10 +56,16 @@ sealed interface BattleUnitEvent : DomainEvent {
 
     data class BattleUnitDamaged(
         val battleUnitId: String,
+        /** Health actually lost, after clamping at zero. */
+        val amount: Int,
+        val remainingHealthPoints: Int,
     ) : BattleUnitEvent
 
     data class BattleUnitHealed(
         val battleUnitId: String,
+        /** Health actually gained, after clamping at the unit maximum. */
+        val amount: Int,
+        val remainingHealthPoints: Int,
     ) : BattleUnitEvent
 
     data class BattleUnitTeleported(

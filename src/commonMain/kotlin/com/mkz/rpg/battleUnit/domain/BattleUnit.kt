@@ -227,7 +227,12 @@ data class BattleUnit private constructor(
             INCREASE_HEALTH -> {
                 val remainingHealthPoints =
                     RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.outcome.increaseHealth!!.healing))
-                val healedEvent = BattleUnitHealed(id.value)
+                val healedEvent =
+                    BattleUnitHealed(
+                        battleUnitId = id.value,
+                        amount = remainingHealthPoints.value - this.remainingHealthPoints.value,
+                        remainingHealthPoints = remainingHealthPoints.value,
+                    )
                 copy(
                     ongoingEffects = ongoingEffects,
                     remainingHealthPoints = remainingHealthPoints,
@@ -270,7 +275,13 @@ data class BattleUnit private constructor(
         val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.outcome.decreaseHealth!!.damage))
         val newEvents =
             buildList {
-                add(BattleUnitDamaged(battleUnitId = id.value))
+                add(
+                    BattleUnitDamaged(
+                        battleUnitId = id.value,
+                        amount = this@BattleUnit.remainingHealthPoints.value - remainingHealthPoints.value,
+                        remainingHealthPoints = remainingHealthPoints.value,
+                    ),
+                )
                 if (remainingHealthPoints.value <= 0) {
                     add(
                         BattleUnitDefeated(

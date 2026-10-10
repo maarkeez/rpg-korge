@@ -459,7 +459,8 @@ class BattleUnitTest {
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
+            assertThat(events)
+                .containsExactly(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id, amount = 3, remainingHealthPoints = 7))
         }
 
         @Test
@@ -482,7 +483,7 @@ class BattleUnitTest {
             val (events, _) = updatedBattleUnit.pullEvents()
             assertThat(events)
                 .containsExactly(
-                    BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
+                    BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id, amount = 3, remainingHealthPoints = 0),
                     BattleUnitEvent.BattleUnitDefeated(
                         playerId = player.id,
                         battleUnitId = updatedBattleUnit.toDto().id,
@@ -518,7 +519,46 @@ class BattleUnitTest {
             // Then
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(10)
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id))
+            assertThat(events)
+                .containsExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id, amount = 4, remainingHealthPoints = 10))
+        }
+
+        @Test
+        fun `should report only the health actually lost when the damage exceeds the remaining health points`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 3).toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = EffectMother.decreaseHealthEffect(damage = 10).toDto(),
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            val (events, _) = updatedBattleUnit.pullEvents()
+            assertThat(events)
+                .contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id, amount = 3, remainingHealthPoints = 0))
+        }
+
+        @Test
+        fun `should report a zero amount when a full health battle unit is healed`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyImmediateEffect(
+                    effect = EffectMother.increaseHealthEffect(healing = 5).toDto(),
+                    unit = unit,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            val (events, _) = updatedBattleUnit.pullEvents()
+            assertThat(events)
+                .containsExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id, amount = 0, remainingHealthPoints = 10))
         }
 
         @Test
@@ -593,7 +633,8 @@ class BattleUnitTest {
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
+            assertThat(events)
+                .contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id, amount = 3, remainingHealthPoints = 7))
         }
 
         @Test
