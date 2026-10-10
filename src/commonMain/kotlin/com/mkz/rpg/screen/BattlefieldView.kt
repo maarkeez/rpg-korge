@@ -20,6 +20,7 @@ import korlibs.korge.ui.UIGridFill
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
 import korlibs.korge.view.Container
+import korlibs.korge.view.Image
 import korlibs.korge.view.View
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.clipContainer
@@ -434,12 +435,13 @@ class BattlefieldView(
         }
     }
 
-    /** An expanding ring over the tile of a unit that was just defeated. */
+    /** The defeat effect over the tile of a unit that was just defeated: the authored `fx_defeat` strip when present, else an expanding ring. */
     fun playPoof(
         row: Int,
         column: Int,
     ) {
         val poof = Container().also { it.name = FxViews.POOF_NAME }
+        val authoredFrames = sprites.fxFrames(SpriteRegistry.FX_DEFEAT)?.takeIf { it.size == FxViews.POOF_FRAMES }
         placeOnTile(poof, row, column)
         var shownFrame = -1
         fxLayer.play(poof, FxViews.POOF_MS) { progress ->
@@ -447,11 +449,21 @@ class BattlefieldView(
             if (frame != shownFrame) {
                 shownFrame = frame
                 poof.removeChildren()
-                FxViews
-                    .poofFrame(frame)
-                    .children
-                    .toList()
-                    .forEach { poof.addChild(it) }
+                val authoredFrame = authoredFrames?.getOrNull(frame)
+                if (authoredFrame != null) {
+                    poof.addChild(
+                        Image(authoredFrame).also {
+                            it.scale = PIXEL_SCALE.toDouble()
+                            it.smoothing = false
+                        },
+                    )
+                } else {
+                    FxViews
+                        .poofFrame(frame)
+                        .children
+                        .toList()
+                        .forEach { poof.addChild(it) }
+                }
             }
         }
     }

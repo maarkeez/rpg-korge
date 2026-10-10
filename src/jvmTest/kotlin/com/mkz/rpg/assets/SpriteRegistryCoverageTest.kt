@@ -54,4 +54,17 @@ class SpriteRegistryCoverageTest {
         // Then
         assertThat(violations).describedAs("Unit animation strips that break the strip convention:\n%s", violations.joinToString("\n")).isEmpty()
     }
+
+    @Test
+    fun `should have exactly three 16x16 frames when the defeat fx strip exists`() {
+        // Given
+        val stripPath = SpriteRegistry.fxPath(SpriteRegistry.FX_DEFEAT)
+        // When
+        val strip = runBlocking { if (resourcesVfs[stripPath].exists()) loadBitmap32(stripPath) else null }
+        // Then
+        if (strip != null) {
+            assertThat(strip.width).describedAs("$stripPath must match POOF_FRAMES = 3").isEqualTo(3 * TILE_PIXEL_SIZE)
+            assertThat(strip.height).isEqualTo(TILE_PIXEL_SIZE)
+        }
+    }
 }

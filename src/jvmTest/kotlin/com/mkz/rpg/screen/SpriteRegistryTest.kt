@@ -61,4 +61,18 @@ class SpriteRegistryTest : ViewsForTesting() {
                 assertThat(bitmap.toBMP32()[0, 0]).isEqualTo(UiPalette.placeholder)
             }
     }
+
+    @Nested
+    inner class FxFrames {
+        @Test
+        fun `should return no frames when the fx strip does not exist`() =
+            viewsTest {
+                // Given
+                spriteRegistry.load()
+                // When
+                val frames = spriteRegistry.fxFrames("fx_unknown")
+                // Then
+                assertThat(frames).isNull()
+            }
+    }
 }

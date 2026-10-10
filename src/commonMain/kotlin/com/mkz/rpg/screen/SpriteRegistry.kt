@@ -18,6 +18,7 @@ class SpriteRegistry {
     private var effects: Map<String, Bitmap> = emptyMap()
     private var highlights: Map<Highlight, Bitmap> = emptyMap()
     private var abilitySelection: Bitmap? = null
+    private var fxStrips: Map<String, List<Bitmap>> = emptyMap()
     private val silhouettes = mutableMapOf<String, Bitmap>()
     private var loaded = false
 
@@ -39,7 +40,24 @@ class SpriteRegistry {
         effects = EFFECT_IDS.associateWith { resourcesVfs[effectPath(it)].readBitmap() }
         highlights = Highlight.entries.associateWith { resourcesVfs[it.path].readBitmap() }
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
+        fxStrips = FX_IDS.mapNotNull { fxId -> loadFxStrip(fxId)?.let { fxId to it } }.toMap()
         loaded = true
+    }
+
+    /** Frames of an authored FX strip, or null when the strip file does not exist yet (callers draw the procedural fallback). */
+    fun fxFrames(fxId: String): List<Bitmap>? = fxStrips[fxId]
+
+    private suspend fun loadFxStrip(fxId: String): List<Bitmap>? {
+        val file = resourcesVfs[fxPath(fxId)]
+        if (!file.exists()) return null
+        val strip = file.readBitmap().toBMP32()
+        return List(strip.width / ART_SIZE) { index ->
+            Bitmap32(ART_SIZE, ART_SIZE).also { frame ->
+                for (y in 0 until ART_SIZE) {
+                    for (x in 0 until ART_SIZE) frame[x, y] = strip[index * ART_SIZE + x, y]
+                }
+            }
+        }
     }
 
     fun unit(unitId: String): Bitmap = units[unitId] ?: placeholder(ART_SIZE)
@@ -73,6 +91,11 @@ class SpriteRegistry {
         internal val UNIT_IDS = listOf("knight", "rat", "bee")
         internal val ABILITY_IDS = listOf("heal", "sword", "poisoned-sword", "mushroom", "skull", "teleport", "bee")
         internal val EFFECT_IDS = listOf("venom-damage", "venom-on-death")
+
+        internal const val FX_DEFEAT = "fx_defeat"
+        internal val FX_IDS = listOf(FX_DEFEAT)
+
+        internal fun fxPath(fxId: String): String = "effect/$fxId.png"
 
         internal fun unitPath(unitId: String): String = "unit/$unitId.png"
 
