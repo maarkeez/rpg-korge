@@ -48,7 +48,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
             }
 
         @Test
-        fun `should not display portrait when unknown unit is displayed`() =
+        fun `should display placeholder portrait when unknown unit is displayed`() =
             viewsTest {
                 // Given
                 val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
@@ -57,7 +57,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 unitPortraitView.display(unitId = "unknown-unit")
                 // Then
                 val battleUnitPortrait = unitPortraitView.children[0]
-                assertThat(battleUnitPortrait.findViewByName("portrait")).isNull()
+                assertThat(battleUnitPortrait.findViewByName("portrait")).isNotNull
             }
     }
 

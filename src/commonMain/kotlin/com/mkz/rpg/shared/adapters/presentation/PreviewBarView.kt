@@ -1,6 +1,5 @@
 package com.mkz.rpg.shared.adapters.presentation
 
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.view.align.centerOn
@@ -18,7 +17,7 @@ open class PreviewBarView(
 ) : UIContainer(size) {
     private val background =
         roundRect(size, radius = RectCorners(3)) {
-            this.color = Colors.DIMGRAY
+            this.color = UiPalette.barBackground
         }
 
     val filled =
@@ -37,7 +36,7 @@ open class PreviewBarView(
         text(
             text = "30 / 500",
             textSize = 14.0,
-            color = Colors.WHITE,
+            color = UiPalette.textPrimary,
         ) {
             centerOn(background)
         }

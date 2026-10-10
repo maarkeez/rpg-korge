@@ -711,7 +711,7 @@ All assets use the Famicube palette, are drawn at 1× art pixels and are added t
 | Milestone | Done | Date | Verified by (tests / snapshots / manual) | Notes |
 | --- | --- | --- | --- | --- |
 | M0 Baseline, scenario and verification helpers | [x] | 2026-10-10 | jvmTest baseline 586 tests, 0 failures. Focused M0 tests and `lintKotlin` pass; existing 3 goldens unchanged. `runJvm` visual check not performed (no display) | Seed column in `reference-battle-scenarios.md` fixed to 42 to match the files. Grass near lava/water was removed in `ui-showcase` because terrain transitions are validated |
-| M1 Visual foundations | [ ] | | | |
+| M1 Visual foundations | [x] | 2026-10-10 | Full jvmTest 597 tests, 0 failures; `lintKotlin` passes; goldens regenerated and inspected (color-only diffs, layout unchanged) | `UnitPortraitViewTest` unknown-unit test now expects a placeholder portrait (plan: no throw/no gap). Views take an optional `SpriteRegistry` (default new instance); `BattleScene` shares one. Palette picks are nearest Famicube colors |
 | M2 Portrait battlefield-first layout | [ ] | | | |
 | M3 Unit selection and on-unit info | [ ] | | | |
 | M4 Movement range | [ ] | | | |

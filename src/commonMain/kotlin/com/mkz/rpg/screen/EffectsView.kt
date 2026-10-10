@@ -5,7 +5,9 @@ import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-class EffectsView : Container() {
+class EffectsView(
+    sprites: SpriteRegistry = SpriteRegistry(),
+) : Container() {
     private lateinit var effectViews: Array<EffectView>
 
     suspend fun loadAssets() {
@@ -17,16 +19,16 @@ class EffectsView : Container() {
             val effectViewSize = Size(width = 16, height = 16)
             effectViews =
                 arrayOf(
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
+                    EffectView(effectViewSize, sprites),
                 )
             effectViews.forEach(::addChild)
         }

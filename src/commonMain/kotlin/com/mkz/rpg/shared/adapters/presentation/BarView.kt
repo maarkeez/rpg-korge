@@ -1,6 +1,5 @@
 package com.mkz.rpg.shared.adapters.presentation
 
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.style.styles
 import korlibs.korge.ui.UIContainer
@@ -20,13 +19,13 @@ open class BarView(
     val progressBar: UIProgressBar =
         uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
             progressBar.styles.uiSelectedColor = color
-            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
+            progressBar.styles.uiBackgroundColor = UiPalette.barBackground
         }
     val label =
         text(
             text = "",
             textSize = 14.0,
-            color = Colors.WHITE,
+            color = UiPalette.textPrimary,
         )
 
     init {

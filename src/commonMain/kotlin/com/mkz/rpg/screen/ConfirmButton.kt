@@ -1,8 +1,6 @@
 package com.mkz.rpg.screen
 
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.color.RGBA.Companion.invoke
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
@@ -15,9 +13,9 @@ class ConfirmButton(
         uiButton {
             text = "Confirm"
             width = 190.0
-            bgColorOut = RGBA(0, 136, 255)
-            bgColorOver = RGBA(30, 110, 244)
-            background.borderColor = Colors.LIGHTGRAY
+            bgColorOut = UiPalette.primaryButton
+            bgColorOver = UiPalette.primaryButtonOver
+            background.borderColor = UiPalette.panelBorder
             onClick {
                 onConfirmed()
             }

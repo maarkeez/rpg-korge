@@ -8,7 +8,9 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-class AttackPreviewView : Container() {
+class AttackPreviewView(
+    sprites: SpriteRegistry = SpriteRegistry(),
+) : Container() {
     private lateinit var casterUnitNameView: UnitNameView
     private lateinit var casterUnitPortraitView: UnitPortraitView
     private lateinit var casterHealthBarView: HealthBarView
@@ -31,7 +33,7 @@ class AttackPreviewView : Container() {
     private val layout =
         uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                casterUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
+                casterUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), sprites)
                 addChild(casterUnitPortraitView)
 
                 uiSpacing(Size(10, 0))
@@ -48,7 +50,7 @@ class AttackPreviewView : Container() {
                     addChild(casterManaBarView)
 
                     uiSpacing(Size(0, 4))
-                    casterEffectsView = EffectsView()
+                    casterEffectsView = EffectsView(sprites)
                     addChild(casterEffectsView)
                 }
             }
@@ -68,11 +70,11 @@ class AttackPreviewView : Container() {
                     addChild(receiverManaBarView)
 
                     uiSpacing(Size(0, 4))
-                    receiverEffectsView = EffectsView()
+                    receiverEffectsView = EffectsView(sprites)
                     addChild(receiverEffectsView)
                 }
                 uiSpacing(Size(10, 0))
-                receiverUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
+                receiverUnitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), sprites)
                 addChild(receiverUnitPortraitView)
             }
         }

@@ -1,9 +1,7 @@
 package com.mkz.rpg.screen
 
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
-import korlibs.io.file.std.resourcesVfs
+import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.align.centerOn
@@ -12,22 +10,18 @@ import korlibs.math.geom.Size
 
 class UnitPortraitView(
     size: Size,
+    private val sprites: SpriteRegistry = SpriteRegistry(),
 ) : UIContainer(size) {
     private val battleUnitPortrait =
         uiButton("").also { button ->
             button.size = size
-            button.bgColorOut = Colors.WHITE
-            button.bgColorOver = Colors.LIGHTSKYBLUE
-            button.background.borderColor = Colors.LIGHTGRAY
+            button.bgColorOut = UiPalette.portraitBackground
+            button.bgColorOver = UiPalette.portraitBackgroundOver
+            button.background.borderColor = UiPalette.panelBorder
         }
-    private lateinit var knightPortrait: Bitmap
-    private lateinit var beePortrait: Bitmap
-    private lateinit var ratPortrait: Bitmap
 
     suspend fun loadAssets() {
-        beePortrait = resourcesVfs["unit/bee_portrait.png"].readBitmap()
-        knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
-        ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
+        sprites.load()
     }
 
     init {
@@ -36,18 +30,11 @@ class UnitPortraitView(
 
     fun display(unitId: String) {
         battleUnitPortrait.findViewByName("portrait")?.removeFromParent()
-        when (unitId) {
-            "knight" -> knightPortrait
-            "rat" -> ratPortrait
-            "bee" -> beePortrait
-            else -> null
-        }?.let { avatarBitmap ->
-            battleUnitPortrait.image(avatarBitmap) {
-                name = "portrait"
-                smoothing = false
-                scale = 3.0
-                centerOn(battleUnitPortrait)
-            }
+        battleUnitPortrait.image(sprites.portrait(unitId)) {
+            name = "portrait"
+            smoothing = false
+            scale = PIXEL_SCALE.toDouble()
+            centerOn(battleUnitPortrait)
         }
         visible = true
     }

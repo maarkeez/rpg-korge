@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen
 
-import korlibs.image.color.RGBA
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.image.text.TextAlignment
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
@@ -27,7 +27,7 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
         ) {
             this.styles.textAlignment = TextAlignment.MIDDLE_LEFT
             this.styles.textSize = 15.0
-            this.styles.textColor = RGBA(0, 136, 255)
+            this.styles.textColor = UiPalette.ally
         }
     val layout =
         uiVerticalStack {

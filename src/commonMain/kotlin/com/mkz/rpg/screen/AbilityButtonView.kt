@@ -1,9 +1,7 @@
 package com.mkz.rpg.screen
 
-import korlibs.image.bitmap.Bitmap
+import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
-import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.align.centerOn
@@ -15,20 +13,12 @@ import korlibs.math.geom.Size
 
 class AbilityButtonView(
     size: Size,
+    private val sprites: SpriteRegistry = SpriteRegistry(),
 ) : UIButton(size) {
     companion object {
         const val ABILITY = "ABILITY"
         const val ABILITY_SELECTION = "ABILITY_SELECTION"
     }
-
-    private lateinit var heal: Bitmap
-    private lateinit var sword: Bitmap
-    private lateinit var poisonedSword: Bitmap
-    private lateinit var mushroom: Bitmap
-    private lateinit var skull: Bitmap
-    private lateinit var teleport: Bitmap
-    private lateinit var bee: Bitmap
-    private lateinit var abilitySelection: Bitmap
 
     private var delegate: Delegate? = null
     private var abilityId: String? = null
@@ -47,14 +37,7 @@ class AbilityButtonView(
     }
 
     suspend fun loadAssets() {
-        heal = resourcesVfs["ability/heal.png"].readBitmap()
-        sword = resourcesVfs["ability/sword.png"].readBitmap()
-        poisonedSword = resourcesVfs["ability/poisoned_sword.png"].readBitmap()
-        mushroom = resourcesVfs["ability/mushroom.png"].readBitmap()
-        skull = resourcesVfs["ability/skull.png"].readBitmap()
-        teleport = resourcesVfs["ability/teleport.png"].readBitmap()
-        bee = resourcesVfs["ability/bee.png"].readBitmap()
-        abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
+        sprites.load()
     }
 
     fun setDelegate(delegate: Delegate) {
@@ -69,24 +52,13 @@ class AbilityButtonView(
         this.abilityId = abilityId
         findViewByName(ABILITY)?.removeFromParent()
         findViewByName(ABILITY_SELECTION)?.removeFromParent()
-        when (abilityId) {
-            "heal" -> heal
-            "poisoned-sword" -> poisonedSword
-            "sword" -> sword
-            "mushroom" -> mushroom
-            "skull" -> skull
-            "teleport" -> teleport
-            "bee" -> bee
-            else -> null
-        }?.let { avatarBitmap ->
-            abilityButton.image(avatarBitmap) {
-                name = ABILITY
-                smoothing = false
-                scale = 3.0
-                centerOn(abilityButton)
-                if (!canCast) {
-                    filter = darkFilter()
-                }
+        abilityButton.image(sprites.ability(abilityId)) {
+            name = ABILITY
+            smoothing = false
+            scale = PIXEL_SCALE.toDouble()
+            centerOn(abilityButton)
+            if (!canCast) {
+                filter = darkFilter()
             }
         }
         visible = true
@@ -95,10 +67,10 @@ class AbilityButtonView(
     fun select() {
         if (findViewByName(ABILITY_SELECTION) != null) return
         val abilityButton = this
-        abilityButton.image(abilitySelection) {
+        abilityButton.image(sprites.abilitySelection()) {
             name = ABILITY_SELECTION
             smoothing = false
-            scale = 3.0
+            scale = PIXEL_SCALE.toDouble()
             centerOn(abilityButton)
         }
     }

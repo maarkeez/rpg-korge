@@ -26,9 +26,10 @@ class BattleScene(
     val scenarioPath: String? = null,
     val debugEnabled: Boolean = false,
 ) : Scene() {
-    val battlefieldView = BattlefieldView()
-    val battleUnitInfoView = BattleUnitInfoView()
-    val attackPreviewView = AttackPreviewView()
+    private val sprites = SpriteRegistry()
+    val battlefieldView = BattlefieldView(sprites)
+    val battleUnitInfoView = BattleUnitInfoView(sprites)
+    val attackPreviewView = AttackPreviewView(sprites)
     val battleHudView =
         BattleHudView(
             Size(390, 300),

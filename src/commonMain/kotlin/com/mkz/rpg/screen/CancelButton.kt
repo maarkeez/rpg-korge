@@ -1,8 +1,6 @@
 package com.mkz.rpg.screen
 
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
-import korlibs.image.color.RGBA.Companion.invoke
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
@@ -15,9 +13,9 @@ class CancelButton(
         uiButton {
             text = "Cancel"
             width = 190.0
-            bgColorOut = Colors.DIMGRAY
-            bgColorOver = RGBA(85, 85, 85)
-            background.borderColor = Colors.LIGHTGRAY
+            bgColorOut = UiPalette.secondaryButton
+            bgColorOver = UiPalette.secondaryButtonOver
+            background.borderColor = UiPalette.panelBorder
             onClick {
                 onCancelled()
             }
