@@ -6,6 +6,7 @@ import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
+import korlibs.korge.view.Image
 import korlibs.korge.view.View
 import korlibs.korge.view.descendantsWith
 import org.assertj.core.api.Assertions.assertThat
@@ -114,11 +115,11 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 val battlefieldView = displayedBattlefieldView()
                 battlefieldView.playPoof(row = 2, column = 3)
                 val poof = battlefieldView.fxNamed(FxViews.POOF_NAME).single() as Container
-                val firstFramePixels = poof.numChildren
+                val firstFrame = poof.frameSignature()
                 // When
                 battlefieldView.advanceFx(deltaMs = FxViews.POOF_MS * 0.9)
                 // Then
-                assertThat(poof.numChildren).isNotEqualTo(firstFramePixels)
+                assertThat(poof.frameSignature()).isNotEqualTo(firstFrame)
                 battlefieldView.advanceFx(deltaMs = FxViews.POOF_MS.toDouble())
                 assertThat(battlefieldView.fxNamed(FxViews.POOF_NAME)).isEmpty()
             }
@@ -248,3 +249,6 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
             }
     }
 }
+
+// Identifies the drawn poof frame: the bitmap of an authored frame, or the pixels of the procedural ring.
+private fun Container.frameSignature(): List<Any?> = children.map { (it as? Image)?.bitmap ?: (it.x to it.y) }

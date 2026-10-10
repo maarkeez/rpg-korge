@@ -25,6 +25,7 @@ internal val GAME_ART_ASSET_PATHS: List<String> =
         "battlefield/tile_selection_3.png",
         "battlefield/tile_selection_4.png",
         "effect/venom-damage.png",
+        "effect/fx_defeat.png",
         "effect/venom-on-death.png",
         "terrain/transitions/sand_to_grass.png",
         "terrain/transitions/sand_to_lava.png",
