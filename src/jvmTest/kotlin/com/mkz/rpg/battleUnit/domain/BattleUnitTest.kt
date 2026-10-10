@@ -312,6 +312,60 @@ class BattleUnitTest {
     }
 
     @Nested
+    inner class OngoingEffectsTurnsLeft {
+        @Test
+        fun `should expose the turns left of the on turn started effect when the battle unit receives it`() {
+            // Given
+            val battleUnit = BattleUnitMother.battleUnit().receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 3)
+            // When
+            val turnsLeft = battleUnit.toDto().ongoingEffects.onTurnStartedTurnsLeft
+            // Then
+            assertThat(turnsLeft).containsExactlyEntriesOf(mapOf("effect-1" to 3))
+        }
+
+        @Test
+        fun `should expose the highest turns left when the same on turn started effect is stacked`() {
+            // Given
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit()
+                    .receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
+                    .receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 5)
+            // When
+            val turnsLeft = battleUnit.toDto().ongoingEffects.onTurnStartedTurnsLeft
+            // Then
+            assertThat(turnsLeft).containsExactlyEntriesOf(mapOf("effect-1" to 5))
+        }
+
+        @Test
+        fun `should decrease the turns left when the on turn started effect is applied`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 10).toDto()
+            val onTurnStartedEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 1, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 3)
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyOnTurnStartedEffect(
+                    effect = onTurnStartedEffect,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStartedTurnsLeft).containsExactlyEntriesOf(mapOf("effect-1" to 2))
+        }
+
+        @Test
+        fun `should not expose turns left for on defeated effects when the battle unit receives one`() {
+            // Given
+            val battleUnit = BattleUnitMother.battleUnit().receiveOnDefeatedEffect(effectId = "effect-1")
+            // When
+            val turnsLeft = battleUnit.toDto().ongoingEffects.onTurnStartedTurnsLeft
+            // Then
+            assertThat(turnsLeft).isEmpty()
+        }
+    }
+
+    @Nested
     inner class ReceiveOnDefeatedEffect {
         @Test
         fun `should add the on defeated effect and publish the received event when the battle unit receives it`() {

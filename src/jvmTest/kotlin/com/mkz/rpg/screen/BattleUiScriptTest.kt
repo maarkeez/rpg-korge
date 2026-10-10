@@ -85,6 +85,35 @@ class BattleUiScriptTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class EnemyInspection {
+        @Test
+        fun `should show inspect info without ability bar when player taps an enemy unit`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                // When
+                script.selectUnit(playerTwoRatId)
+                // Then
+                assertThat(battleUnitInfoView.visible).isTrue()
+                assertThat(battleUnitInfoView.visibleAbilityButtonCount).isZero()
+                assertThat(battleUnitInfoView.readOnlyAbilityIconCount).isGreaterThan(0)
+            }
+
+        @Test
+        fun `should show the ability bar again when player taps an ally after inspecting an enemy`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerTwoRatId)
+                // When
+                script.selectUnit(playerOneKnightId)
+                // Then
+                assertThat(battleUnitInfoView.visibleAbilityButtonCount).isGreaterThan(0)
+                assertThat(battleUnitInfoView.readOnlyAbilityIconCount).isZero()
+            }
+    }
+
+    @Nested
     inner class AbilityCast {
         @Test
         fun `should cast an ability when player taps an ability button and a target tile and confirms`() =

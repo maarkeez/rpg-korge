@@ -45,4 +45,18 @@ class BattleSceneSnapshotTest {
             assertMatchesGolden(ABILITY_SELECTED, actual)
         }
     }
+
+    @Test
+    fun `should render the inspected enemy state matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            selectEnemyRat(scene)
+            val actual = capture()
+            assertMatchesGolden(ENEMY_INSPECTED, actual)
+        }
+    }
 }

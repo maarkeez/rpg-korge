@@ -462,6 +462,11 @@ data class BattleUnit private constructor(
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
                 onTurnStarted = value.filter { it.isOnTurnStarted() }.map { it.effectId() },
+                onTurnStartedTurnsLeft =
+                    value
+                        .filter { it.isOnTurnStarted() }
+                        .groupBy { it.effectId() }
+                        .mapValues { (_, effects) -> effects.maxOf { it.turnsLeft() } },
                 onDefeatedEffects = value.filter { it.isOnDefeated() }.map { it.effectId() },
             )
 
@@ -482,6 +487,8 @@ data class BattleUnit private constructor(
 
                 fun onDefeated(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.onDefeated())
             }
+
+            fun turnsLeft(): Int = (applicationStatus as? ApplicationStatus.OnTurnStarted)?.turnsLeft ?: 0
 
             fun isOnTurnStarted() = applicationStatus.isOnTurnStarted()
 
@@ -549,6 +556,8 @@ data class BattleUnit private constructor(
         data class OngoingEffectsDto(
             val onTurnStarted: List<String>,
             val onDefeatedEffects: List<String>,
+            /** Turns left per on-turn-started effect id. When an effect is stacked, the highest value is kept. */
+            val onTurnStartedTurnsLeft: Map<String, Int> = emptyMap(),
         )
     }
 }

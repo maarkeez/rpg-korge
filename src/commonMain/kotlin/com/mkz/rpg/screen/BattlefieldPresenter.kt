@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -98,8 +99,18 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
             },
+            eventBus.subscribe<BattleUnitEvent.BattleUnitDamaged> { event ->
+                refreshOverlay(event.battleUnitId)
+            },
+            eventBus.subscribe<BattleUnitEvent.BattleUnitHealed> { event ->
+                refreshOverlay(event.battleUnitId)
+            },
+            eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
+                refreshOverlay(event.battleUnitId)
+            },
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
                 clearSelection()
+                refreshAllOverlays(event.playerId)
                 centerOnFirstHumanUnit(event.playerId)
             },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
@@ -151,6 +162,7 @@ class BattlefieldPresenter(
         if (battleUnit.unitId == "bee") {
             battlefieldView.displayBeeBattleUnit(row, column)
         }
+        displayOverlay(row, column, battleUnit)
     }
 
     fun removeUnit(
@@ -168,16 +180,52 @@ class BattlefieldPresenter(
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
         battlefieldView.resetTiles()
-        battleUnitInfoView.display(battleUnit, unit)
+        battleUnitInfoView.display(battleUnit, unit, interactive = !isEnemy(battleUnit))
         battleHudView.displayBattleUnitInfoView()
         selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
             battlefieldView.displayPotentialMovement(row = tile.row, column = tile.column)
         }
-        battlefieldView.displayTileSelection(
+        battlefieldView.displayUnitSelection(
             row = selectedBattleUnitEvent.tile.row,
             column = selectedBattleUnitEvent.tile.column,
+            isEnemy = isEnemy(battleUnit),
         )
     }
+
+    private fun refreshOverlay(battleUnitId: String) {
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
+        val position = battlefieldApi.searchPosition(battleUnitId) ?: return
+        displayOverlay(position.row, position.column, battleUnit)
+    }
+
+    private fun refreshAllOverlays(playerId: String) {
+        val enemyPlayerId = playerApi.searchEnemyPlayer(playerId)?.id
+        listOfNotNull(playerId, enemyPlayerId)
+            .flatMap { battleUnitApi.searchBattleUnitsByPlayerId(it) }
+            .forEach { refreshOverlay(it.id) }
+    }
+
+    private fun displayOverlay(
+        row: Int,
+        column: Int,
+        battleUnit: BattleUnit.Dto,
+    ) {
+        val unit = unitApi.searchUnitById(battleUnit.unitId) ?: return
+        battlefieldView.displayUnitOverlay(
+            row = row,
+            column = column,
+            state =
+                UnitOverlayState(
+                    remainingHealthPoints = battleUnit.remainingHealthPoints,
+                    maximumHealthPoints = unit.healthPoints,
+                    isEnemy = isEnemy(battleUnit),
+                    onTurnStartedEffectCount = battleUnit.ongoingEffects.onTurnStarted.size,
+                    onDefeatedEffectCount = battleUnit.ongoingEffects.onDefeatedEffects.size,
+                ),
+        )
+    }
+
+    private fun isEnemy(battleUnit: BattleUnit.Dto): Boolean = playerApi.searchPlayerById(battleUnit.playerId)?.type != Player.Dto.PlayerTypeDto.HUMAN
 
     private fun centerOnFirstHumanUnit(playerId: String) {
         val player = playerApi.searchPlayerById(playerId) ?: return

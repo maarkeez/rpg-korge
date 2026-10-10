@@ -10,6 +10,7 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
+import korlibs.korge.view.descendantsWith
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -335,6 +336,117 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class DisplayUnitOverlay {
+        @Test
+        fun `should display the overlay on the tile when the unit overlay is displayed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayUnitOverlay(row = 0, column = 0, state = overlayState())
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.UNIT_OVERLAY)).isNotNull
+            }
+
+        @Test
+        fun `should not duplicate the overlay when the unit overlay is displayed twice`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                battlefieldView.displayUnitOverlay(row = 0, column = 0, state = overlayState())
+                // When
+                battlefieldView.displayUnitOverlay(row = 0, column = 0, state = overlayState(remainingHealthPoints = 5))
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.children.count { it.name == BattlefieldView.UNIT_OVERLAY }).isEqualTo(1)
+                assertThat((tileButton.findViewByName(BattlefieldView.UNIT_OVERLAY) as UnitOverlayView).hpFraction).isEqualTo(0.5)
+            }
+
+        @Test
+        fun `should remove the overlay when the battle unit is removed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                battlefieldView.displayKnightBattleUnit(row = 0, column = 0)
+                battlefieldView.displayUnitOverlay(row = 0, column = 0, state = overlayState())
+                // When
+                battlefieldView.removeBattleUnit(row = 0, column = 0)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.UNIT_OVERLAY)).isNull()
+            }
+    }
+
+    @Nested
+    inner class DisplayUnitSelection {
+        @Test
+        fun `should display corner brackets without inspect glyph when an ally is selected`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayUnitSelection(row = 0, column = 0, isEnemy = false)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNotNull
+                assertThat(tileButton.descendantsWith { it.name == BattlefieldView.INSPECT_GLYPH }).isEmpty()
+            }
+
+        @Test
+        fun `should display the inspect glyph when an enemy is selected`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayUnitSelection(row = 0, column = 0, isEnemy = true)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.descendantsWith { it.name == BattlefieldView.INSPECT_GLYPH }).hasSize(1)
+            }
+
+        @Test
+        fun `should replace the selection when the unit selection is displayed over a movement range tile`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                battlefieldView.displayPotentialMovement(row = 0, column = 0)
+                // When
+                battlefieldView.displayUnitSelection(row = 0, column = 0, isEnemy = false)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.children.count { it.name == BattlefieldView.SELECTION }).isEqualTo(1)
+            }
+
+        @Test
+        fun `should remove the brackets when tiles are reset`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                battlefieldView.displayUnitSelection(row = 0, column = 0, isEnemy = true)
+                // When
+                battlefieldView.resetTiles()
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.SELECTION)).isNull()
+            }
+    }
+
+    @Nested
     inner class Drag {
         @Test
         fun `should not select a tile when the pointer is dragged beyond the tap threshold`() =
@@ -468,6 +580,15 @@ class BattlefieldViewTest : ViewsForTesting() {
                 assertThat(battlefieldGrid.y).isEqualTo(0.0)
             }
     }
+
+    private fun overlayState(remainingHealthPoints: Int = 10) =
+        UnitOverlayState(
+            remainingHealthPoints = remainingHealthPoints,
+            maximumHealthPoints = 10,
+            isEnemy = false,
+            onTurnStartedEffectCount = 0,
+            onDefeatedEffectCount = 0,
+        )
 
     private fun getBattlefieldGrid(battlefieldView: BattlefieldView): Container {
         val viewport = battlefieldView.children[0] as Container

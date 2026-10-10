@@ -34,6 +34,8 @@ class BattlefieldView(
         const val TERRAIN = "TERRAIN"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
+        const val UNIT_OVERLAY = "UNIT_OVERLAY"
+        const val INSPECT_GLYPH = "INSPECT_GLYPH"
 
         const val TILE_PIXEL_SIZE = 16
         const val TILE_SIZE = TILE_PIXEL_SIZE * PIXEL_SCALE
@@ -265,6 +267,37 @@ class BattlefieldView(
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
+        tileButton.findViewByName(UNIT_OVERLAY)?.removeFromParent()
+    }
+
+    /** Draws or refreshes the HP bar and status pips of the unit on the tile. */
+    fun displayUnitOverlay(
+        row: Int,
+        column: Int,
+        state: UnitOverlayState,
+    ) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val overlay =
+            tileButton.findViewByName(UNIT_OVERLAY) as? UnitOverlayView
+                ?: UnitOverlayView().also { newOverlay ->
+                    newOverlay.name = UNIT_OVERLAY
+                    tileButton.addChild(newOverlay)
+                }
+        overlay.display(state)
+    }
+
+    /**
+     * Marks the selected unit with corner brackets. Enemies use another color and also show an inspect glyph,
+     * so the "inspecting an enemy" state doesn't rely on color.
+     */
+    fun displayUnitSelection(
+        row: Int,
+        column: Int,
+        isEnemy: Boolean,
+    ) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.findViewByName(SELECTION)?.removeFromParent()
+        tileButton.addChild(SelectionBracketsView(isEnemy).also { it.name = SELECTION })
     }
 
     private fun UIButton.addImage(

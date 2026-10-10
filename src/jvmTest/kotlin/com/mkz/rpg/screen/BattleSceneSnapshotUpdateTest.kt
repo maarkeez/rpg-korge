@@ -49,4 +49,18 @@ class BattleSceneSnapshotUpdateTest {
         }
         assertThat(File(SNAPSHOT_GOLDEN_DIR, "$ABILITY_SELECTED.png")).exists()
     }
+
+    @Test
+    fun `should write the inspected enemy state golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            selectEnemyRat(scene)
+            writeGolden(ENEMY_INSPECTED, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$ENEMY_INSPECTED.png")).exists()
+    }
 }

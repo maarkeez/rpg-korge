@@ -24,8 +24,11 @@ internal const val SNAPSHOT_REPORT_DIR: String = "build/reports/snapshots"
 internal const val INITIAL_LAYOUT: String = "battle-initial-layout"
 internal const val UNIT_SELECTED: String = "battle-unit-selected"
 internal const val ABILITY_SELECTED: String = "battle-ability-selected"
+internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
+internal const val SHOWCASE_SCENARIO: String = "scenarios/ui-showcase.json"
 
 private const val HUMAN_KNIGHT_TILE = "row-6-column-6"
+private const val ENEMY_RAT_TILE = "row-6-column-7"
 private const val EXPECTED_UNIT_COUNT = 4
 private const val READY_TIMEOUT_MS = 10_000L
 private const val POLL_DELAY_MS = 10L
@@ -42,6 +45,11 @@ internal suspend fun awaitBattleReady(scene: BattleScene) {
 
 internal suspend fun OffscreenStage.selectHumanKnight(scene: BattleScene) {
     clickView(scene.battlefieldView, HUMAN_KNIGHT_TILE)
+    awaitUntil { scene.battleHudView.children.isNotEmpty() }
+}
+
+internal suspend fun OffscreenStage.selectEnemyRat(scene: BattleScene) {
+    clickView(scene.battlefieldView, ENEMY_RAT_TILE)
     awaitUntil { scene.battleHudView.children.isNotEmpty() }
 }
 
