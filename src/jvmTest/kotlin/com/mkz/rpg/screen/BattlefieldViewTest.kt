@@ -794,10 +794,11 @@ class BattlefieldViewTest : ViewsForTesting() {
             }
 
         @Test
-        fun `should clamp the scroll to the map bounds when the tile is near the map corner`() =
+        fun `should clamp the scroll to the map bounds and leave room for the tallest unit when the tile is near the map corner`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
+                val sprites = SpriteRegistry()
+                val battlefieldView = BattlefieldView(sprites)
                 battlefieldView.loadAssets()
                 battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
                 addChild(battlefieldView)
@@ -806,7 +807,8 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 val battlefieldGrid = getBattlefieldGrid(battlefieldView)
                 assertThat(battlefieldGrid.x).isEqualTo(0.0)
-                assertThat(battlefieldGrid.y).isEqualTo(0.0)
+                assertThat(battlefieldGrid.y).isEqualTo(sprites.maxUnitOverhang() * PIXEL_SCALE.toDouble())
+                assertThat(sprites.maxUnitOverhang()).isPositive()
             }
     }
 

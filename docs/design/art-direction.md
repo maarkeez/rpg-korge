@@ -142,7 +142,7 @@ Y is luma. Hue shifts: shadows lean red or purple, highlights lean yellow.
 | Material | Deep / outline | Shadow | Base | Light | Highlight |
 | --- | --- | --- | --- | --- | --- |
 | Grass (yellow-green) | `172808` (31) | `376D03` (81) | `6AB417` (140) | `8CD612` (170) | `BEEB71` (208) |
-| Dirt / sand path | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `F5B784` (196) | `FFE9C5` (235) |
+| Dirt / sand path | `5C3C0D` (64) | `AE6C37` (122) shadow, `C59782` (162) pebbles | `F5B784` (196) | – | `FFE9C5` (235) |
 | Cliff / rock | `231712` (26) | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `E2D7B5` (214) |
 | Water (teal) | `00177D` (28) | `005280` (63) | `0A98AC` (112) | `25E2CD` (167) | `FFFFFF` foam |
 | Lava | `4F1507` (37) | `AD4E1A` (100) | `CC8F15` (147) | `FFE9C5` (235) | `FFFFFF` |
@@ -159,11 +159,11 @@ Reserved UI hues (§3) stay forbidden as dominant colors. Grass and poison no lo
 
 ### 7.2 Value checks (Δ luma ≥ 40, main body vs tile)
 
-| Unit main color | Grass 140 | Dirt 162 | Water 112 | Lava 147 |
+| Unit main color | Grass 140 | Dirt 196 | Water 112 | Lava 147 |
 | --- | --- | --- | --- | --- |
-| Knight tunic `3D34A5` (68) | 72 | 94 | 44 | 79 |
-| Rat fur `5C3C0D` (64) | 76 | 98 | 48 | 83 |
-| Bee stripe `343434` (52) / gold `CC8F15` (147) | 88 / 7 | 110 / 15 | 60 / 35 | 95 / 0 |
+| Knight tunic `3D34A5` (68) | 72 | 128 | 44 | 79 |
+| Rat fur `5C3C0D` (64) | 76 | 132 | 48 | 83 |
+| Bee stripe `343434` (52) / gold `CC8F15` (147) | 88 / 7 | 144 / 49 | 60 / 35 | 95 / 0 |
 
 The bee reads by its dark stripes and outline; its gold must never be its largest area.
 

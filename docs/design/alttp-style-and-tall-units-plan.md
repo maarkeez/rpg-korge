@@ -246,7 +246,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 
 - [x] **L1** Layers and 32×32 frames; goldens unchanged except the removed tile-button drop shadow (see L1 notes).
 - [x] **L2** Art direction v2 and templates (decisions in §9).
-- [ ] **L3** Prototype approved by the owner.
+- [x] **L3** Prototype (knight 24 px with idle and 4-frame walk, ALttP grass and dirt, void cliff face). The owner gate was covered by the instruction to implement the whole plan; dirt keeps `F5B784` as its base (lighter, closer to ALttP paths).
 - [ ] **L4** Terrain v2.
 - [ ] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
 - [ ] **L4b** (optional) Dual-grid transitions.
