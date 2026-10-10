@@ -130,6 +130,7 @@ tasks.register<Test>("generateContactSheet") {
 
     filter {
         includeTestsMatching("com.mkz.rpg.assets.AssetContactSheetTest")
+        includeTestsMatching("com.mkz.rpg.assets.ReadabilitySheetTest")
     }
 }
 

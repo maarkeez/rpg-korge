@@ -33,10 +33,10 @@ class SpriteRegistry {
     /** Loads every bitmap once. Later calls do nothing. */
     suspend fun load() {
         if (loaded) return
-        units = UNIT_IDS.associateWith { resourcesVfs["unit/$it.png"].readBitmap() }
-        portraits = UNIT_IDS.associateWith { resourcesVfs["unit/${it}_portrait.png"].readBitmap() }
-        abilities = ABILITY_IDS.associateWith { resourcesVfs["ability/${it.replace('-', '_')}.png"].readBitmap() }
-        effects = EFFECT_IDS.associateWith { resourcesVfs["effect/$it.png"].readBitmap() }
+        units = UNIT_IDS.associateWith { resourcesVfs[unitPath(it)].readBitmap() }
+        portraits = UNIT_IDS.associateWith { resourcesVfs[portraitPath(it)].readBitmap() }
+        abilities = ABILITY_IDS.associateWith { resourcesVfs[abilityPath(it)].readBitmap() }
+        effects = EFFECT_IDS.associateWith { resourcesVfs[effectPath(it)].readBitmap() }
         highlights = Highlight.entries.associateWith { resourcesVfs[it.path].readBitmap() }
         abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
         loaded = true
@@ -66,11 +66,20 @@ class SpriteRegistry {
             }
         }
 
-    private companion object {
-        const val ART_SIZE = 16
-        const val PORTRAIT_SIZE = 32
-        val UNIT_IDS = listOf("knight", "rat", "bee")
-        val ABILITY_IDS = listOf("heal", "sword", "poisoned-sword", "mushroom", "skull", "teleport", "bee")
-        val EFFECT_IDS = listOf("venom-damage", "venom-on-death")
+    // Internal so the asset tests can check that every registered id resolves to a file.
+    internal companion object {
+        private const val ART_SIZE = 16
+        private const val PORTRAIT_SIZE = 32
+        internal val UNIT_IDS = listOf("knight", "rat", "bee")
+        internal val ABILITY_IDS = listOf("heal", "sword", "poisoned-sword", "mushroom", "skull", "teleport", "bee")
+        internal val EFFECT_IDS = listOf("venom-damage", "venom-on-death")
+
+        internal fun unitPath(unitId: String): String = "unit/$unitId.png"
+
+        internal fun portraitPath(unitId: String): String = "unit/${unitId}_portrait.png"
+
+        internal fun abilityPath(abilityId: String): String = "ability/${abilityId.replace('-', '_')}.png"
+
+        internal fun effectPath(effectId: String): String = "effect/$effectId.png"
     }
 }

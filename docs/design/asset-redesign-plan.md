@@ -487,7 +487,7 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 
 ## 16. Milestone completion checklist
 
-- [ ] **M0** Asset spec, transition, registry tests and readability sheet added; all green on unchanged assets; docs updated.
+- [x] **M0** Asset spec, transition, registry tests and readability sheet added; all green on unchanged assets; docs updated.
 - [ ] **M1** `docs/design/art-direction.md` written; palette roles from verified hex only; Q1, Q2, Q3, Q5 answered by owner.
 - [ ] **M2** Prototype (knight, sand_to_grass + sand tile 0 in all strips, venom-damage, defeat FX) merged; goldens reviewed and updated; **owner approved**.
 - [ ] **M3** Lava, water, void strips redrawn; readability sheet and terrain-mix reviewed.
