@@ -27,3 +27,9 @@ Drop the image in `resources` following the naming conventions below. Neither th
 
 - Units and abilities without an image are not displayed.
 - Effects without an image fail when displayed.
+
+## Colour palette
+
+- Assets MUST only use the 64 colours of the FamiCube palette, defined by [`resources/famicube-palette.png`](../../resources/famicube-palette.png).
+- Pixels MUST be fully transparent or fully opaque. Semi-transparent pixels are not allowed.
+- Both rules are enforced for every image under `resources` by [`AssetPaletteArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssetPaletteArchitectureTest.kt). When an asset fails, the test lists each off-palette colour with its closest palette colour.
