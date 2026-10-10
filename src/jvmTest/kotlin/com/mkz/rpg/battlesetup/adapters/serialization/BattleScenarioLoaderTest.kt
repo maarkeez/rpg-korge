@@ -13,6 +13,7 @@ class BattleScenarioLoaderTest {
             "scenarios/default.json",
             "scenarios/chain-showcase.json",
             "scenarios/terrain-mix.json",
+            "scenarios/ui-showcase.json",
         )
 
     @Test

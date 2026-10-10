@@ -11,8 +11,9 @@ Shipped scenarios:
 | File | Seed | Battlefield | Purpose |
 | --- | --- | --- | --- |
 | `default.json` | 42 | 16×16, same terrain as the hardcoded demo | The built-in default battle, as a file |
-| `chain-showcase.json` | 7 | 16×16, demo terrain | Units deployed in adjacent pairs so effect chains trigger immediately |
-| `terrain-mix.json` | 1337 | 16×16, all five terrain types | Visual check of every terrain tile type |
+| `chain-showcase.json` | 42 | 16×16, demo terrain | Units deployed in adjacent pairs so effect chains trigger immediately |
+| `terrain-mix.json` | 42 | 16×16, all five terrain types | Visual check of every terrain tile type |
+| `ui-showcase.json` | 42 | 16×16, sand and grass, one lava tile (6,4) and one water tile (8,8) | UI work: knights at (6,6) and (8,6), rats A (6,7) and B (6,8) adjacent to a knight and to each other, rat C far away at (1,1), so targeting, preview and death propagation are reachable without moving |
 
 ## JSON schema
 

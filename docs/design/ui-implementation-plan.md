@@ -710,7 +710,7 @@ All assets use the Famicube palette, are drawn at 1× art pixels and are added t
 
 | Milestone | Done | Date | Verified by (tests / snapshots / manual) | Notes |
 | --- | --- | --- | --- | --- |
-| M0 Baseline, scenario and verification helpers | [ ] | | | |
+| M0 Baseline, scenario and verification helpers | [x] | 2026-10-10 | jvmTest baseline 586 tests, 0 failures. Focused M0 tests and `lintKotlin` pass; existing 3 goldens unchanged. `runJvm` visual check not performed (no display) | Seed column in `reference-battle-scenarios.md` fixed to 42 to match the files. Grass near lava/water was removed in `ui-showcase` because terrain transitions are validated |
 | M1 Visual foundations | [ ] | | | |
 | M2 Portrait battlefield-first layout | [ ] | | | |
 | M3 Unit selection and on-unit info | [ ] | | | |

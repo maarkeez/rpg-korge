@@ -31,9 +31,9 @@ private const val READY_TIMEOUT_MS = 10_000L
 private const val POLL_DELAY_MS = 10L
 private const val SETTLE_DELAY_MS = 200L
 
-internal suspend fun OffscreenStage.createBattleScene(): BattleScene {
+internal suspend fun OffscreenStage.createBattleScene(scenarioPath: String? = null): BattleScene {
     val container = sceneContainer()
-    return container.changeTo { BattleScene(seed = SNAPSHOT_SEED) }
+    return container.changeTo { BattleScene(seed = SNAPSHOT_SEED, scenarioPath = scenarioPath) }
 }
 
 internal suspend fun awaitBattleReady(scene: BattleScene) {

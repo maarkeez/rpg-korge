@@ -52,6 +52,7 @@ class BattleScenarioAcceptanceTest {
                 "scenarios/default.json",
                 "scenarios/chain-showcase.json",
                 "scenarios/terrain-mix.json",
+                "scenarios/ui-showcase.json",
             )
         // When
         val graphs =
