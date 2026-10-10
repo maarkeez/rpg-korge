@@ -21,6 +21,7 @@ internal fun expectedArtSize(path: String): ArtSize? =
         path.startsWith("effect/fx_") -> ArtSize(width = 3 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("unit/") && (path.endsWith("_idle.png") || path.endsWith("_walk.png")) ->
             ArtSize(width = 2 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
+        path.startsWith("terrain/variants/") -> ArtSize(width = 3 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("terrain/transitions/") -> ArtSize(width = 16 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("unit/") && path.endsWith("_portrait.png") -> ArtSize(width = 32, height = 32)
         path.startsWith("unit/") ||

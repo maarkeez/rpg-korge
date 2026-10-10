@@ -29,6 +29,7 @@ import korlibs.korge.view.image
 import korlibs.math.clamp
 import korlibs.math.geom.Size
 import korlibs.math.geom.Spacing
+import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.hypot
 
@@ -63,6 +64,7 @@ class BattlefieldView(
     private var delegate: Delegate? = null
     private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
+    private var variantBitMaps: Map<String, List<Bitmap>> = emptyMap()
     private var mapWidth = 0.0
     private var mapHeight = 0.0
     private var mapRows = 0
@@ -112,7 +114,22 @@ class BattlefieldView(
                 }
             }
         terrainBitMaps = builtTerrainBitMaps
+        variantBitMaps = loadTerrainVariants()
         sprites.load()
+    }
+
+    /** Alternate base tiles per terrain. They live outside `transitions/`, so they never add a terrain rule. */
+    private suspend fun loadTerrainVariants(): Map<String, List<Bitmap>> {
+        val variantsRoot = resourcesVfs["terrain/variants"]
+        if (!variantsRoot.exists()) return emptyMap()
+        return variantsRoot
+            .listNames()
+            .filter { it.endsWith(".png") }
+            .associate { fileName ->
+                val strip = variantsRoot[fileName].readBitmap()
+                fileName.removeSuffix(".png") to
+                    List(strip.width / TILE_PIXEL_SIZE) { index -> strip.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE) }
+            }
     }
 
     fun displayBattlefield(battlefield: Battlefield.Dto) {
@@ -141,7 +158,7 @@ class BattlefieldView(
                     tileButton.background.bgColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
                     val tileDto = battlefield.tiles[PositionDto(row, column)]!!
-                    tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
+                    tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition, row, column), TERRAIN)
                     tileButton.onClick {
                         if (!gestureIsDrag) delegate?.tileSelected(row, column)
                     }
@@ -197,18 +214,32 @@ class BattlefieldView(
         return offset.clamp(minOffset, 0.0)
     }
 
+    /**
+     * The tile drawn at [row], [column]. Transition tiles come from their strip. Base tiles use a variant picked from the
+     * position, so the same tile always looks the same and the 16 px repeat is broken up.
+     */
     fun terrainTileBitmap(
         terrainId: String,
         terrainTransition: TerrainTransitionDto?,
+        row: Int = 0,
+        column: Int = 0,
     ): Bitmap {
         val transition = terrainTransition
-        return if (transition != null) {
+        if (transition != null) {
             val transitionName = "${transition.fromTerrainId}$TRANSITION_NAME_SEPARATOR${transition.toTerrainId}"
-            transitionBitMaps.getValue(transitionName)[transition.wangIndex]
-        } else {
-            terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+            return transitionBitMaps.getValue(transitionName)[transition.wangIndex]
         }
+        val base = terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
+        val variants = variantBitMaps[terrainId].orEmpty()
+        val pick = terrainVariantPick(row, column)
+        return if (pick in 1..variants.size) variants[pick - 1] else base
     }
+
+    /** 0..7 from the position; 1..N selects variant N - 1, anything else keeps the base tile (so most tiles stay base). */
+    private fun terrainVariantPick(
+        row: Int,
+        column: Int,
+    ): Int = abs((row * 73_856_093) xor (column * 19_349_663)) % 8
 
     private fun tileName(
         row: Int,

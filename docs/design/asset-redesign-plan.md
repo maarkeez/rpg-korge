@@ -496,5 +496,5 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 - [x] **M6a** Ability icons reviewed / polished.
 - [x] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).
 - [x] **M6c** Authored hit, heal, venom, spread FX.
-- [ ] **M7** (optional) Terrain variants / props.
+- [x] **M7** (optional) Terrain variants / props.
 - [ ] **M8** Unused assets retired after verification; docs and inventory updated; full manual checklist passed.

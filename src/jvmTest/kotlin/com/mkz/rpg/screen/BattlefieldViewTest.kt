@@ -107,6 +107,35 @@ class BattlefieldViewTest : ViewsForTesting() {
             }
 
         @Test
+        fun `should return a terrain variant for some positions when the terrain has variants`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val variantStrip = resourcesVfs["terrain/variants/sand.png"].readBitmap()
+                val positions = (0 until 8).flatMap { row -> (0 until 8).map { column -> row to column } }
+                // When
+                val tiles = positions.map { (row, column) -> battlefieldView.terrainTileBitmap("sand", null, row, column) }
+                // Then
+                val variantTiles = tiles.filter { tile -> (0 until variantStrip.width / 16).any { matchesWangTile(tile, variantStrip, it) } }
+                assertThat(variantTiles).isNotEmpty
+                assertThat(variantTiles.size).isLessThan(tiles.size / 2)
+            }
+
+        @Test
+        fun `should return the same tile when the same position is drawn again`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                // When
+                val first = battlefieldView.terrainTileBitmap("grass", null, row = 5, column = 3)
+                val second = battlefieldView.terrainTileBitmap("grass", null, row = 5, column = 3)
+                // Then
+                assertThat(second).isSameAs(first)
+            }
+
+        @Test
         fun `should return the transition tile of the strip when the tile has a terrain transition`() =
             viewsTest {
                 // Given
