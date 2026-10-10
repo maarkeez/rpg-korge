@@ -1,4 +1,4 @@
-# OpenCode Agent Prompt — Game Asset Audit and Redesign Planner
+# Task — Game Asset Audit and Redesign Planner
 
 ## Role
 
