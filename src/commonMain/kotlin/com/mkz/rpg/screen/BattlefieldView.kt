@@ -101,7 +101,10 @@ class BattlefieldView(
     private class StandingUnit(
         val unitId: String,
         val image: Image,
+        var mirrored: Boolean = false,
     )
+
+    private val walkerTypes = mutableMapOf<String, String>()
 
     private val walkers = mutableMapOf<String, View>()
     private val walkerSteps = mutableMapOf<String, Int>()
@@ -400,6 +403,39 @@ class BattlefieldView(
             .forEach { unitLayer.addChild(it.value.image) }
     }
 
+    /** Turns the unit standing on the tile to look right or left, by mirroring its frames when the art looks the other way. */
+    fun turnUnit(
+        row: Int,
+        column: Int,
+        towardsRight: Boolean,
+    ) {
+        val unit = units[row to column] ?: return
+        unit.mirrored = towardsRight != sprites.facesRight(unit.unitId)
+        placeUnitFrame(unit.image, row, column)
+        unit.image.scaleX = if (unit.mirrored) -PIXEL_SCALE.toDouble() else PIXEL_SCALE.toDouble()
+        // A mirrored frame flips around its left edge, so it moves one frame to the right to stay on its tile.
+        if (unit.mirrored) unit.image.x += SpriteRegistry.UNIT_FRAME_SIZE * PIXEL_SCALE.toDouble()
+    }
+
+    /** Turns a walking unit to look right or left. */
+    fun turnWalker(
+        walkerId: String,
+        towardsRight: Boolean,
+    ) {
+        val walker = walkers[walkerId] as? Container ?: return
+        val unitType = walkerTypes[walkerId] ?: return
+        walker.firstChild?.let { mirror(it, towardsRight != sprites.facesRight(unitType)) }
+    }
+
+    /** Mirrors an image that sits at the origin of its container (walkers and flashes). */
+    private fun mirror(
+        view: View,
+        mirrored: Boolean,
+    ) {
+        view.scaleX = if (mirrored) -PIXEL_SCALE.toDouble() else PIXEL_SCALE.toDouble()
+        view.x = if (mirrored) SpriteRegistry.UNIT_FRAME_SIZE * PIXEL_SCALE.toDouble() else 0.0
+    }
+
     /** The unit drawn on the tile, for tests. */
     internal fun unitViewAt(
         row: Int,
@@ -600,6 +636,7 @@ class BattlefieldView(
     ) {
         val flash = FxViews.flash(sprites.silhouette(unitId)).also { it.name = FxViews.FLASH_NAME }
         placeUnitFrame(flash, row, column)
+        if (units[row to column]?.mirrored == true) flash.firstChild?.let { mirror(it, mirrored = true) }
         fxLayer.play(flash, FxViews.FLASH_MS)
     }
 
@@ -727,6 +764,7 @@ class BattlefieldView(
         walkerId: String = unitType,
     ) {
         val frames = sprites.unitFrames(unitType, SpriteRegistry.WALK)
+        walkerTypes[walkerId] = unitType
         val step = walkerSteps[walkerId]?.plus(1) ?: 0
         walkerSteps[walkerId] = step
         val walker =

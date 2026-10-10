@@ -291,6 +291,41 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class TurnUnit {
+        @Test
+        fun `should mirror the rat and keep it on its tile when it turns to look right`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 3).toDto())
+                battlefieldView.displayRatBattleUnit(row = 1, column = 1)
+                // When
+                battlefieldView.turnUnit(row = 1, column = 1, towardsRight = true)
+                // Then
+                val rat = battlefieldView.unitViewAt(row = 1, column = 1)!!
+                assertThat(rat.scaleX).isNegative()
+                val frameRight = rat.x
+                val frameLeft = frameRight - SpriteRegistry.UNIT_FRAME_SIZE * PIXEL_SCALE
+                assertThat(frameLeft + SpriteRegistry.UNIT_TILE_LEFT * PIXEL_SCALE).isEqualTo(1.0 * BattlefieldView.TILE_SIZE)
+            }
+
+        @Test
+        fun `should not mirror the knight when it turns to look right`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 3).toDto())
+                battlefieldView.displayKnightBattleUnit(row = 1, column = 1)
+                // When
+                battlefieldView.turnUnit(row = 1, column = 1, towardsRight = true)
+                // Then
+                assertThat(battlefieldView.unitViewAt(row = 1, column = 1)!!.scaleX).isPositive()
+            }
+    }
+
+    @Nested
     inner class DisplayRatBattleUnit {
         @Test
         fun `should display rat battle unit on tile when is displayed`() =

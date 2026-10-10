@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
@@ -257,6 +258,21 @@ class BattlefieldPresenterPlaybackTest {
             order.verify(battlefieldView).showWalker(eq("knight"), eq(0), eq(2), any())
             order.verify(battlefieldView).hideWalker(movedBattleUnit.id)
             order.verify(battlefieldView).displayKnightBattleUnit(row = 0, column = 3)
+        }
+
+        @Test
+        fun `should turn the unit to look the way it walked when it moves to the left`() {
+            // Given
+            val presenter = presenter(FeedbackTiming.Standard)
+            val movedBattleUnit = givenBattleUnit(owner = humanPlayer, row = 0, column = 0)
+            whenever(canBattlefieldTileBeOccupied(any(), any())).thenReturn(true)
+            // When
+            eventBus.publish(BattleUnitEvent.BattleUnitMoved(movedBattleUnit.id, fromRow = 0, fromColumn = 3, toRow = 0, toColumn = 0))
+            eventBus.dispatch()
+            repeat(5) { presenter.updateFeedback(deltaMs = 1_000.0) }
+            // Then
+            verify(battlefieldView, atLeastOnce()).turnWalker(movedBattleUnit.id, towardsRight = false)
+            verify(battlefieldView).turnUnit(row = 0, column = 0, towardsRight = false)
         }
 
         @Test

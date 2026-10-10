@@ -103,6 +103,9 @@ class BattlefieldPresenter(
     private val teleportingBattleUnitIds = mutableSetOf<String>()
     private val animate = !feedbackTiming.isInstant
 
+    /** Which way each battle unit looks, kept here so it survives redraws of the battlefield. */
+    private val facesRight = mutableMapOf<String, Boolean>()
+
     /** Where each unit is drawn right now. Beats play after the domain moved on, so the repositories can't tell. */
     private val displayedPositions = mutableMapOf<String, Pair<Int, Int>>()
 
@@ -220,6 +223,7 @@ class BattlefieldPresenter(
         if (battleUnit.unitId == "bee") {
             battlefieldView.displayBeeBattleUnit(row, column)
         }
+        facesRight[battleUnitId]?.let { battlefieldView.turnUnit(row, column, towardsRight = it) }
         displayOverlay(row, column, battleUnit)
     }
 
@@ -344,12 +348,23 @@ class BattlefieldPresenter(
             removeUnit(beat.fromRow, beat.fromColumn)
             displayedPositions.remove(beat.battleUnitId)
         }
+        rememberFacing(beat.battleUnitId, beat.fromColumn, beat.toColumn)
         if (beat.isLastHop) {
             battlefieldView.hideWalker(beat.battleUnitId)
             finishMove(beat.battleUnitId, beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn)
         } else {
             battlefieldView.showWalker(unitTypeOf(beat.battleUnitId), beat.toRow, beat.toColumn, beat.battleUnitId)
+            facesRight[beat.battleUnitId]?.let { battlefieldView.turnWalker(beat.battleUnitId, towardsRight = it) }
         }
+    }
+
+    /** A unit looks the way it last walked; a purely vertical step keeps the side it already faced. */
+    private fun rememberFacing(
+        battleUnitId: String,
+        fromColumn: Int,
+        toColumn: Int,
+    ) {
+        if (toColumn != fromColumn) facesRight[battleUnitId] = toColumn > fromColumn
     }
 
     private fun finishMove(
@@ -359,6 +374,7 @@ class BattlefieldPresenter(
         toRow: Int,
         toColumn: Int,
     ) {
+        rememberFacing(battleUnitId, fromColumn, toColumn)
         battlefieldView.resetTiles()
         removeUnit(fromRow, fromColumn)
         displayedPositions[battleUnitId] = toRow to toColumn

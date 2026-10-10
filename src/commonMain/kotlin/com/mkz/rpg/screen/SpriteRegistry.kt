@@ -67,6 +67,9 @@ class SpriteRegistry {
             frames.maxOf { frame -> (UNIT_TILE_TOP - topOpaqueRow(frame)).coerceAtLeast(0) }
         }
 
+    /** True when the unit's art looks to the right; mirroring it makes it look to the left, and the other way round. */
+    fun facesRight(unitId: String): Boolean = unitId in UNITS_DRAWN_FACING_RIGHT
+
     /** The largest [unitOverhang] of every registered unit, so the map can leave room above its first row. */
     fun maxUnitOverhang(): Int = UNIT_IDS.maxOfOrNull(::unitOverhang) ?: 0
 
@@ -131,6 +134,7 @@ class SpriteRegistry {
         const val UNIT_TILE_LEFT = 8
         private const val PORTRAIT_SIZE = 32
         internal val UNIT_IDS = listOf("knight", "rat", "bee")
+        private val UNITS_DRAWN_FACING_RIGHT = setOf("knight")
         internal val ABILITY_IDS = listOf("heal", "sword", "poisoned-sword", "mushroom", "skull", "teleport", "bee")
         internal val EFFECT_IDS = listOf("venom-damage", "venom-on-death")
 
