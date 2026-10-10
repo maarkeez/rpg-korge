@@ -6,8 +6,6 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
-import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.animate.Animator
 import korlibs.korge.animate.animator
 import korlibs.korge.animate.moveTo
@@ -28,7 +26,9 @@ import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
 
-class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
+class BattlefieldView(
+    private val resourcesLoader: BattleSceneResourcesLoader,
+) : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
     companion object {
         const val TERRAIN = "TERRAIN"
         const val BATTLE_UNIT = "BATTLE_UNIT"
@@ -44,15 +44,28 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     }
 
     private var delegate: Delegate? = null
-    private lateinit var terrainBitMaps: Map<String, Bitmap>
-    private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
-    private lateinit var knightBitmap: Bitmap
-    private lateinit var ratBitmap: Bitmap
-    private lateinit var beeBitmap: Bitmap
-    private lateinit var tileSelection1BitMap: Bitmap
-    private lateinit var tileSelection2BitMap: Bitmap
-    private lateinit var tileSelection3BitMap: Bitmap
-    private lateinit var tileSelectionBitMap: Bitmap
+
+    // Each transition strip is split into its terrain tiles, being the first and last ones the pure terrain tiles.
+    private val transitionBitMaps: Map<String, List<Bitmap>> by lazy {
+        resourcesLoader
+            .bitmaps("terrain/transitions")
+            .filterKeys { fileName -> fileName.endsWith(".png") }
+            .map { (fileName, transitionBitmap) ->
+                fileName.removeSuffix(".png") to
+                    List(transitionBitmap.width / TILE_PIXEL_SIZE) { index ->
+                        transitionBitmap.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
+                    }
+            }.toMap()
+    }
+    private val terrainBitMaps: Map<String, Bitmap> by lazy {
+        buildMap {
+            transitionBitMaps.forEach { (transitionName, transitionTiles) ->
+                val (fromTerrainId, toTerrainId) = transitionName.split(TRANSITION_NAME_SEPARATOR)
+                put(fromTerrainId, transitionTiles.first())
+                put(toTerrainId, transitionTiles.last())
+            }
+        }
+    }
     private lateinit var battlefieldAnimator: Animator
 
     private val viewport =
@@ -67,39 +80,6 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
 
     fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
-    }
-
-    suspend fun loadAssets() {
-        val builtTerrainBitMaps = mutableMapOf<String, Bitmap>()
-        transitionBitMaps =
-            buildMap {
-                val transitionsRoot = resourcesVfs["terrain/transitions"]
-                if (transitionsRoot.exists()) {
-                    transitionsRoot
-                        .listNames()
-                        .filter { it.endsWith(".png") }
-                        .forEach { fileName ->
-                            val transitionName = fileName.removeSuffix(".png")
-                            val transitionBitmap = transitionsRoot[fileName].readBitmap()
-                            val transitionTiles =
-                                List(transitionBitmap.width / TILE_PIXEL_SIZE) { index ->
-                                    transitionBitmap.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
-                                }
-                            val (fromTerrainId, toTerrainId) = transitionName.split(TRANSITION_NAME_SEPARATOR)
-                            builtTerrainBitMaps[fromTerrainId] = transitionTiles.first()
-                            builtTerrainBitMaps[toTerrainId] = transitionTiles.last()
-                            put(transitionName, transitionTiles)
-                        }
-                }
-            }
-        terrainBitMaps = builtTerrainBitMaps
-        knightBitmap = resourcesVfs["unit/knight.png"].readBitmap()
-        ratBitmap = resourcesVfs["unit/rat.png"].readBitmap()
-        beeBitmap = resourcesVfs["unit/bee.png"].readBitmap()
-        tileSelection1BitMap = resourcesVfs["battlefield/tile_selection_1.png"].readBitmap()
-        tileSelection2BitMap = resourcesVfs["battlefield/tile_selection_2.png"].readBitmap()
-        tileSelection3BitMap = resourcesVfs["battlefield/tile_selection_3.png"].readBitmap()
-        tileSelectionBitMap = resourcesVfs["battlefield/tile_selection_4.png"].readBitmap()
     }
 
     fun displayBattlefield(battlefield: Battlefield.Dto) {
@@ -170,34 +150,14 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         column: Int,
     ): String = "row-$row-column-$column"
 
-    fun displayKnightBattleUnit(
+    fun displayBattleUnit(
         row: Int,
         column: Int,
+        unitId: String,
     ) {
-        displayUnit(row, column, knightBitmap)
-    }
-
-    fun displayRatBattleUnit(
-        row: Int,
-        column: Int,
-    ) {
-        displayUnit(row, column, ratBitmap)
-    }
-
-    fun displayBeeBattleUnit(
-        row: Int,
-        column: Int,
-    ) {
-        displayUnit(row, column, beeBitmap)
-    }
-
-    private fun displayUnit(
-        row: Int,
-        column: Int,
-        beeBitmap: Bitmap,
-    ) {
+        val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(beeBitmap, BATTLE_UNIT)
+        tileButton.addImage(unitBitmap, BATTLE_UNIT)
     }
 
     interface Delegate {
@@ -212,7 +172,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
         column: Int,
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.addImage(tileSelection3BitMap, SELECTION)
+        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_3.png"), SELECTION)
     }
 
     fun displayPotentialCast(
@@ -221,7 +181,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         if (tileButton.findViewByName(SELECTION) != null) return
-        tileButton.addImage(tileSelection2BitMap, SELECTION)
+        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_2.png"), SELECTION)
     }
 
     fun displayTileSelection(
@@ -230,7 +190,7 @@ class BattlefieldView : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPO
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.findViewByName(SELECTION)?.removeFromParent()
-        tileButton.addImage(tileSelectionBitMap, SELECTION)
+        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_4.png"), SELECTION)
     }
 
     fun resetTiles() {

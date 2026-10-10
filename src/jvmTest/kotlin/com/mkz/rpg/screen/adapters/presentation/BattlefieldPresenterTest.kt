@@ -118,7 +118,7 @@ class BattlefieldPresenterTest {
             // When
             battlefieldPresenter.displayUnit(row = 1, column = 2, battleUnitId = battleUnitId)
             // Then
-            verify(battlefieldView).displayKnightBattleUnit(row = 1, column = 2)
+            verify(battlefieldView).displayBattleUnit(row = 1, column = 2, unitId = "knight")
         }
 
         @Test
@@ -131,7 +131,7 @@ class BattlefieldPresenterTest {
             // When
             battlefieldPresenter.displayUnit(row = 1, column = 2, battleUnitId = battleUnitId)
             // Then
-            verify(battlefieldView).displayRatBattleUnit(row = 1, column = 2)
+            verify(battlefieldView).displayBattleUnit(row = 1, column = 2, unitId = "rat")
         }
 
         @Test
@@ -144,8 +144,7 @@ class BattlefieldPresenterTest {
             // When
             battlefieldPresenter.displayUnit(row = 1, column = 2, battleUnitId = battleUnitId)
             // Then
-            verify(battlefieldView, never()).displayKnightBattleUnit(any(), any())
-            verify(battlefieldView, never()).displayRatBattleUnit(any(), any())
+            verify(battlefieldView, never()).displayBattleUnit(any(), any(), any())
         }
     }
 

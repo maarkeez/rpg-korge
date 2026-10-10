@@ -11,7 +11,9 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.setText
 import korlibs.math.geom.Size
 
-class BattleUnitInfoView : Container() {
+class BattleUnitInfoView(
+    resourcesLoader: BattleSceneResourcesLoader,
+) : Container() {
     private lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
     private lateinit var abilityButtons: Array<AbilityButtonView>
@@ -20,16 +22,10 @@ class BattleUnitInfoView : Container() {
     private lateinit var manaBarView: ManaBarView
     private lateinit var unitPortraitView: UnitPortraitView
 
-    suspend fun loadAssets() {
-        unitPortraitView.loadAssets()
-        abilityButtons.forEach { abilityButton -> abilityButton.loadAssets() }
-        effectsView.loadAssets()
-    }
-
     private val battleUnitInfoLayout =
         uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
+                unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), resourcesLoader)
                 addChild(unitPortraitView)
 
                 uiSpacing(Size(10, 0))
@@ -47,21 +43,13 @@ class BattleUnitInfoView : Container() {
                     addChild(manaBarView)
 
                     uiSpacing(Size(0, 4))
-                    effectsView = EffectsView()
+                    effectsView = EffectsView(resourcesLoader)
                     addChild(effectsView)
                 }
             }
             uiHorizontalStack(padding = 2.0) {
                 val abilityButtonSize = Size(width = 48.75, height = 48.75)
-                abilityButtons =
-                    arrayOf(
-                        AbilityButtonView(abilityButtonSize),
-                        AbilityButtonView(abilityButtonSize),
-                        AbilityButtonView(abilityButtonSize),
-                        AbilityButtonView(abilityButtonSize),
-                        AbilityButtonView(abilityButtonSize),
-                        AbilityButtonView(abilityButtonSize),
-                    )
+                abilityButtons = Array(6) { AbilityButtonView(abilityButtonSize, resourcesLoader) }
                 abilityButtons.forEach(::addChild)
             }
         }

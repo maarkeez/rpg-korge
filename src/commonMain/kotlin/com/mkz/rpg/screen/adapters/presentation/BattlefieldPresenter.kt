@@ -139,15 +139,7 @@ class BattlefieldPresenter(
         battleUnitId: String,
     ) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
-        if (battleUnit.unitId == "knight") {
-            battlefieldView.displayKnightBattleUnit(row, column)
-        }
-        if (battleUnit.unitId == "rat") {
-            battlefieldView.displayRatBattleUnit(row, column)
-        }
-        if (battleUnit.unitId == "bee") {
-            battlefieldView.displayBeeBattleUnit(row, column)
-        }
+        battlefieldView.displayBattleUnit(row, column, battleUnit.unitId)
     }
 
     fun removeUnit(

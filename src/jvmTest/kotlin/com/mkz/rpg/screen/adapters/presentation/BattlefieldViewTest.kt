@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
@@ -22,8 +23,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display battlefield tiles when battlefield is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val battlefield = battlefield(rows = 2, columns = 3).toDto()
                 // When
                 battlefieldView.displayBattlefield(battlefield)
@@ -36,8 +36,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display terrain on each tile when battlefield is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val battlefield = battlefield(rows = 1, columns = 1).toDto()
                 // When
                 battlefieldView.displayBattlefield(battlefield)
@@ -50,8 +49,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display terrain transition tile on tile adjacent to void when battlefield is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val tiles =
                     listOf(
                         listOf("void", "sand"),
@@ -77,8 +75,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should return the pure terrain tile of the strip when the tile has no terrain transition`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
@@ -92,8 +89,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should return the pure target terrain tile of the strip when the target terrain tile has no terrain transition`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
@@ -105,8 +101,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should return the transition tile of the strip when the tile has a terrain transition`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap =
@@ -125,8 +120,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should return the last tile of the strip when the terrain transition has all target terrain edges`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
                 // When
                 val tileBitmap =
@@ -143,8 +137,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should throw when the terrain bitmap is not found and the tile has no terrain transition`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 // When
                 val result = runCatching { battlefieldView.terrainTileBitmap(terrainId = "forest", terrainTransition = null) }
                 // Then
@@ -153,36 +146,44 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
-    inner class DisplayKnightBattleUnit {
+    inner class DisplayBattleUnit {
         @Test
         fun `should display knight battle unit on tile when is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 // When
-                battlefieldView.displayKnightBattleUnit(row = 0, column = 0)
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
                 // Then
                 val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
             }
-    }
 
-    @Nested
-    inner class DisplayRatBattleUnit {
         @Test
         fun `should display rat battle unit on tile when is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 // When
-                battlefieldView.displayRatBattleUnit(row = 0, column = 0)
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "rat")
                 // Then
                 val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
                 assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
+            }
+
+        @Test
+        fun `should not display battle unit on tile when the unit has no image`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                // When
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "dragon")
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNull()
             }
     }
 
@@ -192,8 +193,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display selection on tile when potential movement is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 // When
                 battlefieldView.displayPotentialMovement(row = 0, column = 0)
@@ -209,8 +209,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display selection on tile when potential cast is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 // When
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
@@ -223,8 +222,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should not display duplicated selection when potential cast is displayed twice`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // When
@@ -242,8 +240,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should display selection on tile when tile selection is displayed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 // When
                 battlefieldView.displayTileSelection(row = 0, column = 0)
@@ -256,8 +253,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should replace selection when tile selection is displayed over potential cast`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // When
@@ -275,8 +271,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should remove selections from tiles when tiles are reset`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
                 battlefieldView.displayPotentialMovement(row = 0, column = 0)
                 battlefieldView.displayTileSelection(row = 0, column = 1)
@@ -298,10 +293,9 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should remove battle unit from tile when is removed`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                battlefieldView.displayKnightBattleUnit(row = 0, column = 0)
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
                 // When
                 battlefieldView.removeBattleUnit(row = 0, column = 0)
                 // Then
@@ -316,8 +310,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         fun `should notify delegate with tile position when tile is clicked`() =
             viewsTest {
                 // Given
-                val battlefieldView = BattlefieldView()
-                battlefieldView.loadAssets()
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
                 val delegate = mock<BattlefieldView.Delegate>()
                 battlefieldView.setDelegate(delegate)
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())

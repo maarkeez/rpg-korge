@@ -1,9 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.Colors
-import korlibs.image.format.readBitmap
-import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.align.centerOn
@@ -12,6 +9,7 @@ import korlibs.math.geom.Size
 
 class UnitPortraitView(
     size: Size,
+    private val resourcesLoader: BattleSceneResourcesLoader,
 ) : UIContainer(size) {
     private val battleUnitPortrait =
         uiButton("").also { button ->
@@ -20,15 +18,6 @@ class UnitPortraitView(
             button.bgColorOver = Colors.LIGHTSKYBLUE
             button.background.borderColor = Colors.LIGHTGRAY
         }
-    private lateinit var knightPortrait: Bitmap
-    private lateinit var beePortrait: Bitmap
-    private lateinit var ratPortrait: Bitmap
-
-    suspend fun loadAssets() {
-        beePortrait = resourcesVfs["unit/bee_portrait.png"].readBitmap()
-        knightPortrait = resourcesVfs["unit/knight_portrait.png"].readBitmap()
-        ratPortrait = resourcesVfs["unit/rat_portrait.png"].readBitmap()
-    }
 
     init {
         addChild(battleUnitPortrait)
@@ -36,12 +25,7 @@ class UnitPortraitView(
 
     fun display(unitId: String) {
         battleUnitPortrait.findViewByName("portrait")?.removeFromParent()
-        when (unitId) {
-            "knight" -> knightPortrait
-            "rat" -> ratPortrait
-            "bee" -> beePortrait
-            else -> null
-        }?.let { avatarBitmap ->
+        resourcesLoader.bitmapOrNull("unit/${unitId}_portrait.png")?.let { avatarBitmap ->
             battleUnitPortrait.image(avatarBitmap) {
                 name = "portrait"
                 smoothing = false

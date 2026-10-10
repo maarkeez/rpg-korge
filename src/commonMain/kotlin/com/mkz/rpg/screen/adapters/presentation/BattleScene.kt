@@ -19,9 +19,10 @@ import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
 class BattleScene : Scene() {
-    val battlefieldView = BattlefieldView()
-    val battleUnitInfoView = BattleUnitInfoView()
-    val attackPreviewView = AttackPreviewView()
+    private val resourcesLoader = BattleSceneResourcesLoader()
+    val battlefieldView = BattlefieldView(resourcesLoader)
+    val battleUnitInfoView = BattleUnitInfoView(resourcesLoader)
+    val attackPreviewView = AttackPreviewView(resourcesLoader)
     val battleHudView =
         BattleHudView(
             Size(390, 300),
@@ -31,9 +32,7 @@ class BattleScene : Scene() {
     val playerCallToActionView = PlayerCallToActionView()
 
     override suspend fun SContainer.sceneInit() {
-        battlefieldView.loadAssets()
-        battleUnitInfoView.loadAssets()
-        attackPreviewView.loadAssets()
+        resourcesLoader.load()
     }
 
     override suspend fun SContainer.sceneMain() {

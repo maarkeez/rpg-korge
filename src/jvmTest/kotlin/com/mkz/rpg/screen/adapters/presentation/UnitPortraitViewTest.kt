@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
@@ -13,8 +14,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
         fun `should be visible when is displayed`() =
             viewsTest {
                 // Given
-                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
-                unitPortraitView.loadAssets()
+                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), loadedResourcesLoader())
                 // When
                 unitPortraitView.display(unitId = "knight")
                 // Then
@@ -25,8 +25,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
         fun `should display knight portrait when knight unit is displayed`() =
             viewsTest {
                 // Given
-                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
-                unitPortraitView.loadAssets()
+                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), loadedResourcesLoader())
                 // When
                 unitPortraitView.display(unitId = "knight")
                 // Then
@@ -38,8 +37,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
         fun `should display rat portrait when rat unit is displayed`() =
             viewsTest {
                 // Given
-                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
-                unitPortraitView.loadAssets()
+                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), loadedResourcesLoader())
                 // When
                 unitPortraitView.display(unitId = "rat")
                 // Then
@@ -51,8 +49,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
         fun `should not display portrait when unknown unit is displayed`() =
             viewsTest {
                 // Given
-                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
-                unitPortraitView.loadAssets()
+                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), loadedResourcesLoader())
                 // When
                 unitPortraitView.display(unitId = "unknown-unit")
                 // Then
@@ -67,8 +64,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
         fun `should not be visible when is hidden`() =
             viewsTest {
                 // Given
-                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5))
-                unitPortraitView.loadAssets()
+                val unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), loadedResourcesLoader())
                 unitPortraitView.display(unitId = "knight")
                 // When
                 unitPortraitView.hide()

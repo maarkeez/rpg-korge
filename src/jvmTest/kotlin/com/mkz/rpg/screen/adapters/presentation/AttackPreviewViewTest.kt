@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Container
@@ -16,8 +17,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
         fun `should be visible when is displayed`() =
             viewsTest {
                 // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
+                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
                 val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
                 val casterUnit = unit(id = "knight").toDto()
                 // When
@@ -37,8 +37,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
         fun `should hide receiver views when no receiver battle unit is provided`() =
             viewsTest {
                 // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
+                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
                 val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
                 val casterUnit = unit(id = "knight").toDto()
                 // When
@@ -60,8 +59,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
         fun `should display receiver views when receiver battle unit is provided`() =
             viewsTest {
                 // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
+                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
                 val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
                 val casterUnit = unit(id = "knight").toDto()
                 val receiverBattleUnit = battleUnit(unit = unit(id = "rat").toDto()).toDto()
@@ -88,8 +86,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
         fun `should not be visible when is hidden`() =
             viewsTest {
                 // Given
-                val attackPreviewView = AttackPreviewView()
-                attackPreviewView.loadAssets()
+                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
                 val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
                 val casterUnit = unit(id = "knight").toDto()
                 attackPreviewView.display(

@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Container
@@ -16,7 +17,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         fun `should not be visible when is initialized`() =
             viewsTest {
                 // Given
-                val battleUnitInfoView = BattleUnitInfoView()
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 // When
                 // Then
                 assertThat(battleUnitInfoView.isVisibleToUser()).isFalse
@@ -29,7 +30,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         fun `should be visible when is displayed`() =
             viewsTest {
                 // Given
-                val battleUnitInfoView = BattleUnitInfoView()
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 val unit = unit().toDto()
                 val battleUnit = battleUnit(unit = unit).toDto()
                 // When
@@ -45,8 +46,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         fun `should select ability button when ability is selected`() =
             viewsTest {
                 // Given
-                val battleUnitInfoView = BattleUnitInfoView()
-                battleUnitInfoView.loadAssets()
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 val selectedAbilityIndex = 0
                 // When
                 battleUnitInfoView.displayAbilitySelected(selectedAbilityIndex)
@@ -60,8 +60,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         fun `should unselect other ability buttons when ability is selected`() =
             viewsTest {
                 // Given
-                val battleUnitInfoView = BattleUnitInfoView()
-                battleUnitInfoView.loadAssets()
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 val abilityButtons = battleUnitInfoView.allViews().filterIsInstance<AbilityButtonView>()
                 abilityButtons.forEach { abilityButton -> abilityButton.select() }
                 val selectedAbilityIndex = 0
@@ -81,7 +80,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         fun `should not be visible when is hidden`() =
             viewsTest {
                 // Given
-                val battleUnitInfoView = BattleUnitInfoView()
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 val unit = unit().toDto()
                 val battleUnit = battleUnit(unit = unit).toDto()
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)

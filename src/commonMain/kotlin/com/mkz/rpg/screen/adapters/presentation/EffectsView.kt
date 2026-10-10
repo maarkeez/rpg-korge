@@ -1,33 +1,18 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.effect.adapters.presentation.EffectView
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-class EffectsView : Container() {
+class EffectsView(
+    resourcesLoader: BattleSceneResourcesLoader,
+) : Container() {
     private lateinit var effectViews: Array<EffectView>
-
-    suspend fun loadAssets() {
-        effectViews.forEach { effectView -> effectView.loadAssets() }
-    }
 
     private val effectViewsLayout =
         uiHorizontalStack(padding = 2.0) {
             val effectViewSize = Size(width = 16, height = 16)
-            effectViews =
-                arrayOf(
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                    EffectView(effectViewSize),
-                )
+            effectViews = Array(10) { EffectView(effectViewSize, resourcesLoader) }
             effectViews.forEach(::addChild)
         }
 
