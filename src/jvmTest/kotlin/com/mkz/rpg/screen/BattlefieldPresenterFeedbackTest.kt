@@ -147,17 +147,14 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
                 setup.script.finishTurn()
                 playUntilIdle(setup.presenter)
                 // Then
-                val drawnTiles =
-                    battlefieldView
-                        .descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }
-                        .map { it.parent!!.name }
-                val expectedTiles =
+                val drawnUnitCount = battlefieldView.descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }.size
+                val expectedPositions =
                     listOf("player-one", "player-two")
                         .flatMap { battleUnitApi.searchBattleUnitsByPlayerId(it) }
                         .filter { it.remainingHealthPoints > 0 }
                         .map { battlefieldApi.searchPosition(it.id)!! }
-                        .map { "row-${it.row}-column-${it.column}" }
-                assertThat(drawnTiles).containsExactlyInAnyOrderElementsOf(expectedTiles)
+                assertThat(drawnUnitCount).isEqualTo(expectedPositions.size)
+                assertThat(expectedPositions.filter { battlefieldView.unitViewAt(it.row, it.column) == null }).isEmpty()
             }
 
         @Test

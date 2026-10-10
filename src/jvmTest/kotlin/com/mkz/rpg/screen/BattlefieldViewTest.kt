@@ -3,13 +3,16 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import com.mkz.rpg.shared.adapters.presentation.snapToArtPixel
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
+import korlibs.korge.ui.UIGridFill
 import korlibs.korge.view.Container
+import korlibs.korge.view.View
 import korlibs.korge.view.descendantsWith
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
@@ -47,8 +50,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
-                assertThat(tileButton.findViewByName(BattlefieldView.TERRAIN)).isNotNull
+                assertThat(battlefieldView.terrainViewAt(row = 0, column = 0)?.name).isEqualTo(BattlefieldView.TERRAIN)
             }
 
         @Test
@@ -71,8 +73,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-1") as UIButton
-                assertThat(tileButton.findViewByName(BattlefieldView.TERRAIN)).isNotNull
+                assertThat(battlefieldView.terrainViewAt(row = 0, column = 1)?.name).isEqualTo(BattlefieldView.TERRAIN)
             }
     }
 
@@ -198,8 +199,58 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayKnightBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
-                assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
+                assertThat(battlefieldView.unitViewAt(row = 0, column = 0)?.name).isEqualTo(BattlefieldView.BATTLE_UNIT)
+            }
+
+        @Test
+        fun `should stand the unit frame on its tile when a unit is displayed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 3).toDto())
+                // When
+                battlefieldView.displayKnightBattleUnit(row = 2, column = 1)
+                // Then
+                val unit = battlefieldView.unitViewAt(row = 2, column = 1)!!
+                assertThat(unit.x + SpriteRegistry.UNIT_TILE_LEFT * PIXEL_SCALE).isEqualTo(1.0 * BattlefieldView.TILE_SIZE)
+                assertThat(unit.y + SpriteRegistry.UNIT_TILE_TOP * PIXEL_SCALE).isEqualTo(2.0 * BattlefieldView.TILE_SIZE)
+                assertThat(unit.scaledHeight).isEqualTo(2.0 * BattlefieldView.TILE_SIZE)
+            }
+
+        @Test
+        fun `should draw the unit on the lower row in front when units stand on neighbouring rows`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 3).toDto())
+                battlefieldView.displayKnightBattleUnit(row = 2, column = 1)
+                // When
+                battlefieldView.displayKnightBattleUnit(row = 1, column = 1)
+                // Then
+                val lower = battlefieldView.unitViewAt(row = 2, column = 1)!!
+                val upper = battlefieldView.unitViewAt(row = 1, column = 1)!!
+                assertThat(lower.parent).isSameAs(upper.parent)
+                assertThat(lower.parent!!.children.indexOf(lower)).isGreaterThan(upper.parent!!.children.indexOf(upper))
+            }
+
+        @Test
+        fun `should draw the hp bar of the unit above over the unit below when units stand on neighbouring rows`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 3).toDto())
+                battlefieldView.displayKnightBattleUnit(row = 2, column = 1)
+                battlefieldView.displayKnightBattleUnit(row = 1, column = 1)
+                // When
+                battlefieldView.displayUnitOverlay(row = 1, column = 1, state = UnitOverlayState(10, 10, isEnemy = false, onTurnStartedEffectCount = 0, onDefeatedEffectCount = 0))
+                // Then
+                val viewport = battlefieldView.children[0] as Container
+                val unitLayerIndex = viewport.children.indexOf(battlefieldView.unitViewAt(row = 2, column = 1)!!.parent as View)
+                val tileLayerIndex = viewport.children.indexOf(getBattlefieldGrid(battlefieldView))
+                assertThat(tileLayerIndex).isGreaterThan(unitLayerIndex)
             }
     }
 
@@ -215,8 +266,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayRatBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
-                assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
+                assertThat(battlefieldView.unitViewAt(row = 0, column = 0)?.name).isEqualTo(BattlefieldView.BATTLE_UNIT)
             }
     }
 
@@ -489,8 +539,8 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.removeBattleUnit(row = 0, column = 0)
                 // Then
-                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-0") as UIButton
-                assertThat(tileButton.findViewByName(BattlefieldView.BATTLE_UNIT)).isNull()
+                assertThat(battlefieldView.unitViewAt(row = 0, column = 0)).isNull()
+                assertThat(battlefieldView.descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }).isEmpty()
             }
     }
 
@@ -771,8 +821,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     private fun getBattlefieldGrid(battlefieldView: BattlefieldView): Container {
         val viewport = battlefieldView.children[0] as Container
-        val battlefieldGrid = viewport.children[0] as Container
-        return battlefieldGrid
+        return viewport.children.first { it is UIGridFill } as Container
     }
 
     private fun matchesWangTile(

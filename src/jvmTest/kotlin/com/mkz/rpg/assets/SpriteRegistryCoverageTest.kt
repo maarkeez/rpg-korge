@@ -30,7 +30,7 @@ class SpriteRegistryCoverageTest {
     }
 
     @Test
-    fun `should be a row of 16x16 frames starting with the unit sprite when a unit animation strip exists`() {
+    fun `should be a row of 32x32 frames starting with the unit sprite when a unit animation strip exists`() {
         // Given
         val unitIds = SpriteRegistry.UNIT_IDS
         // When
@@ -41,12 +41,12 @@ class SpriteRegistryCoverageTest {
                     val stripPath = "unit/${unitId}_$animation.png"
                     if (!resourcesVfs[stripPath].exists()) continue
                     val strip = loadBitmap32(stripPath)
-                    if (strip.height != TILE_PIXEL_SIZE || strip.width % TILE_PIXEL_SIZE != 0) {
-                        violations += "$stripPath: expected N x 16 x 16, was ${strip.width}x${strip.height}"
+                    if (strip.height != UNIT_FRAME_SIZE || strip.width % UNIT_FRAME_SIZE != 0) {
+                        violations += "$stripPath: expected N x 32 x 32, was ${strip.width}x${strip.height}"
                     }
                     // Only idle must start on the standing sprite (art direction §1); walk frames are mid-step poses.
                     val startsOnSprite = animation == SpriteRegistry.IDLE
-                    if (startsOnSprite && strip.width >= TILE_PIXEL_SIZE && !strip.tile(0).isPixelIdentical(loadBitmap32(SpriteRegistry.unitPath(unitId)))) {
+                    if (startsOnSprite && strip.width >= UNIT_FRAME_SIZE && !strip.frame(0, UNIT_FRAME_SIZE).isPixelIdentical(loadBitmap32(SpriteRegistry.unitPath(unitId)))) {
                         violations += "$stripPath: frame 0 differs from ${SpriteRegistry.unitPath(unitId)}"
                     }
                 }

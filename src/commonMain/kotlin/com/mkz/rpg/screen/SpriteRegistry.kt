@@ -19,6 +19,7 @@ class SpriteRegistry {
     private var highlights: Map<Highlight, Bitmap> = emptyMap()
     private var fxStrips: Map<String, List<Bitmap>> = emptyMap()
     private var unitAnimations: Map<Pair<String, String>, List<Bitmap>> = emptyMap()
+    private val overhangs = mutableMapOf<String, Int>()
     private val silhouettes = mutableMapOf<String, Bitmap>()
     private var loaded = false
 
@@ -36,12 +37,12 @@ class SpriteRegistry {
         abilities = ABILITY_IDS.associateWith { resourcesVfs[abilityPath(it)].readBitmap() }
         effects = EFFECT_IDS.associateWith { resourcesVfs[effectPath(it)].readBitmap() }
         highlights = Highlight.entries.associateWith { resourcesVfs[it.path].readBitmap() }
-        fxStrips = FX_IDS.mapNotNull { fxId -> loadStrip(fxPath(fxId))?.let { fxId to it } }.toMap()
+        fxStrips = FX_IDS.mapNotNull { fxId -> loadStrip(fxPath(fxId), ART_SIZE)?.let { fxId to it } }.toMap()
         unitAnimations =
             UNIT_IDS
                 .flatMap { unitId ->
                     UNIT_ANIMATIONS.mapNotNull { animation ->
-                        loadStrip(unitAnimationPath(unitId, animation))?.let { (unitId to animation) to it }
+                        loadStrip(unitAnimationPath(unitId, animation), UNIT_FRAME_SIZE)?.let { (unitId to animation) to it }
                     }
                 }.toMap()
         loaded = true
@@ -56,20 +57,45 @@ class SpriteRegistry {
         animation: String,
     ): List<Bitmap> = unitAnimations[unitId to animation] ?: listOf(unit(unitId))
 
-    private suspend fun loadStrip(path: String): List<Bitmap>? {
+    /**
+     * How many art pixels the unit rises above its tile, over every frame it can show. Unit frames are
+     * [UNIT_FRAME_SIZE] square and stand on the tile: the tile covers frame rows 16..31 and columns 8..23.
+     */
+    fun unitOverhang(unitId: String): Int =
+        overhangs.getOrPut(unitId) {
+            val frames = listOf(unit(unitId)) + UNIT_ANIMATIONS.flatMap { unitFrames(unitId, it) }
+            frames.maxOf { frame -> (UNIT_TILE_TOP - topOpaqueRow(frame)).coerceAtLeast(0) }
+        }
+
+    /** The largest [unitOverhang] of every registered unit, so the map can leave room above its first row. */
+    fun maxUnitOverhang(): Int = UNIT_IDS.maxOfOrNull(::unitOverhang) ?: 0
+
+    private fun topOpaqueRow(frame: Bitmap): Int {
+        for (y in 0 until frame.height) {
+            for (x in 0 until frame.width) {
+                if (frame.getRgba(x, y).a > 0) return y
+            }
+        }
+        return frame.height
+    }
+
+    private suspend fun loadStrip(
+        path: String,
+        frameSize: Int,
+    ): List<Bitmap>? {
         val file = resourcesVfs[path]
         if (!file.exists()) return null
         val strip = file.readBitmap().toBMP32()
-        return List(strip.width / ART_SIZE) { index ->
-            Bitmap32(ART_SIZE, ART_SIZE).also { frame ->
-                for (y in 0 until ART_SIZE) {
-                    for (x in 0 until ART_SIZE) frame[x, y] = strip[index * ART_SIZE + x, y]
+        return List(strip.width / frameSize) { index ->
+            Bitmap32(frameSize, frameSize).also { frame ->
+                for (y in 0 until frameSize) {
+                    for (x in 0 until frameSize) frame[x, y] = strip[index * frameSize + x, y]
                 }
             }
         }
     }
 
-    fun unit(unitId: String): Bitmap = units[unitId] ?: placeholder(ART_SIZE)
+    fun unit(unitId: String): Bitmap = units[unitId] ?: placeholder(UNIT_FRAME_SIZE)
 
     /** White copy of the unit sprite, used for hit flashes. Built from frame 0, so it is the same for every idle frame. */
     fun silhouette(unitId: String): Bitmap = silhouettes.getOrPut(unitId) { FxViews.silhouette(unit(unitId)) }
@@ -94,6 +120,15 @@ class SpriteRegistry {
     // Internal so the asset tests can check that every registered id resolves to a file.
     internal companion object {
         private const val ART_SIZE = 16
+
+        /** Unit frames are square and stand on their tile, so units can be up to one tile taller and half a tile wider on each side. */
+        const val UNIT_FRAME_SIZE = 32
+
+        /** First frame row covered by the unit's own tile. */
+        const val UNIT_TILE_TOP = 16
+
+        /** First frame column covered by the unit's own tile. */
+        const val UNIT_TILE_LEFT = 8
         private const val PORTRAIT_SIZE = 32
         internal val UNIT_IDS = listOf("knight", "rat", "bee")
         internal val ABILITY_IDS = listOf("heal", "sword", "poisoned-sword", "mushroom", "skull", "teleport", "bee")

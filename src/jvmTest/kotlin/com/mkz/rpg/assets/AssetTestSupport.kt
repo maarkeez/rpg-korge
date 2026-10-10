@@ -6,11 +6,22 @@ import korlibs.io.file.std.resourcesVfs
 
 internal const val TILE_PIXEL_SIZE: Int = 16
 
+internal const val UNIT_FRAME_SIZE: Int = 32
+
+/** [width] x [height]; a strip of frames sets [frameWidth] and may hold any number of them. */
 internal data class ArtSize(
     val width: Int,
     val height: Int,
+    val frameWidth: Int? = null,
 ) {
-    override fun toString(): String = "${width}x$height"
+    fun matches(
+        actualWidth: Int,
+        actualHeight: Int,
+    ): Boolean =
+        actualHeight == height &&
+            if (frameWidth == null) actualWidth == width else actualWidth > 0 && actualWidth % frameWidth == 0
+
+    override fun toString(): String = if (frameWidth == null) "${width}x$height" else "N x ${frameWidth}x$height"
 }
 
 // Exact frame or strip size per family, from §6.1 of docs/design/asset-redesign-plan.md.
@@ -20,12 +31,12 @@ internal fun expectedArtSize(path: String): ArtSize? =
         path == "effect/fx_spread.png" -> ArtSize(width = 2 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("effect/fx_") -> ArtSize(width = 3 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("unit/") && (path.endsWith("_idle.png") || path.endsWith("_walk.png")) ->
-            ArtSize(width = 2 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
+            ArtSize(width = UNIT_FRAME_SIZE, height = UNIT_FRAME_SIZE, frameWidth = UNIT_FRAME_SIZE)
         path.startsWith("terrain/variants/") -> ArtSize(width = 3 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("terrain/transitions/") -> ArtSize(width = 16 * TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         path.startsWith("unit/") && path.endsWith("_portrait.png") -> ArtSize(width = 32, height = 32)
-        path.startsWith("unit/") ||
-            path.startsWith("ability/") ||
+        path.startsWith("unit/") -> ArtSize(width = UNIT_FRAME_SIZE, height = UNIT_FRAME_SIZE)
+        path.startsWith("ability/") ||
             path.startsWith("battlefield/") ||
             path.startsWith("effect/") -> ArtSize(width = TILE_PIXEL_SIZE, height = TILE_PIXEL_SIZE)
         else -> null
@@ -70,4 +81,18 @@ internal fun Bitmap32.isFullyOpaque(): Boolean {
         }
     }
     return true
+}
+
+/** Frame [index] of a horizontal strip of square frames of [size]. */
+internal fun Bitmap32.frame(
+    index: Int,
+    size: Int,
+): Bitmap32 {
+    val frame = Bitmap32(size, size)
+    for (y in 0 until size) {
+        for (x in 0 until size) {
+            frame[x, y] = this[index * size + x, y]
+        }
+    }
+    return frame
 }

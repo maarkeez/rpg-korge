@@ -70,7 +70,7 @@ Checks every `GAME_ART_ASSET_PATHS` entry against the family table in §6.1 of t
 | Test | Covers |
 | --- | --- |
 | `should decode every game art asset when the asset file exists` | File exists and is a decodable PNG |
-| `should match the family size when every game art asset is listed` | Exact size per family: `terrain/transitions/` 256×16, `terrain/variants/` 48×16, `unit/*_portrait` 32×32, `unit/*_idle` and `unit/*_walk` 32×16, `effect/fx_spread` 32×16, other `effect/fx_*` 48×16, `unit/`, `ability/`, `battlefield/`, `effect/` 16×16. A folder with no family fails, so a new family must be added to the plan first |
+| `should match the family size when every game art asset is listed` | Exact size per family: `terrain/transitions/` 256×16, `terrain/variants/` 48×16, `unit/*_portrait` 32×32, `unit/` 32×32, `unit/*_idle` and `unit/*_walk` N × 32×32, `effect/fx_spread` 32×16, other `effect/fx_*` 48×16, `ability/`, `battlefield/`, `effect/` 16×16. A folder with no family fails, so a new family must be added to the plan first |
 | `should use only fully opaque or fully transparent pixels when every game art asset is checked` | Alpha is 0 or 255 only |
 
 `expectedArtSize(path)` in `AssetTestSupport.kt` holds the family table.
@@ -92,7 +92,7 @@ Checks everything in `resources/terrain/transitions/`. Every file there is a gam
 | Test | Covers |
 | --- | --- |
 | `should find a file for every registered id when the registry id lists are checked` | Every unit, portrait, ability, effect and highlight id in `SpriteRegistry` resolves to a file. A missing file renders the magenta placeholder silently |
-| `should be a row of 16x16 frames starting with the unit sprite when a unit animation strip exists` | For `unit/<id>_idle.png` and `unit/<id>_walk.png`, when present: height 16, width a multiple of 16; idle frame 0 equal to `unit/<id>.png` (walk frames are mid-step poses) |
+| `should be a row of 32x32 frames starting with the unit sprite when a unit animation strip exists` | For `unit/<id>_idle.png` and `unit/<id>_walk.png`, when present: height 32, width a multiple of 32; idle frame 0 equal to `unit/<id>.png` (walk frames are mid-step poses) |
 | `should have exactly three 16x16 frames when the defeat fx strip exists` | `effect/fx_defeat.png` matches `FxViews.POOF_FRAMES` |
 
 Production change for this check: `SpriteRegistry`'s id lists and path builders are now `internal` (in its companion object), and `load()` uses the same path builders the tests use. No behaviour changed.
@@ -108,7 +108,7 @@ Production change for this check: `SpriteRegistry`'s id lists and path builders 
 
 | Test | Covers |
 | --- | --- |
-| `should draw every unit and highlight over every base terrain tile when the readability sheet is written` | Writes `build/readability-sheet.png`: one row per base terrain tile (tile 0 and tile 15 of each transition strip, 8 rows), columns = knight, rat, bee, `tile_selection_4`, each at ×3. Left panel is color, right panel is the same sheet in grayscale to check value contrast |
+| `should draw every unit and highlight over every base terrain tile when the readability sheet is written` | Writes `build/readability-sheet.png`: one row per base terrain tile (tile 0 and tile 15 of each transition strip, 8 rows), each cell a 32×32 unit frame over that terrain repeated 2×2 (so the part of a unit above its tile is checked too), columns = knight, rat, bee, `tile_selection_4`, each at ×3. Left panel is color, right panel is the same sheet in grayscale to check value contrast |
 
 ### `ReservedUiColorReportTest` — 1 test (informational)
 

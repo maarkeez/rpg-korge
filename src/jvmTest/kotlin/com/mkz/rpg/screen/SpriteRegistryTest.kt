@@ -87,7 +87,7 @@ class SpriteRegistryTest : ViewsForTesting() {
                 val frames = spriteRegistry.unitFrames("knight", SpriteRegistry.IDLE)
                 // Then
                 assertThat(frames).hasSize(2)
-                assertThat(frames.map { it.width to it.height }).containsOnly(16 to 16)
+                assertThat(frames.map { it.width to it.height }).containsOnly(32 to 32)
             }
 
         @Test
@@ -100,6 +100,31 @@ class SpriteRegistryTest : ViewsForTesting() {
                 // Then
                 assertThat(frames).hasSize(1)
                 assertThat(frames.single().toBMP32()[0, 0]).isEqualTo(UiPalette.placeholder)
+            }
+    }
+
+    @Nested
+    inner class UnitOverhang {
+        @Test
+        fun `should not rise above the tile when the unit art fits its tile`() =
+            viewsTest {
+                // Given
+                spriteRegistry.load()
+                // When
+                val overhang = spriteRegistry.unitOverhang("rat")
+                // Then
+                assertThat(overhang).isZero()
+            }
+
+        @Test
+        fun `should rise a whole tile when the unit frame is filled to the top`() =
+            viewsTest {
+                // Given
+                spriteRegistry.load()
+                // When
+                val overhang = spriteRegistry.unitOverhang("dragon")
+                // Then
+                assertThat(overhang).isEqualTo(SpriteRegistry.UNIT_TILE_TOP)
             }
     }
 }

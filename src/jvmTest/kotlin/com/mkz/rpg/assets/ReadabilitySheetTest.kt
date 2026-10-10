@@ -28,7 +28,8 @@ class ReadabilitySheetTest {
 
 private const val READABILITY_SHEET_PATH: String = "build/readability-sheet.png"
 private const val SCALE: Int = 3
-private const val CELL_SIZE: Int = TILE_PIXEL_SIZE * SCALE
+private const val CELL_ART_SIZE: Int = 2 * TILE_PIXEL_SIZE
+private const val CELL_SIZE: Int = CELL_ART_SIZE * SCALE
 private const val CELL_GAP: Int = 4
 private const val PANEL_PADDING: Int = 8
 private const val PANEL_GAP: Int = 16
@@ -38,7 +39,8 @@ private val READABILITY_UNIT_PATHS = listOf("unit/knight.png", "unit/rat.png", "
 private const val READABILITY_HIGHLIGHT_PATH: String = "battlefield/tile_selection_4.png"
 
 // One row per base terrain tile: tile 0 and tile 15 of every transition strip.
-// Columns: each unit over the tile, then the selection highlight over the tile.
+// Each cell is a 32x32 unit frame over that terrain repeated 2x2, so the part of a tall unit that rises above its
+// tile is checked against the same terrain. Columns: each unit, then the selection highlight on the unit's tile.
 // The right panel is the same sheet in grayscale, to check value contrast.
 private suspend fun writeReadabilitySheet(): File {
     val transitionsPath = "terrain/transitions"
@@ -69,7 +71,9 @@ private suspend fun writeReadabilitySheet(): File {
         val cellY = PANEL_PADDING + row * (CELL_SIZE + CELL_GAP)
         val sprites: List<Bitmap32> = units + listOf(highlight)
         sprites.forEachIndexed { column, sprite ->
-            val cell = baseTile.scaled(SCALE).also { it.overlay(sprite.scaled(SCALE)) }
+            val ground = baseTile.repeated(CELL_ART_SIZE / TILE_PIXEL_SIZE)
+            if (sprite.width == CELL_ART_SIZE) ground.overlay(sprite) else ground.overlay(sprite, left = TILE_PIXEL_SIZE / 2, top = TILE_PIXEL_SIZE)
+            val cell = ground.scaled(SCALE)
             sheet.paste(cell, PANEL_PADDING + column * (CELL_SIZE + CELL_GAP), cellY)
             sheet.paste(cell.toGrayscale(), PANEL_PADDING + panelWidth + PANEL_GAP + column * (CELL_SIZE + CELL_GAP), cellY)
         }
@@ -90,12 +94,26 @@ private fun Bitmap32.scaled(factor: Int): Bitmap32 {
     return result
 }
 
-// Draws opaque and semi-visible pixels of `sprite` on top of this bitmap, in place.
-private fun Bitmap32.overlay(sprite: Bitmap32) {
-    for (y in 0 until minOf(height, sprite.height)) {
-        for (x in 0 until minOf(width, sprite.width)) {
+private fun Bitmap32.repeated(times: Int): Bitmap32 {
+    val result = Bitmap32(width * times, height * times)
+    for (y in 0 until result.height) {
+        for (x in 0 until result.width) {
+            result[x, y] = this[x % width, y % height]
+        }
+    }
+    return result
+}
+
+// Draws opaque and semi-visible pixels of `sprite` on top of this bitmap at [left], [top], in place.
+private fun Bitmap32.overlay(
+    sprite: Bitmap32,
+    left: Int = 0,
+    top: Int = 0,
+) {
+    for (y in 0 until minOf(height - top, sprite.height)) {
+        for (x in 0 until minOf(width - left, sprite.width)) {
             val pixel = sprite[x, y]
-            if (pixel.a != 0) this[x, y] = pixel
+            if (pixel.a != 0) this[left + x, top + y] = pixel
         }
     }
 }

@@ -183,6 +183,7 @@ Every milestone: focused tests → `./gradlew jvmTest` → `./gradlew lintKotlin
 - Scope: §3.3, §3.4 code; pad `unit/*.png`, `unit/*_idle.png`, `unit/*_walk.png` to 32×32 frames (bottom-centered).
 - Acceptance: all goldens unchanged; new tests for anchor, y-sort, overlays above a lower unit's head (draw a temporary 32-tall test bitmap), top scroll margin, walker/flash positions; readability sheet shows the 1×2 tile column.
 - Rollback: revert the commit (assets and code travel together).
+- Done notes: tile buttons now sit above terrain and units, so KorGE's default button drop shadow had to be switched off. It used to draw a faint darker band on the right and bottom of every tile (a visible 16 px grid). Removing it is the only golden change: every changed pixel got lighter, nothing moved. Body-centered FX use the unit's measured overhang (`SpriteRegistry.unitOverhang`), which is 0 for the padded art, so effects are unchanged.
 
 ### L2 — Art direction v2
 
@@ -243,7 +244,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 
 ## 11. Checklist
 
-- [ ] **L1** Layers and 32×32 frames; goldens unchanged.
+- [x] **L1** Layers and 32×32 frames; goldens unchanged except the removed tile-button drop shadow (see L1 notes).
 - [ ] **L2** Art direction v2 and templates (decisions in §9).
 - [ ] **L3** Prototype approved by the owner.
 - [ ] **L4** Terrain v2.

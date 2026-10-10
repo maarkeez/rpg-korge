@@ -15,8 +15,8 @@ Final for M1. Do not invent other sizes; add a family here first.
 | Family | Art size | Drawn at | Rules |
 | --- | --- | --- | --- |
 | Terrain tile | 16×16; strips 256×16 (16 tiles, Wang order) | ×3 = 48 pt | Fully opaque. Tile 0 = pure `from` terrain; tile 15 = pure `to` terrain. Tile 0 identical across all `sand_to_*` strips. |
-| Unit sprite | 16×16 frame; body ≈ 12–15 px tall, feet on rows 13–15 | ×3 | Transparent background, no partial alpha. Frame 0 is `unit/<id>.png`. |
-| Unit animation strip | N × 16×16, `unit/<id>_<anim>.png` | ×3 | Frame 0 of `idle` equals `unit/<id>.png`. |
+| Unit sprite | 32×32 frame standing on its tile: the tile covers frame rows 16–31 and columns 8–23, so a unit may rise up to one tile above it and half a tile to each side | ×3 | Transparent background, no partial alpha. Frame 0 is `unit/<id>.png`. Body heights: see the ALttP plan (soft 24 px, hard 32 px). |
+| Unit animation strip | N × 32×32, `unit/<id>_<anim>.png` | ×3 | Frame 0 of `idle` equals `unit/<id>.png`. |
 | Portrait | 32×32 | ×3 = 96 pt | On-palette pixel bust, same light direction as the sprite. |
 | Ability icon | 16×16 full square | ×3 = 48 pt | Opaque plate allowed. One clear symbol, readable in grayscale. |
 | Status / effect icon | 16×16 | Q5 (see §5) | Transparent background, 1 px dark outline, readable at 16 pt. |

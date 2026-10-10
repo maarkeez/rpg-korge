@@ -40,8 +40,8 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 battlefieldView.playHitFlash(row = 1, column = 2, unitId = "knight")
                 // Then
                 val flash = battlefieldView.fxNamed(FxViews.FLASH_NAME).single()
-                assertThat(flash.x).isEqualTo(2.0 * BattlefieldView.TILE_SIZE)
-                assertThat(flash.y).isEqualTo(1.0 * BattlefieldView.TILE_SIZE)
+                assertThat(flash.x + SpriteRegistry.UNIT_TILE_LEFT * PIXEL_SCALE).isEqualTo(2.0 * BattlefieldView.TILE_SIZE)
+                assertThat(flash.y + SpriteRegistry.UNIT_TILE_TOP * PIXEL_SCALE).isEqualTo(1.0 * BattlefieldView.TILE_SIZE)
                 assertThat(FxViews.FLASH_MS).isLessThanOrEqualTo(2 * 67)
             }
 
@@ -67,7 +67,7 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 // When
                 battlefieldView.playHitFlash(row = 0, column = 0, unitId = "knight")
                 // Then
-                assertThat(battlefieldView.tile(0, 0).findViewByName(BattlefieldView.BATTLE_UNIT)).isNotNull
+                assertThat(battlefieldView.unitViewAt(row = 0, column = 0)).isNotNull
             }
     }
 
@@ -211,7 +211,8 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 battlefieldView.showWalker(unitType = "knight", row = 0, column = 1, walkerId = "walker-1")
                 // Then
                 assertThat(battlefieldView.isWalking("walker-1")).isTrue()
-                assertThat(battlefieldView.descendantsWith { it.name == BattlefieldView.BATTLE_UNIT && it.parent == battlefieldView.tile(0, 1) }).hasSize(1)
+                assertThat(battlefieldView.unitViewAt(row = 0, column = 1)).isNotNull
+                assertThat(battlefieldView.descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }).hasSize(1)
             }
 
         @Test
@@ -296,8 +297,9 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
                 // Then
                 val flash = battlefieldView.fxNamed(FxViews.FLASH_NAME).single()
                 val tile = battlefieldView.tile(10, 10)
-                assertThat(flash.parent!!.x + flash.x).isEqualTo(tile.parent!!.x + tile.x)
-                assertThat(flash.parent!!.y + flash.y).isEqualTo(tile.parent!!.y + tile.y)
+                // The flash is a whole unit frame standing on the tile.
+                assertThat(flash.parent!!.x + flash.x + SpriteRegistry.UNIT_TILE_LEFT * PIXEL_SCALE).isEqualTo(tile.parent!!.x + tile.x)
+                assertThat(flash.parent!!.y + flash.y + SpriteRegistry.UNIT_TILE_TOP * PIXEL_SCALE).isEqualTo(tile.parent!!.y + tile.y)
             }
     }
 
@@ -308,7 +310,7 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
             battlefieldView.loadAssets()
             battlefieldView.displayBattlefield(battlefield(rows = 3, columns = 4).toDto())
             battlefieldView.displayKnightBattleUnit(row = 1, column = 1)
-            val knight = battlefieldView.tile(1, 1).descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }.single() as Image
+            val knight = battlefieldView.unitViewAt(row = 1, column = 1)!!
             return battlefieldView to knight
         }
 

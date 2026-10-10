@@ -74,8 +74,21 @@ class BattlefieldView(
     private var gestureIsDrag = false
 
     private val viewport = clipContainer(size = viewportSize)
+
+    // Drawn bottom to top: terrain, units (lower rows in front), tile buttons (highlights, dim, HP bars, selection,
+    // and the tap targets), then feedback effects. Units can rise above their tile without hiding what the tile
+    // buttons draw for the tile above.
+    private val terrainLayer = Container()
+    private val unitLayer = Container().also { it.mouseEnabled = false }
     private lateinit var battlefieldGrid: UIGridFill
     private val fxLayer = FxLayer()
+    private val units = mutableMapOf<Pair<Int, Int>, StandingUnit>()
+
+    private class StandingUnit(
+        val unitId: String,
+        val image: Image,
+    )
+
     private val walkers = mutableMapOf<String, View>()
     private val walkerSteps = mutableMapOf<String, Int>()
     private val idleImages = mutableMapOf<Image, List<Bitmap>>()
@@ -137,6 +150,12 @@ class BattlefieldView(
         mapColumns = battlefield.columns
         mapHeight = (TILE_SIZE * battlefield.rows).toDouble()
         mapWidth = (TILE_SIZE * battlefield.columns).toDouble()
+        viewport.removeChildren()
+        terrainLayer.removeChildren()
+        unitLayer.removeChildren()
+        units.clear()
+        viewport.addChild(terrainLayer)
+        viewport.addChild(unitLayer)
         battlefieldGrid =
             viewport.uiGridFill(
                 size = Size(width = mapWidth, height = mapHeight),
@@ -156,9 +175,21 @@ class BattlefieldView(
                     tileButton.bgColorOver = Colors.TRANSPARENT
                     tileButton.background.borderColor = Colors.TRANSPARENT
                     tileButton.background.bgColor = Colors.TRANSPARENT
+                    // The buttons sit above terrain and units, so their default drop shadow and press ripple would
+                    // tint the map. Taps keep working; the buttons just draw nothing of their own.
+                    tileButton.elevation = false
+                    tileButton.background.shadowColor = Colors.TRANSPARENT
+                    tileButton.background.highlightColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
                     val tileDto = battlefield.tiles[PositionDto(row, column)]!!
-                    tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition, row, column), TERRAIN)
+                    terrainLayer.addChild(
+                        Image(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition, row, column)).also { terrain ->
+                            terrain.name = TERRAIN
+                            terrain.scale = PIXEL_SCALE.toDouble()
+                            terrain.smoothing = false
+                            placeOnTile(terrain, row, column)
+                        },
+                    )
                     tileButton.onClick {
                         if (!gestureIsDrag) delegate?.tileSelected(row, column)
                     }
@@ -197,21 +228,25 @@ class BattlefieldView(
         y: Double,
     ) {
         scrollX = clampScroll(x, viewportSize.width, mapWidth)
-        scrollY = clampScroll(y, viewportSize.height, mapHeight)
+        scrollY = clampScroll(y, viewportSize.height, mapHeight, leadingMargin = sprites.maxUnitOverhang() * PIXEL_SCALE.toDouble())
         battlefieldGrid.x = snapToArtPixel(scrollX)
         battlefieldGrid.y = snapToArtPixel(scrollY)
-        fxLayer.x = battlefieldGrid.x
-        fxLayer.y = battlefieldGrid.y
+        listOf(terrainLayer, unitLayer, fxLayer).forEach { layer ->
+            layer.x = battlefieldGrid.x
+            layer.y = battlefieldGrid.y
+        }
     }
 
+    /** [leadingMargin] lets the map scroll past its first row, so units standing there show the part above their tile. */
     private fun clampScroll(
         offset: Double,
         viewportLength: Double,
         mapLength: Double,
+        leadingMargin: Double = 0.0,
     ): Double {
         if (mapLength <= viewportLength) return snapToArtPixel((viewportLength - mapLength) / 2.0)
         val minOffset = -floor((mapLength - viewportLength) / PIXEL_SCALE) * PIXEL_SCALE
-        return offset.clamp(minOffset, 0.0)
+        return offset.clamp(minOffset, leadingMargin)
     }
 
     /**
@@ -267,15 +302,60 @@ class BattlefieldView(
         displayUnit(row, column, "bee")
     }
 
+    /** Stands the unit frame on its tile, in the unit layer, and keeps lower rows in front. */
     private fun displayUnit(
         row: Int,
         column: Int,
         unitId: String,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        units.remove(row to column)?.image?.removeFromParent()
         val frames = sprites.unitFrames(unitId, SpriteRegistry.IDLE)
-        val image = tileButton.addImage(frames[idleFrame % frames.size], BATTLE_UNIT)
+        val image =
+            Image(frames[idleFrame % frames.size]).also {
+                it.name = BATTLE_UNIT
+                it.scale = PIXEL_SCALE.toDouble()
+                it.smoothing = false
+                placeUnitFrame(it, row, column)
+            }
+        units[row to column] = StandingUnit(unitId, image)
         if (frames.size > 1) idleImages[image] = frames
+        sortUnits()
+    }
+
+    private fun sortUnits() {
+        unitLayer.removeChildren()
+        units.entries
+            .sortedWith(compareBy({ it.key.first }, { it.key.second }))
+            .forEach { unitLayer.addChild(it.value.image) }
+    }
+
+    /** The unit drawn on the tile, for tests. */
+    internal fun unitViewAt(
+        row: Int,
+        column: Int,
+    ): Image? = units[row to column]?.image
+
+    /** The terrain image drawn under the tile, for tests. */
+    internal fun terrainViewAt(
+        row: Int,
+        column: Int,
+    ): View? =
+        terrainLayer.children.firstOrNull {
+            it.x == column * TILE_SIZE.toDouble() && it.y == row * TILE_SIZE.toDouble()
+        }
+
+    /** How many art pixels the unit on the tile rises above it, 0 when the tile is empty. */
+    private fun overhangAt(
+        row: Int,
+        column: Int,
+    ): Int = units[row to column]?.let { sprites.unitOverhang(it.unitId) } ?: 0
+
+    private fun placeUnitFrame(
+        view: View,
+        row: Int,
+        column: Int,
+    ) {
+        placeOnTile(view, row, column, artX = -SpriteRegistry.UNIT_TILE_LEFT, artY = -SpriteRegistry.UNIT_TILE_TOP)
     }
 
     interface Delegate {
@@ -378,8 +458,8 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
+        units.remove(row to column)?.image?.removeFromParent()
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
-        tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
         tileButton.findViewByName(UNIT_OVERLAY)?.removeFromParent()
     }
 
@@ -448,7 +528,7 @@ class BattlefieldView(
         unitId: String,
     ) {
         val flash = FxViews.flash(sprites.silhouette(unitId)).also { it.name = FxViews.FLASH_NAME }
-        placeOnTile(flash, row, column)
+        placeUnitFrame(flash, row, column)
         fxLayer.play(flash, FxViews.FLASH_MS)
     }
 
@@ -461,7 +541,8 @@ class BattlefieldView(
     ) {
         val number = FxViews.amountNumber(amount, heal)
         val left = (TILE_PIXEL_SIZE - FxViews.amountWidthArtPixels(amount, heal)) / 2
-        val startY = 2
+        // Starts just above the unit's head, so a tall unit does not cover its own number.
+        val startY = 2 - overhangAt(row, column)
         placeOnTile(number, row, column, artX = left, artY = startY)
         fxLayer.play(number, FxViews.NUMBER_MS) { progress ->
             number.y = tileY(row) + (startY - FxViews.steps(progress, FxViews.NUMBER_RISE_ART_PIXELS)) * PIXEL_SCALE.toDouble()
@@ -510,7 +591,8 @@ class BattlefieldView(
     ) {
         val frames = authoredStrip(fxId, frameCount) ?: return
         val view = Container().also { it.name = viewName }
-        placeOnTile(view, row, column)
+        // Centered on the unit's body: a unit taller than its tile has its body higher than the tile center.
+        placeOnTile(view, row, column, artY = -overhangAt(row, column) / 2)
         var shownFrame = -1
         fxLayer.play(view, durationMs) { progress ->
             val frame = FxViews.steps(progress, frameCount - 1)
@@ -588,8 +670,7 @@ class BattlefieldView(
                 }
             }
         (walker as Container).firstChild.let { it as Image }.bitmap = frames[step % frames.size].slice()
-        walker.x = column * TILE_SIZE.toDouble()
-        walker.y = row * TILE_SIZE.toDouble()
+        placeUnitFrame(walker, row, column)
     }
 
     fun hideWalker(unitId: String) {
@@ -602,10 +683,10 @@ class BattlefieldView(
 
     /** Removes every unit sprite and overlay. The presenter then draws the living units again. */
     fun removeAllBattleUnits() {
+        units.clear()
+        unitLayer.removeChildren()
         battlefieldGrid.children.forEach { view ->
-            val tileButton = view as UIButton
-            tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
-            tileButton.findViewByName(UNIT_OVERLAY)?.removeFromParent()
+            (view as UIButton).findViewByName(UNIT_OVERLAY)?.removeFromParent()
         }
     }
 

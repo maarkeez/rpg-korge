@@ -41,7 +41,7 @@ class AssetSpecTest {
                     continue
                 }
                 val bitmap = loadBitmap32(path)
-                if (bitmap.width != expected.width || bitmap.height != expected.height) {
+                if (!expected.matches(bitmap.width, bitmap.height)) {
                     wrongSizes += "$path: expected $expected, was ${bitmap.width}x${bitmap.height}"
                 }
             }
