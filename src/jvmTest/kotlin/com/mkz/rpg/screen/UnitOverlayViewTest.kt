@@ -197,6 +197,16 @@ class UnitOverlayViewTest {
         }
 
         @Test
+        fun `should draw the turn count when the pending status lasts several turns`() {
+            // Given
+            val overlayView = UnitOverlayView()
+            // When
+            overlayView.display(overlayState(preview = preview(hpAfter = 10, pendingOnTurnCount = 1).copy(pendingTurns = 5)))
+            // Then
+            assertThat(overlayView.pendingTurnsShown).isEqualTo(5)
+        }
+
+        @Test
         fun `should draw no preview marks when the overlay has no preview`() {
             // Given
             val overlayView = UnitOverlayView()

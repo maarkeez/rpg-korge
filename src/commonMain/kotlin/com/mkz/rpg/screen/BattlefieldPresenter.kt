@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
@@ -46,7 +47,7 @@ class BattlefieldPresenter(
     eventBus: EventBus,
     private val battlefieldHudRepository: BattlefieldHudRepository = InMemoryBattlefieldHudRepository(),
     private val searchTerrainById: SearchTerrainById? = null,
-    searchEffectById: SearchEffectById? = null,
+    private val searchEffectById: SearchEffectById? = null,
 ) : BattlefieldView.Delegate,
     AbilityButtonView.Delegate {
     private val movementService =
@@ -289,22 +290,28 @@ class BattlefieldPresenter(
             battleUnitInfoView.displayAbilityLine("${ability.name} - ${ability.cost} MP - ${abilitySummary(ability)}")
         }
         battleHudView.displayBattleUnitInfoView()
-        displayCastTargets(event.castGroupsWhereCanCast)
+        displayCastTargets(event.castGroupsWhereCanCast, casterId = event.battleUnitId, abilityId = event.abilityId)
         if (event.castGroupsWhereCanCast.isEmpty()) {
             battleUnitInfoView.displayAbilityLine(NO_VALID_TARGET_MESSAGE)
         }
     }
 
-    private fun displayCastTargets(castGroups: List<BattlefieldHud.Dto.CastGroupDto>) {
+    private fun displayCastTargets(
+        castGroups: List<BattlefieldHud.Dto.CastGroupDto>,
+        casterId: String,
+        abilityId: String,
+    ) {
         val validTiles = castGroups.flatMap { it.tiles }.map { it.row to it.column }.toSet()
         castGroups.forEach { castGroup ->
             val groupTiles = castGroup.tiles.map { it.row to it.column }.toSet()
+            val lethalTiles = lethalTiles(casterId, abilityId, castGroup)
             groupTiles.forEach { (row, column) ->
                 val isOccupied = battlefieldApi.searchOccupant(row, column) != null
                 battlefieldView.displayPotentialCast(
                     row = row,
                     column = column,
                     kind = if (isOccupied) CastTargetKind.TARGET_UNIT else CastTargetKind.TARGET_TILE,
+                    lethal = (row to column) in lethalTiles,
                     groupEdges =
                         buildSet {
                             if ((row - 1 to column) in groupTiles) add(CastEdge.TOP)
@@ -317,6 +324,19 @@ class BattlefieldPresenter(
         }
         battlefieldView.dimOutside(validTiles)
     }
+
+    /** Tiles of units this cast group would defeat right now, so the player sees lethal options before choosing. */
+    private fun lethalTiles(
+        casterId: String,
+        abilityId: String,
+        castGroup: BattlefieldHud.Dto.CastGroupDto,
+    ): Set<Pair<Int, Int>> =
+        battleUnitApi
+            .previewAbilityCast(casterId, abilityId, castGroup.tiles.map { PositionDto(row = it.row, column = it.column) })
+            .targets
+            .filter { it.isLethal }
+            .mapNotNull { target -> battlefieldApi.searchPosition(target.battleUnitId)?.let { it.row to it.column } }
+            .toSet()
 
     private fun unavailableReason(reason: BattlefieldHudEvent.AbilityUnavailable.Reason): String =
         when (reason) {
@@ -338,18 +358,23 @@ class BattlefieldPresenter(
             )
         // Other valid cast groups stay highlighted, so tapping one of them to switch the preview is discoverable.
         battlefieldView.resetTiles()
-        (battlefieldHudRepository.search() as? BattlefieldHud.DisplayAbilityCastPreview)?.let { displayCastTargets(it.castGroupsWhereCanCast) }
+        (battlefieldHudRepository.search() as? BattlefieldHud.DisplayAbilityCastPreview)?.let {
+            displayCastTargets(it.castGroupsWhereCanCast, casterId = event.casterBattleUnitId, abilityId = event.abilityId)
+        }
         val affectedTiles =
             event.castGroup.tiles
                 .map { it.row to it.column }
                 .toMutableSet()
-        preview.targets.forEach { target ->
-            val position = battlefieldApi.searchPosition(target.battleUnitId) ?: return@forEach
-            val battleUnit = battleUnitApi.searchBattleUnitById(target.battleUnitId) ?: return@forEach
+        val previewStates = preview.targets.associate { it.battleUnitId to unitPreviewState(it) }.toMutableMap()
+        preview.triggered.forEach { triggered -> addPendingSpread(triggered, previewStates) }
+        previewStates.forEach { (battleUnitId, state) ->
+            val position = battlefieldApi.searchPosition(battleUnitId) ?: return@forEach
+            val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return@forEach
             affectedTiles += position.row to position.column
-            displayOverlay(position.row, position.column, battleUnit, preview = unitPreviewState(target))
+            displayOverlay(position.row, position.column, battleUnit, preview = state)
         }
-        previewedBattleUnitIds = preview.targets.map { it.battleUnitId }.toSet()
+        previewedBattleUnitIds = previewStates.keys.toSet()
+        preview.triggered.forEach(::displaySpread)
         affectedTiles.forEach { (row, column) -> battlefieldView.displayCastPreviewTile(row = row, column = column) }
         val summary = CastPreviewSummary { battleUnitId -> battleUnitApi.searchBattleUnitById(battleUnitId)?.let { unitApi.searchUnitById(it.unitId)?.name } }
         attackPreviewView.display(
@@ -362,12 +387,62 @@ class BattlefieldPresenter(
         displayAttackPreview()
     }
 
+    /** Only a spread that is certain to happen (the cast defeats the target) shows a pending status on the neighbour. */
+    private fun addPendingSpread(
+        triggered: PreviewAbilityCast.TriggeredPreview,
+        previewStates: MutableMap<String, UnitPreviewState>,
+    ) {
+        if (triggered.condition != PreviewAbilityCast.TriggeredPreview.Condition.ON_LETHAL_HIT) return
+        val spread = searchEffectById?.invoke(triggered.effectId)
+        val isOverTime = spread?.application?.type == Effect.Dto.ApplicationDto.ApplicationTypeDto.ON_TURN_STARTED
+        val isOnDefeat = spread?.application?.type == Effect.Dto.ApplicationDto.ApplicationTypeDto.ON_DEFEATED
+        if (!isOverTime && !isOnDefeat) return
+        triggered.affectedBattleUnitIds.forEach { neighbourId ->
+            val current =
+                previewStates[neighbourId]
+                    ?: battleUnitApi.searchBattleUnitById(neighbourId)?.let { UnitPreviewState(hpAfter = it.remainingHealthPoints, isLethal = false, pendingOnTurnCount = 0, pendingOnDefeatCount = 0) }
+                    ?: return@forEach
+            previewStates[neighbourId] =
+                current.copy(
+                    pendingOnTurnCount = current.pendingOnTurnCount + if (isOverTime) 1 else 0,
+                    pendingOnDefeatCount = current.pendingOnDefeatCount + if (isOnDefeat) 1 else 0,
+                    pendingTurns = if (isOverTime) spread?.application?.onTurnStarted?.duration else current.pendingTurns,
+                )
+        }
+    }
+
+    /** Dashed outlines on the neighbours and a connector with an arrowhead from the target to each adjacent one. */
+    private fun displaySpread(triggered: PreviewAbilityCast.TriggeredPreview) {
+        val strong = triggered.condition == PreviewAbilityCast.TriggeredPreview.Condition.ON_LETHAL_HIT
+        val source = battlefieldApi.searchPosition(triggered.sourceBattleUnitId) ?: return
+        triggered.affectedBattleUnitIds.forEach { neighbourId ->
+            val neighbour = battlefieldApi.searchPosition(neighbourId) ?: return@forEach
+            battlefieldView.displayConditionalTile(row = neighbour.row, column = neighbour.column, strong = strong)
+            val towardNeighbour = edgeToward(source, neighbour) ?: return@forEach
+            battlefieldView.displaySpreadConnector(source.row, source.column, towardNeighbour, arrowhead = false, strong = strong)
+            battlefieldView.displaySpreadConnector(neighbour.row, neighbour.column, edgeToward(neighbour, source)!!, arrowhead = true, strong = strong)
+        }
+    }
+
+    private fun edgeToward(
+        from: PositionDto,
+        to: PositionDto,
+    ): CastEdge? =
+        when {
+            to.row < from.row && to.column == from.column -> CastEdge.TOP
+            to.row > from.row && to.column == from.column -> CastEdge.BOTTOM
+            to.column < from.column && to.row == from.row -> CastEdge.LEFT
+            to.column > from.column && to.row == from.row -> CastEdge.RIGHT
+            else -> null
+        }
+
     private fun unitPreviewState(target: PreviewAbilityCast.TargetPreview) =
         UnitPreviewState(
             hpAfter = target.hpAfter,
             isLethal = target.isLethal,
             pendingOnTurnCount = target.appliedEffects.count { it.timing == PreviewAbilityCast.AppliedEffectPreview.Timing.OVER_TIME },
             pendingOnDefeatCount = target.appliedEffects.count { it.timing == PreviewAbilityCast.AppliedEffectPreview.Timing.ON_DEATH },
+            pendingTurns = target.appliedEffects.firstOrNull { it.timing == PreviewAbilityCast.AppliedEffectPreview.Timing.OVER_TIME }?.turns,
         )
 
     /** Redraws the units that showed predicted changes, now without them. */

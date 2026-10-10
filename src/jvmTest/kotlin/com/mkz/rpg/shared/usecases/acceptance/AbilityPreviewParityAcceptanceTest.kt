@@ -1,7 +1,11 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AbilityCastPreview
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AppliedEffectPreview.Timing
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -28,11 +32,43 @@ class AbilityPreviewParityAcceptanceTest {
     fun `should match the real cast when the heal is cast`() = assertPreviewMatchesRealCast(abilityId = "heal")
 
     @Test
+    fun `should spread the venom to the neighbour when the previewed skull is lethal and cast for real`() {
+        // Given
+        battle.eventBus.publish(
+            BattleUnitEvent.RequestApplyEffect(
+                EffectApplicationDto(
+                    source = EffectApplicationDto.ApplicationSourceDto.battleUnit(ShowcaseBattle.KNIGHT),
+                    target = EffectTargetDto.Unit(id = RAT_A),
+                    effectId = "low-physical-damage",
+                ),
+            ),
+        )
+        battle.eventBus.dispatch()
+        val castGroup = battle.castGroups("skull").first { group -> group.positions.any { it.row == 6 && it.column == 7 } }
+        val preview = battle.battleUnitApi.previewAbilityCast(ShowcaseBattle.KNIGHT, "skull", battle.positionsOf(castGroup))
+        // When
+        battle.battleUnitApi.castAbility(ShowcaseBattle.KNIGHT, "skull", castGroup)
+        battle.eventBus.dispatch()
+        // Then
+        val triggered = preview.triggered.single()
+        assertThat(triggered.condition).isEqualTo(PreviewAbilityCast.TriggeredPreview.Condition.ON_LETHAL_HIT)
+        assertThat(triggered.affectedBattleUnitIds).containsExactly(RAT_B)
+        val neighbour = battle.battleUnitApi.searchBattleUnitById(RAT_B)!!
+        assertThat(neighbour.ongoingEffects.onTurnStarted).contains(triggered.effectId)
+        assertThat(battle.battleUnitApi.searchBattleUnitById(RAT_A)!!.remainingHealthPoints).isZero()
+    }
+
+    @Test
     fun `should cover every ability of the knight when the parity tests are listed`() {
         // Given / When
         val abilityIds = battle.knightAbilityIds()
         // Then
         assertThat(abilityIds).containsExactlyInAnyOrder("poisoned-sword", "mushroom", "skull", "teleport", "bee", "heal")
+    }
+
+    private companion object {
+        const val RAT_A = "player-2-unit-1"
+        const val RAT_B = "player-2-unit-2"
     }
 
     private fun assertPreviewMatchesRealCast(abilityId: String) {

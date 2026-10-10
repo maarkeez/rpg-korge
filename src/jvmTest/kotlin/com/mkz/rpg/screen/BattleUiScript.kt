@@ -60,6 +60,26 @@ class BattleUiScript(
                 row.toInt() to column.toInt()
             }.toSet()
 
+    /** Tiles outlined as spread neighbours, mapped to whether the outline is the strong (certain) one. */
+    fun conditionalTiles(): Map<Pair<Int, Int>, Boolean> =
+        battlefieldView
+            .descendantsWith { it is ConditionalTileView }
+            .associate { view -> tileOf(view) to (view as ConditionalTileView).strong }
+
+    fun connectorCount() = battlefieldView.descendantsWith { it is SpreadConnectorView }.size
+
+    /** Tiles whose cast highlight carries the lethal skull. */
+    fun lethalHintTiles(): Set<Pair<Int, Int>> =
+        battlefieldView
+            .descendantsWith { it.name == CastTargetTileView.SKULL_HINT }
+            .map { tileOf(it.parent!!) }
+            .toSet()
+
+    private fun tileOf(view: View): Pair<Int, Int> {
+        val (row, column) = Regex("row-(\\d+)-column-(\\d+)").matchEntire(view.parent!!.name!!)!!.destructured
+        return row.toInt() to column.toInt()
+    }
+
     /** The unit overlay drawn on the tile, or null when the tile has none. */
     fun overlayAt(
         row: Int,

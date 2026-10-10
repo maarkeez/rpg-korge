@@ -153,6 +153,8 @@ class BattleUnitApi(
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
             abilityExecution,
+            battlefieldApi.searchOccupant,
+            distanceService,
         )
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)

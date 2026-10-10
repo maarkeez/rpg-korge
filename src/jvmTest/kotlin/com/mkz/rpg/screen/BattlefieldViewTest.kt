@@ -268,6 +268,49 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class DisplaySpreadCues {
+        @Test
+        fun `should draw an outline and a connector when a spread is displayed and remove them when tiles are reset`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+                // When
+                battlefieldView.displayConditionalTile(row = 0, column = 1, strong = true)
+                battlefieldView.displaySpreadConnector(row = 0, column = 1, edge = CastEdge.LEFT, arrowhead = true, strong = true)
+                // Then
+                val tileButton = getBattlefieldGrid(battlefieldView).findViewByName("row-0-column-1") as UIButton
+                assertThat(tileButton.findViewByName(BattlefieldView.CONDITIONAL)).isNotNull
+                assertThat(tileButton.findViewByName(BattlefieldView.CONNECTOR)).isNotNull
+                // When
+                battlefieldView.resetTiles()
+                // Then
+                assertThat(tileButton.findViewByName(BattlefieldView.CONDITIONAL)).isNull()
+                assertThat(tileButton.findViewByName(BattlefieldView.CONNECTOR)).isNull()
+            }
+
+        @Test
+        fun `should draw fewer dashes when the conditional outline is faint`() {
+            // Given / When
+            val strong = ConditionalTileView(strong = true)
+            val faint = ConditionalTileView(strong = false)
+            // Then
+            assertThat(faint.numChildren).isLessThan(strong.numChildren)
+        }
+
+        @Test
+        fun `should draw a skull when the cast tile is lethal`() {
+            // Given / When
+            val lethal = CastTargetTileView(CastTargetKind.TARGET_UNIT, emptySet(), lethal = true)
+            val regular = CastTargetTileView(CastTargetKind.TARGET_UNIT, emptySet())
+            // Then
+            assertThat(lethal.findViewByName(CastTargetTileView.SKULL_HINT)).isNotNull
+            assertThat(regular.findViewByName(CastTargetTileView.SKULL_HINT)).isNull()
+        }
+    }
+
+    @Nested
     inner class DisplayPotentialCast {
         @Test
         fun `should display selection on tile when potential cast is displayed`() =

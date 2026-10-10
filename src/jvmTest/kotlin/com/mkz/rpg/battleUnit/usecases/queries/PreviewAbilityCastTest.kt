@@ -9,8 +9,10 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AppliedEffectPreview
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AppliedEffectPreview.Timing
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.TilePreview
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.TriggeredPreview
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
@@ -22,6 +24,7 @@ import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import org.assertj.core.api.Assertions.assertThat
@@ -38,6 +41,7 @@ class PreviewAbilityCastTest {
     private val searchUnitById: SearchUnitById = mock()
     private val searchPosition: SearchPosition = mock()
     private val abilityExecution: AbilityExecution = mock()
+    private val searchOccupant: SearchOccupant = mock()
     private val previewAbilityCast =
         PreviewAbilityCast(
             battleUnitRepository = battleUnitRepository,
@@ -46,6 +50,7 @@ class PreviewAbilityCastTest {
             searchUnitById = searchUnitById,
             searchPosition = searchPosition,
             abilityExecution = abilityExecution,
+            searchOccupant = searchOccupant,
         )
 
     private val casterUnit = unit(manaPoints = 30)
@@ -223,6 +228,107 @@ class PreviewAbilityCastTest {
         // Then
         assertThat(battleUnitRepository.searchById(target.id())).isEqualTo(target)
         assertThat(battleUnitRepository.searchById(caster.id())).isEqualTo(caster)
+    }
+
+    @Test
+    fun `should predict the spread on lethal hit when a defeated target has a living neighbour of its own player`() {
+        // Given
+        val neighbour = givenNeighbour(row = 1, column = 2, samePlayer = true)
+        val damageEffect = decreaseHealthEffect(damage = 50, applicationType = "IMMEDIATELY").toDto()
+        val onDeathEffect = applyEffectOnNearbyAlliesEffect(effectId = "venom").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect, onDeathEffect))
+        givenApplications(row = 1, column = 3, applications = listOf(onUnit(target, damageEffect), onUnit(target, onDeathEffect)))
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered).containsExactly(TriggeredPreview(target.id(), TriggeredPreview.Condition.ON_LETHAL_HIT, listOf(neighbour.id()), "venom", chainMayContinue = false))
+    }
+
+    @Test
+    fun `should predict the spread if defeated when the target survives the cast`() {
+        // Given
+        val neighbour = givenNeighbour(row = 1, column = 2, samePlayer = true)
+        val damageEffect = decreaseHealthEffect(damage = 10, applicationType = "IMMEDIATELY").toDto()
+        val onDeathEffect = applyEffectOnNearbyAlliesEffect(effectId = "venom").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect, onDeathEffect))
+        givenApplications(row = 1, column = 3, applications = listOf(onUnit(target, damageEffect), onUnit(target, onDeathEffect)))
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered).containsExactly(TriggeredPreview(target.id(), TriggeredPreview.Condition.IF_DEFEATED, listOf(neighbour.id()), "venom", chainMayContinue = false))
+    }
+
+    @Test
+    fun `should not predict a spread when the only neighbour belongs to another player`() {
+        // Given
+        givenNeighbour(row = 1, column = 2, samePlayer = false)
+        val damageEffect = decreaseHealthEffect(damage = 50, applicationType = "IMMEDIATELY").toDto()
+        val onDeathEffect = applyEffectOnNearbyAlliesEffect(effectId = "venom").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect, onDeathEffect))
+        givenApplications(row = 1, column = 3, applications = listOf(onUnit(target, damageEffect), onUnit(target, onDeathEffect)))
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered).isEmpty()
+    }
+
+    @Test
+    fun `should not predict a spread when the neighbour is diagonal to the target`() {
+        // Given
+        givenNeighbour(row = 2, column = 2, samePlayer = true)
+        val damageEffect = decreaseHealthEffect(damage = 50, applicationType = "IMMEDIATELY").toDto()
+        val onDeathEffect = applyEffectOnNearbyAlliesEffect(effectId = "venom").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect, onDeathEffect))
+        givenApplications(row = 1, column = 3, applications = listOf(onUnit(target, damageEffect), onUnit(target, onDeathEffect)))
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered).isEmpty()
+    }
+
+    @Test
+    fun `should predict no spread when the target has no on death effect`() {
+        // Given
+        givenNeighbour(row = 1, column = 2, samePlayer = true)
+        val damageEffect = decreaseHealthEffect(damage = 50, applicationType = "IMMEDIATELY").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect))
+        givenApplications(row = 1, column = 3, applications = listOf(onUnit(target, damageEffect)))
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered).isEmpty()
+    }
+
+    @Test
+    fun `should flag that the chain may continue when the neighbour is also predicted lethal`() {
+        // Given
+        val neighbour = givenNeighbour(row = 1, column = 2, samePlayer = true)
+        val damageEffect = decreaseHealthEffect(damage = 50, applicationType = "IMMEDIATELY").toDto()
+        val onDeathEffect = applyEffectOnNearbyAlliesEffect(effectId = "venom").toDto()
+        val castAbility = givenAbility(cost = 0, effects = listOf(damageEffect, onDeathEffect))
+        givenApplications(
+            row = 1,
+            column = 3,
+            applications = listOf(onUnit(target, damageEffect), onUnit(target, onDeathEffect), onUnit(neighbour, damageEffect)),
+        )
+        // When
+        val preview = previewAbilityCast(caster.id(), castAbility.id, listOf(PositionDto(1, 3)))
+        // Then
+        assertThat(preview.triggered.single().chainMayContinue).isTrue()
+    }
+
+    private fun givenNeighbour(
+        row: Int,
+        column: Int,
+        samePlayer: Boolean,
+    ): BattleUnit {
+        val neighbourUnit = unit(healthPoints = 20)
+        val neighbour = battleUnit(unit = neighbourUnit.toDto(), player = if (samePlayer) player(id = target.toDto().playerId).toDto() else player().toDto())
+        battleUnitRepository.create(neighbour)
+        whenever(searchUnitById(neighbourUnit.toDto().id)).thenReturn(neighbourUnit.toDto())
+        whenever(searchOccupant(row, column)).thenReturn(neighbour.id())
+        whenever(searchPosition(neighbour.id())).thenReturn(PositionDto(row, column))
+        return neighbour
     }
 
     private fun givenAbility(

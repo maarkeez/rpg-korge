@@ -3,12 +3,15 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.battlesetup.adapters.serialization.BattleScenarioLoader
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.acceptance.BattleStateFingerprint
@@ -22,6 +25,7 @@ import korlibs.korge.view.Stage
 import korlibs.korge.view.descendantsWith
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.entry
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -245,7 +249,7 @@ class BattleUiScriptTest : ViewsForTesting() {
                 script.tapTile(row = 6, column = 7)
                 // Then
                 assertThat(script.previewedTiles()).containsExactly(6 to 7)
-                assertThat(attackPreviewView.displayedLines).containsExactly("Rat: 20 -> 10 HP, +Venom on death")
+                assertThat(attackPreviewView.displayedLines).containsExactly("Rat: 20 -> 10 HP, +Venom on death", "If defeated: spreads Venom damage to 1 ally")
                 assertThat(script.overlayAt(row = 6, column = 7)!!.ghostPixelCount).isGreaterThan(0)
                 assertThat(script.overlayAt(row = 6, column = 7)!!.pendingPipCount).isEqualTo(1)
                 assertThat(script.isConfirmAndCancelDisplayed()).isTrue()
@@ -485,6 +489,87 @@ class BattleUiScriptTest : ViewsForTesting() {
                 assertThat(script.dimmedTileCount()).isZero()
                 assertThat(script.reachableTiles(playerOneKnightId)).isNotEmpty
                 assertThat(battleUnitInfoView.visibleAbilityButtonCount).isGreaterThan(0)
+            }
+    }
+
+    @Nested
+    inner class PropagationPreview {
+        @Test
+        fun `should outline the neighbour faintly and explain the condition when the skull does not defeat the target`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                // When
+                script.tapTile(row = 6, column = 7)
+                // Then
+                assertThat(script.conditionalTiles()).containsExactly(entry(6 to 8, false))
+                assertThat(script.connectorCount()).isEqualTo(2)
+                assertThat(script.overlayAt(row = 6, column = 8)!!.pendingPipCount).isZero()
+                assertThat(attackPreviewView.displayedLines).contains("If defeated: spreads Venom damage to 1 ally")
+            }
+
+        @Test
+        fun `should show the skull hint outline and pending status and spread for real when the skull defeats the target`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                eventBus.publish(
+                    BattleUnitEvent.RequestApplyEffect(
+                        EffectApplicationDto(
+                            source = EffectApplicationDto.ApplicationSourceDto.battleUnit(playerOneKnightId),
+                            target = EffectTargetDto.Unit(id = "player-2-unit-1"),
+                            effectId = "low-physical-damage",
+                        ),
+                    ),
+                )
+                eventBus.dispatch()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                // Then
+                assertThat(script.lethalHintTiles()).containsExactly(6 to 7)
+                // When
+                script.tapTile(row = 6, column = 7)
+                // Then
+                assertThat(script.conditionalTiles()).containsExactly(entry(6 to 8, true))
+                assertThat(script.overlayAt(row = 6, column = 8)!!.pendingPipCount).isEqualTo(1)
+                assertThat(script.overlayAt(row = 6, column = 8)!!.pendingTurnsShown).isEqualTo(5)
+                assertThat(attackPreviewView.displayedLines).contains("On defeat: spreads Venom damage to 1 ally")
+                // When
+                script.confirmCast()
+                // Then
+                assertThat(script.battleUnit("player-2-unit-2").ongoingEffects.onTurnStarted).contains("venom-damage")
+            }
+
+        @Test
+        fun `should clear the spread cues when player cancels the preview`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                script.tapTile(row = 6, column = 7)
+                // When
+                script.cancelCast()
+                // Then
+                assertThat(script.conditionalTiles()).isEmpty()
+                assertThat(script.connectorCount()).isZero()
+            }
+
+        @Test
+        fun `should keep the sheet within the line limit when the mushroom is previewed`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                script.selectUnit(playerOneKnightId)
+                script.selectAbility(MUSHROOM_ABILITY_INDEX)
+                val target = script.castTargets(battleUnitId = playerOneKnightId, abilityId = "mushroom").first()
+                // When
+                script.tapTile(row = target.row, column = target.column)
+                // Then
+                assertThat(attackPreviewView.displayedLines.size).isLessThanOrEqualTo(AttackPreviewView.MAX_LINES)
             }
     }
 

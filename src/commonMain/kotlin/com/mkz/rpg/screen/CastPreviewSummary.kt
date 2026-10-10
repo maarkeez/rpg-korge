@@ -3,6 +3,7 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AbilityCastPreview
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.AppliedEffectPreview
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.TargetPreview
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewAbilityCast.TriggeredPreview
 
 /**
  * Turns an [AbilityCastPreview] into the lines of the preview sheet, e.g. `Rat: 20 -> 10 HP, +Venom damage ×5`.
@@ -15,7 +16,7 @@ class CastPreviewSummary(
         val text: String,
         val kind: Kind,
     ) {
-        enum class Kind { TARGET, LETHAL_TARGET, TILE, UNSUPPORTED }
+        enum class Kind { TARGET, LETHAL_TARGET, TILE, CONDITIONAL, UNSUPPORTED }
     }
 
     operator fun invoke(preview: AbilityCastPreview): List<Line> =
@@ -24,7 +25,14 @@ class CastPreviewSummary(
                 val summoned = tile.deploysUnitId?.let(::readable)
                 Line("${if (summoned != null) "Summons $summoned at" else "Tile"} row ${tile.row}, col ${tile.column}", Line.Kind.TILE)
             } +
+            preview.triggered.map(::triggeredLine) +
             preview.unsupported.map { description -> Line("? $description", Line.Kind.UNSUPPORTED) }
+
+    private fun triggeredLine(triggered: TriggeredPreview): Line {
+        val prefix = if (triggered.condition == TriggeredPreview.Condition.ON_LETHAL_HIT) "On defeat" else "If defeated"
+        val count = triggered.affectedBattleUnitIds.size
+        return Line("$prefix: spreads ${readable(triggered.effectId)} to $count ${if (count == 1) "ally" else "allies"}", Line.Kind.CONDITIONAL)
+    }
 
     private fun targetLine(target: TargetPreview): Line {
         val name = unitNameOf(target.battleUnitId) ?: "Unit"

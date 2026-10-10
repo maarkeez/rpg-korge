@@ -30,6 +30,8 @@ data class UnitPreviewState(
     val isLethal: Boolean,
     val pendingOnTurnCount: Int,
     val pendingOnDefeatCount: Int,
+    /** How many turns the pending over-time status lasts. Shown as "×N" next to its pip when known. */
+    val pendingTurns: Int? = null,
 )
 
 /**
@@ -54,6 +56,7 @@ class UnitOverlayView : Container() {
         const val SKULL_GLYPH = "SKULL_GLYPH"
         const val PENDING_BADGE = "PENDING_BADGE"
         const val PENDING_PIP = "PENDING_PIP"
+        const val PENDING_TURNS = "PENDING_TURNS"
 
         const val HP_BAR_WIDTH_ART_PIXELS = 14
         const val HP_BAR_HEIGHT_ART_PIXELS = 2
@@ -63,9 +66,9 @@ class UnitOverlayView : Container() {
         private const val PIP_SIZE_ART_PIXELS = 3
         private const val PENDING_ROW_ART_PIXEL = 5
         private const val PLUS_WIDTH = 3
+        private const val MAX_SHOWN_TURNS = 9
         private const val SKULL_X = 10
         private const val SKULL_Y = 4
-        private val SKULL = listOf("#####", "# # #", "#####", " ### ", " # # ")
         private val PLUS = listOf(" # ", "###", " # ")
     }
 
@@ -83,6 +86,9 @@ class UnitOverlayView : Container() {
     val hasSkull: Boolean get() = children.any { it.name == SKULL_GLYPH }
 
     val pendingPipCount: Int get() = children.count { it.name == PENDING_PIP }
+
+    /** The "×N" turn count drawn next to the pending over-time pip, or null when none is drawn. */
+    val pendingTurnsShown: Int? get() = (children.firstOrNull { it.name == PENDING_TURNS } as? PixelGlyphs.PixelNumberView)?.value
 
     val hasPendingBadge: Boolean get() = children.any { it.name == PENDING_BADGE }
 
@@ -132,8 +138,8 @@ class UnitOverlayView : Container() {
 
     private fun drawPreview(preview: UnitPreviewState) {
         if (preview.isLethal) {
-            addChild(PixelGlyphs.glyph(SKULL, UiPalette.panel, PIXEL_SCALE).also { positionGlyph(it, SKULL_X + 1, SKULL_Y + 1) })
-            addChild(PixelGlyphs.glyph(SKULL, UiPalette.textPrimary, PIXEL_SCALE, SKULL_GLYPH).also { positionGlyph(it, SKULL_X, SKULL_Y) })
+            addChild(PixelGlyphs.glyph(PixelGlyphs.SKULL, UiPalette.panel, PIXEL_SCALE).also { positionGlyph(it, SKULL_X + 1, SKULL_Y + 1) })
+            addChild(PixelGlyphs.glyph(PixelGlyphs.SKULL, UiPalette.textPrimary, PIXEL_SCALE, SKULL_GLYPH).also { positionGlyph(it, SKULL_X, SKULL_Y) })
         }
         val pending = List(preview.pendingOnTurnCount) { PipKind.ON_TURN } + List(preview.pendingOnDefeatCount) { PipKind.ON_DEFEAT }
         if (pending.isEmpty()) return
@@ -142,6 +148,12 @@ class UnitOverlayView : Container() {
             val pip = pipView(kind, x = PLUS_WIDTH + 1 + index * (PIP_SIZE_ART_PIXELS + 1), y = PENDING_ROW_ART_PIXEL)
             pip.name = PENDING_PIP
             addChild(pip)
+        }
+        val turns = preview.pendingTurns
+        if (pending.size == 1 && pending.first() == PipKind.ON_TURN && turns != null && turns in 1..MAX_SHOWN_TURNS) {
+            val x = PLUS_WIDTH + 1 + PIP_SIZE_ART_PIXELS + 1
+            addChild(PixelGlyphs.glyph(PixelGlyphs.TIMES, UiPalette.textPrimary, PIXEL_SCALE).also { positionGlyph(it, x, PENDING_ROW_ART_PIXEL) })
+            addChild(PixelGlyphs.number(turns, UiPalette.textPrimary, PIXEL_SCALE, PENDING_TURNS).also { positionGlyph(it, x + 4, PENDING_ROW_ART_PIXEL) })
         }
     }
 

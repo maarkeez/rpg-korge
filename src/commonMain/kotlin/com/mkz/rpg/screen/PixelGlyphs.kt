@@ -30,6 +30,10 @@ object PixelGlyphs {
             "#######",
         )
 
+    val SKULL = listOf("#####", "# # #", "#####", " ### ", " # # ")
+
+    val TIMES = listOf("# #", " # ", "# #")
+
     private val DIGITS =
         listOf(
             listOf("###", "# #", "# #", "# #", "###"),

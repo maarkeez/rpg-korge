@@ -37,6 +37,8 @@ class BattlefieldView(
         const val UNIT_OVERLAY = "UNIT_OVERLAY"
         const val INSPECT_GLYPH = "INSPECT_GLYPH"
         const val DIM = "DIM"
+        const val CONDITIONAL = "CONDITIONAL"
+        const val CONNECTOR = "CONNECTOR"
 
         const val TILE_PIXEL_SIZE = 16
         const val TILE_SIZE = TILE_PIXEL_SIZE * PIXEL_SCALE
@@ -248,10 +250,33 @@ class BattlefieldView(
         column: Int,
         kind: CastTargetKind = CastTargetKind.TARGET_TILE,
         groupEdges: Set<CastEdge> = emptySet(),
+        lethal: Boolean = false,
     ) {
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         if (tileButton.findViewByName(SELECTION) != null) return
-        tileButton.addChild(CastTargetTileView(kind, groupEdges).also { it.name = SELECTION })
+        tileButton.addChild(CastTargetTileView(kind, groupEdges, lethal).also { it.name = SELECTION })
+    }
+
+    /** Outlines a unit that would receive a spread status when a previewed target is defeated. */
+    fun displayConditionalTile(
+        row: Int,
+        column: Int,
+        strong: Boolean,
+    ) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.addChild(ConditionalTileView(strong).also { it.name = CONDITIONAL })
+    }
+
+    /** Draws half of a spread connector on the tile, towards [edge]. */
+    fun displaySpreadConnector(
+        row: Int,
+        column: Int,
+        edge: CastEdge,
+        arrowhead: Boolean,
+        strong: Boolean,
+    ) {
+        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        tileButton.addChild(SpreadConnectorView(edge, arrowhead, strong).also { it.name = CONNECTOR })
     }
 
     /** Dims every tile that isn't in [validTiles], so valid and invalid tiles differ by pattern and not only by color. */
@@ -295,6 +320,7 @@ class BattlefieldView(
             val tileButton = view as UIButton
             tileButton.findViewByName(SELECTION)?.removeFromParent()
             tileButton.findViewByName(DIM)?.removeFromParent()
+            tileButton.children.filter { it.name == CONDITIONAL || it.name == CONNECTOR }.forEach { it.removeFromParent() }
         }
     }
 

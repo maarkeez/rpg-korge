@@ -26,16 +26,37 @@ enum class CastEdge { TOP, RIGHT, BOTTOM, LEFT }
 class CastTargetTileView(
     val kind: CastTargetKind,
     val joinedEdges: Set<CastEdge>,
+    /** The cast would defeat the unit on this tile right now. Adds a skull glyph. */
+    val lethal: Boolean = false,
 ) : Container() {
     companion object {
         const val GLYPH = "CAST_GLYPH"
+        const val SKULL_HINT = "CAST_SKULL"
 
         private const val TILE_ART_PIXELS = 16
+        private const val SKULL_X = 1
+        private const val SKULL_Y = 5
     }
 
     init {
         drawBorder()
         drawGlyph()
+        if (lethal) drawSkull()
+    }
+
+    private fun drawSkull() {
+        addChild(
+            PixelGlyphs.glyph(PixelGlyphs.SKULL, UiPalette.panel, PIXEL_SCALE).also {
+                it.x = (SKULL_X + 1) * PIXEL_SCALE.toDouble()
+                it.y = (SKULL_Y + 1) * PIXEL_SCALE.toDouble()
+            },
+        )
+        addChild(
+            PixelGlyphs.glyph(PixelGlyphs.SKULL, UiPalette.textPrimary, PIXEL_SCALE, SKULL_HINT).also {
+                it.x = SKULL_X * PIXEL_SCALE.toDouble()
+                it.y = SKULL_Y * PIXEL_SCALE.toDouble()
+            },
+        )
     }
 
     private fun drawBorder() {
@@ -93,5 +114,81 @@ class DimTileView : Container() {
                 },
             )
         }
+    }
+}
+
+/**
+ * A neighbour that would receive a spread status if the previewed target is defeated: a dashed 1 art pixel outline.
+ * [strong] (3 on, 1 off) means the cast defeats the target, so the spread happens. Faint (2 on, 2 off, half transparent)
+ * means it only spreads if the target is defeated later. Solid borders stay reserved for certain, valid casts.
+ */
+class ConditionalTileView(
+    val strong: Boolean,
+) : Container() {
+    init {
+        val last = TILE_ART_PIXELS - 1
+        for (i in 0..last) {
+            if (i % DASH_PERIOD >= (if (strong) 3 else 2)) continue
+            listOf(i to 0, i to last, 0 to i, last to i).forEach { (x, y) -> addChild(pixel(x, y)) }
+        }
+    }
+
+    private fun pixel(
+        x: Int,
+        y: Int,
+    ): SolidRect =
+        SolidRect(Size(PIXEL_SCALE, PIXEL_SCALE), UiPalette.conditional).also {
+            it.x = (x * PIXEL_SCALE).toDouble()
+            it.y = (y * PIXEL_SCALE).toDouble()
+            it.alpha = if (strong) 1.0 else 0.6
+        }
+
+    private companion object {
+        const val TILE_ART_PIXELS = 16
+        const val DASH_PERIOD = 4
+    }
+}
+
+/**
+ * Half of the connector between a defeated target and a neighbour: a dashed line from the tile centre to the
+ * [edge] that faces the other tile. The neighbour's half also ends in an arrowhead at the centre, so the spread has a direction.
+ */
+class SpreadConnectorView(
+    val edge: CastEdge,
+    val arrowhead: Boolean,
+    val strong: Boolean,
+) : Container() {
+    init {
+        for (u in 0 until LINE_LENGTH) {
+            if (u % DASH_PERIOD >= (if (strong) 3 else 1)) continue
+            addChild(pixel(u, 0))
+        }
+        if (arrowhead) {
+            for ((u, v) in listOf(0 to 0, 1 to -1, 1 to 1, 2 to -2, 2 to 2)) addChild(pixel(u, v))
+        }
+    }
+
+    /** [u] runs from the tile centre towards [edge], [v] runs across the line. */
+    private fun pixel(
+        u: Int,
+        v: Int,
+    ): SolidRect {
+        val (x, y) =
+            when (edge) {
+                CastEdge.TOP -> CENTER + v to CENTER - u
+                CastEdge.BOTTOM -> CENTER + v to CENTER + u
+                CastEdge.LEFT -> CENTER - u to CENTER + v
+                CastEdge.RIGHT -> CENTER + u to CENTER + v
+            }
+        return SolidRect(Size(PIXEL_SCALE, PIXEL_SCALE), UiPalette.conditional).also {
+            it.x = (x * PIXEL_SCALE).toDouble()
+            it.y = (y * PIXEL_SCALE).toDouble()
+        }
+    }
+
+    private companion object {
+        const val CENTER = 8
+        const val LINE_LENGTH = 8
+        const val DASH_PERIOD = 4
     }
 }

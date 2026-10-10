@@ -470,9 +470,9 @@ Snapshots: every milestone that changes visuals **must** regenerate goldens with
   - Parity extension: after confirming the lethal skull, the neighbour's `ongoingEffects.onTurnStarted` contains `venom-damage`. Set the precondition by publishing `RequestApplyEffect(low-physical-damage)` to rat A before the test.
   - Add snapshot `battle-propagation-preview` on `ui-showcase`.
 - **Acceptance criteria:**
-  - [ ] Triggered predictions match the real outcome in the parity test.
-  - [ ] Conditional and certain cues differ by line style or pattern, not only color.
-  - [ ] Sheet text never exceeds 4 lines (view test with a 3-target mushroom preview).
+  - [x] Triggered predictions match the real outcome in the parity test.
+  - [x] Conditional and certain cues differ by line style or pattern, not only color.
+  - [x] Sheet text never exceeds 4 lines (view test with a 3-target mushroom preview).
 - **Risks:** clutter. Follow the brief's guiding rule. If a cue doesn't clarify a decision, drop it and say so in the report.
 
 ### M9 — Combat feedback and paced state transitions
