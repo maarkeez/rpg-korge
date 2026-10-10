@@ -11,7 +11,6 @@ import korlibs.io.file.std.resourcesVfs
 // - unit/goblins/: reference samples, not used by the game.
 internal val GAME_ART_ASSET_PATHS: List<String> =
     listOf(
-        "ability/ability_selection.png",
         "ability/bee.png",
         "ability/heal.png",
         "ability/mushroom.png",
@@ -19,9 +18,6 @@ internal val GAME_ART_ASSET_PATHS: List<String> =
         "ability/skull.png",
         "ability/sword.png",
         "ability/teleport.png",
-        "battlefield/tile_selection_1.png",
-        "battlefield/tile_selection_2.png",
-        "battlefield/tile_selection_3.png",
         "battlefield/tile_selection_4.png",
         "effect/venom-damage.png",
         "effect/fx_defeat.png",

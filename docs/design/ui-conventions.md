@@ -18,6 +18,11 @@ Short set of visual conventions for the battle UI. Source of truth in code: `UiP
 ## Sprites
 
 - Look up unit, ability, effect and highlight bitmaps through `SpriteRegistry`. Unknown ids return a `UiPalette.placeholder` bitmap and never throw.
+- Art rules (sizes, palette roles, light, outlines) live in [`art-direction.md`](art-direction.md).
+- Unit animation: `unit/<id>_idle.png` and `unit/<id>_walk.png` are horizontal 16×16 strips, read with `SpriteRegistry.unitFrames`, which falls back to the single sprite. Idle frames follow `FeedbackTiming.idleFrameMs` (0 keeps frame 0, as in tests and snapshots); walkers show the next walk frame on each hop. Hit flashes use frame 0.
+- Combat FX: `effect/fx_<name>.png` strips (`fx_defeat`, `fx_hit`, `fx_heal`, `fx_venom`, `fx_spread`) drawn at ×3 by `BattlefieldView` within the existing `FxViews` durations. A missing strip skips that effect.
+- Status icons are drawn at ×2 (32 pt) in `StatusListView` (Q5); everything else in the battlefield is ×3.
+- Terrain variants: `terrain/variants/<terrain>.png` holds alternate base tiles, picked by tile position. Never put them in `terrain/transitions/`, where every file is a terrain rule.
 
 ## Never color alone
 

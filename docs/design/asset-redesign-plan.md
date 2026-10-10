@@ -175,6 +175,27 @@ Produced during planning with a small dependency-free Python PNG decoder (zlib +
 
 No asset uses partial alpha except `korge.png`. No asset has animation frames.
 
+### 5.1 Inventory after the redesign (M8)
+
+All game art below is on the Famicube palette (`PaletteCheckerTest`), has no partial alpha and matches its family size (`AssetSpecTest`).
+
+| Path | Size | Status |
+| --- | --- | --- |
+| `ability/{sword, poisoned_sword, mushroom, skull, teleport, bee, heal}.png` | 16×16 | Redrawn (M6a): family-coloured plate plus one symbol |
+| `battlefield/tile_selection_4.png` | 16×16 | Retained (selection highlight, readable over every terrain) |
+| `battlefield/tile_selection_1..3.png`, `ability/ability_selection.png` | – | Removed (M8): never drawn; registry entries removed |
+| `effect/venom-damage.png`, `effect/venom-on-death.png` | 16×16, drawn at ×2 | Redrawn (M2, M6b) |
+| `effect/fx_defeat.png`, `fx_hit.png`, `fx_heal.png`, `fx_venom.png` | 48×16 | Created (M2, M6c) |
+| `effect/fx_spread.png` | 32×16 | Created (M6c) |
+| `terrain/transitions/sand_to_{grass, lava, void, water}.png` | 256×16 | Redrawn (M2, M3); same names and Wang order |
+| `terrain/variants/{sand, grass, water}.png` | 48×16 | Created (M7) |
+| `unit/{knight, rat, bee}.png` | 16×16 | Redrawn (M2, M4) |
+| `unit/{knight, rat, bee}_{idle, walk}.png` | 32×16 | Created (M5) |
+| `unit/{knight, rat, bee}_portrait.png` | 32×32 | Redrawn on-palette (M4) |
+| `unit/goblins/*`, `korge.png` | – | Untouched (Q7, A13) |
+
+The procedural poof, status pop and spark in `FxViews` were removed in M8; the authored strips replace them.
+
 ## 6. Art direction and production standards
 
 ### 6.1 Densities and frame sizes per family
@@ -497,4 +518,4 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 - [x] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).
 - [x] **M6c** Authored hit, heal, venom, spread FX.
 - [x] **M7** (optional) Terrain variants / props.
-- [ ] **M8** Unused assets retired after verification; docs and inventory updated; full manual checklist passed.
+- [ ] **M8** Unused assets retired after verification; docs and inventory updated; full manual checklist passed. *(Retirement, docs and inventory done; the manual `ui-regression-checklist.md` pass on `ui-showcase`, `terrain-mix` and `chain-showcase` is still to be run by the owner.)*

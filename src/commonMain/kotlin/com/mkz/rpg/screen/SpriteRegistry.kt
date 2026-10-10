@@ -17,7 +17,6 @@ class SpriteRegistry {
     private var abilities: Map<String, Bitmap> = emptyMap()
     private var effects: Map<String, Bitmap> = emptyMap()
     private var highlights: Map<Highlight, Bitmap> = emptyMap()
-    private var abilitySelection: Bitmap? = null
     private var fxStrips: Map<String, List<Bitmap>> = emptyMap()
     private var unitAnimations: Map<Pair<String, String>, List<Bitmap>> = emptyMap()
     private val silhouettes = mutableMapOf<String, Bitmap>()
@@ -27,9 +26,6 @@ class SpriteRegistry {
         val path: String,
     ) {
         SELECTION("battlefield/tile_selection_4.png"),
-        MOVEMENT("battlefield/tile_selection_3.png"),
-        CAST("battlefield/tile_selection_2.png"),
-        ALTERNATIVE("battlefield/tile_selection_1.png"),
     }
 
     /** Loads every bitmap once. Later calls do nothing. */
@@ -40,7 +36,6 @@ class SpriteRegistry {
         abilities = ABILITY_IDS.associateWith { resourcesVfs[abilityPath(it)].readBitmap() }
         effects = EFFECT_IDS.associateWith { resourcesVfs[effectPath(it)].readBitmap() }
         highlights = Highlight.entries.associateWith { resourcesVfs[it.path].readBitmap() }
-        abilitySelection = resourcesVfs["ability/ability_selection.png"].readBitmap()
         fxStrips = FX_IDS.mapNotNull { fxId -> loadStrip(fxPath(fxId))?.let { fxId to it } }.toMap()
         unitAnimations =
             UNIT_IDS
@@ -86,8 +81,6 @@ class SpriteRegistry {
     fun effect(effectId: String): Bitmap = effects[effectId] ?: placeholder(ART_SIZE)
 
     fun highlight(highlight: Highlight): Bitmap = highlights[highlight] ?: placeholder(ART_SIZE)
-
-    fun abilitySelection(): Bitmap = abilitySelection ?: placeholder(ART_SIZE)
 
     private fun placeholder(size: Int): Bitmap =
         Bitmap32(size, size).also { bitmap ->

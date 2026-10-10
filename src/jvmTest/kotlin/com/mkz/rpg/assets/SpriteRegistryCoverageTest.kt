@@ -17,8 +17,7 @@ class SpriteRegistryCoverageTest {
             SpriteRegistry.UNIT_IDS.flatMap { unitId -> listOf(SpriteRegistry.unitPath(unitId), SpriteRegistry.portraitPath(unitId)) } +
                 SpriteRegistry.ABILITY_IDS.map(SpriteRegistry::abilityPath) +
                 SpriteRegistry.EFFECT_IDS.map(SpriteRegistry::effectPath) +
-                SpriteRegistry.Highlight.entries.map { it.path } +
-                "ability/ability_selection.png"
+                SpriteRegistry.Highlight.entries.map { it.path }
         // When
         val missingPaths =
             runBlocking {
