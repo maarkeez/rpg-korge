@@ -137,7 +137,7 @@ Owner decisions (plan §9): Famicube stays the only palette; water stays teal; t
 
 ### 7.1 Ramps
 
-Y is luma. Hue shifts: shadows lean red or purple, highlights lean yellow.
+Y is luma. Hue shifts: shadows lean red or purple, highlights lean yellow. Lava's luma is the area-weighted mean of melt and streams (about one third of the tile is streams).
 
 | Material | Deep / outline | Shadow | Base | Light | Highlight |
 | --- | --- | --- | --- | --- | --- |
@@ -145,7 +145,7 @@ Y is luma. Hue shifts: shadows lean red or purple, highlights lean yellow.
 | Dirt / sand path | `5C3C0D` (64) | `AE6C37` (122) shadow, `C59782` (162) pebbles | `F5B784` (196) | – | `FFE9C5` (235) |
 | Cliff / rock | `231712` (26) | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `E2D7B5` (214) |
 | Water (teal) | `00177D` (28) | `005280` (63) | `0A98AC` (112) | `25E2CD` (167) | `FFFFFF` foam |
-| Lava | `4F1507` (37) | `AD4E1A` (100) | `CC8F15` (147) | `FFE9C5` (235) | `FFFFFF` |
+| Lava | `4F1507` (37) crust | `AD4E1A` (100) melt (base) | `CC8F15` (147) streams | `FFE9C5` (235) hot cores | `FFFFFF` bubbles |
 | Void (chasm floor) | `000000` (0) | `0D2030` (28) | `211640` (30) | – | – |
 | Steel | `151515` (21) | `415D66` (86) | `7B7B7B` (123) | `A8A8A8` (168) | `D7D7D7` / `FFFFFF` |
 | Skin | `823C3D` (81) | `E18289` (159) | `FFE9C5` (235) | – | `FFFFFF` |
@@ -159,11 +159,11 @@ Reserved UI hues (§3) stay forbidden as dominant colors. Grass and poison no lo
 
 ### 7.2 Value checks (Δ luma ≥ 40, main body vs tile)
 
-| Unit main color | Grass 140 | Dirt 196 | Water 112 | Lava 147 |
+| Unit main color | Grass 140 | Dirt 196 | Water 112 | Lava ≈ 125 (melt 100 with streams) |
 | --- | --- | --- | --- | --- |
-| Knight tunic `3D34A5` (68) | 72 | 128 | 44 | 79 |
-| Rat fur `5C3C0D` (64) | 76 | 132 | 48 | 83 |
-| Bee stripe `343434` (52) / gold `CC8F15` (147) | 88 / 7 | 144 / 49 | 60 / 35 | 95 / 0 |
+| Knight tunic `3D34A5` (68) | 72 | 128 | 44 | 57 |
+| Rat fur `5C3C0D` (64) | 76 | 132 | 48 | 61 |
+| Bee stripe `343434` (52) / gold `CC8F15` (147) | 88 / 7 | 144 / 49 | 60 / 35 | 73 / 22 |
 
 The bee reads by its dark stripes and outline; its gold must never be its largest area.
 
