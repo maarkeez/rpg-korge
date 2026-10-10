@@ -269,6 +269,47 @@ class SimpleBattleAcceptanceTest {
 }
 ```
 
+## Test example - End-to-end test
+
+End-to-end tests play the game as a player would: they boot the game headless, click on the screen and assert what is displayed.
+
+- End-to-end tests MUST only cover critical player journeys. They are slower than the rest of the tests, so prefer acceptance tests for anything else.
+- They MUST be implemented under `com.mkz.rpg.shared.adapters.e2e` test package
+- The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with `viewsTest`. It runs the game without a window or a GPU, so it runs in the CI.
+- They MUST boot the game using `com.mkz.rpg.startGame()`, the same function used by `main`.
+- They MUST interact through mouse events (e.g.: `mouseMoveAndClickTo(x, y)`) using the global coordinates of the views.
+- They MUST assert what is displayed. Views can be found by name (e.g.: battlefield tiles are named `row-<row>-column-<column>`).
+- They MUST wait for the game to react using a `waitUntil` loop bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
+
+For example: [`MoveKnightEndToEndTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
+
+```kotlin
+class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
+    @Test
+    fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
+        viewsTest {
+            // Given
+            startGame()
+            waitUntil { hasBattleUnit(knightRow, knightColumn) }
+            clickOnTile(knightRow, knightColumn)
+            waitUntil { hasSelection(targetRow, targetColumn) }
+            // When
+            clickOnTile(targetRow, targetColumn)
+            // Then
+            waitUntil { hasBattleUnit(targetRow, targetColumn) }
+            assertThat(hasBattleUnit(targetRow, targetColumn)).isTrue
+            assertThat(hasBattleUnit(knightRow, knightColumn)).isFalse
+        }
+
+    private suspend fun waitUntil(condition: () -> Boolean) {
+        val startMillis = System.currentTimeMillis()
+        while (!condition() && System.currentTimeMillis() - startMillis < WAIT_TIMEOUT_MILLIS) {
+            delayFrame()
+            yield()
+        }
+    }
+}
+```
 
 ## Run tests
 
