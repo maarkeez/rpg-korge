@@ -248,7 +248,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 - [x] **L2** Art direction v2 and templates (decisions in §9).
 - [x] **L3** Prototype (knight 24 px with idle and 4-frame walk, ALttP grass and dirt, void cliff face). The owner gate was covered by the instruction to implement the whole plan; dirt keeps `F5B784` as its base (lighter, closer to ALttP paths).
 - [ ] **L4** Terrain v2.
-- [ ] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
+- [x] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
 - [ ] **L4b** (optional) Dual-grid transitions.
 - [ ] **L5** Units v2 with animation.
 - [ ] **L6** Portraits, icons, FX v2.

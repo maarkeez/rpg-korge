@@ -1,5 +1,6 @@
 package com.mkz.rpg.assets
 
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -98,4 +99,20 @@ class TransitionStripTest {
     private fun listTransitionFiles(): List<String> = runBlocking { resourcesVfs[TRANSITIONS_PATH].listNames() }
 
     private fun listTransitionPngs(): List<String> = listTransitionFiles().filter { it.endsWith(".png") }
+
+    @Test
+    fun `should have a transition strip for exactly every allowed terrain pair when the terrain rules are read`() {
+        // Given
+        val loader = ResourcesTerrainLoader()
+        runBlocking { loader.initResources() }
+        val allowedPairs =
+            loader
+                .loadTerrains()
+                .flatMap { terrain -> (terrain.allowedTransitionTo - terrain.id).map { "${terrain.id}_to_$it.png" } }
+                .toSet()
+        // When
+        val strips = listTransitionPngs().toSet()
+        // Then
+        assertThat(strips).describedAs("Transition strips must match the transitionsTo rules in terrain/<id>.toml").isEqualTo(allowedPairs)
+    }
 }

@@ -1,1 +1,2 @@
 canBeOccupied = true
+transitionsTo = ["grass", "lava", "void", "water"]

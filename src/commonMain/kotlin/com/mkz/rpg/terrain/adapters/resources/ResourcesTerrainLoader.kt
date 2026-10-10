@@ -59,37 +59,24 @@ class ResourcesTerrainLoader(
         return allowedTransitions
     }
 
-    private suspend fun loadTransitions(): Map<String, Set<String>> {
-        val transitionsRoot = terrainRoot[TRANSITIONS_FOLDER]
-        val transitionFileNames =
-            if (transitionsRoot.exists()) transitionsRoot.listNames() else emptyList()
-        val transitions = mutableMapOf<String, MutableSet<String>>()
-        transitionFileNames
-            .filter { it.endsWith(PNG_EXTENSION) }
-            .mapNotNull { fileName -> parseTransition(fileName) }
-            .forEach { (terrainId, transitionToTerrainId) ->
-                transitions.getOrPut(terrainId) { mutableSetOf() }.add(transitionToTerrainId)
-            }
-        return transitions
-    }
-
-    private fun parseTransition(fileName: String): Pair<String, String>? {
-        val baseName = fileName.removeSuffix(PNG_EXTENSION)
-        val parts = baseName.split(TRANSITION_SEPARATOR)
-        if (parts.size != 2 || parts.any { it.isBlank() }) return null
-        return parts[0] to parts[1]
-    }
+    /**
+     * Allowed adjacency comes from `transitionsTo` in each `terrain/<id>.toml`. The images in `terrain/transitions/`
+     * are art only, so their names and format can change without touching gameplay.
+     */
+    private fun loadTransitions(): Map<String, Set<String>> =
+        terrainDefinitions
+            .filterValues { it.transitionsTo.isNotEmpty() }
+            .mapValues { (_, definition) -> definition.transitionsTo.toSet() }
 
     @Serializable
     data class TerrainDefinition(
         val canBeOccupied: Boolean,
         val effectId: String? = null,
+        /** Terrains this one may border. The rule works both ways, so it only needs to be written on one side. */
+        val transitionsTo: List<String> = emptyList(),
     )
 
     private companion object {
         const val TOML_EXTENSION = ".toml"
-        const val PNG_EXTENSION = ".png"
-        const val TRANSITIONS_FOLDER = "transitions"
-        const val TRANSITION_SEPARATOR = "_to_"
     }
 }

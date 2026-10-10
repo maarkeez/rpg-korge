@@ -75,17 +75,18 @@ Checks every `GAME_ART_ASSET_PATHS` entry against the family table in §6.1 of t
 
 `expectedArtSize(path)` in `AssetTestSupport.kt` holds the family table.
 
-### `TransitionStripTest` — 5 tests
+### `TransitionStripTest` — 6 tests
 
 Checks everything in `resources/terrain/transitions/`. Every file there is a gameplay rule (see plan §11), so stray files are reported.
 
 | Test | Covers |
 | --- | --- |
-| `should name every transition file as from_to_to when the transitions folder is listed` | Name is `<from>_to_<to>.png`; any other file (draft, backup, variant) fails |
+| `should name every transition file as from_to_to when the transitions folder is listed` | Name is `<from>_to_<to>.png`; any other file (draft, backup, variant) fails. Names no longer define rules (L4a) but must match them |
 | `should have a terrain definition for both sides when a transition file is listed` | `terrain/<from>.toml` and `terrain/<to>.toml` exist |
 | `should be 256 by 16 pixels when every transition strip is listed` | 16 tiles of 16×16 in Wang order |
 | `should be fully opaque at tile 0 and tile 15 when every transition strip is checked` | Base tiles are opaque |
 | `should have an identical tile 0 in every sand strip when the sand base tile is compared` | All `sand_to_*` strips share one sand base tile. Sand is the `from` terrain of every strip, and `BattlefieldView` takes it from whichever strip loads last |
+| `should have a transition strip for exactly every allowed terrain pair when the terrain rules are read` | The strips in `terrain/transitions/` match the `transitionsTo` rules in `terrain/<id>.toml`: no allowed pair without art (it would crash the battlefield view), no art for a pair the rules forbid |
 
 ### `SpriteRegistryCoverageTest` — 3 tests
 

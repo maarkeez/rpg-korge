@@ -74,13 +74,12 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
-        fun `should allow the transition only to the target terrain when a transition asset exists`() {
+        fun `should allow the transition only to the target terrain when the definition lists it`() {
             // Given
             val terrainRoot =
                 MemoryVfsMix(
-                    "terrain/sand.toml" to "canBeOccupied = true",
+                    "terrain/sand.toml" to "canBeOccupied = true\ntransitionsTo = [\"void\"]",
                     "terrain/void.toml" to "canBeOccupied = false",
-                    "terrain/transitions/sand_to_void.png" to "png",
                 )["terrain"]
             val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
             runBlocking { loader.initResources() }
@@ -104,15 +103,13 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
-        fun `should accumulate the transitions of a terrain when it appears in multiple assets`() {
+        fun `should allow every listed transition when the definition lists several terrains`() {
             // Given
             val terrainRoot =
                 MemoryVfsMix(
-                    "terrain/sand.toml" to "canBeOccupied = true",
+                    "terrain/sand.toml" to "canBeOccupied = true\ntransitionsTo = [\"void\", \"forest\"]",
                     "terrain/void.toml" to "canBeOccupied = false",
                     "terrain/forest.toml" to "canBeOccupied = true",
-                    "terrain/transitions/sand_to_void.png" to "png",
-                    "terrain/transitions/sand_to_forest.png" to "png",
                 )["terrain"]
             val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
             runBlocking { loader.initResources() }
@@ -128,8 +125,7 @@ class ResourcesTerrainLoaderTest {
             // Given
             val terrainRoot =
                 MemoryVfsMix(
-                    "terrain/sand.toml" to "canBeOccupied = true",
-                    "terrain/transitions/sand_to_void.png" to "png",
+                    "terrain/sand.toml" to "canBeOccupied = true\ntransitionsTo = [\"void\"]",
                 )["terrain"]
             val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
             runBlocking { loader.initResources() }
@@ -141,16 +137,13 @@ class ResourcesTerrainLoaderTest {
         }
 
         @Test
-        fun `should not return a transition when the asset does not follow the naming convention`() {
+        fun `should not allow a transition when only a transition image exists`() {
             // Given
             val terrainRoot =
                 MemoryVfsMix(
                     "terrain/sand.toml" to "canBeOccupied = true",
-                    "terrain/transitions/sand.png" to "png",
-                    "terrain/transitions/sand_to.png" to "png",
-                    "terrain/transitions/_to_void.png" to "png",
-                    "terrain/transitions/sand_to_void_to_forest.png" to "png",
-                    "terrain/transitions/sand_to_void.txt" to "text",
+                    "terrain/void.toml" to "canBeOccupied = false",
+                    "terrain/transitions/sand_to_void.png" to "png",
                 )["terrain"]
             val loader = ResourcesTerrainLoader(terrainRoot = terrainRoot)
             runBlocking { loader.initResources() }

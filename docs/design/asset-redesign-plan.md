@@ -86,7 +86,7 @@ src/jvmTest/resources/snapshots/  10 golden PNGs (390×844)
 | --- | --- | --- | --- |
 | `SpriteRegistry` | `src/commonMain/kotlin/com/mkz/rpg/screen/SpriteRegistry.kt` | units, portraits, ability icons, effect icons, highlights, ability selection frame | Hard-coded id lists: `UNIT_IDS = knight, rat, bee` → `unit/<id>.png` and `unit/<id>_portrait.png`; `ABILITY_IDS = heal, sword, poisoned-sword, mushroom, skull, teleport, bee` → `ability/<id with '-'→'_'>.png`; `EFFECT_IDS = venom-damage, venom-on-death` → `effect/<id>.png`; `Highlight` enum → `battlefield/tile_selection_N.png`. Unknown ids return a 16×16 (32×32 for portraits) solid `UiPalette.placeholder` (#A328B3) bitmap and never throw. |
 | `BattlefieldView.loadAssets()` | `src/commonMain/kotlin/com/mkz/rpg/screen/BattlefieldView.kt` | every PNG in `terrain/transitions/` | Lists the folder, crops each strip into `width / 16` tiles. **Base terrain bitmaps are not separate files:** tile 0 of each strip becomes the `from` terrain (sand) and the last tile becomes the `to` terrain. Sand's base tile is whichever strip is listed last. |
-| `ResourcesTerrainLoader` | `src/commonMain/kotlin/com/mkz/rpg/terrain/adapters/resources/ResourcesTerrainLoader.kt` | `terrain/*.toml` and **the file names** in `terrain/transitions/` | `<from>_to_<to>.png` file names define which terrain transitions are allowed. **Adding, renaming or removing a transition PNG changes gameplay data** (allowed adjacency), not just visuals. |
+| `ResourcesTerrainLoader` | `src/commonMain/kotlin/com/mkz/rpg/terrain/adapters/resources/ResourcesTerrainLoader.kt` | `terrain/*.toml` | *(Superseded by ALttP plan L4a: allowed adjacency now comes from `transitionsTo` in `terrain/<id>.toml`; transition PNGs are art only.)* Originally: `<from>_to_<to>.png` file names defined which terrain transitions were allowed. |
 | `BattleScenarioLoader` | `src/commonMain/kotlin/com/mkz/rpg/battlesetup/adapters/serialization/BattleScenarioLoader.kt` | `scenarios/*.json` | Not art. |
 
 There is no texture atlas, no sprite-sheet metadata file, no animation data, no font asset, and no asset manifest. **[verified]**
@@ -412,7 +412,7 @@ Only if the owner opts in after M3–M6.
 ## 11. Integration and compatibility strategy
 
 - **Keep paths and sizes.** Redrawing at the same path and size needs no code change. This covers A1, A2, A4, A5, A6, A9.
-- **Never put non-rule files in `resources/terrain/transitions/`.** Every PNG there becomes a terrain rule and is sliced as a strip. No backups, drafts or variants in that folder.
+- **Never put non-strip files in `resources/terrain/transitions/`.** Every PNG there is sliced as a strip. No backups, drafts or variants in that folder. (Since ALttP plan L4a, adjacency rules live in `terrain/<id>.toml`, not in these file names.)
 - **Keep previous versions in git, not in `resources/`.** Rollback is `git revert`. For side-by-side comparison, export the old version with `git show <rev>:resources/<path> > build/compare/<name>.old.png` (in `build/`, not committed).
 - **Code changes travel with their assets.** If a milestone needs a code change (M2 FX, M5, M6b/c, M7), the asset, code, tests and goldens go in the same commit.
 - **Identify broken references:** M0 registry-coverage test; a magenta (`A328B3`) square on screen means a missing id; KorGE throws on a missing transition file at load time (no placeholder there).
