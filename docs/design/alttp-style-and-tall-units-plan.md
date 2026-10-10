@@ -250,7 +250,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 - [x] **L4** Terrain v2 (water and lava strips; sand, grass and water variants). Lava and void keep one tile each: lava's flow lines and void's specks are drawn to continue across tile edges, which variants would break.
 - [x] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
 - [x] **L4b** (optional) Dual-grid transitions: corner overlays for grass, void, water and lava. Tiles that touch only diagonally now read as separate shapes that meet at a corner, as the map data says.
-- [ ] **L5** Units v2 with animation.
+- [x] **L5** Units v2 with animation: rat (side view, 2-frame idle, 4-frame walk) and bee (hovering, 4-frame wing flap for idle and walk) in 32×32 frames; knight from L3.
 - [ ] **L6** Portraits, icons, FX v2.
 - [ ] **L7** (optional) Facing.
 - [ ] **L8** Cleanup, docs, manual checklist.

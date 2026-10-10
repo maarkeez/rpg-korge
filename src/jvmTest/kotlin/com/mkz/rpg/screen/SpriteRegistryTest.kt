@@ -106,14 +106,16 @@ class SpriteRegistryTest : ViewsForTesting() {
     @Nested
     inner class UnitOverhang {
         @Test
-        fun `should not rise above the tile when the unit art fits its tile`() =
+        fun `should rise higher above the tile when the unit is drawn taller`() =
             viewsTest {
                 // Given
                 spriteRegistry.load()
                 // When
-                val overhang = spriteRegistry.unitOverhang("rat")
+                val knightOverhang = spriteRegistry.unitOverhang("knight")
+                val ratOverhang = spriteRegistry.unitOverhang("rat")
                 // Then
-                assertThat(overhang).isZero()
+                assertThat(knightOverhang).isGreaterThan(ratOverhang)
+                assertThat(knightOverhang).isLessThanOrEqualTo(SpriteRegistry.UNIT_TILE_TOP)
             }
 
         @Test
