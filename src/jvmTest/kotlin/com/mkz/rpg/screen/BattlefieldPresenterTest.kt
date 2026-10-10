@@ -12,6 +12,8 @@ import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -51,6 +53,7 @@ class BattlefieldPresenterTest {
     private val battleHudView = mock<BattleHudView>()
     private val battlefieldApi = mock<BattlefieldApi>()
     private val battleUnitApi = mock<BattleUnitApi>()
+    private val searchAbilityAvailability = mock<SearchAbilityAvailability>()
     private val playerApi = mock<PlayerApi>()
     private val unitApi = mock<UnitApi>()
     private val abilityApi = mock<AbilityApi>()
@@ -79,6 +82,7 @@ class BattlefieldPresenterTest {
             whenever(battleUnitApi.canMoveTo).thenReturn(mock<CanMoveTo>())
             whenever(battleUnitApi.moveBattleUnit).thenReturn(mock<MoveBattleUnit>())
             whenever(battleUnitApi.canCastAbility).thenReturn(mock<CanCastAbility>())
+            whenever(battleUnitApi.searchAbilityAvailability).thenReturn(searchAbilityAvailability)
             whenever(battleUnitApi.whereCanCast).thenReturn(mock<WhereCanCast>())
             whenever(battleUnitApi.castAbility).thenReturn(mock<CastAbility>())
             whenever(playerApi.searchPlayerById).thenReturn(mock<SearchPlayerById>())
@@ -249,7 +253,7 @@ class BattlefieldPresenterTest {
             )
             eventBus.dispatch()
             // Then
-            verify(battleUnitInfoView).display(enemyBattleUnit, unit, interactive = false)
+            verify(battleUnitInfoView).display(enemyBattleUnit, unit, interactive = false, abilities = emptyList())
             verify(battlefieldView).displayUnitSelection(row = 1, column = 1, isEnemy = true)
         }
 
@@ -260,6 +264,11 @@ class BattlefieldPresenterTest {
             val player = player(type = Player.Dto.PlayerTypeDto.HUMAN).toDto()
             val allyBattleUnit = battleUnit(unit = unit, player = player).toDto()
             givenBattleUnit(allyBattleUnit, unit, player)
+            val availability =
+                listOf(
+                    AbilityAvailability("ability-1", "Sword", cost = 0, cooldownTurnsLeft = 2, status = AbilityAvailability.Status.COOLDOWN),
+                )
+            whenever(searchAbilityAvailability(allyBattleUnit.id)).thenReturn(availability)
             // When
             eventBus.publish(
                 BattlefieldHudEvent.SelectedBattleUnit(
@@ -270,7 +279,7 @@ class BattlefieldPresenterTest {
             )
             eventBus.dispatch()
             // Then
-            verify(battleUnitInfoView).display(allyBattleUnit, unit, interactive = true)
+            verify(battleUnitInfoView).display(allyBattleUnit, unit, interactive = true, abilities = availability)
             verify(battlefieldView).displayUnitSelection(row = 1, column = 1, isEnemy = false)
         }
     }

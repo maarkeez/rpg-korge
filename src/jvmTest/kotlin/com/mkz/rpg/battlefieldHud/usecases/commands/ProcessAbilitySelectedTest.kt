@@ -1,6 +1,8 @@
 package com.mkz.rpg.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability.Status
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import com.mkz.rpg.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
@@ -20,13 +22,13 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 class ProcessAbilitySelectedTest {
-    private val canCastAbility: CanCastAbility = mock()
+    private val searchAbilityAvailability: SearchAbilityAvailability = mock()
     private val whereCanCast: WhereCanCast = mock()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val processAbilitySelected =
         ProcessAbilitySelected(
-            canCastAbility = canCastAbility,
+            searchAbilityAvailability = searchAbilityAvailability,
             whereCanCast = whereCanCast,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
@@ -49,7 +51,7 @@ class ProcessAbilitySelectedTest {
                 battleUnitId = "battle-unit-1",
             ),
         )
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
+        whenever(searchAbilityAvailability("battle-unit-1")).thenReturn(listOf(availability("ability-1", Status.READY)))
         whenever(whereCanCast("battle-unit-1", "ability-1"))
             .thenReturn(
                 castGroupsWhereCanCast.map { castGroup ->
@@ -78,17 +80,67 @@ class ProcessAbilitySelectedTest {
     }
 
     @Test
-    fun `should not select the ability when the battle unit cannot cast`() {
+    fun `should publish ability unavailable on cooldown and keep the hud when the ability is on cooldown`() {
         // Given
-        val hud =
-            displayMovementRange(battleUnitId = "battle-unit-1")
+        val hud = displayMovementRange(battleUnitId = "battle-unit-1")
         battlefieldHudRepository.create(hud)
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(false)
+        whenever(searchAbilityAvailability("battle-unit-1"))
+            .thenReturn(listOf(availability("ability-1", Status.COOLDOWN, cooldownTurnsLeft = 2)))
         // When
         processAbilitySelected("ability-1")
         // Then
         assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldHudEvent.AbilityUnavailable("ability-1", BattlefieldHudEvent.AbilityUnavailable.Reason.OnCooldown(turnsLeft = 2)),
+        )
+    }
+
+    @Test
+    fun `should publish ability unavailable with the cost and keep the hud when the battle unit has not enough mana`() {
+        // Given
+        val hud = displayMovementRange(battleUnitId = "battle-unit-1")
+        battlefieldHudRepository.create(hud)
+        whenever(searchAbilityAvailability("battle-unit-1"))
+            .thenReturn(listOf(availability("ability-1", Status.NOT_ENOUGH_MANA, cost = 10)))
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldHudEvent.AbilityUnavailable("ability-1", BattlefieldHudEvent.AbilityUnavailable.Reason.NotEnoughMana(cost = 10)),
+        )
+    }
+
+    @Test
+    fun `should publish ability unavailable and keep the hud when the battle unit has no casts left`() {
+        // Given
+        val hud = displayMovementRange(battleUnitId = "battle-unit-1")
+        battlefieldHudRepository.create(hud)
+        whenever(searchAbilityAvailability("battle-unit-1"))
+            .thenReturn(listOf(availability("ability-1", Status.NO_CASTS_LEFT)))
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldHudEvent.AbilityUnavailable("ability-1", BattlefieldHudEvent.AbilityUnavailable.Reason.NoCastsLeft),
+        )
+    }
+
+    @Test
+    fun `should publish ability unavailable and keep the cast range when another ability is unavailable while displaying the ability cast range`() {
+        // Given
+        val hud = displayAbilityCastRange(battleUnitId = "battle-unit-1", abilityId = "ability-1")
+        battlefieldHudRepository.create(hud)
+        whenever(searchAbilityAvailability("battle-unit-1"))
+            .thenReturn(listOf(availability("ability-2", Status.COOLDOWN, cooldownTurnsLeft = 1)))
+        // When
+        processAbilitySelected("ability-2")
+        // Then
+        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
+        assertThat(eventBus).hasPublishedEvents(
+            BattlefieldHudEvent.AbilityUnavailable("ability-2", BattlefieldHudEvent.AbilityUnavailable.Reason.OnCooldown(turnsLeft = 1)),
+        )
     }
 
     @Test
@@ -203,4 +255,11 @@ class ProcessAbilitySelectedTest {
         assertThatThrownBy { processAbilitySelected("ability-1") }
             .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
     }
+
+    private fun availability(
+        abilityId: String,
+        status: Status,
+        cost: Int = 0,
+        cooldownTurnsLeft: Int = 0,
+    ) = AbilityAvailability(abilityId = abilityId, name = "Ability", cost = cost, cooldownTurnsLeft = cooldownTurnsLeft, status = status)
 }

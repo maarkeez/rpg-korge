@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -43,6 +44,7 @@ class BattlefieldPresenter(
     eventBus: EventBus,
     private val battlefieldHudRepository: BattlefieldHudRepository = InMemoryBattlefieldHudRepository(),
     private val searchTerrainById: SearchTerrainById? = null,
+    searchEffectById: SearchEffectById? = null,
 ) : BattlefieldView.Delegate,
     AbilityButtonView.Delegate {
     private val movementService =
@@ -64,11 +66,12 @@ class BattlefieldPresenter(
         )
     private val processAbilitySelected =
         ProcessAbilitySelected(
-            canCastAbility = battleUnitApi.canCastAbility,
+            searchAbilityAvailability = battleUnitApi.searchAbilityAvailability,
             whereCanCast = battleUnitApi.whereCanCast,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
+    private val abilitySummary = AbilitySummary(searchEffectById)
     private val confirmCast =
         ConfirmCast(
             battlefieldHudRepository = battlefieldHudRepository,
@@ -128,8 +131,8 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldHudEvent.AbilityDeselected> {
                 clearSelection()
             },
-            eventBus.subscribe<BattlefieldHudEvent.AbilityDeselected> {
-                clearSelection()
+            eventBus.subscribe<BattlefieldHudEvent.AbilityUnavailable> { event ->
+                battleUnitInfoView.displayAbilityMessage(unavailableReason(event.reason))
             },
             eventBus.subscribe<BattlefieldHudEvent.SelfAbilityCastPreviewed> { event ->
                 displaySelfAbilityCastPreview(event)
@@ -183,7 +186,12 @@ class BattlefieldPresenter(
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
         battlefieldView.resetTiles()
-        battleUnitInfoView.display(battleUnit, unit, interactive = !isEnemy(battleUnit))
+        battleUnitInfoView.display(
+            battleUnit = battleUnit,
+            unit = unit,
+            interactive = !isEnemy(battleUnit),
+            abilities = battleUnitApi.searchAbilityAvailability(battleUnit.id),
+        )
         battleHudView.displayBattleUnitInfoView()
         val style = movementStyle(battleUnit)
         val hazardousTiles = hazardousTiles(selectedBattleUnitEvent.tilesWhereCanBeMoved.map { it.row to it.column })
@@ -273,6 +281,9 @@ class BattlefieldPresenter(
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
         val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
         battleUnitInfoView.displayAbilitySelected(abilityIndex)
+        abilityApi.searchAbilityById(event.abilityId)?.let { ability ->
+            battleUnitInfoView.displayAbilityLine("${ability.name} - ${ability.cost} MP - ${abilitySummary(ability)}")
+        }
         battleHudView.displayBattleUnitInfoView()
         event.castGroupsWhereCanCast.forEach { castGroup ->
             castGroup.tiles.forEach { tilePosition ->
@@ -283,6 +294,13 @@ class BattlefieldPresenter(
             }
         }
     }
+
+    private fun unavailableReason(reason: BattlefieldHudEvent.AbilityUnavailable.Reason): String =
+        when (reason) {
+            is BattlefieldHudEvent.AbilityUnavailable.Reason.OnCooldown -> "On cooldown (${reason.turnsLeft})"
+            is BattlefieldHudEvent.AbilityUnavailable.Reason.NotEnoughMana -> "Needs ${reason.cost} MP"
+            BattlefieldHudEvent.AbilityUnavailable.Reason.NoCastsLeft -> "Already acted"
+        }
 
     private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed) {
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!

@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.ImageDecodingProps
 import korlibs.image.format.ImageEncodingProps
@@ -26,9 +27,11 @@ internal const val UNIT_SELECTED: String = "battle-unit-selected"
 internal const val ABILITY_SELECTED: String = "battle-ability-selected"
 internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
 internal const val MOVEMENT_RANGE: String = "battle-movement-range"
+internal const val ABILITY_COOLDOWNS: String = "battle-ability-cooldowns"
 internal const val SHOWCASE_SCENARIO: String = "scenarios/ui-showcase.json"
 
 private const val HUMAN_KNIGHT_TILE = "row-6-column-6"
+private const val HEAL_ABILITY_INDEX = 5
 private const val ENEMY_RAT_TILE = "row-6-column-7"
 private const val EXPECTED_UNIT_COUNT = 4
 private const val READY_TIMEOUT_MS = 10_000L
@@ -61,6 +64,33 @@ internal suspend fun OffscreenStage.selectFirstAbility(scene: BattleScene) {
             .first() as UIButton
     abilityButton.simulateClick(views)
     awaitUntil { namedViewCount(scene.battleUnitInfoView, AbilityButtonView.ABILITY_SELECTION) == 1 }
+}
+
+/** Casts the knight's heal on itself, passes the turn and reselects the knight, so the heal slot shows its cooldown. */
+internal suspend fun OffscreenStage.selectKnightAfterHealing(scene: BattleScene) {
+    selectHumanKnight(scene)
+    val healButton = scene.battleUnitInfoView.descendantsWith { it is AbilityButtonView && it.visible }[HEAL_ABILITY_INDEX] as UIButton
+    healButton.simulateClick(views)
+    awaitUntil { namedViewCount(scene.battleUnitInfoView, AbilityButtonView.ABILITY_SELECTION) == 1 }
+    clickView(scene.battlefieldView, HUMAN_KNIGHT_TILE)
+    clickActionButton(scene, "Confirm")
+    clickActionButton(scene, "Finish turn")
+    delay(SETTLE_DELAY_MS)
+    selectHumanKnight(scene)
+    awaitUntil {
+        val slots = scene.battleUnitInfoView.abilitySlots
+        slots[HEAL_ABILITY_INDEX].status == SearchAbilityAvailability.AbilityAvailability.Status.COOLDOWN
+    }
+    delay(SETTLE_DELAY_MS)
+}
+
+private suspend fun OffscreenStage.clickActionButton(
+    scene: BattleScene,
+    text: String,
+) {
+    awaitUntil { scene.playerCallToActionView.descendantsWith { it is UIButton && it.text == text }.isNotEmpty() }
+    (scene.playerCallToActionView.descendantsWith { it is UIButton && it.text == text }.first() as UIButton).simulateClick(views)
+    delay(POLL_DELAY_MS)
 }
 
 internal suspend fun OffscreenStage.capture(): Bitmap32 {

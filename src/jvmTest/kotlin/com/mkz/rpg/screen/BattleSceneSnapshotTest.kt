@@ -73,4 +73,18 @@ class BattleSceneSnapshotTest {
             assertMatchesGolden(MOVEMENT_RANGE, actual)
         }
     }
+
+    @Test
+    fun `should render the ability cooldowns state matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene()
+            awaitBattleReady(scene)
+            selectKnightAfterHealing(scene)
+            val actual = capture()
+            assertMatchesGolden(ABILITY_COOLDOWNS, actual)
+        }
+    }
 }

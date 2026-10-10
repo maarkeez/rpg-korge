@@ -93,6 +93,7 @@ class BattleScene(
                 eventBus,
                 battlefieldHudRepository,
                 terrainApi.searchTerrainById,
+                effectApi.searchEffectById,
             )
 
         // Battlefield fills the screen. The sheet and the action bar overlay it, and the top strip sits above it.

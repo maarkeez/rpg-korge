@@ -22,6 +22,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceC
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -76,6 +77,11 @@ class BattleUnitApi(
         )
     val canCastAbility =
         CanCastAbility(
+            battleUnitRepository,
+            abilityApi.searchAbilityById,
+        )
+    val searchAbilityAvailability =
+        SearchAbilityAvailability(
             battleUnitRepository,
             abilityApi.searchAbilityById,
         )

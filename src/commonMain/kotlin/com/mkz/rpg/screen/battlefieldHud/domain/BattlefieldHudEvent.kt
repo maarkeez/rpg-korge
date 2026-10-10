@@ -24,6 +24,24 @@ sealed interface BattlefieldHudEvent : DomainEvent {
         val abilityId: String,
     ) : BattlefieldHudEvent
 
+    /** The player tapped an ability that can't be cast. The HUD state doesn't change. */
+    data class AbilityUnavailable(
+        val abilityId: String,
+        val reason: Reason,
+    ) : BattlefieldHudEvent {
+        sealed interface Reason {
+            data class OnCooldown(
+                val turnsLeft: Int,
+            ) : Reason
+
+            data class NotEnoughMana(
+                val cost: Int,
+            ) : Reason
+
+            data object NoCastsLeft : Reason
+        }
+    }
+
     data class SelfAbilityCastPreviewed(
         val casterBattleUnitId: String,
         val abilityId: String,

@@ -1,14 +1,24 @@
 package com.mkz.rpg.screen
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability
 import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
+import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import com.mkz.rpg.unit.domain.Unit
+import korlibs.image.text.TextAlignment
+import korlibs.korge.style.styles
+import korlibs.korge.style.textAlignment
+import korlibs.korge.style.textColor
+import korlibs.korge.style.textSize
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
+import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
+import korlibs.korge.view.addUpdater
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
+import kotlin.time.DurationUnit
 
 class BattleUnitInfoView(
     private val sprites: SpriteRegistry = SpriteRegistry(),
@@ -18,6 +28,15 @@ class BattleUnitInfoView(
     private lateinit var abilityButtons: Array<AbilityButtonView>
     private val statusListView = StatusListView(Size(width = 390.0, height = StatusListView.MAX_ROWS * StatusListView.ROW_HEIGHT.toDouble()), sprites)
     private val readOnlyAbilities = Container()
+    private val abilityLine =
+        uiText("", size = Size(width = 390.0, height = ABILITY_LINE_HEIGHT)) {
+            name = ABILITY_LINE
+            styles.textColor = UiPalette.textPrimary
+            styles.textAlignment = TextAlignment.MIDDLE_LEFT
+            styles.textSize = 12.0
+        }
+    private var persistentAbilityLine = ""
+    private var transientMessageSecondsLeft = 0.0
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
     private lateinit var unitPortraitView: UnitPortraitView
@@ -70,8 +89,16 @@ class BattleUnitInfoView(
         addChild(battleUnitInfoLayout)
         readOnlyAbilities.y = ABILITY_ROW_Y
         addChild(readOnlyAbilities)
+        abilityLine.y = ABILITY_LINE_Y
+        addChild(abilityLine)
         statusListView.y = STATUS_LIST_Y
         addChild(statusListView)
+        addUpdater { dt ->
+            if (transientMessageSecondsLeft > 0.0) {
+                transientMessageSecondsLeft -= dt.toDouble(DurationUnit.SECONDS)
+                if (transientMessageSecondsLeft <= 0.0) abilityLine.text = persistentAbilityLine
+            }
+        }
     }
 
     private companion object {
@@ -79,8 +106,18 @@ class BattleUnitInfoView(
         const val ART_SIZE = 16
         const val ABILITY_ROW_Y = 102.5
         const val ABILITY_BUTTON_SIZE = 48.75
-        const val STATUS_LIST_Y = ABILITY_ROW_Y + ABILITY_BUTTON_SIZE + 4.0
+        const val ABILITY_LINE_HEIGHT = 18.0
+        const val ABILITY_LINE_Y = ABILITY_ROW_Y + ABILITY_BUTTON_SIZE + 2.0
+        const val STATUS_LIST_Y = ABILITY_LINE_Y + ABILITY_LINE_HEIGHT + 2.0
+        const val MESSAGE_SECONDS = 1.5
+        const val ABILITY_LINE = "ABILITY_LINE"
     }
+
+    /** The text under the ability bar, for tests. */
+    val abilityLineText: String get() = abilityLine.text
+
+    /** The ability bar slots, for tests. */
+    val abilitySlots: List<AbilityButtonView> get() = abilityButtons.toList()
 
     /** Statuses shown in the list, for tests. */
     val displayedStatusRows: Int get() = statusListView.rowCount
@@ -98,8 +135,10 @@ class BattleUnitInfoView(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
         interactive: Boolean = true,
+        abilities: List<AbilityAvailability> = emptyList(),
     ) {
         abilityButtons.forEach(AbilityButtonView::hide)
+        displayAbilityLine("")
         readOnlyAbilities.removeChildren()
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
@@ -123,14 +162,13 @@ class BattleUnitInfoView(
             maximum = unit.manaPoints,
         )
         // Abilities
-        val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
-        battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
-            if (interactive) {
-                val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
-                val canUseAbility = canCast && !isInCooldown
-                abilityButtons[index].display(abilityId = abilityId, canCast = canUseAbility)
-            } else {
-                // Inspected units can't be commanded: show their abilities as plain icons, never as buttons.
+        if (interactive) {
+            abilities.take(abilityButtons.size).forEachIndexed { index, availability ->
+                abilityButtons[index].display(availability)
+            }
+        } else {
+            // Inspected units can't be commanded: show their abilities as plain icons, never as buttons.
+            battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
                 readOnlyAbilities.image(sprites.ability(abilityId)) {
                     smoothing = false
                     scale = PIXEL_SCALE.toDouble()
@@ -152,6 +190,19 @@ class BattleUnitInfoView(
     fun displayAbilitySelected(index: Int) {
         abilityButtons.forEach(AbilityButtonView::unselect)
         abilityButtons[index].select()
+    }
+
+    /** Shows the selected ability's name, cost and summary. An empty text clears the line. */
+    fun displayAbilityLine(text: String) {
+        persistentAbilityLine = text
+        transientMessageSecondsLeft = 0.0
+        abilityLine.text = text
+    }
+
+    /** Shows [text] for about 1.5 s, then goes back to the ability line. Any later interaction replaces it. */
+    fun displayAbilityMessage(text: String) {
+        abilityLine.text = text
+        transientMessageSecondsLeft = MESSAGE_SECONDS
     }
 
     fun hide() {

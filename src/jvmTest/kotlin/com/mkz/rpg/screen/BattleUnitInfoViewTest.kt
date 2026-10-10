@@ -1,6 +1,8 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Container
@@ -103,7 +105,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 val unit = unit().toDto()
                 val battleUnit = battleUnit(unit = unit).toDto()
                 // When
-                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, interactive = true)
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, interactive = true, abilities = readyAbilities(battleUnit))
                 // Then
                 assertThat(battleUnitInfoView.visibleAbilityButtonCount).isEqualTo(battleUnit.abilityCooldowns.size)
                 assertThat(battleUnitInfoView.readOnlyAbilityIconCount).isZero()
@@ -134,10 +136,70 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 val battleUnit = battleUnit(unit = unit).toDto()
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, interactive = false)
                 // When
-                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, interactive = true)
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, interactive = true, abilities = readyAbilities(battleUnit))
                 // Then
                 assertThat(battleUnitInfoView.readOnlyAbilityIconCount).isZero()
                 assertThat(battleUnitInfoView.visibleAbilityButtonCount).isEqualTo(battleUnit.abilityCooldowns.size)
+            }
+    }
+
+    @Nested
+    inner class DisplayAbilities {
+        @Test
+        fun `should display each ability with its availability when the battle unit is commanded`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView()
+                battleUnitInfoView.loadAssets()
+                val unit = unit().toDto()
+                val battleUnit = battleUnit(unit = unit).toDto()
+                val statuses = listOf(AbilityAvailability.Status.READY, AbilityAvailability.Status.COOLDOWN, AbilityAvailability.Status.NO_CASTS_LEFT)
+                val abilities =
+                    battleUnit.abilityCooldowns.keys.zip(statuses).map { (abilityId, status) ->
+                        AbilityAvailability(abilityId, "Ability", cost = 0, cooldownTurnsLeft = 1, status = status)
+                    }
+                // When
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilities = abilities)
+                // Then
+                assertThat(battleUnitInfoView.abilitySlots.take(abilities.size).map { it.status }).isEqualTo(statuses.take(abilities.size))
+            }
+
+        @Test
+        fun `should display the ability line when it is set`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView()
+                // When
+                battleUnitInfoView.displayAbilityLine("Sword - 0 MP - 10 dmg")
+                // Then
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Sword - 0 MP - 10 dmg")
+            }
+
+        @Test
+        fun `should replace the ability message when the ability line is set`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView()
+                battleUnitInfoView.displayAbilityMessage("On cooldown (2)")
+                // When
+                battleUnitInfoView.displayAbilityLine("Sword - 0 MP - 10 dmg")
+                // Then
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Sword - 0 MP - 10 dmg")
+            }
+
+        @Test
+        fun `should clear the ability line when a battle unit is displayed`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView()
+                battleUnitInfoView.loadAssets()
+                val unit = unit().toDto()
+                val battleUnit = battleUnit(unit = unit).toDto()
+                battleUnitInfoView.displayAbilityMessage("Needs 10 MP")
+                // When
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
+                // Then
+                assertThat(battleUnitInfoView.abilityLineText).isEmpty()
             }
     }
 
@@ -170,3 +232,8 @@ private fun Container.allViews(): List<View> {
     }
     return views
 }
+
+private fun readyAbilities(battleUnit: BattleUnit.Dto) =
+    battleUnit.abilityCooldowns.keys.map { abilityId ->
+        AbilityAvailability(abilityId, "Ability", cost = 0, cooldownTurnsLeft = 0, status = AbilityAvailability.Status.READY)
+    }

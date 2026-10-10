@@ -77,4 +77,18 @@ class BattleSceneSnapshotUpdateTest {
         }
         assertThat(File(SNAPSHOT_GOLDEN_DIR, "$MOVEMENT_RANGE.png")).exists()
     }
+
+    @Test
+    fun `should write the ability cooldowns golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene()
+            awaitBattleReady(scene)
+            selectKnightAfterHealing(scene)
+            writeGolden(ABILITY_COOLDOWNS, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$ABILITY_COOLDOWNS.png")).exists()
+    }
 }

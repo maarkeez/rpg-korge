@@ -3,6 +3,7 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
@@ -230,6 +231,97 @@ class BattleUiScriptTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class AbilityAvailability {
+        @Test
+        fun `should show the heal slot on cooldown with the turns left when the knight reselected after healing`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.castHealWithKnight()
+                script.finishTurn()
+                // When
+                script.selectUnit(playerOneKnightId)
+                // Then
+                val healSlot = battleUnitInfoView.abilitySlots[HEAL_ABILITY_INDEX]
+                assertThat(healSlot.status).isEqualTo(SearchAbilityAvailability.AbilityAvailability.Status.COOLDOWN)
+                val number = healSlot.findViewByName(AbilityButtonView.ABILITY_COOLDOWN_NUMBER) as PixelGlyphs.PixelNumberView
+                assertThat(number.value).isEqualTo(1)
+            }
+
+        @Test
+        fun `should explain the cooldown and not enter the cast range when player taps the heal slot on cooldown`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.castHealWithKnight()
+                script.finishTurn()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(HEAL_ABILITY_INDEX)
+                // Then
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("On cooldown (1)")
+                assertThat(battleUnitInfoView.abilitySlots[HEAL_ABILITY_INDEX].findViewByName(AbilityButtonView.ABILITY_SELECTION)).isNull()
+                assertThat(script.isConfirmAndCancelDisplayed()).isFalse()
+            }
+
+        @Test
+        fun `should lock every slot and explain it when player taps an ability after the knight already cast`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.castHealWithKnight()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(TELEPORT_ABILITY_INDEX)
+                // Then
+                val statuses = battleUnitInfoView.abilitySlots.map { it.status }
+                assertThat(statuses).containsOnly(SearchAbilityAvailability.AbilityAvailability.Status.NO_CASTS_LEFT)
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Already acted")
+            }
+
+        @Test
+        fun `should show the selected ability name cost and summary when player selects a ready ability`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                // When
+                script.selectAbility(0)
+                // Then
+                assertThat(battleUnitInfoView.abilityLineText).isEqualTo("Poisoned Sword - 5 MP - 3 dmg /turn ×5")
+            }
+
+        @Test
+        fun `should agree with can cast ability for every slot when the knight is ready and after it healed`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript()
+                script.selectUnit(playerOneKnightId)
+                val readyStatuses = battleUnitInfoView.abilitySlots.map { it.status == SearchAbilityAvailability.AbilityAvailability.Status.READY }
+                val readyExpected =
+                    script
+                        .battleUnit(playerOneKnightId)
+                        .abilityCooldowns.keys
+                        .map { script.canCast(playerOneKnightId, it) }
+                script.castHealWithKnight(alreadySelected = true)
+                script.finishTurn()
+                script.selectUnit(playerOneKnightId)
+                // When
+                val afterStatuses = battleUnitInfoView.abilitySlots.map { it.status == SearchAbilityAvailability.AbilityAvailability.Status.READY }
+                val afterExpected =
+                    script
+                        .battleUnit(playerOneKnightId)
+                        .abilityCooldowns.keys
+                        .map { script.canCast(playerOneKnightId, it) }
+                // Then
+                assertThat(readyStatuses).isEqualTo(readyExpected)
+                assertThat(afterStatuses).isEqualTo(afterExpected)
+                assertThat(readyStatuses).containsExactly(true, true, true, true, true, true)
+                assertThat(afterStatuses).containsExactly(true, true, true, true, true, false)
+            }
+    }
+
+    @Nested
     inner class TurnFlow {
         @Test
         fun `should pass turn and let the cpu play when finish button is tapped`() =
@@ -265,6 +357,7 @@ class BattleUiScriptTest : ViewsForTesting() {
             battleApi,
             eventBus,
             searchTerrainById = terrainApi.searchTerrainById,
+            searchEffectById = effectApi.searchEffectById,
         )
         FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
 
@@ -293,6 +386,19 @@ class BattleUiScriptTest : ViewsForTesting() {
         )
     }
 
+    private suspend fun BattleUiScript.castHealWithKnight(alreadySelected: Boolean = false) {
+        if (!alreadySelected) selectUnit(playerOneKnightId)
+        selectAbility(HEAL_ABILITY_INDEX)
+        val target = castTargets(battleUnitId = playerOneKnightId, abilityId = "heal").first()
+        tapTile(row = target.row, column = target.column)
+        confirmCast()
+    }
+
+    private fun BattleUiScript.canCast(
+        battleUnitId: String,
+        abilityId: String,
+    ) = battleUnitApi.canCastAbility(battleUnitId, abilityId)
+
     private fun selectedTileCount(): Int =
         battlefieldView
             .descendantsWith { it.name?.startsWith("row-") ?: false }
@@ -308,5 +414,6 @@ class BattleUiScriptTest : ViewsForTesting() {
 
     companion object {
         private const val TELEPORT_ABILITY_INDEX = 3
+        private const val HEAL_ABILITY_INDEX = 5
     }
 }

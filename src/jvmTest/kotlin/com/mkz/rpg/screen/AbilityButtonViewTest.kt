@@ -1,5 +1,7 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability.AbilityAvailability.Status
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Image
 import korlibs.korge.view.filter.filter
@@ -20,7 +22,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
                 abilityButtonView.loadAssets()
                 // When
-                abilityButtonView.display(abilityId = "mushroom", canCast = true)
+                abilityButtonView.display(availability("mushroom", Status.READY))
                 // Then
                 assertThat(abilityButtonView.isVisibleToUser()).isTrue
             }
@@ -32,7 +34,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
                 abilityButtonView.loadAssets()
                 // When
-                abilityButtonView.display(abilityId = "mushroom", canCast = true)
+                abilityButtonView.display(availability("mushroom", Status.READY))
                 // Then
                 assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY)).isNotNull
             }
@@ -44,7 +46,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
                 abilityButtonView.loadAssets()
                 // When
-                abilityButtonView.display(abilityId = "mushroom", canCast = true)
+                abilityButtonView.display(availability("mushroom", Status.READY))
                 // Then
                 val abilityIcon = abilityButtonView.findViewByName(AbilityButtonView.ABILITY) as Image
                 assertThat(abilityIcon.filter).isNull()
@@ -57,10 +59,81 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
                 abilityButtonView.loadAssets()
                 // When
-                abilityButtonView.display(abilityId = "mushroom", canCast = false)
+                abilityButtonView.display(availability("mushroom", Status.COOLDOWN, cooldownTurnsLeft = 2))
                 // Then
                 val abilityIcon = abilityButtonView.findViewByName(AbilityButtonView.ABILITY) as Image
                 assertThat(abilityIcon.filter).isNotNull
+            }
+    }
+
+    @Nested
+    inner class DisplayStatus {
+        @Test
+        fun `should display no status glyph when the ability is ready`() =
+            viewsTest {
+                // Given
+                val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
+                abilityButtonView.loadAssets()
+                // When
+                abilityButtonView.display(availability("mushroom", Status.READY))
+                // Then
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_STATUS)).isNull()
+            }
+
+        @Test
+        fun `should display the turns left number when the ability is on cooldown`() =
+            viewsTest {
+                // Given
+                val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
+                abilityButtonView.loadAssets()
+                // When
+                abilityButtonView.display(availability("mushroom", Status.COOLDOWN, cooldownTurnsLeft = 2))
+                // Then
+                val number = abilityButtonView.findViewByName(AbilityButtonView.ABILITY_COOLDOWN_NUMBER) as PixelGlyphs.PixelNumberView
+                assertThat(number.value).isEqualTo(2)
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_MANA_GLYPH)).isNull()
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_LOCK_GLYPH)).isNull()
+            }
+
+        @Test
+        fun `should display the mana drop and the cost when the battle unit has not enough mana`() =
+            viewsTest {
+                // Given
+                val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
+                abilityButtonView.loadAssets()
+                // When
+                abilityButtonView.display(availability("mushroom", Status.NOT_ENOUGH_MANA, cost = 10))
+                // Then
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_MANA_GLYPH)).isNotNull
+                val cost = abilityButtonView.findViewByName(AbilityButtonView.ABILITY_COST_NUMBER) as PixelGlyphs.PixelNumberView
+                assertThat(cost.value).isEqualTo(10)
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_COOLDOWN_NUMBER)).isNull()
+            }
+
+        @Test
+        fun `should display the lock glyph when the battle unit has no casts left`() =
+            viewsTest {
+                // Given
+                val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
+                abilityButtonView.loadAssets()
+                // When
+                abilityButtonView.display(availability("mushroom", Status.NO_CASTS_LEFT))
+                // Then
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_LOCK_GLYPH)).isNotNull
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_COOLDOWN_NUMBER)).isNull()
+            }
+
+        @Test
+        fun `should replace the status glyph when the ability is displayed again as ready`() =
+            viewsTest {
+                // Given
+                val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
+                abilityButtonView.loadAssets()
+                abilityButtonView.display(availability("mushroom", Status.NO_CASTS_LEFT))
+                // When
+                abilityButtonView.display(availability("mushroom", Status.READY))
+                // Then
+                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_STATUS)).isNull()
             }
     }
 
@@ -118,7 +191,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // Given
                 val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75))
                 abilityButtonView.loadAssets()
-                abilityButtonView.display(abilityId = "mushroom", canCast = true)
+                abilityButtonView.display(availability("mushroom", Status.READY))
                 // When
                 abilityButtonView.hide()
                 // Then
@@ -136,7 +209,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 abilityButtonView.loadAssets()
                 val delegate = mock<AbilityButtonView.Delegate>()
                 abilityButtonView.setDelegate(delegate)
-                abilityButtonView.display(abilityId = "mushroom", canCast = true)
+                abilityButtonView.display(availability("mushroom", Status.READY))
                 addChild(abilityButtonView)
                 // When
                 abilityButtonView.simulateClick()
@@ -144,4 +217,11 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 verify(delegate).abilitySelected(abilityId = "mushroom")
             }
     }
+
+    private fun availability(
+        abilityId: String,
+        status: Status,
+        cost: Int = 0,
+        cooldownTurnsLeft: Int = 0,
+    ) = AbilityAvailability(abilityId = abilityId, name = "Ability", cost = cost, cooldownTurnsLeft = cooldownTurnsLeft, status = status)
 }
