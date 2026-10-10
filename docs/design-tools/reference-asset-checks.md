@@ -70,7 +70,7 @@ Checks every `GAME_ART_ASSET_PATHS` entry against the family table in §6.1 of t
 | Test | Covers |
 | --- | --- |
 | `should decode every game art asset when the asset file exists` | File exists and is a decodable PNG |
-| `should match the family size when every game art asset is listed` | Exact size per family: `terrain/transitions/` 256×16, `terrain/variants/` 48×16, `unit/*_portrait` 32×32, `unit/` 32×32, `unit/*_idle` and `unit/*_walk` N × 32×32, `effect/fx_spread` 32×16, other `effect/fx_*` 48×16, `ability/`, `battlefield/`, `effect/` 16×16. A folder with no family fails, so a new family must be added to the plan first |
+| `should match the family size when every game art asset is listed` | Exact size per family: `terrain/transitions/` and `terrain/dual/` 256×16, `terrain/variants/` 48×16, `unit/*_portrait` 32×32, `unit/` 32×32, `unit/*_idle` and `unit/*_walk` N × 32×32, `effect/fx_spread` 32×16, other `effect/fx_*` 48×16, `ability/`, `battlefield/`, `effect/` 16×16. A folder with no family fails, so a new family must be added to the plan first |
 | `should use only fully opaque or fully transparent pixels when every game art asset is checked` | Alpha is 0 or 255 only |
 
 `expectedArtSize(path)` in `AssetTestSupport.kt` holds the family table.
@@ -104,6 +104,13 @@ Production change for this check: `SpriteRegistry`'s id lists and path builders 
 | --- | --- |
 | `should name every variant strip after a terrain definition when the variants folder is listed` | `terrain/variants/<terrain>.png` has a matching `terrain/<terrain>.toml` |
 | `should be fully opaque 16x16 tiles when every variant strip is checked` | Height 16, width a multiple of 16, every tile opaque |
+
+### `CornerOverlayTest` — 2 tests (L4b)
+
+| Test | Covers |
+| --- | --- |
+| `should only draw corner overlays for allowed terrain pairs when the corner folder is listed` | Every `terrain/dual/<from>_to_<to>.png` matches a `transitionsTo` rule |
+| `should leave the empty and the full corner transparent when every corner strip is checked` | Masks 0 and 15 draw nothing, so plain tiles and their variants show through |
 
 ### `ReadabilitySheetTest` — 1 test, `@Tag("contact-sheet")`
 

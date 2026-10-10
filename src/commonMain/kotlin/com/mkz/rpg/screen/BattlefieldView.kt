@@ -59,12 +59,26 @@ class BattlefieldView(
         const val TAP_DRAG_THRESHOLD = 8.0
 
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
+        const val CORNER = "CORNER"
+        private const val FULL_CORNER_MASK = 15
+
+        /** Lower terrains first, so raised grass is drawn over a neighbouring pit or pool at a shared corner. */
+        private val CORNER_LAYER_ORDER = listOf("void", "water", "lava", "grass")
+
+        /** Bit per tile around a corner: north-west 1, north-east 2, south-east 4, south-west 8. */
+        fun cornerMask(
+            northWest: Boolean,
+            northEast: Boolean,
+            southEast: Boolean,
+            southWest: Boolean,
+        ): Int = (if (northWest) 1 else 0) or (if (northEast) 2 else 0) or (if (southEast) 4 else 0) or (if (southWest) 8 else 0)
     }
 
     private var delegate: Delegate? = null
     private lateinit var terrainBitMaps: Map<String, Bitmap>
     private lateinit var transitionBitMaps: Map<String, List<Bitmap>>
     private var variantBitMaps: Map<String, List<Bitmap>> = emptyMap()
+    private var cornerBitMaps: Map<Pair<String, String>, List<Bitmap>> = emptyMap()
     private var mapWidth = 0.0
     private var mapHeight = 0.0
     private var mapRows = 0
@@ -128,6 +142,7 @@ class BattlefieldView(
             }
         terrainBitMaps = builtTerrainBitMaps
         variantBitMaps = loadTerrainVariants()
+        cornerBitMaps = loadCornerOverlays()
         sprites.load()
     }
 
@@ -141,6 +156,21 @@ class BattlefieldView(
             .associate { fileName ->
                 val strip = variantsRoot[fileName].readBitmap()
                 fileName.removeSuffix(".png") to
+                    List(strip.width / TILE_PIXEL_SIZE) { index -> strip.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE) }
+            }
+    }
+
+    /** Corner overlays per terrain pair, `terrain/dual/<from>_to_<to>.png`: 16 tiles indexed by [cornerMask]. */
+    private suspend fun loadCornerOverlays(): Map<Pair<String, String>, List<Bitmap>> {
+        val cornersRoot = resourcesVfs["terrain/dual"]
+        if (!cornersRoot.exists()) return emptyMap()
+        return cornersRoot
+            .listNames()
+            .filter { it.endsWith(".png") }
+            .associate { fileName ->
+                val strip = cornersRoot[fileName].readBitmap()
+                val (fromTerrainId, toTerrainId) = fileName.removeSuffix(".png").split(TRANSITION_NAME_SEPARATOR)
+                (fromTerrainId to toTerrainId) to
                     List(strip.width / TILE_PIXEL_SIZE) { index -> strip.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE) }
             }
     }
@@ -182,8 +212,10 @@ class BattlefieldView(
                     tileButton.background.highlightColor = Colors.TRANSPARENT
                     tileButton.name = tileName(row, column)
                     val tileDto = battlefield.tiles[PositionDto(row, column)]!!
+                    // With corner overlays for the pair, the tile shows its plain terrain and the overlays draw the edges.
+                    val transition = tileDto.terrainTransition?.takeUnless { (it.fromTerrainId to it.toTerrainId) in cornerBitMaps }
                     terrainLayer.addChild(
-                        Image(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition, row, column)).also { terrain ->
+                        Image(terrainTileBitmap(tileDto.terrainId, transition, row, column)).also { terrain ->
                             terrain.name = TERRAIN
                             terrain.scale = PIXEL_SCALE.toDouble()
                             terrain.smoothing = false
@@ -196,6 +228,45 @@ class BattlefieldView(
                 }
             }
         }
+        displayCornerOverlays(battlefield)
+    }
+
+    /**
+     * Draws, for every tile corner, the overlay of each terrain that touches it, centered on the corner. Overlays draw
+     * outer and inner corners and every edge between that terrain and the dirt, even when a dirt tile borders several
+     * terrains. Presentation only: gameplay keeps the edge transition of each tile.
+     */
+    private fun displayCornerOverlays(battlefield: Battlefield.Dto) {
+        fun terrainAt(
+            row: Int,
+            column: Int,
+        ): String = battlefield.tiles.getValue(PositionDto(row.coerceIn(0, battlefield.rows - 1), column.coerceIn(0, battlefield.columns - 1))).terrainId
+        cornerBitMaps.entries
+            .sortedBy { (pair, _) -> CORNER_LAYER_ORDER.indexOf(pair.second).let { if (it < 0) Int.MAX_VALUE else it } }
+            .forEach { (pair, overlays) ->
+                val terrainId = pair.second
+                for (row in 0..battlefield.rows) {
+                    for (column in 0..battlefield.columns) {
+                        val mask =
+                            cornerMask(
+                                northWest = terrainAt(row - 1, column - 1) == terrainId,
+                                northEast = terrainAt(row - 1, column) == terrainId,
+                                southEast = terrainAt(row, column) == terrainId,
+                                southWest = terrainAt(row, column - 1) == terrainId,
+                            )
+                        if (mask == 0 || mask == FULL_CORNER_MASK) continue
+                        terrainLayer.addChild(
+                            Image(overlays[mask]).also { overlay ->
+                                overlay.name = CORNER
+                                overlay.scale = PIXEL_SCALE.toDouble()
+                                overlay.smoothing = false
+                                overlay.x = column * TILE_SIZE - TILE_SIZE / 2.0
+                                overlay.y = row * TILE_SIZE - TILE_SIZE / 2.0
+                            },
+                        )
+                    }
+                }
+            }
     }
 
     /** Scrolls so the tile is as close to the viewport center as the map bounds allow. */

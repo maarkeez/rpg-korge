@@ -249,7 +249,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 - [x] **L3** Prototype (knight 24 px with idle and 4-frame walk, ALttP grass and dirt, void cliff face). The owner gate was covered by the instruction to implement the whole plan; dirt keeps `F5B784` as its base (lighter, closer to ALttP paths).
 - [x] **L4** Terrain v2 (water and lava strips; sand, grass and water variants). Lava and void keep one tile each: lava's flow lines and void's specks are drawn to continue across tile edges, which variants would break.
 - [x] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
-- [ ] **L4b** (optional) Dual-grid transitions.
+- [x] **L4b** (optional) Dual-grid transitions: corner overlays for grass, void, water and lava. Tiles that touch only diagonally now read as separate shapes that meet at a corner, as the map data says.
 - [ ] **L5** Units v2 with animation.
 - [ ] **L6** Portraits, icons, FX v2.
 - [ ] **L7** (optional) Facing.

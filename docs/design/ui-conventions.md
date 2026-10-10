@@ -24,6 +24,7 @@ Short set of visual conventions for the battle UI. Source of truth in code: `UiP
 - Combat FX: `effect/fx_<name>.png` strips (`fx_defeat`, `fx_hit`, `fx_heal`, `fx_venom`, `fx_spread`) drawn at ×3 by `BattlefieldView` within the existing `FxViews` durations. A missing strip skips that effect.
 - Status icons are drawn at ×2 (32 pt) in `StatusListView` (Q5); everything else in the battlefield is ×3.
 - Terrain variants: `terrain/variants/<terrain>.png` holds alternate base tiles, picked by tile position. Never put them in `terrain/transitions/`, where every file is sliced as a transition strip.
+- Terrain edges are drawn with corner overlays (dual grid): `terrain/dual/<from>_to_<to>.png` holds 16 tiles indexed by the corner mask (north-west 1, north-east 2, south-east 4, south-west 8). Every tile shows its plain terrain and `BattlefieldView` draws, centered on each tile corner, the overlay of each terrain touching it (void, water, lava, then grass). Pairs without corner art fall back to the edge transition strip. Gameplay still uses the edge Wang index.
 - Terrain adjacency rules live in `transitionsTo` in `terrain/<id>.toml` (one side is enough); every allowed pair needs a `terrain/transitions/<from>_to_<to>.png` strip.
 
 ## Never color alone

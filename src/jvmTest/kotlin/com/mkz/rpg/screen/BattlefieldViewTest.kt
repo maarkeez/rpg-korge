@@ -78,6 +78,42 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class CornerOverlays {
+        @Test
+        fun `should name each tile around a corner with its own bit when the corner mask is computed`() {
+            // Given
+            val onlySouthWest = BattlefieldView.cornerMask(northWest = false, northEast = false, southEast = false, southWest = true)
+            // When
+            val all = BattlefieldView.cornerMask(northWest = true, northEast = true, southEast = true, southWest = true)
+            // Then
+            assertThat(onlySouthWest).isEqualTo(8)
+            assertThat(all).isEqualTo(15)
+        }
+
+        @Test
+        fun `should draw a corner overlay centered on every corner where grass meets dirt when the battlefield is displayed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView()
+                battlefieldView.loadAssets()
+                val battlefield =
+                    battlefield(
+                        rows = 3,
+                        columns = 3,
+                        tiles = listOf(listOf("sand", "sand", "sand"), listOf("sand", "grass", "sand"), listOf("sand", "sand", "sand")),
+                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "grass")),
+                    ).toDto()
+                // When
+                battlefieldView.displayBattlefield(battlefield)
+                // Then
+                val corners = battlefieldView.descendantsWith { it.name == BattlefieldView.CORNER }
+                val cornerPoints = corners.map { (it.x + BattlefieldView.TILE_SIZE / 2.0) to (it.y + BattlefieldView.TILE_SIZE / 2.0) }
+                val tile = BattlefieldView.TILE_SIZE.toDouble()
+                assertThat(cornerPoints).containsExactlyInAnyOrder(tile to tile, 2 * tile to tile, 2 * tile to 2 * tile, tile to 2 * tile)
+            }
+    }
+
+    @Nested
     inner class TerrainTileBitmap {
         @Test
         fun `should return the pure terrain tile of the strip when the tile has no terrain transition`() =
