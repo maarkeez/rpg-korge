@@ -2,6 +2,8 @@
 
 Plan for auditing, improving and replacing the game's art library. It is written for an implementation agent that has not seen the planning conversation. Read it in full before touching any asset.
 
+Follow-up: the ALttP style pass and taller-than-tile units are planned in [`alttp-style-and-tall-units-plan.md`](alttp-style-and-tall-units-plan.md).
+
 Status legend used throughout: **[verified]** = checked in the repository during planning; **[assumption]** = not verified, must be confirmed before acting on it; **[proposal]** = a recommendation that needs the owner's approval at a decision gate.
 
 ---
