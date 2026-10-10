@@ -127,6 +127,43 @@ class BattlefieldViewFeedbackTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class PlayHitSlash {
+        @Test
+        fun `should slash across the tile and disappear with the hit flash when a unit is damaged`() =
+            viewsTest {
+                // Given
+                val battlefieldView = displayedBattlefieldView()
+                battlefieldView.playHitSlash(row = 1, column = 2)
+                val slash = battlefieldView.fxNamed(FxViews.HIT_NAME).single()
+                // When
+                battlefieldView.advanceFx(deltaMs = FxViews.FLASH_MS.toDouble())
+                // Then
+                assertThat(slash.x).isEqualTo(2.0 * BattlefieldView.TILE_SIZE)
+                assertThat(slash.y).isEqualTo(1.0 * BattlefieldView.TILE_SIZE)
+                assertThat(battlefieldView.fxNamed(FxViews.HIT_NAME)).isEmpty()
+            }
+    }
+
+    @Nested
+    inner class PlayHealSparkle {
+        @Test
+        fun `should raise sparkles over the tile and then remove them when a unit is healed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = displayedBattlefieldView()
+                battlefieldView.playHealSparkle(row = 0, column = 1)
+                val sparkles = battlefieldView.fxNamed(FxViews.HEAL_NAME).single() as Container
+                val firstFrame = sparkles.frameSignature()
+                // When
+                battlefieldView.advanceFx(deltaMs = FxViews.HEAL_MS * 0.9)
+                // Then
+                assertThat(sparkles.frameSignature()).isNotEqualTo(firstFrame)
+                battlefieldView.advanceFx(deltaMs = FxViews.HEAL_MS.toDouble())
+                assertThat(battlefieldView.fxNamed(FxViews.HEAL_NAME)).isEmpty()
+            }
+    }
+
+    @Nested
     inner class PlayStatusPop {
         @Test
         fun `should show a sparkle at the pips of the unit and then remove it when a status arrives`() =

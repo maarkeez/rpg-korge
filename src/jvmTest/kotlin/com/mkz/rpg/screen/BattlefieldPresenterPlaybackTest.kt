@@ -108,6 +108,19 @@ class BattlefieldPresenterPlaybackTest {
         }
 
         @Test
+        fun `should slash across the unit when a battle unit is damaged`() {
+            // Given
+            val presenter = presenter(FeedbackTiming.Standard)
+            val damagedBattleUnit = givenBattleUnit(owner = cpuPlayer)
+            // When
+            eventBus.publish(BattleUnitEvent.BattleUnitDamaged(battleUnitId = damagedBattleUnit.id, amount = 12, remainingHealthPoints = 88))
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).playHitSlash(row = 3, column = 4)
+            verify(battlefieldView, never()).playHealSparkle(any(), any())
+        }
+
+        @Test
         fun `should pop the amount of the event and not a difference of repository state when a unit is hit twice`() {
             // Given
             val presenter = presenter(FeedbackTiming.Standard)
@@ -150,6 +163,19 @@ class BattlefieldPresenterPlaybackTest {
             // Then
             verify(battlefieldView).playAmountPop(row = 3, column = 4, amount = 7, heal = true)
             verify(battlefieldView, never()).playHitFlash(any(), any(), any())
+        }
+
+        @Test
+        fun `should raise heal sparkles over the unit without a slash when a battle unit is healed`() {
+            // Given
+            val presenter = presenter(FeedbackTiming.Standard)
+            val healedBattleUnit = givenBattleUnit(owner = humanPlayer)
+            // When
+            eventBus.publish(BattleUnitEvent.BattleUnitHealed(battleUnitId = healedBattleUnit.id, amount = 7, remainingHealthPoints = 100))
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).playHealSparkle(row = 3, column = 4)
+            verify(battlefieldView, never()).playHitSlash(any(), any())
         }
 
         @Test

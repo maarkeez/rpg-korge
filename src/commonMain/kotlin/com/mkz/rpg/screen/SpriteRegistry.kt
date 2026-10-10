@@ -107,7 +107,11 @@ class SpriteRegistry {
         internal val EFFECT_IDS = listOf("venom-damage", "venom-on-death")
 
         internal const val FX_DEFEAT = "fx_defeat"
-        internal val FX_IDS = listOf(FX_DEFEAT)
+        internal const val FX_HIT = "fx_hit"
+        internal const val FX_HEAL = "fx_heal"
+        internal const val FX_VENOM = "fx_venom"
+        internal const val FX_SPREAD = "fx_spread"
+        internal val FX_IDS = listOf(FX_DEFEAT, FX_HIT, FX_HEAL, FX_VENOM, FX_SPREAD)
 
         internal fun fxPath(fxId: String): String = "effect/$fxId.png"
 

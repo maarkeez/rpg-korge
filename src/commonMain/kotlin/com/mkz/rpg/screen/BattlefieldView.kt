@@ -437,11 +437,25 @@ class BattlefieldView(
         }
     }
 
-    /** A sparkle where the status pips of the unit are drawn. */
+    /** Venom bubbles rising over the unit (authored `fx_venom` strip), or a sparkle at its status pips when the strip is missing. */
     fun playStatusPop(
         row: Int,
         column: Int,
     ) {
+        val authoredFrames = authoredStrip(SpriteRegistry.FX_VENOM, FxViews.VENOM_FRAMES)
+        if (authoredFrames != null) {
+            val pop = Container().also { it.name = FxViews.POP_NAME }
+            placeOnTile(pop, row, column)
+            var shownFrame = -1
+            fxLayer.play(pop, FxViews.POP_MS) { progress ->
+                val frame = FxViews.steps(progress, FxViews.VENOM_FRAMES - 1)
+                if (frame != shownFrame) {
+                    shownFrame = frame
+                    pop.showFrame(authoredFrames[frame])
+                }
+            }
+            return
+        }
         val pop = FxViews.popFrame(0).also { it.name = FxViews.POP_NAME }
         placeOnTile(pop, row, column, artX = 0, artY = 0)
         var shownFrame = 0
@@ -465,23 +479,17 @@ class BattlefieldView(
         column: Int,
     ) {
         val poof = Container().also { it.name = FxViews.POOF_NAME }
-        val authoredFrames = sprites.fxFrames(SpriteRegistry.FX_DEFEAT)?.takeIf { it.size == FxViews.POOF_FRAMES }
+        val authoredFrames = authoredStrip(SpriteRegistry.FX_DEFEAT, FxViews.POOF_FRAMES)
         placeOnTile(poof, row, column)
         var shownFrame = -1
         fxLayer.play(poof, FxViews.POOF_MS) { progress ->
             val frame = FxViews.steps(progress, FxViews.POOF_FRAMES - 1)
             if (frame != shownFrame) {
                 shownFrame = frame
-                poof.removeChildren()
-                val authoredFrame = authoredFrames?.getOrNull(frame)
-                if (authoredFrame != null) {
-                    poof.addChild(
-                        Image(authoredFrame).also {
-                            it.scale = PIXEL_SCALE.toDouble()
-                            it.smoothing = false
-                        },
-                    )
+                if (authoredFrames != null) {
+                    poof.showFrame(authoredFrames[frame])
                 } else {
+                    poof.removeChildren()
                     FxViews
                         .poofFrame(frame)
                         .children
@@ -492,7 +500,62 @@ class BattlefieldView(
         }
     }
 
-    /** A spark travels from the center of one tile to the center of another, moving in whole art pixels. */
+    /** A slash across the tile of a unit that took damage, played with the hit flash. Needs the authored `fx_hit` strip. */
+    fun playHitSlash(
+        row: Int,
+        column: Int,
+    ) {
+        playTileStrip(SpriteRegistry.FX_HIT, FxViews.HIT_FRAMES, FxViews.FLASH_MS, FxViews.HIT_NAME, row, column)
+    }
+
+    /** Plus signs rising over a unit that was healed. Needs the authored `fx_heal` strip. */
+    fun playHealSparkle(
+        row: Int,
+        column: Int,
+    ) {
+        playTileStrip(SpriteRegistry.FX_HEAL, FxViews.HEAL_FRAMES, FxViews.HEAL_MS, FxViews.HEAL_NAME, row, column)
+    }
+
+    private fun playTileStrip(
+        fxId: String,
+        frameCount: Int,
+        durationMs: Int,
+        viewName: String,
+        row: Int,
+        column: Int,
+    ) {
+        val frames = authoredStrip(fxId, frameCount) ?: return
+        val view = Container().also { it.name = viewName }
+        placeOnTile(view, row, column)
+        var shownFrame = -1
+        fxLayer.play(view, durationMs) { progress ->
+            val frame = FxViews.steps(progress, frameCount - 1)
+            if (frame != shownFrame) {
+                shownFrame = frame
+                view.showFrame(frames[frame])
+            }
+        }
+    }
+
+    private fun authoredStrip(
+        fxId: String,
+        frameCount: Int,
+    ): List<Bitmap>? = sprites.fxFrames(fxId)?.takeIf { it.size == frameCount }
+
+    private fun Container.showFrame(frame: Bitmap) {
+        removeChildren()
+        addChild(
+            Image(frame).also {
+                it.scale = PIXEL_SCALE.toDouble()
+                it.smoothing = false
+            },
+        )
+    }
+
+    /**
+     * A venom glob (authored `fx_spread` strip, wobbling between its frames) or a spark when the strip is missing travels from
+     * the center of one tile to the center of another, moving in whole art pixels.
+     */
     fun playSpark(
         fromRow: Int,
         fromColumn: Int,
@@ -500,14 +563,25 @@ class BattlefieldView(
         toColumn: Int,
         durationMs: Int,
     ) {
-        val spark = FxViews.spark().also { it.name = FxViews.SPARK_NAME }
-        val startX = fromColumn * TILE_SIZE + TILE_SIZE / 2.0
-        val startY = fromRow * TILE_SIZE + TILE_SIZE / 2.0
-        val endX = toColumn * TILE_SIZE + TILE_SIZE / 2.0
-        val endY = toRow * TILE_SIZE + TILE_SIZE / 2.0
+        val authoredFrames = authoredStrip(SpriteRegistry.FX_SPREAD, FxViews.SPREAD_FRAMES)
+        val spark = (if (authoredFrames != null) Container() else FxViews.spark()).also { it.name = FxViews.SPARK_NAME }
+        // The authored glob is drawn on a whole tile, so its center is half a tile from its corner.
+        val offset = if (authoredFrames != null) TILE_SIZE / 2.0 else 0.0
+        val startX = fromColumn * TILE_SIZE + TILE_SIZE / 2.0 - offset
+        val startY = fromRow * TILE_SIZE + TILE_SIZE / 2.0 - offset
+        val endX = toColumn * TILE_SIZE + TILE_SIZE / 2.0 - offset
+        val endY = toRow * TILE_SIZE + TILE_SIZE / 2.0 - offset
+        var shownFrame = -1
         fxLayer.play(spark, durationMs) { progress ->
             spark.x = snapToArtPixel(startX + (endX - startX) * progress)
             spark.y = snapToArtPixel(startY + (endY - startY) * progress)
+            if (authoredFrames != null) {
+                val frame = FxViews.steps(progress, 2 * FxViews.SPREAD_FRAMES - 1) % FxViews.SPREAD_FRAMES
+                if (frame != shownFrame) {
+                    shownFrame = frame
+                    spark.showFrame(authoredFrames[frame])
+                }
+            }
         }
     }
 

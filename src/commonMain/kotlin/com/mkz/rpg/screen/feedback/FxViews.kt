@@ -21,6 +21,11 @@ object FxViews {
     const val POP_MS = 240
     const val NUMBER_RISE_ART_PIXELS = 4
     const val POOF_FRAMES = 3
+    const val HIT_FRAMES = 3
+    const val HEAL_FRAMES = 3
+    const val HEAL_MS = 240
+    const val VENOM_FRAMES = 3
+    const val SPREAD_FRAMES = 2
     private const val TILE_ART_PIXELS = 16
     private val PLUS = listOf(" # ", "###", " # ")
 
@@ -131,6 +136,8 @@ object FxViews {
     const val NUMBER_NAME = "FX_NUMBER"
     const val FLASH_NAME = "FX_FLASH"
     const val POOF_NAME = "FX_POOF"
+    const val HIT_NAME = "FX_HIT"
+    const val HEAL_NAME = "FX_HEAL"
     const val POP_NAME = "FX_POP"
     const val SPARK_NAME = "FX_SPARK"
     const val WALKER_NAME = "FX_WALKER"

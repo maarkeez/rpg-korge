@@ -372,7 +372,11 @@ class BattlefieldPresenter(
         heal: Boolean,
     ) {
         val (row, column) = positionOf(battleUnitId) ?: return
-        if (!heal) battlefieldView.playHitFlash(row, column, unitTypeOf(battleUnitId))
+        if (!heal) {
+            battlefieldView.playHitFlash(row, column, unitTypeOf(battleUnitId))
+            battlefieldView.playHitSlash(row, column)
+        }
+        if (heal && amount > 0) battlefieldView.playHealSparkle(row, column)
         if (amount > 0) battlefieldView.playAmountPop(row, column, amount, heal)
     }
 
