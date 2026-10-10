@@ -45,7 +45,12 @@ Only verified hex values. Units and terrain never use a reserved UI hue as their
 | Steel light / steel mid / steel shade | `A8A8A8` / `7B7B7B` / `343434` | 168 / 123 / 52 | Knight armor |
 | Light neutral | `D7D7D7`, `FFFFFF` | 215, 255 | Metal glints, sparkle |
 | Skin light / skin mid / skin dark | `FFE9C5` / `C59782` / `5C3C0D` | 235 / 162 / 64 | Unit skin (**not** `F5B784`, the sand base) |
-| Leather / fur | `AE6C37` | 122 | Rat fur, knight straps |
+| Leather / fur | `AE6C37` | 122 | Knight belt, rat fur highlight |
+| Rat fur dark / base / shade | `AE6C37` / `5C3C0D` / `231712` | 122 / 64 / 27 | Rat body: dark base keeps a value step from sand and grass |
+| Pink (ears, nose, tail) | `FEC9ED` / `E18289` / `CF3C71` | 216 / 159 / 112 | Rat details; `CF3C71` also the rat eye |
+| Bee gold / shade / stripe | `CC8F15` / `AE6C37` / `343434` | 147 / 122 / 52 | Bee body (replaces reserved `FFE737`, `F68F37`) |
+| Wings | `FFFFFF` / `D7D7D7` | 255 / 215 | Bee wings (replaces reserved `98DCFF`) |
+| Knight tunic light / base / shade | `6264DC` / `3D34A5` / `211640` | 112 / 67 / 27 | Knight tunic and plume |
 | Sand base | `F5B784` | 196 | Sand terrain only |
 | Grass dark / base / light | `00604B` / `20B562` / `BDFFCA` | 65 / 127 / 229 | Grass terrain |
 | Lava dark / base / light | `4F1507` / `AD4E1A` / `DA655E` | 37 / 100 / 135 | Lava terrain (no `E03C28`) |

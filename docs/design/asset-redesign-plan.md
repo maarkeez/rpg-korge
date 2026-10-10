@@ -491,7 +491,7 @@ Do not run `pitest` or `allTargetTests` for asset milestones; they are expensive
 - [x] **M1** `docs/design/art-direction.md` written; palette roles from verified hex only; Q1, Q2, Q3, Q5 answered by owner.
 - [x] **M2** Prototype (knight, sand_to_grass + sand tile 0 in all strips, venom-damage, defeat FX) merged; goldens reviewed and updated; **owner approved**.
 - [x] **M3** Lava, water, void strips redrawn; readability sheet and terrain-mix reviewed.
-- [ ] **M4** Rat, bee, three portraits redrawn; portraits palette-checked.
+- [x] **M4** Rat, bee, three portraits redrawn; portraits palette-checked.
 - [ ] **M5** Idle and walk strips with registry fallback; snapshots deterministic.
 - [ ] **M6a** Ability icons reviewed / polished.
 - [ ] **M6b** Status icons polished; Q5 applied; terrain effect icons resolved (A7).

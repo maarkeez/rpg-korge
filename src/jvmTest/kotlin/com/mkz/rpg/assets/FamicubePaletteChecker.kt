@@ -8,7 +8,6 @@ import korlibs.io.file.std.resourcesVfs
 //
 // Excluded on purpose:
 // - korge.png: the Korge engine logo, not game art.
-// - unit/knight_portrait.png and unit/rat_portrait.png: full-color illustration art, not Famicube art.
 // - unit/goblins/: reference samples, not used by the game.
 internal val GAME_ART_ASSET_PATHS: List<String> =
     listOf(
@@ -34,15 +33,15 @@ internal val GAME_ART_ASSET_PATHS: List<String> =
         "unit/bee.png",
         "unit/bee_portrait.png",
         "unit/knight.png",
+        "unit/knight_portrait.png",
         "unit/rat.png",
+        "unit/rat_portrait.png",
     )
 
 internal val CONTACT_SHEET_ASSET_PATHS: List<String> =
     GAME_ART_ASSET_PATHS +
         listOf(
             "unit/goblins/goblin.png",
-            "unit/knight_portrait.png",
-            "unit/rat_portrait.png",
         )
 
 internal const val FAMICUBE_PALETTE_PATH: String = "famicube-palette.png"
