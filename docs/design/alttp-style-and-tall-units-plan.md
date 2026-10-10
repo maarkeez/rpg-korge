@@ -245,7 +245,7 @@ Answered by the owner after this plan was written. L2 still records the final ar
 ## 11. Checklist
 
 - [x] **L1** Layers and 32×32 frames; goldens unchanged except the removed tile-button drop shadow (see L1 notes).
-- [ ] **L2** Art direction v2 and templates (decisions in §9).
+- [x] **L2** Art direction v2 and templates (decisions in §9).
 - [ ] **L3** Prototype approved by the owner.
 - [ ] **L4** Terrain v2.
 - [ ] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.

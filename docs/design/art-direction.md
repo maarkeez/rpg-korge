@@ -8,6 +8,8 @@ Every color is one of the 64 entries of `resources/famicube-palette.png` (enforc
 
 ---
 
+> **v2 (ALttP style) applies.** Section 7 below supersedes the palette roles in §3 for grass, poison, dirt, cliffs, lava, steel, skin and cloth, and the shading and outline rules in §2. Plan: [`alttp-style-and-tall-units-plan.md`](alttp-style-and-tall-units-plan.md).
+
 ## 1. Frame sizes per family
 
 Final for M1. Do not invent other sizes; add a family here first.
@@ -128,3 +130,57 @@ Q4 (new terrain pairs), Q6 (pixel UI font), Q7 (`unit/goblins/` location) and Q8
 - [x] Q1, Q2, Q3, Q5 answers are written into §5 above.
 
 M2 may start.
+
+## 7. Version 2: A Link to the Past style
+
+Owner decisions (plan §9): Famicube stays the only palette; water stays teal; terrain adjacency rules move to `terrain/<id>.toml`; taps select the tile under the finger; unit bodies are 24 px tall (soft limit) and up to 32 px for large creatures; the agent draws all art.
+
+### 7.1 Ramps
+
+Y is luma. Hue shifts: shadows lean red or purple, highlights lean yellow.
+
+| Material | Deep / outline | Shadow | Base | Light | Highlight |
+| --- | --- | --- | --- | --- | --- |
+| Grass (yellow-green) | `172808` (31) | `376D03` (81) | `6AB417` (140) | `8CD612` (170) | `BEEB71` (208) |
+| Dirt / sand path | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `F5B784` (196) | `FFE9C5` (235) |
+| Cliff / rock | `231712` (26) | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `E2D7B5` (214) |
+| Water (teal) | `00177D` (28) | `005280` (63) | `0A98AC` (112) | `25E2CD` (167) | `FFFFFF` foam |
+| Lava | `4F1507` (37) | `AD4E1A` (100) | `CC8F15` (147) | `FFE9C5` (235) | `FFFFFF` |
+| Void (chasm floor) | `000000` (0) | `0D2030` (28) | `211640` (30) | – | – |
+| Steel | `151515` (21) | `415D66` (86) | `7B7B7B` (123) | `A8A8A8` (168) | `D7D7D7` / `FFFFFF` |
+| Skin | `823C3D` (81) | `E18289` (159) | `FFE9C5` (235) | – | `FFFFFF` |
+| Cloth, blue | `211640` (30) | `3D34A5` (68) | `6264DC` (113) | `9BA0EF` (168) | `E2C9FF` (215) |
+| Fur, brown | `231712` (26) | `5C3C0D` (64) | `AE6C37` (122) | `C59782` (162) | `E2D7B5` (214) |
+| Gold | `5C3C0D` (64) | `AE6C37` (122) | `CC8F15` (147) | `FFE9C5` (235) | `FFFFFF` |
+| Poison (purple) | `211640` (30) | `5A1991` (58) | `6A31CA` (83) | `A675FE` (147) | `E2C9FF` (215) |
+| Heal | `00604B` (65) | `20B562` (127) | `58D332` (156) | `BDFFCA` (229) | `FFFFFF` |
+
+Reserved UI hues (§3) stay forbidden as dominant colors. Grass and poison no longer share a ramp: venom art moves to the purple ramp.
+
+### 7.2 Value checks (Δ luma ≥ 40, main body vs tile)
+
+| Unit main color | Grass 140 | Dirt 162 | Water 112 | Lava 147 |
+| --- | --- | --- | --- | --- |
+| Knight tunic `3D34A5` (68) | 72 | 94 | 44 | 79 |
+| Rat fur `5C3C0D` (64) | 76 | 98 | 48 | 83 |
+| Bee stripe `343434` (52) / gold `CC8F15` (147) | 88 / 7 | 110 / 15 | 60 / 35 | 95 / 0 |
+
+The bee reads by its dark stripes and outline; its gold must never be its largest area.
+
+### 7.3 Drawing rules
+
+- **Frame:** units use the 32×32 frame of §1; the tile is frame rows 16–31, columns 8–23. Feet on rows 28–29, ground shadow centered at (16, 30) on rows 29–31. Body ≤ 16 px wide (weapons, wings, tails may use the side margins). Height 24 px for common units, 32 px only for large creatures.
+- **Proportions:** humanoids 2–2.5 heads tall; head 10–12 px wide; eyes 2 px tall; hands and weapon readable at ×1.
+- **Shading:** 4 values per material plus the deep tone; clusters of at least 2 px; light from the top-left; no pillow shading.
+- **Outlines:** 1 px. The outer silhouette uses `151515` on the shadow side and may use the material's deep tone on the lit side (selective outline). Inner edges use the deep tone of the material behind.
+- **Ground shadow:** oval 10–12 px wide, 3 px tall, `151515` in the middle and `343434` at the ends. Hovering units keep the shadow on the ground and float 3–4 px above it.
+- **Terrain:** dense, low-contrast micro texture (≤ 2 values inside a material) built from 8×8 sub-blocks; 3–4 variants per terrain. Raised edges: deep-tone rim, lit pixel on top and left lips, 1–2 px cast shadow down and right. Cliffs: a 3–4 px vertical face with 2 ridge bands, darker toward the bottom. Water: foam on the shore, dark bank under north and west shores.
+- **Animation:** idle 2–4 frames, walk 4–6 frames; feet stay on the ground line; frames reuse pixels.
+
+### 7.4 Editor files
+
+- `docs/design/famicube.gpl`: the 64 Famicube colors as a GIMP/Aseprite palette.
+- `docs/design/templates/unit-frame-32.png`: 32×32 unit frame guide. Blue tint: the unit's tile. Green row 29: ground line. Orange row 8: top of a 24 px body. Red row 0: top of a 32 px body. White column 16: center.
+- `docs/design/templates/terrain-tile-16.png`: 16×16 tile with the 8×8 sub-grid.
+
+Templates and the palette file are references, never shipped under `resources/`.
