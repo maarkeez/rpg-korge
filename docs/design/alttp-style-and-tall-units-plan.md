@@ -251,6 +251,6 @@ Answered by the owner after this plan was written. L2 still records the final ar
 - [x] **L4a** Terrain adjacency rules in `terrain/<id>.toml`.
 - [x] **L4b** (optional) Dual-grid transitions: corner overlays for grass, void, water and lava. Tiles that touch only diagonally now read as separate shapes that meet at a corner, as the map data says.
 - [x] **L5** Units v2 with animation: rat (side view, 2-frame idle, 4-frame walk) and bee (hovering, 4-frame wing flap for idle and walk) in 32×32 frames; knight from L3.
-- [ ] **L6** Portraits, icons, FX v2.
+- [x] **L6** Portraits, icons, FX v2: venom icons, venom FX and poison ability plates moved to the purple ramp; teleport (arcane) plate moved to deep teal so it stays distinct from poison; knight portrait skin and cheek guards use the v2 ramps.
 - [ ] **L7** (optional) Facing.
 - [ ] **L8** Cleanup, docs, manual checklist.
