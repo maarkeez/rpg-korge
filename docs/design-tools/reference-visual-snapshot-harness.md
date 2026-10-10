@@ -49,6 +49,8 @@ Top-level `internal` declarations shared by both test classes.
 | `INITIAL_LAYOUT` | `battle-initial-layout` | Snapshot state name |
 | `UNIT_SELECTED` | `battle-unit-selected` | Snapshot state name |
 | `ABILITY_SELECTED` | `battle-ability-selected` | Snapshot state name |
+| `ENEMY_INSPECTED`, `MOVEMENT_RANGE`, `ABILITY_COOLDOWNS`, `CAST_TARGETS`, `CAST_PREVIEW`, `PROPAGATION_PREVIEW`, `AFTER_CPU_PLAYBACK` | `battle-enemy-inspected`, `battle-movement-range`, `battle-ability-cooldowns`, `battle-cast-targets`, `battle-cast-preview`, `battle-propagation-preview`, `battle-after-cpu-playback` | Snapshot state names. Together with the three above they form the nine-state matrix |
+| `SHOWCASE_SCENARIO` | `scenarios/ui-showcase.json` | Scenario used by every state except the first three and `battle-ability-cooldowns` |
 
 ### Scene lifecycle
 
@@ -58,6 +60,11 @@ Top-level `internal` declarations shared by both test classes.
 | `awaitBattleReady(scene)` | Polls until the battlefield view contains 4 `BATTLE_UNIT` images (all units deployed). 10 second timeout. |
 | `OffscreenStage.selectHumanKnight(scene)` | Simulates a click on the knight tile (`row-6-column-6`) and polls until the HUD shows the unit info view. |
 | `OffscreenStage.selectFirstAbility(scene)` | Simulates a click on the first visible ability button in the unit info view and polls until the ability selection highlight is shown. |
+| `OffscreenStage.createBattleScene(scenarioPath, feedbackTiming)` | Same, with an optional scenario file and feedback timing (default `FeedbackTiming.Instant`; `Standard` only for the CPU playback state). |
+| `OffscreenStage.selectEnemyRat(scene)`, `selectKnightAbility(scene, index)`, `selectKnightAfterHealing(scene)` | Reach the enemy-inspected, cast-targets and ability-cooldowns states. |
+| `OffscreenStage.previewKnightSkullOnRat(scene)` | Selects the knight's skull and taps rat A: cast preview with HP ghost and sheet lines. |
+| `OffscreenStage.previewPropagation(scene)` | Same, then waits for the conditional outline on rat B (faint, because the skull does not defeat rat A). A lethal spread is covered by `BattleUiScriptTest`, since the harness can't set up the prior hit. |
+| `OffscreenStage.finishTurnAndAwaitPlayback(scene)` | Passes the turn with real timing and waits until the CPU turn and every effect have ended. |
 | `OffscreenStage.capture(): Bitmap32` | Settles for 200 ms, then renders the whole stage to a `Bitmap32` with `simulateRenderFrame()`. |
 
 ### Golden file operations

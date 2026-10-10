@@ -59,3 +59,7 @@ Knight ability button order (index in `selectAbility`): `0` poisoned-sword, `1` 
 - Tile button: named `row-<r>-column-<c>` under `BattlefieldView`'s grid.
 - Ability buttons: the six `AbilityButtonView` children of `BattleUnitInfoView`, in `abilityCooldowns` order.
 - Call-to-action: child of `PlayerCallToActionView` named `call-to-action`; action buttons are the `UIButton` descendants matched by `text` (`"Confirm"`, `"Cancel"`, `"Finish turn"`).
+
+## Audits built on the script
+
+`BattleUiScriptTest.TouchTargets` drives the script through idle, unit selected, ability selected and preview, and after each step asserts that every displayed `UIButton` on the stage (visible along its whole parent chain) measures at least 44×44 pt in global bounds. It also asserts that ability buttons, Confirm, Cancel and Finish turn were actually audited, so a renamed button can't silently drop out. `UiColorTokenAuditTest` (in `assets/`) is the matching color audit: no `Colors.*` (except `TRANSPARENT`) or `RGBA(` outside `UiPalette.kt` in `screen/` and `shared/adapters/presentation/`.

@@ -108,6 +108,20 @@ class BattleSceneSnapshotUpdateTest {
     }
 
     @Test
+    fun `should write the propagation preview golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            previewPropagation(scene)
+            writeGolden(PROPAGATION_PREVIEW, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$PROPAGATION_PREVIEW.png")).exists()
+    }
+
+    @Test
     fun `should write the cast preview golden image`() {
         korgeScreenshotTest(
             windowSize = SNAPSHOT_WINDOW_SIZE,

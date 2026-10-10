@@ -28,6 +28,7 @@ internal const val UNIT_SELECTED: String = "battle-unit-selected"
 internal const val ABILITY_SELECTED: String = "battle-ability-selected"
 internal const val CAST_TARGETS: String = "battle-cast-targets"
 internal const val CAST_PREVIEW: String = "battle-cast-preview"
+internal const val PROPAGATION_PREVIEW: String = "battle-propagation-preview"
 internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
 internal const val MOVEMENT_RANGE: String = "battle-movement-range"
 internal const val ABILITY_COOLDOWNS: String = "battle-ability-cooldowns"
@@ -92,6 +93,12 @@ internal suspend fun OffscreenStage.previewKnightSkullOnRat(scene: BattleScene) 
     selectKnightAbility(scene, SKULL_ABILITY_INDEX)
     clickView(scene.battlefieldView, ENEMY_RAT_A_TILE)
     awaitUntil { namedViewCount(scene.battlefieldView, SELECTION_VIEW) > 0 && scene.attackPreviewView.displayedLines.isNotEmpty() }
+}
+
+/** Previews the skull on rat A, which shows the faint conditional outline on rat B and the spread connectors. */
+internal suspend fun OffscreenStage.previewPropagation(scene: BattleScene) {
+    previewKnightSkullOnRat(scene)
+    awaitUntil { scene.battlefieldView.descendantsWith { it is ConditionalTileView }.isNotEmpty() }
 }
 
 /** Casts the knight's heal on itself, passes the turn and reselects the knight, so the heal slot shows its cooldown. */

@@ -22,6 +22,7 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Stage
+import korlibs.korge.view.View
 import korlibs.korge.view.descendantsWith
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
@@ -573,6 +574,42 @@ class BattleUiScriptTest : ViewsForTesting() {
             }
     }
 
+    @Nested
+    inner class TouchTargets {
+        @Test
+        fun `should keep every clickable button at least 44 points when a unit, an ability and a preview are shown`() =
+            viewsTest {
+                // Given
+                val script = setupBattleUiScript(scenarioPath = SHOWCASE_SCENARIO)
+                val undersized = mutableListOf<String>()
+                val audited = mutableSetOf<String>()
+
+                fun audit(step: String) {
+                    stage.descendantsWith { it is UIButton && it.isDisplayedOnStage() }.forEach { view ->
+                        val button = view as UIButton
+                        audited += button.text.ifEmpty { button.javaClass.simpleName }
+                        val bounds = button.getGlobalBounds()
+                        if (bounds.width < MIN_TOUCH_TARGET || bounds.height < MIN_TOUCH_TARGET) {
+                            undersized += "$step: ${button.javaClass.simpleName} ${button.name ?: button.text} ${bounds.width}x${bounds.height}"
+                        }
+                    }
+                }
+                // When
+                audit("idle")
+                script.selectUnit(playerOneKnightId)
+                audit("unit selected")
+                script.selectAbility(SKULL_ABILITY_INDEX)
+                audit("ability selected")
+                script.tapTile(row = 6, column = 7)
+                audit("preview")
+                // Then
+                assertThat(audited).contains("AbilityButtonView", "Confirm", "Cancel", "Finish turn")
+                assertThat(undersized).isEmpty()
+            }
+    }
+
+    private fun View.isDisplayedOnStage(): Boolean = generateSequence(this) { it.parent }.all { it.visible }
+
     private fun fingerprint() =
         BattleStateFingerprint.capture(
             playerIds = listOf(playerOneId, "player-two"),
@@ -659,6 +696,7 @@ class BattleUiScriptTest : ViewsForTesting() {
         private const val SKULL_ABILITY_INDEX = 2
         private const val TELEPORT_ABILITY_INDEX = 3
         private const val HEAL_ABILITY_INDEX = 5
+        private const val MIN_TOUCH_TARGET = 44.0
         private const val BATTLEFIELD_SIZE = 16
         private const val BATTLEFIELD_TILE_COUNT = BATTLEFIELD_SIZE * BATTLEFIELD_SIZE
     }

@@ -5,7 +5,6 @@ import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.view.Container
 import korlibs.korge.view.SolidRect
@@ -40,7 +39,7 @@ object FxViews {
         for (y in 0 until bitmap.height) {
             for (x in 0 until bitmap.width) {
                 val alpha = bitmap.getRgba(x, y).a
-                if (alpha > 0) result[x, y] = RGBA(Colors.WHITE.r, Colors.WHITE.g, Colors.WHITE.b, alpha)
+                if (alpha > 0) result[x, y] = UiPalette.textPrimary.withA(alpha)
             }
         }
         return result

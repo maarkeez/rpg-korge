@@ -118,6 +118,20 @@ class BattleSceneSnapshotTest {
     }
 
     @Test
+    fun `should render the propagation preview state matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO)
+            awaitBattleReady(scene)
+            previewPropagation(scene)
+            val actual = capture()
+            assertMatchesGolden(PROPAGATION_PREVIEW, actual)
+        }
+    }
+
+    @Test
     fun `should render the battle after the cpu turn has played back matching the golden image`() {
         korgeScreenshotTest(
             windowSize = SNAPSHOT_WINDOW_SIZE,
