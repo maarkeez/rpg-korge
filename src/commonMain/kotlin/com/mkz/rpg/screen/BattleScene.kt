@@ -10,6 +10,7 @@ import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.screen.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import com.mkz.rpg.screen.feedback.FeedbackTiming
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -21,11 +22,13 @@ import korlibs.korge.view.addUpdater
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 import kotlin.random.Random
+import kotlin.time.DurationUnit
 
 class BattleScene(
     val seed: Long? = null,
     val scenarioPath: String? = null,
     val debugEnabled: Boolean = false,
+    private val feedbackTiming: FeedbackTiming = FeedbackTiming.Standard,
 ) : Scene() {
     private val sprites = SpriteRegistry()
     val battlefieldView =
@@ -44,6 +47,11 @@ class BattleScene(
             sheetPanel,
         )
     val playerCallToActionView = PlayerCallToActionView()
+    private var battlefieldPresenter: BattlefieldPresenter? = null
+
+    /** True while feedback animations or queued playback are still running. Tests wait on this before a snapshot. */
+    val isFeedbackPlaying: Boolean
+        get() = battlefieldPresenter?.isPlayingFeedback == true || battlefieldView.activeFxCount > 0
 
     override suspend fun SContainer.sceneInit() {
         battlefieldView.loadAssets()
@@ -77,7 +85,7 @@ class BattleScene(
 
         // Main scene
         val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-        val battlefieldPresenter =
+        val presenter =
             BattlefieldPresenter(
                 battlefieldView,
                 battleUnitInfoView,
@@ -94,7 +102,10 @@ class BattleScene(
                 battlefieldHudRepository,
                 terrainApi.searchTerrainById,
                 effectApi.searchEffectById,
+                feedbackTiming,
             )
+        battlefieldPresenter = presenter
+        addUpdater { dt -> presenter.updateFeedback(dt.toDouble(DurationUnit.MILLISECONDS)) }
 
         // Battlefield fills the screen. The sheet and the action bar overlay it, and the top strip sits above it.
         addChild(battlefieldView)
@@ -120,6 +131,7 @@ class BattleScene(
             playerApi,
             eventBus,
         )
+        presenter.onPlaybackChanged = { playing -> battleInfoView.displayPlayback(playing) }
 
         // Start game
         battleSetupApi.setupBattle(scenario)

@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.screen.feedback.FeedbackTiming
 import korlibs.korge.testing.korgeScreenshotTest
 import org.junit.jupiter.api.Test
 
@@ -113,6 +114,20 @@ class BattleSceneSnapshotTest {
             previewKnightSkullOnRat(scene)
             val actual = capture()
             assertMatchesGolden(CAST_PREVIEW, actual)
+        }
+    }
+
+    @Test
+    fun `should render the battle after the cpu turn has played back matching the golden image`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO, feedbackTiming = FeedbackTiming.Standard)
+            awaitBattleReady(scene)
+            finishTurnAndAwaitPlayback(scene)
+            val actual = capture()
+            assertMatchesGolden(AFTER_CPU_PLAYBACK, actual)
         }
     }
 }

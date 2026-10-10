@@ -6,8 +6,18 @@ import korlibs.korge.view.View
 class PlayerCallToActionView : Container() {
     private var onTurnFinished: (() -> Unit)? = null
 
+    private var hidden = false
+    private var playbackLocked = false
+
     fun hide() {
+        hidden = true
         visible = false
+    }
+
+    /** End Turn, Cancel and Confirm are hidden while feedback plays, because taps are ignored then. */
+    fun setPlaybackLocked(locked: Boolean) {
+        playbackLocked = locked
+        visible = !hidden && !locked
     }
 
     fun displayFinishTurn(onTurnFinished: () -> Unit) {

@@ -29,6 +29,7 @@ import com.mkz.rpg.screen.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.screen.feedback.FeedbackBeat
 import com.mkz.rpg.screen.feedback.FeedbackQueue
 import com.mkz.rpg.screen.feedback.FeedbackTiming
+import com.mkz.rpg.screen.feedback.WalkPath
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -100,6 +101,15 @@ class BattlefieldPresenter(
 
     private var previewedBattleUnitIds: Set<String> = emptySet()
     private val teleportingBattleUnitIds = mutableSetOf<String>()
+    private val animate = !feedbackTiming.isInstant
+
+    /** Where each unit is drawn right now. Beats play after the domain moved on, so the repositories can't tell. */
+    private val displayedPositions = mutableMapOf<String, Pair<Int, Int>>()
+
+    /** Where each unit is according to the events handled so far, which is what a later beat needs to know. */
+    private val knownPositions = mutableMapOf<String, Pair<Int, Int>>()
+    private val defeatedPositions = mutableMapOf<String, Pair<Int, Int>>()
+    private var lastCameraFocus: Pair<Int, Int>? = null
 
     /** Called with true when timed playback starts and false when it ends. */
     var onPlaybackChanged: (Boolean) -> Unit = {}
@@ -108,7 +118,11 @@ class BattlefieldPresenter(
         FeedbackQueue(
             timing = feedbackTiming,
             performer = ::perform,
-            onPlaybackChanged = { playing -> onPlaybackChanged(playing) },
+            onPlaybackChanged = { playing ->
+                playerCallToActionView.setPlaybackLocked(playing)
+                onPlaybackChanged(playing)
+            },
+            onDrained = ::resyncUnits,
         )
 
     /** True while queued feedback is still playing. Taps are ignored during that time. */
@@ -118,21 +132,25 @@ class BattlefieldPresenter(
         listOf(
             eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
             eventBus.subscribe<BattleUnitEvent.BattleUnitDeployed> { event ->
+                knownPositions[event.battleUnitId] = event.row to event.column
                 feedbackQueue.enqueue(FeedbackBeat.Deployed(event.battleUnitId, event.row, event.column))
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitTeleported> { event ->
                 teleportingBattleUnitIds += event.battleUnitId
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
-                if (teleportingBattleUnitIds.remove(event.battleUnitId)) {
-                    feedbackQueue.enqueue(
-                        FeedbackBeat.Teleport(event.battleUnitId, event.fromRow, event.fromColumn, event.toRow, event.toColumn),
-                    )
-                } else {
-                    feedbackQueue.enqueue(
-                        FeedbackBeat.Move(event.battleUnitId, event.fromRow, event.fromColumn, event.toRow, event.toColumn),
-                    )
-                }
+                knownPositions[event.battleUnitId] = event.toRow to event.toColumn
+                enqueueMove(event)
+            },
+            eventBus.subscribe<BattleUnitEvent.AbilityCasted> { event ->
+                knownPositions[event.battleUnitId]?.let { (row, column) -> followIfCpu(event.battleUnitId, row, column) }
+            },
+            eventBus.subscribe<BattleUnitEvent.BattleUnitDefeated> { event ->
+                defeatedPositions[event.battleUnitId] = event.defeatedAtRow to event.defeatedAtColumn
+                feedbackQueue.enqueue(FeedbackBeat.Defeated(event.battleUnitId, event.defeatedAtRow, event.defeatedAtColumn))
+            },
+            eventBus.subscribe<BattleUnitEvent.RequestApplyEffect> { event ->
+                enqueueSpread(event)
             },
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 feedbackQueue.enqueue(FeedbackBeat.OccupantRemoved(event.row, event.column))
@@ -144,9 +162,16 @@ class BattlefieldPresenter(
                 feedbackQueue.enqueue(FeedbackBeat.Heal(event.battleUnitId, event.amount, event.remainingHealthPoints))
             },
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
-                feedbackQueue.enqueue(FeedbackBeat.StatusApplied(event.battleUnitId, event.effectId))
+                feedbackQueue.enqueue(
+                    if (isOngoingEffect(event.effectId)) {
+                        FeedbackBeat.StatusApplied(event.battleUnitId, event.effectId)
+                    } else {
+                        FeedbackBeat.OverlayRefresh(event.battleUnitId)
+                    },
+                )
             },
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
+                lastCameraFocus = null
                 feedbackQueue.enqueue(FeedbackBeat.TurnStarted(event.playerId))
             },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
@@ -212,32 +237,122 @@ class BattlefieldPresenter(
     /** Advances timed playback. The scene calls this every frame. */
     fun updateFeedback(deltaMs: Double) {
         feedbackQueue.update(deltaMs)
+        battlefieldView.advanceFx(deltaMs)
     }
 
+    /** Every beat shows what its event reported, from the data the beat carries. */
     private fun perform(beat: FeedbackBeat) {
         onBeatPerformed(beat)
         when (beat) {
-            is FeedbackBeat.Deployed -> displayUnit(beat.row, beat.column, beat.battleUnitId)
-            is FeedbackBeat.Move -> performMove(beat.battleUnitId, beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn)
-            is FeedbackBeat.Teleport -> performMove(beat.battleUnitId, beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn)
-            is FeedbackBeat.Hit -> refreshOverlay(beat.battleUnitId, beat.remainingHealthPoints)
-            is FeedbackBeat.Heal -> refreshOverlay(beat.battleUnitId, beat.remainingHealthPoints)
-            is FeedbackBeat.StatusApplied -> refreshOverlay(beat.battleUnitId)
+            is FeedbackBeat.Deployed -> {
+                displayedPositions[beat.battleUnitId] = beat.row to beat.column
+                displayUnit(beat.row, beat.column, beat.battleUnitId)
+                if (animate) battlefieldView.playHitFlash(beat.row, beat.column, unitTypeOf(beat.battleUnitId))
+            }
+            is FeedbackBeat.Move -> performMoveHop(beat)
+            is FeedbackBeat.Teleport -> {
+                finishMove(beat.battleUnitId, beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn)
+                if (animate) {
+                    val unitType = unitTypeOf(beat.battleUnitId)
+                    battlefieldView.playHitFlash(beat.fromRow, beat.fromColumn, unitType)
+                    battlefieldView.playHitFlash(beat.toRow, beat.toColumn, unitType)
+                }
+            }
+            is FeedbackBeat.Hit -> {
+                refreshOverlay(beat.battleUnitId, beat.remainingHealthPoints)
+                if (animate) playImpact(beat.battleUnitId, beat.amount, heal = false)
+            }
+            is FeedbackBeat.Heal -> {
+                refreshOverlay(beat.battleUnitId, beat.remainingHealthPoints)
+                if (animate) playImpact(beat.battleUnitId, beat.amount, heal = true)
+            }
+            is FeedbackBeat.StatusApplied -> {
+                refreshOverlay(beat.battleUnitId)
+                if (animate) positionOf(beat.battleUnitId)?.let { (row, column) -> battlefieldView.playStatusPop(row, column) }
+            }
             is FeedbackBeat.OverlayRefresh -> refreshOverlay(beat.battleUnitId)
-            is FeedbackBeat.Defeated -> removeUnit(beat.row, beat.column)
+            is FeedbackBeat.Defeated -> {
+                displayedPositions.remove(beat.battleUnitId)
+                removeUnit(beat.row, beat.column)
+                if (animate) battlefieldView.playPoof(beat.row, beat.column)
+            }
             is FeedbackBeat.OccupantRemoved -> removeUnit(beat.row, beat.column)
+            is FeedbackBeat.Spread ->
+                if (animate) {
+                    battlefieldView.playSpark(beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn, feedbackTiming.spreadMs)
+                }
+            is FeedbackBeat.CameraFocus -> battlefieldView.centerOn(row = beat.row, column = beat.column)
             is FeedbackBeat.TurnStarted -> {
                 clearSelection()
                 refreshAllOverlays(beat.playerId)
                 centerOnFirstHumanUnit(beat.playerId)
             }
-            is FeedbackBeat.Spread,
-            is FeedbackBeat.CameraFocus,
-            -> Unit
         }
     }
 
-    private fun performMove(
+    private fun enqueueMove(event: BattleUnitEvent.BattleUnitMoved) {
+        followIfCpu(event.battleUnitId, event.fromRow, event.fromColumn)
+        if (teleportingBattleUnitIds.remove(event.battleUnitId)) {
+            feedbackQueue.enqueue(FeedbackBeat.Teleport(event.battleUnitId, event.fromRow, event.fromColumn, event.toRow, event.toColumn))
+            return
+        }
+        val from = event.fromRow to event.fromColumn
+        val path = if (animate) walkPath(from, event.toRow to event.toColumn) else listOf(event.toRow to event.toColumn)
+        var previous = from
+        path.forEachIndexed { index, tile ->
+            feedbackQueue.enqueue(
+                FeedbackBeat.Move(event.battleUnitId, previous.first, previous.second, tile.first, tile.second, hops = path.size, hopIndex = index),
+            )
+            previous = tile
+        }
+    }
+
+    private fun walkPath(
+        from: Pair<Int, Int>,
+        to: Pair<Int, Int>,
+    ): List<Pair<Int, Int>> {
+        val canBeOccupied = battlefieldApi.canBattlefieldTileBeOccupied
+        return WalkPath.find(from, to) { row, column -> canBeOccupied(row, column) }
+    }
+
+    /** The camera follows units of the CPU, so each of its actions happens where the player is looking. */
+    private fun followIfCpu(
+        battleUnitId: String,
+        row: Int,
+        column: Int,
+    ) {
+        if (!animate || lastCameraFocus == row to column) return
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
+        if (!isEnemy(battleUnit)) return
+        lastCameraFocus = row to column
+        feedbackQueue.enqueue(FeedbackBeat.CameraFocus(row, column))
+    }
+
+    /** A death spread shows as a spark from the defeated unit to each neighbour that receives the effect. */
+    private fun enqueueSpread(event: BattleUnitEvent.RequestApplyEffect) {
+        if (!animate) return
+        val sourceId = event.application.source.battleUnitId ?: return
+        val from = defeatedPositions[sourceId] ?: return
+        val target = event.application.target as? Effect.Dto.EffectTargetDto.Unit ?: return
+        val to = knownPositions[target.id] ?: return
+        feedbackQueue.enqueue(FeedbackBeat.Spread(from.first, from.second, to.first, to.second))
+    }
+
+    private fun performMoveHop(beat: FeedbackBeat.Move) {
+        if (beat.isFirstHop) {
+            battlefieldView.resetTiles()
+            removeUnit(beat.fromRow, beat.fromColumn)
+            displayedPositions.remove(beat.battleUnitId)
+        }
+        if (beat.isLastHop) {
+            battlefieldView.hideWalker(beat.battleUnitId)
+            finishMove(beat.battleUnitId, beat.fromRow, beat.fromColumn, beat.toRow, beat.toColumn)
+        } else {
+            battlefieldView.showWalker(unitTypeOf(beat.battleUnitId), beat.toRow, beat.toColumn, beat.battleUnitId)
+        }
+    }
+
+    private fun finishMove(
         battleUnitId: String,
         fromRow: Int,
         fromColumn: Int,
@@ -246,8 +361,47 @@ class BattlefieldPresenter(
     ) {
         battlefieldView.resetTiles()
         removeUnit(fromRow, fromColumn)
+        displayedPositions[battleUnitId] = toRow to toColumn
         displayUnit(toRow, toColumn, battleUnitId)
         updateMovementRange(battleUnitId)
+    }
+
+    private fun playImpact(
+        battleUnitId: String,
+        amount: Int,
+        heal: Boolean,
+    ) {
+        val (row, column) = positionOf(battleUnitId) ?: return
+        if (!heal) battlefieldView.playHitFlash(row, column, unitTypeOf(battleUnitId))
+        if (amount > 0) battlefieldView.playAmountPop(row, column, amount, heal)
+    }
+
+    private fun positionOf(battleUnitId: String): Pair<Int, Int>? = displayedPositions[battleUnitId] ?: battlefieldApi.searchPosition(battleUnitId)?.let { it.row to it.column }
+
+    private fun unitTypeOf(battleUnitId: String): String = battleUnitApi.searchBattleUnitById(battleUnitId)?.unitId ?: battleUnitId
+
+    private fun isOngoingEffect(effectId: String): Boolean {
+        val effect = searchEffectById?.invoke(effectId) ?: return false
+        return effect.application.type != Effect.Dto.ApplicationDto.ApplicationTypeDto.IMMEDIATELY
+    }
+
+    /**
+     * Redraws every living unit from the domain once a timed playback ends, so a dropped or reordered beat
+     * can't leave the view different from the battle.
+     */
+    private fun resyncUnits() {
+        val currentPlayerId = battleApi.searchBattle()?.currentPlayerTurn ?: return
+        val enemyPlayerId = playerApi.searchEnemyPlayer(currentPlayerId)?.id
+        battlefieldView.removeAllBattleUnits()
+        displayedPositions.clear()
+        listOfNotNull(currentPlayerId, enemyPlayerId)
+            .flatMap { battleUnitApi.searchBattleUnitsByPlayerId(it) }
+            .filter { it.remainingHealthPoints > 0 }
+            .forEach { battleUnit ->
+                val position = battlefieldApi.searchPosition(battleUnit.id) ?: return@forEach
+                displayedPositions[battleUnit.id] = position.row to position.column
+                displayUnit(position.row, position.column, battleUnit.id)
+            }
     }
 
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit) {
@@ -300,8 +454,8 @@ class BattlefieldPresenter(
         remainingHealthPoints: Int? = null,
     ) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
-        val position = battlefieldApi.searchPosition(battleUnitId) ?: return
-        displayOverlay(position.row, position.column, battleUnit, remainingHealthPoints = remainingHealthPoints ?: battleUnit.remainingHealthPoints)
+        val (row, column) = positionOf(battleUnitId) ?: return
+        displayOverlay(row, column, battleUnit, remainingHealthPoints = remainingHealthPoints ?: battleUnit.remainingHealthPoints)
     }
 
     private fun refreshAllOverlays(playerId: String) {

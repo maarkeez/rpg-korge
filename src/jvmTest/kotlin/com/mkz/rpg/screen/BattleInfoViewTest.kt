@@ -44,4 +44,23 @@ class BattleInfoViewTest : ViewsForTesting() {
                 assertThat(winnerText.text).isEqualTo("$playerName wins!")
             }
     }
+
+    @Nested
+    inner class DisplayPlayback {
+        @Test
+        fun `should show the playback indicator only while playback is active`() =
+            viewsTest {
+                // Given
+                val battleInfoView = BattleInfoView()
+                val hiddenAtStart = !battleInfoView.isPlaybackIndicatorVisible
+                // When
+                battleInfoView.displayPlayback(active = true)
+                val shownWhileActive = battleInfoView.isPlaybackIndicatorVisible
+                battleInfoView.displayPlayback(active = false)
+                // Then
+                assertThat(hiddenAtStart).isTrue()
+                assertThat(shownWhileActive).isTrue()
+                assertThat(battleInfoView.isPlaybackIndicatorVisible).isFalse()
+            }
+    }
 }

@@ -3,6 +3,8 @@ package com.mkz.rpg.screen
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
+import com.mkz.rpg.screen.feedback.FxLayer
+import com.mkz.rpg.screen.feedback.FxViews
 import com.mkz.rpg.shared.adapters.presentation.PIXEL_SCALE
 import com.mkz.rpg.shared.adapters.presentation.snapToArtPixel
 import korlibs.image.bitmap.Bitmap
@@ -17,6 +19,8 @@ import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIGridFill
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
+import korlibs.korge.view.Container
+import korlibs.korge.view.View
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.clipContainer
 import korlibs.korge.view.image
@@ -65,6 +69,8 @@ class BattlefieldView(
 
     private val viewport = clipContainer(size = viewportSize)
     private lateinit var battlefieldGrid: UIGridFill
+    private val fxLayer = FxLayer()
+    private val walkers = mutableMapOf<String, View>()
 
     init {
         addChild(viewport)
@@ -113,6 +119,7 @@ class BattlefieldView(
                 cols = 0,
                 rows = 0,
             )
+        viewport.addChild(fxLayer)
         scrollTo(0.0, 0.0)
         installDragScrolling()
         battlefieldGrid.rows = battlefield.rows
@@ -168,6 +175,8 @@ class BattlefieldView(
         scrollY = clampScroll(y, viewportSize.height, mapHeight)
         battlefieldGrid.x = snapToArtPixel(scrollX)
         battlefieldGrid.y = snapToArtPixel(scrollY)
+        fxLayer.x = battlefieldGrid.x
+        fxLayer.y = battlefieldGrid.y
     }
 
     private fun clampScroll(
@@ -361,6 +370,160 @@ class BattlefieldView(
         val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
         tileButton.findViewByName(SELECTION)?.removeFromParent()
         tileButton.addChild(SelectionBracketsView(isEnemy).also { it.name = SELECTION })
+    }
+
+    // Feedback effects. They are drawn in a layer over the grid that scrolls with it, and never touch the tiles.
+
+    /** Number of feedback effects still playing. */
+    val activeFxCount: Int get() = fxLayer.activeCount
+
+    fun advanceFx(deltaMs: Double) = fxLayer.advance(deltaMs)
+
+    fun clearFx() {
+        fxLayer.clearEffects()
+        walkers.values.forEach { it.removeFromParent() }
+        walkers.clear()
+    }
+
+    /** The unit sprite turns white for a moment. */
+    fun playHitFlash(
+        row: Int,
+        column: Int,
+        unitId: String,
+    ) {
+        val flash = FxViews.flash(sprites.silhouette(unitId)).also { it.name = FxViews.FLASH_NAME }
+        placeOnTile(flash, row, column)
+        fxLayer.play(flash, FxViews.FLASH_MS)
+    }
+
+    /** A damage or heal number pops above the unit and rises in whole art pixels. */
+    fun playAmountPop(
+        row: Int,
+        column: Int,
+        amount: Int,
+        heal: Boolean,
+    ) {
+        val number = FxViews.amountNumber(amount, heal)
+        val left = (TILE_PIXEL_SIZE - FxViews.amountWidthArtPixels(amount, heal)) / 2
+        val startY = 2
+        placeOnTile(number, row, column, artX = left, artY = startY)
+        fxLayer.play(number, FxViews.NUMBER_MS) { progress ->
+            number.y = tileY(row) + (startY - FxViews.steps(progress, FxViews.NUMBER_RISE_ART_PIXELS)) * PIXEL_SCALE.toDouble()
+        }
+    }
+
+    /** A sparkle where the status pips of the unit are drawn. */
+    fun playStatusPop(
+        row: Int,
+        column: Int,
+    ) {
+        val pop = FxViews.popFrame(0).also { it.name = FxViews.POP_NAME }
+        placeOnTile(pop, row, column, artX = 0, artY = 0)
+        var shownFrame = 0
+        fxLayer.play(pop, FxViews.POP_MS) { progress ->
+            val frame = FxViews.steps(progress, 2)
+            if (frame != shownFrame || progress == 0.0) {
+                shownFrame = frame
+                pop.removeChildren()
+                FxViews
+                    .popFrame(frame)
+                    .children
+                    .toList()
+                    .forEach { pop.addChild(it) }
+            }
+        }
+    }
+
+    /** An expanding ring over the tile of a unit that was just defeated. */
+    fun playPoof(
+        row: Int,
+        column: Int,
+    ) {
+        val poof = Container().also { it.name = FxViews.POOF_NAME }
+        placeOnTile(poof, row, column)
+        var shownFrame = -1
+        fxLayer.play(poof, FxViews.POOF_MS) { progress ->
+            val frame = FxViews.steps(progress, FxViews.POOF_FRAMES - 1)
+            if (frame != shownFrame) {
+                shownFrame = frame
+                poof.removeChildren()
+                FxViews
+                    .poofFrame(frame)
+                    .children
+                    .toList()
+                    .forEach { poof.addChild(it) }
+            }
+        }
+    }
+
+    /** A spark travels from the center of one tile to the center of another, moving in whole art pixels. */
+    fun playSpark(
+        fromRow: Int,
+        fromColumn: Int,
+        toRow: Int,
+        toColumn: Int,
+        durationMs: Int,
+    ) {
+        val spark = FxViews.spark().also { it.name = FxViews.SPARK_NAME }
+        val startX = fromColumn * TILE_SIZE + TILE_SIZE / 2.0
+        val startY = fromRow * TILE_SIZE + TILE_SIZE / 2.0
+        val endX = toColumn * TILE_SIZE + TILE_SIZE / 2.0
+        val endY = toRow * TILE_SIZE + TILE_SIZE / 2.0
+        fxLayer.play(spark, durationMs) { progress ->
+            spark.x = snapToArtPixel(startX + (endX - startX) * progress)
+            spark.y = snapToArtPixel(startY + (endY - startY) * progress)
+        }
+    }
+
+    /** Shows a unit that is walking through [row], [column], without touching the unit that stands on that tile. */
+    fun showWalker(
+        unitType: String,
+        row: Int,
+        column: Int,
+        walkerId: String = unitType,
+    ) {
+        val walker =
+            walkers.getOrPut(walkerId) {
+                Container().also { container ->
+                    container.name = FxViews.WALKER_NAME
+                    container.image(sprites.unit(unitType)) {
+                        scale = PIXEL_SCALE.toDouble()
+                        smoothing = false
+                    }
+                    fxLayer.addChild(container)
+                }
+            }
+        walker.x = column * TILE_SIZE.toDouble()
+        walker.y = row * TILE_SIZE.toDouble()
+    }
+
+    fun hideWalker(unitId: String) {
+        walkers.remove(unitId)?.removeFromParent()
+    }
+
+    /** True when the unit sprite of [unitId] is currently drawn as a walker. */
+    fun isWalking(unitId: String): Boolean = unitId in walkers
+
+    /** Removes every unit sprite and overlay. The presenter then draws the living units again. */
+    fun removeAllBattleUnits() {
+        battlefieldGrid.children.forEach { view ->
+            val tileButton = view as UIButton
+            tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
+            tileButton.findViewByName(UNIT_OVERLAY)?.removeFromParent()
+        }
+    }
+
+    private fun tileY(row: Int): Double = row * TILE_SIZE.toDouble()
+
+    private fun placeOnTile(
+        view: View,
+        row: Int,
+        column: Int,
+        artX: Int = 0,
+        artY: Int = 0,
+    ) {
+        view.x = column * TILE_SIZE + artX * PIXEL_SCALE.toDouble()
+        view.y = row * TILE_SIZE + artY * PIXEL_SCALE.toDouble()
     }
 
     private fun UIButton.addImage(

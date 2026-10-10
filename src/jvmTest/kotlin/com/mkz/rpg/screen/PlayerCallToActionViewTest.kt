@@ -60,5 +60,36 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             }
     }
 
+    @Nested
+    inner class SetPlaybackLocked {
+        @Test
+        fun `should hide the buttons when playback is locked and show them again when it is unlocked`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                // When
+                playerCallToActionView.setPlaybackLocked(true)
+                val visibleWhileLocked = playerCallToActionView.visible
+                playerCallToActionView.setPlaybackLocked(false)
+                // Then
+                assertThat(visibleWhileLocked).isFalse()
+                assertThat(playerCallToActionView.visible).isTrue()
+            }
+
+        @Test
+        fun `should stay hidden when playback is unlocked after the view was hidden for good`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                playerCallToActionView.hide()
+                // When
+                playerCallToActionView.setPlaybackLocked(false)
+                // Then
+                assertThat(playerCallToActionView.visible).isFalse()
+            }
+    }
+
     private fun buttonsOf(playerCallToActionView: PlayerCallToActionView): List<UIButton> = playerCallToActionView.descendantsWith { it is UIButton }.map { it as UIButton }
 }

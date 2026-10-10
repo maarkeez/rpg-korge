@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen
 
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailability
+import com.mkz.rpg.screen.feedback.FeedbackTiming
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.ImageDecodingProps
 import korlibs.image.format.ImageEncodingProps
@@ -30,6 +31,7 @@ internal const val CAST_PREVIEW: String = "battle-cast-preview"
 internal const val ENEMY_INSPECTED: String = "battle-enemy-inspected"
 internal const val MOVEMENT_RANGE: String = "battle-movement-range"
 internal const val ABILITY_COOLDOWNS: String = "battle-ability-cooldowns"
+internal const val AFTER_CPU_PLAYBACK: String = "battle-after-cpu-playback"
 internal const val SHOWCASE_SCENARIO: String = "scenarios/ui-showcase.json"
 
 private const val HUMAN_KNIGHT_TILE = "row-6-column-6"
@@ -44,9 +46,12 @@ private const val READY_TIMEOUT_MS = 10_000L
 private const val POLL_DELAY_MS = 10L
 private const val SETTLE_DELAY_MS = 200L
 
-internal suspend fun OffscreenStage.createBattleScene(scenarioPath: String? = null): BattleScene {
+internal suspend fun OffscreenStage.createBattleScene(
+    scenarioPath: String? = null,
+    feedbackTiming: FeedbackTiming = FeedbackTiming.Instant,
+): BattleScene {
     val container = sceneContainer()
-    return container.changeTo { BattleScene(seed = SNAPSHOT_SEED, scenarioPath = scenarioPath) }
+    return container.changeTo { BattleScene(seed = SNAPSHOT_SEED, scenarioPath = scenarioPath, feedbackTiming = feedbackTiming) }
 }
 
 internal suspend fun awaitBattleReady(scene: BattleScene) {
@@ -105,6 +110,17 @@ internal suspend fun OffscreenStage.selectKnightAfterHealing(scene: BattleScene)
         slots[HEAL_ABILITY_INDEX].status == SearchAbilityAvailability.AbilityAvailability.Status.COOLDOWN
     }
     delay(SETTLE_DELAY_MS)
+}
+
+/**
+ * Passes the turn with real feedback timing and waits until the whole CPU turn has played back and every effect has ended.
+ * Snapshots are only taken after playback settles, never in the middle of an animation.
+ */
+internal suspend fun OffscreenStage.finishTurnAndAwaitPlayback(scene: BattleScene) {
+    awaitUntil { !scene.isFeedbackPlaying }
+    clickActionButton(scene, "Finish turn")
+    awaitUntil { scene.isFeedbackPlaying }
+    awaitUntil { !scene.isFeedbackPlaying }
 }
 
 private suspend fun OffscreenStage.clickActionButton(

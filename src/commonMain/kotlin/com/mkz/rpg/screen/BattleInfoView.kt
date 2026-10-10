@@ -35,6 +35,25 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
             addChild(playerTurn)
         }
 
+    private val playbackIndicator =
+        uiText(
+            text = "...",
+            size = Size(width = PLAYBACK_INDICATOR_WIDTH, height = 33),
+        ) {
+            this.styles.textAlignment = TextAlignment.MIDDLE_RIGHT
+            this.styles.textSize = 22.0
+            this.styles.textColor = UiPalette.textMuted
+            x = width - PLAYBACK_INDICATOR_WIDTH - 2 * 8.0
+            visible = false
+        }
+
+    val isPlaybackIndicatorVisible: Boolean get() = playbackIndicator.visible
+
+    /** Shows a quiet marker in the top strip while the battle plays back and taps are ignored. */
+    fun displayPlayback(active: Boolean) {
+        playbackIndicator.visible = active
+    }
+
     fun displayBattleInfo(
         playerName: String,
         round: Int,
@@ -54,5 +73,9 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
             this.styles.textAlignment = TextAlignment.MIDDLE_CENTER
             this.styles.textSize = 30.0
         }
+    }
+
+    private companion object {
+        const val PLAYBACK_INDICATOR_WIDTH = 48.0
     }
 }

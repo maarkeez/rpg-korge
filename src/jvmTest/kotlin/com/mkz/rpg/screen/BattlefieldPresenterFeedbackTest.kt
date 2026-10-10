@@ -7,11 +7,13 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.battlesetup.adapters.serialization.BattleScenarioLoader
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.screen.feedback.FeedbackBeat
 import com.mkz.rpg.screen.feedback.FeedbackTiming
+import com.mkz.rpg.screen.feedback.FxViews
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.events.RecordingEventBus
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -21,10 +23,12 @@ import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Stage
+import korlibs.korge.view.descendantsWith
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import kotlin.math.abs
 import kotlin.random.Random
 
 class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
@@ -55,6 +59,7 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
     private val playbackChanges = mutableListOf<Boolean>()
 
     private val playerOneKnightId = "player-1-unit-1"
+    private val skullAbilityIndex = 2
 
     @Nested
     inner class BeatOrder {
@@ -121,6 +126,7 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
             viewsTest {
                 // Given
                 val setup = setupBattleUiScript(feedbackTiming = FeedbackTiming.Standard)
+                playbackChanges.clear()
                 // When
                 setup.script.finishTurn()
                 playUntilIdle(setup.presenter)
@@ -129,9 +135,94 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
             }
     }
 
+    @Nested
+    inner class Resync {
+        @Test
+        fun `should draw exactly the living battle units from the domain when the cpu turn has finished playing`() =
+            viewsTest {
+                // Given
+                val setup = setupBattleUiScript(feedbackTiming = FeedbackTiming.Standard)
+                playUntilIdle(setup.presenter)
+                // When
+                setup.script.finishTurn()
+                playUntilIdle(setup.presenter)
+                // Then
+                val drawnTiles =
+                    battlefieldView
+                        .descendantsWith { it.name == BattlefieldView.BATTLE_UNIT }
+                        .map { it.parent!!.name }
+                val expectedTiles =
+                    listOf("player-one", "player-two")
+                        .flatMap { battleUnitApi.searchBattleUnitsByPlayerId(it) }
+                        .filter { it.remainingHealthPoints > 0 }
+                        .map { battlefieldApi.searchPosition(it.id)!! }
+                        .map { "row-${it.row}-column-${it.column}" }
+                assertThat(drawnTiles).containsExactlyInAnyOrderElementsOf(expectedTiles)
+            }
+
+        @Test
+        fun `should hide the playback indicator and the walkers when the cpu turn has finished playing`() =
+            viewsTest {
+                // Given
+                val setup = setupBattleUiScript(feedbackTiming = FeedbackTiming.Standard)
+                // When
+                setup.script.finishTurn()
+                playUntilIdle(setup.presenter)
+                // Then
+                assertThat(battlefieldView.activeFxCount).isZero()
+                assertThat(battlefieldView.descendantsWith { it.name == FxViews.WALKER_NAME }).isEmpty()
+            }
+    }
+
+    @Nested
+    inner class Walks {
+        @Test
+        fun `should hop one adjacent tile at a time when a unit moves several tiles`() =
+            viewsTest {
+                // Given
+                val setup = setupBattleUiScript(feedbackTiming = FeedbackTiming.Standard)
+                setup.script.selectUnit(playerOneKnightId)
+                playUntilIdle(setup.presenter)
+                performedBeats.clear()
+                // When
+                setup.script.tapTile(row = 6, column = 3)
+                playUntilIdle(setup.presenter)
+                // Then
+                val hops = performedBeats.filterIsInstance<FeedbackBeat.Move>()
+                assertThat(hops).hasSize(3)
+                assertThat(hops.map { it.hopIndex }).containsExactly(0, 1, 2)
+                hops.forEach { hop -> assertThat(abs(hop.fromRow - hop.toRow) + abs(hop.fromColumn - hop.toColumn)).isEqualTo(1) }
+                assertThat(setup.script.occupantAt(row = 6, column = 3)).isEqualTo(playerOneKnightId)
+            }
+    }
+
+    @Nested
+    inner class Impacts {
+        @Test
+        fun `should flash the target and pop its damage when the player casts a damaging ability`() =
+            viewsTest {
+                // Given
+                val setup = setupBattleUiScript(feedbackTiming = FeedbackTiming.Standard, scenarioPath = SHOWCASE_SCENARIO)
+                setup.script.selectUnit(playerOneKnightId)
+                setup.script.selectAbility(skullAbilityIndex)
+                val target = setup.script.castTargets(battleUnitId = playerOneKnightId, abilityId = "skull").first()
+                setup.script.tapTile(row = target.row, column = target.column)
+                performedBeats.clear()
+                // When
+                setup.script.confirmCast()
+                // Then
+                val hit = performedBeats.filterIsInstance<FeedbackBeat.Hit>().first()
+                assertThat(hit.amount).isPositive()
+                assertThat(battlefieldView.descendantsWith { it.name == FxViews.FLASH_NAME }).isNotEmpty
+                assertThat(battlefieldView.descendantsWith { it.name == FxViews.NUMBER_NAME }).isNotEmpty
+                playUntilIdle(setup.presenter)
+                assertThat(battlefieldView.activeFxCount).isZero()
+            }
+    }
+
     private fun playUntilIdle(presenter: BattlefieldPresenter) {
         var elapsedMs = 0
-        while (presenter.isPlayingFeedback && elapsedMs < MAX_PLAYBACK_MS) {
+        while ((presenter.isPlayingFeedback || battlefieldView.activeFxCount > 0) && elapsedMs < MAX_PLAYBACK_MS) {
             presenter.updateFeedback(deltaMs = FRAME_MS)
             elapsedMs += FRAME_MS.toInt()
         }
@@ -155,7 +246,10 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
         val presenter: BattlefieldPresenter,
     )
 
-    private suspend fun Stage.setupBattleUiScript(feedbackTiming: FeedbackTiming): Setup {
+    private suspend fun Stage.setupBattleUiScript(
+        feedbackTiming: FeedbackTiming,
+        scenarioPath: String? = null,
+    ): Setup {
         battlefieldView.loadAssets()
         battleUnitInfoView.loadAssets()
         attackPreviewView.loadAssets()
@@ -192,8 +286,9 @@ class BattlefieldPresenterFeedbackTest : ViewsForTesting() {
         }
 
         terrainApi.init()
-        battleSetupApi.setupBattle(null)
+        battleSetupApi.setupBattle(scenarioPath?.let { BattleScenarioLoader().load(it) })
         eventBus.dispatch()
+        playUntilIdle(presenter)
 
         val script =
             BattleUiScript(

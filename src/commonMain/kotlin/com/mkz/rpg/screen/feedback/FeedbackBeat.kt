@@ -13,8 +13,11 @@ sealed interface FeedbackBeat {
         val toRow: Int,
         val toColumn: Int,
         val hops: Int = 1,
-        val isLastHop: Boolean = true,
-    ) : FeedbackBeat
+        val hopIndex: Int = 0,
+    ) : FeedbackBeat {
+        val isFirstHop: Boolean get() = hopIndex == 0
+        val isLastHop: Boolean get() = hopIndex >= hops - 1
+    }
 
     data class Teleport(
         val battleUnitId: String,

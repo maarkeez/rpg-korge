@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.screen.feedback.FeedbackTiming
 import korlibs.korge.testing.korgeScreenshotTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Tag
@@ -118,5 +119,19 @@ class BattleSceneSnapshotUpdateTest {
             writeGolden(CAST_PREVIEW, capture())
         }
         assertThat(File(SNAPSHOT_GOLDEN_DIR, "$CAST_PREVIEW.png")).exists()
+    }
+
+    @Test
+    fun `should write the golden image of the battle after the cpu turn has played back`() {
+        korgeScreenshotTest(
+            windowSize = SNAPSHOT_WINDOW_SIZE,
+            virtualSize = SNAPSHOT_WINDOW_SIZE,
+        ) {
+            val scene = createBattleScene(scenarioPath = SHOWCASE_SCENARIO, feedbackTiming = FeedbackTiming.Standard)
+            awaitBattleReady(scene)
+            finishTurnAndAwaitPlayback(scene)
+            writeGolden(AFTER_CPU_PLAYBACK, capture())
+        }
+        assertThat(File(SNAPSHOT_GOLDEN_DIR, "$AFTER_CPU_PLAYBACK.png")).exists()
     }
 }

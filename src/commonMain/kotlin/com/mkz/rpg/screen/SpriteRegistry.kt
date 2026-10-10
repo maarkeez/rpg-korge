@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen
 
+import com.mkz.rpg.screen.feedback.FxViews
 import com.mkz.rpg.shared.adapters.presentation.UiPalette
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
@@ -17,6 +18,7 @@ class SpriteRegistry {
     private var effects: Map<String, Bitmap> = emptyMap()
     private var highlights: Map<Highlight, Bitmap> = emptyMap()
     private var abilitySelection: Bitmap? = null
+    private val silhouettes = mutableMapOf<String, Bitmap>()
     private var loaded = false
 
     enum class Highlight(
@@ -41,6 +43,9 @@ class SpriteRegistry {
     }
 
     fun unit(unitId: String): Bitmap = units[unitId] ?: placeholder(ART_SIZE)
+
+    /** White copy of the unit sprite, used for hit flashes. */
+    fun silhouette(unitId: String): Bitmap = silhouettes.getOrPut(unitId) { FxViews.silhouette(unit(unitId)) }
 
     fun portrait(unitId: String): Bitmap = portraits[unitId] ?: placeholder(PORTRAIT_SIZE)
 

@@ -37,7 +37,7 @@ class FeedbackQueueTest {
             assertThat(performed).containsExactlyElementsOf(beats)
             assertThat(queue.isPlaying).isFalse()
             assertThat(playbackChanges).isEmpty()
-            assertThat(drainedCount).isEqualTo(beats.size)
+            assertThat(drainedCount).isZero()
         }
 
         @Test

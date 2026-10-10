@@ -8,7 +8,8 @@ package com.mkz.rpg.screen.feedback
  * - Consecutive beats of the same kind that touch different things (hits on several units, several sparks) play
  *   together as one step, which keeps long CPU turns short. A backlog longer than the turn budget plays faster.
  * - [onPlaybackChanged] is told when playback starts and ends, but only for playback that really takes time.
- * - [onDrained] runs every time the queue empties, so the view can be resynced from the domain.
+ * - [onDrained] runs when a playback that took time ends, so the view can be resynced from the domain. It never runs
+ *   in the middle of a dispatch, because instant beats never open a playback.
  */
 class FeedbackQueue(
     private val timing: FeedbackTiming = FeedbackTiming.Instant,
@@ -22,6 +23,7 @@ class FeedbackQueue(
     private var announcedPlaying = false
     private var pumping = false
     private var playbackScale = 1.0
+    private var playbackTookTime = false
 
     /** True while beats are waiting or a step is still playing. */
     val isPlaying: Boolean get() = stepActive || pending.isNotEmpty()
@@ -51,6 +53,7 @@ class FeedbackQueue(
                 step.forEach(performer)
                 val stepMs = step.maxOf { timing.durationOf(it) } * speedFactor()
                 if (stepMs > 0.0) {
+                    playbackTookTime = true
                     stepActive = true
                     stepRemainingMs = stepMs
                 }
@@ -68,7 +71,10 @@ class FeedbackQueue(
                 announcedPlaying = false
                 onPlaybackChanged(false)
             }
-            onDrained()
+            if (playbackTookTime) {
+                playbackTookTime = false
+                onDrained()
+            }
         }
     }
 
