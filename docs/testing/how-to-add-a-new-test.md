@@ -299,6 +299,8 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the battle scene while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
 - They MUST wait for the game to react using the shared [`waitUntil`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
 
+To see what the player sees at any step of an end-to-end test, see [How to take a snapshot of the game during an end-to-end test](how-to-take-a-game-snapshot.md).
+
 For example: [`MoveKnightEndToEndTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
 
 ```kotlin
