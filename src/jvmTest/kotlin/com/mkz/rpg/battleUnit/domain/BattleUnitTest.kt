@@ -52,8 +52,9 @@ class BattleUnitTest {
         fun `should reduce the remaining steps and publish the moved event when the battle unit moves`() {
             // Given
             val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
+            val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
             // When
-            val movedBattleUnit = battleUnit.move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
+            val movedBattleUnit = battleUnit.move(fromRow = 0, fromColumn = 0, path = path)
             // Then
             assertThat(movedBattleUnit.toDto().remainingTurnActions.remainingSteps).isEqualTo(1)
             val (events, _) = movedBattleUnit.pullEvents()
@@ -65,6 +66,7 @@ class BattleUnitTest {
                         fromColumn = 0,
                         toRow = 0,
                         toColumn = 2,
+                        path = path,
                     ),
                 )
         }
@@ -74,7 +76,7 @@ class BattleUnitTest {
             // Given
             val battleUnit = BattleUnitMother.battleUnit()
             // When
-            val result = runCatching { battleUnit.move(distance = 0, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 1) }
+            val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = emptyList()) }
             // Then
             assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattleUnitError.MovementDistanceMustBeGreaterThanZero::class.java)
         }
@@ -84,7 +86,8 @@ class BattleUnitTest {
             // Given
             val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
             // When
-            val result = runCatching { battleUnit.move(distance = 4, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 4) }
+            val path = (1..4).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+            val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = path) }
             // Then
             assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattleUnitError.MovementDistanceExceedsRemainingSteps::class.java)
         }
@@ -109,6 +112,7 @@ class BattleUnitTest {
                         fromColumn = 0,
                         toRow = 2,
                         toColumn = 2,
+                        path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
                     ),
                 )
         }
@@ -122,7 +126,7 @@ class BattleUnitTest {
             val battleUnit =
                 BattleUnitMother
                     .battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
-                    .move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
+                    .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
             // When
             val resetBattleUnit = battleUnit.resetActions()
             // Then

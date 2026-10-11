@@ -37,12 +37,14 @@ sealed interface BattleUnitEvent : DomainEvent {
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent
 
+    // Path: the tiles walked from the origin (excluded) to the destination (included).
     data class BattleUnitMoved(
         val battleUnitId: String,
         val fromRow: Int,
         val fromColumn: Int,
         val toRow: Int,
         val toColumn: Int,
+        val path: List<Battlefield.Dto.PositionDto>,
     ) : BattleUnitEvent
 
     data class AbilityCasted(

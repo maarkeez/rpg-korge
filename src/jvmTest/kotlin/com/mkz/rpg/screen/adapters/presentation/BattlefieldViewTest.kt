@@ -8,6 +8,12 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -18,6 +24,10 @@ class BattlefieldViewTest : ViewsForTesting() {
     private companion object {
         // The battlefield scroll animation lasts 300ms and each test frame 10ms.
         const val SCROLL_ANIMATION_FRAMES = 40
+
+        // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
+        const val MOVE_STEP_FRAMES = 15
+        const val MAX_MOVE_FRAMES = 1_000
     }
 
     @Nested
@@ -302,6 +312,98 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isFalse
             }
+    }
+
+    @Nested
+    inner class MoveBattleUnit {
+        private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
+
+        @Test
+        fun `should display the battle unit on each tile of the path in order when it moves`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+                addChild(battlefieldView)
+                val displayedPositions = mutableListOf(battlefieldView.battleUnitPositions())
+                // When
+                val moving = startMoving(battlefieldView, path)
+                while (!moving.isCompleted && displayedPositions.size < MAX_MOVE_FRAMES) {
+                    displayedPositions += battlefieldView.battleUnitPositions()
+                    nextFrame()
+                }
+                // Then
+                assertThat(displayedPositions.distinct()).containsExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
+                assertThat(displayedPositions.zipWithNext().count { (previous, next) -> previous != next }).isEqualTo(2)
+            }
+
+        @Test
+        fun `should stop on each tile of the path when the battle unit moves`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+                addChild(battlefieldView)
+                // When
+                startMoving(battlefieldView, path)
+                repeat(MOVE_STEP_FRAMES - 2) { nextFrame() }
+                // Then
+                assertThat(battlefieldView.battleUnitPositions()).containsExactly(0 to 1)
+            }
+
+        @Test
+        fun `should scroll the battlefield to keep the battle unit visible when it moves out of the viewport`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 16).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 5, unitId = "rat")
+                addChild(battlefieldView)
+                val pathOutOfTheViewport = (6..9).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+                require(!battlefieldView.isTileVisible(row = 0, column = 9))
+                // When
+                awaitCompletion(startMoving(battlefieldView, pathOutOfTheViewport))
+                // Then
+                assertThat(battlefieldView.battleUnitPositions()).containsExactly(0 to 9)
+                assertThat(battlefieldView.isTileVisible(row = 0, column = 9)).isTrue
+            }
+
+        @Test
+        fun `should not scroll the battlefield when the battle unit moves and the battlefield is smaller than the viewport`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+                addChild(battlefieldView)
+                // When
+                awaitCompletion(startMoving(battlefieldView, path))
+                // Then
+                assertThat(battlefieldView.scrollOffset()).isEqualTo(0.0 to 0.0)
+            }
+
+        private suspend fun startMoving(
+            battlefieldView: BattlefieldView,
+            path: List<Battlefield.Dto.PositionDto>,
+        ): Job {
+            val origin = battlefieldView.battleUnitPositions().single()
+            return CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) {
+                battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
+            }
+        }
+
+        // The battle unit moves in another coroutine, which only runs when this one yields.
+        private suspend fun nextFrame() {
+            delayFrame()
+            yield()
+        }
+
+        private suspend fun awaitCompletion(job: Job) {
+            var frames = 0
+            while (!job.isCompleted && frames++ < MAX_MOVE_FRAMES) nextFrame()
+        }
     }
 
     @Nested

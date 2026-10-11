@@ -1,6 +1,7 @@
 package com.mkz.rpg.battlefield.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import org.junit.jupiter.api.Test
@@ -31,6 +32,7 @@ class OnBattleUnitMovedTest {
                 fromColumn = 0,
                 toRow = toRow,
                 toColumn = toColumn,
+                path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 1, column = 1), PositionDto(row = toRow, column = toColumn)),
             ),
         )
         // When

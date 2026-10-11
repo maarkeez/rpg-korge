@@ -20,6 +20,16 @@ fun BattlefieldView.hasBattleUnitAt(
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.BATTLE_UNIT)
 
+/** The (row, column) of every tile displaying a battle unit. */
+fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
+    if (!isDisplayed) {
+        emptyList()
+    } else {
+        (0 until battlefieldGrid.rows)
+            .flatMap { row -> (0 until battlefieldGrid.cols).map { column -> row to column } }
+            .filter { (row, column) -> hasBattleUnitAt(row, column) }
+    }
+
 /** Whether the tile is highlighted (e.g.: movement range, cast range or selected tile). */
 fun BattlefieldView.hasSelectionAt(
     row: Int,
@@ -35,6 +45,19 @@ fun BattlefieldView.tilesWithSelectionCount(): Int = if (!isDisplayed) 0 else ti
 
 /** How far the battlefield is scrolled inside the viewport, as (x, y). (0, 0) means not scrolled. */
 fun BattlefieldView.scrollOffset(): Pair<Double, Double> = battlefieldGrid.x to battlefieldGrid.y
+
+/** Whether the whole tile is inside the viewport, given how far the battlefield is scrolled. */
+fun BattlefieldView.isTileVisible(
+    row: Int,
+    column: Int,
+): Boolean {
+    val tileX = column * BattlefieldView.TILE_SIZE + battlefieldGrid.x
+    val tileY = row * BattlefieldView.TILE_SIZE + battlefieldGrid.y
+    return tileX >= 0 &&
+        tileY >= 0 &&
+        tileX + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_WIDTH &&
+        tileY + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_HEIGHT
+}
 
 suspend fun ViewsForTesting.clickTile(
     battlefieldView: BattlefieldView,

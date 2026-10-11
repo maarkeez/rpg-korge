@@ -64,7 +64,8 @@ class BattleScene : Scene() {
         battleUnitApi.init()
         battleApi.init()
 
-        // Main scene
+        // Main scene: the presenters replay the battle events in order on the timeline
+        val timeline = BattleSceneTimeline(this@BattleScene)
         val battlefieldPresenter =
             BattlefieldPresenter(
                 battlefieldView,
@@ -78,6 +79,7 @@ class BattleScene : Scene() {
                 unitApi,
                 abilityApi,
                 battleApi,
+                timeline,
                 eventBus,
             )
 
@@ -91,6 +93,7 @@ class BattleScene : Scene() {
                     battleInfoView,
                     battleApi,
                     playerApi,
+                    timeline,
                     eventBus,
                 )
             // Battlefield
@@ -104,7 +107,7 @@ class BattleScene : Scene() {
                 // addChild(finishTurnView)
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
-                FinishTurnPresenter(playerCallToActionView, battleApi, eventBus)
+                FinishTurnPresenter(playerCallToActionView, battleApi, timeline, eventBus)
             }
         }
 

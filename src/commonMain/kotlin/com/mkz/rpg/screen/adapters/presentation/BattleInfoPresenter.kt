@@ -12,6 +12,7 @@ class BattleInfoPresenter(
     private val battleInfoView: BattleInfoView,
     private val battleApi: BattleApi,
     private val playerApi: PlayerApi,
+    private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) {
     private val subscriptions =
@@ -24,15 +25,17 @@ class BattleInfoPresenter(
             },
         )
 
+    // Each function reads what it needs straight away and draws it once the previous timeline steps have been played.
+
     fun updateBattleInfo() {
         val battle = battleApi.searchBattle()!!
         val player = playerApi.searchPlayerById(battle.currentPlayerTurn)!!
-        battleInfoView.displayBattleInfo(player.name, battle.currentRound)
+        timeline.play { battleInfoView.displayBattleInfo(player.name, battle.currentRound) }
     }
 
     fun displayPlayerWin(playerId: String) {
         val player = playerApi.searchPlayerById(playerId)!!
-        battleInfoView.displayPlayerWin(player.name)
+        timeline.play { battleInfoView.displayPlayerWin(player.name) }
     }
 
     fun dispose() {

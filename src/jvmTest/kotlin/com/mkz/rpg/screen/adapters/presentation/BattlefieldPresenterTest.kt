@@ -5,6 +5,8 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
@@ -13,6 +15,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
@@ -21,6 +24,8 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -31,6 +36,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
 
 class BattlefieldPresenterTest {
@@ -38,13 +44,15 @@ class BattlefieldPresenterTest {
     private val battleUnitInfoView = mock<BattleUnitInfoView>()
     private val attackPreviewView = mock<AttackPreviewView>()
     private val battleHudView = mock<BattleHudView>()
-    private val battlefieldApi = mock<BattlefieldApi>()
+    private val searchOccupant = mock<SearchOccupant>()
+    private val battlefieldApi = mock<BattlefieldApi>().also { whenever(it.searchOccupant).thenReturn(searchOccupant) }
     private val battleUnitApi = mock<BattleUnitApi>()
     private val playerApi = mock<PlayerApi>()
     private val unitApi = mock<UnitApi>()
     private val abilityApi = mock<AbilityApi>()
     private val battleApi = mock<BattleApi>()
     private val eventBus = InMemoryEventBus()
+    private val timeline = battleSceneTimeline()
     private val battlefieldPresenter =
         BattlefieldPresenter(
             battlefieldView = battlefieldView,
@@ -58,10 +66,10 @@ class BattlefieldPresenterTest {
             unitApi = unitApi,
             abilityApi = abilityApi,
             battleApi = battleApi,
+            timeline = timeline,
             eventBus = eventBus,
         ).also {
             whenever(battlefieldApi.searchBattlefield).thenReturn(mock<SearchBattlefield>())
-            whenever(battlefieldApi.searchOccupant).thenReturn(mock<SearchOccupant>())
             whenever(battlefieldApi.searchPosition).thenReturn(mock<SearchPosition>())
             whenever(battlefieldApi.searchTilesThatCanBeOccupied).thenReturn(mock<SearchTilesThatCanBeOccupied>())
             whenever(battleUnitApi.searchBattleUnitById).thenReturn(mock<SearchBattleUnitById>())
@@ -157,6 +165,78 @@ class BattlefieldPresenterTest {
             battlefieldPresenter.removeUnit(row = 1, column = 2)
             // Then
             verify(battlefieldView).removeBattleUnit(row = 1, column = 2)
+        }
+    }
+
+    @Nested
+    inner class DisplayUnitInOrder {
+        @Test
+        fun `should display the deployed battle unit once the previous steps have been played`() {
+            // Given
+            val searchBattleUnitById = mock<SearchBattleUnitById>()
+            whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit(unit = unit(id = "knight").toDto()).toDto())
+            val previousStep = timeline.playLongStep()
+            eventBus.publish(BattleUnitDeployed(battleUnitId = "battle-unit-1", row = 1, column = 2))
+            eventBus.dispatch()
+            verify(battlefieldView, never()).displayBattleUnit(any(), any(), any())
+            // When
+            previousStep.complete(Unit)
+            // Then
+            verify(battlefieldView).displayBattleUnit(row = 1, column = 2, unitId = "knight")
+        }
+    }
+
+    @Nested
+    inner class MoveUnit {
+        @Test
+        fun `should move the battle unit along its path on view when the battle unit is moved`() {
+            // Given
+            val searchBattleUnitById = mock<SearchBattleUnitById>()
+            whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit(unit = unit(id = "rat").toDto()).toDto())
+            val path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2))
+            eventBus.publish(BattleUnitMoved(battleUnitId = "battle-unit-1", fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2, path = path))
+            // When
+            eventBus.dispatch()
+            // Then
+            verifyBlocking(battlefieldView) { moveBattleUnit(fromRow = 0, fromColumn = 0, path = path, unitId = "rat") }
+        }
+
+        @Test
+        fun `should not move the battle unit on view when the battle unit is not found`() {
+            // Given
+            val searchBattleUnitById = mock<SearchBattleUnitById>()
+            whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(searchBattleUnitById("battle-unit-1")).thenReturn(null)
+            val path = listOf(PositionDto(row = 0, column = 1))
+            eventBus.publish(BattleUnitMoved(battleUnitId = "battle-unit-1", fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 1, path = path))
+            // When
+            eventBus.dispatch()
+            // Then
+            verifyBlocking(battlefieldView, never()) { moveBattleUnit(any(), any(), any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class TileSelected {
+        @Test
+        fun `should process the selected tile when the timeline is idle`() {
+            // Given
+            // When
+            battlefieldPresenter.tileSelected(row = 1, column = 2)
+            // Then
+            verify(searchOccupant).invoke(row = 1, column = 2)
+        }
+
+        @Test
+        fun `should ignore the selected tile when the timeline is playing`() {
+            // Given
+            timeline.playLongStep()
+            // When
+            battlefieldPresenter.tileSelected(row = 1, column = 2)
+            // Then
+            verify(searchOccupant, never()).invoke(any(), any())
         }
     }
 }

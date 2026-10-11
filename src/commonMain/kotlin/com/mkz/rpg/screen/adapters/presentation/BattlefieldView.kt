@@ -11,6 +11,7 @@ import korlibs.korge.animate.animator
 import korlibs.korge.animate.moveTo
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onMouseDrag
+import korlibs.korge.time.delay
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIGridFill
@@ -40,6 +41,10 @@ class BattlefieldView(
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
+        // How long a moving battle unit stops on each tile of its path.
+        val MOVE_STEP_DURATION = 150.milliseconds
+        val SCROLL_DURATION = 300.milliseconds
+
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
     }
 
@@ -68,6 +73,10 @@ class BattlefieldView(
     }
     private lateinit var battlefieldAnimator: Animator
 
+    // A battlefield smaller than the viewport can not be scrolled.
+    private var minScrollX = 0.0
+    private var minScrollY = 0.0
+
     private val viewport =
         clipContainer(
             size = Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
@@ -93,25 +102,10 @@ class BattlefieldView(
                 rows = 0,
             )
         battlefieldAnimator = battlefieldGrid.animator(parallel = true)
+        minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
+        minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
         viewport.onMouseDrag { event ->
-            val dx = event.dx
-            val dy = event.dy
-
-            // A battlefield smaller than the viewport can not be scrolled.
-            val minX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
-            val minY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
-
-            val newX = (battlefieldGrid.x + dx).clamp(minX, 0.0)
-            val newY = (battlefieldGrid.y + dy).clamp(minY, 0.0)
-            battlefieldAnimator
-                .cancel()
-                .moveTo(
-                    view = battlefieldGrid,
-                    x = { newX },
-                    y = { newY },
-                    time = 300.milliseconds,
-                    easing = Easing.EASE_OUT_QUAD,
-                )
+            scrollTo(x = battlefieldGrid.x + event.dx, y = battlefieldGrid.y + event.dy)
         }
         battlefieldGrid.rows = battlefield.rows
         battlefieldGrid.cols = battlefield.columns
@@ -218,6 +212,67 @@ class BattlefieldView(
     ) {
         val tileButton = tile(row, column)
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
+    }
+
+    /**
+     * Moves the battle unit tile by tile along the path, stopping on each tile, and scrolls the battlefield so the
+     * battle unit stays visible. Path: the tiles walked from the origin (excluded) to the destination (included).
+     */
+    suspend fun moveBattleUnit(
+        fromRow: Int,
+        fromColumn: Int,
+        path: List<PositionDto>,
+        unitId: String,
+    ) {
+        var previousPosition = PositionDto(fromRow, fromColumn)
+        path.forEach { position ->
+            followTile(position.row, position.column)
+            removeBattleUnit(previousPosition.row, previousPosition.column)
+            displayBattleUnit(position.row, position.column, unitId)
+            delay(MOVE_STEP_DURATION)
+            previousPosition = position
+        }
+    }
+
+    // Centers the tile when it is out of the viewport or on its edge.
+    private suspend fun followTile(
+        row: Int,
+        column: Int,
+    ) {
+        val tileX = column * TILE_SIZE.toDouble()
+        val tileY = row * TILE_SIZE.toDouble()
+        if (isAwayFromViewportEdges(tileX, battlefieldGrid.x, VIEWPORT_WIDTH) && isAwayFromViewportEdges(tileY, battlefieldGrid.y, VIEWPORT_HEIGHT)) return
+        val centeredX = ((VIEWPORT_WIDTH - TILE_SIZE) / 2.0 - tileX).clamp(minScrollX, 0.0)
+        val centeredY = ((VIEWPORT_HEIGHT - TILE_SIZE) / 2.0 - tileY).clamp(minScrollY, 0.0)
+        if (centeredX == battlefieldGrid.x && centeredY == battlefieldGrid.y) return
+        scrollTo(x = centeredX, y = centeredY)
+        battlefieldAnimator.awaitComplete()
+    }
+
+    private fun isAwayFromViewportEdges(
+        tileOffset: Double,
+        scrollOffset: Double,
+        viewportSize: Int,
+    ): Boolean {
+        val tileOffsetInViewport = tileOffset + scrollOffset
+        return tileOffsetInViewport >= TILE_SIZE && tileOffsetInViewport + TILE_SIZE <= viewportSize - TILE_SIZE
+    }
+
+    private fun scrollTo(
+        x: Double,
+        y: Double,
+    ) {
+        val newX = x.clamp(minScrollX, 0.0)
+        val newY = y.clamp(minScrollY, 0.0)
+        battlefieldAnimator
+            .cancel()
+            .moveTo(
+                view = battlefieldGrid,
+                x = { newX },
+                y = { newY },
+                time = SCROLL_DURATION,
+                easing = Easing.EASE_OUT_QUAD,
+            )
     }
 
     private fun UIButton.addImage(

@@ -8,16 +8,18 @@ import com.mkz.rpg.shared.domain.subscribe
 class FinishTurnPresenter(
     private val playerCallToActionView: PlayerCallToActionView,
     private val battleApi: BattleApi,
+    private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) {
     private val subscriptions =
         listOf(
-            eventBus.subscribe<PlayerVictory> { event ->
-                playerCallToActionView.hide()
+            eventBus.subscribe<PlayerVictory> {
+                timeline.play { playerCallToActionView.hide() }
             },
         )
 
     init {
-        playerCallToActionView.displayFinishTurn(onTurnFinished = { battleApi.finishPlayerTurn() })
+        // The player can only finish the turn once the scene shows the current state of the battle.
+        playerCallToActionView.displayFinishTurn(onTurnFinished = { if (!timeline.isPlaying) battleApi.finishPlayerTurn() })
     }
 }

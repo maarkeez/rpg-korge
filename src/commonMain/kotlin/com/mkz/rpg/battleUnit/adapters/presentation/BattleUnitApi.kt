@@ -59,7 +59,7 @@ class BattleUnitApi(
         CanMoveTo(
             battleUnitRepository,
             battlefieldApi.searchPosition,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battlefieldApi.searchShortestPath,
         )
     val whereCanMove =
         WhereCanMove(
@@ -116,7 +116,7 @@ class BattleUnitApi(
             battleUnitRepository,
             eventBus,
             battlefieldApi.searchPosition,
-            distanceService,
+            battlefieldApi.searchShortestPath,
         )
     val resetBattleUnitActionsAndReduceCooldowns = ResetBattleUnitActionsAndReduceCooldowns(battleUnitRepository)
     val castAbility =

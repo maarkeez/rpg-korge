@@ -219,6 +219,18 @@ class FinishTurnViewTest : ViewsForTesting() {
 }
 ```
 
+### Animated views
+
+Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit`). They wait on frames, so the view **MUST** be added to the stage (`addChild(view)`).
+
+* Start them in another coroutine with `CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) { ... }`, so the test can assert what is displayed while they play.
+* Advance the frames with `delayFrame()` followed by `yield()`. `delayFrame()` alone does not let the other coroutine run.
+* See `BattlefieldViewTest.MoveBattleUnit`.
+
+### Presenters and the timeline
+
+Presenters draw through the [presentation timeline](../architecture/presentation-timeline.md). Their tests use `BattleSceneTimelineMother.battleSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
+
 ## Test example - Use case acceptance test
 
 - Use case acceptance tests MUST test new features that integrates multiple subdomains.

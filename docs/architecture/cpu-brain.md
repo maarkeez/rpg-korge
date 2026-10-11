@@ -21,6 +21,8 @@ A CPU turn is played one action at a time by the [`CpuBrain`](../../src/commonMa
 
 The CPU brain only resolves the exact action it awaits (the same battle unit and tile, or the same battle unit and ability), so events of other battle units or actions are ignored.
 
+The whole CPU turn is resolved instantly. The battle scene then replays it action by action, e.g.: each battle unit walking its path tile by tile, see [Presentation timeline](presentation-timeline.md).
+
 Every action spends casts or steps, so a turn always ends. As a safeguard, a turn ends after `CpuBrain.MAX_ACTIONS_PER_TURN` (20) actions.
 
 Known limitations:

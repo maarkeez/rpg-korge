@@ -3,8 +3,8 @@ package com.mkz.rpg.battleUnit.usecases.queries
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -14,51 +14,31 @@ import org.mockito.kotlin.whenever
 class CanMoveToTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val searchPosition: SearchPosition = mock()
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
-    private val canMoveTo = CanMoveTo(battleUnitRepository, searchPosition, canBattlefieldTileBeOccupied)
+    private val searchShortestPath: SearchShortestPath = mock()
+    private val canMoveTo = CanMoveTo(battleUnitRepository, searchPosition, searchShortestPath)
+
+    private val threeTilesPath = listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(3, 0))
 
     @Test
-    fun `should return true when the shortest path distance is within the remaining steps`() {
-        // Given
-        val battleUnit =
-            battleUnit(
-                unit =
-                    unit(movementRange = 5)
-                        .toDto(),
-            )
-        battleUnitRepository.create(battleUnit)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
-        whenever(canBattlefieldTileBeOccupied(1, 0)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(2, 0)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(3, 0)).thenReturn(true)
-        // When
-        val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
-        // Then
-        assertThat(result).isTrue()
-    }
-
-    @Test
-    fun `should return false when the shortest path distance exceeds the remaining steps`() {
-        // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 2).toDto())
-        battleUnitRepository.create(battleUnit)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
-        whenever(canBattlefieldTileBeOccupied(1, 0)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(2, 0)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(3, 0)).thenReturn(true)
-        // When
-        val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
-        // Then
-        assertThat(result).isFalse()
-    }
-
-    @Test
-    fun `should return false when the destination can only be reached jumping over non occupiable tiles`() {
+    fun `should return true when the shortest path is within the remaining steps`() {
         // Given
         val battleUnit = battleUnit(unit = unit(movementRange = 3).toDto())
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
-        whenever(canBattlefieldTileBeOccupied(3, 0)).thenReturn(true)
+        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 0)).thenReturn(threeTilesPath)
+        // When
+        val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
+        // Then
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `should return false when the shortest path exceeds the remaining steps`() {
+        // Given
+        val battleUnit = battleUnit(unit = unit(movementRange = 2).toDto())
+        battleUnitRepository.create(battleUnit)
+        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
+        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 0)).thenReturn(threeTilesPath)
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
@@ -66,19 +46,16 @@ class CanMoveToTest {
     }
 
     @Test
-    fun `should return true when a path exists longer than the straight line distance`() {
+    fun `should return false when there is no path to the destination`() {
         // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 4).toDto())
+        val battleUnit = battleUnit(unit = unit(movementRange = 3).toDto())
         battleUnitRepository.create(battleUnit)
         whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(0, 0))
-        whenever(canBattlefieldTileBeOccupied(1, 0)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(1, 1)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(1, 2)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(0, 2)).thenReturn(true)
+        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 0)).thenReturn(null)
         // When
-        val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 0, moveToColumn = 2)
+        val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        assertThat(result).isTrue()
+        assertThat(result).isFalse()
     }
 
     @Test

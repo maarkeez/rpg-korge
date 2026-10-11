@@ -75,21 +75,24 @@ data class BattleUnit private constructor(
             ongoingEffects = ongoingEffects.toDto(),
         )
 
+    /**
+     * Path: the tiles walked from the origin (excluded) to the destination (included). Each tile costs one step.
+     */
     fun move(
-        distance: Int,
         fromRow: Int,
         fromColumn: Int,
-        toRow: Int,
-        toColumn: Int,
+        path: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
-        val remainingTurnActions = remainingTurnActions.move(distance)
+        val remainingTurnActions = remainingTurnActions.move(path.size)
+        val destination = path.last()
         val movedEvent =
             BattleUnitMoved(
                 battleUnitId = id.value,
                 fromRow = fromRow,
                 fromColumn = fromColumn,
-                toRow = toRow,
-                toColumn = toColumn,
+                toRow = destination.row,
+                toColumn = destination.column,
+                path = path,
             )
         return copy(
             remainingTurnActions = remainingTurnActions,
@@ -110,6 +113,8 @@ data class BattleUnit private constructor(
                 fromColumn = fromColumn,
                 toRow = toRow,
                 toColumn = toColumn,
+                // A teleport jumps straight to the destination.
+                path = listOf(Battlefield.Dto.PositionDto(row = toRow, column = toColumn)),
             )
         return copy(
             remainingTurnActions = remainingTurnActions,

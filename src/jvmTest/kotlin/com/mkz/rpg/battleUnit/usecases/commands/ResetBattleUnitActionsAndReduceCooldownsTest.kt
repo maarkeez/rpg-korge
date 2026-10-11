@@ -20,7 +20,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         val exhaustedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .move(distance = 2, fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
+                .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
                 .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
