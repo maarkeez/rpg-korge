@@ -7,3 +7,18 @@ import korlibs.korge.view.Stage
 
 /** The battlefield on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battlefieldView(): BattlefieldView? = descendants().filterIsInstance<BattlefieldView>().firstOrNull()
+
+/** The battle info on the screen, or `null` while the battle scene is not on the stage yet. */
+fun Stage.battleInfoView(): BattleInfoView? = descendants().filterIsInstance<BattleInfoView>().firstOrNull()
+
+/**
+ * Whether the start of the current turn has been announced: the header displays the turn and the battlefield is no
+ * longer tinted. The player can not act on the battle scene until then.
+ */
+fun Stage.isTurnAnnounced(): Boolean {
+    val battleInfoView = battleInfoView() ?: return false
+    val battlefieldView = battlefieldView() ?: return false
+    return !battleInfoView.playerTurnText().isNullOrEmpty() &&
+        battleInfoView.playerTurnScale() == 1.0 &&
+        battlefieldView.tintColor() == null
+}

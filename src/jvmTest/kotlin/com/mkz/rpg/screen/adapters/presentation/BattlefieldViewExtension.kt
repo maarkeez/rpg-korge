@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 
@@ -25,6 +26,12 @@ fun BattlefieldView.isFlashingAt(
     row: Int,
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.FLASH)
+
+/** The colour the battlefield is tinted with, or `null` when it is not tinted. */
+fun BattlefieldView.tintColor(): RGBA? = tintOverlay?.color?.withA(255)
+
+/** How opaque the battlefield tint is: 0.0 when it is not tinted. */
+fun BattlefieldView.tintAlpha(): Double = tintOverlay?.alpha ?: 0.0
 
 /** The (row, column) of every tile displaying a battle unit. */
 fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =

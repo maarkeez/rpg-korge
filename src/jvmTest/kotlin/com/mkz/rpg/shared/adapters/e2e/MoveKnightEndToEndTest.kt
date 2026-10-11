@@ -6,6 +6,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
+import com.mkz.rpg.screen.adapters.presentation.isTurnAnnounced
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.yield
@@ -24,7 +25,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         viewsTest {
             // Given
             startGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
@@ -46,7 +47,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             val farTargetColumn = 4
             startGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, farTargetColumn) }

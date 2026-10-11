@@ -223,9 +223,9 @@ class FinishTurnViewTest : ViewsForTesting() {
 
 Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit`). They wait on frames, so the view **MUST** be added to the stage (`addChild(view)`).
 
-* Start them in another coroutine with `CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) { ... }`, so the test can assert what is displayed while they play.
-* Advance the frames with `delayFrame()` followed by `yield()`. `delayFrame()` alone does not let the other coroutine run.
-* See `BattlefieldViewTest.MoveBattleUnit`.
+* Start them with `startAnimation { ... }`, so the test can assert what is displayed while they play.
+* Advance the frames with `nextFrame()`, `awaitCompletion(animation)` or `sampleUntilCompletion(animation) { ... }`, which records what is displayed on every frame. They call `delayFrame()` followed by `yield()`, because `delayFrame()` alone does not let the animation coroutine run.
+* These helpers live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See `BattlefieldViewTest.MoveBattleUnit`.
 
 ### Presenters and the timeline
 
@@ -296,6 +296,7 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with `viewsTest`. It runs the game without a window or a GPU, so it runs in the CI.
 - They MUST boot the game using `com.mkz.rpg.startGame()`, the same function used by `main`.
 - They MUST find the scene views through the [`BattleScene` page object](../../src/jvmTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
+- They MUST wait until the turn has been announced (`isTurnAnnounced()`) before acting, as the player can not act on the battle scene while it replays the battle. See [Presentation timeline](../architecture/presentation-timeline.md).
 - They MUST wait for the game to react using a `waitUntil` loop bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
 
 For example: [`MoveKnightEndToEndTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)

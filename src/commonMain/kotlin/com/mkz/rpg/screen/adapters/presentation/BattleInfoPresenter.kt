@@ -4,12 +4,17 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
+import korlibs.io.async.launchImmediately
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.currentCoroutineContext
 
 class BattleInfoPresenter(
     private val battleInfoView: BattleInfoView,
+    private val battlefieldView: BattlefieldView,
     private val battleApi: BattleApi,
     private val playerApi: PlayerApi,
     private val timeline: BattleSceneTimeline,
@@ -18,7 +23,7 @@ class BattleInfoPresenter(
     private val subscriptions =
         listOf(
             eventBus.subscribe<PlayerTurnStarted> {
-                updateBattleInfo()
+                announceTurn()
             },
             eventBus.subscribe<PlayerVictory> { event ->
                 displayPlayerWin(event.playerId)
@@ -27,10 +32,20 @@ class BattleInfoPresenter(
 
     // Each function reads what it needs straight away and draws it once the previous timeline steps have been played.
 
-    fun updateBattleInfo() {
+    // The header pops while the battlefield is tinted with the turn colour.
+    fun announceTurn() {
         val battle = battleApi.searchBattle()!!
         val player = playerApi.searchPlayerById(battle.currentPlayerTurn)!!
-        timeline.play { battleInfoView.displayBattleInfo(player.name, battle.currentRound) }
+        val turnColor =
+            when (player.type) {
+                PlayerTypeDto.HUMAN -> BattleInfoView.HUMAN_TURN_COLOR
+                PlayerTypeDto.CPU -> BattleInfoView.CPU_TURN_COLOR
+            }
+        timeline.play {
+            val tinting = CoroutineScope(currentCoroutineContext()).launchImmediately { battlefieldView.tint(turnColor) }
+            battleInfoView.announceTurn(playerName = player.name, round = battle.currentRound, turnColor = turnColor)
+            tinting.join()
+        }
     }
 
     fun displayPlayerWin(playerId: String) {

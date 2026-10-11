@@ -6,7 +6,9 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
 import korlibs.korge.animate.Animator
+import korlibs.korge.animate.alpha
 import korlibs.korge.animate.animator
 import korlibs.korge.animate.moveTo
 import korlibs.korge.input.onClick
@@ -17,9 +19,11 @@ import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIGridFill
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
+import korlibs.korge.view.SolidRect
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.clipContainer
 import korlibs.korge.view.image
+import korlibs.korge.view.solidRect
 import korlibs.math.clamp
 import korlibs.math.geom.Size
 import korlibs.math.geom.Spacing
@@ -49,6 +53,10 @@ class BattlefieldView(
         // A battle unit receiving an effect blinks in white this many times.
         const val FLASH_COUNT = 3
         val FLASH_DURATION = 80.milliseconds
+
+        // When a turn starts, the battlefield is tinted with the turn colour up to this opacity and back.
+        const val TINT_ALPHA = 0.4
+        val TINT_DURATION = 500.milliseconds
 
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
     }
@@ -90,6 +98,7 @@ class BattlefieldView(
             size = Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
         )
     internal lateinit var battlefieldGrid: UIGridFill
+    internal var tintOverlay: SolidRect? = null
 
     init {
         addChild(viewport)
@@ -240,6 +249,20 @@ class BattlefieldView(
             delay(MOVE_STEP_DURATION)
             previousPosition = position
         }
+    }
+
+    /** Tints the visible battlefield with the colour, fading it in and out, e.g.: when a turn starts. */
+    suspend fun tint(color: RGBA) {
+        val overlay = viewport.solidRect(Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT), color) { alpha = 0.0 }
+        tintOverlay = overlay
+        val tintAnimator =
+            overlay.animator {
+                alpha(overlay, TINT_ALPHA, time = TINT_DURATION / 2)
+                alpha(overlay, 0.0, time = TINT_DURATION / 2)
+            }
+        tintAnimator.awaitComplete()
+        overlay.removeFromParent()
+        tintOverlay = null
     }
 
     /**

@@ -91,6 +91,7 @@ class BattleScene : Scene() {
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
+                    battlefieldView,
                     battleApi,
                     playerApi,
                     timeline,

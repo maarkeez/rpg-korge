@@ -4,17 +4,17 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
+import com.mkz.rpg.shared.adapters.presentation.nextFrame
+import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
+import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -27,7 +27,6 @@ class BattlefieldViewTest : ViewsForTesting() {
 
         // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
-        const val MAX_ANIMATION_FRAMES = 1_000
     }
 
     @Nested
@@ -326,13 +325,10 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
                 battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
                 addChild(battlefieldView)
-                val displayedPositions = mutableListOf(battlefieldView.battleUnitPositions())
+                val positionsBeforeMoving = battlefieldView.battleUnitPositions()
                 // When
                 val moving = startMoving(battlefieldView, path)
-                while (!moving.isCompleted && displayedPositions.size < MAX_ANIMATION_FRAMES) {
-                    displayedPositions += battlefieldView.battleUnitPositions()
-                    nextFrame()
-                }
+                val displayedPositions = listOf(positionsBeforeMoving) + sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() }
                 // Then
                 assertThat(displayedPositions.distinct()).containsExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
                 assertThat(displayedPositions.zipWithNext().count { (previous, next) -> previous != next }).isEqualTo(2)
@@ -389,7 +385,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             path: List<Battlefield.Dto.PositionDto>,
         ): Job {
             val origin = battlefieldView.battleUnitPositions().single()
-            return CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) {
+            return startAnimation {
                 battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
             }
         }
@@ -405,13 +401,9 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
                 battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
                 addChild(battlefieldView)
-                val flashingFrames = mutableListOf<Boolean>()
                 // When
                 val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
-                while (!flashing.isCompleted && flashingFrames.size < MAX_ANIMATION_FRAMES) {
-                    flashingFrames += battlefieldView.isFlashingAt(row = 0, column = 0)
-                    nextFrame()
-                }
+                val flashingFrames = sampleUntilCompletion(flashing) { battlefieldView.isFlashingAt(row = 0, column = 0) }
                 // Then
                 val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
                 assertThat(blinks).isEqualTo(BattlefieldView.FLASH_COUNT)
@@ -453,9 +445,38 @@ class BattlefieldViewTest : ViewsForTesting() {
             row: Int,
             column: Int,
             unitId: String,
-        ): Job =
-            CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) {
-                battlefieldView.flashBattleUnit(row = row, column = column, unitId = unitId)
+        ): Job = startAnimation { battlefieldView.flashBattleUnit(row = row, column = column, unitId = unitId) }
+    }
+
+    @Nested
+    inner class Tint {
+        @Test
+        fun `should tint the battlefield with the colour and fade it out when it is tinted`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                addChild(battlefieldView)
+                // When
+                val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
+                val tints = sampleUntilCompletion(tinting) { battlefieldView.tintColor() to battlefieldView.tintAlpha() }
+                // Then
+                assertThat(tints.mapNotNull { (color, _) -> color }.distinct()).containsExactly(BattleInfoView.CPU_TURN_COLOR)
+                assertThat(tints.maxOf { (_, alpha) -> alpha }).isCloseTo(BattlefieldView.TINT_ALPHA, within(0.05))
+                assertThat(battlefieldView.tintColor()).isNull()
+            }
+
+        @Test
+        fun `should not scroll the battlefield when it is tinted`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                addChild(battlefieldView)
+                // When
+                awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
+                // Then
+                assertThat(battlefieldView.scrollOffset()).isEqualTo(0.0 to 0.0)
             }
     }
 
@@ -475,17 +496,6 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 verify(delegate).tileSelected(row = 0, column = 0)
             }
-    }
-
-    // Animations run in another coroutine, which only runs when this one yields.
-    private suspend fun nextFrame() {
-        delayFrame()
-        yield()
-    }
-
-    private suspend fun awaitCompletion(job: Job) {
-        var frames = 0
-        while (!job.isCompleted && frames++ < MAX_ANIMATION_FRAMES) nextFrame()
     }
 
     private fun matchesWangTile(
