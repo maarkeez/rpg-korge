@@ -60,6 +60,33 @@ class BattleSceneTimelineTest {
     }
 
     @Nested
+    inner class OnPlayingChanged {
+        @Test
+        fun `should notify when the timeline starts and stops playing`() {
+            // Given
+            val notifications = mutableListOf<Boolean>()
+            timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
+            val longStep = timeline.playLongStep()
+            timeline.play { }
+            // When
+            longStep.complete(Unit)
+            // Then
+            assertThat(notifications).containsExactly(true, false)
+        }
+
+        @Test
+        fun `should notify that the timeline is playing when a step is still playing`() {
+            // Given
+            val notifications = mutableListOf<Boolean>()
+            timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
+            // When
+            timeline.playLongStep()
+            // Then
+            assertThat(notifications).containsExactly(true)
+        }
+    }
+
+    @Nested
     inner class IsPlaying {
         @Test
         fun `should not be playing when no step has been added`() {

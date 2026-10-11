@@ -6,6 +6,9 @@ import korlibs.korge.tests.ViewsForTesting
 
 fun PlayerCallToActionView.isDisplayingFinishTurn(): Boolean = visible && callToAction is FinishTurnView
 
+/** Whether the finish turn is displayed and can be clicked. */
+fun PlayerCallToActionView.isFinishTurnEnabled(): Boolean = isDisplayingFinishTurn() && (callToAction as FinishTurnView).isButtonEnabled()
+
 fun PlayerCallToActionView.isDisplayingCancelAndConfirm(): Boolean = visible && callToAction is CancelAndConfirmView
 
 suspend fun ViewsForTesting.clickFinishTurn(playerCallToActionView: PlayerCallToActionView) = clickFinishTurn(playerCallToActionView.callToAction as FinishTurnView)

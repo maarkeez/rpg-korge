@@ -9,6 +9,7 @@ class PlayerCallToActionView : Container() {
     }
 
     private var onTurnFinished: (() -> Unit)? = null
+    private var isFinishTurnEnabled = true
 
     fun hide() {
         visible = false
@@ -17,7 +18,14 @@ class PlayerCallToActionView : Container() {
     fun displayFinishTurn(onTurnFinished: () -> Unit) {
         this.onTurnFinished = onTurnFinished
         val finishTurnView = FinishTurnView(onTurnFinished = onTurnFinished)
+        finishTurnView.isEnabled = isFinishTurnEnabled
         display(finishTurnView)
+    }
+
+    /** Enables or disables the finish turn, also when it is displayed again later (e.g.: after cancelling a cast). */
+    fun setFinishTurnEnabled(enabled: Boolean) {
+        isFinishTurnEnabled = enabled
+        (callToAction as? FinishTurnView)?.isEnabled = enabled
     }
 
     fun displayCancelAndConfirm(

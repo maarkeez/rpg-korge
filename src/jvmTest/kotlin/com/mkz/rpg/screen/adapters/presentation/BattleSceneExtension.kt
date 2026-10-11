@@ -8,6 +8,9 @@ import korlibs.korge.view.Stage
 /** The battlefield on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battlefieldView(): BattlefieldView? = descendants().filterIsInstance<BattlefieldView>().firstOrNull()
 
+/** The player call to action on the screen, or `null` while the battle scene is not on the stage yet. */
+fun Stage.playerCallToActionView(): PlayerCallToActionView? = descendants().filterIsInstance<PlayerCallToActionView>().firstOrNull()
+
 /** The battle info on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleInfoView(): BattleInfoView? = descendants().filterIsInstance<BattleInfoView>().firstOrNull()
 

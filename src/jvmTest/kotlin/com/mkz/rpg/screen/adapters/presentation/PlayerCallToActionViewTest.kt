@@ -36,6 +36,63 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class SetFinishTurnEnabled {
+        @Test
+        fun `should display the finish turn disabled when finish turn is disabled`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                // When
+                playerCallToActionView.setFinishTurnEnabled(false)
+                // Then
+                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
+                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+            }
+
+        @Test
+        fun `should display the finish turn disabled when it was disabled before being displayed`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.setFinishTurnEnabled(false)
+                // When
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                // Then
+                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+            }
+
+        @Test
+        fun `should display the finish turn enabled again when finish turn is enabled`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                playerCallToActionView.setFinishTurnEnabled(false)
+                // When
+                playerCallToActionView.setFinishTurnEnabled(true)
+                // Then
+                assertThat(playerCallToActionView.isFinishTurnEnabled()).isTrue
+            }
+
+        @Test
+        fun `should display the finish turn disabled again when it is disabled and cancel is clicked`() =
+            viewsTest {
+                // Given
+                val playerCallToActionView = PlayerCallToActionView()
+                playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+                playerCallToActionView.displayCancelAndConfirm(onCancelled = {}, onConfirmed = {})
+                playerCallToActionView.setFinishTurnEnabled(false)
+                addChild(playerCallToActionView)
+                // When
+                clickCancel(playerCallToActionView)
+                // Then
+                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
+                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+            }
+    }
+
+    @Nested
     inner class DisplayCancelAndConfirm {
         @Test
         fun `should replace finish turn with cancel and confirm when cancel and confirm is displayed`() =

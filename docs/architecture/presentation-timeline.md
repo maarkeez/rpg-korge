@@ -22,6 +22,7 @@ For example, when the CPU moves two rats and the turn passes back to the human p
 - Presenters MUST read what a step needs when its event arrives, and only draw it inside the step. By the time the step is played, the battle may have moved on, e.g.: a battle unit that walks is defeated later in the same CPU turn, so it can no longer be found.
 - Every visual change caused by a battle event MUST go through the timeline, so the scene never displays a later state before an earlier one.
 - The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast and finishing the turn are ignored. The scene still displays a past state of the battle meanwhile.
+- The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) keeps it displayed but disabled (greyed out) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
 
 ## Starting a turn
 

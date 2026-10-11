@@ -21,4 +21,11 @@ class FinishTurnView(
                     onTurnFinished()
                 }
             }
+
+    /** A disabled button is still displayed, greyed out, but can not be clicked. */
+    var isEnabled: Boolean
+        get() = button.enabled
+        set(value) {
+            button.enabled = value
+        }
 }

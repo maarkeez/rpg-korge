@@ -15,16 +15,23 @@ class BattleSceneTimeline(
 ) {
     private val steps = ArrayDeque<suspend () -> Unit>()
     private var isPlayingSteps = false
+    private val playingListeners = mutableListOf<(isPlaying: Boolean) -> Unit>()
 
     /** Whether a step is being played or waiting to be played. The player should not act on the scene meanwhile. */
     val isPlaying: Boolean
         get() = isPlayingSteps || steps.isNotEmpty()
+
+    /** Calls the listener every time the timeline starts or stops playing, e.g.: to disable what the player can not use. */
+    fun onPlayingChanged(listener: (isPlaying: Boolean) -> Unit) {
+        playingListeners += listener
+    }
 
     /** Adds a step to be played after the previous ones. When the timeline is idle, the step starts straight away. */
     fun play(step: suspend () -> Unit) {
         steps.addLast(step)
         if (isPlayingSteps) return
         isPlayingSteps = true
+        playingListeners.forEach { listener -> listener(true) }
         coroutineScope.launchImmediately {
             try {
                 while (steps.isNotEmpty()) {
@@ -32,6 +39,7 @@ class BattleSceneTimeline(
                 }
             } finally {
                 isPlayingSteps = false
+                playingListeners.forEach { listener -> listener(false) }
             }
         }
     }

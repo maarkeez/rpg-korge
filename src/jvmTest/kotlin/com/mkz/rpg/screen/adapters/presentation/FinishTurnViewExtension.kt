@@ -7,4 +7,7 @@ import korlibs.korge.tests.ViewsForTesting
 
 fun FinishTurnView.buttonText(): String = button.text
 
+/** Whether the button can be clicked. A disabled button is displayed greyed out. */
+fun FinishTurnView.isButtonEnabled(): Boolean = button.enabled
+
 suspend fun ViewsForTesting.clickFinishTurn(finishTurnView: FinishTurnView) = clickOn(finishTurnView.button)

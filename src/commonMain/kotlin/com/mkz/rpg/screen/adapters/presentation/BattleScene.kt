@@ -108,7 +108,7 @@ class BattleScene : Scene() {
                 // addChild(finishTurnView)
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
-                FinishTurnPresenter(playerCallToActionView, battleApi, timeline, eventBus)
+                FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
             }
         }
 

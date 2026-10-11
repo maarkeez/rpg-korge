@@ -9,7 +9,6 @@ import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.isTurnAnnounced
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
-import kotlinx.coroutines.yield
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -67,19 +66,4 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
                 .withFailMessage("Expected the knight to be gone from (%s,%s)", targetRow, targetColumn)
                 .isFalse
         }
-
-    // Frames are simulated much faster than real time, while the game loads its resources
-    // asynchronously in real time. Hence, waiting is bounded by real time instead of frames,
-    // and `yield()` lets the game coroutines run between frames.
-    private suspend fun waitUntil(condition: () -> Boolean) {
-        val startMillis = System.currentTimeMillis()
-        while (!condition() && System.currentTimeMillis() - startMillis < WAIT_TIMEOUT_MILLIS) {
-            delayFrame()
-            yield()
-        }
-    }
-
-    private companion object {
-        const val WAIT_TIMEOUT_MILLIS = 10_000
-    }
 }
