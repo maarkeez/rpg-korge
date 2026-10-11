@@ -20,6 +20,9 @@ class BattleUnitInfoView(
         val CAST_POINTS_COLOR = RGBA(0xFF, 0xBB, 0x31)
 
         private const val TURN_ACTIONS_SPACING = 16.0
+
+        // Space between the info rows, e.g.: between the health and the mana bars.
+        private const val ROWS_SPACING = 4
     }
 
     internal lateinit var unitNameView: UnitNameView
@@ -42,19 +45,22 @@ class BattleUnitInfoView(
                     unitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
                     addChild(unitNameView)
 
+                    uiSpacing(Size(0, ROWS_SPACING))
                     val remainingTurnActionsView = UIContainer(Size(width = 281.5, height = 14))
                     remainingTurnActionsView.addChild(movementPointsView)
                     remainingTurnActionsView.addChild(castPointsView)
                     addChild(remainingTurnActionsView)
-                    uiSpacing(Size(0, 15))
+                    // Minus the space added above the remaining turn actions (the spacing and the stack padding),
+                    // so the health bar stays where it was.
+                    uiSpacing(Size(0, 15 - ROWS_SPACING - 1))
                     healthBarView = HealthBarView(Size(281.5, 16))
                     addChild(healthBarView)
 
-                    uiSpacing(Size(0, 4))
+                    uiSpacing(Size(0, ROWS_SPACING))
                     manaBarView = ManaBarView(Size(281.5, 16))
                     addChild(manaBarView)
 
-                    uiSpacing(Size(0, 4))
+                    uiSpacing(Size(0, ROWS_SPACING))
                     effectsView = EffectsView(resourcesLoader)
                     addChild(effectsView)
                 }
