@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.command
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
@@ -66,6 +67,18 @@ class UpdateMovementRangeTest {
                 tilesWhereCanBeMoved = newTiles,
             ),
         )
+    }
+
+    @Test
+    fun `should go idle when the selected battle unit is no longer on the battlefield`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(battleUnitId = "battle-unit-1"))
+        whenever(searchPosition("battle-unit-1")).thenReturn(null)
+        // When
+        updateMovementRange("battle-unit-1")
+        // Then
+        assertThat(battlefieldHudRepository.search()).isInstanceOf(BattlefieldHud.Idle::class.java)
+        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test

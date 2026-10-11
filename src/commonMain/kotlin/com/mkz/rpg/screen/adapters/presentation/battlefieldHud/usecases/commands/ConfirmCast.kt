@@ -28,7 +28,7 @@ class ConfirmCast(
                                 .map { tile -> Battlefield.Dto.PositionDto(row = tile.row, column = tile.column) },
                     ),
                 )
-                val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
+                val (events, updatedBattlefieldHud) = battlefieldHud.confirmCast().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             }

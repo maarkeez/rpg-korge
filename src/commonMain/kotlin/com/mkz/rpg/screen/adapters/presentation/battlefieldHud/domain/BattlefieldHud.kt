@@ -176,6 +176,36 @@ sealed interface BattlefieldHud {
         fun pullEvents() = events to copy(events = emptySet())
 
         fun idle() = Idle(events + BattlefieldHudEvent.Idle)
+
+        /**
+         * Keeps the caster selected. Its movement range is displayed once the cast has been resolved, since the cast
+         * changes the caster (e.g.: its mana, or its tile when teleported).
+         */
+        fun confirmCast() =
+            DisplayMovementRange(
+                tile = casterTile,
+                battleUnitId = battleUnitId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events = events,
+            )
+
+        // Goes back to choosing where to cast the ability.
+        fun cancelCast() =
+            DisplayAbilityCastRange(
+                casterTile = casterTile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                castGroupsWhereCanCast = castGroupsWhereCanCast,
+                events =
+                    events +
+                        SelectedBattleUnitAbility(
+                            casterTile = casterTile,
+                            battleUnitId = battleUnitId,
+                            abilityId = abilityId,
+                            castGroupsWhereCanCast = castGroupsWhereCanCast,
+                        ),
+            )
     }
 
     interface Dto {

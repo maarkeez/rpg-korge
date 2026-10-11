@@ -22,7 +22,14 @@ class UpdateMovementRange(
         when (battlefieldHud) {
             is DisplayMovementRange -> {
                 if (battleUnitId != battlefieldHud.battleUnitId) return
-                val position = searchPosition(battleUnitId)!!
+                val position = searchPosition(battleUnitId)
+                if (position == null) {
+                    // The selected battle unit is no longer on the battlefield, e.g.: it has been defeated.
+                    val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
+                    battlefieldHudRepository.update(updatedBattlefieldHud)
+                    eventBus.publish(events)
+                    return
+                }
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
                         .tilesWhereCanBeMoved(

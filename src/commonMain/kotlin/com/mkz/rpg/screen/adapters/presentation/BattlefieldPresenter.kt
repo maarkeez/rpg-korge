@@ -93,6 +93,10 @@ class BattlefieldPresenter(
                 moveUnit(event)
                 updateMovementRange(event.battleUnitId)
             },
+            // The selected caster is displayed again once its cast has been resolved.
+            eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> { event ->
+                updateMovementRange(event.battleUnitId)
+            },
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
                 flashUnit(event.battleUnitId)
             },

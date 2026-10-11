@@ -62,3 +62,10 @@ When the player selects a battle unit or an ability, the tiles that can be selec
 | Ability     | Every tile where it can be cast and the caster tile       |
 
 `BattlefieldView.resetTiles` removes the frames and the mask, e.g.: when the selection is cleared or a battle unit moves.
+
+## Casting an ability
+
+The selected battle unit stays selected while the player casts an ability with it:
+
+- Confirming the cast keeps the preview displayed while the cast is played, e.g.: the target blinking. Once the cast has been resolved (`AbilityCastResolved`), the caster is displayed selected again, with its movement range read after the cast (e.g.: its mana spent, or its new tile when teleported).
+- Cancelling the cast goes back to choosing where to cast the same ability.

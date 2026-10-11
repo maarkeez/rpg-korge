@@ -249,6 +249,59 @@ class BattlefieldHudTest {
         }
 
         @Test
+        fun `should display the caster movement range without publishing events when the cast is confirmed`() {
+            // Given
+            val hud =
+                BattlefieldHudMother.displayAbilityCastPreview(
+                    casterTile = tile(2, 2),
+                    battleUnitId = "battle-unit-1",
+                    tilesWhereCanBeMoved = setOf(tile(2, 3)),
+                )
+            // When
+            val updatedHud = hud.confirmCast()
+            // Then
+            assertThat(updatedHud).isEqualTo(
+                BattlefieldHudMother.displayMovementRange(tile = tile(2, 2), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(2, 3))),
+            )
+            assertThat(updatedHud.pullEvents().first).isEmpty()
+        }
+
+        @Test
+        fun `should display the ability cast range again and publish the event when the cast is cancelled`() {
+            // Given
+            val castGroupsWhereCanCast = listOf(castGroup(tile(1, 1)), castGroup(tile(0, 1)))
+            val hud =
+                BattlefieldHudMother.displayAbilityCastPreview(
+                    casterTile = tile(0, 0),
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "ability-1",
+                    tilesWhereCanBeMoved = setOf(tile(1, 0)),
+                    castGroupsWhereCanCast = castGroupsWhereCanCast,
+                )
+            // When
+            val updatedHud = hud.cancelCast()
+            // Then
+            val (events, hudWithoutEvents) = updatedHud.pullEvents()
+            assertThat(hudWithoutEvents).isEqualTo(
+                BattlefieldHudMother.displayAbilityCastRange(
+                    casterTile = tile(0, 0),
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "ability-1",
+                    tilesWhereCanBeMoved = setOf(tile(1, 0)),
+                    castGroupsWhereCanCast = castGroupsWhereCanCast,
+                ),
+            )
+            assertThat(events).containsExactly(
+                BattlefieldHudEvent.SelectedBattleUnitAbility(
+                    casterTile = tile(0, 0),
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "ability-1",
+                    castGroupsWhereCanCast = castGroupsWhereCanCast,
+                ),
+            )
+        }
+
+        @Test
         fun `should pull the pending events and clear them when the preview has events`() {
             // Given
             val hud = BattlefieldHudMother.displayAbilityCastRange().previewSelfAbilityCast(castGroup = castGroup(tile(1, 1)))

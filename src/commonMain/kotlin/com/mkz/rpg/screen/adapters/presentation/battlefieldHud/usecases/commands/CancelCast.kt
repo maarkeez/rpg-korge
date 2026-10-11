@@ -17,7 +17,7 @@ class CancelCast(
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayAbilityCastPreview -> {
-                val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
+                val (events, updatedBattlefieldHud) = battlefieldHud.cancelCast().pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             }
