@@ -49,3 +49,16 @@ A battle unit blinks in white every time an effect is applied to it:
 | `OnTurnStartedEffectApplied` | An effect applied at the start of the turn ticks     | venom damage at the start of the turn |
 
 `BattlefieldView.flashBattleUnit` first scrolls the battlefield to the battle unit, like a moving battle unit, so effects applied at the start of a turn are seen wherever the battle unit is. Then, a white silhouette of the battle unit blinks `FLASH_COUNT` (3) times, for `FLASH_DURATION` (80ms) each. A battle unit receiving several effects at once (e.g.: skull) blinks once per effect, one after the other.
+
+## Selecting tiles
+
+Each battlefield tile draws its content as named layers, from bottom to top: `TERRAIN`, `BATTLE_UNIT`, `SELECTION` (the tile frames) and `DIM`.
+
+When the player selects a battle unit or an ability, the tiles that can be selected keep their frames, and every other tile is darkened with a black mask (`DIM`, at `DIM_ALPHA` 0.4 opacity) by `BattlefieldView.dimTilesExcept`, including the battle units on them:
+
+| Selection   | Tiles that are not darkened                              |
+|-------------|----------------------------------------------------------|
+| Battle unit | Its movement range and the selected battle unit tile      |
+| Ability     | Every tile where it can be cast and the caster tile       |
+
+`BattlefieldView.resetTiles` removes the frames and the mask, e.g.: when the selection is cleared or a battle unit moves.

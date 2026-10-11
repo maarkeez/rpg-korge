@@ -28,6 +28,9 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -277,6 +280,69 @@ class BattlefieldPresenterTest {
             previousStep.complete(Unit)
             // Then
             verifyBlocking(battlefieldView) { flashBattleUnit(row = 3, column = 4, unitId = "knight") }
+        }
+    }
+
+    @Nested
+    inner class DimTiles {
+        private val searchBattleUnitById = mock<SearchBattleUnitById>()
+        private val searchUnitById = mock<SearchUnitById>()
+
+        private fun knight() {
+            val knight = unit(id = "knight")
+            whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(unitApi.searchUnitById).thenReturn(searchUnitById)
+            whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit(unit = knight.toDto()).toDto())
+            whenever(searchUnitById("knight")).thenReturn(knight.toDto())
+        }
+
+        @Test
+        fun `should dim every tile but the movement range and the selected battle unit when a battle unit is selected`() {
+            // Given
+            knight()
+            eventBus.publish(
+                BattlefieldHudEvent.SelectedBattleUnit(
+                    tile = TileDto(row = 1, column = 1),
+                    battleUnitId = "battle-unit-1",
+                    tilesWhereCanBeMoved = setOf(TileDto(row = 1, column = 2), TileDto(row = 2, column = 1)),
+                ),
+            )
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).dimTilesExcept(setOf(PositionDto(row = 1, column = 2), PositionDto(row = 2, column = 1), PositionDto(row = 1, column = 1)))
+        }
+
+        @Test
+        fun `should dim every tile but the cast tiles and the caster when an ability is selected`() {
+            // Given
+            knight()
+            eventBus.publish(
+                BattlefieldHudEvent.SelectedBattleUnitAbility(
+                    casterTile = TileDto(row = 1, column = 1),
+                    battleUnitId = "battle-unit-1",
+                    abilityId = "sword",
+                    castGroupsWhereCanCast =
+                        listOf(
+                            CastGroupDto(tiles = listOf(TileDto(row = 0, column = 1))),
+                            CastGroupDto(tiles = listOf(TileDto(row = 1, column = 0))),
+                        ),
+                ),
+            )
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).dimTilesExcept(setOf(PositionDto(row = 0, column = 1), PositionDto(row = 1, column = 0), PositionDto(row = 1, column = 1)))
+        }
+
+        @Test
+        fun `should reset the tiles when the battlefield hud is idle`() {
+            // Given
+            eventBus.publish(BattlefieldHudEvent.Idle)
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).resetTiles()
         }
     }
 

@@ -6,6 +6,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -190,6 +191,8 @@ class BattlefieldPresenter(
                 row = selectedBattleUnitEvent.tile.row,
                 column = selectedBattleUnitEvent.tile.column,
             )
+            val selectableTiles = selectedBattleUnitEvent.tilesWhereCanBeMoved + selectedBattleUnitEvent.tile
+            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> PositionDto(tile.row, tile.column) }.toSet())
         }
     }
 
@@ -214,6 +217,8 @@ class BattlefieldPresenter(
                     )
                 }
             }
+            val selectableTiles = event.castGroupsWhereCanCast.flatMap { castGroup -> castGroup.tiles } + event.casterTile
+            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> PositionDto(tile.row, tile.column) }.toSet())
         }
     }
 

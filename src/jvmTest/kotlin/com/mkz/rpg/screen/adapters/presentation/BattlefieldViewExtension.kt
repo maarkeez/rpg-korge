@@ -33,6 +33,23 @@ fun BattlefieldView.tintColor(): RGBA? = tintOverlay?.color?.withA(255)
 /** How opaque the battlefield tint is: 0.0 when it is not tinted. */
 fun BattlefieldView.tintAlpha(): Double = tintOverlay?.alpha ?: 0.0
 
+/** Whether the tile is darkened by the mask over the tiles that can not be selected. */
+fun BattlefieldView.isDimmedAt(
+    row: Int,
+    column: Int,
+): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.DIM)
+
+/** Whether the battle unit on the tile is darkened by the mask, i.e.: the mask is displayed over it. */
+fun BattlefieldView.isBattleUnitDimmedAt(
+    row: Int,
+    column: Int,
+): Boolean {
+    val layerNames = tile(row, column).children.map { child -> child.name }
+    return BattlefieldView.BATTLE_UNIT in layerNames && layerNames.lastIndexOf(BattlefieldView.DIM) > layerNames.indexOf(BattlefieldView.BATTLE_UNIT)
+}
+
+fun BattlefieldView.dimmedTilesCount(): Int = if (!isDisplayed) 0 else tiles.count { tile -> tile.hasLayer(BattlefieldView.DIM) }
+
 /** The (row, column) of every tile displaying a battle unit. */
 fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
     if (!isDisplayed) {

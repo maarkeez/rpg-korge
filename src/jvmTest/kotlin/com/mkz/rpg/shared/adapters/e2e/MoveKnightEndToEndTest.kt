@@ -6,6 +6,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
+import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
 import com.mkz.rpg.screen.adapters.presentation.isTurnAnnounced
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
@@ -37,6 +38,28 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
                 .isTrue
             assertThat(battlefieldView.hasBattleUnitAt(knightRow, knightColumn))
                 .withFailMessage("Expected the knight to be gone from (%s,%s)", knightRow, knightColumn)
+                .isFalse
+        }
+
+    @Test
+    fun `should dim the tiles out of the knight movement range when the human player selects the knight`() =
+        viewsTest {
+            // Given
+            startGame()
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
+            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
+            // When
+            clickTile(battlefieldView, knightRow, knightColumn)
+            // Then
+            waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
+            assertThat(battlefieldView.isDimmedAt(0, 0))
+                .withFailMessage("Expected (0,0), out of the knight movement range, to be dimmed")
+                .isTrue
+            assertThat(battlefieldView.isDimmedAt(knightRow, knightColumn))
+                .withFailMessage("Expected the selected knight not to be dimmed")
+                .isFalse
+            assertThat(battlefieldView.isDimmedAt(targetRow, targetColumn))
+                .withFailMessage("Expected (%s,%s), in the knight movement range, not to be dimmed", targetRow, targetColumn)
                 .isFalse
         }
 

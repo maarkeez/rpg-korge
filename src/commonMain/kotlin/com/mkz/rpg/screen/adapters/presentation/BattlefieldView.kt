@@ -39,6 +39,7 @@ class BattlefieldView(
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
+        const val DIM = "DIM"
 
         const val TILE_SIZE = 48
         const val TILE_PIXEL_SIZE = 16
@@ -49,6 +50,9 @@ class BattlefieldView(
         // How long a moving battle unit stops on each tile of its path.
         val MOVE_STEP_DURATION = 150.milliseconds
         val SCROLL_DURATION = 300.milliseconds
+
+        // Opacity of the black mask over the tiles that can not be selected.
+        const val DIM_ALPHA = 0.4
 
         // A battle unit receiving an effect blinks in white this many times.
         const val FLASH_COUNT = 3
@@ -220,6 +224,25 @@ class BattlefieldView(
         battlefieldGrid.children.forEach { view ->
             val tileButton = view as UIButton
             tileButton.findViewByName(SELECTION)?.removeFromParent()
+            tileButton.findViewByName(DIM)?.removeFromParent()
+        }
+    }
+
+    /**
+     * Darkens every tile but the given ones, including the battle units on them, so the tiles that can be selected
+     * stand out. Removed when the tiles are reset.
+     */
+    fun dimTilesExcept(tiles: Set<PositionDto>) {
+        for (row in 0 until battlefieldGrid.rows) {
+            for (column in 0 until battlefieldGrid.cols) {
+                if (PositionDto(row, column) in tiles) continue
+                val tileButton = tile(row, column)
+                if (tileButton.findViewByName(DIM) != null) continue
+                tileButton.solidRect(Size(TILE_SIZE, TILE_SIZE), Colors.BLACK) {
+                    name = DIM
+                    alpha = DIM_ALPHA
+                }
+            }
         }
     }
 

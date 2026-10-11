@@ -298,6 +298,64 @@ class BattlefieldViewTest : ViewsForTesting() {
     }
 
     @Nested
+    inner class DimTilesExcept {
+        @Test
+        fun `should dim every tile but the given ones when tiles are dimmed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+                // When
+                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0), Battlefield.Dto.PositionDto(row = 1, column = 1)))
+                // Then
+                assertThat(battlefieldView.isDimmedAt(row = 0, column = 0)).isFalse
+                assertThat(battlefieldView.isDimmedAt(row = 1, column = 1)).isFalse
+                assertThat(battlefieldView.isDimmedAt(row = 0, column = 1)).isTrue
+                assertThat(battlefieldView.isDimmedAt(row = 1, column = 0)).isTrue
+            }
+
+        @Test
+        fun `should dim the battle unit on a tile that is dimmed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
+                // When
+                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+                // Then
+                assertThat(battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1)).isTrue
+            }
+
+        @Test
+        fun `should not dim a tile twice when tiles are dimmed twice`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+                // When
+                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+                battlefieldView.resetTiles()
+                // Then
+                assertThat(battlefieldView.isDimmedAt(row = 0, column = 1)).isFalse
+            }
+
+        @Test
+        fun `should remove the mask from every tile when tiles are reset`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+                battlefieldView.dimTilesExcept(emptySet())
+                // When
+                battlefieldView.resetTiles()
+                // Then
+                assertThat(battlefieldView.dimmedTilesCount()).isEqualTo(0)
+            }
+    }
+
+    @Nested
     inner class RemoveBattleUnit {
         @Test
         fun `should remove battle unit from tile when is removed`() =
