@@ -1,8 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.ui.UIText
-import korlibs.korge.ui.UIVerticalStack
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -20,11 +18,8 @@ class BattleInfoViewTest : ViewsForTesting() {
                 // When
                 battleInfoView.displayBattleInfo(playerName = playerName, round = round)
                 // Then
-                val layout = battleInfoView.children[0] as UIVerticalStack
-                val roundText = layout.children[0] as UIText
-                val playerText = layout.children[1] as UIText
-                assertThat(roundText.text).isEqualTo("Round $round")
-                assertThat(playerText.text).isEqualTo("$playerName turn")
+                assertThat(battleInfoView.roundText()).isEqualTo("Round $round")
+                assertThat(battleInfoView.playerTurnText()).isEqualTo("$playerName turn")
             }
     }
 
@@ -39,9 +34,9 @@ class BattleInfoViewTest : ViewsForTesting() {
                 // When
                 battleInfoView.displayPlayerWin(playerName)
                 // Then
-                val layout = battleInfoView.children[0] as UIVerticalStack
-                val winnerText = layout.children[0] as UIText
-                assertThat(winnerText.text).isEqualTo("$playerName wins!")
+                assertThat(battleInfoView.winnerText()).isEqualTo("$playerName wins!")
+                assertThat(battleInfoView.roundText()).isNull()
+                assertThat(battleInfoView.playerTurnText()).isNull()
             }
     }
 }

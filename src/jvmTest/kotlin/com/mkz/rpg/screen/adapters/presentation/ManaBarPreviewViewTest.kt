@@ -1,5 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.filledWidth
+import com.mkz.rpg.shared.adapters.presentation.labelText
+import com.mkz.rpg.shared.adapters.presentation.previewWidth
 import korlibs.korge.tests.ViewsForTesting
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -41,7 +44,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(manaBarPreviewView.label.text).isEqualTo("50 / 100")
+                assertThat(manaBarPreviewView.labelText()).isEqualTo("50 / 100")
             }
 
         @Test
@@ -55,7 +58,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
                 // Then
-                assertThat(manaBarPreviewView.filled.width).isEqualTo(size.width * filledPercentage)
+                assertThat(manaBarPreviewView.filledWidth()).isEqualTo(size.width * filledPercentage)
             }
 
         @Test
@@ -69,7 +72,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
                 // Then
-                assertThat(manaBarPreviewView.preview.width).isEqualTo(size.width * previewPercentage)
+                assertThat(manaBarPreviewView.previewWidth()).isEqualTo(size.width * previewPercentage)
             }
 
         @Test
@@ -80,8 +83,8 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
                 // Then
-                assertThat(manaBarPreviewView.filled.width).isEqualTo(0.00)
-                assertThat(manaBarPreviewView.label.text).isEqualTo("0 / 100")
+                assertThat(manaBarPreviewView.filledWidth()).isEqualTo(0.00)
+                assertThat(manaBarPreviewView.labelText()).isEqualTo("0 / 100")
             }
     }
 

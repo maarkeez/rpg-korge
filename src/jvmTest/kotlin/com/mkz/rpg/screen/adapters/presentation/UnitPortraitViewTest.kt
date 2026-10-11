@@ -29,8 +29,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "knight")
                 // Then
-                val battleUnitPortrait = unitPortraitView.children[0]
-                assertThat(battleUnitPortrait.findViewByName("portrait")).isNotNull
+                assertThat(unitPortraitView.isPortraitDisplayed()).isTrue
             }
 
         @Test
@@ -41,8 +40,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "rat")
                 // Then
-                val battleUnitPortrait = unitPortraitView.children[0]
-                assertThat(battleUnitPortrait.findViewByName("portrait")).isNotNull
+                assertThat(unitPortraitView.isPortraitDisplayed()).isTrue
             }
 
         @Test
@@ -53,8 +51,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "unknown-unit")
                 // Then
-                val battleUnitPortrait = unitPortraitView.children[0]
-                assertThat(battleUnitPortrait.findViewByName("portrait")).isNull()
+                assertThat(unitPortraitView.isPortraitDisplayed()).isFalse
             }
     }
 

@@ -17,12 +17,12 @@ open class BarView(
     size: Size,
     color: RGBA,
 ) : UIContainer(size) {
-    val progressBar: UIProgressBar =
+    internal val progressBar: UIProgressBar =
         uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
             progressBar.styles.uiSelectedColor = color
             progressBar.styles.uiBackgroundColor = Colors.DIMGREY
         }
-    val label =
+    internal val label =
         text(
             text = "",
             textSize = 14.0,

@@ -14,13 +14,13 @@ import korlibs.math.geom.Size
 class BattleUnitInfoView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
-    private lateinit var unitNameView: UnitNameView
+    internal lateinit var unitNameView: UnitNameView
     private lateinit var remainingTurnActionsLabel: UIText
-    private lateinit var abilityButtons: Array<AbilityButtonView>
-    private lateinit var effectsView: EffectsView
+    internal lateinit var abilityButtons: Array<AbilityButtonView>
+    internal lateinit var effectsView: EffectsView
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
-    private lateinit var unitPortraitView: UnitPortraitView
+    internal lateinit var unitPortraitView: UnitPortraitView
 
     private val battleUnitInfoLayout =
         uiVerticalStack(padding = 5.0) {

@@ -4,6 +4,10 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
 class PlayerCallToActionView : Container() {
+    companion object {
+        const val CALL_TO_ACTION = "CALL_TO_ACTION"
+    }
+
     private var onTurnFinished: (() -> Unit)? = null
 
     fun hide() {
@@ -34,10 +38,12 @@ class PlayerCallToActionView : Container() {
         display(cancelAndConfirmView)
     }
 
+    internal val callToAction: View?
+        get() = findViewByName(CALL_TO_ACTION)
+
     private fun display(view: View) {
-        val viewName = "call-to-action"
-        view.name = viewName
-        findViewByName(viewName)?.removeFromParent()
+        view.name = CALL_TO_ACTION
+        callToAction?.removeFromParent()
         addChild(view)
     }
 }

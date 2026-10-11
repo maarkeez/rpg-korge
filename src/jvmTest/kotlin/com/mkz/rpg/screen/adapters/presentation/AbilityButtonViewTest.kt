@@ -2,8 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.view.Image
-import korlibs.korge.view.filter.filter
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -33,7 +31,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 // Then
-                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY)).isNotNull
+                assertThat(abilityButtonView.isAbilityIconDisplayed()).isTrue
             }
 
         @Test
@@ -44,8 +42,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 // Then
-                val abilityIcon = abilityButtonView.findViewByName(AbilityButtonView.ABILITY) as Image
-                assertThat(abilityIcon.filter).isNull()
+                assertThat(abilityButtonView.isAbilityIconDarkened()).isFalse
             }
 
         @Test
@@ -56,8 +53,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = false)
                 // Then
-                val abilityIcon = abilityButtonView.findViewByName(AbilityButtonView.ABILITY) as Image
-                assertThat(abilityIcon.filter).isNotNull
+                assertThat(abilityButtonView.isAbilityIconDarkened()).isTrue
             }
     }
 
@@ -71,7 +67,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.select()
                 // Then
-                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_SELECTION)).isNotNull
+                assertThat(abilityButtonView.isSelected()).isTrue
             }
 
         @Test
@@ -83,9 +79,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.select()
                 // Then
-                val abilitySelectionIcons =
-                    abilityButtonView.children.count { child -> child.name == AbilityButtonView.ABILITY_SELECTION }
-                assertThat(abilitySelectionIcons).isEqualTo(1)
+                assertThat(abilityButtonView.selectionIconCount()).isEqualTo(1)
             }
     }
 
@@ -100,7 +94,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.unselect()
                 // Then
-                assertThat(abilityButtonView.findViewByName(AbilityButtonView.ABILITY_SELECTION)).isNull()
+                assertThat(abilityButtonView.isSelected()).isFalse
             }
     }
 
@@ -131,7 +125,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 addChild(abilityButtonView)
                 // When
-                abilityButtonView.simulateClick()
+                clickAbilityButton(abilityButtonView)
                 // Then
                 verify(delegate).abilitySelected(abilityId = "mushroom")
             }

@@ -7,7 +7,7 @@ import korlibs.math.geom.Size
 class EffectsView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
-    private lateinit var effectViews: Array<EffectView>
+    internal lateinit var effectViews: Array<EffectView>
 
     private val effectViewsLayout =
         uiHorizontalStack(padding = 2.0) {

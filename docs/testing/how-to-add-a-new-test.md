@@ -150,65 +150,70 @@ class OnBattleUnitDefeatedTest {
 }
 ```
 
-## Test example - Presentation View 
+## Test example - Presentation View
 
 View tests are a bit different from the rest of the tests because they need to rely on KorGE's testing features.
 
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
 * Each test function **MUST** start by using `viewsTest` from `korlibs.korge.tests.ViewsForTesting`.
-* The production code **SHOULD** be adapted to grant access to `korlibs.korge.view` properties, so that tests can assert whether they are visible and verify their properties, such as `text`, etc.
+* The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
 
-Here is a complete example of a view test:
+### View page objects
+
+Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.: `BattleInfoViewExtension.kt` for `BattleInfoView`). It is the only place that knows how the view is built, so changing the view structure only requires changing its page object, not its tests.
+
+* Queries **MUST** be extension functions on the view, named in terms of what the player sees (e.g.: `fun BattleInfoView.roundText(): String?`, `fun BattlefieldView.hasBattleUnitAt(row, column): Boolean`).
+* Actions **MUST** be extension functions on `ViewsForTesting` that receive the view, and **MUST** click with the mouse through `clickOn(view)` (e.g.: `suspend fun ViewsForTesting.clickTile(battlefieldView, row, column)`). The view **MUST** be added to the stage (`addChild(view)`) before clicking it.
+* The view children used by the page object **SHOULD** be declared `internal` in the production code, so the page object is typed and fails to compile when the view structure changes.
+* Page objects of composite views **SHOULD** reuse the page objects of their child views (e.g.: `BattleUnitInfoView.abilityButtons()` plus `AbilityButtonView.isSelected()`).
+* Shared helpers (`clickOn`, `isShown`, `descendants`) live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt).
+
+Here is an example of a page object:
 
 ```kotlin
-import com.mkz.rpg.shared.adapters.presentation.BarView
-import korlibs.image.color.Colors
-import korlibs.korge.tests.ViewsForTesting
-import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.Nested
-import org.junit.jupiter.api.Test
+// src/jvmTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnViewExtension.kt
+package com.mkz.rpg.screen.adapters.presentation
 
-class BarViewTest : ViewsForTesting() {
+import com.mkz.rpg.shared.adapters.presentation.clickOn
+import korlibs.korge.tests.ViewsForTesting
+
+// Page object of [FinishTurnView].
+
+fun FinishTurnView.buttonText(): String = button.text
+
+suspend fun ViewsForTesting.clickFinishTurn(finishTurnView: FinishTurnView) = clickOn(finishTurnView.button)
+```
+
+And a view test using it:
+
+```kotlin
+class FinishTurnViewTest : ViewsForTesting() {
+    @Nested
+    inner class Init {
+        @Test
+        fun `should display finish turn text when is initialized`() =
+            viewsTest {
+                // Given
+                // When
+                val finishTurnView = FinishTurnView(onTurnFinished = {})
+                // Then
+                assertThat(finishTurnView.buttonText()).isEqualTo("Finish turn")
+            }
+    }
 
     @Nested
-    inner class Display {
+    inner class ButtonClick {
         @Test
-        fun `should be visible when is displayed`() =
+        fun `should finish turn when button is clicked`() =
             viewsTest {
                 // Given
-                val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
+                var turnFinished = false
+                val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
+                addChild(finishTurnView)
                 // When
-                barView.display(remaining = 50, maximum = 100)
+                clickFinishTurn(finishTurnView)
                 // Then
-                assertThat(barView.isVisibleToUser()).isTrue
-                assertThat(barView.progressBar.isVisibleToUser()).isTrue
-                assertThat(barView.label.isVisibleToUser()).isTrue
-            }
-
-        @Test
-        fun `should modify label when is displayed`() =
-            viewsTest {
-                // Given
-                val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
-                // When
-                barView.display(remaining = 50, maximum = 100)
-                // Then
-                assertThat(barView.label.text).isEqualTo("50 / 100")
-            }
-
-        @Test
-        fun `should modify progress bar when is displayed`() =
-            viewsTest {
-                // Given
-                val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
-                val remaining = 50
-                val maximum = 100
-                val percentage = (remaining.toDouble() / maximum.toDouble()) * 100
-                // When
-                barView.display(remaining = 50, maximum = 100)
-                // Then
-                assertThat(barView.progressBar.current).isEqualTo(percentage)
+                assertThat(turnFinished).isTrue
             }
     }
 }
@@ -277,8 +282,7 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - They MUST be implemented under `com.mkz.rpg.shared.adapters.e2e` test package
 - The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with `viewsTest`. It runs the game without a window or a GPU, so it runs in the CI.
 - They MUST boot the game using `com.mkz.rpg.startGame()`, the same function used by `main`.
-- They MUST interact through mouse events (e.g.: `mouseMoveAndClickTo(x, y)`) using the global coordinates of the views.
-- They MUST assert what is displayed. Views can be found by name (e.g.: battlefield tiles are named `row-<row>-column-<column>`).
+- They MUST find the scene views through the [`BattleScene` page object](../../src/jvmTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
 - They MUST wait for the game to react using a `waitUntil` loop bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
 
 For example: [`MoveKnightEndToEndTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
@@ -290,15 +294,16 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         viewsTest {
             // Given
             startGame()
-            waitUntil { hasBattleUnit(knightRow, knightColumn) }
-            clickOnTile(knightRow, knightColumn)
-            waitUntil { hasSelection(targetRow, targetColumn) }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
+            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
+            clickTile(battlefieldView, knightRow, knightColumn)
+            waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
             // When
-            clickOnTile(targetRow, targetColumn)
+            clickTile(battlefieldView, targetRow, targetColumn)
             // Then
-            waitUntil { hasBattleUnit(targetRow, targetColumn) }
-            assertThat(hasBattleUnit(targetRow, targetColumn)).isTrue
-            assertThat(hasBattleUnit(knightRow, knightColumn)).isFalse
+            waitUntil { battlefieldView.hasBattleUnitAt(targetRow, targetColumn) }
+            assertThat(battlefieldView.hasBattleUnitAt(targetRow, targetColumn)).isTrue
+            assertThat(battlefieldView.hasBattleUnitAt(knightRow, knightColumn)).isFalse
         }
 
     private suspend fun waitUntil(condition: () -> Boolean) {

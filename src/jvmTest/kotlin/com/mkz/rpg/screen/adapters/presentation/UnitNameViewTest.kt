@@ -1,10 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.image.text.TextAlignment
-import korlibs.korge.style.styles
-import korlibs.korge.style.textAlignment
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.ui.UIText
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -48,8 +44,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.display(unitName = unitName)
                 // Then
-                val unitNameLabel = unitNameView.children[0] as UIText
-                assertThat(unitNameLabel.text).isEqualTo(unitName)
+                assertThat(unitNameView.nameText()).isEqualTo(unitName)
             }
     }
 
@@ -63,8 +58,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.alignTextToRight()
                 // Then
-                val unitNameLabel = unitNameView.children[0] as UIText
-                assertThat(unitNameLabel.styles.textAlignment).isEqualTo(TextAlignment.RIGHT)
+                assertThat(unitNameView.isAlignedToRight()).isTrue
             }
     }
 

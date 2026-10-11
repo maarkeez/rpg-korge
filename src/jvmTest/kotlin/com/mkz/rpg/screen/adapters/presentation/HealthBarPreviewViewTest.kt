@@ -1,5 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.filledWidth
+import com.mkz.rpg.shared.adapters.presentation.labelText
+import com.mkz.rpg.shared.adapters.presentation.previewWidth
 import korlibs.korge.tests.ViewsForTesting
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -41,7 +44,7 @@ class HealthBarPreviewViewTest : ViewsForTesting() {
                 // When
                 healthBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(healthBarPreviewView.label.text).isEqualTo("50 / 100")
+                assertThat(healthBarPreviewView.labelText()).isEqualTo("50 / 100")
             }
 
         @Test
@@ -55,7 +58,7 @@ class HealthBarPreviewViewTest : ViewsForTesting() {
                 // When
                 healthBarPreviewView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
                 // Then
-                assertThat(healthBarPreviewView.filled.width).isEqualTo(size.width * filledPercentage)
+                assertThat(healthBarPreviewView.filledWidth()).isEqualTo(size.width * filledPercentage)
             }
 
         @Test
@@ -69,7 +72,7 @@ class HealthBarPreviewViewTest : ViewsForTesting() {
                 // When
                 healthBarPreviewView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
                 // Then
-                assertThat(healthBarPreviewView.preview.width).isEqualTo(size.width * previewPercentage)
+                assertThat(healthBarPreviewView.previewWidth()).isEqualTo(size.width * previewPercentage)
             }
 
         @Test
@@ -80,8 +83,8 @@ class HealthBarPreviewViewTest : ViewsForTesting() {
                 // When
                 healthBarPreviewView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
                 // Then
-                assertThat(healthBarPreviewView.filled.width).isEqualTo(0.00)
-                assertThat(healthBarPreviewView.label.text).isEqualTo("0 / 100")
+                assertThat(healthBarPreviewView.filledWidth()).isEqualTo(0.00)
+                assertThat(healthBarPreviewView.labelText()).isEqualTo("0 / 100")
             }
     }
 

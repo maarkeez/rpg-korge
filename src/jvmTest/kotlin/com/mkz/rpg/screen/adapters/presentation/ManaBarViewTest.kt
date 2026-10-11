@@ -1,5 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.isLabelShown
+import com.mkz.rpg.shared.adapters.presentation.isProgressBarShown
+import com.mkz.rpg.shared.adapters.presentation.labelText
+import com.mkz.rpg.shared.adapters.presentation.progressPercentage
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
 import org.assertj.core.api.Assertions.assertThat
@@ -17,8 +21,8 @@ class ManaBarViewTest : ViewsForTesting() {
                 // When
                 // Then
                 assertThat(manaBarView.isVisibleToUser()).isFalse
-                assertThat(manaBarView.progressBar.isVisibleToUser()).isFalse
-                assertThat(manaBarView.label.isVisibleToUser()).isFalse
+                assertThat(manaBarView.isProgressBarShown()).isFalse
+                assertThat(manaBarView.isLabelShown()).isFalse
             }
     }
 
@@ -33,8 +37,8 @@ class ManaBarViewTest : ViewsForTesting() {
                 manaBarView.display(remaining = 50, maximum = 100)
                 // Then
                 assertThat(manaBarView.isVisibleToUser()).isTrue
-                assertThat(manaBarView.progressBar.isVisibleToUser()).isTrue
-                assertThat(manaBarView.label.isVisibleToUser()).isTrue
+                assertThat(manaBarView.isProgressBarShown()).isTrue
+                assertThat(manaBarView.isLabelShown()).isTrue
             }
 
         @Test
@@ -45,7 +49,7 @@ class ManaBarViewTest : ViewsForTesting() {
                 // When
                 manaBarView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(manaBarView.label.text).isEqualTo("50 / 100")
+                assertThat(manaBarView.labelText()).isEqualTo("50 / 100")
             }
 
         @Test
@@ -59,7 +63,7 @@ class ManaBarViewTest : ViewsForTesting() {
                 // When
                 manaBarView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(manaBarView.progressBar.current).isEqualTo(percentage)
+                assertThat(manaBarView.progressPercentage()).isEqualTo(percentage)
             }
     }
 
@@ -75,8 +79,8 @@ class ManaBarViewTest : ViewsForTesting() {
                 manaBarView.hide()
                 // Then
                 assertThat(manaBarView.isVisibleToUser()).isFalse
-                assertThat(manaBarView.progressBar.isVisibleToUser()).isFalse
-                assertThat(manaBarView.label.isVisibleToUser()).isFalse
+                assertThat(manaBarView.isProgressBarShown()).isFalse
+                assertThat(manaBarView.isLabelShown()).isFalse
             }
     }
 }

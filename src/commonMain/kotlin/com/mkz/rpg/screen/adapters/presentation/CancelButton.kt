@@ -11,7 +11,7 @@ import korlibs.korge.view.Container
 class CancelButton(
     val onCancelled: () -> Unit,
 ) : Container() {
-    private val cancelButton: UIButton =
+    internal val cancelButton: UIButton =
         uiButton {
             text = "Cancel"
             width = 190.0

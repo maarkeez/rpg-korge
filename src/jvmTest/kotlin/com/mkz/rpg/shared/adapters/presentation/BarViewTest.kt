@@ -18,8 +18,8 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 // Then
                 assertThat(barView.isVisibleToUser()).isFalse
-                assertThat(barView.progressBar.isVisibleToUser()).isFalse
-                assertThat(barView.label.isVisibleToUser()).isFalse
+                assertThat(barView.isProgressBarShown()).isFalse
+                assertThat(barView.isLabelShown()).isFalse
             }
     }
 
@@ -34,8 +34,8 @@ class BarViewTest : ViewsForTesting() {
                 barView.display(remaining = 50, maximum = 100)
                 // Then
                 assertThat(barView.isVisibleToUser()).isTrue
-                assertThat(barView.progressBar.isVisibleToUser()).isTrue
-                assertThat(barView.label.isVisibleToUser()).isTrue
+                assertThat(barView.isProgressBarShown()).isTrue
+                assertThat(barView.isLabelShown()).isTrue
             }
 
         @Test
@@ -46,7 +46,7 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(barView.label.text).isEqualTo("50 / 100")
+                assertThat(barView.labelText()).isEqualTo("50 / 100")
             }
 
         @Test
@@ -60,7 +60,7 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(barView.progressBar.current).isEqualTo(percentage)
+                assertThat(barView.progressPercentage()).isEqualTo(percentage)
             }
     }
 
@@ -76,8 +76,8 @@ class BarViewTest : ViewsForTesting() {
                 barView.hide()
                 // Then
                 assertThat(barView.isVisibleToUser()).isFalse
-                assertThat(barView.progressBar.isVisibleToUser()).isFalse
-                assertThat(barView.label.isVisibleToUser()).isFalse
+                assertThat(barView.isProgressBarShown()).isFalse
+                assertThat(barView.isLabelShown()).isFalse
             }
     }
 }

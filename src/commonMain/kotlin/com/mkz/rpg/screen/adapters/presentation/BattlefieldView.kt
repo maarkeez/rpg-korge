@@ -72,7 +72,7 @@ class BattlefieldView(
         clipContainer(
             size = Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
         )
-    private lateinit var battlefieldGrid: UIGridFill
+    internal lateinit var battlefieldGrid: UIGridFill
 
     init {
         addChild(viewport)
@@ -97,8 +97,9 @@ class BattlefieldView(
             val dx = event.dx
             val dy = event.dy
 
-            val minX = -(mapWidth - VIEWPORT_WIDTH).toDouble()
-            val minY = -(mapHeight - VIEWPORT_HEIGHT).toDouble()
+            // A battlefield smaller than the viewport can not be scrolled.
+            val minX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
+            val minY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
 
             val newX = (battlefieldGrid.x + dx).clamp(minX, 0.0)
             val newY = (battlefieldGrid.y + dy).clamp(minY, 0.0)
@@ -145,6 +146,17 @@ class BattlefieldView(
         }
     }
 
+    internal val isDisplayed: Boolean
+        get() = ::battlefieldGrid.isInitialized
+
+    internal val tiles: List<UIButton>
+        get() = battlefieldGrid.children.filterIsInstance<UIButton>()
+
+    internal fun tile(
+        row: Int,
+        column: Int,
+    ): UIButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+
     private fun tileName(
         row: Int,
         column: Int,
@@ -156,7 +168,7 @@ class BattlefieldView(
         unitId: String,
     ) {
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val tileButton = tile(row, column)
         tileButton.addImage(unitBitmap, BATTLE_UNIT)
     }
 
@@ -171,7 +183,7 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val tileButton = tile(row, column)
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_3.png"), SELECTION)
     }
 
@@ -179,7 +191,7 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val tileButton = tile(row, column)
         if (tileButton.findViewByName(SELECTION) != null) return
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_2.png"), SELECTION)
     }
@@ -188,7 +200,7 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val tileButton = tile(row, column)
         tileButton.findViewByName(SELECTION)?.removeFromParent()
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_4.png"), SELECTION)
     }
@@ -204,7 +216,7 @@ class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        val tileButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+        val tileButton = tile(row, column)
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
     }
 

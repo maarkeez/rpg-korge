@@ -9,9 +9,10 @@ class CancelAndConfirmView(
     val onCancelled: () -> Unit,
     val onConfirmed: () -> Unit,
 ) : Container() {
+    internal val cancelButton = CancelButton(onCancelled = { onCancelled() })
+    internal val confirmButton = ConfirmButton(onConfirmed = { onConfirmed() })
+
     init {
-        val cancelButton = CancelButton(onCancelled = { onCancelled() })
-        val confirmButton = ConfirmButton(onConfirmed = { onConfirmed() })
         val layout =
             uiHorizontalStack {
                 addChild(cancelButton)

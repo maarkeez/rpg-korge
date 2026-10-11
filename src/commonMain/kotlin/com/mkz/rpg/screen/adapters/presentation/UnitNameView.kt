@@ -11,7 +11,7 @@ import korlibs.math.geom.Size
 class UnitNameView(
     size: Size,
 ) : UIContainer(size) {
-    private val unitNameLabel = uiText("", size = size)
+    internal val unitNameLabel = uiText("", size = size)
 
     init {
         addChild(unitNameLabel)

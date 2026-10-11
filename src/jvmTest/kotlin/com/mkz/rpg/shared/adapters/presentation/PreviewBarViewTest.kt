@@ -42,7 +42,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(previewBarView.label.text).isEqualTo("50 / 100")
+                assertThat(previewBarView.labelText()).isEqualTo("50 / 100")
             }
 
         @Test
@@ -56,7 +56,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
                 // Then
-                assertThat(previewBarView.filled.width).isEqualTo(size.width * filledPercentage)
+                assertThat(previewBarView.filledWidth()).isEqualTo(size.width * filledPercentage)
             }
 
         @Test
@@ -70,7 +70,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
                 // Then
-                assertThat(previewBarView.preview.width).isEqualTo(size.width * previewPercentage)
+                assertThat(previewBarView.previewWidth()).isEqualTo(size.width * previewPercentage)
             }
 
         @Test
@@ -81,8 +81,8 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
                 // Then
-                assertThat(previewBarView.filled.width).isEqualTo(0.00)
-                assertThat(previewBarView.label.text).isEqualTo("0 / 100")
+                assertThat(previewBarView.filledWidth()).isEqualTo(0.00)
+                assertThat(previewBarView.labelText()).isEqualTo("0 / 100")
             }
     }
 

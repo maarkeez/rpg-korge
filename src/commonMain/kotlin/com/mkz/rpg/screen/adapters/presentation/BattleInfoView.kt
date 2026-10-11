@@ -7,12 +7,13 @@ import korlibs.korge.style.textAlignment
 import korlibs.korge.style.textColor
 import korlibs.korge.style.textSize
 import korlibs.korge.ui.UIContainer
+import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.Size
 
 class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
-    private val round =
+    internal val round =
         uiText(
             text = "",
             size = Size(width = width, height = 18),
@@ -20,7 +21,7 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
             this.styles.textAlignment = TextAlignment.MIDDLE_LEFT
             this.styles.textSize = 18.0
         }
-    private val playerTurn =
+    internal val playerTurn =
         uiText(
             text = "",
             size = Size(width = width, height = 15),
@@ -29,7 +30,8 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
             this.styles.textSize = 15.0
             this.styles.textColor = RGBA(0, 136, 255)
         }
-    val layout =
+    internal var winner: UIText? = null
+    internal val layout =
         uiVerticalStack {
             addChild(round)
             addChild(playerTurn)
@@ -47,12 +49,13 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
         this.playerTurn.removeFromParent()
         this.round.removeFromParent()
 
-        layout.uiText(
-            text = "$playerName wins!",
-            size = Size(width = width, height = 33),
-        ) {
-            this.styles.textAlignment = TextAlignment.MIDDLE_CENTER
-            this.styles.textSize = 30.0
-        }
+        winner =
+            layout.uiText(
+                text = "$playerName wins!",
+                size = Size(width = width, height = 33),
+            ) {
+                this.styles.textAlignment = TextAlignment.MIDDLE_CENTER
+                this.styles.textSize = 30.0
+            }
     }
 }

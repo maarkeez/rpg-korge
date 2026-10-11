@@ -12,16 +12,16 @@ class AttackPreviewView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
     private lateinit var casterUnitNameView: UnitNameView
-    private lateinit var casterUnitPortraitView: UnitPortraitView
+    internal lateinit var casterUnitPortraitView: UnitPortraitView
     private lateinit var casterHealthBarView: HealthBarView
     private lateinit var casterManaBarView: ManaBarPreviewView
-    private lateinit var casterEffectsView: EffectsView
+    internal lateinit var casterEffectsView: EffectsView
 
     private lateinit var receiverUnitNameView: UnitNameView
-    private lateinit var receiverUnitPortraitView: UnitPortraitView
+    internal lateinit var receiverUnitPortraitView: UnitPortraitView
     private lateinit var receiverHealthBarView: HealthBarPreviewView
     private lateinit var receiverManaBarView: ManaBarView
-    private lateinit var receiverEffectsView: EffectsView
+    internal lateinit var receiverEffectsView: EffectsView
 
     private val layout =
         uiVerticalStack(padding = 5.0) {

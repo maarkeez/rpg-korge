@@ -4,8 +4,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.view.Container
-import korlibs.korge.view.View
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -51,9 +49,9 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.displayAbilitySelected(selectedAbilityIndex)
                 // Then
-                val abilityButtons = battleUnitInfoView.allViews().filterIsInstance<AbilityButtonView>()
+                val abilityButtons = battleUnitInfoView.abilityButtons()
                 val selectedAbilityButton = abilityButtons[selectedAbilityIndex]
-                assertThat(selectedAbilityButton.findViewByName(AbilityButtonView.ABILITY_SELECTION)).isNotNull
+                assertThat(selectedAbilityButton.isSelected()).isTrue
             }
 
         @Test
@@ -61,7 +59,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             viewsTest {
                 // Given
                 val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
-                val abilityButtons = battleUnitInfoView.allViews().filterIsInstance<AbilityButtonView>()
+                val abilityButtons = battleUnitInfoView.abilityButtons()
                 abilityButtons.forEach { abilityButton -> abilityButton.select() }
                 val selectedAbilityIndex = 0
                 // When
@@ -69,7 +67,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // Then
                 abilityButtons.forEachIndexed { index, abilityButton ->
                     val isSelected = index == selectedAbilityIndex
-                    assertThat(abilityButton.findViewByName(AbilityButtonView.ABILITY_SELECTION) != null).isEqualTo(isSelected)
+                    assertThat(abilityButton.isSelected()).isEqualTo(isSelected)
                 }
             }
     }
@@ -90,12 +88,4 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 assertThat(battleUnitInfoView.isVisibleToUser()).isFalse
             }
     }
-}
-
-private fun Container.allViews(): List<View> {
-    val views = mutableListOf<View>(this)
-    children.forEach { child ->
-        if (child is Container) views += child.allViews()
-    }
-    return views
 }

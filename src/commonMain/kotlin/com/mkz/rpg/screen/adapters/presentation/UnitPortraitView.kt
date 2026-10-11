@@ -11,7 +11,11 @@ class UnitPortraitView(
     size: Size,
     private val resourcesLoader: BattleSceneResourcesLoader,
 ) : UIContainer(size) {
-    private val battleUnitPortrait =
+    companion object {
+        const val PORTRAIT = "PORTRAIT"
+    }
+
+    internal val battleUnitPortrait =
         uiButton("").also { button ->
             button.size = size
             button.bgColorOut = Colors.WHITE
@@ -24,10 +28,10 @@ class UnitPortraitView(
     }
 
     fun display(unitId: String) {
-        battleUnitPortrait.findViewByName("portrait")?.removeFromParent()
+        battleUnitPortrait.findViewByName(PORTRAIT)?.removeFromParent()
         resourcesLoader.bitmapOrNull("unit/${unitId}_portrait.png")?.let { avatarBitmap ->
             battleUnitPortrait.image(avatarBitmap) {
-                name = "portrait"
+                name = PORTRAIT
                 smoothing = false
                 scale = 3.0
                 centerOn(battleUnitPortrait)

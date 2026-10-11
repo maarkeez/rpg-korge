@@ -9,7 +9,7 @@ import korlibs.korge.view.Container
 class FinishTurnView(
     onTurnFinished: () -> Unit,
 ) : Container() {
-    private val button =
+    internal val button =
         uiButton("Finish turn")
             .also { button ->
                 button.width = 390.0

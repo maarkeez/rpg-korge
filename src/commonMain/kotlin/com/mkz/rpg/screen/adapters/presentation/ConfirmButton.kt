@@ -11,7 +11,7 @@ import korlibs.korge.view.Container
 class ConfirmButton(
     val onConfirmed: () -> Unit,
 ) : Container() {
-    private val confirmButton: UIButton =
+    internal val confirmButton: UIButton =
         uiButton {
             text = "Confirm"
             width = 190.0

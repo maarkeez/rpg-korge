@@ -21,7 +21,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.displayBattleUnitInfoView()
                 // Then
-                assertThat(battleHudView.children).containsExactly(battleUnitInfoView)
+                assertThat(battleHudView.displayedViews()).containsExactly(battleUnitInfoView)
             }
     }
 
@@ -38,7 +38,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.displayAttackPreviewView()
                 // Then
-                assertThat(battleHudView.children).containsExactly(attackPreviewView)
+                assertThat(battleHudView.displayedViews()).containsExactly(attackPreviewView)
             }
     }
 
@@ -55,7 +55,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.hide()
                 // Then
-                assertThat(battleHudView.children).isEmpty()
+                assertThat(battleHudView.displayedViews()).isEmpty()
             }
     }
 }
