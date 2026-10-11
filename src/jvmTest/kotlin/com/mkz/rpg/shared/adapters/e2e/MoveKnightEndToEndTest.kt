@@ -3,11 +3,11 @@ package com.mkz.rpg.shared.adapters.e2e
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battleUnitPositions
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
-import com.mkz.rpg.screen.adapters.presentation.isTurnAnnounced
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
 import org.assertj.core.api.Assertions.assertThat
@@ -25,7 +25,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         viewsTest {
             // Given
             startGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
@@ -46,7 +46,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         viewsTest {
             // Given
             startGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
             clickTile(battlefieldView, knightRow, knightColumn)
@@ -69,7 +69,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             val farTargetColumn = 4
             startGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && isTurnAnnounced() }
+            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, farTargetColumn) }

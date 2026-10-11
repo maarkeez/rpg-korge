@@ -31,3 +31,9 @@ fun Stage.isTurnAnnounced(): Boolean {
         battleInfoView.playerTurnScale() == 1.0 &&
         battlefieldView.tintColor() == null
 }
+
+/**
+ * Whether the human player can act on the battle scene: their turn has been announced and the scene is not replaying
+ * the battle, as shown by the finish turn being enabled. End-to-end tests should wait for it before clicking.
+ */
+fun Stage.canHumanPlayerAct(): Boolean = isTurnAnnounced() && playerCallToActionView()?.isFinishTurnEnabled() == true

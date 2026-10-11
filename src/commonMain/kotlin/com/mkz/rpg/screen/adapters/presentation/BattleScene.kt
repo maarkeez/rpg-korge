@@ -19,6 +19,11 @@ import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
 class BattleScene : Scene() {
+    // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
+    // the views are only changed from that loop. KorGE adds it to the views coroutine context when running the game,
+    // but not when running the headless tests (ViewsForTesting), which would run them on Dispatchers.Default instead.
+    override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
+
     private val resourcesLoader = BattleSceneResourcesLoader()
     val battlefieldView = BattlefieldView(resourcesLoader)
     val battleUnitInfoView = BattleUnitInfoView(resourcesLoader)

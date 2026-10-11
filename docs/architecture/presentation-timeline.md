@@ -17,6 +17,8 @@ For example, when the CPU moves two rats and the turn passes back to the human p
 | `BattleUnitMoved` (second rat)     | Then, the second rat walks its path                 |
 | `PlayerTurnStarted` (human player) | Then, the battle info displays the human player turn |
 
+The timeline plays its steps on the scene coroutines, which `BattleScene` runs on the game window event loop, like the frames. Hence, the views are only changed from that loop. KorGE does so when running the game, but not in the headless tests (`ViewsForTesting`), which would otherwise play the steps on `Dispatchers.Default` while the frames are rendered, making the end-to-end tests flaky.
+
 ## Rules
 
 - Presenters MUST read what a step needs when its event arrives, and only draw it inside the step. By the time the step is played, the battle may have moved on, e.g.: a battle unit that walks is defeated later in the same CPU turn, so it can no longer be found.
