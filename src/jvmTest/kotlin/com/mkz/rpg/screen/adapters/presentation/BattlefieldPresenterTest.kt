@@ -2,13 +2,16 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
@@ -19,12 +22,16 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.OccupantRemoved
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
@@ -32,14 +39,18 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.whenever
@@ -49,11 +60,28 @@ class BattlefieldPresenterTest {
     private val battleUnitInfoView = mock<BattleUnitInfoView>()
     private val attackPreviewView = mock<AttackPreviewView>()
     private val battleHudView = mock<BattleHudView>()
+
+    // The presenter keeps these queries when it is created, so they are stubbed before creating it.
     private val searchOccupant = mock<SearchOccupant>()
-    private val battlefieldApi = mock<BattlefieldApi>().also { whenever(it.searchOccupant).thenReturn(searchOccupant) }
-    private val battleUnitApi = mock<BattleUnitApi>()
-    private val playerApi = mock<PlayerApi>()
-    private val unitApi = mock<UnitApi>()
+    private val searchPosition = mock<SearchPosition>()
+    private val searchTilesThatCanBeOccupied = mock<SearchTilesThatCanBeOccupied>()
+    private val searchBattleUnitById = mock<SearchBattleUnitById>()
+    private val canMoveTo = mock<CanMoveTo>()
+    private val searchPlayerById = mock<SearchPlayerById>()
+    private val searchUnitById = mock<SearchUnitById>()
+    private val battlefieldApi =
+        mock<BattlefieldApi>().also {
+            whenever(it.searchOccupant).thenReturn(searchOccupant)
+            whenever(it.searchPosition).thenReturn(searchPosition)
+            whenever(it.searchTilesThatCanBeOccupied).thenReturn(searchTilesThatCanBeOccupied)
+        }
+    private val battleUnitApi =
+        mock<BattleUnitApi>().also {
+            whenever(it.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(it.canMoveTo).thenReturn(canMoveTo)
+        }
+    private val playerApi = mock<PlayerApi>().also { whenever(it.searchPlayerById).thenReturn(searchPlayerById) }
+    private val unitApi = mock<UnitApi>().also { whenever(it.searchUnitById).thenReturn(searchUnitById) }
     private val abilityApi = mock<AbilityApi>()
     private val battleApi = mock<BattleApi>()
     private val eventBus = InMemoryEventBus()
@@ -75,16 +103,10 @@ class BattlefieldPresenterTest {
             eventBus = eventBus,
         ).also {
             whenever(battlefieldApi.searchBattlefield).thenReturn(mock<SearchBattlefield>())
-            whenever(battlefieldApi.searchPosition).thenReturn(mock<SearchPosition>())
-            whenever(battlefieldApi.searchTilesThatCanBeOccupied).thenReturn(mock<SearchTilesThatCanBeOccupied>())
-            whenever(battleUnitApi.searchBattleUnitById).thenReturn(mock<SearchBattleUnitById>())
-            whenever(battleUnitApi.canMoveTo).thenReturn(mock<CanMoveTo>())
             whenever(battleUnitApi.moveBattleUnit).thenReturn(mock<MoveBattleUnit>())
             whenever(battleUnitApi.canCastAbility).thenReturn(mock<CanCastAbility>())
             whenever(battleUnitApi.whereCanCast).thenReturn(mock<WhereCanCast>())
             whenever(battleUnitApi.castAbility).thenReturn(mock<CastAbility>())
-            whenever(playerApi.searchPlayerById).thenReturn(mock<SearchPlayerById>())
-            whenever(unitApi.searchUnitById).thenReturn(mock<SearchUnitById>())
             whenever(battleApi.searchBattle).thenReturn(mock<SearchBattle>())
             whenever(battleApi.finishPlayerTurn).thenReturn(mock<FinishPlayerTurn>())
         }
@@ -343,6 +365,75 @@ class BattlefieldPresenterTest {
             eventBus.dispatch()
             // Then
             verify(battlefieldView).resetTiles()
+        }
+    }
+
+    @Nested
+    inner class RefreshSelectedBattleUnit {
+        private val knightUnit = unit(id = "knight", movementRange = 3).toDto()
+        private val knight = battleUnit(id = "knight-1", unit = knightUnit, player = player(id = "human", type = HUMAN).toDto())
+
+        @BeforeEach
+        fun selectKnight() {
+            whenever(searchOccupant(row = 1, column = 1)).thenReturn("knight-1")
+            whenever(searchBattleUnitById("knight-1")).thenReturn(knight.toDto())
+            whenever(searchUnitById("knight")).thenReturn(knightUnit)
+            whenever(searchPlayerById("human")).thenReturn(player(id = "human", type = HUMAN).toDto())
+            whenever(searchPosition("knight-1")).thenReturn(PositionDto(row = 1, column = 1))
+            whenever(canMoveTo(any(), any(), any())).thenReturn(true)
+            reachableTiles(PositionDto(row = 1, column = 2))
+            battlefieldPresenter.tileSelected(row = 1, column = 1)
+            eventBus.dispatch()
+        }
+
+        private fun reachableTiles(vararg tiles: PositionDto) {
+            whenever(searchTilesThatCanBeOccupied(battleUnitId = "knight-1", distance = 3)).thenReturn(tiles.toList())
+        }
+
+        @Test
+        fun `should display the new paths of the selected battle unit when a tile is vacated`() {
+            // Given
+            reachableTiles(PositionDto(row = 1, column = 2), PositionDto(row = 1, column = 3))
+            eventBus.publish(OccupantRemoved(battleUnitId = "rat-1", row = 1, column = 3))
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).displayPotentialMovement(row = 1, column = 3)
+        }
+
+        @Test
+        fun `should stop displaying the closed paths of the selected battle unit when a tile is occupied`() {
+            // Given
+            reachableTiles()
+            eventBus.publish(BattlefieldTileOccupied(row = 1, column = 2, battlefieldUnitId = "bee-1"))
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battlefieldView).dimTilesExcept(setOf(PositionDto(row = 1, column = 1)))
+        }
+
+        @Test
+        fun `should display the selected battle unit again when its cast has been resolved`() {
+            // Given
+            eventBus.publish(AbilityCastResolved(battleUnitId = "knight-1", abilityId = "heal"))
+            // When
+            eventBus.dispatch()
+            // Then
+            verify(battleUnitInfoView, times(2)).display(knight.toDto(), knightUnit)
+        }
+
+        @Test
+        fun `should not move the previously selected battle unit when a turn starts and an empty tile is selected`() {
+            // Given
+            val requestedMoves = mutableListOf<RequestMoveBattleUnit>()
+            eventBus.subscribe<RequestMoveBattleUnit> { event -> requestedMoves += event }
+            eventBus.publish(PlayerTurnStarted(playerId = "human"))
+            eventBus.dispatch()
+            // When
+            battlefieldPresenter.tileSelected(row = 1, column = 2)
+            eventBus.dispatch()
+            // Then
+            assertThat(requestedMoves).isEmpty()
         }
     }
 

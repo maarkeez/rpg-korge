@@ -11,17 +11,21 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.EventBus
 
-class UpdateMovementRange(
+/**
+ * Displays again the selected battle unit with its current tile and movement range, e.g.: after it moves or casts,
+ * or after a tile is occupied or vacated, since that may open or close paths.
+ */
+class RefreshMovementRange(
     private val searchPosition: SearchPosition,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
     private val movementService: MovementService,
 ) {
-    operator fun invoke(battleUnitId: String) {
+    operator fun invoke() {
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
         when (battlefieldHud) {
             is DisplayMovementRange -> {
-                if (battleUnitId != battlefieldHud.battleUnitId) return
+                val battleUnitId = battlefieldHud.battleUnitId
                 val position = searchPosition(battleUnitId)
                 if (position == null) {
                     // The selected battle unit is no longer on the battlefield, e.g.: it has been defeated.

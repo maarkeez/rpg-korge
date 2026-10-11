@@ -63,6 +63,10 @@ When the player selects a battle unit or an ability, the tiles that can be selec
 
 `BattlefieldView.resetTiles` removes the frames and the mask, e.g.: when the selection is cleared or a battle unit moves.
 
+The movement range of the selected battle unit is refreshed (`RefreshMovementRange`) whenever it may change: when a tile is occupied (`BattlefieldTileOccupied`, e.g.: a battle unit moved or deployed) or vacated (`OccupantRemoved`, e.g.: a battle unit defeated), and when a cast has been resolved. A cast resolves before its consequences reach the battlefield (e.g.: the deployed bee, or the defeated enemy leaving its tile), so refreshing on the occupancy changes is what keeps the range right.
+
+When a turn starts, the selection is cleared (`DeselectBattleUnit`), so a selection from a previous turn can not be acted on.
+
 ## Casting an ability
 
 The selected battle unit stays selected while the player casts an ability with it:

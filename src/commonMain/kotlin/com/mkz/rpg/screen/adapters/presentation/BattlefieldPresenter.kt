@@ -14,10 +14,11 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.CancelCast
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ConfirmCast
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.DeselectBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.InitializeBattlefieldHud
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessAbilitySelected
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessTileSelected
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.UpdateMovementRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.RefreshMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -75,8 +76,13 @@ class BattlefieldPresenter(
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
-    private val updateMovementRange =
-        UpdateMovementRange(
+    private val deselectBattleUnit =
+        DeselectBattleUnit(
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+        )
+    private val refreshMovementRange =
+        RefreshMovementRange(
             searchPosition = battlefieldApi.searchPosition,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
@@ -91,11 +97,14 @@ class BattlefieldPresenter(
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
-                updateMovementRange(event.battleUnitId)
             },
             // The selected caster is displayed again once its cast has been resolved.
-            eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> { event ->
-                updateMovementRange(event.battleUnitId)
+            eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> {
+                refreshMovementRange()
+            },
+            // An occupied tile (e.g.: a battle unit moved or deployed) may close paths of the selected battle unit.
+            eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> {
+                refreshMovementRange()
             },
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
                 flashUnit(event.battleUnitId)
@@ -103,11 +112,15 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
                 flashUnit(event.battleUnitId)
             },
+            // A vacated tile (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
+                refreshMovementRange()
             },
+            // The selection is cleared before the turn is announced, and can not be acted on during the new turn.
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
                 timeline.play { clearSelection() }
+                deselectBattleUnit()
             },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 timeline.play(displayMovementRange(event))
