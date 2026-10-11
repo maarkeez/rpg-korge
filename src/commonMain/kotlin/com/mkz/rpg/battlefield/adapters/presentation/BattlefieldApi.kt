@@ -4,10 +4,12 @@ import com.mkz.rpg.battlefield.adapters.events.OnBattleRoundStarted
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitMoved
-import com.mkz.rpg.battlefield.adapters.events.OnRequestInitializeBattlefield
+import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
-import com.mkz.rpg.battlefield.usecases.commands.InitializeBattlefield
+import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
+import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.commands.RequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
@@ -15,19 +17,28 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 
 class BattlefieldApi(
     terrainApi: TerrainApi,
     eventBus: EventBus,
+    private val battlefieldLoader: BattlefieldLoader = ResourcesBattlefieldLoader(),
 ) {
     // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
     // Commands
-    val initializeBattlefield =
-        InitializeBattlefield(
+    val requestBattlefieldCreation =
+        RequestBattlefieldCreation(
+            battlefieldRepository = battlefieldRepository,
+            searchTerrainById = terrainApi.searchTerrainById,
+            eventBus = eventBus,
+        )
+    val initialiseBattlefield =
+        InitialiseBattlefield(
+            battlefieldLoader = battlefieldLoader,
             battlefieldRepository = battlefieldRepository,
             searchTerrainById = terrainApi.searchTerrainById,
             eventBus = eventBus,
@@ -52,6 +63,10 @@ class BattlefieldApi(
     private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
-    private val onRequestInitializeBattlefield = OnRequestInitializeBattlefield(initializeBattlefield, eventBus)
+    private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)
     private val onBattleRoundStarted = OnBattleRoundStarted(requestEffectApplicationToOccupants, eventBus)
+
+    suspend fun init() {
+        battlefieldLoader.initResources()
+    }
 }

@@ -1,0 +1,8 @@
+name = "Heal"
+cost = 10
+cooldown = 2
+targeting = "SELF"
+
+[[effects]]
+effectId = "low-damage-heal"
+target = "CASTER"

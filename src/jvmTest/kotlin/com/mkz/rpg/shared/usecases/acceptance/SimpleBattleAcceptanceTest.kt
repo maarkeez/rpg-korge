@@ -54,7 +54,7 @@ class SimpleBattleAcceptanceTest {
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
         runBlocking { terrainApi.init() }
         terrainApi.initialiseTerrains()
-        battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "sand" } })
+        battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
         val lowPhysicalDamage =
             EffectMother

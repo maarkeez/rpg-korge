@@ -1,22 +1,22 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
-import com.mkz.rpg.battleUnit.domain.BattleUnit
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattlefieldTileCanNotBeOccupied
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.PlayerNotFound
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.UnitNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
 class DeployBattleUnit(
-    private val battleUnitRepository: BattleUnitRepository,
+    battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
-    private val searchUnitById: SearchUnitById,
-    private val searchPlayerById: SearchPlayerById,
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    searchUnitById: SearchUnitById,
+    searchPlayerById: SearchPlayerById,
+    canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
 ) {
+    private val battleUnitDeployment =
+        BattleUnitDeployment(battleUnitRepository, searchUnitById, searchPlayerById, canBattlefieldTileBeOccupied)
+
     operator fun invoke(
         battleUnitId: String,
         unitId: String,
@@ -24,20 +24,6 @@ class DeployBattleUnit(
         deployAtRow: Int,
         deployAtColumn: Int,
     ) {
-        val unit = searchUnitById(unitId) ?: throw UnitNotFound()
-        val player = searchPlayerById(playerId) ?: throw PlayerNotFound()
-        val canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied(deployAtRow, deployAtColumn)
-        if (!canBattlefieldTileBeOccupied) throw BattlefieldTileCanNotBeOccupied()
-        val (events, battleUnit) =
-            BattleUnit
-                .deploy(
-                    id = battleUnitId,
-                    unit = unit,
-                    player = player,
-                    deployAtRow = deployAtRow,
-                    deployAtColumn = deployAtColumn,
-                ).pullEvents()
-        battleUnitRepository.create(battleUnit)
-        eventBus.publish(events)
+        eventBus.publish(battleUnitDeployment.deploy(battleUnitId, unitId, playerId, deployAtRow, deployAtColumn))
     }
 }

@@ -44,7 +44,6 @@ class BattleScene : Scene() {
 
         // Backend APIs
         val terrainApi = TerrainApi(eventBus)
-        terrainApi.init()
         val unitApi = UnitApi(eventBus)
         val playerApi = PlayerApi(eventBus)
         val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
@@ -54,6 +53,16 @@ class BattleScene : Scene() {
         val battleApi = BattleApi(eventBus, battleUnitApi)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
+
+        // Resources: each subdomain loads its data before the battle is set up
+        terrainApi.init()
+        effectApi.init()
+        abilityApi.init()
+        unitApi.init()
+        playerApi.init()
+        battlefieldApi.init()
+        battleUnitApi.init()
+        battleApi.init()
 
         // Main scene
         val battlefieldPresenter =

@@ -1,22 +1,22 @@
-package com.mkz.rpg.battlefield.usecases.commands
+package com.mkz.rpg.battlefield.usecases.services
 
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
-import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-class InitializeBattlefield(
+/** Creates the battlefield, unless it already exists, from the terrain id of each tile. Returns the events to publish. */
+class BattlefieldCreation(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
-    private val eventBus: EventBus,
 ) {
-    operator fun invoke(
+    fun create(
         rows: Int,
         columns: Int,
         tiles: List<List<String>>,
-    ) {
-        if (battlefieldRepository.search() != null) return
+    ): Set<BattlefieldEvent> {
+        if (battlefieldRepository.search() != null) return emptySet()
         val (events, battlefield) =
             Battlefield
                 .create(
@@ -27,7 +27,7 @@ class InitializeBattlefield(
                     terrainTransitionRules = terrainTransitionRules(tiles),
                 ).pullEvents()
         battlefieldRepository.create(battlefield)
-        eventBus.publish(events)
+        return events
     }
 
     private fun terrainOccupancy(tiles: List<List<String>>): Map<String, Boolean> =

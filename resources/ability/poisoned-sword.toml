@@ -1,0 +1,8 @@
+name = "Poisoned Sword"
+cost = 5
+cooldown = 1
+targeting = "ADJACENT_ENEMY"
+
+[[effects]]
+effectId = "venom-damage"
+target = "SELECTED_TARGET"

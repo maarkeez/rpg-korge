@@ -10,4 +10,6 @@ sealed interface AbilityEvent : DomainEvent {
     data class RequestAbilityCreation(
         val abilityDto: Ability.Dto,
     ) : AbilityEvent
+
+    object RequestInitialiseAbilities : AbilityEvent
 }

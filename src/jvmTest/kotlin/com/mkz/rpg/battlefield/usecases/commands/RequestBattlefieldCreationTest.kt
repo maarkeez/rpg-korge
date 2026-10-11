@@ -16,12 +16,12 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
-class InitializeBattlefieldTest {
+class RequestBattlefieldCreationTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val searchTerrainById: SearchTerrainById = mock()
     private val eventBus = FakeEventBus()
-    private val initializeBattlefield =
-        InitializeBattlefield(
+    private val requestBattlefieldCreation =
+        RequestBattlefieldCreation(
             battlefieldRepository = battlefieldRepository,
             searchTerrainById = searchTerrainById,
             eventBus = eventBus,
@@ -40,7 +40,7 @@ class InitializeBattlefieldTest {
             }
         whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain(allowedTransitionTo = setOf("sand", "void")).toDto())
         // When
-        initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
+        requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
         assertThat(storedBattlefield).isNotNull
@@ -61,7 +61,7 @@ class InitializeBattlefieldTest {
                 .battlefield()
         battlefieldRepository.create(existingBattlefield)
         // When
-        initializeBattlefield(rows = 3, columns = 3, tiles = emptyList())
+        requestBattlefieldCreation(rows = 3, columns = 3, tiles = emptyList())
         // Then
         assertThat(battlefieldRepository.search()?.toDto())
             .isEqualTo(existingBattlefield.toDto())
@@ -79,7 +79,7 @@ class InitializeBattlefieldTest {
             )
         whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
         // When
-        val error = catchThrowable { initializeBattlefield(rows = rows, columns = columns, tiles = tiles) }
+        val error = catchThrowable { requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles) }
         // Then
         val tileTerrainTransitionNotAllowed = error as BattlefieldError.TileTerrainTransitionNotAllowed
         assertThat(tileTerrainTransitionNotAllowed.terrainId).isEqualTo("sand")
@@ -104,7 +104,7 @@ class InitializeBattlefieldTest {
                 .toDto(),
         )
         // When
-        initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
+        requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val storedBattlefield = battlefieldRepository.search()
         assertThat(storedBattlefield).isNotNull

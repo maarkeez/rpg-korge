@@ -10,4 +10,6 @@ sealed interface EffectEvent : DomainEvent {
     data class RequestEffectCreation(
         val effectDto: Effect.Dto,
     ) : EffectEvent
+
+    object RequestInitialiseEffects : EffectEvent
 }

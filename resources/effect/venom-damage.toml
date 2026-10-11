@@ -1,0 +1,7 @@
+[outcome]
+type = "DECREASE_HEALTH"
+damage = 3
+
+[application]
+type = "ON_TURN_STARTED"
+duration = 5

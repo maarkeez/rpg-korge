@@ -7,7 +7,9 @@ import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestDeployBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
+import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
@@ -15,6 +17,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToNearbyAl
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
+import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
@@ -27,6 +30,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
@@ -41,6 +45,7 @@ class BattleUnitApi(
     playerApi: PlayerApi,
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
+    private val battleUnitLoader: BattleUnitLoader = ResourcesBattleUnitLoader(),
 ) {
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
@@ -96,6 +101,15 @@ class BattleUnitApi(
             unitApi.searchUnitById,
             playerApi.searchPlayerById,
             battlefieldApi.canBattlefieldTileBeOccupied,
+        )
+    val initialiseBattleUnits =
+        InitialiseBattleUnits(
+            battleUnitLoader,
+            battleUnitRepository,
+            unitApi.searchUnitById,
+            playerApi.searchPlayerById,
+            battlefieldApi.canBattlefieldTileBeOccupied,
+            eventBus,
         )
     val moveBattleUnit =
         MoveBattleUnit(
@@ -158,5 +172,10 @@ class BattleUnitApi(
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
     private val onRequestDeployBattleUnit = OnRequestDeployBattleUnit(deployBattleUnit, eventBus)
+    private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
+
+    suspend fun init() {
+        battleUnitLoader.initResources()
+    }
 }

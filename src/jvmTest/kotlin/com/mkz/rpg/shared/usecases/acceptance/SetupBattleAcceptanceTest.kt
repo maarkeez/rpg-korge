@@ -34,7 +34,16 @@ class SetupBattleAcceptanceTest {
 
     @BeforeEach
     fun setup() {
-        runBlocking { terrainApi.init() }
+        runBlocking {
+            terrainApi.init()
+            effectApi.init()
+            abilityApi.init()
+            unitApi.init()
+            playerApi.init()
+            battlefieldApi.init()
+            battleUnitApi.init()
+            battleApi.init()
+        }
         battleSetupApi.setupBattle()
         eventBus.dispatch()
     }

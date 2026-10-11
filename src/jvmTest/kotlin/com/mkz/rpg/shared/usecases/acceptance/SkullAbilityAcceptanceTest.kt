@@ -60,7 +60,7 @@ class SkullAbilityAcceptanceTest {
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
         runBlocking { terrainApi.init() }
         terrainApi.initialiseTerrains()
-        battlefieldApi.initializeBattlefield(8, 8, List(8) { List(8) { "sand" } })
+        battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
         val venomEffect = EffectMother.decreaseHealthEffect(id = venomEffectId, damage = 3, applicationType = "ON_TURN_STARTED")
         val skullEffect = EffectMother.applyEffectOnNearbyAlliesEffect(id = skullEffectId, effectId = venomEffectId)

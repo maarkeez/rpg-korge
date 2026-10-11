@@ -70,7 +70,7 @@ class TerrainEffectAcceptanceTest {
                     if (row in 2..3 && column in 2..3) "sand" else "forest"
                 }
             }
-        battlefieldApi.initializeBattlefield(8, 8, tiles)
+        battlefieldApi.requestBattlefieldCreation(8, 8, tiles)
 
         unitApi.requestUnitCreation(
             UnitMother.unit(id = "unit-sand-1", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto(),

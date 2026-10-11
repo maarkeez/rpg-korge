@@ -15,7 +15,7 @@ The battle scene images live in the [`resources`](../../resources) folder. They 
 
 ## Adding an asset
 
-Drop the image in `resources` following the naming conventions below. Neither the loader nor the views need to change.
+Drop the image in `resources` following the naming conventions below. Neither the loader nor the views need to change. A new unit, ability or effect also needs its data file, see [Game data](game-data.md).
 
 | Asset                            | Path                                  | Example                          |
 |----------------------------------|---------------------------------------|----------------------------------|

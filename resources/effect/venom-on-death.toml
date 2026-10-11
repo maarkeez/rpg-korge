@@ -1,0 +1,6 @@
+[outcome]
+type = "APPLY_EFFECT_ON_NEARBY_ALLIES"
+effectId = "venom-damage"
+
+[application]
+type = "ON_DEFEATED"

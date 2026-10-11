@@ -1,0 +1,6 @@
+[outcome]
+type = "DECREASE_HEALTH"
+damage = 10
+
+[application]
+type = "IMMEDIATELY"

@@ -1,0 +1,8 @@
+name = "Mushroom"
+cost = 10
+cooldown = 0
+targeting = "ALL_ADJACENT_ENEMIES"
+
+[[effects]]
+effectId = "venom-damage"
+target = "SELECTED_TARGET"

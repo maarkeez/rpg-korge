@@ -14,4 +14,6 @@ sealed interface PlayerEvent : DomainEvent {
         val name: String,
         val type: Player.Dto.PlayerTypeDto,
     ) : PlayerEvent
+
+    object RequestInitialisePlayers : PlayerEvent
 }

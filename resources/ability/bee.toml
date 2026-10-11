@@ -1,0 +1,8 @@
+name = "Bee"
+cost = 10
+cooldown = 0
+targeting = "VACANT_TILE_ADJACENT_TO_SELF"
+
+[[effects]]
+effectId = "deploy-bee"
+target = "SELECTED_TILE"

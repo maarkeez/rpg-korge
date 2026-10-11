@@ -1,0 +1,8 @@
+name = "Teleport"
+cost = 5
+cooldown = 1
+targeting = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"
+
+[[effects]]
+effectId = "teleport"
+target = "CASTER"

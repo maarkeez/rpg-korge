@@ -31,7 +31,7 @@ class BattlefieldTerrainTransitionsAcceptanceTest {
                 listOf("sand", "void", "sand"),
             )
         // When
-        battlefieldApi.initializeBattlefield(rows = rows, columns = columns, tiles = tiles)
+        battlefieldApi.requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val battlefield = battlefieldApi.searchBattlefield()
         assertThat(battlefield).isNotNull

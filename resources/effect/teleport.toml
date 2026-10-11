@@ -1,0 +1,5 @@
+[outcome]
+type = "TELEPORT"
+
+[application]
+type = "IMMEDIATELY"
