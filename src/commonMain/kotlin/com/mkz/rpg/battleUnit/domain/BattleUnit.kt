@@ -325,7 +325,11 @@ data class BattleUnit private constructor(
         private val remainingSteps: RemainingSteps,
         private val remainingCasts: RemainingCasts,
     ) {
-        constructor(movementRange: Int) : this(MovementRange(movementRange), RemainingSteps(movementRange), RemainingCasts(1))
+        constructor(movementRange: Int) : this(MovementRange(movementRange), RemainingSteps(movementRange), RemainingCasts(CASTS_PER_TURN))
+
+        private companion object {
+            const val CASTS_PER_TURN = 1
+        }
 
         @JvmInline private value class MovementRange(
             val value: Int,
@@ -343,6 +347,8 @@ data class BattleUnit private constructor(
             Dto.RemainingTurnActionsDto(
                 remainingSteps = remainingSteps.value,
                 remainingCasts = remainingCasts.value,
+                maximumSteps = movementRange.value,
+                maximumCasts = CASTS_PER_TURN,
             )
 
         fun canMoveDistance(distance: Int): Boolean = distance <= remainingSteps.value
@@ -356,7 +362,7 @@ data class BattleUnit private constructor(
         fun reset(): RemainingTurnActions =
             copy(
                 remainingSteps = RemainingSteps(movementRange.value),
-                remainingCasts = RemainingCasts(1),
+                remainingCasts = RemainingCasts(CASTS_PER_TURN),
             )
 
         fun canCastAbility(): Boolean = remainingCasts.value > 0
@@ -551,6 +557,8 @@ data class BattleUnit private constructor(
         data class RemainingTurnActionsDto(
             val remainingCasts: Int,
             val remainingSteps: Int,
+            val maximumSteps: Int,
+            val maximumCasts: Int,
         )
 
         data class OngoingEffectsDto(

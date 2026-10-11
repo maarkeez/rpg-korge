@@ -28,7 +28,7 @@ class BattleUnitTest {
             assertThat(battleUnitDto.playerId).isEqualTo(player.id)
             assertThat(battleUnitDto.remainingHealthPoints).isEqualTo(10)
             assertThat(battleUnitDto.remainingManaPoints).isEqualTo(5)
-            assertThat(battleUnitDto.remainingTurnActions).isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3))
+            assertThat(battleUnitDto.remainingTurnActions).isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1))
         }
 
         @Test
@@ -131,7 +131,7 @@ class BattleUnitTest {
             val resetBattleUnit = battleUnit.resetActions()
             // Then
             assertThat(resetBattleUnit.toDto().remainingTurnActions)
-                .isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3))
+                .isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1))
         }
     }
 

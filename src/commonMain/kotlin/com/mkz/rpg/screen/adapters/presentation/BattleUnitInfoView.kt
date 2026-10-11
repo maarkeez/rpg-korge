@@ -2,20 +2,29 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.unit.domain.Unit
-import korlibs.korge.ui.UIText
+import korlibs.image.color.Colors
+import korlibs.image.color.RGBA
+import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
-import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
-import korlibs.korge.view.setText
 import korlibs.math.geom.Size
 
 class BattleUnitInfoView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
+    companion object {
+        // FamiCube palette colours of the remaining turn actions.
+        val MOVEMENT_POINTS_COLOR = Colors.WHITE
+        val CAST_POINTS_COLOR = RGBA(0xFF, 0xBB, 0x31)
+
+        private const val TURN_ACTIONS_SPACING = 16.0
+    }
+
     internal lateinit var unitNameView: UnitNameView
-    private lateinit var remainingTurnActionsLabel: UIText
+    internal val movementPointsView = PointsView(MOVEMENT_POINTS_COLOR)
+    internal val castPointsView = PointsView(CAST_POINTS_COLOR)
     internal lateinit var abilityButtons: Array<AbilityButtonView>
     internal lateinit var effectsView: EffectsView
     private lateinit var healthBarView: HealthBarView
@@ -33,7 +42,10 @@ class BattleUnitInfoView(
                     unitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
                     addChild(unitNameView)
 
-                    remainingTurnActionsLabel = uiText("", size = Size(width = 281.5, height = 14)) {}
+                    val remainingTurnActionsView = UIContainer(Size(width = 281.5, height = 14))
+                    remainingTurnActionsView.addChild(movementPointsView)
+                    remainingTurnActionsView.addChild(castPointsView)
+                    addChild(remainingTurnActionsView)
                     uiSpacing(Size(0, 15))
                     healthBarView = HealthBarView(Size(281.5, 16))
                     addChild(healthBarView)
@@ -72,8 +84,11 @@ class BattleUnitInfoView(
         unitPortraitView.display(battleUnit.unitId)
         // Name
         unitNameView.display(unitName = unit.name)
-        // Remaining turn actions
-        remainingTurnActionsLabel.setText("Movements left: ${battleUnit.remainingTurnActions.remainingSteps}    Remaining casts: ${battleUnit.remainingTurnActions.remainingCasts}")
+        // Remaining turn actions, out of their maximum
+        val remainingTurnActions = battleUnit.remainingTurnActions
+        movementPointsView.display(remaining = remainingTurnActions.remainingSteps, maximum = remainingTurnActions.maximumSteps)
+        castPointsView.display(remaining = remainingTurnActions.remainingCasts, maximum = remainingTurnActions.maximumCasts)
+        castPointsView.x = movementPointsView.width + TURN_ACTIONS_SPACING
         // Health
         healthBarView.display(
             remaining = battleUnit.remainingHealthPoints,

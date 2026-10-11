@@ -1,0 +1,84 @@
+package com.mkz.rpg.screen.adapters.presentation
+
+import korlibs.image.color.Colors
+import korlibs.korge.tests.ViewsForTesting
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+
+class PointsViewTest : ViewsForTesting() {
+    @Nested
+    inner class Display {
+        @Test
+        fun `should display every point filled when none has been spent`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(Colors.WHITE)
+                // When
+                pointsView.display(remaining = 3, maximum = 3)
+                // Then
+                assertThat(pointsView.filledPoints()).isEqualTo(3)
+                assertThat(pointsView.hollowPoints()).isEqualTo(0)
+            }
+
+        @Test
+        fun `should display the spent points hollow when some have been spent`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(Colors.WHITE)
+                // When
+                pointsView.display(remaining = 1, maximum = 3)
+                // Then
+                assertThat(pointsView.filledPoints()).isEqualTo(1)
+                assertThat(pointsView.hollowPoints()).isEqualTo(2)
+            }
+
+        @Test
+        fun `should display every point hollow when all have been spent`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(Colors.WHITE)
+                // When
+                pointsView.display(remaining = 0, maximum = 1)
+                // Then
+                assertThat(pointsView.filledPoints()).isEqualTo(0)
+                assertThat(pointsView.hollowPoints()).isEqualTo(1)
+            }
+
+        @Test
+        fun `should draw every point with its colour when points are displayed`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(BattleUnitInfoView.CAST_POINTS_COLOR)
+                // When
+                pointsView.display(remaining = 1, maximum = 2)
+                // Then
+                assertThat(pointsView.pointColors()).containsExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
+            }
+
+        @Test
+        fun `should display hollow points as big as filled points when some have been spent`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(Colors.WHITE)
+                addChild(pointsView)
+                // When
+                pointsView.display(remaining = 1, maximum = 2)
+                // Then
+                assertThat(pointsView.pointSizes()).containsExactly(PointsView.POINT_RADIUS * 2 to PointsView.POINT_RADIUS * 2)
+            }
+
+        @Test
+        fun `should replace the previous points when points are displayed again`() =
+            viewsTest {
+                // Given
+                val pointsView = PointsView(Colors.WHITE)
+                pointsView.display(remaining = 5, maximum = 5)
+                // When
+                pointsView.display(remaining = 1, maximum = 2)
+                // Then
+                assertThat(pointsView.filledPoints()).isEqualTo(1)
+                assertThat(pointsView.hollowPoints()).isEqualTo(1)
+            }
+    }
+}

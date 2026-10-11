@@ -10,7 +10,6 @@ import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
-import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
@@ -79,10 +78,12 @@ class WhatShouldCastTest {
         val rat =
             battleUnit(id = ratId, unit = ratUnit, player = player(id = "cpu").toDto())
                 .toDto()
-                .copy(
-                    remainingHealthPoints = remainingHealthPoints,
-                    remainingTurnActions = BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = remainingCasts, remainingSteps = 3),
-                )
+                .let { rat ->
+                    rat.copy(
+                        remainingHealthPoints = remainingHealthPoints,
+                        remainingTurnActions = rat.remainingTurnActions.copy(remainingCasts = remainingCasts),
+                    )
+                }
         whenever(searchBattleUnitById(ratId)).thenReturn(rat)
         whenever(searchUnitById("rat")).thenReturn(ratUnit)
         whenever(canCastAbility(any(), any())).thenReturn(true)

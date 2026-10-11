@@ -1,6 +1,7 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
+import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitPositions
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
@@ -8,6 +9,8 @@ import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
+import com.mkz.rpg.screen.adapters.presentation.maximumSteps
+import com.mkz.rpg.screen.adapters.presentation.remainingSteps
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
 import org.assertj.core.api.Assertions.assertThat
@@ -88,5 +91,11 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             assertThat(battlefieldView.hasBattleUnitAt(targetRow, targetColumn))
                 .withFailMessage("Expected the knight to be gone from (%s,%s)", targetRow, targetColumn)
                 .isFalse
+            val battleUnitInfoView = requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }
+            waitUntil { battleUnitInfoView.remainingSteps() == 1 }
+            assertThat(battleUnitInfoView.remainingSteps())
+                .withFailMessage("Expected 1 of the 3 knight steps to remain after walking 2 tiles")
+                .isEqualTo(1)
+            assertThat(battleUnitInfoView.maximumSteps()).isEqualTo(3)
         }
 }

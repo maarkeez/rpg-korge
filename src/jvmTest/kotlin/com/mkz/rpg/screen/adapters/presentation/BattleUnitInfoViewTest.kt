@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import korlibs.korge.tests.ViewsForTesting
@@ -35,6 +36,50 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
                 // Then
                 assertThat(battleUnitInfoView.isVisibleToUser()).isTrue
+            }
+
+        @Test
+        fun `should display the remaining steps and casts out of their maximum when is displayed`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+                val unit = unit(movementRange = 3).toDto()
+                val battleUnit = battleUnit(unit = unit).move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1))).toDto()
+                // When
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
+                // Then
+                assertThat(battleUnitInfoView.remainingSteps()).isEqualTo(2)
+                assertThat(battleUnitInfoView.maximumSteps()).isEqualTo(3)
+                assertThat(battleUnitInfoView.remainingCasts()).isEqualTo(1)
+                assertThat(battleUnitInfoView.maximumCasts()).isEqualTo(1)
+            }
+
+        @Test
+        fun `should display the steps in white and the casts in gold when is displayed`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+                val unit = unit().toDto()
+                val battleUnit = battleUnit(unit = unit).toDto()
+                // When
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
+                // Then
+                assertThat(battleUnitInfoView.movementPointColors()).containsExactly(BattleUnitInfoView.MOVEMENT_POINTS_COLOR)
+                assertThat(battleUnitInfoView.castPointColors()).containsExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
+            }
+
+        @Test
+        fun `should display no remaining casts when the battle unit has cast this turn`() =
+            viewsTest {
+                // Given
+                val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+                val unit = unit().toDto()
+                val battleUnit = battleUnit(unit = unit).toDto().let { dto -> dto.copy(remainingTurnActions = dto.remainingTurnActions.copy(remainingCasts = 0)) }
+                // When
+                battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
+                // Then
+                assertThat(battleUnitInfoView.remainingCasts()).isEqualTo(0)
+                assertThat(battleUnitInfoView.maximumCasts()).isEqualTo(1)
             }
     }
 

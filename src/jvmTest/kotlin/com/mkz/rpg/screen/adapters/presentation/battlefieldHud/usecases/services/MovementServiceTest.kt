@@ -34,6 +34,8 @@ class MovementServiceTest {
                         BattleUnit.Dto.RemainingTurnActionsDto(
                             remainingCasts = 1,
                             remainingSteps = 2,
+                            maximumSteps = 3,
+                            maximumCasts = 1,
                         ),
                 )
         whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
