@@ -20,7 +20,7 @@ class OnAbilityCastedTest {
         )
 
     @Test
-    fun `should receive ability effects for all the positions in the cast group when an ability is casted`() {
+    fun `should request the effects for the whole cast group when an ability is casted`() {
         // Given
         val battleUnitId = "battle-unit-1"
         val abilityId = "ability-1"
@@ -42,14 +42,7 @@ class OnAbilityCastedTest {
         verify(requestEffectApplicationToCastTargets).invoke(
             battleUnitId = battleUnitId,
             abilityId = abilityId,
-            row = 1,
-            column = 2,
-        )
-        verify(requestEffectApplicationToCastTargets).invoke(
-            battleUnitId = battleUnitId,
-            abilityId = abilityId,
-            row = 2,
-            column = 1,
+            castGroup = castGroup,
         )
     }
 
@@ -60,6 +53,6 @@ class OnAbilityCastedTest {
         // When
         eventBus.dispatch()
         // Then
-        verify(requestEffectApplicationToCastTargets, never()).invoke(any(), any(), any(), any())
+        verify(requestEffectApplicationToCastTargets, never()).invoke(any(), any(), any())
     }
 }

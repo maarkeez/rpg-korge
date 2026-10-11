@@ -2,12 +2,31 @@
 
 The CPU player decides what its battle units do following the **utility AI** pattern: every option is scored between 0 and 1 from a few considerations, and the best one is chosen when it is worth more than doing nothing.
 
-When a CPU player turn starts, [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) does the following for each of its battle units, then finishes the turn:
+## Playing a turn
 
-1. Asks [`WhatShouldCast`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhatShouldCast.kt) which ability to cast, if any.
-2. Asks [`WhereShouldMove`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldMove.kt) where to move, if anywhere.
+A CPU turn is played one action at a time by the [`CpuBrain`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/domain/CpuBrain.kt), so every decision is based on the state left by the previous action. This allows, for example, a unit to move next to an enemy and attack it in the same turn.
 
-Both decisions are made from the state at the start of the turn: the requests are applied after `PlayTurn` finishes. Hence, a unit can not move next to an enemy and attack it in the same turn.
+1. [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) starts the CPU brain with the battle units to manage, in order (`CpuBrainInitialized`).
+2. [`ManageCpuBattleUnit`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/ManageCpuBattleUnit.kt) takes one action with the next battle unit:
+   - It casts when [`WhatShouldCast`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhatShouldCast.kt) decides to cast.
+   - Otherwise, it moves when [`WhereShouldMove`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldMove.kt) returns a tile.
+   - Otherwise, the battle unit is managed (`CpuBattleUnitManaged`), and the next battle unit follows.
+   - Once every battle unit has been managed, the turn is finished (`CpuTurnFinished`, then `RequestFinishPlayerTurn`).
+3. After a cast or a move, the CPU brain waits for the event that ends that action, then manages the same battle unit again (`CpuBattleUnitActionResolved`):
+
+| Action | Ends with                         | Published when                                             |
+|--------|-----------------------------------|------------------------------------------------------------|
+| Move   | `BattlefieldTileOccupied`          | The battlefield occupancy has been updated                 |
+| Cast   | `AbilityCastResolved`              | Every effect of the cast has been applied to its targets   |
+
+The CPU brain only resolves the exact action it awaits (the same battle unit and tile, or the same battle unit and ability), so events of other battle units or actions are ignored.
+
+Every action spends casts or steps, so a turn always ends. As a safeguard, a turn ends after `CpuBrain.MAX_ACTIONS_PER_TURN` (20) actions.
+
+Known limitations:
+
+- Decisions are greedy: a unit takes the best action available now, e.g.: it attacks an adjacent healthy enemy instead of moving next to a weak one and finishing it off. Scoring a move and a cast together is a possible next step.
+- The consequences of an applied effect (e.g.: removing a defeated unit from the battlefield) may still be pending when the next decision is made. A defeated unit is already ignored, but its tile may still look occupied.
 
 An option must beat doing nothing by more than `MINIMUM_UTILITY_GAIN` (0.05), defined in [`Utility.kt`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/services/Utility.kt).
 

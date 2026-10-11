@@ -232,6 +232,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 - They SHOULD use each subdomain API declared under `com.mkz.rpg.<subdomain>.adapters.presentation.<subdomain>Api`. E.g.: use `com.mkz.rpg.effect.adapters.presentation.EffectApi` to interact with the effect subdomain use cases.
 - They SHOULD use `require` to validate preconditions about the common setup for the acceptance test scenario. E.g.: before moving a battle unit, require that the initial position is the one needed by the test.
 - They MUST only invoke `eventBus.dispatch()` in the `// When` section
+- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeEach`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. See `CpuCastingAcceptanceTest` for an example.
 
 For example: Requesting to move a battle unit
 

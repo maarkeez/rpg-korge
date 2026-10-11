@@ -51,6 +51,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val castGroup: List<Battlefield.Dto.PositionDto>,
     ) : BattleUnitEvent
 
+    // Published once every effect of a cast has been applied to its targets.
+    data class AbilityCastResolved(
+        val battleUnitId: String,
+        val abilityId: String,
+    ) : BattleUnitEvent
+
     data class EffectReceived(
         val battleUnitId: String,
         val effectId: String,
