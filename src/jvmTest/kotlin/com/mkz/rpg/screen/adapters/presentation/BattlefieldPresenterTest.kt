@@ -7,6 +7,8 @@ import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
@@ -215,6 +217,66 @@ class BattlefieldPresenterTest {
             eventBus.dispatch()
             // Then
             verifyBlocking(battlefieldView, never()) { moveBattleUnit(any(), any(), any(), any()) }
+        }
+    }
+
+    @Nested
+    inner class FlashUnit {
+        private val searchBattleUnitById = mock<SearchBattleUnitById>()
+        private val searchPosition = mock<SearchPosition>()
+
+        private fun knightAt(position: PositionDto?) {
+            whenever(battleUnitApi.searchBattleUnitById).thenReturn(searchBattleUnitById)
+            whenever(battlefieldApi.searchPosition).thenReturn(searchPosition)
+            whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit(unit = unit(id = "knight").toDto()).toDto())
+            whenever(searchPosition("battle-unit-1")).thenReturn(position)
+        }
+
+        @Test
+        fun `should flash the battle unit on view when it receives an effect`() {
+            // Given
+            knightAt(PositionDto(row = 3, column = 4))
+            eventBus.publish(EffectReceived(battleUnitId = "battle-unit-1", effectId = "lava-damage"))
+            // When
+            eventBus.dispatch()
+            // Then
+            verifyBlocking(battlefieldView) { flashBattleUnit(row = 3, column = 4, unitId = "knight") }
+        }
+
+        @Test
+        fun `should flash the battle unit on view when an effect is applied at the start of its turn`() {
+            // Given
+            knightAt(PositionDto(row = 3, column = 4))
+            eventBus.publish(OnTurnStartedEffectApplied(battleUnitId = "battle-unit-1", effectId = "venom-damage"))
+            // When
+            eventBus.dispatch()
+            // Then
+            verifyBlocking(battlefieldView) { flashBattleUnit(row = 3, column = 4, unitId = "knight") }
+        }
+
+        @Test
+        fun `should not flash the battle unit on view when it is not on the battlefield`() {
+            // Given
+            knightAt(null)
+            eventBus.publish(EffectReceived(battleUnitId = "battle-unit-1", effectId = "lava-damage"))
+            // When
+            eventBus.dispatch()
+            // Then
+            verifyBlocking(battlefieldView, never()) { flashBattleUnit(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should flash the battle unit once the previous steps have been played`() {
+            // Given
+            knightAt(PositionDto(row = 3, column = 4))
+            val previousStep = timeline.playLongStep()
+            eventBus.publish(EffectReceived(battleUnitId = "battle-unit-1", effectId = "lava-damage"))
+            eventBus.dispatch()
+            verifyBlocking(battlefieldView, never()) { flashBattleUnit(any(), any(), any()) }
+            // When
+            previousStep.complete(Unit)
+            // Then
+            verifyBlocking(battlefieldView) { flashBattleUnit(row = 3, column = 4, unitId = "knight") }
         }
     }
 

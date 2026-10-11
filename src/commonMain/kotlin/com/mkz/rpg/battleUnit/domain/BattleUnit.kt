@@ -14,6 +14,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
@@ -259,8 +260,9 @@ data class BattleUnit private constructor(
         currentColumn: Int,
     ): BattleUnit {
         val ongoingEffects = ongoingEffects.applyOnTurnStartedEffect(effect.id)
+        val appliedEvent = OnTurnStartedEffectApplied(battleUnitId = id.value, effectId = effect.id)
         return if (effect.outcome.type == DECREASE_HEALTH) {
-            applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
+            copy(events = events + appliedEvent).applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
         } else {
             TODO("Not implemented yet")
         }

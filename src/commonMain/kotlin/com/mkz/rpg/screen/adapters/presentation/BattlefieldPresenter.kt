@@ -92,6 +92,12 @@ class BattlefieldPresenter(
                 moveUnit(event)
                 updateMovementRange(event.battleUnitId)
             },
+            eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
+                flashUnit(event.battleUnitId)
+            },
+            eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
+                flashUnit(event.battleUnitId)
+            },
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
             },
@@ -162,6 +168,12 @@ class BattlefieldPresenter(
                 unitId = battleUnit.unitId,
             )
         }
+    }
+
+    private fun flashUnit(battleUnitId: String) {
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
+        val position = battlefieldApi.searchPosition(battleUnitId) ?: return
+        timeline.play { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
     }
 
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {

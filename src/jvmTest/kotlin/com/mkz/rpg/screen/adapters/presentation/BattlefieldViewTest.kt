@@ -27,7 +27,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
         // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
-        const val MAX_MOVE_FRAMES = 1_000
+        const val MAX_ANIMATION_FRAMES = 1_000
     }
 
     @Nested
@@ -329,7 +329,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 val displayedPositions = mutableListOf(battlefieldView.battleUnitPositions())
                 // When
                 val moving = startMoving(battlefieldView, path)
-                while (!moving.isCompleted && displayedPositions.size < MAX_MOVE_FRAMES) {
+                while (!moving.isCompleted && displayedPositions.size < MAX_ANIMATION_FRAMES) {
                     displayedPositions += battlefieldView.battleUnitPositions()
                     nextFrame()
                 }
@@ -393,17 +393,70 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
             }
         }
+    }
 
-        // The battle unit moves in another coroutine, which only runs when this one yields.
-        private suspend fun nextFrame() {
-            delayFrame()
-            yield()
-        }
+    @Nested
+    inner class FlashBattleUnit {
+        @Test
+        fun `should blink the battle unit when it is flashed`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+                addChild(battlefieldView)
+                val flashingFrames = mutableListOf<Boolean>()
+                // When
+                val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
+                while (!flashing.isCompleted && flashingFrames.size < MAX_ANIMATION_FRAMES) {
+                    flashingFrames += battlefieldView.isFlashingAt(row = 0, column = 0)
+                    nextFrame()
+                }
+                // Then
+                val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
+                assertThat(blinks).isEqualTo(BattlefieldView.FLASH_COUNT)
+                assertThat(battlefieldView.isFlashingAt(row = 0, column = 0)).isFalse
+                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isTrue
+            }
 
-        private suspend fun awaitCompletion(job: Job) {
-            var frames = 0
-            while (!job.isCompleted && frames++ < MAX_MOVE_FRAMES) nextFrame()
-        }
+        @Test
+        fun `should scroll the battlefield to the battle unit when it is flashed out of the viewport`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+                battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
+                addChild(battlefieldView)
+                require(!battlefieldView.isTileVisible(row = 12, column = 13))
+                // When
+                awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
+                // Then
+                assertThat(battlefieldView.isTileVisible(row = 12, column = 13)).isTrue
+            }
+
+        @Test
+        fun `should not blink when the unit has no image`() =
+            viewsTest {
+                // Given
+                val battlefieldView = BattlefieldView(loadedResourcesLoader())
+                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+                addChild(battlefieldView)
+                // When
+                val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "dragon")
+                // Then
+                assertThat(flashing.isCompleted).isTrue
+                assertThat(battlefieldView.isFlashingAt(row = 0, column = 0)).isFalse
+            }
+
+        private suspend fun startFlashing(
+            battlefieldView: BattlefieldView,
+            row: Int,
+            column: Int,
+            unitId: String,
+        ): Job =
+            CoroutineScope(currentCoroutineContext()).launch(start = CoroutineStart.UNDISPATCHED) {
+                battlefieldView.flashBattleUnit(row = row, column = column, unitId = unitId)
+            }
     }
 
     @Nested
@@ -422,6 +475,17 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // Then
                 verify(delegate).tileSelected(row = 0, column = 0)
             }
+    }
+
+    // Animations run in another coroutine, which only runs when this one yields.
+    private suspend fun nextFrame() {
+        delayFrame()
+        yield()
+    }
+
+    private suspend fun awaitCompletion(job: Job) {
+        var frames = 0
+        while (!job.isCompleted && frames++ < MAX_ANIMATION_FRAMES) nextFrame()
     }
 
     private fun matchesWangTile(

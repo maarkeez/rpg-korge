@@ -34,6 +34,7 @@ class BattlefieldView(
         const val TERRAIN = "TERRAIN"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
+        const val FLASH = "FLASH"
 
         const val TILE_SIZE = 48
         const val TILE_PIXEL_SIZE = 16
@@ -44,6 +45,10 @@ class BattlefieldView(
         // How long a moving battle unit stops on each tile of its path.
         val MOVE_STEP_DURATION = 150.milliseconds
         val SCROLL_DURATION = 300.milliseconds
+
+        // A battle unit receiving an effect blinks in white this many times.
+        const val FLASH_COUNT = 3
+        val FLASH_DURATION = 80.milliseconds
 
         private const val TRANSITION_NAME_SEPARATOR = "_to_"
     }
@@ -72,6 +77,9 @@ class BattlefieldView(
         }
     }
     private lateinit var battlefieldAnimator: Animator
+
+    // White silhouette of each unit image, keyed by unit id.
+    private val flashBitMaps = mutableMapOf<String, Bitmap>()
 
     // A battlefield smaller than the viewport can not be scrolled.
     private var minScrollX = 0.0
@@ -234,6 +242,27 @@ class BattlefieldView(
         }
     }
 
+    /**
+     * Blinks the battle unit in white, after scrolling the battlefield so the battle unit is visible, e.g.: when it
+     * receives an effect.
+     */
+    suspend fun flashBattleUnit(
+        row: Int,
+        column: Int,
+        unitId: String,
+    ) {
+        val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
+        val flashBitmap = flashBitMaps.getOrPut(unitId) { unitBitmap.whiteSilhouette() }
+        followTile(row, column)
+        val tileButton = tile(row, column)
+        repeat(FLASH_COUNT) {
+            tileButton.addImage(flashBitmap, FLASH)
+            delay(FLASH_DURATION)
+            tileButton.findViewByName(FLASH)?.removeFromParent()
+            delay(FLASH_DURATION)
+        }
+    }
+
     // Centers the tile when it is out of the viewport or on its edge.
     private suspend fun followTile(
         row: Int,
@@ -286,6 +315,16 @@ class BattlefieldView(
             smoothing = false
             centerOn(button)
         }
+    }
+
+    private fun Bitmap.whiteSilhouette(): Bitmap {
+        val silhouette = Bitmap32(width, height, premultiplied = premultiplied)
+        for (y in 0 until height) {
+            for (x in 0 until width) {
+                if (getRgba(x, y).a > 0) silhouette.setRgba(x, y, Colors.WHITE)
+            }
+        }
+        return silhouette
     }
 
     private fun Bitmap.crop(

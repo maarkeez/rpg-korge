@@ -28,3 +28,14 @@ For example, when the CPU moves two rats and the turn passes back to the human p
 `BattleUnitMoved` carries the `path` walked: the tiles from the origin (excluded) to the destination (included). Each tile costs one step. The path is the shortest one found by [`SearchShortestPath`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchShortestPath.kt) through tiles that can be occupied. A teleport jumps straight to its destination, so its path only has the destination.
 
 `BattlefieldView.moveBattleUnit` displays the battle unit on each tile of the path, stopping `MOVE_STEP_DURATION` (150ms) on each one. Before each step, it scrolls the battlefield to center the tile when the tile is out of the viewport or on its edge. A battlefield smaller than the viewport is never scrolled.
+
+## Applying effects
+
+A battle unit blinks in white every time an effect is applied to it:
+
+| Event                        | Published when                                       | Example                              |
+|------------------------------|------------------------------------------------------|--------------------------------------|
+| `EffectReceived`             | The battle unit receives an effect                   | sword, heal, venom, lava, water      |
+| `OnTurnStartedEffectApplied` | An effect applied at the start of the turn ticks     | venom damage at the start of the turn |
+
+`BattlefieldView.flashBattleUnit` first scrolls the battlefield to the battle unit, like a moving battle unit, so effects applied at the start of a turn are seen wherever the battle unit is. Then, a white silhouette of the battle unit blinks `FLASH_COUNT` (3) times, for `FLASH_DURATION` (80ms) each. A battle unit receiving several effects at once (e.g.: skull) blinks once per effect, one after the other.

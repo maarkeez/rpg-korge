@@ -531,7 +531,12 @@ class BattleUnitTest {
             // Given
             val unit = UnitMother.unit(healthPoints = 10).toDto()
             val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
-            val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit(unit = unit)
+                    .receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
+                    .pullEvents()
+                    .second
             // When
             val updatedBattleUnit =
                 battleUnit.applyOnTurnStartedEffect(
@@ -543,7 +548,37 @@ class BattleUnitTest {
             assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
             assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).contains(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
+            assertThat(events).containsExactly(
+                BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = updatedBattleUnit.toDto().id, effectId = onTurnStartedEffect.id),
+                BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
+            )
+        }
+
+        @Test
+        fun `should publish the applied event before the defeat when the effect defeats the battle unit`() {
+            // Given
+            val unit = UnitMother.unit(healthPoints = 3).toDto()
+            val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+            val battleUnit =
+                BattleUnitMother
+                    .battleUnit(unit = unit)
+                    .receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
+                    .pullEvents()
+                    .second
+            // When
+            val updatedBattleUnit =
+                battleUnit.applyOnTurnStartedEffect(
+                    effect = onTurnStartedEffect,
+                    currentRow = position().row,
+                    currentColumn = position().column,
+                )
+            // Then
+            val (events, _) = updatedBattleUnit.pullEvents()
+            assertThat(events.map { event -> event::class }).containsExactly(
+                BattleUnitEvent.OnTurnStartedEffectApplied::class,
+                BattleUnitEvent.BattleUnitDamaged::class,
+                BattleUnitEvent.BattleUnitDefeated::class,
+            )
         }
 
         @Test

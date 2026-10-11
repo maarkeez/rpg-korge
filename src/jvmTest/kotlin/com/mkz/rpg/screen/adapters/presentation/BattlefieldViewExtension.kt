@@ -20,6 +20,12 @@ fun BattlefieldView.hasBattleUnitAt(
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.BATTLE_UNIT)
 
+/** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
+fun BattlefieldView.isFlashingAt(
+    row: Int,
+    column: Int,
+): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.FLASH)
+
 /** The (row, column) of every tile displaying a battle unit. */
 fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
     if (!isDisplayed) {

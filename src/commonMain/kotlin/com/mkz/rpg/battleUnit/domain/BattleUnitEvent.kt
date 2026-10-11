@@ -64,6 +64,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val effectId: String,
     ) : BattleUnitEvent
 
+    // Published every time an effect applied at the start of the turn takes effect (e.g.: venom damage).
+    data class OnTurnStartedEffectApplied(
+        val battleUnitId: String,
+        val effectId: String,
+    ) : BattleUnitEvent
+
     data class BattleUnitDamaged(
         val battleUnitId: String,
     ) : BattleUnitEvent
