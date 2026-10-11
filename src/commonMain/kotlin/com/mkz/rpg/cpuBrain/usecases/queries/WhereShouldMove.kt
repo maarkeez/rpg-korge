@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.cpuBrain.usecases.services.MINIMUM_UTILITY_GAIN
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
@@ -164,9 +165,8 @@ class WhereShouldMove(
         // Calculate the best candidate
         val (bestPosition, bestEvaluationData) = utilityData.entries.maxBy { (_, evaluationData) -> evaluationData.candidateUtility!! }
         // Check threshold to prevent movements with minimum gain
-        val threshold = 0.05
         val currentPositionUtility = utilityData[currentPosition]!!.candidateUtility!!
-        if (abs(bestEvaluationData.candidateUtility!! - currentPositionUtility) <= threshold) {
+        if (abs(bestEvaluationData.candidateUtility!! - currentPositionUtility) <= MINIMUM_UTILITY_GAIN) {
             return null
         }
         // Check if we are moving at all

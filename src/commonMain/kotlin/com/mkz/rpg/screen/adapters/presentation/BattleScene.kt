@@ -51,7 +51,7 @@ class BattleScene : Scene() {
         val abilityApi = AbilityApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val battleApi = BattleApi(eventBus, battleUnitApi)
-        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, eventBus)
+        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Resources: each subdomain loads its data before the battle is set up

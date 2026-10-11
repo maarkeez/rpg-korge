@@ -4,11 +4,10 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -26,18 +25,14 @@ import org.mockito.kotlin.whenever
 class PlayTurnTest {
     private val searchPlayerById: SearchPlayerById = mock()
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
-    private val whereCanCast: WhereCanCast = mock()
-    private val canCastAbility: CanCastAbility = mock()
-    private val searchBattleUnitById: SearchBattleUnitById = mock()
+    private val whatShouldCast: WhatShouldCast = mock()
     private val whereShouldMove: WhereShouldMove = mock()
     private val eventBus = FakeEventBus()
     private val playTurn =
         PlayTurn(
             searchPlayerById = searchPlayerById,
             searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
-            whereCanCast = whereCanCast,
-            canCastAbility = canCastAbility,
-            searchBattleUnitById = searchBattleUnitById,
+            whatShouldCast = whatShouldCast,
             whereShouldMove = whereShouldMove,
             eventBus = eventBus,
         )
@@ -93,16 +88,13 @@ class PlayTurnTest {
     }
 
     @Test
-    fun `should cast ability when the battle unit can cast it`() {
+    fun `should cast the ability when what should cast decides to cast it`() {
         // Given
         whenever(searchPlayerById("player-1")).thenReturn(player.toDto())
         val battleUnit = battleUnitDto(id = "battle-unit-1", remainingCasts = 1)
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit))
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
         val castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 0, column = 0)))
-        whenever(whereCanCast("battle-unit-1", "ability-1"))
-            .thenReturn(listOf(castGroup))
+        whenever(whatShouldCast("battle-unit-1")).thenReturn(WhatShouldCast.CastDecision(abilityId = "ability-1", castGroup = castGroup))
         whenever(whereShouldMove("battle-unit-1")).thenReturn(null)
         // When
         playTurn("player-1")
@@ -123,7 +115,6 @@ class PlayTurnTest {
         whenever(searchPlayerById("player-1")).thenReturn(player.toDto())
         val battleUnit = battleUnitDto(id = "battle-unit-1", remainingCasts = 0)
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit))
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
         whenever(whereShouldMove("battle-unit-1")).thenReturn(Battlefield.Dto.PositionDto(row = 1, column = 1))
         // When
         playTurn("player-1")
@@ -139,13 +130,12 @@ class PlayTurnTest {
     }
 
     @Test
-    fun `should not cast ability when the battle unit cannot cast it`() {
+    fun `should not cast any ability when what should cast decides to do nothing`() {
         // Given
         whenever(searchPlayerById("player-1")).thenReturn(player.toDto())
         val battleUnit = battleUnitDto(id = "battle-unit-1", remainingCasts = 1)
         whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit))
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(false)
+        whenever(whatShouldCast("battle-unit-1")).thenReturn(null)
         whenever(whereShouldMove("battle-unit-1")).thenReturn(null)
         // When
         playTurn("player-1")

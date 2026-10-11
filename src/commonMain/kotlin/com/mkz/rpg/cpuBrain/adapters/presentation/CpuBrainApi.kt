@@ -1,10 +1,12 @@
 package com.mkz.rpg.cpuBrain.adapters.presentation
 
+import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBrain.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -19,6 +21,7 @@ class CpuBrainApi(
     battlefieldApi: BattlefieldApi,
     terrainApi: TerrainApi,
     effectApi: EffectApi,
+    abilityApi: AbilityApi,
     eventBus: EventBus,
 ) {
     // Queries
@@ -26,6 +29,18 @@ class CpuBrainApi(
         HealingNeed(
             battleUnitApi.searchBattleUnitById,
             unitApi.searchUnitById,
+        )
+
+    val whatShouldCast =
+        WhatShouldCast(
+            battleUnitApi.searchBattleUnitById,
+            unitApi.searchUnitById,
+            battleUnitApi.canCastAbility,
+            battleUnitApi.whereCanCast,
+            abilityApi.searchAbilityById,
+            effectApi.searchEffectById,
+            battlefieldApi.searchOccupant,
+            healingNeed,
         )
 
     val whereShouldMove =
@@ -47,9 +62,7 @@ class CpuBrainApi(
         PlayTurn(
             playerApi.searchPlayerById,
             battleUnitApi.searchBattleUnitsByPlayerId,
-            battleUnitApi.whereCanCast,
-            battleUnitApi.canCastAbility,
-            battleUnitApi.searchBattleUnitById,
+            whatShouldCast,
             whereShouldMove,
             eventBus,
         )
