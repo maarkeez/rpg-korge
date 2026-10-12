@@ -8,222 +8,197 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BattleTest {
-    @Nested
-    inner class StartFirstRound {
-        @Test
-        fun `should start the first round with the first player when two players join`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            // When
-            val battle = Battle.startFirstRound(players)
-            // Then
-            battle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
-        }
-
-        @Test
-        fun `should publish the battle and first player turn events when the battle starts`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            // When
-            val battle = Battle.startFirstRound(players)
-            // Then
-            val (events, _) = battle.pullEvents()
-            events.shouldContainExactly(BattleEvent.BattleStarted, BattleEvent.PlayerTurnStarted(players.first()))
-        }
-
-        @Test
-        fun `should fail when fewer than two players join`() {
-            // Given
-            val players = listOf("player-1")
-            // When
-            val result = runCatching { Battle.startFirstRound(players) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<BattleError.MinimumTwoPlayersRequired>()
-        }
+    @Test
+    fun `StartFirstRound should start the first round with the first player when two players join`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        // When
+        val battle = Battle.startFirstRound(players)
+        // Then
+        battle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
     }
 
-    @Nested
-    inner class ToDto {
-        @Test
-        fun `should expose the current player turn and round when converted to dto`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players)
-            // When
-            val result = battle.toDto()
-            // Then
-            result shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
-        }
-
-        @Test
-        fun `should expose the finished state as false when the battle has not finished`() {
-            // Given
-            val battle = battle()
-            // When
-            val result = battle.toDto().isFinished
-            // Then
-            result.shouldBeFalse()
-        }
-
-        @Test
-        fun `should expose the finished state as true when the battle has finished`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players).defeatPlayer(players[1]).finishBattle()
-            // When
-            val result = battle.toDto().isFinished
-            // Then
-            result.shouldBeTrue()
-        }
+    @Test
+    fun `StartFirstRound should publish the battle and first player turn events when the battle starts`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        // When
+        val battle = Battle.startFirstRound(players)
+        // Then
+        val (events, _) = battle.pullEvents()
+        events.shouldContainExactly(BattleEvent.BattleStarted, BattleEvent.PlayerTurnStarted(players.first()))
     }
 
-    @Nested
-    inner class StartNextRound {
-        @Test
-        fun `should increment the round and start the first player turn when a battle exists`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players)
-            // When
-            val nextBattle = battle.startNextRound()
-            // Then
-            nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false)
-            val (events, _) = nextBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.BattleRoundStarted(2), BattleEvent.PlayerTurnStarted(players.first()))
-        }
+    @Test
+    fun `StartFirstRound should fail when fewer than two players join`() {
+        // Given
+        val players = listOf("player-1")
+        // When
+        val result = runCatching { Battle.startFirstRound(players) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleError.MinimumTwoPlayersRequired>()
     }
 
-    @Nested
-    inner class FinishPlayerTurn {
-        @Test
-        fun `should start the next player turn when another player remains in the queue`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players)
-            // When
-            val nextBattle = battle.finishPlayerTurn()
-            // Then
-            nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
-            val (events, _) = nextBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.PlayerTurnStarted(players[1]))
-        }
-
-        @Test
-        fun `should finish the round when the current player is the last one in the queue`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle =
-                battle(players)
-                    .finishPlayerTurn()
-                    .pullEvents()
-                    .second
-            // When
-            val nextBattle = battle.finishPlayerTurn()
-            // Then
-            nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
-            val (events, _) = nextBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.BattleRoundFinished(1))
-        }
+    @Test
+    fun `ToDto should expose the current player turn and round when converted to dto`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players)
+        // When
+        val result = battle.toDto()
+        // Then
+        result shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
     }
 
-    @Nested
-    inner class IsBattleFinished {
-        @Test
-        fun `should be finished when only one player remains`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players).defeatPlayer(players[1])
-            // When
-            val result = battle.isBattleFinished()
-            // Then
-            result.shouldBeTrue()
-        }
-
-        @Test
-        fun `should not be finished when more than one player remains`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = battle(players)
-            // When
-            val result = battle.isBattleFinished()
-            // Then
-            result.shouldBeFalse()
-        }
+    @Test
+    fun `ToDto should expose the finished state as false when the battle has not finished`() {
+        // Given
+        val battle = battle()
+        // When
+        val result = battle.toDto().isFinished
+        // Then
+        result.shouldBeFalse()
     }
 
-    @Nested
-    inner class FinishBattle {
-        @Test
-        fun `should publish the player victory when a single player remains`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val winner = players[1]
-            val battle = finishedBattle(players)
-            // When
-            val finishedBattle = battle.finishBattle()
-            // Then
-            val (events, _) = finishedBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.PlayerVictory(winner))
-        }
+    @Test
+    fun `ToDto should expose the finished state as true when the battle has finished`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players).defeatPlayer(players[1]).finishBattle()
+        // When
+        val result = battle.toDto().isFinished
+        // Then
+        result.shouldBeTrue()
     }
 
-    @Nested
-    inner class DefeatPlayer {
-        @Test
-        fun `should remove the player and publish the defeat when the defeated player is not the current player`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val defeatedPlayer = players[1]
-            val battle = battle(players)
-            // When
-            val nextBattle = battle.defeatPlayer(defeatedPlayer)
-            // Then
-            nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
-            val (events, _) = nextBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
-        }
-
-        @Test
-        fun `should start the next player turn when the defeated player is the current player`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val defeatedPlayer = players.first()
-            val battle = battle(players)
-            // When
-            val nextBattle = battle.defeatPlayer(defeatedPlayer)
-            // Then
-            nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
-            val (events, _) = nextBattle.pullEvents()
-            events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
-        }
+    @Test
+    fun `StartNextRound should increment the round and start the first player turn when a battle exists`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players)
+        // When
+        val nextBattle = battle.startNextRound()
+        // Then
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false)
+        val (events, _) = nextBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.BattleRoundStarted(2), BattleEvent.PlayerTurnStarted(players.first()))
     }
 
-    @Nested
-    inner class PullEvents {
-        @Test
-        fun `should pull the pending events and clear them when the battle has events`() {
-            // Given
-            val players = listOf("player-1", "player-2")
-            val battle = Battle.startFirstRound(players)
-            // When
-            val (events, clearedBattle) = battle.pullEvents()
-            // Then
-            events.shouldContainExactly(BattleEvent.BattleStarted, BattleEvent.PlayerTurnStarted(players.first()))
-            clearedBattle.pullEvents().first.shouldBeEmpty()
-        }
+    @Test
+    fun `FinishPlayerTurn should start the next player turn when another player remains in the queue`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players)
+        // When
+        val nextBattle = battle.finishPlayerTurn()
+        // Then
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
+        val (events, _) = nextBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.PlayerTurnStarted(players[1]))
+    }
 
-        @Test
-        fun `should not pull events when there are no pending events`() {
-            // Given
-            val battle = battle()
-            // When
-            val (events, _) = battle.pullEvents()
-            // Then
-            events.shouldBeEmpty()
-        }
+    @Test
+    fun `FinishPlayerTurn should finish the round when the current player is the last one in the queue`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle =
+            battle(players)
+                .finishPlayerTurn()
+                .pullEvents()
+                .second
+        // When
+        val nextBattle = battle.finishPlayerTurn()
+        // Then
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
+        val (events, _) = nextBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.BattleRoundFinished(1))
+    }
+
+    @Test
+    fun `IsBattleFinished should be finished when only one player remains`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players).defeatPlayer(players[1])
+        // When
+        val result = battle.isBattleFinished()
+        // Then
+        result.shouldBeTrue()
+    }
+
+    @Test
+    fun `IsBattleFinished should not be finished when more than one player remains`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players)
+        // When
+        val result = battle.isBattleFinished()
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `FinishBattle should publish the player victory when a single player remains`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val winner = players[1]
+        val battle = finishedBattle(players)
+        // When
+        val finishedBattle = battle.finishBattle()
+        // Then
+        val (events, _) = finishedBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.PlayerVictory(winner))
+    }
+
+    @Test
+    fun `DefeatPlayer should remove the player and publish the defeat when the defeated player is not the current player`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val defeatedPlayer = players[1]
+        val battle = battle(players)
+        // When
+        val nextBattle = battle.defeatPlayer(defeatedPlayer)
+        // Then
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        val (events, _) = nextBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
+    }
+
+    @Test
+    fun `DefeatPlayer should start the next player turn when the defeated player is the current player`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val defeatedPlayer = players.first()
+        val battle = battle(players)
+        // When
+        val nextBattle = battle.defeatPlayer(defeatedPlayer)
+        // Then
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
+        val (events, _) = nextBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
+    }
+
+    @Test
+    fun `PullEvents should pull the pending events and clear them when the battle has events`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = Battle.startFirstRound(players)
+        // When
+        val (events, clearedBattle) = battle.pullEvents()
+        // Then
+        events.shouldContainExactly(BattleEvent.BattleStarted, BattleEvent.PlayerTurnStarted(players.first()))
+        clearedBattle.pullEvents().first.shouldBeEmpty()
+    }
+
+    @Test
+    fun `PullEvents should not pull events when there are no pending events`() {
+        // Given
+        val battle = battle()
+        // When
+        val (events, _) = battle.pullEvents()
+        // Then
+        events.shouldBeEmpty()
     }
 }

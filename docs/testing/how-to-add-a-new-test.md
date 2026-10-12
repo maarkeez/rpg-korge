@@ -9,6 +9,7 @@
 ## Test naming convention
 
 - All the tests MUST be named following this convention `should XXX when YYY`. Where `XXX` is what we expect to happen and `YYY` the precondition. For example: `should deploy battle unit when the battlefield tile can be occupied`
+- When the class under test has several public functions, the test name MUST start with the function under test, in upper camel case: `<Function> should XXX when YYY`. For example: `StartFirstRound should start the first round with the first player when two players join`. See [Tests of a class with several functions](#tests-of-a-class-with-several-functions).
 - All test variables SHOULD be named using domain terms, unless we are testing an adapter layer where adapter terms might be required.
 
 ## Test structure
@@ -30,41 +31,30 @@
 - The test MUST use object mothers to create the required test data (e.g.: `val effect = EffectMother.effect()`)
 - The test MUST set only the relevant values while creating objects with object mothers (e.g.: `val ability = ability(effects = listOf(effect.id)).toDto()`)
 
-## Test nested classes
+## Tests of a class with several functions
 
-- When the class under test has multiple public functions, we MUST use junit `@Nested` and create one nested class per public function
-- Domain class tests SHOULD use `@Nested`. Often they will grow their available public functions.
-- Commands and queries use cases class tests MUST not use `@Nested`. They are expected to have only one single public function.
+- The tests MUST NOT use JUnit `@Nested` classes, which are not available on every target. This is enforced by [`NoNestedTestArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/NoNestedTestArchitectureTest.kt).
+- When the class under test has several public functions (e.g.: domain classes, views and presenters), the test names MUST start with the function under test, so the tests of the same function are listed together.
+- Commands and queries use cases tests MUST NOT prefix their test names. They are expected to have only one single public function.
+- A setup only needed by some tests SHOULD be a private function called in their `// Given` section, instead of a `@BeforeEach`, which runs before every test of the class.
 
 For example:
 
 ```kotlin
 // Class under test
-class MainClass {
+class Battle {
+    fun startFirstRound(players: List<String>): Battle { ... }
 
-    fun functionOne() {
-        // Function one logic goes here
-    }
-
-    fun functionTwo() {
-        // Function two logic goes here
-    }
+    fun toDto(): Dto { ... }
 }
 
 // Test example
-import org.junit.jupiter.api.Nested
+class BattleTest {
+    @Test
+    fun `StartFirstRound should start the first round with the first player when two players join`() { ... }
 
-class MainClassTest {
-
-    @Nested
-    class FunctionOne {
-        // Function one tests go here
-    }
-
-    @Nested
-    class FunctionTwo {
-        // Function two tests go here
-    }
+    @Test
+    fun `ToDto should expose the finished state as true when the battle has finished`() { ... }
 }
 ```
 
@@ -190,34 +180,28 @@ And a view test using it:
 
 ```kotlin
 class FinishTurnViewTest : ViewsForTesting() {
-    @Nested
-    inner class Init {
-        @Test
-        fun `should display finish turn text when is initialized`() =
-            viewsTest {
-                // Given
-                // When
-                val finishTurnView = FinishTurnView(onTurnFinished = {})
-                // Then
-                finishTurnView.buttonText() shouldBe "Finish turn"
-            }
-    }
+    @Test
+    fun `Init should display finish turn text when is initialized`() =
+        viewsTest {
+            // Given
+            // When
+            val finishTurnView = FinishTurnView(onTurnFinished = {})
+            // Then
+            finishTurnView.buttonText() shouldBe "Finish turn"
+        }
 
-    @Nested
-    inner class ButtonClick {
-        @Test
-        fun `should finish turn when button is clicked`() =
-            viewsTest {
-                // Given
-                var turnFinished = false
-                val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
-                addChild(finishTurnView)
-                // When
-                clickFinishTurn(finishTurnView)
-                // Then
-                turnFinished.shouldBeTrue()
-            }
-    }
+    @Test
+    fun `ButtonClick should finish turn when button is clicked`() =
+        viewsTest {
+            // Given
+            var turnFinished = false
+            val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
+            addChild(finishTurnView)
+            // When
+            clickFinishTurn(finishTurnView)
+            // Then
+            turnFinished.shouldBeTrue()
+        }
 }
 ```
 
@@ -227,7 +211,7 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 
 * Start them with `startAnimation { ... }`, so the test can assert what is displayed while they play.
 * Advance the frames with `nextFrame()`, `awaitCompletion(animation)` or `sampleUntilCompletion(animation) { ... }`, which records what is displayed on every frame. They call `delayFrame()` followed by `yield()`, because `delayFrame()` alone does not let the animation coroutine run.
-* These helpers live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See `BattlefieldViewTest.MoveBattleUnit`.
+* These helpers live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See the `MoveBattleUnit` tests of `BattlefieldViewTest`.
 
 ### Presenters and the timeline
 
@@ -246,7 +230,7 @@ Presenters draw through the [presentation timeline](../architecture/presentation
 - They SHOULD use each subdomain API declared under `com.mkz.rpg.<subdomain>.adapters.presentation.<subdomain>Api`. E.g.: use `com.mkz.rpg.effect.adapters.presentation.EffectApi` to interact with the effect subdomain use cases.
 - They SHOULD use `require` to validate preconditions about the common setup for the acceptance test scenario. E.g.: before moving a battle unit, require that the initial position is the one needed by the test.
 - They MUST only invoke `eventBus.dispatch()` in the `// When` section
-- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeEach`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. See `CpuCastingAcceptanceTest` for an example.
+- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeEach`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. A scenario that needs a different `@BeforeEach` MUST be its own test class. See `CpuCastingBadlyHurtRatAcceptanceTest` for an example.
 
 For example: Requesting to move a battle unit
 
@@ -332,7 +316,6 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use Mockito, KorGE views or `java.*` classes.
 
 - The test MUST be annotated with `@kotlin.test.Test` instead of `@org.junit.jupiter.api.Test`.
-- The test MUST NOT use `@Nested`, which is not available on JS. Flatten the nested classes and put their context in the test name (e.g.: `should start the first round with the first player when start first round and two players join`).
 - The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.
 
 ## Run tests

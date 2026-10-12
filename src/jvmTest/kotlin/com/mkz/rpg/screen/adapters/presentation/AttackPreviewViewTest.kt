@@ -6,98 +6,91 @@ import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class AttackPreviewViewTest : ViewsForTesting() {
-    @Nested
-    inner class Display {
-        @Test
-        fun `should be visible when is displayed`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                // When
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = null,
-                    receiverUnit = null,
-                    damage = null,
-                )
-                // Then
-                attackPreviewView.isVisibleToUser().shouldBeTrue()
-            }
+    @Test
+    fun `Display should be visible when is displayed`() =
+        viewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
+            val casterUnit = unit(id = "knight").toDto()
+            // When
+            attackPreviewView.display(
+                casterBattleUnit = casterBattleUnit,
+                casterUnit = casterUnit,
+                manaCost = 10,
+                receiverBattleUnit = null,
+                receiverUnit = null,
+                damage = null,
+            )
+            // Then
+            attackPreviewView.isVisibleToUser().shouldBeTrue()
+        }
 
-        @Test
-        fun `should hide receiver views when no receiver battle unit is provided`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                // When
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = null,
-                    receiverUnit = null,
-                    damage = null,
-                )
-                // Then
-                attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
-                attackPreviewView.isReceiverPortraitVisible().shouldBeFalse()
-            }
+    @Test
+    fun `Display should hide receiver views when no receiver battle unit is provided`() =
+        viewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
+            val casterUnit = unit(id = "knight").toDto()
+            // When
+            attackPreviewView.display(
+                casterBattleUnit = casterBattleUnit,
+                casterUnit = casterUnit,
+                manaCost = 10,
+                receiverBattleUnit = null,
+                receiverUnit = null,
+                damage = null,
+            )
+            // Then
+            attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
+            attackPreviewView.isReceiverPortraitVisible().shouldBeFalse()
+        }
 
-        @Test
-        fun `should display receiver views when receiver battle unit is provided`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                val receiverBattleUnit = battleUnit(unit = unit(id = "rat").toDto()).toDto()
-                val receiverUnit = unit(id = "rat").toDto()
-                // When
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = receiverBattleUnit,
-                    receiverUnit = receiverUnit,
-                    damage = 10,
-                )
-                // Then
-                attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
-                attackPreviewView.isReceiverPortraitVisible().shouldBeTrue()
-            }
-    }
+    @Test
+    fun `Display should display receiver views when receiver battle unit is provided`() =
+        viewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
+            val casterUnit = unit(id = "knight").toDto()
+            val receiverBattleUnit = battleUnit(unit = unit(id = "rat").toDto()).toDto()
+            val receiverUnit = unit(id = "rat").toDto()
+            // When
+            attackPreviewView.display(
+                casterBattleUnit = casterBattleUnit,
+                casterUnit = casterUnit,
+                manaCost = 10,
+                receiverBattleUnit = receiverBattleUnit,
+                receiverUnit = receiverUnit,
+                damage = 10,
+            )
+            // Then
+            attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
+            attackPreviewView.isReceiverPortraitVisible().shouldBeTrue()
+        }
 
-    @Nested
-    inner class Hide {
-        @Test
-        fun `should not be visible when is hidden`() =
-            viewsTest {
-                // Given
-                val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-                val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-                val casterUnit = unit(id = "knight").toDto()
-                attackPreviewView.display(
-                    casterBattleUnit = casterBattleUnit,
-                    casterUnit = casterUnit,
-                    manaCost = 10,
-                    receiverBattleUnit = null,
-                    receiverUnit = null,
-                    damage = null,
-                )
-                // When
-                attackPreviewView.hide()
-                // Then
-                attackPreviewView.isVisibleToUser().shouldBeFalse()
-            }
-    }
+    @Test
+    fun `Hide should not be visible when is hidden`() =
+        viewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
+            val casterUnit = unit(id = "knight").toDto()
+            attackPreviewView.display(
+                casterBattleUnit = casterBattleUnit,
+                casterUnit = casterUnit,
+                manaCost = 10,
+                receiverBattleUnit = null,
+                receiverUnit = null,
+                damage = null,
+            )
+            // When
+            attackPreviewView.hide()
+            // Then
+            attackPreviewView.isVisibleToUser().shouldBeFalse()
+        }
 }

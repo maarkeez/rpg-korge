@@ -6,120 +6,110 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class BattleSceneTimelineTest {
     private val timeline = battleSceneTimeline()
 
-    @Nested
-    inner class Play {
-        @Test
-        fun `should play the step straight away when the timeline is idle`() {
-            // Given
-            val playedSteps = mutableListOf<String>()
-            // When
-            timeline.play { playedSteps += "step" }
-            // Then
-            playedSteps.shouldContainExactly("step")
-        }
-
-        @Test
-        fun `should wait to play the step when the previous step is still playing`() {
-            // Given
-            val playedSteps = mutableListOf<String>()
-            timeline.playLongStep()
-            // When
-            timeline.play { playedSteps += "step" }
-            // Then
-            playedSteps.shouldBeEmpty()
-        }
-
-        @Test
-        fun `should play the waiting steps in order when the previous step finishes`() {
-            // Given
-            val playedSteps = mutableListOf<String>()
-            val longStep = timeline.playLongStep()
-            timeline.play { playedSteps += "first" }
-            timeline.play { playedSteps += "second" }
-            // When
-            longStep.complete(Unit)
-            // Then
-            playedSteps.shouldContainExactly("first", "second")
-        }
-
-        @Test
-        fun `should play the step after the previous steps when it is added by a playing step`() {
-            // Given
-            val playedSteps = mutableListOf<String>()
-            // When
-            timeline.play {
-                timeline.play { playedSteps += "added" }
-                playedSteps += "adding"
-            }
-            // Then
-            playedSteps.shouldContainExactly("adding", "added")
-        }
+    @Test
+    fun `Play should play the step straight away when the timeline is idle`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        // When
+        timeline.play { playedSteps += "step" }
+        // Then
+        playedSteps.shouldContainExactly("step")
     }
 
-    @Nested
-    inner class OnPlayingChanged {
-        @Test
-        fun `should notify when the timeline starts and stops playing`() {
-            // Given
-            val notifications = mutableListOf<Boolean>()
-            timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
-            val longStep = timeline.playLongStep()
-            timeline.play { }
-            // When
-            longStep.complete(Unit)
-            // Then
-            notifications.shouldContainExactly(true, false)
-        }
-
-        @Test
-        fun `should notify that the timeline is playing when a step is still playing`() {
-            // Given
-            val notifications = mutableListOf<Boolean>()
-            timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
-            // When
-            timeline.playLongStep()
-            // Then
-            notifications.shouldContainExactly(true)
-        }
+    @Test
+    fun `Play should wait to play the step when the previous step is still playing`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        timeline.playLongStep()
+        // When
+        timeline.play { playedSteps += "step" }
+        // Then
+        playedSteps.shouldBeEmpty()
     }
 
-    @Nested
-    inner class IsPlaying {
-        @Test
-        fun `should not be playing when no step has been added`() {
-            // Given
-            // When
-            val isPlaying = timeline.isPlaying
-            // Then
-            isPlaying.shouldBeFalse()
-        }
+    @Test
+    fun `Play should play the waiting steps in order when the previous step finishes`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        val longStep = timeline.playLongStep()
+        timeline.play { playedSteps += "first" }
+        timeline.play { playedSteps += "second" }
+        // When
+        longStep.complete(Unit)
+        // Then
+        playedSteps.shouldContainExactly("first", "second")
+    }
 
-        @Test
-        fun `should be playing when a step is still playing`() {
-            // Given
-            timeline.playLongStep()
-            // When
-            val isPlaying = timeline.isPlaying
-            // Then
-            isPlaying.shouldBeTrue()
+    @Test
+    fun `Play should play the step after the previous steps when it is added by a playing step`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        // When
+        timeline.play {
+            timeline.play { playedSteps += "added" }
+            playedSteps += "adding"
         }
+        // Then
+        playedSteps.shouldContainExactly("adding", "added")
+    }
 
-        @Test
-        fun `should not be playing when every step has been played`() {
-            // Given
-            val longStep = timeline.playLongStep()
-            timeline.play { }
-            longStep.complete(Unit)
-            // When
-            val isPlaying = timeline.isPlaying
-            // Then
-            isPlaying.shouldBeFalse()
-        }
+    @Test
+    fun `OnPlayingChanged should notify when the timeline starts and stops playing`() {
+        // Given
+        val notifications = mutableListOf<Boolean>()
+        timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
+        val longStep = timeline.playLongStep()
+        timeline.play { }
+        // When
+        longStep.complete(Unit)
+        // Then
+        notifications.shouldContainExactly(true, false)
+    }
+
+    @Test
+    fun `OnPlayingChanged should notify that the timeline is playing when a step is still playing`() {
+        // Given
+        val notifications = mutableListOf<Boolean>()
+        timeline.onPlayingChanged { isPlaying -> notifications += isPlaying }
+        // When
+        timeline.playLongStep()
+        // Then
+        notifications.shouldContainExactly(true)
+    }
+
+    @Test
+    fun `IsPlaying should not be playing when no step has been added`() {
+        // Given
+        // When
+        val isPlaying = timeline.isPlaying
+        // Then
+        isPlaying.shouldBeFalse()
+    }
+
+    @Test
+    fun `IsPlaying should be playing when a step is still playing`() {
+        // Given
+        timeline.playLongStep()
+        // When
+        val isPlaying = timeline.isPlaying
+        // Then
+        isPlaying.shouldBeTrue()
+    }
+
+    @Test
+    fun `IsPlaying should not be playing when every step has been played`() {
+        // Given
+        val longStep = timeline.playLongStep()
+        timeline.play { }
+        longStep.complete(Unit)
+        // When
+        val isPlaying = timeline.isPlaying
+        // Then
+        isPlaying.shouldBeFalse()
     }
 }

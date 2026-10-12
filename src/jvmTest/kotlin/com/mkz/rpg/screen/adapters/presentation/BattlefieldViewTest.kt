@@ -20,7 +20,6 @@ import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -34,532 +33,493 @@ class BattlefieldViewTest : ViewsForTesting() {
         const val MOVE_STEP_FRAMES = 15
     }
 
-    @Nested
-    inner class DisplayBattlefield {
-        @Test
-        fun `should not scroll the battlefield when is clicked and is smaller than the viewport`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                addChild(battlefieldView)
-                // When
-                clickTile(battlefieldView, row = 0, column = 0)
-                // Then
-                repeat(SCROLL_ANIMATION_FRAMES) { delayFrame() }
-                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
-            }
+    @Test
+    fun `DisplayBattlefield should not scroll the battlefield when is clicked and is smaller than the viewport`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            addChild(battlefieldView)
+            // When
+            clickTile(battlefieldView, row = 0, column = 0)
+            // Then
+            repeat(SCROLL_ANIMATION_FRAMES) { delayFrame() }
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
 
-        @Test
-        fun `should display battlefield tiles when battlefield is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val battlefield = battlefield(rows = 2, columns = 3).toDto()
-                // When
-                battlefieldView.displayBattlefield(battlefield)
-                // Then
-                battlefieldView.tileCount() shouldBe 6
-            }
+    @Test
+    fun `DisplayBattlefield should display battlefield tiles when battlefield is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val battlefield = battlefield(rows = 2, columns = 3).toDto()
+            // When
+            battlefieldView.displayBattlefield(battlefield)
+            // Then
+            battlefieldView.tileCount() shouldBe 6
+        }
 
-        @Test
-        fun `should display terrain on each tile when battlefield is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val battlefield = battlefield(rows = 1, columns = 1).toDto()
-                // When
-                battlefieldView.displayBattlefield(battlefield)
-                // Then
-                battlefieldView.hasTerrainAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayBattlefield should display terrain on each tile when battlefield is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val battlefield = battlefield(rows = 1, columns = 1).toDto()
+            // When
+            battlefieldView.displayBattlefield(battlefield)
+            // Then
+            battlefieldView.hasTerrainAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should display terrain transition tile on tile adjacent to void when battlefield is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val tiles =
-                    listOf(
-                        listOf("void", "sand"),
+    @Test
+    fun `DisplayBattlefield should display terrain transition tile on tile adjacent to void when battlefield is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val tiles =
+                listOf(
+                    listOf("void", "sand"),
+                )
+            val battlefield =
+                battlefield(
+                    rows = 1,
+                    columns = 2,
+                    tiles = tiles,
+                    terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
+                ).toDto()
+            // When
+            battlefieldView.displayBattlefield(battlefield)
+            // Then
+            battlefieldView.hasTerrainAt(row = 0, column = 1).shouldBeTrue()
+        }
+
+    @Test
+    fun `TerrainTileBitmap should return the pure terrain tile of the strip when the tile has no terrain transition`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            // When
+            val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
+            // Then
+            tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
+            tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
+            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0).shouldBeTrue()
+        }
+
+    @Test
+    fun `TerrainTileBitmap should return the pure target terrain tile of the strip when the target terrain tile has no terrain transition`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            // When
+            val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
+            // Then
+            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
+        }
+
+    @Test
+    fun `TerrainTileBitmap should return the transition tile of the strip when the tile has a terrain transition`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            // When
+            val tileBitmap =
+                battlefieldView
+                    .terrainTileBitmap(
+                        terrainId = "sand",
+                        terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
                     )
-                val battlefield =
-                    battlefield(
-                        rows = 1,
-                        columns = 2,
-                        tiles = tiles,
-                        terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
-                    ).toDto()
-                // When
-                battlefieldView.displayBattlefield(battlefield)
-                // Then
-                battlefieldView.hasTerrainAt(row = 0, column = 1).shouldBeTrue()
-            }
-    }
+            // Then
+            tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
+            tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
+            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9).shouldBeTrue()
+        }
 
-    @Nested
-    inner class TerrainTileBitmap {
-        @Test
-        fun `should return the pure terrain tile of the strip when the tile has no terrain transition`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
-                // When
-                val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
-                // Then
-                tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
-                tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
-                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0).shouldBeTrue()
-            }
+    @Test
+    fun `TerrainTileBitmap should return the last tile of the strip when the terrain transition has all target terrain edges`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            // When
+            val tileBitmap =
+                battlefieldView
+                    .terrainTileBitmap(
+                        terrainId = "sand",
+                        terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
+                    )
+            // Then
+            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
+        }
 
-        @Test
-        fun `should return the pure target terrain tile of the strip when the target terrain tile has no terrain transition`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
-                // When
-                val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
-                // Then
-                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
-            }
+    @Test
+    fun `TerrainTileBitmap should throw when the terrain bitmap is not found and the tile has no terrain transition`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            // When
+            val result = runCatching { battlefieldView.terrainTileBitmap(terrainId = "forest", terrainTransition = null) }
+            // Then
+            result.exceptionOrNull().shouldBeInstanceOf<IllegalStateException>()
+        }
 
-        @Test
-        fun `should return the transition tile of the strip when the tile has a terrain transition`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
-                // When
-                val tileBitmap =
-                    battlefieldView
-                        .terrainTileBitmap(
-                            terrainId = "sand",
-                            terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
-                        )
-                // Then
-                tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
-                tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
-                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayBattleUnit should display knight battle unit on tile when is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            // Then
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should return the last tile of the strip when the terrain transition has all target terrain edges`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
-                // When
-                val tileBitmap =
-                    battlefieldView
-                        .terrainTileBitmap(
-                            terrainId = "sand",
-                            terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
-                        )
-                // Then
-                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayBattleUnit should display rat battle unit on tile when is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "rat")
+            // Then
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should throw when the terrain bitmap is not found and the tile has no terrain transition`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                // When
-                val result = runCatching { battlefieldView.terrainTileBitmap(terrainId = "forest", terrainTransition = null) }
-                // Then
-                result.exceptionOrNull().shouldBeInstanceOf<IllegalStateException>()
-            }
-    }
+    @Test
+    fun `DisplayBattleUnit should not display battle unit on tile when the unit has no image`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "dragon")
+            // Then
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
+        }
 
-    @Nested
-    inner class DisplayBattleUnit {
-        @Test
-        fun `should display knight battle unit on tile when is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                // Then
-                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayPotentialMovement should display selection on tile when potential movement is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayPotentialMovement(row = 0, column = 0)
+            // Then
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should display rat battle unit on tile when is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "rat")
-                // Then
-                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayPotentialCast should display selection on tile when potential cast is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayPotentialCast(row = 0, column = 0)
+            // Then
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should not display battle unit on tile when the unit has no image`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "dragon")
-                // Then
-                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
-            }
-    }
+    @Test
+    fun `DisplayPotentialCast should not display duplicated selection when potential cast is displayed twice`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayPotentialCast(row = 0, column = 0)
+            // When
+            battlefieldView.displayPotentialCast(row = 0, column = 0)
+            // Then
+            val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
+            selectionCount shouldBe 1
+        }
 
-    @Nested
-    inner class DisplayPotentialMovement {
-        @Test
-        fun `should display selection on tile when potential movement is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayPotentialMovement(row = 0, column = 0)
-                // Then
-                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
-            }
-    }
+    @Test
+    fun `DisplayTileSelection should display selection on tile when tile selection is displayed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayTileSelection(row = 0, column = 0)
+            // Then
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-    @Nested
-    inner class DisplayPotentialCast {
-        @Test
-        fun `should display selection on tile when potential cast is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayPotentialCast(row = 0, column = 0)
-                // Then
-                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DisplayTileSelection should replace selection when tile selection is displayed over potential cast`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayPotentialCast(row = 0, column = 0)
+            // When
+            battlefieldView.displayTileSelection(row = 0, column = 0)
+            // Then
+            val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
+            selectionCount shouldBe 1
+        }
 
-        @Test
-        fun `should not display duplicated selection when potential cast is displayed twice`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                battlefieldView.displayPotentialCast(row = 0, column = 0)
-                // When
-                battlefieldView.displayPotentialCast(row = 0, column = 0)
-                // Then
-                val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
-                selectionCount shouldBe 1
-            }
-    }
+    @Test
+    fun `ResetTiles should remove selections from tiles when tiles are reset`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayPotentialMovement(row = 0, column = 0)
+            battlefieldView.displayTileSelection(row = 0, column = 1)
+            // When
+            battlefieldView.resetTiles()
+            // Then
+            battlefieldView.tilesWithSelectionCount() shouldBe 0
+        }
 
-    @Nested
-    inner class DisplayTileSelection {
-        @Test
-        fun `should display selection on tile when tile selection is displayed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                // When
-                battlefieldView.displayTileSelection(row = 0, column = 0)
-                // Then
-                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DimTilesExcept should dim every tile but the given ones when tiles are dimmed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+            // When
+            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0), Battlefield.Dto.PositionDto(row = 1, column = 1)))
+            // Then
+            battlefieldView.isDimmedAt(row = 0, column = 0).shouldBeFalse()
+            battlefieldView.isDimmedAt(row = 1, column = 1).shouldBeFalse()
+            battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeTrue()
+            battlefieldView.isDimmedAt(row = 1, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should replace selection when tile selection is displayed over potential cast`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                battlefieldView.displayPotentialCast(row = 0, column = 0)
-                // When
-                battlefieldView.displayTileSelection(row = 0, column = 0)
-                // Then
-                val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
-                selectionCount shouldBe 1
-            }
-    }
+    @Test
+    fun `DimTilesExcept should dim the battle unit on a tile that is dimmed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
+            // When
+            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            // Then
+            battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1).shouldBeTrue()
+        }
 
-    @Nested
-    inner class ResetTiles {
-        @Test
-        fun `should remove selections from tiles when tiles are reset`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
-                battlefieldView.displayPotentialMovement(row = 0, column = 0)
-                battlefieldView.displayTileSelection(row = 0, column = 1)
-                // When
-                battlefieldView.resetTiles()
-                // Then
-                battlefieldView.tilesWithSelectionCount() shouldBe 0
-            }
-    }
+    @Test
+    fun `DimTilesExcept should not dim a tile twice when tiles are dimmed twice`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            // When
+            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            battlefieldView.resetTiles()
+            // Then
+            battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeFalse()
+        }
 
-    @Nested
-    inner class DimTilesExcept {
-        @Test
-        fun `should dim every tile but the given ones when tiles are dimmed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
-                // When
-                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0), Battlefield.Dto.PositionDto(row = 1, column = 1)))
-                // Then
-                battlefieldView.isDimmedAt(row = 0, column = 0).shouldBeFalse()
-                battlefieldView.isDimmedAt(row = 1, column = 1).shouldBeFalse()
-                battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeTrue()
-                battlefieldView.isDimmedAt(row = 1, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `DimTilesExcept should remove the mask from every tile when tiles are reset`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+            battlefieldView.dimTilesExcept(emptySet())
+            // When
+            battlefieldView.resetTiles()
+            // Then
+            battlefieldView.dimmedTilesCount() shouldBe 0
+        }
 
-        @Test
-        fun `should dim the battle unit on a tile that is dimmed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
-                // When
-                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
-                // Then
-                battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1).shouldBeTrue()
-            }
+    @Test
+    fun `RemoveBattleUnit should remove battle unit from tile when is removed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            // When
+            battlefieldView.removeBattleUnit(row = 0, column = 0)
+            // Then
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
+        }
 
-        @Test
-        fun `should not dim a tile twice when tiles are dimmed twice`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
-                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
-                // When
-                battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
-                battlefieldView.resetTiles()
-                // Then
-                battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeFalse()
-            }
+    private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
 
-        @Test
-        fun `should remove the mask from every tile when tiles are reset`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
-                battlefieldView.dimTilesExcept(emptySet())
-                // When
-                battlefieldView.resetTiles()
-                // Then
-                battlefieldView.dimmedTilesCount() shouldBe 0
-            }
-    }
+    @Test
+    fun `MoveBattleUnit should display the battle unit on each tile of the path in order when it moves`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            val positionsBeforeMoving = battlefieldView.battleUnitPositions()
+            // When
+            val moving = startMoving(battlefieldView, path)
+            val displayedPositions = listOf(positionsBeforeMoving) + sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() }
+            // Then
+            displayedPositions.distinct().shouldContainExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
+            displayedPositions.zipWithNext().count { (previous, next) -> previous != next } shouldBe 2
+        }
 
-    @Nested
-    inner class RemoveBattleUnit {
-        @Test
-        fun `should remove battle unit from tile when is removed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                // When
-                battlefieldView.removeBattleUnit(row = 0, column = 0)
-                // Then
-                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
-            }
-    }
+    @Test
+    fun `MoveBattleUnit should stop on each tile of the path when the battle unit moves`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            startMoving(battlefieldView, path)
+            repeat(MOVE_STEP_FRAMES - 2) { nextFrame() }
+            // Then
+            battlefieldView.battleUnitPositions().shouldContainExactly(0 to 1)
+        }
 
-    @Nested
-    inner class MoveBattleUnit {
-        private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
+    @Test
+    fun `MoveBattleUnit should scroll the battlefield to keep the battle unit visible when it moves out of the viewport`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 5, unitId = "rat")
+            addChild(battlefieldView)
+            val pathOutOfTheViewport = (6..9).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+            require(!battlefieldView.isTileVisible(row = 0, column = 9))
+            // When
+            awaitCompletion(startMoving(battlefieldView, pathOutOfTheViewport))
+            // Then
+            battlefieldView.battleUnitPositions().shouldContainExactly(0 to 9)
+            battlefieldView.isTileVisible(row = 0, column = 9).shouldBeTrue()
+        }
 
-        @Test
-        fun `should display the battle unit on each tile of the path in order when it moves`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                addChild(battlefieldView)
-                val positionsBeforeMoving = battlefieldView.battleUnitPositions()
-                // When
-                val moving = startMoving(battlefieldView, path)
-                val displayedPositions = listOf(positionsBeforeMoving) + sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() }
-                // Then
-                displayedPositions.distinct().shouldContainExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
-                displayedPositions.zipWithNext().count { (previous, next) -> previous != next } shouldBe 2
-            }
+    @Test
+    fun `MoveBattleUnit should not scroll the battlefield when the battle unit moves and the battlefield is smaller than the viewport`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, path))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
 
-        @Test
-        fun `should stop on each tile of the path when the battle unit moves`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                addChild(battlefieldView)
-                // When
-                startMoving(battlefieldView, path)
-                repeat(MOVE_STEP_FRAMES - 2) { nextFrame() }
-                // Then
-                battlefieldView.battleUnitPositions().shouldContainExactly(0 to 1)
-            }
-
-        @Test
-        fun `should scroll the battlefield to keep the battle unit visible when it moves out of the viewport`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 16).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 5, unitId = "rat")
-                addChild(battlefieldView)
-                val pathOutOfTheViewport = (6..9).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
-                require(!battlefieldView.isTileVisible(row = 0, column = 9))
-                // When
-                awaitCompletion(startMoving(battlefieldView, pathOutOfTheViewport))
-                // Then
-                battlefieldView.battleUnitPositions().shouldContainExactly(0 to 9)
-                battlefieldView.isTileVisible(row = 0, column = 9).shouldBeTrue()
-            }
-
-        @Test
-        fun `should not scroll the battlefield when the battle unit moves and the battlefield is smaller than the viewport`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                addChild(battlefieldView)
-                // When
-                awaitCompletion(startMoving(battlefieldView, path))
-                // Then
-                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
-            }
-
-        private suspend fun startMoving(
-            battlefieldView: BattlefieldView,
-            path: List<Battlefield.Dto.PositionDto>,
-        ): Job {
-            val origin = battlefieldView.battleUnitPositions().single()
-            return startAnimation {
-                battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
-            }
+    private suspend fun startMoving(
+        battlefieldView: BattlefieldView,
+        path: List<Battlefield.Dto.PositionDto>,
+    ): Job {
+        val origin = battlefieldView.battleUnitPositions().single()
+        return startAnimation {
+            battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
         }
     }
 
-    @Nested
-    inner class FlashBattleUnit {
-        @Test
-        fun `should blink the battle unit when it is flashed`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
-                addChild(battlefieldView)
-                // When
-                val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
-                val flashingFrames = sampleUntilCompletion(flashing) { battlefieldView.isFlashingAt(row = 0, column = 0) }
-                // Then
-                val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
-                blinks shouldBe BattlefieldView.FLASH_COUNT
-                battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
-                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
-            }
+    @Test
+    fun `FlashBattleUnit should blink the battle unit when it is flashed`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
+            val flashingFrames = sampleUntilCompletion(flashing) { battlefieldView.isFlashingAt(row = 0, column = 0) }
+            // Then
+            val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
+            blinks shouldBe BattlefieldView.FLASH_COUNT
+            battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
+        }
 
-        @Test
-        fun `should scroll the battlefield to the battle unit when it is flashed out of the viewport`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-                battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
-                addChild(battlefieldView)
-                require(!battlefieldView.isTileVisible(row = 12, column = 13))
-                // When
-                awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
-                // Then
-                battlefieldView.isTileVisible(row = 12, column = 13).shouldBeTrue()
-            }
+    @Test
+    fun `FlashBattleUnit should scroll the battlefield to the battle unit when it is flashed out of the viewport`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
+            addChild(battlefieldView)
+            require(!battlefieldView.isTileVisible(row = 12, column = 13))
+            // When
+            awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
+            // Then
+            battlefieldView.isTileVisible(row = 12, column = 13).shouldBeTrue()
+        }
 
-        @Test
-        fun `should not blink when the unit has no image`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                addChild(battlefieldView)
-                // When
-                val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "dragon")
-                // Then
-                flashing.isCompleted.shouldBeTrue()
-                battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
-            }
+    @Test
+    fun `FlashBattleUnit should not blink when the unit has no image`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            addChild(battlefieldView)
+            // When
+            val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "dragon")
+            // Then
+            flashing.isCompleted.shouldBeTrue()
+            battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
+        }
 
-        private suspend fun startFlashing(
-            battlefieldView: BattlefieldView,
-            row: Int,
-            column: Int,
-            unitId: String,
-        ): Job = startAnimation { battlefieldView.flashBattleUnit(row = row, column = column, unitId = unitId) }
-    }
+    private suspend fun startFlashing(
+        battlefieldView: BattlefieldView,
+        row: Int,
+        column: Int,
+        unitId: String,
+    ): Job = startAnimation { battlefieldView.flashBattleUnit(row = row, column = column, unitId = unitId) }
 
-    @Nested
-    inner class Tint {
-        @Test
-        fun `should tint the battlefield with the colour and fade it out when it is tinted`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                addChild(battlefieldView)
-                // When
-                val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
-                val tints = sampleUntilCompletion(tinting) { battlefieldView.tintColor() to battlefieldView.tintAlpha() }
-                // Then
-                tints.mapNotNull { (color, _) -> color }.distinct().shouldContainExactly(BattleInfoView.CPU_TURN_COLOR)
-                tints.maxOf { (_, alpha) -> alpha } shouldBe (BattlefieldView.TINT_ALPHA plusOrMinus 0.05)
-                battlefieldView.tintColor().shouldBeNull()
-            }
+    @Test
+    fun `Tint should tint the battlefield with the colour and fade it out when it is tinted`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            addChild(battlefieldView)
+            // When
+            val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
+            val tints = sampleUntilCompletion(tinting) { battlefieldView.tintColor() to battlefieldView.tintAlpha() }
+            // Then
+            tints.mapNotNull { (color, _) -> color }.distinct().shouldContainExactly(BattleInfoView.CPU_TURN_COLOR)
+            tints.maxOf { (_, alpha) -> alpha } shouldBe (BattlefieldView.TINT_ALPHA plusOrMinus 0.05)
+            battlefieldView.tintColor().shouldBeNull()
+        }
 
-        @Test
-        fun `should not scroll the battlefield when it is tinted`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-                addChild(battlefieldView)
-                // When
-                awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
-                // Then
-                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
-            }
-    }
+    @Test
+    fun `Tint should not scroll the battlefield when it is tinted`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
 
-    @Nested
-    inner class TileClick {
-        @Test
-        fun `should notify delegate with tile position when tile is clicked`() =
-            viewsTest {
-                // Given
-                val battlefieldView = BattlefieldView(loadedResourcesLoader())
-                val delegate = mock<BattlefieldView.Delegate>()
-                battlefieldView.setDelegate(delegate)
-                battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
-                addChild(battlefieldView)
-                // When
-                clickTile(battlefieldView, row = 0, column = 0)
-                // Then
-                verify(delegate).tileSelected(row = 0, column = 0)
-            }
-    }
+    @Test
+    fun `TileClick should notify delegate with tile position when tile is clicked`() =
+        viewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val delegate = mock<BattlefieldView.Delegate>()
+            battlefieldView.setDelegate(delegate)
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            addChild(battlefieldView)
+            // When
+            clickTile(battlefieldView, row = 0, column = 0)
+            // Then
+            verify(delegate).tileSelected(row = 0, column = 0)
+        }
 
     private fun matchesWangTile(
         tile: Bitmap,

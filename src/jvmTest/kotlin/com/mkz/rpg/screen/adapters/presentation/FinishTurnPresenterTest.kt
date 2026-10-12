@@ -12,7 +12,6 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLo
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -55,134 +54,122 @@ class FinishTurnPresenterTest {
         onTurnFinished.firstValue()
     }
 
-    @Nested
-    inner class Init {
-        @Test
-        fun `should display finish turn when is created`() {
-            // Given
-            // When
-            createPresenter()
-            // Then
-            verify(playerCallToActionView).displayFinishTurn(any())
-        }
-
-        @Test
-        fun `should disable finish turn when is created and no turn has started yet`() {
-            // Given
-            // When
-            createPresenter()
-            // Then
-            isFinishTurnEnabled().shouldBeFalse()
-        }
+    @Test
+    fun `Init should display finish turn when is created`() {
+        // Given
+        // When
+        createPresenter()
+        // Then
+        verify(playerCallToActionView).displayFinishTurn(any())
     }
 
-    @Nested
-    inner class EnableFinishTurn {
-        @Test
-        fun `should enable finish turn when a human player turn starts`() {
-            // Given
-            createPresenter()
-            // When
-            startTurnOf("human")
-            // Then
-            isFinishTurnEnabled().shouldBeTrue()
-        }
-
-        @Test
-        fun `should disable finish turn when a cpu player turn starts`() {
-            // Given
-            createPresenter()
-            startTurnOf("human")
-            // When
-            startTurnOf("cpu")
-            // Then
-            isFinishTurnEnabled().shouldBeFalse()
-        }
-
-        @Test
-        fun `should disable finish turn while the timeline is playing during a human player turn`() {
-            // Given
-            createPresenter()
-            startTurnOf("human")
-            // When
-            timeline.playLongStep()
-            // Then
-            isFinishTurnEnabled().shouldBeFalse()
-        }
-
-        @Test
-        fun `should enable finish turn once the previous steps have been played when a human player turn starts`() {
-            // Given
-            createPresenter()
-            val cpuMove = timeline.playLongStep()
-            startTurnOf("human")
-            isFinishTurnEnabled().shouldBeFalse()
-            // When
-            cpuMove.complete(Unit)
-            // Then
-            isFinishTurnEnabled().shouldBeTrue()
-        }
+    @Test
+    fun `Init should disable finish turn when is created and no turn has started yet`() {
+        // Given
+        // When
+        createPresenter()
+        // Then
+        isFinishTurnEnabled().shouldBeFalse()
     }
 
-    @Nested
-    inner class FinishTurn {
-        @Test
-        fun `should finish the player turn when the player finishes the turn`() {
-            // Given
-            createPresenter()
-            startTurnOf("human")
-            // When
-            clickFinishTurn()
-            // Then
-            verify(finishPlayerTurn).invoke()
-        }
-
-        @Test
-        fun `should disable finish turn when the player finishes the turn`() {
-            // Given
-            createPresenter()
-            startTurnOf("human")
-            // When
-            clickFinishTurn()
-            // Then
-            isFinishTurnEnabled().shouldBeFalse()
-        }
-
-        @Test
-        fun `should not finish the player turn when the timeline is playing`() {
-            // Given
-            createPresenter()
-            startTurnOf("human")
-            timeline.playLongStep()
-            // When
-            clickFinishTurn()
-            // Then
-            verify(finishPlayerTurn, never()).invoke()
-        }
-
-        @Test
-        fun `should not finish the player turn when the cpu player turn is displayed`() {
-            // Given
-            createPresenter()
-            startTurnOf("cpu")
-            // When
-            clickFinishTurn()
-            // Then
-            verify(finishPlayerTurn, never()).invoke()
-        }
+    @Test
+    fun `EnableFinishTurn should enable finish turn when a human player turn starts`() {
+        // Given
+        createPresenter()
+        // When
+        startTurnOf("human")
+        // Then
+        isFinishTurnEnabled().shouldBeTrue()
     }
 
-    @Nested
-    inner class PlayerWins {
-        @Test
-        fun `should hide the call to action when a player wins`() {
-            // Given
-            createPresenter()
-            eventBus.publish(PlayerVictory(playerId = "human"))
-            // When
-            eventBus.dispatch()
-            // Then
-            verify(playerCallToActionView).hide()
-        }
+    @Test
+    fun `EnableFinishTurn should disable finish turn when a cpu player turn starts`() {
+        // Given
+        createPresenter()
+        startTurnOf("human")
+        // When
+        startTurnOf("cpu")
+        // Then
+        isFinishTurnEnabled().shouldBeFalse()
+    }
+
+    @Test
+    fun `EnableFinishTurn should disable finish turn while the timeline is playing during a human player turn`() {
+        // Given
+        createPresenter()
+        startTurnOf("human")
+        // When
+        timeline.playLongStep()
+        // Then
+        isFinishTurnEnabled().shouldBeFalse()
+    }
+
+    @Test
+    fun `EnableFinishTurn should enable finish turn once the previous steps have been played when a human player turn starts`() {
+        // Given
+        createPresenter()
+        val cpuMove = timeline.playLongStep()
+        startTurnOf("human")
+        isFinishTurnEnabled().shouldBeFalse()
+        // When
+        cpuMove.complete(Unit)
+        // Then
+        isFinishTurnEnabled().shouldBeTrue()
+    }
+
+    @Test
+    fun `FinishTurn should finish the player turn when the player finishes the turn`() {
+        // Given
+        createPresenter()
+        startTurnOf("human")
+        // When
+        clickFinishTurn()
+        // Then
+        verify(finishPlayerTurn).invoke()
+    }
+
+    @Test
+    fun `FinishTurn should disable finish turn when the player finishes the turn`() {
+        // Given
+        createPresenter()
+        startTurnOf("human")
+        // When
+        clickFinishTurn()
+        // Then
+        isFinishTurnEnabled().shouldBeFalse()
+    }
+
+    @Test
+    fun `FinishTurn should not finish the player turn when the timeline is playing`() {
+        // Given
+        createPresenter()
+        startTurnOf("human")
+        timeline.playLongStep()
+        // When
+        clickFinishTurn()
+        // Then
+        verify(finishPlayerTurn, never()).invoke()
+    }
+
+    @Test
+    fun `FinishTurn should not finish the player turn when the cpu player turn is displayed`() {
+        // Given
+        createPresenter()
+        startTurnOf("cpu")
+        // When
+        clickFinishTurn()
+        // Then
+        verify(finishPlayerTurn, never()).invoke()
+    }
+
+    @Test
+    fun `PlayerWins should hide the call to action when a player wins`() {
+        // Given
+        createPresenter()
+        eventBus.publish(PlayerVictory(playerId = "human"))
+        // When
+        eventBus.dispatch()
+        // Then
+        verify(playerCallToActionView).hide()
     }
 }

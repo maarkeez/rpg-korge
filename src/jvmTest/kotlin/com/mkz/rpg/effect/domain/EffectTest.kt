@@ -14,465 +14,455 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeTypeOf
-import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
 class EffectTest {
-    @Nested
-    inner class Create {
-        @Test
-        fun `should create effect when the dto is valid`() {
-            // Given
-            val effectDto = EffectMother.decreaseHealthEffect().toDto()
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect.toDto() shouldBe effectDto
-        }
-
-        @Test
-        fun `should create effect when the application type is on defeated`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_DEFEATED, onTurnStarted = null, beforeApplyingEffect = null))
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect.toDto() shouldBe effectDto
-        }
-
-        @Test
-        fun `should fail when the effect id is blank`() {
-            // Given
-            val effectDto = EffectMother.decreaseHealthEffect().toDto().copy(id = "  ")
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.EmptyEffectId>()
-        }
-
-        @Test
-        fun `should fail when the damage is negative`() {
-            // Given
-            val damage = -1
-            // When
-            val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativePower>()
-        }
-
-        @Test
-        fun `should fail when the damage is above the limit`() {
-            // Given
-            val damage = 1000
-            // When
-            val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.PowerAboveLimit>()
-        }
-
-        @Test
-        fun `should fail when the application is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_TURN_STARTED, onTurnStarted = null, beforeApplyingEffect = null))
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
-        }
-
-        @Test
-        fun `should fail when the application duration is negative`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.ON_TURN_STARTED,
-                                onTurnStarted = OnTurnStartedDto(duration = -1),
-                                beforeApplyingEffect = null,
-                            ),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativeApplicationDuration>()
-        }
-
-        @Test
-        fun `should fail when the application duration is above the limit`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.ON_TURN_STARTED,
-                                onTurnStarted = OnTurnStartedDto(duration = 100),
-                                beforeApplyingEffect = null,
-                            ),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.ApplicationDurationAboveLimit>()
-        }
-
-        @Test
-        fun `should create effect when the damage is zero`() {
-            // Given
-            val damage = 0
-            // When
-            val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
-            // Then
-            createdEffect
-                .toDto()
-                .outcome.decreaseHealth!!
-                .damage shouldBe damage
-        }
-
-        @Test
-        fun `should create effect when the damage is at the limit`() {
-            // Given
-            val damage = 999
-            // When
-            val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
-            // Then
-            createdEffect
-                .toDto()
-                .outcome.decreaseHealth!!
-                .damage shouldBe damage
-        }
-
-        @Test
-        fun `should create effect when the healing is zero`() {
-            // Given
-            val healing = 0
-            // When
-            val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
-            // Then
-            createdEffect
-                .toDto()
-                .outcome.increaseHealth!!
-                .healing shouldBe healing
-        }
-
-        @Test
-        fun `should create effect when the healing is at the limit`() {
-            // Given
-            val healing = 999
-            // When
-            val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
-            // Then
-            createdEffect
-                .toDto()
-                .outcome.increaseHealth!!
-                .healing shouldBe healing
-        }
-
-        @Test
-        fun `should create effect when the on turn started duration is zero`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.ON_TURN_STARTED,
-                                onTurnStarted = OnTurnStartedDto(duration = 0),
-                                beforeApplyingEffect = null,
-                            ),
-                    )
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect
-                .toDto()
-                .application.onTurnStarted!!
-                .duration shouldBe 0
-        }
-
-        @Test
-        fun `should create effect when the on turn started duration is at the limit`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.ON_TURN_STARTED,
-                                onTurnStarted = OnTurnStartedDto(duration = 99),
-                                beforeApplyingEffect = null,
-                            ),
-                    )
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect
-                .toDto()
-                .application.onTurnStarted!!
-                .duration shouldBe 99
-        }
-
-        @Test
-        fun `should create effect when the before applying effect duration is zero`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
-                                onTurnStarted = null,
-                                beforeApplyingEffect = BeforeApplyingEffectDto(duration = 0),
-                            ),
-                    )
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect
-                .toDto()
-                .application.beforeApplyingEffect!!
-                .duration shouldBe 0
-        }
-
-        @Test
-        fun `should create effect when the before applying effect duration is at the limit`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
-                                onTurnStarted = null,
-                                beforeApplyingEffect = BeforeApplyingEffectDto(duration = 99),
-                            ),
-                    )
-            // When
-            val createdEffect = Effect.create(effectDto)
-            // Then
-            createdEffect
-                .toDto()
-                .application.beforeApplyingEffect!!
-                .duration shouldBe 99
-        }
-
-        @Test
-        fun `should fail when the before applying effect is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        application =
-                            ApplicationDto(
-                                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
-                                onTurnStarted = null,
-                                beforeApplyingEffect = null,
-                            ),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
-        }
-
-        @Test
-        fun `should fail when the decrease health outcome is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .decreaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        outcome =
-                            EffectMother
-                                .decreaseHealthEffect()
-                                .toDto()
-                                .outcome
-                                .copy(decreaseHealth = null),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
-        }
-
-        @Test
-        fun `should fail when the increase health outcome is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .increaseHealthEffect()
-                    .toDto()
-                    .copy(
-                        outcome =
-                            EffectMother
-                                .increaseHealthEffect()
-                                .toDto()
-                                .outcome
-                                .copy(increaseHealth = null),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
-        }
-
-        @Test
-        fun `should fail when the apply effect on nearby allies outcome is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .applyEffectOnNearbyAlliesEffect()
-                    .toDto()
-                    .copy(
-                        outcome =
-                            EffectMother
-                                .applyEffectOnNearbyAlliesEffect()
-                                .toDto()
-                                .outcome
-                                .copy(applyEffectOnNearbyAllies = null),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
-        }
-
-        @Test
-        fun `should fail when the deploy battle unit outcome is missing its details`() {
-            // Given
-            val effectDto =
-                EffectMother
-                    .deployBattleUnitEffect()
-                    .toDto()
-                    .copy(
-                        outcome =
-                            EffectMother
-                                .deployBattleUnitEffect()
-                                .toDto()
-                                .outcome
-                                .copy(deployBattleUnit = null),
-                    )
-            // When
-            val result = runCatching { Effect.create(effectDto) }
-            // Then
-            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
-        }
+    @Test
+    fun `Create should create effect when the dto is valid`() {
+        // Given
+        val effectDto = EffectMother.decreaseHealthEffect().toDto()
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect.toDto() shouldBe effectDto
     }
 
-    @Nested
-    inner class ToDto {
-        @Test
-        fun `should expose the effect data when converted to dto`() {
-            // Given
-            val effect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3)
-            // When
-            val result = effect.toDto()
-            // Then
-            result.id shouldBe "effect-1"
-            result.outcome.type shouldBe DECREASE_HEALTH
-            result.outcome.decreaseHealth!!.damage shouldBe 3
-        }
-
-        @Test
-        fun `should expose the apply effect on nearby allies outcome when converted to dto`() {
-            // Given
-            val effect = EffectMother.applyEffectOnNearbyAlliesEffect(effectId = "venom-damage")
-            // When
-            val result = effect.toDto()
-            // Then
-            result.outcome.type shouldBe APPLY_EFFECT_ON_NEARBY_ALLIES
-            result.outcome.applyEffectOnNearbyAllies!!.effectId shouldBe "venom-damage"
-        }
-
-        @Test
-        fun `should expose the deploy battle unit outcome when converted to dto`() {
-            // Given
-            val effect = EffectMother.deployBattleUnitEffect(unitId = "summoned-rat")
-            // When
-            val result = effect.toDto()
-            // Then
-            result.outcome.type shouldBe DEPLOY_BATTLE_UNIT
-            result.outcome.deployBattleUnit!!.unitId shouldBe "summoned-rat"
-        }
-
-        @Test
-        fun `should expose the destination when the effect application targets a tile`() {
-            // Given
-            val destination = Effect.Dto.EffectTargetDto.Tile(row = 2, column = 3)
-            // When
-            val effectApplication =
-                Effect.Dto.EffectApplicationDto(
-                    source = ApplicationSourceDto.battleUnit("battle-unit-1"),
-                    target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-2"),
-                    effectId = "effect-1",
-                    destination = destination,
-                )
-            // Then
-            effectApplication.destination shouldBe destination
-        }
-
-        @Test
-        fun `should expose the before applying effect details when the application type is before applying effect`() {
-            // Given
-            val beforeApplyingEffect = BeforeApplyingEffectDto(duration = 3)
-            // When
-            val application =
-                ApplicationDto(
-                    type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
-                    onTurnStarted = null,
-                    beforeApplyingEffect = beforeApplyingEffect,
-                )
-            // Then
-            application.beforeApplyingEffect shouldBe beforeApplyingEffect
-            application.onTurnStarted.shouldBeNull()
-        }
+    @Test
+    fun `Create should create effect when the application type is on defeated`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_DEFEATED, onTurnStarted = null, beforeApplyingEffect = null))
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect.toDto() shouldBe effectDto
     }
 
-    @Nested
-    inner class PullEvents {
-        @Test
-        fun `should pull the created event when the effect has pending events`() {
-            // Given
-            val createdEffect = Effect.create(EffectMother.decreaseHealthEffect().toDto())
-            // When
-            val (events, _) = createdEffect.pullEvents()
-            // Then
-            events.shouldContainExactly(EffectEvent.EffectCreated(effectId = createdEffect.toDto().id))
-        }
+    @Test
+    fun `Create should fail when the effect id is blank`() {
+        // Given
+        val effectDto = EffectMother.decreaseHealthEffect().toDto().copy(id = "  ")
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.EmptyEffectId>()
+    }
 
-        @Test
-        fun `should not pull events when there are no pending events`() {
-            // Given
-            val effect = EffectMother.decreaseHealthEffect()
-            // When
-            val (events, _) = effect.pullEvents()
-            // Then
-            events.shouldBeEmpty()
-        }
+    @Test
+    fun `Create should fail when the damage is negative`() {
+        // Given
+        val damage = -1
+        // When
+        val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativePower>()
+    }
+
+    @Test
+    fun `Create should fail when the damage is above the limit`() {
+        // Given
+        val damage = 1000
+        // When
+        val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.PowerAboveLimit>()
+    }
+
+    @Test
+    fun `Create should fail when the application is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_TURN_STARTED, onTurnStarted = null, beforeApplyingEffect = null))
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
+    }
+
+    @Test
+    fun `Create should fail when the application duration is negative`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.ON_TURN_STARTED,
+                            onTurnStarted = OnTurnStartedDto(duration = -1),
+                            beforeApplyingEffect = null,
+                        ),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativeApplicationDuration>()
+    }
+
+    @Test
+    fun `Create should fail when the application duration is above the limit`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.ON_TURN_STARTED,
+                            onTurnStarted = OnTurnStartedDto(duration = 100),
+                            beforeApplyingEffect = null,
+                        ),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.ApplicationDurationAboveLimit>()
+    }
+
+    @Test
+    fun `Create should create effect when the damage is zero`() {
+        // Given
+        val damage = 0
+        // When
+        val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.decreaseHealth!!
+            .damage shouldBe damage
+    }
+
+    @Test
+    fun `Create should create effect when the damage is at the limit`() {
+        // Given
+        val damage = 999
+        // When
+        val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.decreaseHealth!!
+            .damage shouldBe damage
+    }
+
+    @Test
+    fun `Create should create effect when the healing is zero`() {
+        // Given
+        val healing = 0
+        // When
+        val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.increaseHealth!!
+            .healing shouldBe healing
+    }
+
+    @Test
+    fun `Create should create effect when the healing is at the limit`() {
+        // Given
+        val healing = 999
+        // When
+        val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.increaseHealth!!
+            .healing shouldBe healing
+    }
+
+    @Test
+    fun `Create should create effect when the on turn started duration is zero`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.ON_TURN_STARTED,
+                            onTurnStarted = OnTurnStartedDto(duration = 0),
+                            beforeApplyingEffect = null,
+                        ),
+                )
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .application.onTurnStarted!!
+            .duration shouldBe 0
+    }
+
+    @Test
+    fun `Create should create effect when the on turn started duration is at the limit`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.ON_TURN_STARTED,
+                            onTurnStarted = OnTurnStartedDto(duration = 99),
+                            beforeApplyingEffect = null,
+                        ),
+                )
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .application.onTurnStarted!!
+            .duration shouldBe 99
+    }
+
+    @Test
+    fun `Create should create effect when the before applying effect duration is zero`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                            onTurnStarted = null,
+                            beforeApplyingEffect = BeforeApplyingEffectDto(duration = 0),
+                        ),
+                )
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .application.beforeApplyingEffect!!
+            .duration shouldBe 0
+    }
+
+    @Test
+    fun `Create should create effect when the before applying effect duration is at the limit`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                            onTurnStarted = null,
+                            beforeApplyingEffect = BeforeApplyingEffectDto(duration = 99),
+                        ),
+                )
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .application.beforeApplyingEffect!!
+            .duration shouldBe 99
+    }
+
+    @Test
+    fun `Create should fail when the before applying effect is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    application =
+                        ApplicationDto(
+                            type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                            onTurnStarted = null,
+                            beforeApplyingEffect = null,
+                        ),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
+    }
+
+    @Test
+    fun `Create should fail when the decrease health outcome is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .decreaseHealthEffect()
+                .toDto()
+                .copy(
+                    outcome =
+                        EffectMother
+                            .decreaseHealthEffect()
+                            .toDto()
+                            .outcome
+                            .copy(decreaseHealth = null),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `Create should fail when the increase health outcome is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .increaseHealthEffect()
+                .toDto()
+                .copy(
+                    outcome =
+                        EffectMother
+                            .increaseHealthEffect()
+                            .toDto()
+                            .outcome
+                            .copy(increaseHealth = null),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `Create should fail when the apply effect on nearby allies outcome is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .applyEffectOnNearbyAlliesEffect()
+                .toDto()
+                .copy(
+                    outcome =
+                        EffectMother
+                            .applyEffectOnNearbyAlliesEffect()
+                            .toDto()
+                            .outcome
+                            .copy(applyEffectOnNearbyAllies = null),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `Create should fail when the deploy battle unit outcome is missing its details`() {
+        // Given
+        val effectDto =
+            EffectMother
+                .deployBattleUnitEffect()
+                .toDto()
+                .copy(
+                    outcome =
+                        EffectMother
+                            .deployBattleUnitEffect()
+                            .toDto()
+                            .outcome
+                            .copy(deployBattleUnit = null),
+                )
+        // When
+        val result = runCatching { Effect.create(effectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `ToDto should expose the effect data when converted to dto`() {
+        // Given
+        val effect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3)
+        // When
+        val result = effect.toDto()
+        // Then
+        result.id shouldBe "effect-1"
+        result.outcome.type shouldBe DECREASE_HEALTH
+        result.outcome.decreaseHealth!!.damage shouldBe 3
+    }
+
+    @Test
+    fun `ToDto should expose the apply effect on nearby allies outcome when converted to dto`() {
+        // Given
+        val effect = EffectMother.applyEffectOnNearbyAlliesEffect(effectId = "venom-damage")
+        // When
+        val result = effect.toDto()
+        // Then
+        result.outcome.type shouldBe APPLY_EFFECT_ON_NEARBY_ALLIES
+        result.outcome.applyEffectOnNearbyAllies!!.effectId shouldBe "venom-damage"
+    }
+
+    @Test
+    fun `ToDto should expose the deploy battle unit outcome when converted to dto`() {
+        // Given
+        val effect = EffectMother.deployBattleUnitEffect(unitId = "summoned-rat")
+        // When
+        val result = effect.toDto()
+        // Then
+        result.outcome.type shouldBe DEPLOY_BATTLE_UNIT
+        result.outcome.deployBattleUnit!!.unitId shouldBe "summoned-rat"
+    }
+
+    @Test
+    fun `ToDto should expose the destination when the effect application targets a tile`() {
+        // Given
+        val destination = Effect.Dto.EffectTargetDto.Tile(row = 2, column = 3)
+        // When
+        val effectApplication =
+            Effect.Dto.EffectApplicationDto(
+                source = ApplicationSourceDto.battleUnit("battle-unit-1"),
+                target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-2"),
+                effectId = "effect-1",
+                destination = destination,
+            )
+        // Then
+        effectApplication.destination shouldBe destination
+    }
+
+    @Test
+    fun `ToDto should expose the before applying effect details when the application type is before applying effect`() {
+        // Given
+        val beforeApplyingEffect = BeforeApplyingEffectDto(duration = 3)
+        // When
+        val application =
+            ApplicationDto(
+                type = ApplicationTypeDto.BEFORE_APPLYING_EFFECT,
+                onTurnStarted = null,
+                beforeApplyingEffect = beforeApplyingEffect,
+            )
+        // Then
+        application.beforeApplyingEffect shouldBe beforeApplyingEffect
+        application.onTurnStarted.shouldBeNull()
+    }
+
+    @Test
+    fun `PullEvents should pull the created event when the effect has pending events`() {
+        // Given
+        val createdEffect = Effect.create(EffectMother.decreaseHealthEffect().toDto())
+        // When
+        val (events, _) = createdEffect.pullEvents()
+        // Then
+        events.shouldContainExactly(EffectEvent.EffectCreated(effectId = createdEffect.toDto().id))
+    }
+
+    @Test
+    fun `PullEvents should not pull events when there are no pending events`() {
+        // Given
+        val effect = EffectMother.decreaseHealthEffect()
+        // When
+        val (events, _) = effect.pullEvents()
+        // Then
+        events.shouldBeEmpty()
     }
 }
