@@ -245,7 +245,7 @@ The project defines use-case acceptance tests as tests for features that integra
 Put the acceptance test under:
 
 ```text
-src/jvmTest/kotlin/com/mkz/rpg/shared/usecases/acceptance
+src/commonTest/kotlin/com/mkz/rpg/shared/usecases/acceptance
 ```
 
 Use the relevant subdomain APIs, such as:
@@ -301,7 +301,7 @@ Before opening the pull request, verify:
 - [ ] A use-case acceptance test covers the happy path through an ability.
 - [ ] The acceptance test asserts resulting state rather than events.
 - [ ] Chaining behavior has been considered and tested where relevant.
-- [ ] `./gradlew clean jvmTest` passes.
+- [ ] `./gradlew jvmTest jsTest` passes.
 
 ## Summary
 

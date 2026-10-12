@@ -57,6 +57,7 @@ dependencies {
     add("commonMainApi", "com.akuleshov7:ktoml-core:0.7.1")
 
     add("commonTestImplementation", "io.kotest:kotest-assertions-core:6.2.5")
+    add("commonTestImplementation", "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
 
     add("jvmTestRuntimeOnly", "org.junit.jupiter:junit-jupiter:6.1.3")
     add("jvmTestApi", "com.tngtech.archunit:archunit:1.5.0")

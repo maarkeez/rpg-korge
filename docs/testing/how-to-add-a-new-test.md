@@ -2,9 +2,9 @@
 
 ## Tests location
 
-- All the tests can be found at `src/jvmTest`
-- Tests that can run on every target MAY be moved to `src/commonTest`, so they also run on JS (`./gradlew jsTest`). See [Shared tests](#shared-tests).
-- The test MUST be in the same package as the class being tested. For example, given the class `src/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt` 
+- The tests MUST be in `src/commonTest`, so they run on both the JVM (`./gradlew jvmTest`) and JS (`./gradlew jsTest`). See [Shared tests](#shared-tests).
+- Only the tests that can not run on JS MUST be in `src/jvmTest`: the architecture tests (Konsist and ArchUnit are only available on the JVM), the [view tests](#test-example---presentation-view) and the [end-to-end tests](#test-example---end-to-end-test).
+- The test MUST be in the same package as the class being tested. For example, given the class `src/commonMain/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt`
 
 ## Test naming convention
 
@@ -47,9 +47,9 @@ val battlefield =
 
 - The tests MUST NOT use a mocking library (Mockito, MockK, Mokkery...). This is enforced by [`MockingLibraryArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/MockingLibraryArchitectureTest.kt).
 - The use case under test SHOULD use its real collaborators (queries, commands, services) built on in-memory repositories (e.g.: `SearchEffectById(InMemoryEffectRepository())`), and the test SHOULD store the data they read in the repositories.
-- When the queries under test need many collaborators, the test SHOULD use [`InMemoryQueries`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/usecases/InMemoryQueries.kt), which wires the in-memory repositories and the real queries as the subdomain APIs do. For example: `InMemoryQueries().whereShouldMove`.
+- When the queries under test need many collaborators, the test SHOULD use [`InMemoryQueries`](../../src/commonTest/kotlin/com/mkz/rpg/shared/usecases/InMemoryQueries.kt), which wires the in-memory repositories and the real queries as the subdomain APIs do. For example: `InMemoryQueries().whereShouldMove`.
 - The test SHOULD assert outcomes (the stored state, the published events or what is displayed) instead of the calls to the collaborators.
-- The `EventBus` is provided by a `FakeEventBus` (in `src/jvmTest/kotlin/com/mkz/rpg/shared/domain/FakeEventBus.kt`), so tests can assert on the published events with `eventBus.shouldHavePublishedEvents(...)` and `eventBus.shouldNotHavePublishedEvents()` (in `src/jvmTest/kotlin/com/mkz/rpg/shared/domain/EventBusMatchers.kt`). Event listener tests use the `InMemoryEventBus` instead. See [Test example - Event listener](#test-example---event-listener).
+- The `EventBus` is provided by a `FakeEventBus` (in `src/commonTest/kotlin/com/mkz/rpg/shared/domain/FakeEventBus.kt`), so tests can assert on the published events with `eventBus.shouldHavePublishedEvents(...)` and `eventBus.shouldNotHavePublishedEvents()` (in `src/commonTest/kotlin/com/mkz/rpg/shared/domain/EventBusMatchers.kt`). Event listener tests use the `InMemoryEventBus` instead. See [Test example - Event listener](#test-example---event-listener).
 - The adapters that read the game resources are replaced by hand-written fakes that load the given data (e.g.: `FakeAbilityLoader(abilities)`), next to the loader interface they implement (e.g.: `ability/usecases/services/FakeAbilityLoader.kt`).
 - The views used by presenters are replaced by hand-written fakes that record what they are asked to display (e.g.: `FakeBattlefieldView`), next to the view tests. The views are `open`, with `open` functions, so the fakes can override them. See [Presenters](#presenters).
 
@@ -85,7 +85,7 @@ class BattleTest {
 For example, here you are a command test:
 
 ```kotlin
-// src/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt
+// src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt
 package ability.usecases.commands
 
 import ability.adapters.storage.*
@@ -127,7 +127,7 @@ class RequestAbilityCreationTest {
 ## Test example - Event listener
 
 - Event listener tests MUST use the `com.mkz.rpg.shared.adapters.events.InMemoryEventBus` + `eventBus.dispatch()` instead of the `FakeEventBus`, so the listener receives the published event.
-- Each event listener MUST have one single test, which asserts the outcome of the use case it calls (e.g.: the stored state, or the event the use case publishes, recorded with `eventBus.subscribe`). Typed subscriptions are already covered by [`EventBusTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/domain/EventBusTest.kt), so there is no need to test that other event types are ignored.
+- Each event listener MUST have one single test, which asserts the outcome of the use case it calls (e.g.: the stored state, or the event the use case publishes, recorded with `eventBus.subscribe`). Typed subscriptions are already covered by [`EventBusTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/domain/EventBusTest.kt), so there is no need to test that other event types are ignored.
 
 You can use this example as reference:
 
@@ -165,6 +165,7 @@ class OnBattleUnitDefeatedTest {
 
 View tests are a bit different from the rest of the tests because they need to rely on KorGE's testing features.
 
+* The test **MUST** be in `src/jvmTest`, together with the view page objects. KorGE's `viewsTest` skips the test on JS, so a view test in `src/commonTest` would pass on JS without asserting anything. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
 * Each test function **MUST** start by using `viewsTest` from `korlibs.korge.tests.ViewsForTesting`.
 * The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
@@ -234,7 +235,7 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 
 ### Presenters
 
-- Presenter tests MUST use the real subdomain APIs through [`SubdomainApis`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SubdomainApis.kt), which wires them on one event bus as the game does, with fake loaders that load the given data. Call `initialise()` to store the data, deploy the battle units and start the battle, before creating the presenter.
+- Presenter tests MUST use the real subdomain APIs through [`SubdomainApis`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SubdomainApis.kt), which wires them on one event bus as the game does, with fake loaders that load the given data. Call `initialise()` to store the data, deploy the battle units and start the battle, before creating the presenter.
 - Presenter tests MUST use the fake views (e.g.: `FakeBattlefieldView`, `FakeBattleUnitInfoView`), and assert what the fakes recorded (e.g.: `battlefieldView.displayedBattleUnits`). The player actions are simulated by calling the delegate or the callbacks the presenter gave to the fake (e.g.: `playerCallToActionView.onTurnFinished`).
 
 ```kotlin
@@ -278,7 +279,8 @@ Presenters draw through the [presentation timeline](../architecture/presentation
 - They SHOULD use each subdomain API declared under `com.mkz.rpg.<subdomain>.adapters.presentation.<subdomain>Api`. E.g.: use `com.mkz.rpg.effect.adapters.presentation.EffectApi` to interact with the effect subdomain use cases.
 - They SHOULD use `require` to validate preconditions about the common setup for the acceptance test scenario. E.g.: before moving a battle unit, require that the initial position is the one needed by the test.
 - They MUST only invoke `eventBus.dispatch()` in the `// When` section
-- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeTest`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. A scenario that needs a different `@BeforeTest` MUST be its own test class. See `CpuCastingBadlyHurtRatAcceptanceTest` for an example.
+- The common setup for the acceptance test scenario MUST be a `private suspend fun setUp()`, and each test MUST run it with [`scenarioTest(::setUp) { ... }`](../../src/commonTest/kotlin/com/mkz/rpg/shared/usecases/acceptance/ScenarioTest.kt). The setup loads the resources, which suspends, so it can not be a `@BeforeTest`.
+- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in the `setUp`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. A scenario that needs a different `setUp` MUST be its own test class. See `CpuCastingBadlyHurtRatAcceptanceTest` for an example.
 
 For example: Requesting to move a battle unit
 
@@ -294,20 +296,18 @@ package com.mkz.rpg.shared.usecases.acceptance
 // Imports goes here
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SimpleBattleAcceptanceTest {
 
     // Subdomain APIs setup goes here
 
-    @BeforeTest
-    fun setup() {
-        // Common setup for the acceptance test scenario goes here
+    private suspend fun setUp() {
+        // Common setup for the acceptance test scenario goes here (e.g.: `terrainApi.init()` to load the resources)
     }
 
     @Test
-    fun `should occupy a tile when unit was moved`() {
+    fun `should occupy a tile when unit was moved`() = scenarioTest(::setUp) {
         // Given
         require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
         battleUnitApi.moveBattleUnit(battleUnitId = humanBattleUnitId, moveToRow = 2, moveToColumn = 1)
@@ -361,10 +361,13 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
 ## Shared tests
 
-A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use KorGE views or `java.*` classes.
+The tests in `src/commonTest` run on both the JVM and JS, so they MUST only depend on common code.
 
+- The test MUST NOT use `java.*` classes, nor JVM only libraries (e.g.: `runBlocking`).
+- A test that calls suspend functions MUST run them with `runTest { ... }` (from `kotlinx-coroutines-test`), e.g.: ``fun `should load the abilities`() = runTest { ... }``.
 - The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.
+- The JS tests read the game resources from `build/processedResources/js/test`, which [`karma.config.d/resources.js`](../../karma.config.d/resources.js) serves to the browser as the game does.
 
 ## Run tests
 
-All the project tests can be run using `./gradlew clean jvmTest`. The shared tests also run on JS with `./gradlew jsTest`, which needs Chrome.
+All the project tests can be run using `./gradlew clean` followed by `./gradlew jvmTest jsTest` (cleaning in the same run fails the JS tasks). The shared tests run on JS with `./gradlew jsTest`, which needs Chrome. Both run in the CI.
