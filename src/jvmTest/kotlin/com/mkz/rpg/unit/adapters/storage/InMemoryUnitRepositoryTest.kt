@@ -3,7 +3,7 @@ package com.mkz.rpg.unit.adapters.storage
 import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class InMemoryUnitRepositoryTest {
     private val unitRepository = InMemoryUnitRepository()

@@ -6,7 +6,7 @@ import com.mkz.rpg.cpuBrain.usecases.commands.ManageCpuBattleUnit
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnCpuBrainInitializedTest {
     private val eventBus = InMemoryEventBus()

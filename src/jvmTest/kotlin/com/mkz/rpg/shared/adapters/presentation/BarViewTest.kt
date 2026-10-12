@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BarViewTest : ViewsForTesting() {
     @Test

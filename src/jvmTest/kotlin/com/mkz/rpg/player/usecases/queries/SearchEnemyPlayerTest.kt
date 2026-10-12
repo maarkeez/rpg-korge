@@ -3,7 +3,7 @@ package com.mkz.rpg.player.usecases.queries
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.player
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SearchEnemyPlayerTest {
     private val playerRepository = InMemoryPlayerRepository()

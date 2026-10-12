@@ -4,7 +4,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class PointsViewTest : ViewsForTesting() {
     @Test

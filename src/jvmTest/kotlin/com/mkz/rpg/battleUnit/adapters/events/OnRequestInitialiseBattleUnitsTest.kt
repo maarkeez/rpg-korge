@@ -10,7 +10,7 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldNotBeNull
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialiseBattleUnitsTest {
     private val eventBus = InMemoryEventBus()

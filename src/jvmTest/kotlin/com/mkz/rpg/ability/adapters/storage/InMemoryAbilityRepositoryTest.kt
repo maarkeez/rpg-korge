@@ -3,7 +3,7 @@ package com.mkz.rpg.ability.adapters.storage
 import com.mkz.rpg.ability.domain.AbilityMother
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class InMemoryAbilityRepositoryTest {
     private val abilityRepository = InMemoryAbilityRepository()

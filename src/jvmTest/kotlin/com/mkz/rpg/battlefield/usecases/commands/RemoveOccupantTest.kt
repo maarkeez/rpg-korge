@@ -8,7 +8,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class RemoveOccupantTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()

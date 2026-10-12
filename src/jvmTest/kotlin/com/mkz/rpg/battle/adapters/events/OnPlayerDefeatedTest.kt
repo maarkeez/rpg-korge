@@ -6,7 +6,7 @@ import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.commands.FinishBattle
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnPlayerDefeatedTest {
     private val eventBus = InMemoryEventBus()

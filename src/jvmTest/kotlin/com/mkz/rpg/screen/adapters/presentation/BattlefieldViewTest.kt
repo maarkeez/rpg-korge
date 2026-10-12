@@ -20,7 +20,7 @@ import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattlefieldViewTest : ViewsForTesting() {
     private companion object {

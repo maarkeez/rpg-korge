@@ -8,15 +8,15 @@ import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class BattlefieldTerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus)
     private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         runBlocking { terrainApi.init() }
         terrainApi.initialiseTerrains()

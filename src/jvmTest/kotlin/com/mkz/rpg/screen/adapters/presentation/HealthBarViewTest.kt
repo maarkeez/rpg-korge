@@ -9,7 +9,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class HealthBarViewTest : ViewsForTesting() {
     @Test

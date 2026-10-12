@@ -17,8 +17,8 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class TerrainEffectAcceptanceTest {
     private class StubTerrainLoader(
@@ -54,7 +54,7 @@ class TerrainEffectAcceptanceTest {
     private val secondSandBattleUnitId = "battle-unit-sand-2"
     private val forestBattleUnitId = "battle-unit-forest"
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         playerApi.requestPlayerCreation(playerOneId, "Player One", HUMAN)
         playerApi.requestPlayerCreation(playerTwoId, "Player Two", HUMAN)

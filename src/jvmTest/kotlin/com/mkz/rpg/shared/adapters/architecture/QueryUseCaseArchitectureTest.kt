@@ -6,7 +6,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldNotBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class QueryUseCaseArchitectureTest {
     @Test

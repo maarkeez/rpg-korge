@@ -3,7 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.command
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class InitializeBattlefieldHudTest {
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()

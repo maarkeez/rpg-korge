@@ -5,7 +5,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class UnitPortraitViewTest : ViewsForTesting() {
     @Test

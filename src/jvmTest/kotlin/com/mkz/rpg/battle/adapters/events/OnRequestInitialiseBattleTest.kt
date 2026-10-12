@@ -7,7 +7,7 @@ import com.mkz.rpg.battle.usecases.commands.InitialiseBattle
 import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialiseBattleTest {
     private val eventBus = InMemoryEventBus()

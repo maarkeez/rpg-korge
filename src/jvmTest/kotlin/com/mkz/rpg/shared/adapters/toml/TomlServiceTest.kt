@@ -2,7 +2,7 @@ package com.mkz.rpg.shared.adapters.toml
 
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.Serializable
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class TomlServiceTest {
     @Serializable

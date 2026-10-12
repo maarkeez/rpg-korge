@@ -13,7 +13,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.maps.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattleUnitTest {
     @Test

@@ -7,7 +7,7 @@ import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SearchBattleUnitsByPlayerIdTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()

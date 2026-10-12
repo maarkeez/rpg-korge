@@ -7,7 +7,7 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class MovementServiceTest {
     private val queries = InMemoryQueries()

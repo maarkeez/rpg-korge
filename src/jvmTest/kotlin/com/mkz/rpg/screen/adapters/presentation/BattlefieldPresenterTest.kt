@@ -31,7 +31,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1 stands at (1,1) and can walk 3 tiles,

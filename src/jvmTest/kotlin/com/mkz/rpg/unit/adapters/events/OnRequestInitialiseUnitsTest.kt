@@ -7,7 +7,7 @@ import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.commands.InitialiseUnits
 import com.mkz.rpg.unit.usecases.services.FakeUnitLoader
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialiseUnitsTest {
     private val eventBus = InMemoryEventBus()

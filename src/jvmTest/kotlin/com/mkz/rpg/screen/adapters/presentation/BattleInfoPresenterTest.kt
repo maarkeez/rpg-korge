@@ -10,7 +10,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattleInfoView.BattleInfo
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattleInfoPresenterTest {
     private val battleInfoView = FakeBattleInfoView()

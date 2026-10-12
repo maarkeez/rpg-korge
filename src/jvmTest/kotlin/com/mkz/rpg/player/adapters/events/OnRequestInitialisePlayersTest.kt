@@ -7,7 +7,7 @@ import com.mkz.rpg.player.usecases.commands.InitialisePlayers
 import com.mkz.rpg.player.usecases.services.FakePlayerLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialisePlayersTest {
     private val eventBus = InMemoryEventBus()

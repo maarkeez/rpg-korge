@@ -4,7 +4,7 @@ import com.lemonappdev.konsist.api.Konsist
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class AssertionLibraryArchitectureTest {
     // Tests are asserted with Kotest assertions only, which run on every target, so the tests can be shared through `commonTest`.

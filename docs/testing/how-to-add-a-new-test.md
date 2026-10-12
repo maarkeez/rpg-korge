@@ -22,7 +22,7 @@
 
 ## Test libraries
 
-- The test MUST be annotated with `@org.junit.jupiter.api.Test`
+- The test MUST be declared with [kotlin.test](https://kotlinlang.org/api/core/kotlin-test/) annotations (e.g.: `@kotlin.test.Test`, `@kotlin.test.BeforeTest`), which run on every target, so the tests can be shared through `src/commonTest`. JUnit is not allowed, which is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 - The test MUST be asserted using [Kotest assertions](https://kotest.io/docs/assertions/assertions.html) (e.g.: `actual shouldBe expected`, `events.shouldContainExactly(...)`, `shouldThrow<Error> { ... }`). They run on every target, so the tests can be shared through `src/commonTest`. AssertJ is not allowed, which is enforced by [`AssertionLibraryArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssertionLibraryArchitectureTest.kt).
 - The test SHOULD explain a failure that is not obvious from the assertion with `withClue("...") { ... }`, and SHOULD report several failures at once with `assertSoftly { ... }`.
 
@@ -55,10 +55,10 @@ val battlefield =
 
 ## Tests of a class with several functions
 
-- The tests MUST NOT use JUnit `@Nested` classes, which are not available on every target. This is enforced by [`NoNestedTestArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/NoNestedTestArchitectureTest.kt).
+- The tests MUST NOT use nested test classes (JUnit `@Nested`), which are not available on every target. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 - When the class under test has several public functions (e.g.: domain classes, views and presenters), the test names MUST start with the function under test, so the tests of the same function are listed together.
 - Commands and queries use cases tests MUST NOT prefix their test names. They are expected to have only one single public function.
-- A setup only needed by some tests SHOULD be a private function called in their `// Given` section, instead of a `@BeforeEach`, which runs before every test of the class.
+- A setup only needed by some tests SHOULD be a private function called in their `// Given` section, instead of a `@BeforeTest`, which runs before every test of the class.
 
 For example:
 
@@ -94,8 +94,8 @@ import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
 import shared.domain.*
+import kotlin.test.Test
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
@@ -278,7 +278,7 @@ Presenters draw through the [presentation timeline](../architecture/presentation
 - They SHOULD use each subdomain API declared under `com.mkz.rpg.<subdomain>.adapters.presentation.<subdomain>Api`. E.g.: use `com.mkz.rpg.effect.adapters.presentation.EffectApi` to interact with the effect subdomain use cases.
 - They SHOULD use `require` to validate preconditions about the common setup for the acceptance test scenario. E.g.: before moving a battle unit, require that the initial position is the one needed by the test.
 - They MUST only invoke `eventBus.dispatch()` in the `// When` section
-- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeEach`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. A scenario that needs a different `@BeforeEach` MUST be its own test class. See `CpuCastingBadlyHurtRatAcceptanceTest` for an example.
+- When the scenario needs the state left by an action (e.g.: a battle unit damaged by an ability) before the action under test, that action SHOULD be applied in a `@BeforeTest`, dispatching the events. Effects are applied through a chain of events, and each follow-up event is queued behind the events already published: requested in the `// Given` section, they would be applied after the action under test. A scenario that needs a different `@BeforeTest` MUST be its own test class. See `CpuCastingBadlyHurtRatAcceptanceTest` for an example.
 
 For example: Requesting to move a battle unit
 
@@ -294,14 +294,14 @@ package com.mkz.rpg.shared.usecases.acceptance
 // Imports goes here
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class SimpleBattleAcceptanceTest {
 
     // Subdomain APIs setup goes here
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         // Common setup for the acceptance test scenario goes here
     }
@@ -363,7 +363,6 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
 A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use KorGE views or `java.*` classes.
 
-- The test MUST be annotated with `@kotlin.test.Test` instead of `@org.junit.jupiter.api.Test`.
 - The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.
 
 ## Run tests

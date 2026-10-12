@@ -11,8 +11,8 @@ import korlibs.image.format.readBitmap
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
 import kotlin.math.pow
+import kotlin.test.Test
 
 class AssetPaletteArchitectureTest {
     private val paletteFileName = "famicube-palette.png"

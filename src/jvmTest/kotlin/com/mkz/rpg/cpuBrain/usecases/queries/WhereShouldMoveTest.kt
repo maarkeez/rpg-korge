@@ -13,7 +13,7 @@ import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class WhereShouldMoveTest {
     private val queries = InMemoryQueries()

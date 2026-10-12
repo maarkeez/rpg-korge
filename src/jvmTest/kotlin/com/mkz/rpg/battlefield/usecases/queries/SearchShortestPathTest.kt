@@ -6,7 +6,7 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SearchShortestPathTest {
     private val queries = InMemoryQueries()

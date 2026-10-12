@@ -6,7 +6,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.nulls.shouldBeNull
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnBattleUnitDefeatedTest {
     private val eventBus = InMemoryEventBus()

@@ -15,9 +15,9 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import kotlin.math.abs
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 // Uses the effects, abilities and units defined in the resources: CPU rats (20 HP, sword and heal) and a human knight.
 class CpuTurnAcceptanceTest {
@@ -36,7 +36,7 @@ class CpuTurnAcceptanceTest {
     private val cpuPlayerId = "cpu"
     private val knightBattleUnitId = "human-knight"
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         runBlocking {
             terrainApi.init()

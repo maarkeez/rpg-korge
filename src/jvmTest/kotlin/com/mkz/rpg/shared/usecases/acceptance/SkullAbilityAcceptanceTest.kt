@@ -22,8 +22,8 @@ import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class SkullAbilityAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -55,7 +55,7 @@ class SkullAbilityAcceptanceTest {
     private val enemyBattleUnitId = BattleUnitMother.id()
     private val allyBattleUnitId = BattleUnitMother.id()
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)

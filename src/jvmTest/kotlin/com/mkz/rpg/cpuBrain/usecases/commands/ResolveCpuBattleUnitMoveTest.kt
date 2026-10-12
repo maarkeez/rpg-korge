@@ -8,7 +8,7 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class ResolveCpuBattleUnitMoveTest {
     private val cpuBrainRepository = InMemoryCpuBrainRepository()

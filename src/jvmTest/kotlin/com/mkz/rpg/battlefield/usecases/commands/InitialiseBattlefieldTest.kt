@@ -9,7 +9,7 @@ import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.TerrainMother
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class InitialiseBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()

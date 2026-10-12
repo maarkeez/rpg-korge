@@ -9,7 +9,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattleUnitInfoViewTest : ViewsForTesting() {
     @Test

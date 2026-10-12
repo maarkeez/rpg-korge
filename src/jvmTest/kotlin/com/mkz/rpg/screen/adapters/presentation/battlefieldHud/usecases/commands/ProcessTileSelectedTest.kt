@@ -28,7 +28,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class ProcessTileSelectedTest {
     private val queries = InMemoryQueries()

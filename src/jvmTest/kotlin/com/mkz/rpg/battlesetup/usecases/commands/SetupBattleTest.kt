@@ -10,7 +10,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SetupBattleTest {
     private val eventBus = FakeEventBus()

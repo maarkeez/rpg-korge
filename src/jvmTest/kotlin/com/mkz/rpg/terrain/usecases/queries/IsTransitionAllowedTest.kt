@@ -4,7 +4,7 @@ import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.TerrainMother
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class IsTransitionAllowedTest {
     private val terrainRepository = InMemoryTerrainRepository()

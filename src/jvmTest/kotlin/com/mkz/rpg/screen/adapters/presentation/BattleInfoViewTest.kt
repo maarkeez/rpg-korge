@@ -7,7 +7,7 @@ import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattleInfoViewTest : ViewsForTesting() {
     @Test

@@ -6,7 +6,7 @@ import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitCast
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeFalse
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnAbilityCastResolvedTest {
     private val eventBus = InMemoryEventBus()

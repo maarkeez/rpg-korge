@@ -8,7 +8,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class EffectViewTest : ViewsForTesting() {
     private val size = Size(width = 16, height = 16)

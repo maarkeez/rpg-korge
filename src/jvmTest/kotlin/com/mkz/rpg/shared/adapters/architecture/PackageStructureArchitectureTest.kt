@@ -5,7 +5,7 @@ import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class PackageStructureArchitectureTest {
     // Each subdomain lives in `com.mkz.rpg.<subdomain>`.

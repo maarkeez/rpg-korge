@@ -7,7 +7,7 @@ import com.mkz.rpg.effect.usecases.commands.InitialiseEffects
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialiseEffectsTest {
     private val eventBus = InMemoryEventBus()

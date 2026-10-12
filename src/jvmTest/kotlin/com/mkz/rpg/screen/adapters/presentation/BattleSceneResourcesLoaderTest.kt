@@ -15,7 +15,7 @@ import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.PNG
 import korlibs.io.file.std.MemoryVfsMix
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class BattleSceneResourcesLoaderTest : ViewsForTesting() {
     // Each image has a distinct width, so the tests can tell them apart.

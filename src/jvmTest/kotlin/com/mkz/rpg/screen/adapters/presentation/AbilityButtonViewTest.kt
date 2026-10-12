@@ -7,7 +7,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class AbilityButtonViewTest : ViewsForTesting() {
     @Test

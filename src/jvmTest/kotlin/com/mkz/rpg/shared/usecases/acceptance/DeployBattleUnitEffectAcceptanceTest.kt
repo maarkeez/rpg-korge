@@ -22,8 +22,8 @@ import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class DeployBattleUnitEffectAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -46,7 +46,7 @@ class DeployBattleUnitEffectAcceptanceTest {
     private val casterBattleUnitId = BattleUnitMother.id()
     private val supportBattleUnitId = BattleUnitMother.id()
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)

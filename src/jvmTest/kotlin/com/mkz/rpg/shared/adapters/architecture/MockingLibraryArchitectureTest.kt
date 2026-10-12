@@ -4,7 +4,7 @@ import com.lemonappdev.konsist.api.Konsist
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class MockingLibraryArchitectureTest {
     // Tests use real collaborators, in-memory repositories and hand-written fakes instead of mocks, so they can be shared through `commonTest`.

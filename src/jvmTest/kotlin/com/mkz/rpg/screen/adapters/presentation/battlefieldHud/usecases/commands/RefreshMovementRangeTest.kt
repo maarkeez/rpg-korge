@@ -20,7 +20,7 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class RefreshMovementRangeTest {
     private val queries = InMemoryQueries()

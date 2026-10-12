@@ -12,7 +12,7 @@ import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class RequestEffectApplicationToOccupantsTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()

@@ -16,7 +16,7 @@ import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class CastAbilityTest {
     private val queries = InMemoryQueries()

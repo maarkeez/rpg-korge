@@ -14,8 +14,8 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class SetupBattleAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -33,7 +33,7 @@ class SetupBattleAcceptanceTest {
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "player-1-unit-1"
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         runBlocking {
             terrainApi.init()

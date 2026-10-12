@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainTransitionRule
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class CanBattlefieldTileBeOccupiedTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()

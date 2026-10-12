@@ -20,7 +20,7 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     // The battle setup deploys a human player knight at (6,6), which can walk 3 tiles. (6,5) is an adjacent sand tile.

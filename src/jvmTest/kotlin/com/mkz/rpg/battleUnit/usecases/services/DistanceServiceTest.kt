@@ -1,7 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.services
 
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class DistanceServiceTest {
     private val distanceService = DistanceService()

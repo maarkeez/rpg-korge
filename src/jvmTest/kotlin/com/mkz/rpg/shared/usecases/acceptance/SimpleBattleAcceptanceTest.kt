@@ -26,8 +26,8 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class SimpleBattleAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -50,7 +50,7 @@ class SimpleBattleAcceptanceTest {
     private val humanBattleUnitId = BattleUnitMother.id()
     private val cpuBattleUnitId = BattleUnitMother.id()
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)

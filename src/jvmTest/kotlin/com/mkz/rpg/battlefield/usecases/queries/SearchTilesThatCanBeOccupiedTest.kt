@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SearchTilesThatCanBeOccupiedTest {
     private val queries = InMemoryQueries()

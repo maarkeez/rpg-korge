@@ -7,7 +7,7 @@ import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.terrain.usecases.commands.InitialiseTerrains
 import com.mkz.rpg.terrain.usecases.services.FakeTerrainLoader
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class OnRequestInitialiseTerrainsTest {
     private val eventBus = InMemoryEventBus()

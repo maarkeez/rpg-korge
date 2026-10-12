@@ -10,7 +10,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class WhereCanCastTest {
     private val queries = InMemoryQueries()

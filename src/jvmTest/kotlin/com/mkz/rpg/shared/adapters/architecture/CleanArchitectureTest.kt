@@ -6,8 +6,8 @@ import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
 import io.kotest.matchers.comparables.shouldBeGreaterThan
-import org.junit.jupiter.api.Test
 import java.io.File
+import kotlin.test.Test
 
 class CleanArchitectureTest {
     private val productionClasses: JavaClasses =

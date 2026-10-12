@@ -9,7 +9,7 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class StartNextRoundTest {
     private val battleRepository = InMemoryBattleRepository()

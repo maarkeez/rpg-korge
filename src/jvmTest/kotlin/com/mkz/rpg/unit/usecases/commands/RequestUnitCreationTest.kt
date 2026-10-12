@@ -6,7 +6,7 @@ import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitEvent
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class RequestUnitCreationTest {
     private val unitRepository = InMemoryUnitRepository()

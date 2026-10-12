@@ -5,7 +5,7 @@ import com.mkz.rpg.unit.domain.UnitMother
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class SearchUnitByIdTest {
     private val unitRepository = InMemoryUnitRepository()

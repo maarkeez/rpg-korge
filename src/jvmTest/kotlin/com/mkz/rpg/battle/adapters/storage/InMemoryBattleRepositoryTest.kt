@@ -3,7 +3,7 @@ package com.mkz.rpg.battle.adapters.storage
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class InMemoryBattleRepositoryTest {
     private val battleRepository = InMemoryBattleRepository()

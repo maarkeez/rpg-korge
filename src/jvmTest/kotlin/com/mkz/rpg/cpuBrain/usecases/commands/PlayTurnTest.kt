@@ -11,7 +11,7 @@ import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
 class PlayTurnTest {
     private val queries = InMemoryQueries()

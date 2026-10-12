@@ -21,8 +21,8 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.collections.shouldContain
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class MushroomAbilityAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -46,7 +46,7 @@ class MushroomAbilityAcceptanceTest {
     private val firstRatBattleUnitId = BattleUnitMother.id()
     private val secondRatBattleUnitId = BattleUnitMother.id()
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)

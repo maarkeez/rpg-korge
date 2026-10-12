@@ -6,15 +6,15 @@ import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import kotlin.test.BeforeTest
+import kotlin.test.Test
 
 class TerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
-    @BeforeEach
+    @BeforeTest
     fun setup() {
         runBlocking { terrainApi.init() }
     }

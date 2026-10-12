@@ -24,7 +24,7 @@ class KnightSelectedSnapshotTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE
         return AGOpenglAWT(context = glContext)
     }
 
-    @AfterEach
+    @AfterTest
     fun releaseGlContext() {
         if (!::glContext.isInitialized) return
         glContext.unset()
@@ -40,7 +40,7 @@ import korlibs.graphics.AG
 import korlibs.kgl.KmlGlContext
 import korlibs.korge.testing.createKmlGlContext
 import korlibs.render.awt.AGOpenglAWT
-import org.junit.jupiter.api.AfterEach
+import kotlin.test.AfterTest
 ```
 
 ### 2. Add the snapshot helper
