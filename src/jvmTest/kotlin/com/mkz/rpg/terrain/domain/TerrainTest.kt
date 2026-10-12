@@ -1,6 +1,12 @@
 package com.mkz.rpg.terrain.domain
 
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -23,8 +29,7 @@ class TerrainTest {
                     ),
                 )
             // Then
-            assertThat(terrain.toDto())
-                .isEqualTo(Terrain.Dto(id = id, canBeOccupied = canBeOccupied, allowedTransitionTo = allowedTransitionTo))
+            terrain.toDto() shouldBe Terrain.Dto(id = id, canBeOccupied = canBeOccupied, allowedTransitionTo = allowedTransitionTo)
         }
 
         @Test
@@ -35,7 +40,7 @@ class TerrainTest {
             // When
             val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, effectId = effectId))
             // Then
-            assertThat(terrain.toDto().effectId).isEqualTo(effectId)
+            terrain.toDto().effectId shouldBe effectId
         }
 
         @Test
@@ -45,7 +50,7 @@ class TerrainTest {
             // When
             val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true))
             // Then
-            assertThat(terrain.toDto().effectId).isNull()
+            terrain.toDto().effectId.shouldBeNull()
         }
 
         @Test
@@ -56,7 +61,7 @@ class TerrainTest {
             val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true))
             val (events, _) = terrain.pullEvents()
             // Then
-            assertThat(events).containsExactly(TerrainEvent.TerrainCreated(terrainId = id))
+            events.shouldContainExactly(TerrainEvent.TerrainCreated(terrainId = id))
         }
     }
 
@@ -69,7 +74,7 @@ class TerrainTest {
             // When
             val canTransition = terrain.canTransitionTo("void")
             // Then
-            assertThat(canTransition).isTrue()
+            canTransition.shouldBeTrue()
         }
 
         @Test
@@ -79,7 +84,7 @@ class TerrainTest {
             // When
             val canTransition = terrain.canTransitionTo("forest")
             // Then
-            assertThat(canTransition).isFalse()
+            canTransition.shouldBeFalse()
         }
 
         @Test
@@ -89,7 +94,7 @@ class TerrainTest {
             // When
             val canTransition = terrain.canTransitionTo("void")
             // Then
-            assertThat(canTransition).isFalse()
+            canTransition.shouldBeFalse()
         }
     }
 
@@ -102,7 +107,7 @@ class TerrainTest {
             // When
             val dto = terrain.toDto()
             // Then
-            assertThat(dto).isEqualTo(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("void")))
+            dto shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("void"))
         }
 
         @Test
@@ -112,7 +117,7 @@ class TerrainTest {
             // When
             val dto = terrain.toDto()
             // Then
-            assertThat(dto.effectId).isEqualTo("swamp-effect")
+            dto.effectId shouldBe "swamp-effect"
         }
     }
 
@@ -125,7 +130,7 @@ class TerrainTest {
             // When
             val (events, _) = terrain.pullEvents()
             // Then
-            assertThat(events).isNotEmpty()
+            events.shouldNotBeEmpty()
         }
 
         @Test
@@ -135,8 +140,8 @@ class TerrainTest {
             // When
             val (pulledEvents, _) = terrain.pullEvents()
             // Then
-            assertThat(events).isNotEmpty()
-            assertThat(pulledEvents).isEmpty()
+            events.shouldNotBeEmpty()
+            pulledEvents.shouldBeEmpty()
         }
     }
 }

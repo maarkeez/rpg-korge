@@ -16,8 +16,10 @@ import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingCancelAndConfirm
 import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.startGame
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
@@ -54,17 +56,11 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Then
             val battleHudView = requireNotNull(battleHudView()) { "The battle HUD is not displayed" }
             waitUntil { battleHudView.isDisplayingBattleUnitInfo() && !battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
-            assertThat(battleHudView.isDisplayingBattleUnitInfo())
-                .withFailMessage("Expected the knight info to be displayed after casting heal")
-                .isTrue
-            assertThat(battleHudView.isDisplayingAttackPreview()).isFalse
-            assertThat(battlefieldView.hasSelectionAt(knightRow, knightColumn))
-                .withFailMessage("Expected the knight tile to be selected after casting heal")
-                .isTrue
-            assertThat(battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn))
-                .withFailMessage("Expected the knight movement range to be displayed after casting heal")
-                .isFalse
-            assertThat(battlefieldView.isDimmedAt(0, 0)).isTrue
+            withClue("Expected the knight info to be displayed after casting heal") { battleHudView.isDisplayingBattleUnitInfo().shouldBeTrue() }
+            battleHudView.isDisplayingAttackPreview().shouldBeFalse()
+            withClue("Expected the knight tile to be selected after casting heal") { battlefieldView.hasSelectionAt(knightRow, knightColumn).shouldBeTrue() }
+            withClue("Expected the knight movement range to be displayed after casting heal") { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeFalse() }
+            battlefieldView.isDimmedAt(0, 0).shouldBeTrue()
         }
 
     @Test
@@ -88,14 +84,12 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             val battleHudView = requireNotNull(battleHudView()) { "The battle HUD is not displayed" }
             waitUntil { battleHudView.isDisplayingBattleUnitInfo() && battlefieldView.hasBattleUnitAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
             waitUntil { !battlefieldView.isDimmedAt(knightRow - 1, knightColumn) }
-            assertThat(battlefieldView.hasBattleUnitAt(tileInMovementRangeRow, tileInMovementRangeColumn))
-                .withFailMessage("Expected the bee to be deployed at (%s,%s)", tileInMovementRangeRow, tileInMovementRangeColumn)
-                .isTrue
-            assertThat(battlefieldView.isDimmedAt(knightRow - 1, knightColumn))
-                .withFailMessage("Expected the knight movement range to be displayed after deploying the bee")
-                .isFalse
-            assertThat(battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn))
-                .withFailMessage("Expected (6,4) to be out of the knight movement range once the bee blocks the way")
-                .isTrue
+            withClue("Expected the bee to be deployed at ($tileInMovementRangeRow,$tileInMovementRangeColumn)") {
+                battlefieldView.hasBattleUnitAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeTrue()
+            }
+            withClue("Expected the knight movement range to be displayed after deploying the bee") { battlefieldView.isDimmedAt(knightRow - 1, knightColumn).shouldBeFalse() }
+            withClue(
+                "Expected (6,4) to be out of the knight movement range once the bee blocks the way",
+            ) { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn).shouldBeTrue() }
         }
 }

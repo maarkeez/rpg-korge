@@ -5,7 +5,7 @@ import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -39,7 +39,7 @@ class CalculateImmediateDamageTest {
         // When
         val damage = calculateImmediateDamage(abilityDto.id)
         // Then
-        assertThat(damage).isEqualTo(4)
+        damage shouldBe 4
     }
 
     @Test
@@ -51,6 +51,6 @@ class CalculateImmediateDamageTest {
         // When
         val damage = calculateImmediateDamage(unknownAbilityId)
         // Then
-        assertThat(damage).isEqualTo(0)
+        damage shouldBe 0
     }
 }

@@ -8,9 +8,9 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class DeselectBattleUnitTest {
@@ -29,8 +29,8 @@ class DeselectBattleUnitTest {
         // When
         deselectBattleUnit()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(idle())
-        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search() shouldBe idle()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -40,8 +40,8 @@ class DeselectBattleUnitTest {
         // When
         deselectBattleUnit()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(idle())
-        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search() shouldBe idle()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -51,8 +51,8 @@ class DeselectBattleUnitTest {
         // When
         deselectBattleUnit()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(idle())
-        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search() shouldBe idle()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -62,8 +62,8 @@ class DeselectBattleUnitTest {
         // When
         deselectBattleUnit()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(idle())
-        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search() shouldBe idle()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -71,7 +71,6 @@ class DeselectBattleUnitTest {
         // Given
         // When
         // Then
-        assertThatThrownBy { deselectBattleUnit() }
-            .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
+        shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { deselectBattleUnit() }
     }
 }

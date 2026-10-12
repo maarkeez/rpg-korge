@@ -7,7 +7,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 import org.junit.jupiter.api.Test
@@ -22,7 +22,7 @@ class SetupBattleTest {
         // When
         setupBattle()
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             TerrainEvent.RequestInitialiseTerrains,
             EffectEvent.RequestInitialiseEffects,
             AbilityEvent.RequestInitialiseAbilities,

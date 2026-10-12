@@ -1,13 +1,16 @@
 package com.mkz.rpg.shared.adapters.architecture
 
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.maps.shouldNotBeEmpty
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.image.format.readBitmap
 import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
 import org.junit.jupiter.api.Test
 import kotlin.math.pow
 
@@ -46,20 +49,17 @@ class AssetPaletteArchitectureTest {
                         .eachCount()
                 }.filterValues { it.isNotEmpty() }
         // Then
-        assertThat(palette).hasSize(64)
-        assertThat(assets).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            offPaletteColoursByAsset.forEach { (path, offPaletteColours) ->
-                softly.fail<Unit>(
-                    "Asset '%s' uses colours outside of '%s': %s",
-                    path,
-                    paletteFileName,
+        palette.shouldHaveSize(64)
+        assets.shouldNotBeEmpty()
+        val violations =
+            offPaletteColoursByAsset.map { (path, offPaletteColours) ->
+                val colours =
                     offPaletteColours.entries
                         .sortedByDescending { it.value }
-                        .joinToString { (colour, pixels) -> "${colour.hex()} ($pixels px, nearest is ${nearestPaletteColour(colour).hex()})" },
-                )
+                        .joinToString { (colour, pixels) -> "${colour.hex()} ($pixels px, nearest is ${nearestPaletteColour(colour).hex()})" }
+                "Asset '$path' uses colours outside of '$paletteFileName': $colours"
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
     @Test
@@ -72,16 +72,12 @@ class AssetPaletteArchitectureTest {
                 .mapValues { (_, alphas) -> alphas.count { it in 1..254 } }
                 .filterValues { it > 0 }
         // Then
-        assertThat(assets).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            semiTransparentPixelsByAsset.forEach { (path, semiTransparentPixels) ->
-                softly.fail<Unit>(
-                    "Asset '%s' has %s semi-transparent pixels. Pixels must be fully transparent or fully opaque.",
-                    path,
-                    semiTransparentPixels,
-                )
+        assets.shouldNotBeEmpty()
+        val violations =
+            semiTransparentPixelsByAsset.map { (path, semiTransparentPixels) ->
+                "Asset '$path' has $semiTransparentPixels semi-transparent pixels. Pixels must be fully transparent or fully opaque."
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
     private fun VfsFile.fileName(): String = path.substringAfterLast("/")

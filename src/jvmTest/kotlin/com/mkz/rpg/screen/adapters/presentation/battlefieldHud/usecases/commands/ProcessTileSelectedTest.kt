@@ -19,8 +19,11 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -74,12 +77,10 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 2)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
-        assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-1")
-        assertThat(storedHud.tile).isEqualTo(
-            tile(1, 2),
-        )
-        assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.battleUnitId shouldBe "battle-unit-1"
+        storedHud.tile shouldBe tile(1, 2)
+        storedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
                     tile(1, 2),
@@ -100,9 +101,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(0, 0)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -129,8 +129,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(2, 3)
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus).hasPublishedEvents(
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestMoveBattleUnit(
                 battleUnitId = "battle-unit-1",
                 moveToRow = 2,
@@ -163,9 +163,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(5, 5)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -192,9 +191,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(2, 3)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -211,9 +209,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(1, 1)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -236,12 +233,10 @@ class ProcessTileSelectedTest {
         processTileSelected(2, 2)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
-        assertThat(storedHud.battleUnitId).isEqualTo("battle-unit-2")
-        assertThat(storedHud.tile).isEqualTo(
-            tile(2, 2),
-        )
-        assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.battleUnitId shouldBe "battle-unit-2"
+        storedHud.tile shouldBe tile(2, 2)
+        storedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.Idle,
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
@@ -262,8 +257,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(1, 1)
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -289,9 +284,9 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
-        assertThat(storedHud.castGroup).isEqualTo(castGroup)
-        assertThat(storedHud.enemyBattleUnitId).isNull()
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.castGroup shouldBe castGroup
+        storedHud.enemyBattleUnitId.shouldBeNull()
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelfAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
@@ -327,9 +322,9 @@ class ProcessTileSelectedTest {
         processTileSelected(1, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
-        assertThat(storedHud.castGroup).isEqualTo(castGroup)
-        assertThat(storedHud.enemyBattleUnitId).isEqualTo("enemy-battle-unit-1")
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.castGroup shouldBe castGroup
+        storedHud.enemyBattleUnitId shouldBe "enemy-battle-unit-1"
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
@@ -363,9 +358,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(4, 4)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -393,9 +387,8 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(1, 1)
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(Idle::class.java)
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -409,7 +402,7 @@ class ProcessTileSelectedTest {
         // When
         processTileSelected(1, 1)
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

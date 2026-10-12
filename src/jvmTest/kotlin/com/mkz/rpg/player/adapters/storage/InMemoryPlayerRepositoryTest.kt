@@ -1,7 +1,8 @@
 package com.mkz.rpg.player.adapters.storage
 
 import com.mkz.rpg.player.domain.PlayerMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class InMemoryPlayerRepositoryTest {
             playerRepository.create(player)
             // Then
             val storedPlayer = playerRepository.searchById(player.toDto().id)
-            assertThat(storedPlayer).isEqualTo(player)
+            storedPlayer shouldBe player
         }
     }
 
@@ -32,7 +33,7 @@ class InMemoryPlayerRepositoryTest {
             // When
             val storedPlayer = playerRepository.searchById(player.toDto().id)
             // Then
-            assertThat(storedPlayer).isEqualTo(player)
+            storedPlayer shouldBe player
         }
 
         @Test
@@ -40,7 +41,7 @@ class InMemoryPlayerRepositoryTest {
             // When
             val storedPlayer = playerRepository.searchById("player-unknown")
             // Then
-            assertThat(storedPlayer).isNull()
+            storedPlayer.shouldBeNull()
         }
     }
 
@@ -56,7 +57,7 @@ class InMemoryPlayerRepositoryTest {
             // When
             val storedEnemyPlayer = playerRepository.searchEnemy(playerId = player.toDto().id)
             // Then
-            assertThat(storedEnemyPlayer).isEqualTo(enemyPlayer)
+            storedEnemyPlayer shouldBe enemyPlayer
         }
     }
 }

@@ -1,9 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -21,7 +22,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.displayBattleUnitInfoView()
                 // Then
-                assertThat(battleHudView.displayedViews()).containsExactly(battleUnitInfoView)
+                battleHudView.displayedViews().shouldContainExactly(battleUnitInfoView)
             }
     }
 
@@ -38,7 +39,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.displayAttackPreviewView()
                 // Then
-                assertThat(battleHudView.displayedViews()).containsExactly(attackPreviewView)
+                battleHudView.displayedViews().shouldContainExactly(attackPreviewView)
             }
     }
 
@@ -55,7 +56,7 @@ class BattleHudViewTest : ViewsForTesting() {
                 // When
                 battleHudView.hide()
                 // Then
-                assertThat(battleHudView.displayedViews()).isEmpty()
+                battleHudView.displayedViews().shouldBeEmpty()
             }
     }
 }

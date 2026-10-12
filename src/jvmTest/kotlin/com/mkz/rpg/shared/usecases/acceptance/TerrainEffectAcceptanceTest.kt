@@ -15,8 +15,8 @@ import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.services.TerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -111,19 +111,19 @@ class TerrainEffectAcceptanceTest {
     @Test
     fun `should apply the terrain effect to the occupants of the terrain tiles when a new battle round starts`() {
         // Given
-        assertThat(battleApi.searchBattle()!!.currentRound).isEqualTo(1)
-        assertThat(battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints).isEqualTo(20)
-        assertThat(battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints).isEqualTo(40)
-        assertThat(battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints).isEqualTo(30)
+        battleApi.searchBattle()!!.currentRound shouldBe 1
+        battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints shouldBe 20
+        battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints shouldBe 40
+        battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints shouldBe 30
         // When
         battleApi.finishPlayerTurn()
         eventBus.dispatch()
         battleApi.finishPlayerTurn()
         eventBus.dispatch()
         // Then
-        assertThat(battleApi.searchBattle()!!.currentRound).isEqualTo(2)
-        assertThat(battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints).isEqualTo(13)
-        assertThat(battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints).isEqualTo(33)
-        assertThat(battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints).isEqualTo(30)
+        battleApi.searchBattle()!!.currentRound shouldBe 2
+        battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints shouldBe 13
+        battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints shouldBe 33
+        battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints shouldBe 30
     }
 }

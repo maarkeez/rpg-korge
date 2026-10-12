@@ -4,7 +4,8 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class ResetBattleUnitActionsAndReduceCooldownsTest {
@@ -29,9 +30,9 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         resetBattleUnitActionsAndReduceCooldowns("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(exhaustedBattleUnit.toDto().id)?.toDto()
-        assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(4)
-        assertThat(storedBattleUnit.remainingTurnActions.remainingCasts).isEqualTo(1)
-        assertThat(storedBattleUnit.abilityCooldowns["ability-1"]).isEqualTo(2)
+        storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 4
+        storedBattleUnit.remainingTurnActions.remainingCasts shouldBe 1
+        storedBattleUnit.abilityCooldowns["ability-1"] shouldBe 2
     }
 
     @Test
@@ -40,6 +41,6 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
         // When
         resetBattleUnitActionsAndReduceCooldowns("player-1")
         // Then
-        assertThat(battleUnitRepository.searchAll()).isEmpty()
+        battleUnitRepository.searchAll().shouldBeEmpty()
     }
 }

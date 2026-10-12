@@ -6,7 +6,8 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -52,7 +53,7 @@ class MovementServiceTest {
         // When
         val tilesWhereCanMove = movementService.tilesWhereCanMove("battle-unit-1")
         // Then
-        assertThat(tilesWhereCanMove).containsExactly(
+        tilesWhereCanMove.shouldContainExactly(
             TileDto(row = 0, column = 1),
             TileDto(row = 0, column = 2),
         )
@@ -71,6 +72,6 @@ class MovementServiceTest {
         // When
         val tilesWhereCanMove = movementService.tilesWhereCanMove("battle-unit-1")
         // Then
-        assertThat(tilesWhereCanMove).isEmpty()
+        tilesWhereCanMove.shouldBeEmpty()
     }
 }

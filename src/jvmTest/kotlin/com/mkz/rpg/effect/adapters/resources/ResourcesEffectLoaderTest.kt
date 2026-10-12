@@ -5,10 +5,11 @@ import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesEffectLoaderTest {
@@ -27,7 +28,7 @@ class ResourcesEffectLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadEffects()).containsExactly(
+        loader.loadEffects().shouldContainExactly(
             applyEffectOnNearbyAlliesEffect(id = "curse", effectId = "venom").toDto(),
             increaseHealthEffect(id = "heal", healing = 7).toDto(),
             deployBattleUnitEffect(id = "summon", unitId = "bee").toDto(),
@@ -47,10 +48,7 @@ class ResourcesEffectLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("effect/venom.toml")
-            .hasMessageContaining("'outcome.damage' is required")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("effect/venom.toml").shouldContain("'outcome.damage' is required")
     }
 
     @Test
@@ -64,9 +62,6 @@ class ResourcesEffectLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("effect/venom.toml")
-            .hasMessageContaining("SOMETIMES")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("effect/venom.toml").shouldContain("SOMETIMES")
     }
 }

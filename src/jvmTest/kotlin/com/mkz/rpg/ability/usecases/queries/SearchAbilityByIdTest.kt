@@ -3,7 +3,8 @@ package com.mkz.rpg.ability.usecases.queries
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.id
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchAbilityByIdTest {
@@ -19,7 +20,7 @@ class SearchAbilityByIdTest {
         // When
         val storedAbility = searchAbilityById(abilityDto.id)
         // Then
-        assertThat(storedAbility).isEqualTo(abilityDto)
+        storedAbility shouldBe abilityDto
     }
 
     @Test
@@ -29,6 +30,6 @@ class SearchAbilityByIdTest {
         // When
         val storedAbility = searchAbilityById(unknownAbilityId)
         // Then
-        assertThat(storedAbility).isNull()
+        storedAbility.shouldBeNull()
     }
 }

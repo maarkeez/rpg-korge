@@ -5,7 +5,7 @@ import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -45,7 +45,7 @@ class CleanArchitectureTest {
         rule.check(productionClasses)
         // Then
         val domainClassCount = productionClasses.count { it.getPackageName().split(".").contains("domain") }
-        assertThat(domainClassCount).isGreaterThan(0)
+        domainClassCount.shouldBeGreaterThan(0)
     }
 
     @Test
@@ -62,7 +62,7 @@ class CleanArchitectureTest {
         rule.check(productionClasses)
         // Then
         val useCaseClassCount = productionClasses.count { it.getPackageName().split(".").contains("usecases") }
-        assertThat(useCaseClassCount).isGreaterThan(0)
+        useCaseClassCount.shouldBeGreaterThan(0)
     }
 
     @Test
@@ -75,6 +75,6 @@ class CleanArchitectureTest {
         // When
         // no dependency restrictions apply to the adapters layer
         // Then
-        assertThat(adapterClassCount).isGreaterThan(0)
+        adapterClassCount.shouldBeGreaterThan(0)
     }
 }

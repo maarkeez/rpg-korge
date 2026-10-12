@@ -4,8 +4,8 @@ import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectEvent
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class RequestEffectCreationTest {
@@ -25,9 +25,8 @@ class RequestEffectCreationTest {
         requestEffectCreation(effectDto = effect)
         // Then
         val storedEffect = effectRepository.searchById(effect.id)?.toDto()
-        assertThat(storedEffect).isEqualTo(effect)
-        assertThat(eventBus)
-            .hasPublishedEvents(EffectEvent.EffectCreated(effect.id))
+        storedEffect shouldBe effect
+        eventBus.shouldHavePublishedEvents(EffectEvent.EffectCreated(effect.id))
     }
 
     @Test
@@ -40,7 +39,7 @@ class RequestEffectCreationTest {
         requestEffectCreation(effectDto = duplicateEffect.toDto())
         // Then
         val storedEffect = effectRepository.searchById(existingEffect.toDto().id)?.toDto()
-        assertThat(storedEffect).isEqualTo(existingEffect.toDto())
-        assertThat(eventBus).hasPublishedEvents()
+        storedEffect shouldBe existingEffect.toDto()
+        eventBus.shouldHavePublishedEvents()
     }
 }

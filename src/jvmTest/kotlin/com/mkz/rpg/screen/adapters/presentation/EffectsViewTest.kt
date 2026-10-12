@@ -1,8 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -17,7 +19,7 @@ class EffectsViewTest : ViewsForTesting() {
                 // When
                 effectsView.display(effectIds = listOf("venom-damage"))
                 // Then
-                assertThat(effectsView.isVisibleToUser()).isTrue
+                effectsView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -28,7 +30,7 @@ class EffectsViewTest : ViewsForTesting() {
                 // When
                 effectsView.display(effectIds = listOf("venom-damage", "venom-on-death"))
                 // Then
-                assertThat(effectsView.displayedEffectCount()).isEqualTo(2)
+                effectsView.displayedEffectCount() shouldBe 2
             }
 
         @Test
@@ -40,7 +42,7 @@ class EffectsViewTest : ViewsForTesting() {
                 // When
                 effectsView.display(effectIds = listOf("venom-damage"))
                 // Then
-                assertThat(effectsView.displayedEffectCount()).isEqualTo(1)
+                effectsView.displayedEffectCount() shouldBe 1
             }
 
         @Test
@@ -52,7 +54,7 @@ class EffectsViewTest : ViewsForTesting() {
                 // When
                 effectsView.display(effectIds = effectIds)
                 // Then
-                assertThat(effectsView.displayedEffectCount()).isEqualTo(effectsView.effectSlotCount())
+                effectsView.displayedEffectCount() shouldBe effectsView.effectSlotCount()
             }
     }
 
@@ -67,7 +69,7 @@ class EffectsViewTest : ViewsForTesting() {
                 // When
                 effectsView.hide()
                 // Then
-                assertThat(effectsView.isVisibleToUser()).isFalse
+                effectsView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

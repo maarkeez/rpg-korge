@@ -2,9 +2,19 @@ package com.mkz.rpg.terrain.adapters.resources
 
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainError.TerrainNotFound
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -24,7 +34,7 @@ class ResourcesTerrainLoaderTest {
             runBlocking { loader.initResources() }
             // Then
             val terrains = loader.loadTerrains()
-            assertThat(terrains.map { it.id }).containsExactlyInAnyOrder("sand", "void")
+            terrains.map { it.id }.shouldContainExactlyInAnyOrder("sand", "void")
         }
 
         @Test
@@ -36,7 +46,7 @@ class ResourcesTerrainLoaderTest {
             runBlocking { loader.initResources() }
             // Then
             val terrains = loader.loadTerrains()
-            assertThat(terrains).isEmpty()
+            terrains.shouldBeEmpty()
         }
     }
 
@@ -51,7 +61,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains).containsExactly(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand")))
+            terrains.shouldContainExactly(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand")))
         }
 
         @Test
@@ -68,9 +78,9 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.map { it.id }).containsExactly("forest", "sand", "void")
-            assertThat(terrains.first { it.id == "void" }.canBeOccupied).isFalse()
-            assertThat(terrains.first { it.id == "forest" }.canBeOccupied).isTrue()
+            terrains.map { it.id }.shouldContainExactly("forest", "sand", "void")
+            terrains.first { it.id == "void" }.canBeOccupied.shouldBeFalse()
+            terrains.first { it.id == "forest" }.canBeOccupied.shouldBeTrue()
         }
 
         @Test
@@ -87,8 +97,8 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void")
-            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactly("void")
+            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactlyInAnyOrder("sand", "void")
+            terrains.first { it.id == "void" }.allowedTransitionTo.shouldContainExactly("void")
         }
 
         @Test
@@ -100,7 +110,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).contains("sand")
+            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContain("sand")
         }
 
         @Test
@@ -119,8 +129,8 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).containsExactlyInAnyOrder("sand", "void", "forest")
-            assertThat(terrains.first { it.id == "void" }.allowedTransitionTo).containsExactly("void")
+            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactlyInAnyOrder("sand", "void", "forest")
+            terrains.first { it.id == "void" }.allowedTransitionTo.shouldContainExactly("void")
         }
 
         @Test
@@ -136,8 +146,8 @@ class ResourcesTerrainLoaderTest {
             // When
             val result = runCatching { loader.loadTerrains() }
             // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(TerrainNotFound::class.java)
-            assertThat(result.exceptionOrNull() as TerrainNotFound).extracting("terrainId").isEqualTo("void")
+            result.exceptionOrNull().shouldBeInstanceOf<TerrainNotFound>()
+            result.exceptionOrNull().shouldBeInstanceOf<TerrainNotFound>().terrainId shouldBe "void"
         }
 
         @Test
@@ -157,7 +167,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "sand" }.allowedTransitionTo).containsExactly("sand")
+            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactly("sand")
         }
 
         @Test
@@ -173,7 +183,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.map { it.id }).containsExactly("sand")
+            terrains.map { it.id }.shouldContainExactly("sand")
         }
 
         @Test
@@ -185,7 +195,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "swamp" }.effectId).isEqualTo("swamp-effect")
+            terrains.first { it.id == "swamp" }.effectId shouldBe "swamp-effect"
         }
 
         @Test
@@ -197,7 +207,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            assertThat(terrains.first { it.id == "sand" }.effectId).isNull()
+            terrains.first { it.id == "sand" }.effectId.shouldBeNull()
         }
 
         @Test
@@ -209,10 +219,10 @@ class ResourcesTerrainLoaderTest {
             val terrains = loader.loadTerrains()
             // Then
             val terrainIds = terrains.map { it.id }.toSet()
-            assertThat(terrainIds).isNotEmpty
+            terrainIds.shouldNotBeEmpty()
             terrains.forEach { terrain ->
-                assertThat(terrain.allowedTransitionTo).isSubsetOf(terrainIds)
-                assertThat(terrain.allowedTransitionTo).contains(terrain.id)
+                terrainIds.shouldContainAll(terrain.allowedTransitionTo)
+                terrain.allowedTransitionTo.shouldContain(terrain.id)
             }
         }
     }

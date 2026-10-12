@@ -2,7 +2,8 @@ package com.mkz.rpg.terrain.usecases.queries
 
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.TerrainMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 
 class IsTransitionAllowedTest {
@@ -16,7 +17,7 @@ class IsTransitionAllowedTest {
         // When
         val isAllowed = isTransitionAllowed(terrainId = "sand", transitionToTerrainId = "void")
         // Then
-        assertThat(isAllowed).isTrue()
+        isAllowed.shouldBeTrue()
     }
 
     @Test
@@ -26,7 +27,7 @@ class IsTransitionAllowedTest {
         // When
         val isAllowed = isTransitionAllowed(terrainId = "sand", transitionToTerrainId = "void")
         // Then
-        assertThat(isAllowed).isFalse()
+        isAllowed.shouldBeFalse()
     }
 
     @Test
@@ -34,6 +35,6 @@ class IsTransitionAllowedTest {
         // When
         val isAllowed = isTransitionAllowed(terrainId = "sand", transitionToTerrainId = "void")
         // Then
-        assertThat(isAllowed).isFalse()
+        isAllowed.shouldBeFalse()
     }
 }

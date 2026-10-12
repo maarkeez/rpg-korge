@@ -4,10 +4,10 @@ import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.domain.TerrainMother
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -29,8 +29,8 @@ class InitialiseBattlefieldTest {
         initialiseBattlefield()
         // Then
         val battlefield = battlefieldRepository.search()?.toDto()
-        assertThat(battlefield?.rows).isEqualTo(2)
-        assertThat(battlefield?.columns).isEqualTo(3)
-        assertThat(eventBus).hasPublishedEvents(BattlefieldEvent.BattlefieldCreated)
+        battlefield?.rows shouldBe 2
+        battlefield?.columns shouldBe 3
+        eventBus.shouldHavePublishedEvents(BattlefieldEvent.BattlefieldCreated)
     }
 }

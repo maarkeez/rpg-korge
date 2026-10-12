@@ -10,7 +10,10 @@ import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -24,7 +27,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto()).isEqualTo(dto)
+            createdAbility.toDto() shouldBe dto
         }
 
         @Test
@@ -37,7 +40,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(EmptyAbilityId::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<EmptyAbilityId>()
         }
 
         @Test
@@ -50,7 +53,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(EmptyAbilityName::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<EmptyAbilityName>()
         }
 
         @Test
@@ -63,7 +66,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto().name).isEqualTo("a".repeat(50))
+            createdAbility.toDto().name shouldBe "a".repeat(50)
         }
 
         @Test
@@ -76,7 +79,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityNameTooLong::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityNameTooLong>()
         }
 
         @Test
@@ -89,7 +92,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(NegativeAbilityCost::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<NegativeAbilityCost>()
         }
 
         @Test
@@ -102,7 +105,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto().cost).isEqualTo(0)
+            createdAbility.toDto().cost shouldBe 0
         }
 
         @Test
@@ -115,7 +118,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto().cost).isEqualTo(999)
+            createdAbility.toDto().cost shouldBe 999
         }
 
         @Test
@@ -128,7 +131,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityCostAboveLimit::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityCostAboveLimit>()
         }
 
         @Test
@@ -141,7 +144,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto().cooldown).isEqualTo(0)
+            createdAbility.toDto().cooldown shouldBe 0
         }
 
         @Test
@@ -154,7 +157,7 @@ class AbilityTest {
             // When
             val createdAbility = Ability.create(dto = dto)
             // Then
-            assertThat(createdAbility.toDto().cooldown).isEqualTo(99)
+            createdAbility.toDto().cooldown shouldBe 99
         }
 
         @Test
@@ -167,7 +170,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(NegativeAbilityCooldown::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<NegativeAbilityCooldown>()
         }
 
         @Test
@@ -180,7 +183,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityCooldownAboveLimit::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityCooldownAboveLimit>()
         }
 
         @Test
@@ -193,7 +196,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityEmptyEffects::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityEmptyEffects>()
         }
 
         @Test
@@ -206,7 +209,7 @@ class AbilityTest {
             // When
             val createdAbility = runCatching { Ability.create(dto = dto) }
             // Then
-            assertThat(createdAbility.exceptionOrNull()).isExactlyInstanceOf(AbilityEffectsAboveLimit::class.java)
+            createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityEffectsAboveLimit>()
         }
     }
 
@@ -222,7 +225,7 @@ class AbilityTest {
             // When
             val result = createdAbility.toDto()
             // Then
-            assertThat(result).isEqualTo(dto)
+            result shouldBe dto
         }
 
         @Test
@@ -235,7 +238,7 @@ class AbilityTest {
             // When
             val result = createdAbility.toDto()
             // Then
-            assertThat(result.targeting).isEqualTo(Ability.Dto.TargetingDto.SELF)
+            result.targeting shouldBe Ability.Dto.TargetingDto.SELF
         }
     }
 
@@ -249,7 +252,7 @@ class AbilityTest {
             // When
             val (events, _) = createdAbility.pullEvents()
             // Then
-            assertThat(events).containsExactly(AbilityEvent.AbilityCreated(abilityId = createdAbility.toDto().id))
+            events.shouldContainExactly(AbilityEvent.AbilityCreated(abilityId = createdAbility.toDto().id))
         }
 
         @Test
@@ -261,7 +264,7 @@ class AbilityTest {
             // When
             val (pulledEvents, _) = updatedAbility.pullEvents()
             // Then
-            assertThat(pulledEvents).isEmpty()
+            pulledEvents.shouldBeEmpty()
         }
     }
 }

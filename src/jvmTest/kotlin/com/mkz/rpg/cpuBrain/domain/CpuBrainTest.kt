@@ -8,8 +8,13 @@ import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent.CpuBattleUnitManaged
 import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent.CpuBrainInitialized
 import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent.CpuTurnFinished
 import com.mkz.rpg.cpuBrain.domain.CpuBrainMother.cpuBrain
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -23,9 +28,9 @@ class CpuBrainTest {
             // When
             val (events, cpuBrain) = CpuBrain.startTurn(playerId = "cpu", battleUnitIds = battleUnitIds).pullEvents()
             // Then
-            assertThat(cpuBrain.toDto()).isEqualTo(CpuBrain.Dto(playerId = "cpu", pendingBattleUnitIds = battleUnitIds, isAwaitingAction = false, actionsTaken = 0))
-            assertThat(cpuBrain.nextBattleUnitId()).isEqualTo("unit-1")
-            assertThat(events).containsExactly(CpuBrainInitialized(playerId = "cpu"))
+            cpuBrain.toDto() shouldBe CpuBrain.Dto(playerId = "cpu", pendingBattleUnitIds = battleUnitIds, isAwaitingAction = false, actionsTaken = 0)
+            cpuBrain.nextBattleUnitId() shouldBe "unit-1"
+            events.shouldContainExactly(CpuBrainInitialized(playerId = "cpu"))
         }
 
         @Test
@@ -35,7 +40,7 @@ class CpuBrainTest {
             // When
             val start = { CpuBrain.startTurn(playerId = "cpu", battleUnitIds = battleUnitIds) }
             // Then
-            assertThatThrownBy { start() }.isInstanceOf(NoBattleUnitsToManage::class.java)
+            shouldThrow<NoBattleUnitsToManage> { start() }
         }
     }
 
@@ -48,9 +53,9 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.requestMove(battleUnitId = "unit-1", row = 1, column = 2).pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isTrue
-            assertThat(updatedCpuBrain.toDto().actionsTaken).isEqualTo(1)
-            assertThat(events).isEmpty()
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+            updatedCpuBrain.toDto().actionsTaken shouldBe 1
+            events.shouldBeEmpty()
         }
 
         @Test
@@ -60,7 +65,7 @@ class CpuBrainTest {
             // When
             val move = { cpuBrain.requestMove(battleUnitId = "unit-2", row = 1, column = 2) }
             // Then
-            assertThatThrownBy { move() }.isInstanceOf(NotTheNextBattleUnit::class.java)
+            shouldThrow<NotTheNextBattleUnit> { move() }
         }
 
         @Test
@@ -70,7 +75,7 @@ class CpuBrainTest {
             // When
             val move = { cpuBrain.requestMove(battleUnitId = "unit-1", row = 1, column = 2) }
             // Then
-            assertThatThrownBy { move() }.isInstanceOf(AlreadyAwaitingAnAction::class.java)
+            shouldThrow<AlreadyAwaitingAnAction> { move() }
         }
     }
 
@@ -83,8 +88,8 @@ class CpuBrainTest {
             // When
             val updatedCpuBrain = cpuBrain.requestCast(battleUnitId = "unit-1", abilityId = "sword")
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isTrue
-            assertThat(updatedCpuBrain.toDto().actionsTaken).isEqualTo(1)
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+            updatedCpuBrain.toDto().actionsTaken shouldBe 1
         }
     }
 
@@ -97,8 +102,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.resolveMove(battleUnitId = "unit-1", row = 1, column = 2).pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isFalse
-            assertThat(events).containsExactly(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeFalse()
+            events.shouldContainExactly(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
         }
 
         @Test
@@ -108,8 +113,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.resolveMove(battleUnitId = "unit-1", row = 5, column = 5).pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isTrue
-            assertThat(events).isEmpty()
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+            events.shouldBeEmpty()
         }
 
         @Test
@@ -119,8 +124,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.resolveMove(battleUnitId = "unit-1", row = 1, column = 2).pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isTrue
-            assertThat(events).isEmpty()
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+            events.shouldBeEmpty()
         }
     }
 
@@ -133,8 +138,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.resolveCast(battleUnitId = "unit-1", abilityId = "sword").pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isFalse
-            assertThat(events).containsExactly(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeFalse()
+            events.shouldContainExactly(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
         }
 
         @Test
@@ -144,8 +149,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.resolveCast(battleUnitId = "unit-2", abilityId = "sword").pullEvents()
             // Then
-            assertThat(updatedCpuBrain.toDto().isAwaitingAction).isTrue
-            assertThat(events).isEmpty()
+            updatedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+            events.shouldBeEmpty()
         }
     }
 
@@ -158,8 +163,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.manageBattleUnit("unit-1").pullEvents()
             // Then
-            assertThat(updatedCpuBrain.nextBattleUnitId()).isEqualTo("unit-2")
-            assertThat(events).containsExactly(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
+            updatedCpuBrain.nextBattleUnitId() shouldBe "unit-2"
+            events.shouldContainExactly(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
         }
 
         @Test
@@ -169,7 +174,7 @@ class CpuBrainTest {
             // When
             val managing = { cpuBrain.manageBattleUnit("unit-1") }
             // Then
-            assertThatThrownBy { managing() }.isInstanceOf(AlreadyAwaitingAnAction::class.java)
+            shouldThrow<AlreadyAwaitingAnAction> { managing() }
         }
     }
 
@@ -188,7 +193,7 @@ class CpuBrainTest {
             // When
             val hasReachedActionLimit = cpuBrain.hasReachedActionLimit()
             // Then
-            assertThat(hasReachedActionLimit).isTrue
+            hasReachedActionLimit.shouldBeTrue()
         }
     }
 
@@ -201,8 +206,8 @@ class CpuBrainTest {
             // When
             val (events, updatedCpuBrain) = cpuBrain.finishTurn().pullEvents()
             // Then
-            assertThat(updatedCpuBrain.nextBattleUnitId()).isNull()
-            assertThat(events).containsExactly(CpuTurnFinished(playerId = "cpu"))
+            updatedCpuBrain.nextBattleUnitId().shouldBeNull()
+            events.shouldContainExactly(CpuTurnFinished(playerId = "cpu"))
         }
     }
 }

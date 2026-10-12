@@ -2,8 +2,9 @@ package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import org.junit.jupiter.api.Test
 
 class ViewTestPageObjectArchitectureTest {
@@ -29,16 +30,12 @@ class ViewTestPageObjectArchitectureTest {
                 .associateWith { file -> file.imports.map { it.name }.filter { name -> forbiddenImportPrefixes.any { name.startsWith(it) } } }
                 .filterValues { it.isNotEmpty() }
         // Then
-        assertThat(files).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            forbiddenImportsByFile.forEach { (file, forbiddenImports) ->
-                softly.fail<Unit>(
-                    "Test '%s' imports view classes %s. Interact with views through their page object ('<View>Extension.kt') instead.",
-                    file.name,
-                    forbiddenImports,
-                )
+        files.shouldNotBeEmpty()
+        val violations =
+            forbiddenImportsByFile.map { (file, forbiddenImports) ->
+                "Test '${file.name}' imports view classes $forbiddenImports. Interact with views through their page object ('<View>Extension.kt') instead."
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
     @Test
@@ -51,15 +48,11 @@ class ViewTestPageObjectArchitectureTest {
                 .associateWith { file -> forbiddenCalls.filter { call -> file.text.contains(call) } }
                 .filterValues { it.isNotEmpty() }
         // Then
-        assertThat(files).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            forbiddenCallsByFile.forEach { (file, calls) ->
-                softly.fail<Unit>(
-                    "Test '%s' accesses view internals using %s. Interact with views through their page object ('<View>Extension.kt') instead.",
-                    file.name,
-                    calls,
-                )
+        files.shouldNotBeEmpty()
+        val violations =
+            forbiddenCallsByFile.map { (file, calls) ->
+                "Test '${file.name}' accesses view internals using $calls. Interact with views through their page object ('<View>Extension.kt') instead."
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 }

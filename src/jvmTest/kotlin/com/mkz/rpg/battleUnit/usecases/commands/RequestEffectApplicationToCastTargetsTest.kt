@@ -30,11 +30,11 @@ import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
+import io.kotest.assertions.throwables.shouldThrowAny
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -83,7 +83,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(battleUnitId), target = EffectTargetDto.Unit(id = battleUnitId), effectId = effectId),
             ),
@@ -113,7 +113,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(battleUnitId), target = EffectTargetDto.Tile(row = 1, column = 1), effectId = effectId),
             ),
@@ -149,7 +149,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(battleUnitId), target = EffectTargetDto.Unit(id = enemyBattleUnitId), effectId = effectId),
             ),
@@ -180,7 +180,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(battleUnitId), target = EffectTargetDto.Unit(id = battleUnitId), effectId = effectId),
             ),
@@ -212,7 +212,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
@@ -252,7 +252,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(battleUnitId), target = EffectTargetDto.Unit(id = enemyBattleUnitId), effectId = effectId),
             ),
@@ -268,11 +268,11 @@ class RequestEffectApplicationToCastTargetsTest {
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
         val error =
-            catchThrowable {
+            shouldThrowAny {
                 requestEffectApplicationToCastTargets(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
             }
         // Then
-        assertThat(error).isInstanceOf(AbilityDoesNotExists::class.java)
+        error.shouldBeInstanceOf<AbilityDoesNotExists>()
     }
 
     @Test
@@ -282,9 +282,9 @@ class RequestEffectApplicationToCastTargetsTest {
         whenever(searchAbilityById(ability.id)).thenReturn(ability)
         // When
         val error =
-            catchThrowable { requestEffectApplicationToCastTargets(battleUnitId = "unknown-battle-unit", abilityId = ability.id, castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0))) }
+            shouldThrowAny { requestEffectApplicationToCastTargets(battleUnitId = "unknown-battle-unit", abilityId = ability.id, castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 0))) }
         // Then
-        assertThat(error).isInstanceOf(BattleUnitError.BattleUnitDoesNotExists::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.BattleUnitDoesNotExists>()
     }
 
     @Test
@@ -325,7 +325,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId), target = EffectTargetDto.Unit(id = enemyId), effectId = enemyDamageEffectId),
             ),
@@ -364,7 +364,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId), target = EffectTargetDto.Unit(id = casterId), effectId = healEffectId),
             ),
@@ -410,7 +410,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // When
         requestEffectApplicationToCastTargets(battleUnitId = casterId, abilityId = "ability-1", castGroup = listOf(Battlefield.Dto.PositionDto(row = 1, column = 1)))
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId), target = EffectTargetDto.Unit(id = enemyId), effectId = damageEffectId),
             ),

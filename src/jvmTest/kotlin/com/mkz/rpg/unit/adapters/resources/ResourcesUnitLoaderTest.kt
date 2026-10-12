@@ -1,10 +1,11 @@
 package com.mkz.rpg.unit.adapters.resources
 
 import com.mkz.rpg.unit.domain.UnitMother.unit
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesUnitLoaderTest {
@@ -20,7 +21,7 @@ class ResourcesUnitLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadUnits()).containsExactly(
+        loader.loadUnits().shouldContainExactly(
             unit(id = "knight", name = "Knight", healthPoints = 100, manaPoints = 30, abilities = listOf("sword", "heal"), movementRange = 3).toDto(),
         )
     }
@@ -33,8 +34,6 @@ class ResourcesUnitLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("unit/knight.toml")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("unit/knight.toml")
     }
 }

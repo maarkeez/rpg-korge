@@ -1,7 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -15,7 +16,7 @@ class ConfirmButtonTest : ViewsForTesting() {
                 // When
                 val confirmButton = ConfirmButton(onConfirmed = {})
                 // Then
-                assertThat(confirmButton.buttonText()).isEqualTo("Confirm")
+                confirmButton.buttonText() shouldBe "Confirm"
             }
     }
 
@@ -31,7 +32,7 @@ class ConfirmButtonTest : ViewsForTesting() {
                 // When
                 clickConfirm(confirmButton)
                 // Then
-                assertThat(confirmed).isTrue
+                confirmed.shouldBeTrue()
             }
     }
 }

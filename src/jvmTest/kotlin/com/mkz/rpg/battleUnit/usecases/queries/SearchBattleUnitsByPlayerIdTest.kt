@@ -4,7 +4,9 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import org.junit.jupiter.api.Test
 
 class SearchBattleUnitsByPlayerIdTest {
@@ -25,8 +27,7 @@ class SearchBattleUnitsByPlayerIdTest {
         // When
         val result = searchBattleUnitsByPlayerId("player-1")
         // Then
-        assertThat(result)
-            .containsExactlyInAnyOrder(firstBattleUnit.toDto(), secondBattleUnit.toDto())
+        result.shouldContainExactlyInAnyOrder(firstBattleUnit.toDto(), secondBattleUnit.toDto())
     }
 
     @Test
@@ -48,7 +49,7 @@ class SearchBattleUnitsByPlayerIdTest {
         // When
         val result = searchBattleUnitsByPlayerId("player-1")
         // Then
-        assertThat(result).containsExactly(aliveBattleUnit.toDto())
+        result.shouldContainExactly(aliveBattleUnit.toDto())
     }
 
     @Test
@@ -57,6 +58,6 @@ class SearchBattleUnitsByPlayerIdTest {
         // When
         val result = searchBattleUnitsByPlayerId("player-1")
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 }

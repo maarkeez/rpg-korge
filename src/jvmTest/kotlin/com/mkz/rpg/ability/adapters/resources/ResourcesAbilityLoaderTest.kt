@@ -5,10 +5,11 @@ import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesAbilityLoaderTest {
@@ -37,7 +38,7 @@ class ResourcesAbilityLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadAbilities()).containsExactly(
+        loader.loadAbilities().shouldContainExactly(
             ability(
                 id = "skull",
                 name = "Skull",
@@ -60,9 +61,6 @@ class ResourcesAbilityLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("ability/skull.toml")
-            .hasMessageContaining("ANYWHERE")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("ability/skull.toml").shouldContain("ANYWHERE")
     }
 }

@@ -1,8 +1,9 @@
 package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import org.junit.jupiter.api.Test
 
 class PresentationResourcesArchitectureTest {
@@ -27,15 +28,11 @@ class PresentationResourcesArchitectureTest {
                 .filterNot { it.nameWithExtension == resourcesLoaderFileName }
                 .filter { file -> file.imports.any { it.name in resourceReadingImports } }
         // Then
-        assertThat(presentationFiles).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            filesReadingResources.forEach { file ->
-                softly.fail<Unit>(
-                    "File '%s' reads resources directly. Use '%s' to access the loaded resources instead.",
-                    file.path,
-                    resourcesLoaderFileName.removeSuffix(".kt"),
-                )
+        presentationFiles.shouldNotBeEmpty()
+        val violations =
+            filesReadingResources.map { file ->
+                "File '${file.path}' reads resources directly. Use '${resourcesLoaderFileName.removeSuffix(".kt")}' to access the loaded resources instead."
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 }

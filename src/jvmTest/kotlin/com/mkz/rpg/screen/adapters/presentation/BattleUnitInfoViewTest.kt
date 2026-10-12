@@ -4,8 +4,11 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -19,7 +22,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
                 // When
                 // Then
-                assertThat(battleUnitInfoView.isVisibleToUser()).isFalse
+                battleUnitInfoView.isVisibleToUser().shouldBeFalse()
             }
     }
 
@@ -35,7 +38,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
                 // Then
-                assertThat(battleUnitInfoView.isVisibleToUser()).isTrue
+                battleUnitInfoView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -48,10 +51,10 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
                 // Then
-                assertThat(battleUnitInfoView.remainingSteps()).isEqualTo(2)
-                assertThat(battleUnitInfoView.maximumSteps()).isEqualTo(3)
-                assertThat(battleUnitInfoView.remainingCasts()).isEqualTo(1)
-                assertThat(battleUnitInfoView.maximumCasts()).isEqualTo(1)
+                battleUnitInfoView.remainingSteps() shouldBe 2
+                battleUnitInfoView.maximumSteps() shouldBe 3
+                battleUnitInfoView.remainingCasts() shouldBe 1
+                battleUnitInfoView.maximumCasts() shouldBe 1
             }
 
         @Test
@@ -64,8 +67,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
                 // Then
-                assertThat(battleUnitInfoView.movementPointColors()).containsExactly(BattleUnitInfoView.MOVEMENT_POINTS_COLOR)
-                assertThat(battleUnitInfoView.castPointColors()).containsExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
+                battleUnitInfoView.movementPointColors().shouldContainExactly(BattleUnitInfoView.MOVEMENT_POINTS_COLOR)
+                battleUnitInfoView.castPointColors().shouldContainExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
             }
 
         @Test
@@ -78,8 +81,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.display(battleUnit = battleUnit, unit = unit)
                 // Then
-                assertThat(battleUnitInfoView.remainingCasts()).isEqualTo(0)
-                assertThat(battleUnitInfoView.maximumCasts()).isEqualTo(1)
+                battleUnitInfoView.remainingCasts() shouldBe 0
+                battleUnitInfoView.maximumCasts() shouldBe 1
             }
     }
 
@@ -96,7 +99,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // Then
                 val abilityButtons = battleUnitInfoView.abilityButtons()
                 val selectedAbilityButton = abilityButtons[selectedAbilityIndex]
-                assertThat(selectedAbilityButton.isSelected()).isTrue
+                selectedAbilityButton.isSelected().shouldBeTrue()
             }
 
         @Test
@@ -112,7 +115,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // Then
                 abilityButtons.forEachIndexed { index, abilityButton ->
                     val isSelected = index == selectedAbilityIndex
-                    assertThat(abilityButton.isSelected()).isEqualTo(isSelected)
+                    abilityButton.isSelected() shouldBe isSelected
                 }
             }
     }
@@ -130,7 +133,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 // When
                 battleUnitInfoView.hide()
                 // Then
-                assertThat(battleUnitInfoView.isVisibleToUser()).isFalse
+                battleUnitInfoView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

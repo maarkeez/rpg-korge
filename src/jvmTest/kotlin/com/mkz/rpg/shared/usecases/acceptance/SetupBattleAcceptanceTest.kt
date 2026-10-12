@@ -11,8 +11,9 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -63,8 +64,8 @@ class SetupBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val previousTileOccupantId = battlefieldApi.searchOccupant(row = 6, column = 6)
-        assertThat(previousTileOccupantId).isNull()
+        previousTileOccupantId.shouldBeNull()
         val newTileOccupantId = battlefieldApi.searchOccupant(row = 5, column = 6)
-        assertThat(newTileOccupantId).isEqualTo(playerOneKnightBattleUnitId)
+        newTileOccupantId shouldBe playerOneKnightBattleUnitId
     }
 }

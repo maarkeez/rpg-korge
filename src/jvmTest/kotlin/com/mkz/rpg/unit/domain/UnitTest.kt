@@ -1,6 +1,8 @@
 package com.mkz.rpg.unit.domain
 
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -17,7 +19,7 @@ class UnitTest {
             // When
             val createdUnit = Unit.create(unitDto)
             // Then
-            assertThat(createdUnit.toDto()).isEqualTo(unitDto)
+            createdUnit.toDto() shouldBe unitDto
         }
 
         @Test
@@ -31,7 +33,7 @@ class UnitTest {
             val createdUnit = Unit.create(unitDto)
             // Then
             val (events, _) = createdUnit.pullEvents()
-            assertThat(events).containsExactly(UnitEvent.UnitCreated(unitId = unitDto.id))
+            events.shouldContainExactly(UnitEvent.UnitCreated(unitId = unitDto.id))
         }
     }
 
@@ -52,16 +54,14 @@ class UnitTest {
             // When
             val result = unit.toDto()
             // Then
-            assertThat(result)
-                .isEqualTo(
-                    Unit.Dto(
-                        id = "unit-1",
-                        name = "Knight",
-                        healthPoints = 10,
-                        manaPoints = 5,
-                        abilities = listOf("ability-1"),
-                        movementRange = 3,
-                    ),
+            result shouldBe
+                Unit.Dto(
+                    id = "unit-1",
+                    name = "Knight",
+                    healthPoints = 10,
+                    manaPoints = 5,
+                    abilities = listOf("ability-1"),
+                    movementRange = 3,
                 )
         }
     }
@@ -80,7 +80,7 @@ class UnitTest {
             // When
             val (events, _) = createdUnit.pullEvents()
             // Then
-            assertThat(events).containsExactly(UnitEvent.UnitCreated(unitId = createdUnit.toDto().id))
+            events.shouldContainExactly(UnitEvent.UnitCreated(unitId = createdUnit.toDto().id))
         }
 
         @Test
@@ -90,7 +90,7 @@ class UnitTest {
             // When
             val (events, _) = unit.pullEvents()
             // Then
-            assertThat(events).isEmpty()
+            events.shouldBeEmpty()
         }
     }
 }

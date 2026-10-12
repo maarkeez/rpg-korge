@@ -1,7 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -16,8 +17,8 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.displayFinishTurn(onTurnFinished = {})
                 // Then
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
-                assertThat(playerCallToActionView.isDisplayingCancelAndConfirm()).isFalse
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+                playerCallToActionView.isDisplayingCancelAndConfirm().shouldBeFalse()
             }
 
         @Test
@@ -31,7 +32,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 clickFinishTurn(playerCallToActionView)
                 // Then
-                assertThat(turnFinished).isTrue
+                turnFinished.shouldBeTrue()
             }
     }
 
@@ -46,8 +47,8 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.setFinishTurnEnabled(false)
                 // Then
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
-                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+                playerCallToActionView.isFinishTurnEnabled().shouldBeFalse()
             }
 
         @Test
@@ -59,7 +60,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.displayFinishTurn(onTurnFinished = {})
                 // Then
-                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+                playerCallToActionView.isFinishTurnEnabled().shouldBeFalse()
             }
 
         @Test
@@ -72,7 +73,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.setFinishTurnEnabled(true)
                 // Then
-                assertThat(playerCallToActionView.isFinishTurnEnabled()).isTrue
+                playerCallToActionView.isFinishTurnEnabled().shouldBeTrue()
             }
 
         @Test
@@ -87,8 +88,8 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 clickCancel(playerCallToActionView)
                 // Then
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
-                assertThat(playerCallToActionView.isFinishTurnEnabled()).isFalse
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+                playerCallToActionView.isFinishTurnEnabled().shouldBeFalse()
             }
     }
 
@@ -103,8 +104,8 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.displayCancelAndConfirm(onCancelled = {}, onConfirmed = {})
                 // Then
-                assertThat(playerCallToActionView.isDisplayingCancelAndConfirm()).isTrue
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isFalse
+                playerCallToActionView.isDisplayingCancelAndConfirm().shouldBeTrue()
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeFalse()
             }
 
         @Test
@@ -120,9 +121,9 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 clickCancel(playerCallToActionView)
                 // Then
-                assertThat(cancelled).isTrue
-                assertThat(confirmed).isFalse
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
+                cancelled.shouldBeTrue()
+                confirmed.shouldBeFalse()
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
             }
 
         @Test
@@ -138,9 +139,9 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 clickConfirm(playerCallToActionView)
                 // Then
-                assertThat(confirmed).isTrue
-                assertThat(cancelled).isFalse
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isTrue
+                confirmed.shouldBeTrue()
+                cancelled.shouldBeFalse()
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
             }
     }
 
@@ -155,8 +156,8 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                 // When
                 playerCallToActionView.hide()
                 // Then
-                assertThat(playerCallToActionView.isDisplayingFinishTurn()).isFalse
-                assertThat(playerCallToActionView.isDisplayingCancelAndConfirm()).isFalse
+                playerCallToActionView.isDisplayingFinishTurn().shouldBeFalse()
+                playerCallToActionView.isDisplayingCancelAndConfirm().shouldBeFalse()
             }
     }
 }

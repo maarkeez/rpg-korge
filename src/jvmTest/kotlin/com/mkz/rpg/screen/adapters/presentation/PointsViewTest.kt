@@ -1,8 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -17,8 +18,8 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 3, maximum = 3)
                 // Then
-                assertThat(pointsView.filledPoints()).isEqualTo(3)
-                assertThat(pointsView.hollowPoints()).isEqualTo(0)
+                pointsView.filledPoints() shouldBe 3
+                pointsView.hollowPoints() shouldBe 0
             }
 
         @Test
@@ -29,8 +30,8 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 1, maximum = 3)
                 // Then
-                assertThat(pointsView.filledPoints()).isEqualTo(1)
-                assertThat(pointsView.hollowPoints()).isEqualTo(2)
+                pointsView.filledPoints() shouldBe 1
+                pointsView.hollowPoints() shouldBe 2
             }
 
         @Test
@@ -41,8 +42,8 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 0, maximum = 1)
                 // Then
-                assertThat(pointsView.filledPoints()).isEqualTo(0)
-                assertThat(pointsView.hollowPoints()).isEqualTo(1)
+                pointsView.filledPoints() shouldBe 0
+                pointsView.hollowPoints() shouldBe 1
             }
 
         @Test
@@ -53,7 +54,7 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 1, maximum = 2)
                 // Then
-                assertThat(pointsView.pointColors()).containsExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
+                pointsView.pointColors().shouldContainExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
             }
 
         @Test
@@ -65,7 +66,7 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 1, maximum = 2)
                 // Then
-                assertThat(pointsView.pointSizes()).containsExactly(PointsView.POINT_RADIUS * 2 to PointsView.POINT_RADIUS * 2)
+                pointsView.pointSizes().shouldContainExactly(PointsView.POINT_RADIUS * 2 to PointsView.POINT_RADIUS * 2)
             }
 
         @Test
@@ -77,8 +78,8 @@ class PointsViewTest : ViewsForTesting() {
                 // When
                 pointsView.display(remaining = 1, maximum = 2)
                 // Then
-                assertThat(pointsView.filledPoints()).isEqualTo(1)
-                assertThat(pointsView.hollowPoints()).isEqualTo(1)
+                pointsView.filledPoints() shouldBe 1
+                pointsView.hollowPoints() shouldBe 1
             }
     }
 }

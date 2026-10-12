@@ -1,7 +1,8 @@
 package com.mkz.rpg.ability.adapters.storage
 
 import com.mkz.rpg.ability.domain.AbilityMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class InMemoryAbilityRepositoryTest {
             abilityRepository.create(ability)
             // Then
             val storedAbility = abilityRepository.searchById(ability.toDto().id)
-            assertThat(storedAbility).isEqualTo(ability)
+            storedAbility shouldBe ability
         }
 
         @Test
@@ -31,7 +32,7 @@ class InMemoryAbilityRepositoryTest {
             abilityRepository.create(updatedAbility)
             // Then
             val storedAbility = abilityRepository.searchById("ability-1")
-            assertThat(storedAbility).isEqualTo(updatedAbility)
+            storedAbility shouldBe updatedAbility
         }
     }
 
@@ -45,7 +46,7 @@ class InMemoryAbilityRepositoryTest {
             // When
             val storedAbility = abilityRepository.searchById(ability.toDto().id)
             // Then
-            assertThat(storedAbility).isEqualTo(ability)
+            storedAbility shouldBe ability
         }
 
         @Test
@@ -53,7 +54,7 @@ class InMemoryAbilityRepositoryTest {
             // When
             val storedAbility = abilityRepository.searchById("ability-unknown")
             // Then
-            assertThat(storedAbility).isNull()
+            storedAbility.shouldBeNull()
         }
     }
 }

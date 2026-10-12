@@ -12,7 +12,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.player.domain.PlayerMother.player
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -51,8 +54,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        assertThat(result)
-            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 2))))
+        result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 2))))
     }
 
     @Test
@@ -74,8 +76,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        assertThat(result)
-            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))))
+        result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))))
     }
 
     @Test
@@ -97,8 +98,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        assertThat(result)
-            .containsExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 1))))
+        result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 1))))
     }
 
     @Test
@@ -132,8 +132,8 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnitId, "ability-1")
         // Then
-        assertThat(result).hasSize(1)
-        assertThat(result.first().positions).containsExactlyInAnyOrder(
+        result.shouldHaveSize(1)
+        result.first().positions.shouldContainExactlyInAnyOrder(
             WhereCanCast.PositionDto(1, 2),
             WhereCanCast.PositionDto(2, 1),
         )
@@ -151,7 +151,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnit.toDto().id, "ability-1")
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 
     @Test
@@ -174,7 +174,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(casterId, "ability-1")
         // Then
-        assertThat(result).containsExactlyInAnyOrder(
+        result.shouldContainExactlyInAnyOrder(
             WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))),
             WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 1))),
         )
@@ -190,7 +190,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(battleUnit.toDto().id, "unknown-ability")
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 
     @Test
@@ -199,7 +199,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast("unknown-battle-unit", "ability-1")
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 
     @Test
@@ -221,7 +221,7 @@ class WhereCanCastTest {
         // When
         val result = whereCanCast(casterId, "ability-1")
         // Then
-        assertThat(result).containsExactly(
+        result.shouldContainExactly(
             WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = adjacentPosition.row, column = adjacentPosition.column))),
         )
     }

@@ -9,11 +9,11 @@ import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -44,9 +44,9 @@ class InitialiseBattleUnitsTest {
         // When
         initialiseBattleUnits()
         // Then
-        assertThat(battleUnitRepository.searchById("player-1-unit-1")?.toDto()?.playerId).isEqualTo("player-one")
-        assertThat(battleUnitRepository.searchById("player-1-unit-2")?.toDto()?.playerId).isEqualTo("player-one")
-        assertThat(eventBus).hasPublishedEvents(
+        battleUnitRepository.searchById("player-1-unit-1")?.toDto()?.playerId shouldBe "player-one"
+        battleUnitRepository.searchById("player-1-unit-2")?.toDto()?.playerId shouldBe "player-one"
+        eventBus.shouldHavePublishedEvents(
             BattleUnitDeployed(battleUnitId = "player-1-unit-1", row = 6, column = 6),
             BattleUnitDeployed(battleUnitId = "player-1-unit-2", row = 7, column = 7),
         )
@@ -61,6 +61,6 @@ class InitialiseBattleUnitsTest {
         // When
         val initialisation = { initialiseBattleUnits() }
         // Then
-        assertThatThrownBy { initialisation() }.isInstanceOf(UnitNotFound::class.java)
+        shouldThrow<UnitNotFound> { initialisation() }
     }
 }

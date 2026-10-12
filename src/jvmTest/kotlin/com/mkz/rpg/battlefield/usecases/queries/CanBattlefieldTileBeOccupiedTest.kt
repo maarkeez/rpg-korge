@@ -3,7 +3,8 @@ package com.mkz.rpg.battlefield.usecases.queries
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainTransitionRule
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 
 class CanBattlefieldTileBeOccupiedTest {
@@ -19,7 +20,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 1)
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 
     @Test
@@ -34,7 +35,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 1)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -46,7 +47,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(5, 5)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -67,7 +68,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 0)
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 
     @Test
@@ -83,7 +84,7 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(0, 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -104,6 +105,6 @@ class CanBattlefieldTileBeOccupiedTest {
         // When
         val result = canBattlefieldTileBeOccupied(1, 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 }

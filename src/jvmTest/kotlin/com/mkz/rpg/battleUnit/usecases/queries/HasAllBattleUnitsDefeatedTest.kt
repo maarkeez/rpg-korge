@@ -4,7 +4,8 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 
 class HasAllBattleUnitsDefeatedTest {
@@ -29,7 +30,7 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 
     @Test
@@ -51,7 +52,7 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -60,6 +61,6 @@ class HasAllBattleUnitsDefeatedTest {
         // When
         val result = hasAllBattleUnitsDefeated("player-1")
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 }

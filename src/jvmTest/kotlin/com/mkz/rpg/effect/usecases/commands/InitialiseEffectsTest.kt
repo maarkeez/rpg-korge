@@ -6,8 +6,9 @@ import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import com.mkz.rpg.effect.usecases.services.EffectLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -27,9 +28,9 @@ class InitialiseEffectsTest {
         // When
         initialiseEffects()
         // Then
-        assertThat(effectRepository.searchById("venom")?.toDto()).isEqualTo(venom)
-        assertThat(effectRepository.searchById("teleport")?.toDto()).isEqualTo(teleport)
-        assertThat(eventBus).hasPublishedEvents(EffectCreated("venom"), EffectCreated("teleport"))
+        effectRepository.searchById("venom")?.toDto() shouldBe venom
+        effectRepository.searchById("teleport")?.toDto() shouldBe teleport
+        eventBus.shouldHavePublishedEvents(EffectCreated("venom"), EffectCreated("teleport"))
     }
 
     @Test
@@ -41,7 +42,7 @@ class InitialiseEffectsTest {
         // When
         initialiseEffects()
         // Then
-        assertThat(effectRepository.searchById("venom")?.toDto()).isEqualTo(venom.toDto())
-        assertThat(eventBus).hasNotPublishedEvents()
+        effectRepository.searchById("venom")?.toDto() shouldBe venom.toDto()
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

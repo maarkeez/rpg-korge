@@ -6,8 +6,9 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -37,10 +38,8 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
-        assertThat(eventBus)
-            .hasPublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
 
     @Test
@@ -57,8 +56,7 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
-        assertThat(eventBus.publishedEvents).isEmpty()
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

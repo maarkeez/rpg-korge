@@ -1,8 +1,10 @@
 package com.mkz.rpg.shared.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -16,7 +18,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
                 // When
                 // Then
-                assertThat(previewBarView.isVisibleToUser()).isTrue
+                previewBarView.isVisibleToUser().shouldBeTrue()
             }
     }
 
@@ -31,7 +33,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(previewBarView.isVisibleToUser()).isTrue
+                previewBarView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -42,7 +44,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(previewBarView.labelText()).isEqualTo("50 / 100")
+                previewBarView.labelText() shouldBe "50 / 100"
             }
 
         @Test
@@ -56,7 +58,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
                 // Then
-                assertThat(previewBarView.filledWidth()).isEqualTo(size.width * filledPercentage)
+                previewBarView.filledWidth() shouldBe size.width * filledPercentage
             }
 
         @Test
@@ -70,7 +72,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
                 // Then
-                assertThat(previewBarView.previewWidth()).isEqualTo(size.width * previewPercentage)
+                previewBarView.previewWidth() shouldBe size.width * previewPercentage
             }
 
         @Test
@@ -81,8 +83,8 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
                 // Then
-                assertThat(previewBarView.filledWidth()).isEqualTo(0.00)
-                assertThat(previewBarView.labelText()).isEqualTo("0 / 100")
+                previewBarView.filledWidth() shouldBe 0.00
+                previewBarView.labelText() shouldBe "0 / 100"
             }
     }
 
@@ -97,7 +99,7 @@ class PreviewBarViewTest : ViewsForTesting() {
                 // When
                 previewBarView.hide()
                 // Then
-                assertThat(previewBarView.isVisibleToUser()).isFalse
+                previewBarView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

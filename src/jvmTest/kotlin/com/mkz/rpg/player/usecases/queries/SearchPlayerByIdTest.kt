@@ -2,7 +2,8 @@ package com.mkz.rpg.player.usecases.queries
 
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.id
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchPlayerByIdTest {
@@ -20,7 +21,7 @@ class SearchPlayerByIdTest {
         // When
         val storedPlayer = searchPlayerById(playerDto.id)
         // Then
-        assertThat(storedPlayer).isEqualTo(playerDto)
+        storedPlayer shouldBe playerDto
     }
 
     @Test
@@ -30,6 +31,6 @@ class SearchPlayerByIdTest {
         // When
         val storedPlayer = searchPlayerById(unknownPlayerId)
         // Then
-        assertThat(storedPlayer).isNull()
+        storedPlayer.shouldBeNull()
     }
 }

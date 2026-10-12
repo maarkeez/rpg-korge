@@ -13,9 +13,11 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -43,10 +45,8 @@ class RefreshMovementRangeTest {
         // When
         refreshMovementRange()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(
-            displayMovementRange(tile = tile(3, 4), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles),
-        )
-        assertThat(eventBus).hasPublishedEvents(
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = tile(3, 4), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles)
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnit(tile = tile(3, 4), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles),
         )
     }
@@ -59,8 +59,8 @@ class RefreshMovementRangeTest {
         // When
         refreshMovementRange()
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(BattlefieldHud.Idle::class.java)
-        assertThat(eventBus).hasPublishedEvents(BattlefieldHudEvent.Idle)
+        battlefieldHudRepository.search().shouldBeInstanceOf<BattlefieldHud.Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
@@ -71,8 +71,8 @@ class RefreshMovementRangeTest {
         // When
         refreshMovementRange()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -83,8 +83,8 @@ class RefreshMovementRangeTest {
         // When
         refreshMovementRange()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -95,8 +95,8 @@ class RefreshMovementRangeTest {
         // When
         refreshMovementRange()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -104,7 +104,6 @@ class RefreshMovementRangeTest {
         // Given
         // When
         // Then
-        assertThatThrownBy { refreshMovementRange() }
-            .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
+        shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { refreshMovementRange() }
     }
 }

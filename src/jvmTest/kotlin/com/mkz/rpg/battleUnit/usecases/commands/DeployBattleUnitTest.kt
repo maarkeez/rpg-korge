@@ -7,11 +7,13 @@ import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
+import io.kotest.assertions.throwables.shouldThrowAny
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -49,11 +51,11 @@ class DeployBattleUnitTest {
         )
         // Then
         val storedBattleUnit = battleUnitRepository.searchById("battle-unit-1")?.toDto()
-        assertThat(storedBattleUnit).isNotNull
-        assertThat(storedBattleUnit!!.playerId).isEqualTo(player.id)
-        assertThat(storedBattleUnit.unitId).isEqualTo(unit.id)
-        assertThat(storedBattleUnit.remainingHealthPoints).isEqualTo(unit.healthPoints)
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattleUnit.shouldNotBeNull()
+        storedBattleUnit!!.playerId shouldBe player.id
+        storedBattleUnit.unitId shouldBe unit.id
+        storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitDeployed("battle-unit-1", 0, 0),
         )
     }
@@ -64,11 +66,11 @@ class DeployBattleUnitTest {
         whenever(searchUnitById("unknown-unit")).thenReturn(null)
         // When
         val error =
-            catchThrowable {
+            shouldThrowAny {
                 deployBattleUnit("battle-unit-1", "unknown-unit", "player-1", 0, 0)
             }
         // Then
-        assertThat(error).isInstanceOf(BattleUnitError.UnitNotFound::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.UnitNotFound>()
     }
 
     @Test
@@ -81,11 +83,11 @@ class DeployBattleUnitTest {
         whenever(searchPlayerById("unknown-player")).thenReturn(null)
         // When
         val error =
-            catchThrowable {
+            shouldThrowAny {
                 deployBattleUnit("battle-unit-1", unit.id, "unknown-player", 0, 0)
             }
         // Then
-        assertThat(error).isInstanceOf(BattleUnitError.PlayerNotFound::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.PlayerNotFound>()
     }
 
     @Test
@@ -102,11 +104,10 @@ class DeployBattleUnitTest {
         whenever(canBattlefieldTileBeOccupied(0, 0)).thenReturn(false)
         // When
         val error =
-            catchThrowable {
+            shouldThrowAny {
                 deployBattleUnit("battle-unit-1", unit.id, player.id, 0, 0)
             }
         // Then
-        assertThat(error)
-            .isInstanceOf(BattleUnitError.BattlefieldTileCanNotBeOccupied::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.BattlefieldTileCanNotBeOccupied>()
     }
 }

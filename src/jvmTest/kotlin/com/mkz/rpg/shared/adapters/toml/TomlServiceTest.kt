@@ -1,7 +1,7 @@
 package com.mkz.rpg.shared.adapters.toml
 
+import io.kotest.matchers.shouldBe
 import kotlinx.serialization.Serializable
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class TomlServiceTest {
@@ -24,6 +24,6 @@ class TomlServiceTest {
         // When
         val config = tomlService.deserialize<GameConfig>(toml)
         // Then
-        assertThat(config).isEqualTo(GameConfig(title = "Hello World", version = 1))
+        config shouldBe GameConfig(title = "Hello World", version = 1)
     }
 }

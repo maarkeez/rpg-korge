@@ -1,7 +1,8 @@
 package com.mkz.rpg.unit.adapters.storage
 
 import com.mkz.rpg.unit.domain.UnitMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class InMemoryUnitRepositoryTest {
             unitRepository.create(unit)
             // Then
             val storedUnit = unitRepository.searchById(unit.toDto().id)
-            assertThat(storedUnit).isEqualTo(unit)
+            storedUnit shouldBe unit
         }
     }
 
@@ -32,7 +33,7 @@ class InMemoryUnitRepositoryTest {
             // When
             val storedUnit = unitRepository.searchById(unit.toDto().id)
             // Then
-            assertThat(storedUnit).isEqualTo(unit)
+            storedUnit shouldBe unit
         }
 
         @Test
@@ -40,7 +41,7 @@ class InMemoryUnitRepositoryTest {
             // When
             val storedUnit = unitRepository.searchById("unit-unknown")
             // Then
-            assertThat(storedUnit).isNull()
+            storedUnit.shouldBeNull()
         }
     }
 }

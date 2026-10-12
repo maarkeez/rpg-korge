@@ -5,7 +5,7 @@ import com.tngtech.archunit.core.domain.JavaClasses
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.ArchRule
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.comparables.shouldBeGreaterThan
 import org.junit.jupiter.api.Test
 import java.io.File
 
@@ -31,6 +31,6 @@ class NoRunBlockingArchitectureTest {
         rule.check(productionClasses)
         // Then
         val productionClassCount = productionClasses.size
-        assertThat(productionClassCount).isGreaterThan(0)
+        productionClassCount.shouldBeGreaterThan(0)
     }
 }

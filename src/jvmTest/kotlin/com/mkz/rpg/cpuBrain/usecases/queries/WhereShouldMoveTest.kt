@@ -18,7 +18,8 @@ import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -101,7 +102,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 2))
+        result shouldBe position(0, 2)
     }
 
     @Test
@@ -122,7 +123,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 
     @Test
@@ -141,7 +142,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isNull()
+        result.shouldBeNull()
     }
 
     @Test
@@ -157,7 +158,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isNull()
+        result.shouldBeNull()
     }
 
     @Test
@@ -186,7 +187,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 
     @Test
@@ -215,7 +216,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 
     @Test
@@ -248,7 +249,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 
     @Test
@@ -280,7 +281,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 2))
+        result shouldBe position(0, 2)
     }
 
     @Test
@@ -312,7 +313,7 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 
     @Test
@@ -343,6 +344,6 @@ class WhereShouldMoveTest {
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(position(0, 1))
+        result shouldBe position(0, 1)
     }
 }

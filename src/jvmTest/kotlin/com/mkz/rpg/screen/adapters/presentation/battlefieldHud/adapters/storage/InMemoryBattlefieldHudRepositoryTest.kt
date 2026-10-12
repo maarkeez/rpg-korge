@@ -2,7 +2,8 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -19,7 +20,7 @@ class InMemoryBattlefieldHudRepositoryTest {
             battlefieldHudRepository.create(createdBattlefieldHud)
             // Then
             val storedBattlefieldHud = battlefieldHudRepository.search()
-            assertThat(storedBattlefieldHud).isEqualTo(createdBattlefieldHud)
+            storedBattlefieldHud shouldBe createdBattlefieldHud
         }
     }
 
@@ -35,7 +36,7 @@ class InMemoryBattlefieldHudRepositoryTest {
             battlefieldHudRepository.update(updatedBattlefieldHud)
             // Then
             val searchResult = battlefieldHudRepository.search()
-            assertThat(searchResult).isEqualTo(updatedBattlefieldHud)
+            searchResult shouldBe updatedBattlefieldHud
         }
     }
 
@@ -46,7 +47,7 @@ class InMemoryBattlefieldHudRepositoryTest {
             // When
             val storedBattlefieldHud = battlefieldHudRepository.search()
             // Then
-            assertThat(storedBattlefieldHud).isNull()
+            storedBattlefieldHud.shouldBeNull()
         }
     }
 }

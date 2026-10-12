@@ -12,8 +12,9 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.math.abs
@@ -81,8 +82,8 @@ class CpuTurnAcceptanceTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(distanceToKnight("cpu-rat")).isEqualTo(1)
-        assertThat(battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints).isEqualTo(90)
+        distanceToKnight("cpu-rat") shouldBe 1
+        battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
     }
 
     @Test
@@ -95,10 +96,10 @@ class CpuTurnAcceptanceTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(battlefieldApi.searchPosition("cpu-rat-1")).isNotEqualTo(battlefieldApi.searchPosition("cpu-rat-2"))
-        assertThat(distanceToKnight("cpu-rat-1")).isEqualTo(1)
-        assertThat(distanceToKnight("cpu-rat-2")).isEqualTo(1)
-        assertThat(battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints).isEqualTo(80)
+        battlefieldApi.searchPosition("cpu-rat-1") shouldNotBe battlefieldApi.searchPosition("cpu-rat-2")
+        distanceToKnight("cpu-rat-1") shouldBe 1
+        distanceToKnight("cpu-rat-2") shouldBe 1
+        battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 80
     }
 
     @Test
@@ -111,7 +112,7 @@ class CpuTurnAcceptanceTest {
         eventBus.dispatch()
         // Then
         val battle = battleApi.searchBattle()!!
-        assertThat(battle.currentPlayerTurn).isEqualTo(humanPlayerId)
-        assertThat(battle.currentRound).isEqualTo(2)
+        battle.currentPlayerTurn shouldBe humanPlayerId
+        battle.currentRound shouldBe 2
     }
 }

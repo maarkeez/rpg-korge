@@ -3,7 +3,8 @@ package com.mkz.rpg.effect.usecases.queries
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.effectId
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchEffectByIdTest {
@@ -19,7 +20,7 @@ class SearchEffectByIdTest {
         // When
         val storedEffect = searchEffectById(effectDto.id)
         // Then
-        assertThat(storedEffect).isEqualTo(effectDto)
+        storedEffect shouldBe effectDto
     }
 
     @Test
@@ -29,6 +30,6 @@ class SearchEffectByIdTest {
         // When
         val storedEffect = searchEffectById(unknownEffectId)
         // Then
-        assertThat(storedEffect).isNull()
+        storedEffect.shouldBeNull()
     }
 }

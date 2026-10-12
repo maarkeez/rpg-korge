@@ -1,11 +1,20 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.maps.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeSameInstanceAs
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.PNG
 import korlibs.io.file.std.MemoryVfsMix
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -32,9 +41,9 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 resourcesLoader.load()
                 // Then
-                assertThat(resourcesLoader.bitmap("unit/knight.png").width).isEqualTo(1)
-                assertThat(resourcesLoader.bitmap("unit/portraits/knight_portrait.png").width).isEqualTo(2)
-                assertThat(resourcesLoader.bitmap("card.jpg").width).isEqualTo(3)
+                resourcesLoader.bitmap("unit/knight.png").width shouldBe 1
+                resourcesLoader.bitmap("unit/portraits/knight_portrait.png").width shouldBe 2
+                resourcesLoader.bitmap("card.jpg").width shouldBe 3
             }
 
         @Test
@@ -45,7 +54,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 resourcesLoader.load()
                 // Then
-                assertThat(resourcesLoader.bitmapOrNull("terrain/sand.toml")).isNull()
+                resourcesLoader.bitmapOrNull("terrain/sand.toml").shouldBeNull()
             }
 
         @Test
@@ -56,7 +65,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 resourcesLoader.load()
                 // Then
-                assertThat(resourcesLoader.bitmapOrNull("unit/.hidden.png")).isNull()
+                resourcesLoader.bitmapOrNull("unit/.hidden.png").shouldBeNull()
             }
 
         @Test
@@ -67,8 +76,8 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 resourcesLoader.load()
                 // Then
-                assertThat(resourcesLoader.bitmapOrNull("unit/knight.png")).isNotNull
-                assertThat(resourcesLoader.bitmaps("terrain/transitions")).isNotEmpty
+                resourcesLoader.bitmapOrNull("unit/knight.png").shouldNotBeNull()
+                resourcesLoader.bitmaps("terrain/transitions").shouldNotBeEmpty()
             }
     }
 
@@ -83,7 +92,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 val firstBitmap = resourcesLoader.bitmap("unit/knight.png")
                 val secondBitmap = resourcesLoader.bitmap("unit/knight.png")
                 // Then
-                assertThat(secondBitmap).isSameAs(firstBitmap)
+                secondBitmap.shouldBeSameInstanceAs(firstBitmap)
             }
 
         @Test
@@ -94,9 +103,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 val bitmapRequest = { resourcesLoader.bitmap("unit/dragon.png") }
                 // Then
-                assertThatThrownBy { bitmapRequest() }
-                    .isInstanceOf(IllegalStateException::class.java)
-                    .hasMessageContaining("unit/dragon.png")
+                shouldThrow<IllegalStateException> { bitmapRequest() }.message.shouldContain("unit/dragon.png")
             }
     }
 
@@ -110,7 +117,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 val bitmap = resourcesLoader.bitmapOrNull("unit/dragon.png")
                 // Then
-                assertThat(bitmap).isNull()
+                bitmap.shouldBeNull()
             }
     }
 
@@ -124,7 +131,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 val bitmaps = resourcesLoader.bitmaps("unit")
                 // Then
-                assertThat(bitmaps.keys).containsExactly("knight.png")
+                bitmaps.keys.shouldContainExactly("knight.png")
             }
 
         @Test
@@ -135,7 +142,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
                 // When
                 val bitmaps = resourcesLoader.bitmaps("dragons")
                 // Then
-                assertThat(bitmaps).isEmpty()
+                bitmaps.shouldBeEmpty()
             }
     }
 }

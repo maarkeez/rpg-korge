@@ -5,8 +5,10 @@ import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleError
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrowAny
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 
 class StartFirstRoundTest {
@@ -26,9 +28,8 @@ class StartFirstRoundTest {
         startFirstRound(players = players)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false))
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        eventBus.shouldHavePublishedEvents(
             BattleEvent.BattleStarted,
             BattleEvent.PlayerTurnStarted(players.first()),
         )
@@ -40,11 +41,10 @@ class StartFirstRoundTest {
         val players = listOf("player-1")
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            shouldThrowAny {
                 startFirstRound(players = players)
             }
         // Then
-        assertThat(error)
-            .isInstanceOf(BattleError.MinimumTwoPlayersRequired::class.java)
+        error.shouldBeInstanceOf<BattleError.MinimumTwoPlayersRequired>()
     }
 }

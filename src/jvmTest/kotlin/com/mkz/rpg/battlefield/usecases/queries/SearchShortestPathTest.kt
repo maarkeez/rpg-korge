@@ -1,7 +1,9 @@
 package com.mkz.rpg.battlefield.usecases.queries
 
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -23,7 +25,7 @@ class SearchShortestPathTest {
         // When
         val path = searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 0)
         // Then
-        assertThat(path).containsExactly(PositionDto(1, 0), PositionDto(2, 0), PositionDto(3, 0))
+        path.shouldContainExactly(PositionDto(1, 0), PositionDto(2, 0), PositionDto(3, 0))
     }
 
     @Test
@@ -33,7 +35,7 @@ class SearchShortestPathTest {
         // When
         val path = searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)
         // Then
-        assertThat(path).containsExactly(PositionDto(1, 0), PositionDto(1, 1), PositionDto(1, 2), PositionDto(0, 2))
+        path.shouldContainExactly(PositionDto(1, 0), PositionDto(1, 1), PositionDto(1, 2), PositionDto(0, 2))
     }
 
     @Test
@@ -43,7 +45,7 @@ class SearchShortestPathTest {
         // When
         val path = searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 1, toColumn = 2)
         // Then
-        assertThat(path).containsExactly(PositionDto(0, 1), PositionDto(0, 2), PositionDto(1, 2))
+        path.shouldContainExactly(PositionDto(0, 1), PositionDto(0, 2), PositionDto(1, 2))
     }
 
     @Test
@@ -53,7 +55,7 @@ class SearchShortestPathTest {
         // When
         val path = searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 3, toColumn = 0)
         // Then
-        assertThat(path).isNull()
+        path.shouldBeNull()
     }
 
     @Test
@@ -63,6 +65,6 @@ class SearchShortestPathTest {
         // When
         val path = searchShortestPath(fromRow = 2, fromColumn = 2, toRow = 2, toColumn = 2)
         // Then
-        assertThat(path).isEmpty()
+        path.shouldBeEmpty()
     }
 }

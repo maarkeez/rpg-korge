@@ -1,12 +1,13 @@
 package com.mkz.rpg.unit.usecases.commands
 
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.services.UnitLoader
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -26,9 +27,9 @@ class InitialiseUnitsTest {
         // When
         initialiseUnits()
         // Then
-        assertThat(unitRepository.searchById("knight")?.toDto()).isEqualTo(knight)
-        assertThat(unitRepository.searchById("rat")?.toDto()).isEqualTo(rat)
-        assertThat(eventBus).hasPublishedEvents(UnitCreated("knight"), UnitCreated("rat"))
+        unitRepository.searchById("knight")?.toDto() shouldBe knight
+        unitRepository.searchById("rat")?.toDto() shouldBe rat
+        eventBus.shouldHavePublishedEvents(UnitCreated("knight"), UnitCreated("rat"))
     }
 
     @Test
@@ -40,7 +41,7 @@ class InitialiseUnitsTest {
         // When
         initialiseUnits()
         // Then
-        assertThat(unitRepository.searchById("knight")?.toDto()).isEqualTo(knight.toDto())
-        assertThat(eventBus).hasNotPublishedEvents()
+        unitRepository.searchById("knight")?.toDto() shouldBe knight.toDto()
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

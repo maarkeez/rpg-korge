@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.command
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 
 class InitializeBattlefieldHudTest {
@@ -18,6 +18,6 @@ class InitializeBattlefieldHudTest {
         // When
         initializeBattlefieldHud()
         // Then
-        assertThat(battlefieldHudRepository.search()).isInstanceOf(BattlefieldHud.Idle::class.java)
+        battlefieldHudRepository.search().shouldBeInstanceOf<BattlefieldHud.Idle>()
     }
 }

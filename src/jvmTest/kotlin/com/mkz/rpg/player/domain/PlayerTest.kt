@@ -1,6 +1,10 @@
 package com.mkz.rpg.player.domain
 
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -15,8 +19,7 @@ class PlayerTest {
             // When
             val createdPlayer = Player.createHuman(playerId, playerName)
             // Then
-            assertThat(createdPlayer.toDto())
-                .isEqualTo(Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.HUMAN))
+            createdPlayer.toDto() shouldBe Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.HUMAN)
         }
 
         @Test
@@ -28,14 +31,13 @@ class PlayerTest {
             val createdPlayer = Player.createHuman(playerId, playerName)
             // Then
             val (events, _) = createdPlayer.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    PlayerEvent.PlayerCreated(
-                        playerId = playerId,
-                        playerName = playerName,
-                        playerType = Player.Dto.PlayerTypeDto.HUMAN,
-                    ),
-                )
+            events.shouldContainExactly(
+                PlayerEvent.PlayerCreated(
+                    playerId = playerId,
+                    playerName = playerName,
+                    playerType = Player.Dto.PlayerTypeDto.HUMAN,
+                ),
+            )
         }
 
         @Test
@@ -43,7 +45,7 @@ class PlayerTest {
             // When
             val result = runCatching { Player.createHuman("", "David") }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(PlayerError.EmptyPlayerId::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerId>()
         }
 
         @Test
@@ -51,7 +53,7 @@ class PlayerTest {
             // When
             val result = runCatching { Player.createHuman("player-1", "") }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(PlayerError.EmptyPlayerName::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerName>()
         }
 
         @Test
@@ -61,7 +63,7 @@ class PlayerTest {
             // When
             val createdPlayer = Player.createHuman("player-1", playerName)
             // Then
-            assertThat(createdPlayer.toDto().name).isEqualTo(playerName)
+            createdPlayer.toDto().name shouldBe playerName
         }
 
         @Test
@@ -71,7 +73,7 @@ class PlayerTest {
             // When
             val result = runCatching { Player.createHuman("player-1", playerName) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(PlayerError.PlayerNameLongerThanExpected::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<PlayerError.PlayerNameLongerThanExpected>()
         }
     }
 
@@ -85,8 +87,7 @@ class PlayerTest {
             // When
             val createdPlayer = Player.createCpu(playerId, playerName)
             // Then
-            assertThat(createdPlayer.toDto())
-                .isEqualTo(Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.CPU))
+            createdPlayer.toDto() shouldBe Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.CPU)
         }
 
         @Test
@@ -98,14 +99,13 @@ class PlayerTest {
             val createdPlayer = Player.createCpu(playerId, playerName)
             // Then
             val (events, _) = createdPlayer.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    PlayerEvent.PlayerCreated(
-                        playerId = playerId,
-                        playerName = playerName,
-                        playerType = Player.Dto.PlayerTypeDto.CPU,
-                    ),
-                )
+            events.shouldContainExactly(
+                PlayerEvent.PlayerCreated(
+                    playerId = playerId,
+                    playerName = playerName,
+                    playerType = Player.Dto.PlayerTypeDto.CPU,
+                ),
+            )
         }
 
         @Test
@@ -113,7 +113,7 @@ class PlayerTest {
             // When
             val result = runCatching { Player.createCpu("", "Robo") }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(PlayerError.EmptyPlayerId::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerId>()
         }
     }
 
@@ -126,8 +126,7 @@ class PlayerTest {
             // When
             val result = player.toDto()
             // Then
-            assertThat(result)
-                .isEqualTo(Player.Dto(id = "player-1", name = "David", type = Player.Dto.PlayerTypeDto.HUMAN))
+            result shouldBe Player.Dto(id = "player-1", name = "David", type = Player.Dto.PlayerTypeDto.HUMAN)
         }
     }
 
@@ -140,7 +139,7 @@ class PlayerTest {
             // When
             val (events, _) = createdPlayer.pullEvents()
             // Then
-            assertThat(events).isNotEmpty()
+            events.shouldNotBeEmpty()
         }
 
         @Test
@@ -150,7 +149,7 @@ class PlayerTest {
             // When
             val (events, _) = player.pullEvents()
             // Then
-            assertThat(events).isEmpty()
+            events.shouldBeEmpty()
         }
     }
 }

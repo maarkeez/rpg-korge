@@ -24,7 +24,8 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -127,7 +128,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isEqualTo(CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(east))))
+        decision shouldBe CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(east)))
     }
 
     @Test
@@ -139,7 +140,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isEqualTo(CastDecision(abilityId = heal.id, castGroup = CastGroup(listOf(casterPosition))))
+        decision shouldBe CastDecision(abilityId = heal.id, castGroup = CastGroup(listOf(casterPosition)))
     }
 
     @Test
@@ -150,7 +151,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isNull()
+        decision.shouldBeNull()
     }
 
     @Test
@@ -163,7 +164,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isEqualTo(CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(south))))
+        decision shouldBe CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(south)))
     }
 
     @Test
@@ -175,7 +176,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision?.abilityId).isEqualTo(heal.id)
+        decision?.abilityId shouldBe heal.id
     }
 
     @Test
@@ -188,7 +189,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision?.abilityId).isEqualTo(poisonedSword.id)
+        decision?.abilityId shouldBe poisonedSword.id
     }
 
     @Test
@@ -201,7 +202,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision?.abilityId).isEqualTo(bigSword.id)
+        decision?.abilityId shouldBe bigSword.id
     }
 
     @Test
@@ -215,7 +216,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isEqualTo(CastDecision(abilityId = whirlwind.id, castGroup = CastGroup(listOf(east, south))))
+        decision shouldBe CastDecision(abilityId = whirlwind.id, castGroup = CastGroup(listOf(east, south)))
     }
 
     @Test
@@ -226,7 +227,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision?.abilityId).isEqualTo(teleport.id)
+        decision?.abilityId shouldBe teleport.id
     }
 
     @Test
@@ -238,7 +239,7 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isNull()
+        decision.shouldBeNull()
     }
 
     @Test
@@ -248,6 +249,6 @@ class WhatShouldCastTest {
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        assertThat(decision).isNull()
+        decision.shouldBeNull()
     }
 }

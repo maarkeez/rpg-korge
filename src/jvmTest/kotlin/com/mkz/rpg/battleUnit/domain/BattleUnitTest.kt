@@ -6,7 +6,13 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.unit.domain.UnitMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldContain
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -23,12 +29,12 @@ class BattleUnitTest {
             val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, deployAtRow = 2, deployAtColumn = 3)
             // Then
             val battleUnitDto = deployedBattleUnit.toDto()
-            assertThat(battleUnitDto.id).isEqualTo(battleUnitId)
-            assertThat(battleUnitDto.unitId).isEqualTo(unit.id)
-            assertThat(battleUnitDto.playerId).isEqualTo(player.id)
-            assertThat(battleUnitDto.remainingHealthPoints).isEqualTo(10)
-            assertThat(battleUnitDto.remainingManaPoints).isEqualTo(5)
-            assertThat(battleUnitDto.remainingTurnActions).isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1))
+            battleUnitDto.id shouldBe battleUnitId
+            battleUnitDto.unitId shouldBe unit.id
+            battleUnitDto.playerId shouldBe player.id
+            battleUnitDto.remainingHealthPoints shouldBe 10
+            battleUnitDto.remainingManaPoints shouldBe 5
+            battleUnitDto.remainingTurnActions shouldBe BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
         }
 
         @Test
@@ -41,8 +47,7 @@ class BattleUnitTest {
             val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, deployAtRow = 2, deployAtColumn = 3)
             // Then
             val (events, _) = deployedBattleUnit.pullEvents()
-            assertThat(events)
-                .containsExactly(BattleUnitEvent.BattleUnitDeployed(battleUnitId = battleUnitId, row = 2, column = 3))
+            events.shouldContainExactly(BattleUnitEvent.BattleUnitDeployed(battleUnitId = battleUnitId, row = 2, column = 3))
         }
     }
 
@@ -56,19 +61,18 @@ class BattleUnitTest {
             // When
             val movedBattleUnit = battleUnit.move(fromRow = 0, fromColumn = 0, path = path)
             // Then
-            assertThat(movedBattleUnit.toDto().remainingTurnActions.remainingSteps).isEqualTo(1)
+            movedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 1
             val (events, _) = movedBattleUnit.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattleUnitEvent.BattleUnitMoved(
-                        battleUnitId = movedBattleUnit.toDto().id,
-                        fromRow = 0,
-                        fromColumn = 0,
-                        toRow = 0,
-                        toColumn = 2,
-                        path = path,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattleUnitEvent.BattleUnitMoved(
+                    battleUnitId = movedBattleUnit.toDto().id,
+                    fromRow = 0,
+                    fromColumn = 0,
+                    toRow = 0,
+                    toColumn = 2,
+                    path = path,
+                ),
+            )
         }
 
         @Test
@@ -78,7 +82,7 @@ class BattleUnitTest {
             // When
             val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = emptyList()) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattleUnitError.MovementDistanceMustBeGreaterThanZero::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.MovementDistanceMustBeGreaterThanZero>()
         }
 
         @Test
@@ -89,7 +93,7 @@ class BattleUnitTest {
             val path = (1..4).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
             val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = path) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattleUnitError.MovementDistanceExceedsRemainingSteps::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.MovementDistanceExceedsRemainingSteps>()
         }
     }
 
@@ -102,19 +106,18 @@ class BattleUnitTest {
             // When
             val teleportedBattleUnit = battleUnit.teleport(fromRow = 0, fromColumn = 0, toRow = 2, toColumn = 2)
             // Then
-            assertThat(teleportedBattleUnit.toDto().remainingTurnActions.remainingSteps).isEqualTo(3)
+            teleportedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 3
             val (events, _) = teleportedBattleUnit.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattleUnitEvent.BattleUnitMoved(
-                        battleUnitId = teleportedBattleUnit.toDto().id,
-                        fromRow = 0,
-                        fromColumn = 0,
-                        toRow = 2,
-                        toColumn = 2,
-                        path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
-                    ),
-                )
+            events.shouldContainExactly(
+                BattleUnitEvent.BattleUnitMoved(
+                    battleUnitId = teleportedBattleUnit.toDto().id,
+                    fromRow = 0,
+                    fromColumn = 0,
+                    toRow = 2,
+                    toColumn = 2,
+                    path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
+                ),
+            )
         }
     }
 
@@ -130,8 +133,7 @@ class BattleUnitTest {
             // When
             val resetBattleUnit = battleUnit.resetActions()
             // Then
-            assertThat(resetBattleUnit.toDto().remainingTurnActions)
-                .isEqualTo(BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1))
+            resetBattleUnit.toDto().remainingTurnActions shouldBe BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
         }
     }
 
@@ -145,7 +147,7 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnitWithCooldown.reduceCoolDowns()
             // Then
-            assertThat(updatedBattleUnit.toDto().abilityCooldowns).containsEntry("ability-1", 2)
+            updatedBattleUnit.toDto().abilityCooldowns.shouldContain("ability-1", 2)
         }
     }
 
@@ -162,7 +164,7 @@ class BattleUnitTest {
             // When
             val replenishedBattleUnit = battleUnit.replenishMana(unit = unit)
             // Then
-            assertThat(replenishedBattleUnit.toDto().remainingManaPoints).isEqualTo(10)
+            replenishedBattleUnit.toDto().remainingManaPoints shouldBe 10
         }
     }
 
@@ -175,7 +177,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canMoveDistance(distance = 2)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -185,7 +187,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canMoveDistance(distance = 4)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -200,7 +202,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.isSamePlayer(otherBattleUnit)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -211,7 +213,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.isSamePlayer(otherBattleUnit)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -225,7 +227,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -239,7 +241,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -253,7 +255,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -264,7 +266,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -275,7 +277,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.canCastAbility(ability = ability)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -290,12 +292,11 @@ class BattleUnitTest {
             val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 3, castGroup = castGroup)
             // Then
             val battleUnitDto = updatedBattleUnit.toDto()
-            assertThat(battleUnitDto.remainingManaPoints).isEqualTo(7)
-            assertThat(battleUnitDto.remainingTurnActions.remainingCasts).isEqualTo(0)
-            assertThat(battleUnitDto.abilityCooldowns).containsEntry("ability-1", 2)
+            battleUnitDto.remainingManaPoints shouldBe 7
+            battleUnitDto.remainingTurnActions.remainingCasts shouldBe 0
+            battleUnitDto.abilityCooldowns.shouldContain("ability-1", 2)
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events)
-                .containsExactly(BattleUnitEvent.AbilityCasted(battleUnitId = battleUnitDto.id, abilityId = "ability-1", castGroup = castGroup))
+            events.shouldContainExactly(BattleUnitEvent.AbilityCasted(battleUnitId = battleUnitDto.id, abilityId = "ability-1", castGroup = castGroup))
         }
     }
 
@@ -309,9 +310,12 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnit.receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 2)
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly(effectId)
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldContainExactly(effectId)
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
+            events.shouldContainExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
         }
     }
 
@@ -325,9 +329,12 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnit.receiveOnDefeatedEffect(effectId = effectId)
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).containsExactly(effectId)
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onDefeatedEffects
+                .shouldContainExactly(effectId)
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
+            events.shouldContainExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
         }
     }
 
@@ -340,7 +347,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.isDefeated()
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -359,7 +366,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.isDefeated()
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
     }
 
@@ -372,7 +379,10 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).isEmpty()
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onDefeatedEffects
+                .shouldBeEmpty()
         }
 
         @Test
@@ -386,8 +396,14 @@ class BattleUnitTest {
             // When
             val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onDefeatedEffects).isEmpty()
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-2")
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onDefeatedEffects
+                .shouldBeEmpty()
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldContainExactly("effect-2")
         }
     }
 
@@ -407,9 +423,9 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
+            events.shouldContainExactly(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
         }
 
         @Test
@@ -428,18 +444,17 @@ class BattleUnitTest {
                     currentColumn = defeatedAtPosition.column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(0)
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 0
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
-                    BattleUnitEvent.BattleUnitDefeated(
-                        playerId = player.id,
-                        battleUnitId = updatedBattleUnit.toDto().id,
-                        defeatedAtRow = defeatedAtPosition.row,
-                        defeatedAtColumn = defeatedAtPosition.column,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
+                BattleUnitEvent.BattleUnitDefeated(
+                    playerId = player.id,
+                    battleUnitId = updatedBattleUnit.toDto().id,
+                    defeatedAtRow = defeatedAtPosition.row,
+                    defeatedAtColumn = defeatedAtPosition.column,
+                ),
+            )
         }
 
         @Test
@@ -466,9 +481,9 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(10)
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 10
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id))
+            events.shouldContainExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id))
         }
 
         @Test
@@ -487,7 +502,7 @@ class BattleUnitTest {
                 )
             // Then
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(BattleUnitEvent.BattleUnitTeleported(battleUnitId = updatedBattleUnit.toDto().id))
+            events.shouldContainExactly(BattleUnitEvent.BattleUnitTeleported(battleUnitId = updatedBattleUnit.toDto().id))
         }
     }
 
@@ -500,7 +515,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.hasOnTurnStartedEffects()
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -510,7 +525,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.hasOnTurnStartedEffects()
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -520,7 +535,7 @@ class BattleUnitTest {
             // When
             val result = battleUnit.hasOnTurnStartedEffects()
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -545,10 +560,13 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldBeEmpty()
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events).containsExactly(
+            events.shouldContainExactly(
                 BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = updatedBattleUnit.toDto().id, effectId = onTurnStartedEffect.id),
                 BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
             )
@@ -574,7 +592,7 @@ class BattleUnitTest {
                 )
             // Then
             val (events, _) = updatedBattleUnit.pullEvents()
-            assertThat(events.map { event -> event::class }).containsExactly(
+            events.map { event -> event::class }.shouldContainExactly(
                 BattleUnitEvent.OnTurnStartedEffectApplied::class,
                 BattleUnitEvent.BattleUnitDamaged::class,
                 BattleUnitEvent.BattleUnitDefeated::class,
@@ -595,8 +613,11 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1")
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldContainExactly("effect-1")
         }
 
         @Test
@@ -618,7 +639,10 @@ class BattleUnitTest {
                         currentColumn = position().column,
                     )
             // Then
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).isEmpty()
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldBeEmpty()
         }
 
         @Test
@@ -639,8 +663,11 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1", "effect-2")
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldContainExactly("effect-1", "effect-2")
         }
 
         @Test
@@ -662,8 +689,11 @@ class BattleUnitTest {
                     currentColumn = position().column,
                 )
             // Then
-            assertThat(updatedBattleUnit.toDto().remainingHealthPoints).isEqualTo(7)
-            assertThat(updatedBattleUnit.toDto().ongoingEffects.onTurnStarted).containsExactly("effect-1")
+            updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+            updatedBattleUnit
+                .toDto()
+                .ongoingEffects.onTurnStarted
+                .shouldContainExactly("effect-1")
         }
     }
 }

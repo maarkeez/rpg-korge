@@ -12,8 +12,13 @@ import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
 import com.mkz.rpg.screen.adapters.presentation.maximumSteps
 import com.mkz.rpg.screen.adapters.presentation.remainingSteps
 import com.mkz.rpg.startGame
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldNotContainAnyOf
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
@@ -36,12 +41,8 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickTile(battlefieldView, targetRow, targetColumn)
             // Then
             waitUntil { battlefieldView.hasBattleUnitAt(targetRow, targetColumn) }
-            assertThat(battlefieldView.hasBattleUnitAt(targetRow, targetColumn))
-                .withFailMessage("Expected the knight to be displayed at (%s,%s)", targetRow, targetColumn)
-                .isTrue
-            assertThat(battlefieldView.hasBattleUnitAt(knightRow, knightColumn))
-                .withFailMessage("Expected the knight to be gone from (%s,%s)", knightRow, knightColumn)
-                .isFalse
+            withClue("Expected the knight to be displayed at ($targetRow,$targetColumn)") { battlefieldView.hasBattleUnitAt(targetRow, targetColumn).shouldBeTrue() }
+            withClue("Expected the knight to be gone from ($knightRow,$knightColumn)") { battlefieldView.hasBattleUnitAt(knightRow, knightColumn).shouldBeFalse() }
         }
 
     @Test
@@ -55,15 +56,9 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickTile(battlefieldView, knightRow, knightColumn)
             // Then
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
-            assertThat(battlefieldView.isDimmedAt(0, 0))
-                .withFailMessage("Expected (0,0), out of the knight movement range, to be dimmed")
-                .isTrue
-            assertThat(battlefieldView.isDimmedAt(knightRow, knightColumn))
-                .withFailMessage("Expected the selected knight not to be dimmed")
-                .isFalse
-            assertThat(battlefieldView.isDimmedAt(targetRow, targetColumn))
-                .withFailMessage("Expected (%s,%s), in the knight movement range, not to be dimmed", targetRow, targetColumn)
-                .isFalse
+            withClue("Expected (0,0), out of the knight movement range, to be dimmed") { battlefieldView.isDimmedAt(0, 0).shouldBeTrue() }
+            withClue("Expected the selected knight not to be dimmed") { battlefieldView.isDimmedAt(knightRow, knightColumn).shouldBeFalse() }
+            withClue("Expected ($targetRow,$targetColumn), in the knight movement range, not to be dimmed") { battlefieldView.isDimmedAt(targetRow, targetColumn).shouldBeFalse() }
         }
 
     @Test
@@ -80,22 +75,16 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickTile(battlefieldView, targetRow, farTargetColumn)
             // Then
             waitUntil { battlefieldView.hasBattleUnitAt(targetRow, targetColumn) }
-            assertThat(battlefieldView.battleUnitPositions())
-                .withFailMessage("Expected the knight to be displayed only on the tile it walks through (%s,%s)", targetRow, targetColumn)
-                .contains(targetRow to targetColumn)
-                .doesNotContain(knightRow to knightColumn, targetRow to farTargetColumn)
+            withClue("Expected the knight to be displayed only on the tile it walks through ($targetRow,$targetColumn)") {
+                battlefieldView.battleUnitPositions().shouldContain(targetRow to targetColumn)
+                battlefieldView.battleUnitPositions().shouldNotContainAnyOf(knightRow to knightColumn, targetRow to farTargetColumn)
+            }
             waitUntil { battlefieldView.hasBattleUnitAt(targetRow, farTargetColumn) }
-            assertThat(battlefieldView.hasBattleUnitAt(targetRow, farTargetColumn))
-                .withFailMessage("Expected the knight to be displayed at (%s,%s)", targetRow, farTargetColumn)
-                .isTrue
-            assertThat(battlefieldView.hasBattleUnitAt(targetRow, targetColumn))
-                .withFailMessage("Expected the knight to be gone from (%s,%s)", targetRow, targetColumn)
-                .isFalse
+            withClue("Expected the knight to be displayed at ($targetRow,$farTargetColumn)") { battlefieldView.hasBattleUnitAt(targetRow, farTargetColumn).shouldBeTrue() }
+            withClue("Expected the knight to be gone from ($targetRow,$targetColumn)") { battlefieldView.hasBattleUnitAt(targetRow, targetColumn).shouldBeFalse() }
             val battleUnitInfoView = requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }
             waitUntil { battleUnitInfoView.remainingSteps() == 1 }
-            assertThat(battleUnitInfoView.remainingSteps())
-                .withFailMessage("Expected 1 of the 3 knight steps to remain after walking 2 tiles")
-                .isEqualTo(1)
-            assertThat(battleUnitInfoView.maximumSteps()).isEqualTo(3)
+            withClue("Expected 1 of the 3 knight steps to remain after walking 2 tiles") { battleUnitInfoView.remainingSteps() shouldBe 1 }
+            battleUnitInfoView.maximumSteps() shouldBe 3
         }
 }

@@ -3,8 +3,9 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -28,7 +29,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
                     damage = null,
                 )
                 // Then
-                assertThat(attackPreviewView.isVisibleToUser()).isTrue
+                attackPreviewView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -48,8 +49,8 @@ class AttackPreviewViewTest : ViewsForTesting() {
                     damage = null,
                 )
                 // Then
-                assertThat(attackPreviewView.isCasterPortraitVisible()).isTrue
-                assertThat(attackPreviewView.isReceiverPortraitVisible()).isFalse
+                attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
+                attackPreviewView.isReceiverPortraitVisible().shouldBeFalse()
             }
 
         @Test
@@ -71,8 +72,8 @@ class AttackPreviewViewTest : ViewsForTesting() {
                     damage = 10,
                 )
                 // Then
-                assertThat(attackPreviewView.isCasterPortraitVisible()).isTrue
-                assertThat(attackPreviewView.isReceiverPortraitVisible()).isTrue
+                attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
+                attackPreviewView.isReceiverPortraitVisible().shouldBeTrue()
             }
     }
 
@@ -96,7 +97,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
                 // When
                 attackPreviewView.hide()
                 // Then
-                assertThat(attackPreviewView.isVisibleToUser()).isFalse
+                attackPreviewView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

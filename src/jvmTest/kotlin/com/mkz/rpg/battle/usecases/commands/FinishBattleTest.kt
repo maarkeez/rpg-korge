@@ -5,8 +5,8 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.domain.BattleMother.finishedBattle
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.collections.shouldBeEmpty
 import org.junit.jupiter.api.Test
 
 class FinishBattleTest {
@@ -27,8 +27,7 @@ class FinishBattleTest {
         // When
         finishBattle()
         // Then
-        assertThat(eventBus)
-            .hasPublishedEvents(BattleEvent.PlayerVictory(winner))
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerVictory(winner))
     }
 
     @Test
@@ -39,6 +38,6 @@ class FinishBattleTest {
         // When
         finishBattle()
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

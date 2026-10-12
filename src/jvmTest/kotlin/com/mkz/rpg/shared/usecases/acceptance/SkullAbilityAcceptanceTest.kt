@@ -19,8 +19,9 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -192,8 +193,8 @@ class SkullAbilityAcceptanceTest {
         eventBus.dispatch()
         // Then
         val enemy = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
-        assertThat(enemy.remainingHealthPoints).isEqualTo(0)
+        enemy.remainingHealthPoints shouldBe 0
         val ally = battleUnitApi.searchBattleUnitById(allyBattleUnitId)!!
-        assertThat(ally.ongoingEffects.onTurnStarted).contains(venomEffectId)
+        ally.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
     }
 }

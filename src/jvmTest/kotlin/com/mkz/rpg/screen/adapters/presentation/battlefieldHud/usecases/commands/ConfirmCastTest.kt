@@ -9,9 +9,9 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class ConfirmCastTest {
@@ -39,20 +39,17 @@ class ConfirmCastTest {
         // When
         confirmCast()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(
-            displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 1))),
-        )
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 1)))
         // The caster movement range is displayed once the cast has been resolved.
-        assertThat(eventBus)
-            .hasPublishedEvents(
-                BattleUnitEvent.RequestCastAbility(
-                    battleUnitId = "battle-unit-1",
-                    abilityId = "ability-1",
-                    castGroup =
-                        castGroup.tiles
-                            .map { tile -> Battlefield.Dto.PositionDto(row = tile.row, column = tile.column) },
-                ),
-            )
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestCastAbility(
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroup =
+                    castGroup.tiles
+                        .map { tile -> Battlefield.Dto.PositionDto(row = tile.row, column = tile.column) },
+            ),
+        )
     }
 
     @Test
@@ -64,8 +61,7 @@ class ConfirmCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { confirmCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { confirmCast() }
     }
 
     @Test
@@ -77,8 +73,7 @@ class ConfirmCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { confirmCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { confirmCast() }
     }
 
     @Test
@@ -90,8 +85,7 @@ class ConfirmCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { confirmCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { confirmCast() }
     }
 
     @Test
@@ -99,7 +93,6 @@ class ConfirmCastTest {
         // Given
         // When
         // Then
-        assertThatThrownBy { confirmCast() }
-            .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
+        shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { confirmCast() }
     }
 }

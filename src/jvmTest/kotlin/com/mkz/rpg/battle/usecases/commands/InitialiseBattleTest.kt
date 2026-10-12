@@ -5,8 +5,8 @@ import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.usecases.services.BattleLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -25,8 +25,8 @@ class InitialiseBattleTest {
         initialiseBattle()
         // Then
         val battle = battleRepository.search()?.toDto()
-        assertThat(battle?.currentRound).isEqualTo(1)
-        assertThat(battle?.currentPlayerTurn).isEqualTo("player-one")
-        assertThat(eventBus).hasPublishedEvents(BattleStarted, PlayerTurnStarted("player-one"))
+        battle?.currentRound shouldBe 1
+        battle?.currentPlayerTurn shouldBe "player-one"
+        eventBus.shouldHavePublishedEvents(BattleStarted, PlayerTurnStarted("player-one"))
     }
 }

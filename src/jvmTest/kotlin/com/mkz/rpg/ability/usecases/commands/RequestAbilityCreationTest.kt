@@ -7,8 +7,8 @@ import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -34,8 +34,7 @@ class RequestAbilityCreationTest {
         requestAbilityCreation(abilityDto = ability)
         // Then
         val storedAbility = abilityRepository.searchById(ability.id)?.toDto()
-        assertThat(storedAbility).isEqualTo(ability)
-        assertThat(eventBus)
-            .hasPublishedEvents(AbilityEvent.AbilityCreated(ability.id))
+        storedAbility shouldBe ability
+        eventBus.shouldHavePublishedEvents(AbilityEvent.AbilityCreated(ability.id))
     }
 }

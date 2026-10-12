@@ -2,7 +2,10 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +21,7 @@ class BattleSceneTimelineTest {
             // When
             timeline.play { playedSteps += "step" }
             // Then
-            assertThat(playedSteps).containsExactly("step")
+            playedSteps.shouldContainExactly("step")
         }
 
         @Test
@@ -29,7 +32,7 @@ class BattleSceneTimelineTest {
             // When
             timeline.play { playedSteps += "step" }
             // Then
-            assertThat(playedSteps).isEmpty()
+            playedSteps.shouldBeEmpty()
         }
 
         @Test
@@ -42,7 +45,7 @@ class BattleSceneTimelineTest {
             // When
             longStep.complete(Unit)
             // Then
-            assertThat(playedSteps).containsExactly("first", "second")
+            playedSteps.shouldContainExactly("first", "second")
         }
 
         @Test
@@ -55,7 +58,7 @@ class BattleSceneTimelineTest {
                 playedSteps += "adding"
             }
             // Then
-            assertThat(playedSteps).containsExactly("adding", "added")
+            playedSteps.shouldContainExactly("adding", "added")
         }
     }
 
@@ -71,7 +74,7 @@ class BattleSceneTimelineTest {
             // When
             longStep.complete(Unit)
             // Then
-            assertThat(notifications).containsExactly(true, false)
+            notifications.shouldContainExactly(true, false)
         }
 
         @Test
@@ -82,7 +85,7 @@ class BattleSceneTimelineTest {
             // When
             timeline.playLongStep()
             // Then
-            assertThat(notifications).containsExactly(true)
+            notifications.shouldContainExactly(true)
         }
     }
 
@@ -94,7 +97,7 @@ class BattleSceneTimelineTest {
             // When
             val isPlaying = timeline.isPlaying
             // Then
-            assertThat(isPlaying).isFalse
+            isPlaying.shouldBeFalse()
         }
 
         @Test
@@ -104,7 +107,7 @@ class BattleSceneTimelineTest {
             // When
             val isPlaying = timeline.isPlaying
             // Then
-            assertThat(isPlaying).isTrue
+            isPlaying.shouldBeTrue()
         }
 
         @Test
@@ -116,7 +119,7 @@ class BattleSceneTimelineTest {
             // When
             val isPlaying = timeline.isPlaying
             // Then
-            assertThat(isPlaying).isFalse
+            isPlaying.shouldBeFalse()
         }
     }
 }

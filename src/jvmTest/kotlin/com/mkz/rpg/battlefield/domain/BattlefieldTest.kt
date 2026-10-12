@@ -1,6 +1,14 @@
 package com.mkz.rpg.battlefield.domain
 
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -25,9 +33,9 @@ class BattlefieldTest {
                     )
             // Then
             val battlefieldDto = createdBattlefield.toDto()
-            assertThat(battlefieldDto.rows).isEqualTo(rows)
-            assertThat(battlefieldDto.columns).isEqualTo(columns)
-            assertThat(battlefieldDto.tiles).hasSize(rows * columns)
+            battlefieldDto.rows shouldBe rows
+            battlefieldDto.columns shouldBe columns
+            battlefieldDto.tiles.shouldHaveSize(rows * columns)
         }
 
         @Test
@@ -46,7 +54,7 @@ class BattlefieldTest {
                     )
             // Then
             val (events, _) = createdBattlefield.pullEvents()
-            assertThat(events).containsExactly(BattlefieldEvent.BattlefieldCreated)
+            events.shouldContainExactly(BattlefieldEvent.BattlefieldCreated)
         }
 
         @Test
@@ -65,8 +73,7 @@ class BattlefieldTest {
                     )
             // Then
             val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 1))
-            assertThat(sandTile.terrainTransition)
-                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 8))
+            sandTile.terrainTransition shouldBe Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 8)
         }
 
         @Test
@@ -90,7 +97,7 @@ class BattlefieldTest {
                     )
             // Then
             val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 1, column = 1))
-            assertThat(sandTile.terrainTransition?.wangIndex).isEqualTo(9)
+            sandTile.terrainTransition?.wangIndex shouldBe 9
         }
 
         @Test
@@ -113,8 +120,7 @@ class BattlefieldTest {
                     )
             // Then
             val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 1))
-            assertThat(sandTile.terrainTransition)
-                .isEqualTo(Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "grass", wangIndex = 8))
+            sandTile.terrainTransition shouldBe Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "grass", wangIndex = 8)
         }
 
         @Test
@@ -133,7 +139,7 @@ class BattlefieldTest {
                     )
             // Then
             val sandTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 0))
-            assertThat(sandTile.terrainTransition).isNull()
+            sandTile.terrainTransition.shouldBeNull()
         }
 
         @Test
@@ -152,7 +158,7 @@ class BattlefieldTest {
                     )
             // Then
             val voidTile = createdBattlefield.toDto().tiles.getValue(Battlefield.Dto.PositionDto(row = 0, column = 0))
-            assertThat(voidTile.terrainTransition).isNull()
+            voidTile.terrainTransition.shouldBeNull()
         }
 
         @Test
@@ -172,7 +178,7 @@ class BattlefieldTest {
                         )
                 }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattlefieldError.TileTerrainTransitionNotAllowed::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileTerrainTransitionNotAllowed>()
         }
 
         @Test
@@ -190,7 +196,7 @@ class BattlefieldTest {
                         terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "void", toTerrainId = "sand")),
                     )
             // Then
-            assertThat(createdBattlefield.toDto().tiles).hasSize(2)
+            createdBattlefield.toDto().tiles.shouldHaveSize(2)
         }
     }
 
@@ -203,9 +209,9 @@ class BattlefieldTest {
             // When
             val result = battlefield.toDto()
             // Then
-            assertThat(result.rows).isEqualTo(2)
-            assertThat(result.columns).isEqualTo(3)
-            assertThat(result.tiles).hasSize(6)
+            result.rows shouldBe 2
+            result.columns shouldBe 3
+            result.tiles.shouldHaveSize(6)
         }
     }
 
@@ -219,10 +225,9 @@ class BattlefieldTest {
             // When
             val occupiedBattlefield = battlefield.occupy(row = 0, column = 0, battleUnitId = battleUnitId)
             // Then
-            assertThat(occupiedBattlefield.occupant(row = 0, column = 0)).isEqualTo(battleUnitId)
+            occupiedBattlefield.occupant(row = 0, column = 0) shouldBe battleUnitId
             val (events, _) = occupiedBattlefield.pullEvents()
-            assertThat(events)
-                .containsExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = battleUnitId))
+            events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = battleUnitId))
         }
 
         @Test
@@ -233,8 +238,8 @@ class BattlefieldTest {
             // When
             val occupiedBattlefield = battlefield.occupy(row = 0, column = 1, battleUnitId = battleUnitId)
             // Then
-            assertThat(occupiedBattlefield.occupant(row = 0, column = 0)).isNull()
-            assertThat(occupiedBattlefield.occupant(row = 0, column = 1)).isEqualTo(battleUnitId)
+            occupiedBattlefield.occupant(row = 0, column = 0).shouldBeNull()
+            occupiedBattlefield.occupant(row = 0, column = 1) shouldBe battleUnitId
         }
 
         @Test
@@ -244,7 +249,7 @@ class BattlefieldTest {
             // When
             val result = runCatching { battlefield.occupy(row = 0, column = 0, battleUnitId = "battle-unit-2") }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattlefieldError.TileIsNotVacant::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
         }
 
         @Test
@@ -254,7 +259,7 @@ class BattlefieldTest {
             // When
             val result = runCatching { battlefield.occupy(row = 5, column = 5, battleUnitId = "battle-unit-1") }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(BattlefieldError.TileNotFound::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileNotFound>()
         }
     }
 
@@ -273,10 +278,9 @@ class BattlefieldTest {
             // When
             val updatedBattlefield = battlefield.removeOccupant(battleUnitId = battleUnitId)
             // Then
-            assertThat(updatedBattlefield.occupant(row = 1, column = 1)).isNull()
+            updatedBattlefield.occupant(row = 1, column = 1).shouldBeNull()
             val (events, _) = updatedBattlefield.pullEvents()
-            assertThat(events)
-                .containsExactly(BattlefieldEvent.OccupantRemoved(battleUnitId = battleUnitId, row = 1, column = 1))
+            events.shouldContainExactly(BattlefieldEvent.OccupantRemoved(battleUnitId = battleUnitId, row = 1, column = 1))
         }
 
         @Test
@@ -286,7 +290,7 @@ class BattlefieldTest {
             // When
             val updatedBattlefield = battlefield.removeOccupant(battleUnitId = "battle-unit-1")
             // Then
-            assertThat(updatedBattlefield).isEqualTo(battlefield)
+            updatedBattlefield shouldBe battlefield
         }
     }
 
@@ -299,7 +303,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.canBeOccupied(row = 0, column = 0)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -309,7 +313,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.canBeOccupied(row = 0, column = 0)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -326,7 +330,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.canBeOccupied(row = 1, column = 0)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -341,7 +345,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.canBeOccupied(row = 0, column = 0)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -358,7 +362,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.canBeOccupied(row = 1, column = 0)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -372,7 +376,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.occupant(row = 0, column = 0)
             // Then
-            assertThat(result).isEqualTo(battleUnitId)
+            result shouldBe battleUnitId
         }
 
         @Test
@@ -382,7 +386,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.occupant(row = 0, column = 0)
             // Then
-            assertThat(result).isNull()
+            result.shouldBeNull()
         }
     }
 
@@ -396,7 +400,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.position(battleUnitId = battleUnitId)
             // Then
-            assertThat(result).isEqualTo(Battlefield.Dto.PositionDto(row = 1, column = 2))
+            result shouldBe Battlefield.Dto.PositionDto(row = 1, column = 2)
         }
 
         @Test
@@ -406,7 +410,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.position(battleUnitId = "battle-unit-1")
             // Then
-            assertThat(result).isNull()
+            result.shouldBeNull()
         }
     }
 
@@ -423,11 +427,10 @@ class BattlefieldTest {
             // When
             val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
             // Then
-            assertThat(result)
-                .containsExactly(
-                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
-                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
-                )
+            result.shouldContainExactly(
+                Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+                Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
+            )
         }
 
         @Test
@@ -437,7 +440,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
             // Then
-            assertThat(result).isEmpty()
+            result.shouldBeEmpty()
         }
 
         @Test
@@ -447,7 +450,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = emptyMap())
             // Then
-            assertThat(result).isEmpty()
+            result.shouldBeEmpty()
         }
 
         @Test
@@ -462,10 +465,9 @@ class BattlefieldTest {
             // When
             val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
             // Then
-            assertThat(result)
-                .containsExactly(
-                    Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
-                )
+            result.shouldContainExactly(
+                Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+            )
         }
     }
 
@@ -478,7 +480,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.isInBoundaries(row = 1, column = 1)
             // Then
-            assertThat(result).isTrue
+            result.shouldBeTrue()
         }
 
         @Test
@@ -488,7 +490,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.isInBoundaries(row = 3, column = 0)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
 
         @Test
@@ -498,7 +500,7 @@ class BattlefieldTest {
             // When
             val result = battlefield.isInBoundaries(row = 0, column = 3)
             // Then
-            assertThat(result).isFalse
+            result.shouldBeFalse()
         }
     }
 
@@ -511,9 +513,8 @@ class BattlefieldTest {
             // When
             val (events, clearedBattlefield) = battlefield.pullEvents()
             // Then
-            assertThat(events)
-                .containsExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = "battle-unit-1"))
-            assertThat(clearedBattlefield.pullEvents().first).isEmpty()
+            events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = "battle-unit-1"))
+            clearedBattlefield.pullEvents().first.shouldBeEmpty()
         }
 
         @Test
@@ -523,7 +524,7 @@ class BattlefieldTest {
             // When
             val (events, _) = battlefield.pullEvents()
             // Then
-            assertThat(events).isEmpty()
+            events.shouldBeEmpty()
         }
     }
 }

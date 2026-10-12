@@ -6,7 +6,8 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -29,7 +30,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 
     @Test
@@ -42,7 +43,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -55,7 +56,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 3, moveToColumn = 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -65,7 +66,7 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = "unknown-battle-unit", moveToRow = 1, moveToColumn = 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -77,6 +78,6 @@ class CanMoveToTest {
         // When
         val result = canMoveTo(battleUnitId = battleUnit.toDto().id, moveToRow = 1, moveToColumn = 0)
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 }

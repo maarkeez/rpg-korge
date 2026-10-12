@@ -3,10 +3,11 @@ package com.mkz.rpg.player.adapters.resources
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesPlayerLoaderTest {
@@ -22,7 +23,7 @@ class ResourcesPlayerLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadPlayers()).containsExactly(
+        loader.loadPlayers().shouldContainExactly(
             player(id = "player-one", name = "Human", type = HUMAN).toDto(),
             player(id = "player-two", name = "CPU", type = CPU).toDto(),
         )
@@ -36,9 +37,6 @@ class ResourcesPlayerLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("player/player-one.toml")
-            .hasMessageContaining("ROBOT")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("player/player-one.toml").shouldContain("ROBOT")
     }
 }

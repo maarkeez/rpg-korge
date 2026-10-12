@@ -1,7 +1,13 @@
 package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class DomainArchitectureTest {
@@ -16,7 +22,7 @@ class DomainArchitectureTest {
                 .filter { it != "com.mkz.rpg.shared.domain" }
                 .distinct()
 
-        SoftAssertions.assertSoftly { softly ->
+        assertSoftly {
             domainPackages.forEach { domainPackageName ->
                 val subdomain =
                     domainPackageName
@@ -40,14 +46,9 @@ class DomainArchitectureTest {
 
                 val unexpectedNames = actual - expected
 
-                softly
-                    .assertThat(unexpectedNames)
-                    .withFailMessage(
-                        "Package '%s' has unexpected declaration(s) %s. Allowed names for this subdomain are %s.",
-                        domainPackageName,
-                        unexpectedNames,
-                        expected,
-                    ).isEmpty()
+                withClue("Package '$domainPackageName' has unexpected declaration(s) $unexpectedNames. Allowed names for this subdomain are $expected.") {
+                    unexpectedNames.shouldBeEmpty()
+                }
             }
         }
     }
@@ -69,33 +70,23 @@ class DomainArchitectureTest {
                 declaration.takeIf { it.name == expectedAggregateRootName }
             }
 
-        SoftAssertions.assertSoftly { softly ->
+        assertSoftly {
             aggregateRoots.forEach { aggregateRoot ->
                 val aggregateName = aggregateRoot.name
 
                 // Aggregate root must have a private primary constructor.
-                softly
-                    .assertThat(aggregateRoot.primaryConstructor)
-                    .withFailMessage(
-                        "Aggregate root '%s' must declare a primary constructor.",
-                        aggregateName,
-                    ).isNotNull
+                withClue("Aggregate root '$aggregateName' must declare a primary constructor.") {
+                    aggregateRoot.primaryConstructor.shouldNotBeNull()
+                }
 
-                softly
-                    .assertThat(aggregateRoot.primaryConstructor?.hasPrivateModifier)
-                    .withFailMessage(
-                        "Aggregate root '%s' must have a private primary constructor.",
-                        aggregateName,
-                    ).isTrue
+                withClue("Aggregate root '$aggregateName' must have a private primary constructor.") {
+                    aggregateRoot.primaryConstructor?.hasPrivateModifier shouldBe true
+                }
 
                 // Aggregate root must be annotated with @ConsistentCopyVisibility.
-                softly
-                    .assertThat(
-                        aggregateRoot.hasAnnotationOf(ConsistentCopyVisibility::class),
-                    ).withFailMessage(
-                        "Aggregate root '%s' must be annotated with @ConsistentCopyVisibility.",
-                        aggregateName,
-                    ).isTrue
+                withClue("Aggregate root '$aggregateName' must be annotated with @ConsistentCopyVisibility.") {
+                    aggregateRoot.hasAnnotationOf(ConsistentCopyVisibility::class).shouldBeTrue()
+                }
 
                 val nestedClasses = aggregateRoot.classes(includeNested = false, includeLocal = false)
 
@@ -103,21 +94,15 @@ class DomainArchitectureTest {
                 val dtoClasses =
                     nestedClasses.filter { it.name == "Dto" }
 
-                softly
-                    .assertThat(dtoClasses)
-                    .withFailMessage(
-                        "Aggregate root '%s' must declare exactly one nested Dto class.",
-                        aggregateName,
-                    ).hasSize(1)
+                withClue("Aggregate root '$aggregateName' must declare exactly one nested Dto class.") {
+                    dtoClasses.shouldHaveSize(1)
+                }
 
                 // Dto must be public.
                 dtoClasses.singleOrNull()?.let { dto ->
-                    softly
-                        .assertThat(dto.hasPublicOrDefaultModifier)
-                        .withFailMessage(
-                            "Aggregate root '%s.Dto' must be public.",
-                            aggregateName,
-                        ).isTrue
+                    withClue("Aggregate root '$aggregateName.Dto' must be public.") {
+                        dto.hasPublicOrDefaultModifier.shouldBeTrue()
+                    }
                 }
                 // TODO: Assert it contains a public method called `toDto()` with return type `<subdomain>.Dto`
 
@@ -125,13 +110,9 @@ class DomainArchitectureTest {
                 nestedClasses
                     .filterNot { it.name == "Dto" }
                     .forEach { nestedClass ->
-                        softly
-                            .assertThat(nestedClass.hasPrivateModifier)
-                            .withFailMessage(
-                                "Nested class '%s.%s' must be private.",
-                                aggregateName,
-                                nestedClass.name,
-                            ).isTrue
+                        withClue("Nested class '$aggregateName.${nestedClass.name}' must be private.") {
+                            nestedClass.hasPrivateModifier.shouldBeTrue()
+                        }
                     }
             }
         }

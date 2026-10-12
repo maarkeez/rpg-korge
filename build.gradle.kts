@@ -56,8 +56,9 @@ dependencies {
     add("commonMainApi", project(":deps"))
     add("commonMainApi", "com.akuleshov7:ktoml-core:0.7.1")
 
+    add("commonTestImplementation", "io.kotest:kotest-assertions-core:6.2.5")
+
     add("jvmTestApi", "org.mockito.kotlin:mockito-kotlin:6.3.0")
-    add("jvmTestApi", "org.assertj:assertj-core:3.27.7")
     add("jvmTestApi", "org.junit.jupiter:junit-jupiter:6.1.3")
     add("jvmTestApi", "com.tngtech.archunit:archunit:1.5.0")
     add("jvmTestApi", "com.lemonappdev:konsist:0.13.0")

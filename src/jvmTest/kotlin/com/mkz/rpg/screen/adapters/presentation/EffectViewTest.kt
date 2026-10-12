@@ -1,10 +1,13 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -21,7 +24,7 @@ class EffectViewTest : ViewsForTesting() {
                 // When
                 effectView.displayEffect("venom-damage")
                 // Then
-                assertThat(effectView.isEffectIconDisplayed()).isTrue
+                effectView.isEffectIconDisplayed().shouldBeTrue()
             }
 
         @Test
@@ -33,7 +36,7 @@ class EffectViewTest : ViewsForTesting() {
                 // When
                 effectView.displayEffect("venom-on-death")
                 // Then
-                assertThat(effectView.effectIconCount()).isEqualTo(1)
+                effectView.effectIconCount() shouldBe 1
             }
 
         @Test
@@ -44,9 +47,7 @@ class EffectViewTest : ViewsForTesting() {
                 // When
                 val effectDisplay = { effectView.displayEffect("unknown-effect") }
                 // Then
-                assertThatThrownBy { effectDisplay() }
-                    .isInstanceOf(IllegalStateException::class.java)
-                    .hasMessageContaining("effect/unknown-effect.png")
+                shouldThrow<IllegalStateException> { effectDisplay() }.message.shouldContain("effect/unknown-effect.png")
             }
     }
 
@@ -61,7 +62,7 @@ class EffectViewTest : ViewsForTesting() {
                 // When
                 effectView.hide()
                 // Then
-                assertThat(effectView.isEffectIconDisplayed()).isFalse
+                effectView.isEffectIconDisplayed().shouldBeFalse()
             }
     }
 }

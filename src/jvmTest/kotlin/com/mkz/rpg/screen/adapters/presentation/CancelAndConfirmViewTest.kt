@@ -1,7 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -19,8 +20,8 @@ class CancelAndConfirmViewTest : ViewsForTesting() {
                 // When
                 clickCancel(cancelAndConfirmView)
                 // Then
-                assertThat(cancelled).isTrue
-                assertThat(confirmed).isFalse
+                cancelled.shouldBeTrue()
+                confirmed.shouldBeFalse()
             }
     }
 
@@ -37,8 +38,8 @@ class CancelAndConfirmViewTest : ViewsForTesting() {
                 // When
                 clickConfirm(cancelAndConfirmView)
                 // Then
-                assertThat(confirmed).isTrue
-                assertThat(cancelled).isFalse
+                confirmed.shouldBeTrue()
+                cancelled.shouldBeFalse()
             }
     }
 }

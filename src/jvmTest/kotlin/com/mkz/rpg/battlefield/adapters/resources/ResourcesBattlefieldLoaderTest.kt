@@ -1,9 +1,10 @@
 package com.mkz.rpg.battlefield.adapters.resources
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesBattlefieldLoaderTest {
@@ -18,7 +19,7 @@ class ResourcesBattlefieldLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadTiles()).isEqualTo(listOf(listOf("sand", "void"), listOf("grass", "sand")))
+        loader.loadTiles() shouldBe listOf(listOf("sand", "void"), listOf("grass", "sand"))
     }
 
     @Test
@@ -30,10 +31,7 @@ class ResourcesBattlefieldLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("battlefield/battlefield.toml")
-            .hasMessageContaining("same number of columns")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("battlefield/battlefield.toml").shouldContain("same number of columns")
     }
 
     @Test
@@ -44,8 +42,6 @@ class ResourcesBattlefieldLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("battlefield/battlefield.toml")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("battlefield/battlefield.toml")
     }
 }

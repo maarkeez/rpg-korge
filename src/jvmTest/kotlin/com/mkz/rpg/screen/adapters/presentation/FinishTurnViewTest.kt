@@ -1,7 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -15,7 +17,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 val finishTurnView = FinishTurnView(onTurnFinished = {})
                 // Then
-                assertThat(finishTurnView.buttonText()).isEqualTo("Finish turn")
+                finishTurnView.buttonText() shouldBe "Finish turn"
             }
     }
 
@@ -31,7 +33,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 clickFinishTurn(finishTurnView)
                 // Then
-                assertThat(turnFinished).isTrue
+                turnFinished.shouldBeTrue()
             }
 
         @Test
@@ -45,7 +47,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 clickFinishTurn(finishTurnView)
                 // Then
-                assertThat(turnFinished).isFalse
+                turnFinished.shouldBeFalse()
             }
     }
 
@@ -58,7 +60,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 val finishTurnView = FinishTurnView(onTurnFinished = {})
                 // Then
-                assertThat(finishTurnView.isButtonEnabled()).isTrue
+                finishTurnView.isButtonEnabled().shouldBeTrue()
             }
 
         @Test
@@ -69,7 +71,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 finishTurnView.isEnabled = false
                 // Then
-                assertThat(finishTurnView.isButtonEnabled()).isFalse
+                finishTurnView.isButtonEnabled().shouldBeFalse()
             }
     }
 }

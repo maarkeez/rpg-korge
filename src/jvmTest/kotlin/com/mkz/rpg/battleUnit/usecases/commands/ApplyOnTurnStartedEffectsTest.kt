@@ -10,9 +10,10 @@ import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -52,12 +53,11 @@ class ApplyOnTurnStartedEffectsTest {
         applyOnTurnStartedEffects("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
-        assertThat(storedBattleUnit!!.remainingHealthPoints).isEqualTo(7)
-        assertThat(eventBus)
-            .hasPublishedEvents(
-                BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = battleUnit.toDto().id, effectId = effectId),
-                BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id),
-            )
+        storedBattleUnit!!.remainingHealthPoints shouldBe 7
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = battleUnit.toDto().id, effectId = effectId),
+            BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id),
+        )
     }
 
     @Test
@@ -67,7 +67,7 @@ class ApplyOnTurnStartedEffectsTest {
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -79,6 +79,6 @@ class ApplyOnTurnStartedEffectsTest {
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

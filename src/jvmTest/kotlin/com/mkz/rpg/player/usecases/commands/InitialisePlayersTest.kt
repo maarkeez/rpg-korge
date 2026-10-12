@@ -7,8 +7,9 @@ import com.mkz.rpg.player.domain.PlayerEvent.PlayerCreated
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.services.PlayerLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -28,9 +29,9 @@ class InitialisePlayersTest {
         // When
         initialisePlayers()
         // Then
-        assertThat(playerRepository.searchById("player-one")?.toDto()).isEqualTo(human)
-        assertThat(playerRepository.searchById("player-two")?.toDto()).isEqualTo(cpu)
-        assertThat(eventBus).hasPublishedEvents(
+        playerRepository.searchById("player-one")?.toDto() shouldBe human
+        playerRepository.searchById("player-two")?.toDto() shouldBe cpu
+        eventBus.shouldHavePublishedEvents(
             PlayerCreated(playerId = "player-one", playerName = "Human", playerType = HUMAN),
             PlayerCreated(playerId = "player-two", playerName = "CPU", playerType = CPU),
         )
@@ -45,7 +46,7 @@ class InitialisePlayersTest {
         // When
         initialisePlayers()
         // Then
-        assertThat(playerRepository.searchById("player-one")?.toDto()).isEqualTo(human.toDto())
-        assertThat(eventBus).hasNotPublishedEvents()
+        playerRepository.searchById("player-one")?.toDto() shouldBe human.toDto()
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

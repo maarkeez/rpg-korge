@@ -1,7 +1,8 @@
 package com.mkz.rpg.effect.adapters.storage
 
 import com.mkz.rpg.effect.domain.EffectMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class InMemoryEffectRepositoryTest {
             effectRepository.create(effect)
             // Then
             val storedEffect = effectRepository.searchById(effect.toDto().id)
-            assertThat(storedEffect).isEqualTo(effect)
+            storedEffect shouldBe effect
         }
     }
 
@@ -32,7 +33,7 @@ class InMemoryEffectRepositoryTest {
             // When
             val storedEffect = effectRepository.searchById(effect.toDto().id)
             // Then
-            assertThat(storedEffect).isEqualTo(effect)
+            storedEffect shouldBe effect
         }
 
         @Test
@@ -40,7 +41,7 @@ class InMemoryEffectRepositoryTest {
             // When
             val storedEffect = effectRepository.searchById("effect-unknown")
             // Then
-            assertThat(storedEffect).isNull()
+            storedEffect.shouldBeNull()
         }
     }
 }

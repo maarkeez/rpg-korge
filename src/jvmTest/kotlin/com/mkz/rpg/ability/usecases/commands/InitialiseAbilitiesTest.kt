@@ -9,9 +9,9 @@ import com.mkz.rpg.ability.usecases.services.AbilityLoader
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -33,8 +33,8 @@ class InitialiseAbilitiesTest {
         // When
         initialiseAbilities()
         // Then
-        assertThat(abilityRepository.searchById("sword")?.toDto()).isEqualTo(sword)
-        assertThat(eventBus).hasPublishedEvents(AbilityCreated("sword"))
+        abilityRepository.searchById("sword")?.toDto() shouldBe sword
+        eventBus.shouldHavePublishedEvents(AbilityCreated("sword"))
     }
 
     @Test
@@ -45,6 +45,6 @@ class InitialiseAbilitiesTest {
         // When
         val initialisation = { initialiseAbilities() }
         // Then
-        assertThatThrownBy { initialisation() }.isInstanceOf(AbilityEffectDoesNotExist::class.java)
+        shouldThrow<AbilityEffectDoesNotExist> { initialisation() }
     }
 }

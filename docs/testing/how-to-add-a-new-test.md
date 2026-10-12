@@ -3,6 +3,7 @@
 ## Tests location
 
 - All the tests can be found at `src/jvmTest`
+- Tests that can run on every target MAY be moved to `src/commonTest`, so they also run on JS (`./gradlew jsTest`). See [Shared tests](#shared-tests).
 - The test MUST be in the same package as the class being tested. For example, given the class `src/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/jvmTest/kotlin/ability/usecases/commands/RequestAbilityCreationTest.kt` 
 
 ## Test naming convention
@@ -21,7 +22,8 @@
 ## Test libraries
 
 - The test MUST be annotated with `@org.junit.jupiter.api.Test`
-- The test MUST be asserted using `AssertJ` library assertions
+- The test MUST be asserted using [Kotest assertions](https://kotest.io/docs/assertions/assertions.html) (e.g.: `actual shouldBe expected`, `events.shouldContainExactly(...)`, `shouldThrow<Error> { ... }`). They run on every target, so the tests can be shared through `src/commonTest`. AssertJ is not allowed, which is enforced by [`AssertionLibraryArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssertionLibraryArchitectureTest.kt).
+- The test SHOULD explain a failure that is not obvious from the assertion with `withClue("...") { ... }`, and SHOULD report several failures at once with `assertSoftly { ... }`.
 
 ## Test fixtures
 
@@ -79,10 +81,10 @@ import ability.domain.AbilityEvent
 import ability.domain.AbilityMother.ability
 import effect.domain.*
 import effect.usecases.queries.*
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.*
 import shared.domain.*
-import shared.domain.assertThat
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
@@ -104,13 +106,13 @@ class RequestAbilityCreationTest {
         requestAbilityCreation(abilityDto = ability)
         // Then
         val storedAbility = abilityRepository.searchById(ability.id)?.toDto()
-        org.assertj.core.api.Assertions.assertThat(storedAbility).isEqualTo(ability)
-        assertThat(eventBus).hasPublishedEvents(AbilityEvent.AbilityCreated(ability.id))
+        storedAbility shouldBe ability
+        eventBus.shouldHavePublishedEvents(AbilityEvent.AbilityCreated(ability.id))
     }
 }
 ```
 
-Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `assertThat(eventBus).hasPublishedEvents(...)`. Since the custom `assertThat(FakeEventBus)` extension shares its name with the AssertJ one, import the fake utilities via `import shared.domain.assertThat` and import the plain AssertJ assertion as `import org.assertj.core.api.Assertions.assertThat`.
+Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `eventBus.shouldHavePublishedEvents(...)` and `eventBus.shouldNotHavePublishedEvents()` (in `test/jvmTest/kotlin/shared/domain/EventBusMatchers.kt`).
 
 ## Test example - Event listener
 
@@ -197,7 +199,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 val finishTurnView = FinishTurnView(onTurnFinished = {})
                 // Then
-                assertThat(finishTurnView.buttonText()).isEqualTo("Finish turn")
+                finishTurnView.buttonText() shouldBe "Finish turn"
             }
     }
 
@@ -213,7 +215,7 @@ class FinishTurnViewTest : ViewsForTesting() {
                 // When
                 clickFinishTurn(finishTurnView)
                 // Then
-                assertThat(turnFinished).isTrue
+                turnFinished.shouldBeTrue()
             }
     }
 }
@@ -258,7 +260,8 @@ Here is a test example
 package com.mkz.rpg.shared.usecases.acceptance
 
 // Imports goes here
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -280,9 +283,9 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val previousTileOccupantId = battlefieldApi.searchOccupant(row = 1, column = 1)
-        assertThat(previousTileOccupantId).isNull()
+        previousTileOccupantId.shouldBeNull()
         val newTileOccupantId = battlefieldApi.searchOccupant(row = 2, column = 1)
-        assertThat(newTileOccupantId).isEqualTo(humanBattleUnitId)
+        newTileOccupantId shouldBe humanBattleUnitId
     }
 }
 ```
@@ -318,12 +321,20 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickTile(battlefieldView, targetRow, targetColumn)
             // Then
             waitUntil { battlefieldView.hasBattleUnitAt(targetRow, targetColumn) }
-            assertThat(battlefieldView.hasBattleUnitAt(targetRow, targetColumn)).isTrue
-            assertThat(battlefieldView.hasBattleUnitAt(knightRow, knightColumn)).isFalse
+            battlefieldView.hasBattleUnitAt(targetRow, targetColumn).shouldBeTrue()
+            battlefieldView.hasBattleUnitAt(knightRow, knightColumn).shouldBeFalse()
         }
 }
 ```
 
+## Shared tests
+
+A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use Mockito, KorGE views or `java.*` classes.
+
+- The test MUST be annotated with `@kotlin.test.Test` instead of `@org.junit.jupiter.api.Test`.
+- The test MUST NOT use `@Nested`, which is not available on JS. Flatten the nested classes and put their context in the test name (e.g.: `should start the first round with the first player when start first round and two players join`).
+- The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.
+
 ## Run tests
 
-All the project tests can be run using `./gradlew clean jvmTest`
+All the project tests can be run using `./gradlew clean jvmTest`. The shared tests also run on JS with `./gradlew jsTest`, which needs Chrome.

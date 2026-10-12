@@ -2,7 +2,8 @@ package com.mkz.rpg.battlefield.usecases.queries
 
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchOccupantTest {
@@ -22,7 +23,7 @@ class SearchOccupantTest {
         // When
         val result = searchOccupant(1, 1)
         // Then
-        assertThat(result).isEqualTo(battleUnitId)
+        result shouldBe battleUnitId
     }
 
     @Test
@@ -32,6 +33,6 @@ class SearchOccupantTest {
         // When
         val result = searchOccupant(1, 1)
         // Then
-        assertThat(result).isNull()
+        result.shouldBeNull()
     }
 }

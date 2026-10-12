@@ -9,8 +9,10 @@ import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -37,8 +39,8 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
-        assertThat(cpuBrainRepository.search()).isNull()
+        eventBus.shouldNotHavePublishedEvents()
+        cpuBrainRepository.search().shouldBeNull()
     }
 
     @Test
@@ -48,8 +50,8 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
-        assertThat(cpuBrainRepository.search()).isNull()
+        eventBus.shouldNotHavePublishedEvents()
+        cpuBrainRepository.search().shouldBeNull()
     }
 
     @Test
@@ -62,8 +64,12 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        assertThat(cpuBrainRepository.search()?.toDto()?.pendingBattleUnitIds).containsExactly("battle-unit-1", "battle-unit-2")
-        assertThat(eventBus).hasPublishedEvents(CpuBrainInitialized(playerId = "player-1"))
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.pendingBattleUnitIds
+            .shouldContainExactly("battle-unit-1", "battle-unit-2")
+        eventBus.shouldHavePublishedEvents(CpuBrainInitialized(playerId = "player-1"))
     }
 
     @Test
@@ -74,6 +80,6 @@ class PlayTurnTest {
         // When
         playTurn("player-1")
         // Then
-        assertThat(eventBus).hasPublishedEvents(BattleEvent.RequestFinishPlayerTurn)
+        eventBus.shouldHavePublishedEvents(BattleEvent.RequestFinishPlayerTurn)
     }
 }

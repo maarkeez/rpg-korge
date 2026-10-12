@@ -1,10 +1,14 @@
 package com.mkz.rpg.shared.adapters.toml
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -33,8 +37,8 @@ class TomlResourcesTest {
             // When
             val definitions = runBlocking { directory.readTomlFiles<Definition>() }
             // Then
-            assertThat(definitions.keys).containsExactly("a", "b")
-            assertThat(definitions["a"]).isEqualTo(Definition(name = "A"))
+            definitions.keys.toList().shouldContainExactly("a", "b")
+            definitions["a"] shouldBe Definition(name = "A")
         }
 
         @Test
@@ -44,7 +48,7 @@ class TomlResourcesTest {
             // When
             val definitions = runBlocking { directory.readTomlFiles<Definition>() }
             // Then
-            assertThat(definitions).isEmpty()
+            definitions.shouldBeEmpty()
         }
     }
 
@@ -57,9 +61,7 @@ class TomlResourcesTest {
             // When
             val reading = { runBlocking { file.readTomlFile<Definition>() } }
             // Then
-            assertThatThrownBy { reading() }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("things/a.toml")
+            shouldThrow<IllegalStateException> { reading() }.message.shouldContain("things/a.toml")
         }
 
         @Test
@@ -69,9 +71,7 @@ class TomlResourcesTest {
             // When
             val reading = { runBlocking { file.readTomlFile<Definition>() } }
             // Then
-            assertThatThrownBy { reading() }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("things/a.toml")
+            shouldThrow<IllegalStateException> { reading() }.message.shouldContain("things/a.toml")
         }
     }
 
@@ -83,10 +83,7 @@ class TomlResourcesTest {
             val conversion = { fromResource("things/a.toml") { error("wrong value") } }
             // When
             // Then
-            assertThatThrownBy { conversion() }
-                .isInstanceOf(IllegalStateException::class.java)
-                .hasMessageContaining("things/a.toml")
-                .hasMessageContaining("wrong value")
+            shouldThrow<IllegalStateException> { conversion() }.message.shouldContain("things/a.toml").shouldContain("wrong value")
         }
     }
 
@@ -99,7 +96,7 @@ class TomlResourcesTest {
             // When
             val colour = enumOf<Colour>("colour", value)
             // Then
-            assertThat(colour).isEqualTo(Colour.BLUE)
+            colour shouldBe Colour.BLUE
         }
 
         @Test
@@ -109,11 +106,11 @@ class TomlResourcesTest {
             // When
             val parsing = { enumOf<Colour>("colour", value) }
             // Then
-            assertThatThrownBy { parsing() }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessageContaining("'colour'")
-                .hasMessageContaining("[RED, BLUE]")
-                .hasMessageContaining("GREEN")
+            shouldThrow<IllegalArgumentException> { parsing() }
+                .message
+                .shouldContain("'colour'")
+                .shouldContain("[RED, BLUE]")
+                .shouldContain("GREEN")
         }
     }
 
@@ -126,9 +123,7 @@ class TomlResourcesTest {
             // When
             val requiring = { required("damage", value) }
             // Then
-            assertThatThrownBy { requiring() }
-                .isInstanceOf(IllegalArgumentException::class.java)
-                .hasMessageContaining("'damage' is required")
+            shouldThrow<IllegalArgumentException> { requiring() }.message.shouldContain("'damage' is required")
         }
     }
 }

@@ -10,7 +10,8 @@ import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -71,7 +72,7 @@ class FinishTurnPresenterTest {
             // When
             createPresenter()
             // Then
-            assertThat(isFinishTurnEnabled()).isFalse
+            isFinishTurnEnabled().shouldBeFalse()
         }
     }
 
@@ -84,7 +85,7 @@ class FinishTurnPresenterTest {
             // When
             startTurnOf("human")
             // Then
-            assertThat(isFinishTurnEnabled()).isTrue
+            isFinishTurnEnabled().shouldBeTrue()
         }
 
         @Test
@@ -95,7 +96,7 @@ class FinishTurnPresenterTest {
             // When
             startTurnOf("cpu")
             // Then
-            assertThat(isFinishTurnEnabled()).isFalse
+            isFinishTurnEnabled().shouldBeFalse()
         }
 
         @Test
@@ -106,7 +107,7 @@ class FinishTurnPresenterTest {
             // When
             timeline.playLongStep()
             // Then
-            assertThat(isFinishTurnEnabled()).isFalse
+            isFinishTurnEnabled().shouldBeFalse()
         }
 
         @Test
@@ -115,11 +116,11 @@ class FinishTurnPresenterTest {
             createPresenter()
             val cpuMove = timeline.playLongStep()
             startTurnOf("human")
-            assertThat(isFinishTurnEnabled()).isFalse
+            isFinishTurnEnabled().shouldBeFalse()
             // When
             cpuMove.complete(Unit)
             // Then
-            assertThat(isFinishTurnEnabled()).isTrue
+            isFinishTurnEnabled().shouldBeTrue()
         }
     }
 
@@ -144,7 +145,7 @@ class FinishTurnPresenterTest {
             // When
             clickFinishTurn()
             // Then
-            assertThat(isFinishTurnEnabled()).isFalse
+            isFinishTurnEnabled().shouldBeFalse()
         }
 
         @Test

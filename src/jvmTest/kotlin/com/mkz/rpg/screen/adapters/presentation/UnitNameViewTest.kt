@@ -1,8 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +20,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
                 // When
                 // Then
-                assertThat(unitNameView.isVisibleToUser()).isTrue
+                unitNameView.isVisibleToUser().shouldBeTrue()
             }
     }
 
@@ -33,7 +35,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.display(unitName = unitName)
                 // Then
-                assertThat(unitNameView.isVisibleToUser()).isTrue
+                unitNameView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -44,7 +46,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.display(unitName = unitName)
                 // Then
-                assertThat(unitNameView.nameText()).isEqualTo(unitName)
+                unitNameView.nameText() shouldBe unitName
             }
     }
 
@@ -58,7 +60,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.alignTextToRight()
                 // Then
-                assertThat(unitNameView.isAlignedToRight()).isTrue
+                unitNameView.isAlignedToRight().shouldBeTrue()
             }
     }
 
@@ -73,7 +75,7 @@ class UnitNameViewTest : ViewsForTesting() {
                 // When
                 unitNameView.hide()
                 // Then
-                assertThat(unitNameView.isVisibleToUser()).isFalse
+                unitNameView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

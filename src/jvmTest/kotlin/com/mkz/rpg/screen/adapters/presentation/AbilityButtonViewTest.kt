@@ -1,9 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -20,7 +22,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 // Then
-                assertThat(abilityButtonView.isVisibleToUser()).isTrue
+                abilityButtonView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -31,7 +33,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 // Then
-                assertThat(abilityButtonView.isAbilityIconDisplayed()).isTrue
+                abilityButtonView.isAbilityIconDisplayed().shouldBeTrue()
             }
 
         @Test
@@ -42,7 +44,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = true)
                 // Then
-                assertThat(abilityButtonView.isAbilityIconDarkened()).isFalse
+                abilityButtonView.isAbilityIconDarkened().shouldBeFalse()
             }
 
         @Test
@@ -53,7 +55,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.display(abilityId = "mushroom", canCast = false)
                 // Then
-                assertThat(abilityButtonView.isAbilityIconDarkened()).isTrue
+                abilityButtonView.isAbilityIconDarkened().shouldBeTrue()
             }
     }
 
@@ -67,7 +69,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.select()
                 // Then
-                assertThat(abilityButtonView.isSelected()).isTrue
+                abilityButtonView.isSelected().shouldBeTrue()
             }
 
         @Test
@@ -79,7 +81,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.select()
                 // Then
-                assertThat(abilityButtonView.selectionIconCount()).isEqualTo(1)
+                abilityButtonView.selectionIconCount() shouldBe 1
             }
     }
 
@@ -94,7 +96,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.unselect()
                 // Then
-                assertThat(abilityButtonView.isSelected()).isFalse
+                abilityButtonView.isSelected().shouldBeFalse()
             }
     }
 
@@ -109,7 +111,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                 // When
                 abilityButtonView.hide()
                 // Then
-                assertThat(abilityButtonView.isVisibleToUser()).isFalse
+                abilityButtonView.isVisibleToUser().shouldBeFalse()
             }
     }
 

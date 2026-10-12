@@ -5,8 +5,10 @@ import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class StartNextRoundTest {
@@ -27,9 +29,8 @@ class StartNextRoundTest {
         startNextRound()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false))
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false)
+        eventBus.shouldHavePublishedEvents(
             BattleEvent.BattleRoundStarted(2),
             BattleEvent.PlayerTurnStarted(players.first()),
         )
@@ -41,7 +42,7 @@ class StartNextRoundTest {
         // When
         startNextRound()
         // Then
-        assertThat(battleRepository.search()).isNull()
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battleRepository.search().shouldBeNull()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

@@ -1,7 +1,12 @@
 package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class CommandUseCaseArchitectureTest {
@@ -14,42 +19,29 @@ class CommandUseCaseArchitectureTest {
                 .filter { it.resideInPackage("..usecases.commands..") }
                 .filter { it.isTopLevel }
 
-        SoftAssertions.assertSoftly { softly ->
+        assertSoftly {
             useCaseClasses.forEach { useCase ->
                 val publicFunctions =
                     useCase
                         .functions()
                         .filter { it.hasPublicOrDefaultModifier }
 
-                softly
-                    .assertThat(publicFunctions)
-                    .withFailMessage(
-                        "Use case '%s' should declare exactly 1 public method, found %d: %s",
-                        useCase.name,
-                        publicFunctions.size,
-                        publicFunctions.map { it.name },
-                    ).hasSize(1)
+                withClue("Use case '${useCase.name}' should declare exactly 1 public method, found ${publicFunctions.size}: ${publicFunctions.map { it.name }}") {
+                    publicFunctions.shouldHaveSize(1)
+                }
 
                 val publicFunction = publicFunctions.singleOrNull() ?: return@forEach
 
-                softly
-                    .assertThat(publicFunction.name == "invoke" && publicFunction.hasOperatorModifier)
-                    .withFailMessage(
-                        "Use case '%s' public method must be 'operator fun invoke', found '%s'%s",
-                        useCase.name,
-                        publicFunction.name,
-                        if (!publicFunction.hasOperatorModifier) " without the 'operator' modifier" else "",
-                    ).isTrue()
+                val missingOperatorModifier = if (!publicFunction.hasOperatorModifier) " without the 'operator' modifier" else ""
+                withClue("Use case '${useCase.name}' public method must be 'operator fun invoke', found '${publicFunction.name}'$missingOperatorModifier") {
+                    (publicFunction.name == "invoke" && publicFunction.hasOperatorModifier).shouldBeTrue()
+                }
 
                 val returnTypeName = publicFunction.returnType?.name ?: "Unit"
 
-                softly
-                    .assertThat(returnTypeName)
-                    .withFailMessage(
-                        "Use case '%s' invoke() must not Unit/void, but its return type is '%s'",
-                        useCase.name,
-                        returnTypeName,
-                    ).isEqualTo("Unit")
+                withClue("Use case '${useCase.name}' invoke() must not Unit/void, but its return type is '$returnTypeName'") {
+                    returnTypeName shouldBe "Unit"
+                }
             }
         }
     }
@@ -65,7 +57,7 @@ class CommandUseCaseArchitectureTest {
 
         val commandNames = useCaseClasses.map { it.name }.toSet()
 
-        SoftAssertions.assertSoftly { softly ->
+        assertSoftly {
             useCaseClasses.forEach { useCase ->
                 val commandProperties =
                     useCase
@@ -74,15 +66,10 @@ class CommandUseCaseArchitectureTest {
                             property.type?.name in commandNames
                         }
 
-                softly
-                    .assertThat(commandProperties)
-                    .withFailMessage(
-                        "Command '%s' must not depend on other commands. Publish and listen to events instead. Found command dependencies: %s",
-                        useCase.name,
-                        commandProperties.map {
-                            "${it.name}: ${it.type?.name}"
-                        },
-                    ).isEmpty()
+                val commandDependencies = commandProperties.map { "${it.name}: ${it.type?.name}" }
+                withClue("Command '${useCase.name}' must not depend on other commands. Publish and listen to events instead. Found command dependencies: $commandDependencies") {
+                    commandProperties.shouldBeEmpty()
+                }
             }
         }
     }

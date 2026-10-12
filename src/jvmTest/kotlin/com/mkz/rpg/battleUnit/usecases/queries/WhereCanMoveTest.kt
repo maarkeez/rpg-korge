@@ -5,7 +5,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -33,7 +34,7 @@ class WhereCanMoveTest {
         // When
         val result = whereCanMove(battleUnitId)
         // Then
-        assertThat(result).containsExactly(firstPosition, thirdPosition)
+        result.shouldContainExactly(firstPosition, thirdPosition)
     }
 
     @Test
@@ -42,6 +43,6 @@ class WhereCanMoveTest {
         // When
         val result = whereCanMove("unknown-battle-unit")
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 }

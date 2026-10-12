@@ -5,8 +5,9 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
 import org.junit.jupiter.api.Test
 
 class RemoveOccupantTest {
@@ -32,10 +33,12 @@ class RemoveOccupantTest {
         removeOccupant(battleUnitId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        assertThat(
-            storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.battleUnitId,
-        ).isNull()
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattlefield
+            ?.tiles
+            ?.get(Battlefield.Dto.PositionDto(1, 1))
+            ?.battleUnitId
+            .shouldBeNull()
+        eventBus.shouldHavePublishedEvents(
             BattlefieldEvent.OccupantRemoved(battleUnitId, 1, 1),
         )
     }
@@ -47,6 +50,6 @@ class RemoveOccupantTest {
         // When
         removeOccupant("unknown-battle-unit")
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

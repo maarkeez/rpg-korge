@@ -19,8 +19,9 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -121,11 +122,11 @@ class DeployBattleUnitEffectAcceptanceTest {
         eventBus.dispatch()
         // Then
         val humanUnitsAfter = battleUnitApi.searchBattleUnitsByPlayerId(humanPlayerId)
-        assertThat(humanUnitsAfter.size).isEqualTo(humanUnitsBefore + 1)
+        humanUnitsAfter.size shouldBe humanUnitsBefore + 1
         val deployedOccupantId = battlefieldApi.searchOccupant(row = target.row, column = target.column)
-        assertThat(deployedOccupantId).isNotNull()
+        deployedOccupantId.shouldNotBeNull()
         val deployed = battleUnitApi.searchBattleUnitById(deployedOccupantId!!)!!
-        assertThat(deployed.playerId).isEqualTo(humanPlayerId)
-        assertThat(deployed.unitId).isEqualTo(summonUnitId)
+        deployed.playerId shouldBe humanPlayerId
+        deployed.unitId shouldBe summonUnitId
     }
 }

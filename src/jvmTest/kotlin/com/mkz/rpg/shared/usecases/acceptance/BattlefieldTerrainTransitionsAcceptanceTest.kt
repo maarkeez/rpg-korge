@@ -3,8 +3,11 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -34,9 +37,9 @@ class BattlefieldTerrainTransitionsAcceptanceTest {
         battlefieldApi.requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val battlefield = battlefieldApi.searchBattlefield()
-        assertThat(battlefield).isNotNull
-        assertThat(battlefield!!.rows).isEqualTo(rows)
-        assertThat(battlefield.columns).isEqualTo(columns)
-        assertThat(battlefield.tiles).hasSize(rows * columns)
+        battlefield.shouldNotBeNull()
+        battlefield!!.rows shouldBe rows
+        battlefield.columns shouldBe columns
+        battlefield.tiles.shouldHaveSize(rows * columns)
     }
 }

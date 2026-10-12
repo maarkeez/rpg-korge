@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -40,7 +40,7 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(0.0)
+        result shouldBe 0.0
     }
 
     @Test
@@ -52,7 +52,7 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(0.25)
+        result shouldBe 0.25
     }
 
     @Test
@@ -64,7 +64,7 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(0.5)
+        result shouldBe 0.5
     }
 
     @Test
@@ -76,7 +76,7 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(0.75)
+        result shouldBe 0.75
     }
 
     @Test
@@ -88,7 +88,7 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(0.9)
+        result shouldBe 0.9
     }
 
     @Test
@@ -100,6 +100,6 @@ class HealingNeedTest {
         // When
         val result = healingNeed("battle-unit-1")
         // Then
-        assertThat(result).isEqualTo(1.0)
+        result shouldBe 1.0
     }
 }

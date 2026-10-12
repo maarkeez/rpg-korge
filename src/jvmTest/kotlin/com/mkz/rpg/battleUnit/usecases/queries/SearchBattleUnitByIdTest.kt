@@ -2,7 +2,8 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchBattleUnitByIdTest {
@@ -17,7 +18,7 @@ class SearchBattleUnitByIdTest {
         // When
         val result = searchBattleUnitById(battleUnit.toDto().id)
         // Then
-        assertThat(result).isEqualTo(battleUnit.toDto())
+        result shouldBe battleUnit.toDto()
     }
 
     @Test
@@ -26,6 +27,6 @@ class SearchBattleUnitByIdTest {
         // When
         val result = searchBattleUnitById("unknown-battle-unit")
         // Then
-        assertThat(result).isNull()
+        result.shouldBeNull()
     }
 }

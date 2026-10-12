@@ -5,7 +5,8 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -36,7 +37,7 @@ class ReplenishManaTest {
         replenishMana("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(15)
+        storedBattleUnit!!.remainingManaPoints shouldBe 15
     }
 
     @Test
@@ -56,7 +57,7 @@ class ReplenishManaTest {
         replenishMana("player-1")
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        assertThat(storedBattleUnit!!.remainingManaPoints).isEqualTo(12)
+        storedBattleUnit!!.remainingManaPoints shouldBe 12
     }
 
     @Test
@@ -65,6 +66,6 @@ class ReplenishManaTest {
         // When
         replenishMana("player-1")
         // Then
-        assertThat(battleUnitRepository.searchAll()).isEmpty()
+        battleUnitRepository.searchAll().shouldBeEmpty()
     }
 }

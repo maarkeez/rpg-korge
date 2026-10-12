@@ -4,8 +4,10 @@ import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent.CpuBattleUnitActionResolved
 import com.mkz.rpg.cpuBrain.domain.CpuBrainMother.cpuBrain
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 
 class ResolveCpuBattleUnitCastTest {
@@ -20,8 +22,12 @@ class ResolveCpuBattleUnitCastTest {
         // When
         resolveCpuBattleUnitCast(battleUnitId = "unit-1", abilityId = "sword")
         // Then
-        assertThat(eventBus).hasPublishedEvents(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
-        assertThat(cpuBrainRepository.search()?.toDto()?.isAwaitingAction).isFalse
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.isAwaitingAction
+            .shouldBeFalse()
     }
 
     @Test
@@ -31,7 +37,11 @@ class ResolveCpuBattleUnitCastTest {
         // When
         resolveCpuBattleUnitCast(battleUnitId = "unit-1", abilityId = "heal")
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
-        assertThat(cpuBrainRepository.search()?.toDto()?.isAwaitingAction).isTrue
+        eventBus.shouldNotHavePublishedEvents()
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.isAwaitingAction
+            .shouldBeTrue()
     }
 }

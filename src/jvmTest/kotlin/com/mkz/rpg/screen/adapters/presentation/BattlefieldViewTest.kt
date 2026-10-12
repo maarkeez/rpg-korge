@@ -8,13 +8,18 @@ import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.doubles.plusOrMinus
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -42,7 +47,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 clickTile(battlefieldView, row = 0, column = 0)
                 // Then
                 repeat(SCROLL_ANIMATION_FRAMES) { delayFrame() }
-                assertThat(battlefieldView.scrollOffset()).isEqualTo(0.0 to 0.0)
+                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
             }
 
         @Test
@@ -54,7 +59,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                assertThat(battlefieldView.tileCount()).isEqualTo(6)
+                battlefieldView.tileCount() shouldBe 6
             }
 
         @Test
@@ -66,7 +71,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                assertThat(battlefieldView.hasTerrainAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasTerrainAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -88,7 +93,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattlefield(battlefield)
                 // Then
-                assertThat(battlefieldView.hasTerrainAt(row = 0, column = 1)).isTrue
+                battlefieldView.hasTerrainAt(row = 0, column = 1).shouldBeTrue()
             }
     }
 
@@ -103,9 +108,9 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
                 // Then
-                assertThat(tileBitmap.width).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(tileBitmap.height).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0)).isTrue
+                tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
+                tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
+                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0).shouldBeTrue()
             }
 
         @Test
@@ -117,7 +122,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
                 // Then
-                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15)).isTrue
+                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
             }
 
         @Test
@@ -134,9 +139,9 @@ class BattlefieldViewTest : ViewsForTesting() {
                             terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
                         )
                 // Then
-                assertThat(tileBitmap.width).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(tileBitmap.height).isEqualTo(BattlefieldView.TILE_PIXEL_SIZE)
-                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9)).isTrue
+                tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
+                tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
+                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9).shouldBeTrue()
             }
 
         @Test
@@ -153,7 +158,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                             terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
                         )
                 // Then
-                assertThat(matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15)).isTrue
+                matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
             }
 
         @Test
@@ -164,7 +169,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 val result = runCatching { battlefieldView.terrainTileBitmap(terrainId = "forest", terrainTransition = null) }
                 // Then
-                assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+                result.exceptionOrNull().shouldBeInstanceOf<IllegalStateException>()
             }
     }
 
@@ -179,7 +184,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
                 // Then
-                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -191,7 +196,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "rat")
                 // Then
-                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -203,7 +208,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "dragon")
                 // Then
-                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isFalse
+                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
             }
     }
 
@@ -218,7 +223,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayPotentialMovement(row = 0, column = 0)
                 // Then
-                assertThat(battlefieldView.hasSelectionAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
             }
     }
 
@@ -233,7 +238,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // Then
-                assertThat(battlefieldView.hasSelectionAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -247,7 +252,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.displayPotentialCast(row = 0, column = 0)
                 // Then
                 val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
-                assertThat(selectionCount).isEqualTo(1)
+                selectionCount shouldBe 1
             }
     }
 
@@ -262,7 +267,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.displayTileSelection(row = 0, column = 0)
                 // Then
-                assertThat(battlefieldView.hasSelectionAt(row = 0, column = 0)).isTrue
+                battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -276,7 +281,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.displayTileSelection(row = 0, column = 0)
                 // Then
                 val selectionCount = battlefieldView.selectionCountAt(row = 0, column = 0)
-                assertThat(selectionCount).isEqualTo(1)
+                selectionCount shouldBe 1
             }
     }
 
@@ -293,7 +298,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.resetTiles()
                 // Then
-                assertThat(battlefieldView.tilesWithSelectionCount()).isEqualTo(0)
+                battlefieldView.tilesWithSelectionCount() shouldBe 0
             }
     }
 
@@ -308,10 +313,10 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0), Battlefield.Dto.PositionDto(row = 1, column = 1)))
                 // Then
-                assertThat(battlefieldView.isDimmedAt(row = 0, column = 0)).isFalse
-                assertThat(battlefieldView.isDimmedAt(row = 1, column = 1)).isFalse
-                assertThat(battlefieldView.isDimmedAt(row = 0, column = 1)).isTrue
-                assertThat(battlefieldView.isDimmedAt(row = 1, column = 0)).isTrue
+                battlefieldView.isDimmedAt(row = 0, column = 0).shouldBeFalse()
+                battlefieldView.isDimmedAt(row = 1, column = 1).shouldBeFalse()
+                battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeTrue()
+                battlefieldView.isDimmedAt(row = 1, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -324,7 +329,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
                 // Then
-                assertThat(battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1)).isTrue
+                battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1).shouldBeTrue()
             }
 
         @Test
@@ -338,7 +343,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
                 battlefieldView.resetTiles()
                 // Then
-                assertThat(battlefieldView.isDimmedAt(row = 0, column = 1)).isFalse
+                battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeFalse()
             }
 
         @Test
@@ -351,7 +356,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.resetTiles()
                 // Then
-                assertThat(battlefieldView.dimmedTilesCount()).isEqualTo(0)
+                battlefieldView.dimmedTilesCount() shouldBe 0
             }
     }
 
@@ -367,7 +372,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 battlefieldView.removeBattleUnit(row = 0, column = 0)
                 // Then
-                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isFalse
+                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
             }
     }
 
@@ -388,8 +393,8 @@ class BattlefieldViewTest : ViewsForTesting() {
                 val moving = startMoving(battlefieldView, path)
                 val displayedPositions = listOf(positionsBeforeMoving) + sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() }
                 // Then
-                assertThat(displayedPositions.distinct()).containsExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
-                assertThat(displayedPositions.zipWithNext().count { (previous, next) -> previous != next }).isEqualTo(2)
+                displayedPositions.distinct().shouldContainExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
+                displayedPositions.zipWithNext().count { (previous, next) -> previous != next } shouldBe 2
             }
 
         @Test
@@ -404,7 +409,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 startMoving(battlefieldView, path)
                 repeat(MOVE_STEP_FRAMES - 2) { nextFrame() }
                 // Then
-                assertThat(battlefieldView.battleUnitPositions()).containsExactly(0 to 1)
+                battlefieldView.battleUnitPositions().shouldContainExactly(0 to 1)
             }
 
         @Test
@@ -420,8 +425,8 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 awaitCompletion(startMoving(battlefieldView, pathOutOfTheViewport))
                 // Then
-                assertThat(battlefieldView.battleUnitPositions()).containsExactly(0 to 9)
-                assertThat(battlefieldView.isTileVisible(row = 0, column = 9)).isTrue
+                battlefieldView.battleUnitPositions().shouldContainExactly(0 to 9)
+                battlefieldView.isTileVisible(row = 0, column = 9).shouldBeTrue()
             }
 
         @Test
@@ -435,7 +440,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 awaitCompletion(startMoving(battlefieldView, path))
                 // Then
-                assertThat(battlefieldView.scrollOffset()).isEqualTo(0.0 to 0.0)
+                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
             }
 
         private suspend fun startMoving(
@@ -464,9 +469,9 @@ class BattlefieldViewTest : ViewsForTesting() {
                 val flashingFrames = sampleUntilCompletion(flashing) { battlefieldView.isFlashingAt(row = 0, column = 0) }
                 // Then
                 val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
-                assertThat(blinks).isEqualTo(BattlefieldView.FLASH_COUNT)
-                assertThat(battlefieldView.isFlashingAt(row = 0, column = 0)).isFalse
-                assertThat(battlefieldView.hasBattleUnitAt(row = 0, column = 0)).isTrue
+                blinks shouldBe BattlefieldView.FLASH_COUNT
+                battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
+                battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
             }
 
         @Test
@@ -481,7 +486,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
                 // Then
-                assertThat(battlefieldView.isTileVisible(row = 12, column = 13)).isTrue
+                battlefieldView.isTileVisible(row = 12, column = 13).shouldBeTrue()
             }
 
         @Test
@@ -494,8 +499,8 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "dragon")
                 // Then
-                assertThat(flashing.isCompleted).isTrue
-                assertThat(battlefieldView.isFlashingAt(row = 0, column = 0)).isFalse
+                flashing.isCompleted.shouldBeTrue()
+                battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
             }
 
         private suspend fun startFlashing(
@@ -519,9 +524,9 @@ class BattlefieldViewTest : ViewsForTesting() {
                 val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
                 val tints = sampleUntilCompletion(tinting) { battlefieldView.tintColor() to battlefieldView.tintAlpha() }
                 // Then
-                assertThat(tints.mapNotNull { (color, _) -> color }.distinct()).containsExactly(BattleInfoView.CPU_TURN_COLOR)
-                assertThat(tints.maxOf { (_, alpha) -> alpha }).isCloseTo(BattlefieldView.TINT_ALPHA, within(0.05))
-                assertThat(battlefieldView.tintColor()).isNull()
+                tints.mapNotNull { (color, _) -> color }.distinct().shouldContainExactly(BattleInfoView.CPU_TURN_COLOR)
+                tints.maxOf { (_, alpha) -> alpha } shouldBe (BattlefieldView.TINT_ALPHA plusOrMinus 0.05)
+                battlefieldView.tintColor().shouldBeNull()
             }
 
         @Test
@@ -534,7 +539,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 // When
                 awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
                 // Then
-                assertThat(battlefieldView.scrollOffset()).isEqualTo(0.0 to 0.0)
+                battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
             }
     }
 

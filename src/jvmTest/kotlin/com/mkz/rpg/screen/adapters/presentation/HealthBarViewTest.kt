@@ -4,9 +4,11 @@ import com.mkz.rpg.shared.adapters.presentation.isLabelShown
 import com.mkz.rpg.shared.adapters.presentation.isProgressBarShown
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.progressPercentage
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -20,9 +22,9 @@ class HealthBarViewTest : ViewsForTesting() {
                 val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
                 // When
                 // Then
-                assertThat(healthBarView.isVisibleToUser()).isFalse
-                assertThat(healthBarView.isProgressBarShown()).isFalse
-                assertThat(healthBarView.isLabelShown()).isFalse
+                healthBarView.isVisibleToUser().shouldBeFalse()
+                healthBarView.isProgressBarShown().shouldBeFalse()
+                healthBarView.isLabelShown().shouldBeFalse()
             }
     }
 
@@ -36,9 +38,9 @@ class HealthBarViewTest : ViewsForTesting() {
                 // When
                 healthBarView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(healthBarView.isVisibleToUser()).isTrue
-                assertThat(healthBarView.isProgressBarShown()).isTrue
-                assertThat(healthBarView.isLabelShown()).isTrue
+                healthBarView.isVisibleToUser().shouldBeTrue()
+                healthBarView.isProgressBarShown().shouldBeTrue()
+                healthBarView.isLabelShown().shouldBeTrue()
             }
 
         @Test
@@ -49,7 +51,7 @@ class HealthBarViewTest : ViewsForTesting() {
                 // When
                 healthBarView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(healthBarView.labelText()).isEqualTo("50 / 100")
+                healthBarView.labelText() shouldBe "50 / 100"
             }
 
         @Test
@@ -63,7 +65,7 @@ class HealthBarViewTest : ViewsForTesting() {
                 // When
                 healthBarView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(healthBarView.progressPercentage()).isEqualTo(percentage)
+                healthBarView.progressPercentage() shouldBe percentage
             }
     }
 
@@ -78,9 +80,9 @@ class HealthBarViewTest : ViewsForTesting() {
                 // When
                 healthBarView.hide()
                 // Then
-                assertThat(healthBarView.isVisibleToUser()).isFalse
-                assertThat(healthBarView.isProgressBarShown()).isFalse
-                assertThat(healthBarView.isLabelShown()).isFalse
+                healthBarView.isVisibleToUser().shouldBeFalse()
+                healthBarView.isProgressBarShown().shouldBeFalse()
+                healthBarView.isLabelShown().shouldBeFalse()
             }
     }
 }

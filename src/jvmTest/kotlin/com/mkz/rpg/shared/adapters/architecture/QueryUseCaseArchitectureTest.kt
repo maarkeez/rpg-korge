@@ -1,7 +1,11 @@
 package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Test
 
 class QueryUseCaseArchitectureTest {
@@ -14,42 +18,29 @@ class QueryUseCaseArchitectureTest {
                 .filter { it.resideInPackage("..usecases.queries..") }
                 .filter { it.isTopLevel }
 
-        SoftAssertions.assertSoftly { softly ->
+        assertSoftly {
             useCaseClasses.forEach { useCase ->
                 val publicFunctions =
                     useCase
                         .functions()
                         .filter { it.hasPublicOrDefaultModifier }
 
-                softly
-                    .assertThat(publicFunctions)
-                    .withFailMessage(
-                        "Use case '%s' should declare exactly 1 public method, found %d: %s",
-                        useCase.name,
-                        publicFunctions.size,
-                        publicFunctions.map { it.name },
-                    ).hasSize(1)
+                withClue("Use case '${useCase.name}' should declare exactly 1 public method, found ${publicFunctions.size}: ${publicFunctions.map { it.name }}") {
+                    publicFunctions.shouldHaveSize(1)
+                }
 
                 val publicFunction = publicFunctions.singleOrNull() ?: return@forEach
 
-                softly
-                    .assertThat(publicFunction.name == "invoke" && publicFunction.hasOperatorModifier)
-                    .withFailMessage(
-                        "Use case '%s' public method must be 'operator fun invoke', found '%s'%s",
-                        useCase.name,
-                        publicFunction.name,
-                        if (!publicFunction.hasOperatorModifier) " without the 'operator' modifier" else "",
-                    ).isTrue()
+                val missingOperatorModifier = if (!publicFunction.hasOperatorModifier) " without the 'operator' modifier" else ""
+                withClue("Use case '${useCase.name}' public method must be 'operator fun invoke', found '${publicFunction.name}'$missingOperatorModifier") {
+                    (publicFunction.name == "invoke" && publicFunction.hasOperatorModifier).shouldBeTrue()
+                }
 
                 val returnTypeName = publicFunction.returnType?.name ?: "Unit"
 
-                softly
-                    .assertThat(returnTypeName)
-                    .withFailMessage(
-                        "Use case '%s' invoke() must not return Unit/void, but its return type is '%s'",
-                        useCase.name,
-                        returnTypeName,
-                    ).isNotEqualTo("Unit")
+                withClue("Use case '${useCase.name}' invoke() must not return Unit/void, but its return type is '$returnTypeName'") {
+                    returnTypeName shouldNotBe "Unit"
+                }
             }
         }
     }

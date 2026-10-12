@@ -10,10 +10,11 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
+import io.kotest.assertions.throwables.shouldThrowAny
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -46,8 +47,8 @@ class CastAbilityTest {
         castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = castGroup)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        assertThat(storedBattleUnit!!.remainingTurnActions.remainingCasts).isEqualTo(0)
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattleUnit!!.remainingTurnActions.remainingCasts shouldBe 0
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.AbilityCasted(battleUnitId, "ability-1", listOf(Battlefield.Dto.PositionDto(0, 0))),
         )
     }
@@ -56,9 +57,9 @@ class CastAbilityTest {
     fun `should not cast ability when the battle unit does not exist`() {
         // Given
         // When
-        val error = catchThrowable { castAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0)))) }
+        val error = shouldThrowAny { castAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0)))) }
         // Then
-        assertThat(error).isInstanceOf(BattleUnitDoesNotExists::class.java)
+        error.shouldBeInstanceOf<BattleUnitDoesNotExists>()
     }
 
     @Test
@@ -70,12 +71,11 @@ class CastAbilityTest {
         whenever(searchAbilityById("unknown-ability")).thenReturn(null)
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            shouldThrowAny {
                 castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0))))
             }
         // Then
-        assertThat(error)
-            .isInstanceOf(BattleUnitError.AbilityDoesNotExists::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.AbilityDoesNotExists>()
     }
 
     @Test
@@ -94,12 +94,11 @@ class CastAbilityTest {
         whenever(searchAbilityById("ability-1")).thenReturn(ability)
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            shouldThrowAny {
                 castAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0))))
             }
         // Then
-        assertThat(error)
-            .isInstanceOf(BattleUnitError.BattleUnitCanNotCastAbility::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.BattleUnitCanNotCastAbility>()
     }
 
     @Test
@@ -121,11 +120,10 @@ class CastAbilityTest {
             .thenReturn(listOf(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 1)))))
         // When
         val error =
-            org.assertj.core.api.Assertions.catchThrowable {
+            shouldThrowAny {
                 castAbility(battleUnitId = battleUnitId, abilityId = "ability-1", castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0))))
             }
         // Then
-        assertThat(error)
-            .isInstanceOf(BattleUnitError.InvalidCastPosition::class.java)
+        error.shouldBeInstanceOf<BattleUnitError.InvalidCastPosition>()
     }
 }

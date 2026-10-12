@@ -1,13 +1,16 @@
 package com.mkz.rpg.terrain.usecases.commands
 
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainError.TerrainAlreadyExists
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.terrain.usecases.services.TerrainLoader
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -35,10 +38,8 @@ class InitialiseTerrainsTest {
         // When
         initialiseTerrains()
         // Then
-        assertThat(terrainRepository.searchById("sand")?.toDto())
-            .isEqualTo(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void")))
-        assertThat(terrainRepository.searchById("void")?.toDto())
-            .isEqualTo(Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand")))
+        terrainRepository.searchById("sand")?.toDto() shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void"))
+        terrainRepository.searchById("void")?.toDto() shouldBe Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand"))
     }
 
     @Test
@@ -53,11 +54,10 @@ class InitialiseTerrainsTest {
         // When
         initialiseTerrains()
         // Then
-        assertThat(eventBus)
-            .hasPublishedEvents(
-                TerrainEvent.TerrainCreated(terrainId = "sand"),
-                TerrainEvent.TerrainCreated(terrainId = "void"),
-            )
+        eventBus.shouldHavePublishedEvents(
+            TerrainEvent.TerrainCreated(terrainId = "sand"),
+            TerrainEvent.TerrainCreated(terrainId = "void"),
+        )
     }
 
     @Test
@@ -70,7 +70,7 @@ class InitialiseTerrainsTest {
         // When
         val result = runCatching { initialiseTerrains() }
         // Then
-        assertThat(result.exceptionOrNull()).isInstanceOf(TerrainAlreadyExists::class.java)
+        result.exceptionOrNull().shouldBeInstanceOf<TerrainAlreadyExists>()
     }
 
     @Test
@@ -80,7 +80,7 @@ class InitialiseTerrainsTest {
         // When
         initialiseTerrains()
         // Then
-        assertThat(terrainRepository.searchById("sand")).isNull()
-        assertThat(eventBus.publishedEvents).isEmpty()
+        terrainRepository.searchById("sand").shouldBeNull()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

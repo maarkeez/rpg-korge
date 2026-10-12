@@ -3,4 +3,3 @@ korge = { id = "com.soywiz.korge", version = "6.0.0" }
 
 [libraries]
 mockitoKotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version = "6.3.0" }
-assertJ = { group = "org.assertj", name = "assertj-core", version = "3.27.7" }

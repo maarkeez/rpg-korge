@@ -3,7 +3,8 @@ package com.mkz.rpg.battleUnit.usecases.queries
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -32,7 +33,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1")
         // Then
-        assertThat(result).isTrue()
+        result.shouldBeTrue()
     }
 
     @Test
@@ -44,7 +45,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "unknown-ability")
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -66,7 +67,7 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = battleUnit.toDto().id, abilityId = "ability-1")
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 
     @Test
@@ -80,6 +81,6 @@ class CanCastAbilityTest {
         // When
         val result = canCastAbility(battleUnitId = "unknown-battle-unit", abilityId = "ability-1")
         // Then
-        assertThat(result).isFalse()
+        result.shouldBeFalse()
     }
 }

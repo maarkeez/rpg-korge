@@ -2,8 +2,9 @@ package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
 import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.SoftAssertions
+import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import org.junit.jupiter.api.Test
 
 class PackageStructureArchitectureTest {
@@ -32,19 +33,14 @@ class PackageStructureArchitectureTest {
         // When
         val misplacedFiles = productionFiles.filterNot { it.isEntryPoint() || it.resideInAllowedPackage() }
         // Then
-        assertThat(productionFiles).isNotEmpty
-        SoftAssertions.assertSoftly { softly ->
-            misplacedFiles.forEach { file ->
-                softly
-                    .fail<Unit>(
-                        "File '%s' is declared in package '%s'. Allowed packages are " +
-                            "'<subdomain>.adapters.<any name>', '<subdomain>.domain' and " +
-                            "'<subdomain>.usecases.commands|queries|services'.",
-                        file.path,
-                        file.packagee?.fullyQualifiedName,
-                    )
+        productionFiles.shouldNotBeEmpty()
+        val violations =
+            misplacedFiles.map { file ->
+                "File '${file.path}' is declared in package '${file.packagee?.fullyQualifiedName}'. Allowed packages are " +
+                    "'<subdomain>.adapters.<any name>', '<subdomain>.domain' and " +
+                    "'<subdomain>.usecases.commands|queries|services'."
             }
-        }
+        withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
     private fun KoFileDeclaration.isEntryPoint(): Boolean = packagee?.fullyQualifiedName == "com.mkz.rpg" && nameWithExtension == "Main.kt"

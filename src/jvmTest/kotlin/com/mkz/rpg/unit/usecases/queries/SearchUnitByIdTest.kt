@@ -1,10 +1,10 @@
 package com.mkz.rpg.unit.usecases.queries
 
-import com.mkz.rpg.shared.domain.assertThat
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitMother
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class SearchUnitByIdTest {
@@ -19,7 +19,7 @@ class SearchUnitByIdTest {
         // When
         val unitFound = searchUnitById(id = unit.toDto().id)
         // Then
-        assertThat(unitFound).isEqualTo(unit.toDto())
+        unitFound shouldBe unit.toDto()
     }
 
     @Test
@@ -29,6 +29,6 @@ class SearchUnitByIdTest {
         // When
         val unitFound = searchUnitById(id = unitId)
         // Then
-        assertThat(unitFound).isNull()
+        unitFound.shouldBeNull()
     }
 }

@@ -15,8 +15,10 @@ import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast.CastDecision
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
@@ -52,10 +54,14 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestCastAbility(battleUnitId = "unit-1", abilityId = "sword", castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1))),
         )
-        assertThat(cpuBrainRepository.search()?.toDto()?.isAwaitingAction).isTrue
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.isAwaitingAction
+            .shouldBeTrue()
     }
 
     @Test
@@ -67,8 +73,12 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(BattleUnitEvent.RequestMoveBattleUnit(battleUnitId = "unit-1", moveToRow = 2, moveToColumn = 3))
-        assertThat(cpuBrainRepository.search()?.toDto()?.isAwaitingAction).isTrue
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestMoveBattleUnit(battleUnitId = "unit-1", moveToRow = 2, moveToColumn = 3))
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.isAwaitingAction
+            .shouldBeTrue()
     }
 
     @Test
@@ -80,8 +90,8 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
-        assertThat(cpuBrainRepository.search()?.nextBattleUnitId()).isEqualTo("unit-2")
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
+        cpuBrainRepository.search()?.nextBattleUnitId() shouldBe "unit-2"
     }
 
     @Test
@@ -92,7 +102,7 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
     }
 
     @Test
@@ -102,7 +112,7 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
+        eventBus.shouldHavePublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
     }
 
     @Test
@@ -119,7 +129,7 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasPublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
+        eventBus.shouldHavePublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
     }
 
     @Test
@@ -129,7 +139,7 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
+        eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
@@ -139,6 +149,6 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

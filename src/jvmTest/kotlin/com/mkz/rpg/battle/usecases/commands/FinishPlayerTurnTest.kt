@@ -5,8 +5,8 @@ import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class FinishPlayerTurnTest {
@@ -27,10 +27,8 @@ class FinishPlayerTurnTest {
         finishPlayerTurn()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
-        assertThat(eventBus)
-            .hasPublishedEvents(BattleEvent.PlayerTurnStarted(players[1]))
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerTurnStarted(players[1]))
     }
 
     @Test
@@ -47,9 +45,7 @@ class FinishPlayerTurnTest {
         finishPlayerTurn()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        assertThat(storedBattle)
-            .isEqualTo(Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false))
-        assertThat(eventBus)
-            .hasPublishedEvents(BattleEvent.BattleRoundFinished(1))
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleRoundFinished(1))
     }
 }

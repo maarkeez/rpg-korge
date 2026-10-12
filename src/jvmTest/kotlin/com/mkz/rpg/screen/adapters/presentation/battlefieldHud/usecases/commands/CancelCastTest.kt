@@ -8,9 +8,9 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class CancelCastTest {
@@ -39,24 +39,22 @@ class CancelCastTest {
         // When
         cancelCast()
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(
+        battlefieldHudRepository.search() shouldBe
             displayAbilityCastRange(
                 casterTile = tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 tilesWhereCanBeMoved = setOf(tile(1, 0)),
                 castGroupsWhereCanCast = castGroupsWhereCanCast,
+            )
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.SelectedBattleUnitAbility(
+                casterTile = tile(0, 0),
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroupsWhereCanCast = castGroupsWhereCanCast,
             ),
         )
-        assertThat(eventBus)
-            .hasPublishedEvents(
-                BattlefieldHudEvent.SelectedBattleUnitAbility(
-                    casterTile = tile(0, 0),
-                    battleUnitId = "battle-unit-1",
-                    abilityId = "ability-1",
-                    castGroupsWhereCanCast = castGroupsWhereCanCast,
-                ),
-            )
     }
 
     @Test
@@ -68,8 +66,7 @@ class CancelCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { cancelCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { cancelCast() }
     }
 
     @Test
@@ -81,8 +78,7 @@ class CancelCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { cancelCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { cancelCast() }
     }
 
     @Test
@@ -94,8 +90,7 @@ class CancelCastTest {
         )
         // When
         // Then
-        assertThatThrownBy { cancelCast() }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { cancelCast() }
     }
 
     @Test
@@ -103,7 +98,6 @@ class CancelCastTest {
         // Given
         // When
         // Then
-        assertThatThrownBy { cancelCast() }
-            .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
+        shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { cancelCast() }
     }
 }

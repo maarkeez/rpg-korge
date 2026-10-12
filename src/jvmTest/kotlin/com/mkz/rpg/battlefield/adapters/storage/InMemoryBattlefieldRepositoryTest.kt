@@ -1,7 +1,8 @@
 package com.mkz.rpg.battlefield.adapters.storage
 
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class InMemoryBattlefieldRepositoryTest {
             battlefieldRepository.create(createdBattlefield)
             // Then
             val storedBattlefield = battlefieldRepository.search()
-            assertThat(storedBattlefield).isEqualTo(createdBattlefield)
+            storedBattlefield shouldBe createdBattlefield
         }
     }
 
@@ -34,7 +35,7 @@ class InMemoryBattlefieldRepositoryTest {
             battlefieldRepository.update(updatedBattlefield)
             // Then
             val searchResult = battlefieldRepository.search()
-            assertThat(searchResult).isEqualTo(updatedBattlefield)
+            searchResult shouldBe updatedBattlefield
         }
     }
 
@@ -45,7 +46,7 @@ class InMemoryBattlefieldRepositoryTest {
             // When
             val storedBattlefield = battlefieldRepository.search()
             // Then
-            assertThat(storedBattlefield).isNull()
+            storedBattlefield.shouldBeNull()
         }
     }
 }

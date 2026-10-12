@@ -2,7 +2,13 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -16,7 +22,7 @@ class BattlefieldHudTest {
             // When
             val (events, _) = hud.pullEvents()
             // Then
-            assertThat(events).containsExactly(BattlefieldHudEvent.Idle)
+            events.shouldContainExactly(BattlefieldHudEvent.Idle)
         }
 
         @Test
@@ -26,9 +32,9 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.idle()
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.Idle::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.Idle>()
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events).containsExactly(BattlefieldHudEvent.Idle)
+            events.shouldContainExactly(BattlefieldHudEvent.Idle)
         }
 
         @Test
@@ -41,20 +47,19 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.selectBattleUnit(tile = tile, battleUnitId = battleUnitId, tilesWhereCanBeMoved = tilesWhereCanBeMoved)
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayMovementRange::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayMovementRange>()
             val movementRange = updatedHud as BattlefieldHud.DisplayMovementRange
-            assertThat(movementRange.tile).isEqualTo(tile)
-            assertThat(movementRange.battleUnitId).isEqualTo(battleUnitId)
-            assertThat(movementRange.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
+            movementRange.tile shouldBe tile
+            movementRange.battleUnitId shouldBe battleUnitId
+            movementRange.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.SelectedBattleUnit(
-                        tile = tile,
-                        battleUnitId = battleUnitId,
-                        tilesWhereCanBeMoved = tilesWhereCanBeMoved,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.SelectedBattleUnit(
+                    tile = tile,
+                    battleUnitId = battleUnitId,
+                    tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                ),
+            )
         }
     }
 
@@ -69,22 +74,21 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.selectAbility(abilityId = abilityId, castGroupsWhereCanCast = castGroupsWhereCanCast)
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayAbilityCastRange::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayAbilityCastRange>()
             val castRange = updatedHud as BattlefieldHud.DisplayAbilityCastRange
-            assertThat(castRange.casterTile).isEqualTo(hud.tile)
-            assertThat(castRange.battleUnitId).isEqualTo(hud.battleUnitId)
-            assertThat(castRange.abilityId).isEqualTo(abilityId)
-            assertThat(castRange.castGroupsWhereCanCast).isEqualTo(castGroupsWhereCanCast)
+            castRange.casterTile shouldBe hud.tile
+            castRange.battleUnitId shouldBe hud.battleUnitId
+            castRange.abilityId shouldBe abilityId
+            castRange.castGroupsWhereCanCast shouldBe castGroupsWhereCanCast
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.SelectedBattleUnitAbility(
-                        casterTile = hud.tile,
-                        battleUnitId = hud.battleUnitId,
-                        abilityId = abilityId,
-                        castGroupsWhereCanCast = castGroupsWhereCanCast,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.SelectedBattleUnitAbility(
+                    casterTile = hud.tile,
+                    battleUnitId = hud.battleUnitId,
+                    abilityId = abilityId,
+                    castGroupsWhereCanCast = castGroupsWhereCanCast,
+                ),
+            )
         }
 
         @Test
@@ -96,17 +100,16 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.tilesWhereCanBeMoved(tile = newTile, tilesWhereCanBeMoved = newTilesWhereCanBeMoved)
             // Then
-            assertThat(updatedHud.tile).isEqualTo(newTile)
-            assertThat(updatedHud.tilesWhereCanBeMoved).isEqualTo(newTilesWhereCanBeMoved)
+            updatedHud.tile shouldBe newTile
+            updatedHud.tilesWhereCanBeMoved shouldBe newTilesWhereCanBeMoved
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.SelectedBattleUnit(
-                        tile = newTile,
-                        battleUnitId = hud.battleUnitId,
-                        tilesWhereCanBeMoved = newTilesWhereCanBeMoved,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.SelectedBattleUnit(
+                    tile = newTile,
+                    battleUnitId = hud.battleUnitId,
+                    tilesWhereCanBeMoved = newTilesWhereCanBeMoved,
+                ),
+            )
         }
 
         @Test
@@ -116,9 +119,9 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.idle()
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.Idle::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.Idle>()
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events).containsExactly(BattlefieldHudEvent.Idle)
+            events.shouldContainExactly(BattlefieldHudEvent.Idle)
         }
     }
 
@@ -133,18 +136,17 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.selectAbility(abilityId = newAbilityId, castGroupsWhereCanCast = newCastGroupsWhereCanCast)
             // Then
-            assertThat(updatedHud.abilityId).isEqualTo(newAbilityId)
-            assertThat(updatedHud.castGroupsWhereCanCast).isEqualTo(newCastGroupsWhereCanCast)
+            updatedHud.abilityId shouldBe newAbilityId
+            updatedHud.castGroupsWhereCanCast shouldBe newCastGroupsWhereCanCast
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.SelectedBattleUnitAbility(
-                        casterTile = hud.casterTile,
-                        battleUnitId = hud.battleUnitId,
-                        abilityId = newAbilityId,
-                        castGroupsWhereCanCast = newCastGroupsWhereCanCast,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.SelectedBattleUnitAbility(
+                    casterTile = hud.casterTile,
+                    battleUnitId = hud.battleUnitId,
+                    abilityId = newAbilityId,
+                    castGroupsWhereCanCast = newCastGroupsWhereCanCast,
+                ),
+            )
         }
 
         @Test
@@ -154,21 +156,20 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.deselectAbility()
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayMovementRange::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayMovementRange>()
             val movementRange = updatedHud as BattlefieldHud.DisplayMovementRange
-            assertThat(movementRange.tile).isEqualTo(hud.casterTile)
-            assertThat(movementRange.battleUnitId).isEqualTo(hud.battleUnitId)
-            assertThat(movementRange.tilesWhereCanBeMoved).isEqualTo(hud.tilesWhereCanBeMoved)
+            movementRange.tile shouldBe hud.casterTile
+            movementRange.battleUnitId shouldBe hud.battleUnitId
+            movementRange.tilesWhereCanBeMoved shouldBe hud.tilesWhereCanBeMoved
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactlyInAnyOrder(
-                    BattlefieldHudEvent.AbilityDeselected(abilityId = hud.abilityId),
-                    BattlefieldHudEvent.SelectedBattleUnit(
-                        tile = hud.casterTile,
-                        battleUnitId = hud.battleUnitId,
-                        tilesWhereCanBeMoved = hud.tilesWhereCanBeMoved,
-                    ),
-                )
+            events.shouldContainExactlyInAnyOrder(
+                BattlefieldHudEvent.AbilityDeselected(abilityId = hud.abilityId),
+                BattlefieldHudEvent.SelectedBattleUnit(
+                    tile = hud.casterTile,
+                    battleUnitId = hud.battleUnitId,
+                    tilesWhereCanBeMoved = hud.tilesWhereCanBeMoved,
+                ),
+            )
         }
 
         @Test
@@ -179,21 +180,20 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.previewSelfAbilityCast(castGroup = castGroup)
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayAbilityCastPreview::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayAbilityCastPreview>()
             val preview = updatedHud as BattlefieldHud.DisplayAbilityCastPreview
-            assertThat(preview.casterTile).isEqualTo(hud.casterTile)
-            assertThat(preview.abilityId).isEqualTo(hud.abilityId)
-            assertThat(preview.castGroup).isEqualTo(castGroup)
-            assertThat(preview.enemyBattleUnitId).isNull()
+            preview.casterTile shouldBe hud.casterTile
+            preview.abilityId shouldBe hud.abilityId
+            preview.castGroup shouldBe castGroup
+            preview.enemyBattleUnitId.shouldBeNull()
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.SelfAbilityCastPreviewed(
-                        casterBattleUnitId = hud.battleUnitId,
-                        abilityId = hud.abilityId,
-                        castGroup = castGroup,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.SelfAbilityCastPreviewed(
+                    casterBattleUnitId = hud.battleUnitId,
+                    abilityId = hud.abilityId,
+                    castGroup = castGroup,
+                ),
+            )
         }
 
         @Test
@@ -205,20 +205,19 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.previewEnemyAbilityCast(castGroup = castGroup, enemyBattleUnitId = enemyBattleUnitId)
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.DisplayAbilityCastPreview::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayAbilityCastPreview>()
             val preview = updatedHud as BattlefieldHud.DisplayAbilityCastPreview
-            assertThat(preview.castGroup).isEqualTo(castGroup)
-            assertThat(preview.enemyBattleUnitId).isEqualTo(enemyBattleUnitId)
+            preview.castGroup shouldBe castGroup
+            preview.enemyBattleUnitId shouldBe enemyBattleUnitId
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events)
-                .containsExactly(
-                    BattlefieldHudEvent.EnemyAbilityCastPreviewed(
-                        casterBattleUnitId = hud.battleUnitId,
-                        abilityId = hud.abilityId,
-                        castGroup = castGroup,
-                        enemyBattleUnitId = enemyBattleUnitId,
-                    ),
-                )
+            events.shouldContainExactly(
+                BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                    casterBattleUnitId = hud.battleUnitId,
+                    abilityId = hud.abilityId,
+                    castGroup = castGroup,
+                    enemyBattleUnitId = enemyBattleUnitId,
+                ),
+            )
         }
 
         @Test
@@ -228,9 +227,9 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.idle()
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.Idle::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.Idle>()
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events).containsExactly(BattlefieldHudEvent.Idle)
+            events.shouldContainExactly(BattlefieldHudEvent.Idle)
         }
     }
 
@@ -243,9 +242,9 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.idle()
             // Then
-            assertThat(updatedHud).isInstanceOf(BattlefieldHud.Idle::class.java)
+            updatedHud.shouldBeInstanceOf<BattlefieldHud.Idle>()
             val (events, _) = updatedHud.pullEvents()
-            assertThat(events).containsExactly(BattlefieldHudEvent.Idle)
+            events.shouldContainExactly(BattlefieldHudEvent.Idle)
         }
 
         @Test
@@ -260,10 +259,8 @@ class BattlefieldHudTest {
             // When
             val updatedHud = hud.confirmCast()
             // Then
-            assertThat(updatedHud).isEqualTo(
-                BattlefieldHudMother.displayMovementRange(tile = tile(2, 2), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(2, 3))),
-            )
-            assertThat(updatedHud.pullEvents().first).isEmpty()
+            updatedHud shouldBe BattlefieldHudMother.displayMovementRange(tile = tile(2, 2), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(2, 3)))
+            updatedHud.pullEvents().first.shouldBeEmpty()
         }
 
         @Test
@@ -282,16 +279,15 @@ class BattlefieldHudTest {
             val updatedHud = hud.cancelCast()
             // Then
             val (events, hudWithoutEvents) = updatedHud.pullEvents()
-            assertThat(hudWithoutEvents).isEqualTo(
+            hudWithoutEvents shouldBe
                 BattlefieldHudMother.displayAbilityCastRange(
                     casterTile = tile(0, 0),
                     battleUnitId = "battle-unit-1",
                     abilityId = "ability-1",
                     tilesWhereCanBeMoved = setOf(tile(1, 0)),
                     castGroupsWhereCanCast = castGroupsWhereCanCast,
-                ),
-            )
-            assertThat(events).containsExactly(
+                )
+            events.shouldContainExactly(
                 BattlefieldHudEvent.SelectedBattleUnitAbility(
                     casterTile = tile(0, 0),
                     battleUnitId = "battle-unit-1",
@@ -308,8 +304,8 @@ class BattlefieldHudTest {
             // When
             val (events, clearedHud) = hud.pullEvents()
             // Then
-            assertThat(events).isNotEmpty()
-            assertThat(clearedHud.pullEvents().first).isEmpty()
+            events.shouldNotBeEmpty()
+            clearedHud.pullEvents().first.shouldBeEmpty()
         }
     }
 }

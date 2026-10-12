@@ -1,9 +1,10 @@
 package com.mkz.rpg.battle.adapters.resources
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 
 class ResourcesBattleLoaderTest {
@@ -15,7 +16,7 @@ class ResourcesBattleLoaderTest {
         // When
         runBlocking { loader.initResources() }
         // Then
-        assertThat(loader.loadPlayerOrder()).containsExactly("player-one", "player-two")
+        loader.loadPlayerOrder().shouldContainExactly("player-one", "player-two")
     }
 
     @Test
@@ -26,8 +27,6 @@ class ResourcesBattleLoaderTest {
         // When
         val initialisation = { runBlocking { loader.initResources() } }
         // Then
-        assertThatThrownBy { initialisation() }
-            .isInstanceOf(IllegalStateException::class.java)
-            .hasMessageContaining("battle/battle.toml")
+        shouldThrow<IllegalStateException> { initialisation() }.message.shouldContain("battle/battle.toml")
     }
 }

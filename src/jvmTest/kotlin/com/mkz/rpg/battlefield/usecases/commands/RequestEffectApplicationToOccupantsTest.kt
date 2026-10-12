@@ -7,7 +7,8 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import org.junit.jupiter.api.Test
@@ -34,7 +35,7 @@ class RequestEffectApplicationToOccupantsTest {
         // When
         requestEffectApplicationToOccupants()
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
@@ -60,7 +61,7 @@ class RequestEffectApplicationToOccupantsTest {
         // When
         requestEffectApplicationToOccupants()
         // Then
-        assertThat(eventBus).hasPublishedEvents(
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
@@ -88,7 +89,7 @@ class RequestEffectApplicationToOccupantsTest {
         // When
         requestEffectApplicationToOccupants()
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
+        eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
@@ -100,7 +101,7 @@ class RequestEffectApplicationToOccupantsTest {
         // When
         requestEffectApplicationToOccupants()
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
+        eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
@@ -108,6 +109,6 @@ class RequestEffectApplicationToOccupantsTest {
         // When
         requestEffectApplicationToOccupants()
         // Then
-        assertThat(eventBus).hasNotPublishedEvents()
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

@@ -3,7 +3,8 @@ package com.mkz.rpg.shared.domain
 import com.mkz.rpg.effect.domain.EffectEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.unit.domain.UnitEvent
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Test
 
 class EventBusTest {
@@ -19,7 +20,7 @@ class EventBusTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(receivedEvents).containsExactly(unitCreated)
+        receivedEvents.shouldContainExactly(unitCreated)
     }
 
     @Test
@@ -34,8 +35,8 @@ class EventBusTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(firstReceived).containsExactly(unitCreated)
-        assertThat(secondReceived).containsExactly(unitCreated)
+        firstReceived.shouldContainExactly(unitCreated)
+        secondReceived.shouldContainExactly(unitCreated)
     }
 
     @Test
@@ -48,7 +49,7 @@ class EventBusTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(effectCreated).isEmpty()
+        effectCreated.shouldBeEmpty()
     }
 
     @Test
@@ -62,7 +63,7 @@ class EventBusTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(receivedEvents).isEmpty()
+        receivedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -77,6 +78,6 @@ class EventBusTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(receivedEvents).containsExactly(firstUnitCreated, secondUnitCreated)
+        receivedEvents.shouldContainExactly(firstUnitCreated, secondUnitCreated)
     }
 }

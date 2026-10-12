@@ -2,7 +2,11 @@ package com.mkz.rpg.battleUnit.adapters.storage
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother
 import com.mkz.rpg.player.domain.PlayerMother
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -19,7 +23,7 @@ class InMemoryBattleUnitRepositoryTest {
             battleUnitRepository.create(battleUnit)
             // Then
             val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)
-            assertThat(storedBattleUnit).isEqualTo(battleUnit)
+            storedBattleUnit shouldBe battleUnit
         }
     }
 
@@ -35,7 +39,7 @@ class InMemoryBattleUnitRepositoryTest {
             battleUnitRepository.update(updatedBattleUnit)
             // Then
             val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)
-            assertThat(storedBattleUnit).isEqualTo(updatedBattleUnit)
+            storedBattleUnit shouldBe updatedBattleUnit
         }
     }
 
@@ -49,7 +53,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)
             // Then
-            assertThat(storedBattleUnit).isEqualTo(battleUnit)
+            storedBattleUnit shouldBe battleUnit
         }
 
         @Test
@@ -57,7 +61,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnit = battleUnitRepository.searchById("battle-unit-unknown")
             // Then
-            assertThat(storedBattleUnit).isNull()
+            storedBattleUnit.shouldBeNull()
         }
     }
 
@@ -75,7 +79,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnits = battleUnitRepository.searchByPlayerId(playerId = player.id)
             // Then
-            assertThat(storedBattleUnits).containsExactly(playerBattleUnit)
+            storedBattleUnits.shouldContainExactly(playerBattleUnit)
         }
 
         @Test
@@ -86,7 +90,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnits = battleUnitRepository.searchByPlayerId(playerId = "player-1")
             // Then
-            assertThat(storedBattleUnits).isEmpty()
+            storedBattleUnits.shouldBeEmpty()
         }
     }
 
@@ -102,7 +106,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnits = battleUnitRepository.searchAll()
             // Then
-            assertThat(storedBattleUnits).containsExactlyInAnyOrder(firstBattleUnit, secondBattleUnit)
+            storedBattleUnits.shouldContainExactlyInAnyOrder(firstBattleUnit, secondBattleUnit)
         }
 
         @Test
@@ -110,7 +114,7 @@ class InMemoryBattleUnitRepositoryTest {
             // When
             val storedBattleUnits = battleUnitRepository.searchAll()
             // Then
-            assertThat(storedBattleUnits).isEmpty()
+            storedBattleUnits.shouldBeEmpty()
         }
     }
 }

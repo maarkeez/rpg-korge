@@ -9,8 +9,11 @@ import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.startGame
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class FinishTurnEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
@@ -28,14 +31,10 @@ class FinishTurnEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickFinishTurn(playerCallToActionView)
             // Then
             waitUntil { battleInfoView.playerTurnText() == "CPU turn" }
-            assertThat(battleInfoView.playerTurnText()).isEqualTo("CPU turn")
-            assertThat(playerCallToActionView.isFinishTurnEnabled())
-                .withFailMessage("Expected finish turn to be disabled while the CPU turn is displayed")
-                .isFalse
+            battleInfoView.playerTurnText() shouldBe "CPU turn"
+            withClue("Expected finish turn to be disabled while the CPU turn is displayed") { playerCallToActionView.isFinishTurnEnabled().shouldBeFalse() }
             waitUntil { battleInfoView.playerTurnText() == "Human turn" && canHumanPlayerAct() }
-            assertThat(battleInfoView.roundText()).isEqualTo("Round 2")
-            assertThat(playerCallToActionView.isFinishTurnEnabled())
-                .withFailMessage("Expected finish turn to be enabled once the human turn has been announced")
-                .isTrue
+            battleInfoView.roundText() shouldBe "Round 2"
+            withClue("Expected finish turn to be enabled once the human turn has been announced") { playerCallToActionView.isFinishTurnEnabled().shouldBeTrue() }
         }
 }

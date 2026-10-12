@@ -13,8 +13,8 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -66,7 +66,7 @@ class CpuCastingAcceptanceTest {
         // When
         eventBus.dispatch()
         // Then
-        assertThat(battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints).isEqualTo(90)
+        battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
     }
 
     @Nested
@@ -91,8 +91,8 @@ class CpuCastingAcceptanceTest {
             // When
             eventBus.dispatch()
             // Then
-            assertThat(battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealthPoints).isEqualTo(20)
-            assertThat(battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints).isEqualTo(100)
+            battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealthPoints shouldBe 20
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 100
         }
     }
 }

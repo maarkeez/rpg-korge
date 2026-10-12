@@ -3,8 +3,10 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.shared.adapters.presentation.filledWidth
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.previewWidth
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +20,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 val manaBarPreviewView = ManaBarPreviewView(size)
                 // When
                 // Then
-                assertThat(manaBarPreviewView.isVisibleToUser()).isTrue
+                manaBarPreviewView.isVisibleToUser().shouldBeTrue()
             }
     }
 
@@ -33,7 +35,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(manaBarPreviewView.isVisibleToUser()).isTrue
+                manaBarPreviewView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -44,7 +46,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
                 // Then
-                assertThat(manaBarPreviewView.labelText()).isEqualTo("50 / 100")
+                manaBarPreviewView.labelText() shouldBe "50 / 100"
             }
 
         @Test
@@ -58,7 +60,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
                 // Then
-                assertThat(manaBarPreviewView.filledWidth()).isEqualTo(size.width * filledPercentage)
+                manaBarPreviewView.filledWidth() shouldBe size.width * filledPercentage
             }
 
         @Test
@@ -72,7 +74,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
                 // Then
-                assertThat(manaBarPreviewView.previewWidth()).isEqualTo(size.width * previewPercentage)
+                manaBarPreviewView.previewWidth() shouldBe size.width * previewPercentage
             }
 
         @Test
@@ -83,8 +85,8 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
                 // Then
-                assertThat(manaBarPreviewView.filledWidth()).isEqualTo(0.00)
-                assertThat(manaBarPreviewView.labelText()).isEqualTo("0 / 100")
+                manaBarPreviewView.filledWidth() shouldBe 0.00
+                manaBarPreviewView.labelText() shouldBe "0 / 100"
             }
     }
 
@@ -99,7 +101,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
                 // When
                 manaBarPreviewView.hide()
                 // Then
-                assertThat(manaBarPreviewView.isVisibleToUser()).isFalse
+                manaBarPreviewView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

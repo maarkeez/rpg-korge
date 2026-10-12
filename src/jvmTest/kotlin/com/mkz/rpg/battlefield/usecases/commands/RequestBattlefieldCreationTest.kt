@@ -6,11 +6,19 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.domain.TerrainMother
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.catchThrowable
+import io.kotest.assertions.throwables.shouldThrowAny
+import io.kotest.inspectors.forAll
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -43,14 +51,12 @@ class RequestBattlefieldCreationTest {
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        assertThat(storedBattlefield).isNotNull
-        assertThat(storedBattlefield!!.rows).isEqualTo(rows)
-        assertThat(storedBattlefield.columns).isEqualTo(columns)
-        assertThat(storedBattlefield.tiles).hasSize(rows * columns)
-        assertThat(storedBattlefield.tiles.values)
-            .allSatisfy { tile -> assertThat(tile.battleUnitId).isNull() }
-        assertThat(eventBus)
-            .hasPublishedEvents(BattlefieldEvent.BattlefieldCreated)
+        storedBattlefield.shouldNotBeNull()
+        storedBattlefield!!.rows shouldBe rows
+        storedBattlefield.columns shouldBe columns
+        storedBattlefield.tiles.shouldHaveSize(rows * columns)
+        storedBattlefield.tiles.values.forAll { tile -> tile.battleUnitId.shouldBeNull() }
+        eventBus.shouldHavePublishedEvents(BattlefieldEvent.BattlefieldCreated)
     }
 
     @Test
@@ -63,9 +69,8 @@ class RequestBattlefieldCreationTest {
         // When
         requestBattlefieldCreation(rows = 3, columns = 3, tiles = emptyList())
         // Then
-        assertThat(battlefieldRepository.search()?.toDto())
-            .isEqualTo(existingBattlefield.toDto())
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldRepository.search()?.toDto() shouldBe existingBattlefield.toDto()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -79,13 +84,13 @@ class RequestBattlefieldCreationTest {
             )
         whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
         // When
-        val error = catchThrowable { requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles) }
+        val error = shouldThrowAny { requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles) }
         // Then
         val tileTerrainTransitionNotAllowed = error as BattlefieldError.TileTerrainTransitionNotAllowed
-        assertThat(tileTerrainTransitionNotAllowed.terrainId).isEqualTo("sand")
-        assertThat(tileTerrainTransitionNotAllowed.transitionToTerrainId).isEqualTo("void")
-        assertThat(battlefieldRepository.search()).isNull()
-        assertThat(eventBus.publishedEvents).isEmpty()
+        tileTerrainTransitionNotAllowed.terrainId shouldBe "sand"
+        tileTerrainTransitionNotAllowed.transitionToTerrainId shouldBe "void"
+        battlefieldRepository.search().shouldBeNull()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -107,8 +112,8 @@ class RequestBattlefieldCreationTest {
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
         val storedBattlefield = battlefieldRepository.search()
-        assertThat(storedBattlefield).isNotNull
-        assertThat(storedBattlefield!!.canBeOccupied(row = 0, column = 0)).isFalse()
-        assertThat(storedBattlefield.canBeOccupied(row = 0, column = 1)).isTrue()
+        storedBattlefield.shouldNotBeNull()
+        storedBattlefield!!.canBeOccupied(row = 0, column = 0).shouldBeFalse()
+        storedBattlefield.canBeOccupied(row = 0, column = 1).shouldBeTrue()
     }
 }

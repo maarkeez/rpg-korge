@@ -1,11 +1,11 @@
 package com.mkz.rpg.unit.usecases.commands
 
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitEvent
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class RequestUnitCreationTest {
@@ -25,7 +25,7 @@ class RequestUnitCreationTest {
         requestUnitCreation(unitDto = unit)
         // Then
         val storedUnit = unitRepository.searchById(unit.id)?.toDto()
-        assertThat(storedUnit).isEqualTo(unit)
-        assertThat(eventBus).hasPublishedEvents(UnitEvent.UnitCreated(unit.id))
+        storedUnit shouldBe unit
+        eventBus.shouldHavePublishedEvents(UnitEvent.UnitCreated(unit.id))
     }
 }

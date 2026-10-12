@@ -1,9 +1,11 @@
 package com.mkz.rpg.shared.adapters.presentation
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -17,9 +19,9 @@ class BarViewTest : ViewsForTesting() {
                 val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
                 // When
                 // Then
-                assertThat(barView.isVisibleToUser()).isFalse
-                assertThat(barView.isProgressBarShown()).isFalse
-                assertThat(barView.isLabelShown()).isFalse
+                barView.isVisibleToUser().shouldBeFalse()
+                barView.isProgressBarShown().shouldBeFalse()
+                barView.isLabelShown().shouldBeFalse()
             }
     }
 
@@ -33,9 +35,9 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(barView.isVisibleToUser()).isTrue
-                assertThat(barView.isProgressBarShown()).isTrue
-                assertThat(barView.isLabelShown()).isTrue
+                barView.isVisibleToUser().shouldBeTrue()
+                barView.isProgressBarShown().shouldBeTrue()
+                barView.isLabelShown().shouldBeTrue()
             }
 
         @Test
@@ -46,7 +48,7 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(barView.labelText()).isEqualTo("50 / 100")
+                barView.labelText() shouldBe "50 / 100"
             }
 
         @Test
@@ -60,7 +62,7 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.display(remaining = 50, maximum = 100)
                 // Then
-                assertThat(barView.progressPercentage()).isEqualTo(percentage)
+                barView.progressPercentage() shouldBe percentage
             }
     }
 
@@ -75,9 +77,9 @@ class BarViewTest : ViewsForTesting() {
                 // When
                 barView.hide()
                 // Then
-                assertThat(barView.isVisibleToUser()).isFalse
-                assertThat(barView.isProgressBarShown()).isFalse
-                assertThat(barView.isLabelShown()).isFalse
+                barView.isVisibleToUser().shouldBeFalse()
+                barView.isProgressBarShown().shouldBeFalse()
+                barView.isLabelShown().shouldBeFalse()
             }
     }
 }

@@ -7,9 +7,10 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -40,8 +41,8 @@ class MoveBattleUnitTest {
         moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 2, moveToColumn = 1)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(2)
-        assertThat(eventBus).hasPublishedEvents(
+        storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 2
+        eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitMoved(battleUnitId, 0, 0, 2, 1, path),
         )
     }
@@ -59,7 +60,7 @@ class MoveBattleUnitTest {
         moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 0, moveToColumn = 2)
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
-        assertThat(storedBattleUnit!!.remainingTurnActions.remainingSteps).isEqualTo(1)
+        storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 1
     }
 
     @Test
@@ -73,14 +74,12 @@ class MoveBattleUnitTest {
         // When
         moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 2, moveToColumn = 1)
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
-        assertThat(
-            battleUnitRepository
-                .searchById(battleUnitId)
-                ?.toDto()
-                ?.remainingTurnActions
-                ?.remainingSteps,
-        ).isEqualTo(5)
+        eventBus.publishedEvents.shouldBeEmpty()
+        battleUnitRepository
+            .searchById(battleUnitId)
+            ?.toDto()
+            ?.remainingTurnActions
+            ?.remainingSteps shouldBe 5
     }
 
     @Test
@@ -89,7 +88,7 @@ class MoveBattleUnitTest {
         // When
         moveBattleUnit(battleUnitId = "unknown-battle-unit", moveToRow = 1, moveToColumn = 0)
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -102,6 +101,6 @@ class MoveBattleUnitTest {
         // When
         moveBattleUnit(battleUnitId = battleUnit.toDto().id, moveToRow = 1, moveToColumn = 0)
         // Then
-        assertThat(eventBus.publishedEvents).isEmpty()
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 }

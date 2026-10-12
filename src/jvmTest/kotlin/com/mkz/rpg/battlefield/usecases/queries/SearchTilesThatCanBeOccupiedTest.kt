@@ -3,7 +3,8 @@ package com.mkz.rpg.battlefield.usecases.queries
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -29,7 +30,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 1)
         // Then
-        assertThat(result).containsExactlyInAnyOrder(
+        result.shouldContainExactlyInAnyOrder(
             Battlefield.Dto.PositionDto(0, 0),
             Battlefield.Dto.PositionDto(0, 1),
             Battlefield.Dto.PositionDto(0, 2),
@@ -54,7 +55,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 0)
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 
     @Test
@@ -63,7 +64,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 1)
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 
     @Test
@@ -75,6 +76,6 @@ class SearchTilesThatCanBeOccupiedTest {
         // When
         val result = searchTilesThatCanBeOccupied("unknown-battle-unit", distance = 1)
         // Then
-        assertThat(result).isEmpty()
+        result.shouldBeEmpty()
     }
 }

@@ -22,8 +22,10 @@ import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.domain.UnitMother
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -129,7 +131,7 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val occupantBattleUnitId = battlefieldApi.searchOccupant(row = 2, column = 2)
-        assertThat(occupantBattleUnitId).isEqualTo(battleUnitId)
+        occupantBattleUnitId shouldBe battleUnitId
     }
 
     @Test
@@ -143,8 +145,8 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val storedBattle = battleApi.searchBattle()!!
-        assertThat(storedBattle.currentPlayerTurn).isEqualTo(humanPlayerId)
-        assertThat(storedBattle.currentRound).isEqualTo(2)
+        storedBattle.currentPlayerTurn shouldBe humanPlayerId
+        storedBattle.currentRound shouldBe 2
     }
 
     @Test
@@ -156,9 +158,9 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val previousTileOccupantId = battlefieldApi.searchOccupant(row = 1, column = 1)
-        assertThat(previousTileOccupantId).isNull()
+        previousTileOccupantId.shouldBeNull()
         val newTileOccupantId = battlefieldApi.searchOccupant(row = 2, column = 1)
-        assertThat(newTileOccupantId).isEqualTo(humanBattleUnitId)
+        newTileOccupantId shouldBe humanBattleUnitId
     }
 
     @Test
@@ -181,9 +183,9 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val cpuBattleUnit = battleUnitApi.searchBattleUnitById(cpuBattleUnitId)!!
-        assertThat(cpuBattleUnit.remainingHealthPoints).isZero
+        cpuBattleUnit.remainingHealthPoints shouldBe 0
         val cpuBattleUnitPosition = battlefieldApi.searchPosition(cpuBattleUnitId)
-        assertThat(cpuBattleUnitPosition).isNull()
+        cpuBattleUnitPosition.shouldBeNull()
     }
 
     @Test
@@ -206,7 +208,7 @@ class SimpleBattleAcceptanceTest {
         eventBus.dispatch()
         // Then
         val battle = battleApi.searchBattle()!!
-        assertThat(battle.isFinished).isTrue()
-        assertThat(battle.currentPlayerTurn).isEqualTo(humanPlayerId)
+        battle.isFinished.shouldBeTrue()
+        battle.currentPlayerTurn shouldBe humanPlayerId
     }
 }

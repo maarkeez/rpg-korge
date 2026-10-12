@@ -19,8 +19,8 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother
+import io.kotest.matchers.collections.shouldContain
 import kotlinx.coroutines.runBlocking
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -130,8 +130,8 @@ class MushroomAbilityAcceptanceTest {
         eventBus.dispatch()
         // Then
         val firstRat = battleUnitApi.searchBattleUnitById(firstRatBattleUnitId)!!
-        assertThat(firstRat.ongoingEffects.onTurnStarted).contains(venomEffectId)
+        firstRat.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
         val secondRat = battleUnitApi.searchBattleUnitById(secondRatBattleUnitId)!!
-        assertThat(secondRat.ongoingEffects.onTurnStarted).contains(venomEffectId)
+        secondRat.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
     }
 }

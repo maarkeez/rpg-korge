@@ -43,7 +43,7 @@ import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -433,7 +433,7 @@ class BattlefieldPresenterTest {
             battlefieldPresenter.tileSelected(row = 1, column = 2)
             eventBus.dispatch()
             // Then
-            assertThat(requestedMoves).isEmpty()
+            requestedMoves.shouldBeEmpty()
         }
     }
 

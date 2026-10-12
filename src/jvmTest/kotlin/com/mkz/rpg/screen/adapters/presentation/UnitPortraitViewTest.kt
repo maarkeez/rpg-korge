@@ -1,9 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -18,7 +19,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "knight")
                 // Then
-                assertThat(unitPortraitView.isVisibleToUser()).isTrue
+                unitPortraitView.isVisibleToUser().shouldBeTrue()
             }
 
         @Test
@@ -29,7 +30,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "knight")
                 // Then
-                assertThat(unitPortraitView.isPortraitDisplayed()).isTrue
+                unitPortraitView.isPortraitDisplayed().shouldBeTrue()
             }
 
         @Test
@@ -40,7 +41,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "rat")
                 // Then
-                assertThat(unitPortraitView.isPortraitDisplayed()).isTrue
+                unitPortraitView.isPortraitDisplayed().shouldBeTrue()
             }
 
         @Test
@@ -51,7 +52,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.display(unitId = "unknown-unit")
                 // Then
-                assertThat(unitPortraitView.isPortraitDisplayed()).isFalse
+                unitPortraitView.isPortraitDisplayed().shouldBeFalse()
             }
     }
 
@@ -66,7 +67,7 @@ class UnitPortraitViewTest : ViewsForTesting() {
                 // When
                 unitPortraitView.hide()
                 // Then
-                assertThat(unitPortraitView.isVisibleToUser()).isFalse
+                unitPortraitView.isVisibleToUser().shouldBeFalse()
             }
     }
 }

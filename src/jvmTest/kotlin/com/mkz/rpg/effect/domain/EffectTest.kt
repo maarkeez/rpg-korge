@@ -8,7 +8,12 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSour
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
-import org.assertj.core.api.Assertions.assertThat
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldBeTypeOf
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -22,7 +27,7 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(createdEffect.toDto()).isEqualTo(effectDto)
+            createdEffect.toDto() shouldBe effectDto
         }
 
         @Test
@@ -36,7 +41,7 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(createdEffect.toDto()).isEqualTo(effectDto)
+            createdEffect.toDto() shouldBe effectDto
         }
 
         @Test
@@ -46,7 +51,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.EmptyEffectId::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.EmptyEffectId>()
         }
 
         @Test
@@ -56,7 +61,7 @@ class EffectTest {
             // When
             val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.NegativePower::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativePower>()
         }
 
         @Test
@@ -66,7 +71,7 @@ class EffectTest {
             // When
             val result = runCatching { EffectMother.decreaseHealthEffect(damage = damage) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.PowerAboveLimit::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.PowerAboveLimit>()
         }
 
         @Test
@@ -80,7 +85,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.MissingEffectApplicationDetails::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
         }
 
         @Test
@@ -101,7 +106,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.NegativeApplicationDuration::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativeApplicationDuration>()
         }
 
         @Test
@@ -122,7 +127,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.ApplicationDurationAboveLimit::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.ApplicationDurationAboveLimit>()
         }
 
         @Test
@@ -132,12 +137,10 @@ class EffectTest {
             // When
             val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .outcome.decreaseHealth!!
-                    .damage,
-            ).isEqualTo(damage)
+            createdEffect
+                .toDto()
+                .outcome.decreaseHealth!!
+                .damage shouldBe damage
         }
 
         @Test
@@ -147,12 +150,10 @@ class EffectTest {
             // When
             val createdEffect = EffectMother.decreaseHealthEffect(damage = damage)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .outcome.decreaseHealth!!
-                    .damage,
-            ).isEqualTo(damage)
+            createdEffect
+                .toDto()
+                .outcome.decreaseHealth!!
+                .damage shouldBe damage
         }
 
         @Test
@@ -162,12 +163,10 @@ class EffectTest {
             // When
             val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .outcome.increaseHealth!!
-                    .healing,
-            ).isEqualTo(healing)
+            createdEffect
+                .toDto()
+                .outcome.increaseHealth!!
+                .healing shouldBe healing
         }
 
         @Test
@@ -177,12 +176,10 @@ class EffectTest {
             // When
             val createdEffect = EffectMother.increaseHealthEffect(healing = healing)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .outcome.increaseHealth!!
-                    .healing,
-            ).isEqualTo(healing)
+            createdEffect
+                .toDto()
+                .outcome.increaseHealth!!
+                .healing shouldBe healing
         }
 
         @Test
@@ -203,12 +200,10 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .application.onTurnStarted!!
-                    .duration,
-            ).isEqualTo(0)
+            createdEffect
+                .toDto()
+                .application.onTurnStarted!!
+                .duration shouldBe 0
         }
 
         @Test
@@ -229,12 +224,10 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .application.onTurnStarted!!
-                    .duration,
-            ).isEqualTo(99)
+            createdEffect
+                .toDto()
+                .application.onTurnStarted!!
+                .duration shouldBe 99
         }
 
         @Test
@@ -255,12 +248,10 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .application.beforeApplyingEffect!!
-                    .duration,
-            ).isEqualTo(0)
+            createdEffect
+                .toDto()
+                .application.beforeApplyingEffect!!
+                .duration shouldBe 0
         }
 
         @Test
@@ -281,12 +272,10 @@ class EffectTest {
             // When
             val createdEffect = Effect.create(effectDto)
             // Then
-            assertThat(
-                createdEffect
-                    .toDto()
-                    .application.beforeApplyingEffect!!
-                    .duration,
-            ).isEqualTo(99)
+            createdEffect
+                .toDto()
+                .application.beforeApplyingEffect!!
+                .duration shouldBe 99
         }
 
         @Test
@@ -307,7 +296,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isExactlyInstanceOf(EffectError.MissingEffectApplicationDetails::class.java)
+            result.exceptionOrNull().shouldBeTypeOf<EffectError.MissingEffectApplicationDetails>()
         }
 
         @Test
@@ -328,7 +317,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
         }
 
         @Test
@@ -349,7 +338,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
         }
 
         @Test
@@ -370,7 +359,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
         }
 
         @Test
@@ -391,7 +380,7 @@ class EffectTest {
             // When
             val result = runCatching { Effect.create(effectDto) }
             // Then
-            assertThat(result.exceptionOrNull()).isInstanceOf(NullPointerException::class.java)
+            result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
         }
     }
 
@@ -404,9 +393,9 @@ class EffectTest {
             // When
             val result = effect.toDto()
             // Then
-            assertThat(result.id).isEqualTo("effect-1")
-            assertThat(result.outcome.type).isEqualTo(DECREASE_HEALTH)
-            assertThat(result.outcome.decreaseHealth!!.damage).isEqualTo(3)
+            result.id shouldBe "effect-1"
+            result.outcome.type shouldBe DECREASE_HEALTH
+            result.outcome.decreaseHealth!!.damage shouldBe 3
         }
 
         @Test
@@ -416,8 +405,8 @@ class EffectTest {
             // When
             val result = effect.toDto()
             // Then
-            assertThat(result.outcome.type).isEqualTo(APPLY_EFFECT_ON_NEARBY_ALLIES)
-            assertThat(result.outcome.applyEffectOnNearbyAllies!!.effectId).isEqualTo("venom-damage")
+            result.outcome.type shouldBe APPLY_EFFECT_ON_NEARBY_ALLIES
+            result.outcome.applyEffectOnNearbyAllies!!.effectId shouldBe "venom-damage"
         }
 
         @Test
@@ -427,8 +416,8 @@ class EffectTest {
             // When
             val result = effect.toDto()
             // Then
-            assertThat(result.outcome.type).isEqualTo(DEPLOY_BATTLE_UNIT)
-            assertThat(result.outcome.deployBattleUnit!!.unitId).isEqualTo("summoned-rat")
+            result.outcome.type shouldBe DEPLOY_BATTLE_UNIT
+            result.outcome.deployBattleUnit!!.unitId shouldBe "summoned-rat"
         }
 
         @Test
@@ -444,7 +433,7 @@ class EffectTest {
                     destination = destination,
                 )
             // Then
-            assertThat(effectApplication.destination).isEqualTo(destination)
+            effectApplication.destination shouldBe destination
         }
 
         @Test
@@ -459,8 +448,8 @@ class EffectTest {
                     beforeApplyingEffect = beforeApplyingEffect,
                 )
             // Then
-            assertThat(application.beforeApplyingEffect).isEqualTo(beforeApplyingEffect)
-            assertThat(application.onTurnStarted).isNull()
+            application.beforeApplyingEffect shouldBe beforeApplyingEffect
+            application.onTurnStarted.shouldBeNull()
         }
     }
 
@@ -473,7 +462,7 @@ class EffectTest {
             // When
             val (events, _) = createdEffect.pullEvents()
             // Then
-            assertThat(events).containsExactly(EffectEvent.EffectCreated(effectId = createdEffect.toDto().id))
+            events.shouldContainExactly(EffectEvent.EffectCreated(effectId = createdEffect.toDto().id))
         }
 
         @Test
@@ -483,7 +472,7 @@ class EffectTest {
             // When
             val (events, _) = effect.pullEvents()
             // Then
-            assertThat(events).isEmpty()
+            events.shouldBeEmpty()
         }
     }
 }

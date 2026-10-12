@@ -7,8 +7,8 @@ import com.mkz.rpg.player.domain.PlayerMother.id
 import com.mkz.rpg.player.domain.PlayerMother.name
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 
 class RequestPlayerCreationTest {
@@ -31,12 +31,10 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.HUMAN)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        assertThat(storedPlayer).isEqualTo(
+        storedPlayer shouldBe
             player(playerId, playerName, type = Player.Dto.PlayerTypeDto.HUMAN)
-                .toDto(),
-        )
-        assertThat(eventBus)
-            .hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.HUMAN))
+                .toDto()
+        eventBus.shouldHavePublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.HUMAN))
     }
 
     @Test
@@ -48,11 +46,8 @@ class RequestPlayerCreationTest {
         requestPlayerCreation(id = playerId, name = playerName, type = RequestPlayerCreation.PlayerType.CPU)
         // Then
         val storedPlayer = playerRepository.searchById(playerId)?.toDto()
-        assertThat(storedPlayer).isEqualTo(
-            player(playerId, playerName, type = Player.Dto.PlayerTypeDto.CPU).toDto(),
-        )
-        assertThat(eventBus)
-            .hasPublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.CPU))
+        storedPlayer shouldBe player(playerId, playerName, type = Player.Dto.PlayerTypeDto.CPU).toDto()
+        eventBus.shouldHavePublishedEvents(PlayerEvent.PlayerCreated(playerId, playerName, Player.Dto.PlayerTypeDto.CPU))
     }
 
     @Test
@@ -69,7 +64,7 @@ class RequestPlayerCreationTest {
         )
         // Then
         val storedPlayer = playerRepository.searchById(existingPlayer.toDto().id)?.toDto()
-        assertThat(storedPlayer).isEqualTo(existingPlayer.toDto())
-        assertThat(eventBus).hasPublishedEvents()
+        storedPlayer shouldBe existingPlayer.toDto()
+        eventBus.shouldHavePublishedEvents()
     }
 }

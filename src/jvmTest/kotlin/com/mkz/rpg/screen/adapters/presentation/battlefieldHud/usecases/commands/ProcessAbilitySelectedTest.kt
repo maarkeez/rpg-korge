@@ -11,9 +11,10 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
-import com.mkz.rpg.shared.domain.assertThat
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -63,9 +64,9 @@ class ProcessAbilitySelectedTest {
         processAbilitySelected("ability-1")
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
-        assertThat(storedHud.abilityId).isEqualTo("ability-1")
-        assertThat(storedHud.castGroupsWhereCanCast).isEqualTo(castGroupsWhereCanCast)
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.abilityId shouldBe "ability-1"
+        storedHud.castGroupsWhereCanCast shouldBe castGroupsWhereCanCast
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
                     tile(0, 0),
@@ -86,8 +87,8 @@ class ProcessAbilitySelectedTest {
         // When
         processAbilitySelected("ability-1")
         // Then
-        assertThat(battlefieldHudRepository.search()).isEqualTo(hud)
-        assertThat(eventBus.publishedEvents).isEmpty()
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test
@@ -110,11 +111,9 @@ class ProcessAbilitySelectedTest {
         processAbilitySelected("ability-1")
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
-        assertThat(storedHud.tile).isEqualTo(
-            tile(0, 0),
-        )
-        assertThat(storedHud.tilesWhereCanBeMoved).isEqualTo(tilesWhereCanBeMoved)
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.tile shouldBe tile(0, 0)
+        storedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.AbilityDeselected(abilityId = "ability-1"),
             BattlefieldHudEvent.SelectedBattleUnit(
                 tile =
@@ -155,9 +154,9 @@ class ProcessAbilitySelectedTest {
         processAbilitySelected("ability-2")
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastRange
-        assertThat(storedHud.abilityId).isEqualTo("ability-2")
-        assertThat(storedHud.castGroupsWhereCanCast).isEqualTo(newCastGroupsWhereCanCast)
-        assertThat(eventBus).hasPublishedEvents(
+        storedHud.abilityId shouldBe "ability-2"
+        storedHud.castGroupsWhereCanCast shouldBe newCastGroupsWhereCanCast
+        eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile =
                     tile(0, 0),
@@ -177,8 +176,7 @@ class ProcessAbilitySelectedTest {
         )
         // When
         // Then
-        assertThatThrownBy { processAbilitySelected("ability-1") }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { processAbilitySelected("ability-1") }
     }
 
     @Test
@@ -190,8 +188,7 @@ class ProcessAbilitySelectedTest {
         )
         // When
         // Then
-        assertThatThrownBy { processAbilitySelected("ability-1") }
-            .isInstanceOf(BattlefieldHudError.InvalidBattlefieldHudState::class.java)
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { processAbilitySelected("ability-1") }
     }
 
     @Test
@@ -199,7 +196,6 @@ class ProcessAbilitySelectedTest {
         // Given
         // When
         // Then
-        assertThatThrownBy { processAbilitySelected("ability-1") }
-            .isInstanceOf(BattlefieldHudError.BattlefieldHudNotFound::class.java)
+        shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { processAbilitySelected("ability-1") }
     }
 }
