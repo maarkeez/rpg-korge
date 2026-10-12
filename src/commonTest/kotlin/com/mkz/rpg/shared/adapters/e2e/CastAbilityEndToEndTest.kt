@@ -15,6 +15,7 @@ import com.mkz.rpg.screen.adapters.presentation.isDisplayingAttackPreview
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingCancelAndConfirm
 import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -39,7 +40,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should keep the knight selected when the human player casts heal on the knight`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
@@ -65,7 +66,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should update the knight movement range when the human player deploys a bee on an adjacent tile`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }

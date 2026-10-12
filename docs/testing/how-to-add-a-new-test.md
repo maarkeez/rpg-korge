@@ -3,7 +3,7 @@
 ## Tests location
 
 - The tests MUST be in `src/commonTest`, so they run on both the JVM (`./gradlew jvmTest`) and JS (`./gradlew jsTest`). See [Shared tests](#shared-tests).
-- Only the tests that can not run on JS MUST be in `src/jvmTest`: the architecture tests (Konsist and ArchUnit are only available on the JVM) and the [end-to-end tests](#test-example---end-to-end-test).
+- Only the tests that can not run on JS MUST be in `src/jvmTest`: the architecture tests (Konsist and ArchUnit are only available on the JVM).
 - The test MUST be in the same package as the class being tested. For example, given the class `src/commonMain/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt`
 
 ## Test naming convention
@@ -166,7 +166,7 @@ class OnBattleUnitDefeatedTest {
 View tests are a bit different from the rest of the tests because they need to rely on KorGE's testing features.
 
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
-* Each test function **MUST** start by using [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), and never KorGE's `viewsTest` directly. KorGE's `viewsTest` skips the test on JS, so the test would pass on JS without asserting anything. `sharedViewsTest` runs it on every target, loading the game resources before the views test starts. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
+* Each test function **MUST** start by using [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), and never KorGE's `viewsTest` directly. KorGE's `viewsTest` skips the test on JS, so the test would pass on JS without asserting anything. `sharedViewsTest` runs it on every target, letting the browser load the resources between frames. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
 
 ### View page objects
@@ -327,21 +327,21 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 
 - End-to-end tests MUST only cover critical player journeys. They are slower than the rest of the tests, so prefer acceptance tests for anything else.
 - They MUST be implemented under `com.mkz.rpg.shared.adapters.e2e` test package
-- The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with `viewsTest`. It runs the game without a window or a GPU, so it runs in the CI.
+- The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), as the view tests do. It runs the game without a window or a GPU on both the JVM and JS, so it runs in the CI.
 - They MUST boot the game using `com.mkz.rpg.startGame()`, the same function used by `main`.
 - They MUST find the scene views through the [`BattleScene` page object](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
 - They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the battle scene while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
-- They MUST wait for the game to react using the shared [`waitUntil`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
+- They MUST wait for the game to react using the shared [`waitUntil`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while the frames are simulated much faster than that, so a fixed number of frames is not enough.
 
 To see what the player sees at any step of an end-to-end test, see [How to take a snapshot of the game during an end-to-end test](how-to-take-a-game-snapshot.md).
 
-For example: [`MoveKnightEndToEndTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
+For example: [`MoveKnightEndToEndTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
 
 ```kotlin
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     @Test
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
@@ -366,6 +366,7 @@ The tests in `src/commonTest` run on both the JVM and JS, so they MUST only depe
 - A test that calls suspend functions MUST run them with `runTest { ... }` (from `kotlinx-coroutines-test`), e.g.: ``fun `should load the abilities`() = runTest { ... }``.
 - The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.
 - The JS tests read the game resources from `build/processedResources/js/test`, which [`karma.config.d/resources.js`](../../karma.config.d/resources.js) serves to the browser as the game does.
+- Each JS test MUST finish within 30 seconds, set in [`karma.config.d/timeout.js`](../../karma.config.d/timeout.js), as the end-to-end tests boot the whole game.
 
 ## Run tests
 

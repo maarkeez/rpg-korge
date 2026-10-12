@@ -11,6 +11,7 @@ import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
 import com.mkz.rpg.screen.adapters.presentation.maximumSteps
 import com.mkz.rpg.screen.adapters.presentation.remainingSteps
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -30,7 +31,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
@@ -47,7 +48,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should dim the tiles out of the knight movement range when the human player selects the knight`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
@@ -63,7 +64,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should walk the knight tile by tile when the human player moves it two tiles away`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val farTargetColumn = 4
             startGame()

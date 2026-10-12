@@ -14,7 +14,6 @@ class TestFrameworkArchitectureTest {
     // KorGE's `viewsTest` skips the test on JS by default, so a view test in `commonTest` would pass on JS without asserting anything.
     // `sharedViewsTest` runs it on every target instead.
     private val viewsTestCall = Regex("""\bviewsTest\s*[({]""")
-    private val sharedViewsTestFileName = "SharedViewsTestExtension"
 
     @Test
     fun `should not use JUnit when is a test file`() {
@@ -33,12 +32,13 @@ class TestFrameworkArchitectureTest {
         // Given
         val sharedFiles = Konsist.scopeFromTest().files.filter { file -> file.path.contains("/src/commonTest/") }
         // When
-        val sharedFilesCallingViewsTest =
-            sharedFiles.filterNot { file -> file.name == sharedViewsTestFileName }.filter { file -> viewsTestCall.containsMatchIn(file.text) }
+        val sharedFilesCallingViewsTest = sharedFiles.filter { file -> viewsTestCall.containsMatchIn(file.text) }
         // Then
         sharedFiles.shouldNotBeEmpty()
         val violations =
-            sharedFilesCallingViewsTest.map { file -> "Shared test file '${file.path}' uses KorGE's `viewsTest`, which is skipped on JS. Use `sharedViewsTest` instead." }
+            sharedFilesCallingViewsTest.map { file ->
+                "Shared test file '${file.path}' uses KorGE's `viewsTest`, which is skipped on JS. Use `sharedViewsTest` instead, which runs it on every target."
+            }
         withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 }

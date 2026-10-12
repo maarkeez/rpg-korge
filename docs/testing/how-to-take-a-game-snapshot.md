@@ -11,7 +11,7 @@
 
 ### 1. Create a test class that renders with OpenGL
 
-Create the test class under `src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e`. Override `createAg()` so the frames are rendered with an offscreen OpenGL context, and release it after each test:
+Create the test class under `src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e`, as the OpenGL rendering is only available on the JVM. Override `createAg()` so the frames are rendered with an offscreen OpenGL context, and release it after each test:
 
 ```kotlin
 class KnightSelectedSnapshotTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {

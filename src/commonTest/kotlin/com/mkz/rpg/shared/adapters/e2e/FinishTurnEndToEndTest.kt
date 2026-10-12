@@ -8,6 +8,7 @@ import com.mkz.rpg.screen.adapters.presentation.isFinishTurnEnabled
 import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -21,7 +22,7 @@ class FinishTurnEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     @Test
     fun `should disable finish turn while the cpu turn is displayed and enable it again when the human turn is announced`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             startGame()
             waitUntil { canHumanPlayerAct() }
