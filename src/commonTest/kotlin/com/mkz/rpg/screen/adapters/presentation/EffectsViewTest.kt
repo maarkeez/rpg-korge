@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -10,7 +11,7 @@ import kotlin.test.Test
 class EffectsViewTest : ViewsForTesting() {
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             // When
@@ -21,7 +22,7 @@ class EffectsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display one icon per effect when effects are displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             // When
@@ -32,7 +33,7 @@ class EffectsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should hide icons of previous effects when fewer effects are displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             effectsView.display(effectIds = listOf("venom-damage", "venom-on-death", "venom-damage"))
@@ -44,7 +45,7 @@ class EffectsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display as many icons as effect slots when there are more effects than slots`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             val effectIds = List(effectsView.effectSlotCount() + 2) { "venom-damage" }
@@ -56,7 +57,7 @@ class EffectsViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             effectsView.display(effectIds = listOf("venom-damage"))

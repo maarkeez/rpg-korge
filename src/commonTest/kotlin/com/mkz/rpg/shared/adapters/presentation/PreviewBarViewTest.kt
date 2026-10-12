@@ -10,7 +10,7 @@ import kotlin.test.Test
 class PreviewBarViewTest : ViewsForTesting() {
     @Test
     fun `Init should be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             // When
@@ -20,7 +20,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             previewBarView.hide()
@@ -32,7 +32,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify label when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             // When
@@ -43,7 +43,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify filled width when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             val remainingAfter = 50
@@ -57,7 +57,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify preview width when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             val remainingBefore = 75
@@ -71,7 +71,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should set filled width to zero when remaining after is negative`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             // When
@@ -83,7 +83,7 @@ class PreviewBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             previewBarView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)

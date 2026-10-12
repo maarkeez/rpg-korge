@@ -4,6 +4,7 @@ import com.mkz.rpg.shared.adapters.presentation.isLabelShown
 import com.mkz.rpg.shared.adapters.presentation.isProgressBarShown
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.progressPercentage
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -14,7 +15,7 @@ import kotlin.test.Test
 class HealthBarViewTest : ViewsForTesting() {
     @Test
     fun `Init should not be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
             // When
@@ -26,7 +27,7 @@ class HealthBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
             // When
@@ -39,7 +40,7 @@ class HealthBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify label when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
             // When
@@ -50,7 +51,7 @@ class HealthBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify progress bar when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
             val remaining = 50
@@ -64,7 +65,7 @@ class HealthBarViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val healthBarView = HealthBarView(Size(width = 100.00, height = 50.00))
             healthBarView.display(remaining = 50, maximum = 100)

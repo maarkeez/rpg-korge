@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import korlibs.korge.tests.ViewsForTesting
@@ -10,7 +11,7 @@ import kotlin.test.Test
 class BattleHudViewTest : ViewsForTesting() {
     @Test
     fun `DisplayBattleUnitInfoView should display battle unit info view when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
@@ -24,7 +25,7 @@ class BattleHudViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayAttackPreviewView should display attack preview view when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
@@ -38,7 +39,7 @@ class BattleHudViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not display any view when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())

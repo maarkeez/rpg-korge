@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
@@ -8,7 +9,7 @@ import kotlin.test.Test
 class PlayerCallToActionViewTest : ViewsForTesting() {
     @Test
     fun `DisplayFinishTurn should display finish turn when finish turn is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             // When
@@ -20,7 +21,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayFinishTurn should finish turn when finish turn is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var turnFinished = false
             val playerCallToActionView = PlayerCallToActionView()
@@ -34,7 +35,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `SetFinishTurnEnabled should display the finish turn disabled when finish turn is disabled`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
@@ -47,7 +48,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `SetFinishTurnEnabled should display the finish turn disabled when it was disabled before being displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.setFinishTurnEnabled(false)
@@ -59,7 +60,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `SetFinishTurnEnabled should display the finish turn enabled again when finish turn is enabled`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
@@ -72,7 +73,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `SetFinishTurnEnabled should display the finish turn disabled again when it is disabled and cancel is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
@@ -88,7 +89,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayCancelAndConfirm should replace finish turn with cancel and confirm when cancel and confirm is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
@@ -101,7 +102,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayCancelAndConfirm should cancel and display finish turn again when cancel is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var cancelled = false
             var confirmed = false
@@ -119,7 +120,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayCancelAndConfirm should confirm and display finish turn again when confirm is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var cancelled = false
             var confirmed = false
@@ -137,7 +138,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not display any call to action when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})

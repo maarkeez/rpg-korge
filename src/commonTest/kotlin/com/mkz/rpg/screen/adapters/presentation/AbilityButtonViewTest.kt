@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
@@ -12,7 +13,7 @@ import kotlin.test.Test
 class AbilityButtonViewTest : ViewsForTesting() {
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
@@ -23,7 +24,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display ability icon when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
@@ -34,7 +35,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should not darken ability icon when ability can be cast`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
@@ -45,7 +46,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should darken ability icon when ability can not be cast`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
@@ -56,7 +57,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Select should display ability selection icon when is selected`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
@@ -67,7 +68,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Select should not display duplicated ability selection icon when is selected twice`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             abilityButtonView.select()
@@ -79,7 +80,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Unselect should remove ability selection icon when is unselected`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             abilityButtonView.select()
@@ -91,7 +92,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             abilityButtonView.display(abilityId = "mushroom", canCast = true)
@@ -103,7 +104,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
 
     @Test
     fun `ButtonClick should notify delegate with ability id when button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             val selectedAbilityIds = mutableListOf<String>()

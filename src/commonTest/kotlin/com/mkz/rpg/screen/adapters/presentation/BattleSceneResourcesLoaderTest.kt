@@ -14,10 +14,10 @@ import io.kotest.matchers.types.shouldBeSameInstanceAs
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.format.PNG
 import korlibs.io.file.std.MemoryVfsMix
-import korlibs.korge.tests.ViewsForTesting
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
-class BattleSceneResourcesLoaderTest : ViewsForTesting() {
+class BattleSceneResourcesLoaderTest {
     // Each image has a distinct width, so the tests can tell them apart.
     private fun resourcesRoot() =
         MemoryVfsMix(
@@ -32,7 +32,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Load should load images of nested directories when resources are loaded`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot())
             // When
@@ -45,7 +45,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Load should ignore files that are not images when resources are loaded`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot())
             // When
@@ -56,7 +56,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Load should ignore hidden files when resources are loaded`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot())
             // When
@@ -67,7 +67,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Load should load the game images when resources are loaded from the default root`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader()
             // When
@@ -79,7 +79,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Bitmap should return the same image instance when the image is requested twice`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot()).also { it.load() }
             // When
@@ -91,7 +91,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Bitmap should fail with the requested path when the image does not exist`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot()).also { it.load() }
             // When
@@ -102,7 +102,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `BitmapOrNull should return null when the image does not exist`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot()).also { it.load() }
             // When
@@ -113,7 +113,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Bitmaps should return the images directly inside the directory keyed by file name when the directory is requested`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot()).also { it.load() }
             // When
@@ -124,7 +124,7 @@ class BattleSceneResourcesLoaderTest : ViewsForTesting() {
 
     @Test
     fun `Bitmaps should return no images when the directory does not exist`() =
-        viewsTest {
+        runTest {
             // Given
             val resourcesLoader = BattleSceneResourcesLoader(resourcesRoot()).also { it.load() }
             // When

@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -11,7 +12,7 @@ import kotlin.test.Test
 class AttackPreviewViewTest : ViewsForTesting() {
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
             val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
@@ -31,7 +32,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should hide receiver views when no receiver battle unit is provided`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
             val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
@@ -52,7 +53,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display receiver views when receiver battle unit is provided`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
             val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
@@ -75,7 +76,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
             val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()

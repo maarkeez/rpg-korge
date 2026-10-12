@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import korlibs.korge.tests.ViewsForTesting
@@ -8,7 +9,7 @@ import kotlin.test.Test
 class CancelAndConfirmViewTest : ViewsForTesting() {
     @Test
     fun `CancelClick should only cancel when cancel button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var cancelled = false
             var confirmed = false
@@ -23,7 +24,7 @@ class CancelAndConfirmViewTest : ViewsForTesting() {
 
     @Test
     fun `ConfirmClick should only confirm when confirm button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var cancelled = false
             var confirmed = false

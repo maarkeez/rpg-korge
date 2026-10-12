@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -15,7 +16,7 @@ class EffectViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayEffect should display effect icon when effect is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectView = EffectView(size, loadedResourcesLoader())
             // When
@@ -26,7 +27,7 @@ class EffectViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayEffect should replace previous effect icon when another effect is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectView = EffectView(size, loadedResourcesLoader())
             effectView.displayEffect("venom-damage")
@@ -38,7 +39,7 @@ class EffectViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayEffect should fail when effect has no image`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectView = EffectView(size, loadedResourcesLoader())
             // When
@@ -49,7 +50,7 @@ class EffectViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not display effect icon when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val effectView = EffectView(size, loadedResourcesLoader())
             effectView.displayEffect("venom-damage")

@@ -11,7 +11,7 @@ import kotlin.test.Test
 class BarViewTest : ViewsForTesting() {
     @Test
     fun `Init should not be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
             // When
@@ -23,7 +23,7 @@ class BarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
             // When
@@ -36,7 +36,7 @@ class BarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify label when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
             // When
@@ -47,7 +47,7 @@ class BarViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify progress bar when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
             val remaining = 50
@@ -61,7 +61,7 @@ class BarViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should be visible when was hide`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val barView = BarView(Size(width = 100.00, height = 50.00), Colors.RED)
             barView.display(remaining = 50, maximum = 100)

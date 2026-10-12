@@ -3,7 +3,7 @@
 ## Tests location
 
 - The tests MUST be in `src/commonTest`, so they run on both the JVM (`./gradlew jvmTest`) and JS (`./gradlew jsTest`). See [Shared tests](#shared-tests).
-- Only the tests that can not run on JS MUST be in `src/jvmTest`: the architecture tests (Konsist and ArchUnit are only available on the JVM), the [view tests](#test-example---presentation-view) and the [end-to-end tests](#test-example---end-to-end-test).
+- Only the tests that can not run on JS MUST be in `src/jvmTest`: the architecture tests (Konsist and ArchUnit are only available on the JVM) and the [end-to-end tests](#test-example---end-to-end-test).
 - The test MUST be in the same package as the class being tested. For example, given the class `src/commonMain/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreation.kt` the test will be in `src/commonTest/kotlin/com/mkz/rpg/ability/usecases/commands/RequestAbilityCreationTest.kt`
 
 ## Test naming convention
@@ -165,9 +165,8 @@ class OnBattleUnitDefeatedTest {
 
 View tests are a bit different from the rest of the tests because they need to rely on KorGE's testing features.
 
-* The test **MUST** be in `src/jvmTest`, together with the view page objects. KorGE's `viewsTest` skips the test on JS, so a view test in `src/commonTest` would pass on JS without asserting anything. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
-* Each test function **MUST** start by using `viewsTest` from `korlibs.korge.tests.ViewsForTesting`.
+* Each test function **MUST** start by using [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), and never KorGE's `viewsTest` directly. KorGE's `viewsTest` skips the test on JS, so the test would pass on JS without asserting anything. `sharedViewsTest` runs it on every target, loading the game resources before the views test starts. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
 
 ### View page objects
@@ -178,12 +177,12 @@ Each view has a page object: a `<View>Extension.kt` file next to its test (e.g.:
 * Actions **MUST** be extension functions on `ViewsForTesting` that receive the view, and **MUST** click with the mouse through `clickOn(view)` (e.g.: `suspend fun ViewsForTesting.clickTile(battlefieldView, row, column)`). The view **MUST** be added to the stage (`addChild(view)`) before clicking it.
 * The view children used by the page object **SHOULD** be declared `internal` in the production code, so the page object is typed and fails to compile when the view structure changes.
 * Page objects of composite views **SHOULD** reuse the page objects of their child views (e.g.: `BattleUnitInfoView.abilityButtons()` plus `AbilityButtonView.isSelected()`).
-* Shared helpers (`clickOn`, `isShown`, `descendants`) live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt).
+* Shared helpers (`clickOn`, `isShown`, `descendants`) live in [`ViewExtension.kt`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt).
 
 Here is an example of a page object:
 
 ```kotlin
-// src/jvmTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnViewExtension.kt
+// src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnViewExtension.kt
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
@@ -202,7 +201,7 @@ And a view test using it:
 class FinishTurnViewTest : ViewsForTesting() {
     @Test
     fun `Init should display finish turn text when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             // When
             val finishTurnView = FinishTurnView(onTurnFinished = {})
@@ -212,7 +211,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 
     @Test
     fun `ButtonClick should finish turn when button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var turnFinished = false
             val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
@@ -231,7 +230,7 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 
 * Start them with `startAnimation { ... }`, so the test can assert what is displayed while they play.
 * Advance the frames with `nextFrame()`, `awaitCompletion(animation)` or `sampleUntilCompletion(animation) { ... }`, which records what is displayed on every frame. They call `delayFrame()` followed by `yield()`, because `delayFrame()` alone does not let the animation coroutine run.
-* These helpers live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See the `MoveBattleUnit` tests of `BattlefieldViewTest`.
+* These helpers live in [`ViewExtension.kt`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See the `MoveBattleUnit` tests of `BattlefieldViewTest`.
 
 ### Presenters
 
@@ -330,7 +329,7 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 - They MUST be implemented under `com.mkz.rpg.shared.adapters.e2e` test package
 - The test class MUST extend `korlibs.korge.tests.ViewsForTesting(windowSize = GAME_WINDOW_SIZE)` and each test MUST start with `viewsTest`. It runs the game without a window or a GPU, so it runs in the CI.
 - They MUST boot the game using `com.mkz.rpg.startGame()`, the same function used by `main`.
-- They MUST find the scene views through the [`BattleScene` page object](../../src/jvmTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
+- They MUST find the scene views through the [`BattleScene` page object](../../src/commonTest/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneExtension.kt) (e.g.: `battlefieldView()`), and interact with them and assert what is displayed through their view page objects (e.g.: `clickTile(...)`, `hasBattleUnitAt(...)`). See [View page objects](#view-page-objects).
 - They MUST wait until the human player can act (`canHumanPlayerAct()`: the turn has been announced and the finish turn is enabled) before clicking, as the player can not act on the battle scene while it replays the battle. Waiting for what is displayed only is not enough: the last animation may have finished while its timeline step has not. See [Presentation timeline](../architecture/presentation-timeline.md).
 - They MUST wait for the game to react using the shared [`waitUntil`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/e2e/EndToEndExtension.kt) helper, which is bounded by real time. The game loads its resources asynchronously in real time, while `delayFrame()` simulates frames much faster than that. A fixed number of frames is therefore not enough, and `yield()` is needed to let the game coroutines run between frames.
 
@@ -371,3 +370,5 @@ The tests in `src/commonTest` run on both the JVM and JS, so they MUST only depe
 ## Run tests
 
 All the project tests can be run using `./gradlew clean` followed by `./gradlew jvmTest jsTest` (cleaning in the same run fails the JS tasks). The shared tests run on JS with `./gradlew jsTest`, which needs Chrome. Both run in the CI.
+
+A single test class can be run on JS with `./gradlew jsBrowserTest --tests '<fully qualified class name>'` (e.g.: `com.mkz.rpg.screen.adapters.presentation.FinishTurnViewTest`). Wildcards (e.g.: `'*FinishTurnViewTest'`) run no test on JS, and the build still succeeds.

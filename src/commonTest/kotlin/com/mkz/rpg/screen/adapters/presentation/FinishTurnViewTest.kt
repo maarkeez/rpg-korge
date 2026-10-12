@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -9,7 +10,7 @@ import kotlin.test.Test
 class FinishTurnViewTest : ViewsForTesting() {
     @Test
     fun `Init should display finish turn text when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             // When
             val finishTurnView = FinishTurnView(onTurnFinished = {})
@@ -19,7 +20,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 
     @Test
     fun `ButtonClick should finish turn when button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var turnFinished = false
             val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
@@ -32,7 +33,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 
     @Test
     fun `ButtonClick should not finish turn when button is clicked and is disabled`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var turnFinished = false
             val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
@@ -46,7 +47,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 
     @Test
     fun `IsEnabled should be enabled when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             // When
             val finishTurnView = FinishTurnView(onTurnFinished = {})
@@ -56,7 +57,7 @@ class FinishTurnViewTest : ViewsForTesting() {
 
     @Test
     fun `IsEnabled should be disabled when is disabled`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val finishTurnView = FinishTurnView(onTurnFinished = {})
             // When

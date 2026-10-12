@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.image.color.Colors
@@ -9,7 +10,7 @@ import kotlin.test.Test
 class PointsViewTest : ViewsForTesting() {
     @Test
     fun `Display should display every point filled when none has been spent`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
             // When
@@ -21,7 +22,7 @@ class PointsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display the spent points hollow when some have been spent`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
             // When
@@ -33,7 +34,7 @@ class PointsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display every point hollow when all have been spent`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
             // When
@@ -45,7 +46,7 @@ class PointsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should draw every point with its colour when points are displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(BattleUnitInfoView.CAST_POINTS_COLOR)
             // When
@@ -56,7 +57,7 @@ class PointsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display hollow points as big as filled points when some have been spent`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
             addChild(pointsView)
@@ -68,7 +69,7 @@ class PointsViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should replace the previous points when points are displayed again`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
             pointsView.display(remaining = 5, maximum = 5)

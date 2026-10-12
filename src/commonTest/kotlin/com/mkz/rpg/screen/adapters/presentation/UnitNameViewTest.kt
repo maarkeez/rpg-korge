@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -12,7 +13,7 @@ class UnitNameViewTest : ViewsForTesting() {
 
     @Test
     fun `Init should be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
             // When
@@ -22,7 +23,7 @@ class UnitNameViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
             unitNameView.hide()
@@ -34,7 +35,7 @@ class UnitNameViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify unit name label when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
             // When
@@ -45,7 +46,7 @@ class UnitNameViewTest : ViewsForTesting() {
 
     @Test
     fun `AlignTextToRight should align text to right when is aligned`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
             // When
@@ -56,7 +57,7 @@ class UnitNameViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val unitNameView = UnitNameView(Size(width = 100.00, height = 50.00))
             unitNameView.display(unitName = unitName)

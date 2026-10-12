@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.nulls.shouldBeNull
@@ -12,7 +13,7 @@ import kotlin.test.Test
 class BattleInfoViewTest : ViewsForTesting() {
     @Test
     fun `DisplayBattleInfo should display player name and round when battle info is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             val playerName = "Player 1"
@@ -26,7 +27,7 @@ class BattleInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattleInfo should display the player turn with the turn colour when battle info is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             // When
@@ -37,7 +38,7 @@ class BattleInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `AnnounceTurn should display the battle info when the turn is announced`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             addChild(battleInfoView)
@@ -51,7 +52,7 @@ class BattleInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `AnnounceTurn should pop the player turn and the round when the turn of a new round is announced`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             addChild(battleInfoView)
@@ -67,7 +68,7 @@ class BattleInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `AnnounceTurn should only pop the player turn when the turn of the same round is announced`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             addChild(battleInfoView)
@@ -82,7 +83,7 @@ class BattleInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayPlayerWin should display player name when player wins`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView()
             val playerName = "Player 1"

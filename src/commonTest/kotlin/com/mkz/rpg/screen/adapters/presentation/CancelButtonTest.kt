@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
@@ -8,7 +9,7 @@ import kotlin.test.Test
 class CancelButtonTest : ViewsForTesting() {
     @Test
     fun `Init should display cancel text when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             // When
             val cancelButton = CancelButton(onCancelled = {})
@@ -18,7 +19,7 @@ class CancelButtonTest : ViewsForTesting() {
 
     @Test
     fun `ButtonClick should cancel when button is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             var cancelled = false
             val cancelButton = CancelButton(onCancelled = { cancelled = true })

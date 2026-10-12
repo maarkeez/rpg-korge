@@ -7,6 +7,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -33,7 +34,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattlefield should not scroll the battlefield when is clicked and is smaller than the viewport`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -47,7 +48,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattlefield should display battlefield tiles when battlefield is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val battlefield = battlefield(rows = 2, columns = 3).toDto()
@@ -59,7 +60,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattlefield should display terrain on each tile when battlefield is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val battlefield = battlefield(rows = 1, columns = 1).toDto()
@@ -71,7 +72,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattlefield should display terrain transition tile on tile adjacent to void when battlefield is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val tiles =
@@ -93,7 +94,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TerrainTileBitmap should return the pure terrain tile of the strip when the tile has no terrain transition`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
@@ -107,7 +108,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TerrainTileBitmap should return the pure target terrain tile of the strip when the target terrain tile has no terrain transition`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
@@ -119,7 +120,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TerrainTileBitmap should return the transition tile of the strip when the tile has a terrain transition`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
@@ -138,7 +139,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TerrainTileBitmap should return the last tile of the strip when the terrain transition has all target terrain edges`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
@@ -155,7 +156,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TerrainTileBitmap should throw when the terrain bitmap is not found and the tile has no terrain transition`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             // When
@@ -166,7 +167,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattleUnit should display knight battle unit on tile when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -178,7 +179,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattleUnit should display rat battle unit on tile when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -190,7 +191,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayBattleUnit should not display battle unit on tile when the unit has no image`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -202,7 +203,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayPotentialMovement should display selection on tile when potential movement is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -214,7 +215,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayPotentialCast should display selection on tile when potential cast is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -226,7 +227,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayPotentialCast should not display duplicated selection when potential cast is displayed twice`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -240,7 +241,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayTileSelection should display selection on tile when tile selection is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -252,7 +253,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayTileSelection should replace selection when tile selection is displayed over potential cast`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -266,7 +267,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `ResetTiles should remove selections from tiles when tiles are reset`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
@@ -280,7 +281,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DimTilesExcept should dim every tile but the given ones when tiles are dimmed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
@@ -295,7 +296,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DimTilesExcept should dim the battle unit on a tile that is dimmed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
@@ -308,7 +309,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DimTilesExcept should not dim a tile twice when tiles are dimmed twice`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
@@ -322,7 +323,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `DimTilesExcept should remove the mask from every tile when tiles are reset`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
@@ -335,7 +336,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `RemoveBattleUnit should remove battle unit from tile when is removed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -350,7 +351,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `MoveBattleUnit should display the battle unit on each tile of the path in order when it moves`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
@@ -367,7 +368,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `MoveBattleUnit should stop on each tile of the path when the battle unit moves`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
@@ -382,7 +383,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `MoveBattleUnit should scroll the battlefield to keep the battle unit visible when it moves out of the viewport`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 16).toDto())
@@ -399,7 +400,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `MoveBattleUnit should not scroll the battlefield when the battle unit moves and the battlefield is smaller than the viewport`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
@@ -423,7 +424,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `FlashBattleUnit should blink the battle unit when it is flashed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -441,7 +442,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `FlashBattleUnit should scroll the battlefield to the battle unit when it is flashed out of the viewport`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
@@ -456,7 +457,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `FlashBattleUnit should not blink when the unit has no image`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -477,7 +478,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `Tint should tint the battlefield with the colour and fade it out when it is tinted`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
@@ -493,7 +494,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `Tint should not scroll the battlefield when it is tinted`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
@@ -506,7 +507,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     @Test
     fun `TileClick should notify delegate with tile position when tile is clicked`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             val selectedTiles = mutableListOf<Pair<Int, Int>>()

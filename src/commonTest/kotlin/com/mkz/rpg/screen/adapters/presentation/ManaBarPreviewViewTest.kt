@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.shared.adapters.presentation.filledWidth
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.previewWidth
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
@@ -12,7 +13,7 @@ import kotlin.test.Test
 class ManaBarPreviewViewTest : ViewsForTesting() {
     @Test
     fun `Init should be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             // When
@@ -22,7 +23,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             manaBarPreviewView.hide()
@@ -34,7 +35,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify label when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             // When
@@ -45,7 +46,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify filled width when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             val remainingAfter = 50
@@ -59,7 +60,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should modify preview width when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             val remainingBefore = 75
@@ -73,7 +74,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should set filled width to zero when remaining after is negative`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             // When
@@ -85,7 +86,7 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             manaBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)

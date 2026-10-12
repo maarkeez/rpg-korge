@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -14,7 +15,7 @@ import kotlin.test.Test
 class BattleUnitInfoViewTest : ViewsForTesting() {
     @Test
     fun `Init should not be visible when is initialized`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             // When
@@ -24,7 +25,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should be visible when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val unit = unit().toDto()
@@ -37,7 +38,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display the remaining steps and casts out of their maximum when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val unit = unit(movementRange = 3).toDto()
@@ -53,7 +54,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display the steps in white and the casts in gold when is displayed`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val unit = unit().toDto()
@@ -67,7 +68,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `Display should display no remaining casts when the battle unit has cast this turn`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val unit = unit().toDto()
@@ -81,7 +82,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayAbilitySelected should select ability button when ability is selected`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val selectedAbilityIndex = 0
@@ -95,7 +96,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `DisplayAbilitySelected should unselect other ability buttons when ability is selected`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val abilityButtons = battleUnitInfoView.abilityButtons()
@@ -112,7 +113,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
 
     @Test
     fun `Hide should not be visible when is hidden`() =
-        viewsTest {
+        sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val unit = unit().toDto()
