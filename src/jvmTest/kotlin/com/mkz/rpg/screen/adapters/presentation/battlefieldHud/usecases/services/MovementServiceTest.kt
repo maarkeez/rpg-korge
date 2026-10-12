@@ -1,55 +1,37 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services
 
-import com.mkz.rpg.battleUnit.domain.BattleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class MovementServiceTest {
-    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
-    private val canMoveTo: CanMoveTo = mock()
-    private val searchBattleUnitById: SearchBattleUnitById = mock()
+    private val queries = InMemoryQueries()
     private val movementService =
         MovementService(
-            searchBattleUnitById = searchBattleUnitById,
-            searchTilesThatCanBeOccupied = searchTilesThatCanBeOccupied,
-            canMoveTo = canMoveTo,
+            searchBattleUnitById = queries.searchBattleUnitById,
+            searchTilesThatCanBeOccupied = queries.searchTilesThatCanBeOccupied,
+            canMoveTo = queries.canMoveTo,
         )
 
     @Test
     fun `should return only the tiles the battle unit can move to when computing the tiles where it can move`() {
         // Given
-        val battleUnit =
-            com.mkz.rpg.battleUnit.domain.BattleUnitMother
-                .battleUnit(id = "battle-unit-1")
-                .toDto()
-                .copy(
-                    remainingTurnActions =
-                        BattleUnit.Dto.RemainingTurnActionsDto(
-                            remainingCasts = 1,
-                            remainingSteps = 2,
-                            maximumSteps = 3,
-                            maximumCasts = 1,
-                        ),
-                )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
-        whenever(searchTilesThatCanBeOccupied("battle-unit-1", 2)).thenReturn(
-            listOf(
-                Battlefield.Dto.PositionDto(row = 0, column = 1),
-                Battlefield.Dto.PositionDto(row = 1, column = 0),
-                Battlefield.Dto.PositionDto(row = 0, column = 2),
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 2).toDto()))
+        // The bottom right tile is in range, but too far to walk to.
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K . .
+                # # .
+                """,
+                occupants = mapOf('K' to "battle-unit-1"),
             ),
         )
-        whenever(canMoveTo("battle-unit-1", 0, 1)).thenReturn(true)
-        whenever(canMoveTo("battle-unit-1", 1, 0)).thenReturn(false)
-        whenever(canMoveTo("battle-unit-1", 0, 2)).thenReturn(true)
         // When
         val tilesWhereCanMove = movementService.tilesWhereCanMove("battle-unit-1")
         // Then
@@ -62,13 +44,8 @@ class MovementServiceTest {
     @Test
     fun `should return an empty set when there are no tiles that can be occupied`() {
         // Given
-        val battleUnit =
-            com.mkz.rpg.battleUnit.domain.BattleUnitMother
-                .battleUnit(id = "battle-unit-1")
-                .toDto()
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnit)
-        whenever(searchTilesThatCanBeOccupied("battle-unit-1", battleUnit.remainingTurnActions.remainingSteps))
-            .thenReturn(emptyList())
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1"))
+        queries.battlefieldRepository.create(battlefield("K #", occupants = mapOf('K' to "battle-unit-1")))
         // When
         val tilesWhereCanMove = movementService.tilesWhereCanMove("battle-unit-1")
         // Then

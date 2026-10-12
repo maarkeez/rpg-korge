@@ -1,35 +1,28 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
-import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
-import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class ApplyOnTurnStartedEffectsTest {
-    private val searchEffectById: SearchEffectById = mock()
-    private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId = mock()
-    private val searchPosition: SearchPosition = mock()
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val queries = InMemoryQueries()
+    private val battleUnitRepository = queries.battleUnitRepository
     private val eventBus = FakeEventBus()
     private val applyOnTurnStartedEffects =
         ApplyOnTurnStartedEffects(
-            searchEffectById = searchEffectById,
-            searchBattleUnitsByPlayerId = searchBattleUnitsByPlayerId,
+            searchEffectById = queries.searchEffectById,
+            searchBattleUnitsByPlayerId = queries.searchBattleUnitsByPlayerId,
             battleUnitRepository = battleUnitRepository,
-            searchPosition = searchPosition,
+            searchPosition = queries.searchPosition,
             eventBus = eventBus,
         )
 
@@ -37,18 +30,16 @@ class ApplyOnTurnStartedEffectsTest {
     fun `should apply on turn started effect when the battle unit has a delayed ongoing effect`() {
         // Given
         val effectId = "effect-1"
-        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+        queries.effectRepository.create(decreaseHealthEffect(id = effectId, damage = 3, applicationType = "ON_TURN_STARTED"))
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit =
-            battleUnit(unit = unit, player = player)
+            battleUnit(id = "knight-1", unit = unit, player = player)
                 .receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 1)
                 .pullEvents()
                 .second
         battleUnitRepository.create(battleUnit)
-        whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit.toDto()))
-        whenever(searchEffectById(effectId)).thenReturn(effect)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(position())
+        queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
@@ -63,7 +54,6 @@ class ApplyOnTurnStartedEffectsTest {
     @Test
     fun `should not apply any effect when the player has no battle units`() {
         // Given
-        whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(emptyList())
         // When
         applyOnTurnStartedEffects("player-1")
         // Then
@@ -73,9 +63,7 @@ class ApplyOnTurnStartedEffectsTest {
     @Test
     fun `should not apply any effect when the battle unit has no delayed ongoing effects`() {
         // Given
-        val battleUnit = battleUnit()
-        battleUnitRepository.create(battleUnit)
-        whenever(searchBattleUnitsByPlayerId("player-1")).thenReturn(listOf(battleUnit.toDto()))
+        battleUnitRepository.create(battleUnit(player = player(id = "player-1").toDto()))
         // When
         applyOnTurnStartedEffects("player-1")
         // Then

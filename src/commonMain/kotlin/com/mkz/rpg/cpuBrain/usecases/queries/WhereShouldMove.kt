@@ -51,7 +51,7 @@ class WhereShouldMove(
             enemyBattleUnits.associate { battleUnit ->
                 battleUnit.id to searchPosition(battleUnitId = battleUnit.id)
             }
-        val allyBattleUnits = searchBattleUnitsByPlayerId(playerId = battleUnit.playerId)
+        val allyBattleUnits = searchBattleUnitsByPlayerId(playerId = battleUnit.playerId).filter { ally -> ally.id != battleUnit.id }
         val allyBattleUnitsPositions =
             allyBattleUnits.associate { battleUnit ->
                 battleUnit.id to searchPosition(battleUnitId = battleUnit.id)

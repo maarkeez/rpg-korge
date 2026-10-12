@@ -30,6 +30,28 @@
 
 - The test MUST use object mothers to create the required test data (e.g.: `val effect = EffectMother.effect()`)
 - The test MUST set only the relevant values while creating objects with object mothers (e.g.: `val ability = ability(effects = listOf(effect.id)).toDto()`)
+- The test SHOULD draw the battlefield it needs with `BattlefieldMother.battlefield(map, occupants)`: one line per row and one character per tile, separated by spaces. `.` is sand, `#` is void and a letter is sand occupied by the battle unit that `occupants` maps it to. As in the game, sand in a corner between two void tiles (e.g.: void to the north and to the east) can not be occupied. For example:
+
+```kotlin
+val battlefield =
+    battlefield(
+        """
+        K . #
+        . . R
+        """,
+        occupants = mapOf('K' to "knight-1", 'R' to "rat-1"),
+    )
+```
+
+## Test doubles
+
+- The tests MUST NOT use a mocking library (Mockito, MockK, Mokkery...). This is enforced by [`MockingLibraryArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/MockingLibraryArchitectureTest.kt).
+- The use case under test SHOULD use its real collaborators (queries, commands, services) built on in-memory repositories (e.g.: `SearchEffectById(InMemoryEffectRepository())`), and the test SHOULD store the data they read in the repositories.
+- When the queries under test need many collaborators, the test SHOULD use [`InMemoryQueries`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/usecases/InMemoryQueries.kt), which wires the in-memory repositories and the real queries as the subdomain APIs do. For example: `InMemoryQueries().whereShouldMove`.
+- The test SHOULD assert outcomes (the stored state, the published events or what is displayed) instead of the calls to the collaborators.
+- The `EventBus` is provided by a `FakeEventBus` (in `src/jvmTest/kotlin/com/mkz/rpg/shared/domain/FakeEventBus.kt`), so tests can assert on the published events with `eventBus.shouldHavePublishedEvents(...)` and `eventBus.shouldNotHavePublishedEvents()` (in `src/jvmTest/kotlin/com/mkz/rpg/shared/domain/EventBusMatchers.kt`). Event listener tests use the `InMemoryEventBus` instead. See [Test example - Event listener](#test-example---event-listener).
+- The adapters that read the game resources are replaced by hand-written fakes that load the given data (e.g.: `FakeAbilityLoader(abilities)`), next to the loader interface they implement (e.g.: `ability/usecases/services/FakeAbilityLoader.kt`).
+- The views used by presenters are replaced by hand-written fakes that record what they are asked to display (e.g.: `FakeBattlefieldView`), next to the view tests. The views are `open`, with `open` functions, so the fakes can override them. See [Presenters](#presenters).
 
 ## Tests of a class with several functions
 
@@ -73,25 +95,25 @@ import effect.domain.*
 import effect.usecases.queries.*
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.*
 import shared.domain.*
 
 class RequestAbilityCreationTest {
     private val abilityRepository = InMemoryAbilityRepository()
+    private val effectRepository = InMemoryEffectRepository()
     private val eventBus = FakeEventBus()
-    private val searchEffectById: SearchEffectById = mock()
-    private val requestAbilityCreation = RequestAbilityCreation(
-        abilityRepository = abilityRepository,
-        searchEffectById = searchEffectById,
-        eventBus = eventBus
-    )
+    private val requestAbilityCreation =
+        RequestAbilityCreation(
+            abilityRepository = abilityRepository,
+            searchEffectById = SearchEffectById(effectRepository),
+            eventBus = eventBus,
+        )
 
     @Test
     fun `should create ability`() {
         // Given
-        val effect = EffectMother.effect().toDto()
-        val ability = ability(effects = listOf(effect.id)).toDto()
-        whenever(searchEffectById(effect.id)).thenReturn(effect)
+        val effect = decreaseHealthEffect()
+        effectRepository.create(effect)
+        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id))).toDto()
         // When
         requestAbilityCreation(abilityDto = ability)
         // Then
@@ -102,42 +124,39 @@ class RequestAbilityCreationTest {
 }
 ```
 
-Note: the `EventBus` is provided by a `FakeEventBus` (in `test/jvmTest/kotlin/shared/domain/FakeEventBus.kt`) instead of a mock, so tests can assert on the published events with `eventBus.shouldHavePublishedEvents(...)` and `eventBus.shouldNotHavePublishedEvents()` (in `test/jvmTest/kotlin/shared/domain/EventBusMatchers.kt`).
-
 ## Test example - Event listener
 
-In order to test event subscriptions we need to use the `com.mkz.rpg.shared.adapters.events.InMemoryEventBus` + `eventBus.dispatch()` instead of the FakeEvenBus. You can use this example as reference:
+- Event listener tests MUST use the `com.mkz.rpg.shared.adapters.events.InMemoryEventBus` + `eventBus.dispatch()` instead of the `FakeEventBus`, so the listener receives the published event.
+- Each event listener MUST have one single test, which asserts the outcome of the use case it calls (e.g.: the stored state, or the event the use case publishes, recorded with `eventBus.subscribe`). Typed subscriptions are already covered by [`EventBusTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/domain/EventBusTest.kt), so there is no need to test that other event types are ignored.
+
+You can use this example as reference:
+
 ```kotlin
 package com.mkz.rpg.battle.adapters.events
 
-import com.mkz.rpg.battle.usecases.commands.DefeatPlayer
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
-import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
+// Imports goes here
 
 class OnBattleUnitDefeatedTest {
     private val eventBus = InMemoryEventBus()
-    private val defeatPlayer: DefeatPlayer = mock()
+    private val battleRepository = InMemoryBattleRepository()
+    private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val onBattleUnitDefeated =
         OnBattleUnitDefeated(
             eventBus = eventBus,
-            defeatPlayer = defeatPlayer,
+            defeatPlayer = DefeatPlayer(HasAllBattleUnitsDefeated(battleUnitRepository), battleRepository, eventBus),
         )
+    private val defeatedPlayers = mutableListOf<PlayerDefeated>().also { defeated -> eventBus.subscribe<PlayerDefeated> { defeated += it } }
 
     @Test
     fun `should defeat player when a battle unit is defeated`() {
         // Given
-        val defeatedPlayer = "player-1"
-        val defeatedBattleUnit = "battle-unit-1"
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(defeatedPlayer, defeatedBattleUnit))
+        battleRepository.create(battle(players = listOf("player-1", "player-2")))
+        battleUnitRepository.create(battleUnit(id = "battle-unit-1", player = player(id = "player-2").toDto(), unit = unit(healthPoints = 0).toDto()))
+        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "player-2", battleUnitId = "battle-unit-1", defeatedAtRow = 1, defeatedAtColumn = 2))
         // When
         eventBus.dispatch()
         // Then
-        verify(defeatPlayer).invoke(defeatedPlayer)
+        defeatedPlayers.shouldContainExactly(PlayerDefeated("player-2"))
     }
 }
 ```
@@ -213,7 +232,36 @@ Some view functions take time and suspend (e.g.: `BattlefieldView.moveBattleUnit
 * Advance the frames with `nextFrame()`, `awaitCompletion(animation)` or `sampleUntilCompletion(animation) { ... }`, which records what is displayed on every frame. They call `delayFrame()` followed by `yield()`, because `delayFrame()` alone does not let the animation coroutine run.
 * These helpers live in [`ViewExtension.kt`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/ViewExtension.kt). See the `MoveBattleUnit` tests of `BattlefieldViewTest`.
 
-### Presenters and the timeline
+### Presenters
+
+- Presenter tests MUST use the real subdomain APIs through [`SubdomainApis`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SubdomainApis.kt), which wires them on one event bus as the game does, with fake loaders that load the given data. Call `initialise()` to store the data, deploy the battle units and start the battle, before creating the presenter.
+- Presenter tests MUST use the fake views (e.g.: `FakeBattlefieldView`, `FakeBattleUnitInfoView`), and assert what the fakes recorded (e.g.: `battlefieldView.displayedBattleUnits`). The player actions are simulated by calling the delegate or the callbacks the presenter gave to the fake (e.g.: `playerCallToActionView.onTurnFinished`).
+
+```kotlin
+class FinishTurnPresenterTest {
+    // The battle has started with the human player turn.
+    private val apis =
+        SubdomainApis(
+            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            playerOrder = listOf("human", "cpu"),
+        ).also(SubdomainApis::initialise)
+    private val playerCallToActionView = FakePlayerCallToActionView()
+    private val timeline = battleSceneTimeline()
+
+    @Test
+    fun `FinishTurn should finish the player turn when the player finishes the turn`() {
+        // Given
+        FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
+        apis.eventBus.publish(PlayerTurnStarted(playerId = "human"))
+        apis.eventBus.dispatch()
+        // When
+        playerCallToActionView.onTurnFinished.shouldNotBeNull().invoke()
+        apis.eventBus.dispatch()
+        // Then
+        apis.battleApi.searchBattle()?.currentPlayerTurn shouldBe "cpu"
+    }
+}
+```
 
 Presenters draw through the [presentation timeline](../architecture/presentation-timeline.md). Their tests use `BattleSceneTimelineMother.battleSceneTimeline()`, which plays the steps straight away. To check that something waits for the previous steps, start a step that keeps the timeline playing with `timeline.playLongStep()`, and complete it later.
 
@@ -313,7 +361,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
 ## Shared tests
 
-A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use Mockito, KorGE views or `java.*` classes.
+A test that only depends on common code can be moved to `src/commonTest`, so it runs on both the JVM and JS. A test can be shared when it does not use KorGE views or `java.*` classes.
 
 - The test MUST be annotated with `@kotlin.test.Test` instead of `@org.junit.jupiter.api.Test`.
 - The test MUST only use test fixtures (e.g.: object mothers, fakes) that are shared too.

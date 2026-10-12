@@ -1,89 +1,87 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battle.usecases.queries.SearchBattle
-import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.Player
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.castGroup
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class ProcessTileSelectedTest {
-    private val searchOccupant: SearchOccupant = mock()
-    private val searchBattleUnitById: SearchBattleUnitById = mock()
-    private val searchPlayerById: SearchPlayerById = mock()
-    private val searchBattle: SearchBattle = mock()
-    private val movementService: MovementService = mock()
+    private val queries = InMemoryQueries()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val processTileSelected =
         ProcessTileSelected(
-            searchOccupant = searchOccupant,
-            searchBattleUnitById = searchBattleUnitById,
-            searchPlayerById = searchPlayerById,
-            searchBattle = searchBattle,
+            searchOccupant = queries.searchOccupant,
+            searchBattleUnitById = queries.searchBattleUnitById,
+            searchPlayerById = queries.searchPlayerById,
+            searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = movementService,
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchTilesThatCanBeOccupied, queries.canMoveTo),
         )
 
-    private fun battleUnitDto(
-        id: String,
-        playerId: String,
-    ): BattleUnit.Dto =
-        battleUnit(
-            player =
-                com.mkz.rpg.player.domain.PlayerMother
-                    .player(id = playerId)
-                    .toDto(),
-        ).toDto()
-            .copy(id = id, playerId = playerId)
+    /**
+     * Stores the players, the battle in the turn of the first one, and the battle units standing on the battlefield map, which walk one tile:
+     * - `K` is battle-unit-1, of the [knightPlayerType] player-1.
+     * - `S` is battle-unit-2, of player-1.
+     * - `E` is enemy-battle-unit-1, of player-2.
+     */
+    private fun givenBattle(
+        map: String,
+        knightPlayerType: Player.Dto.PlayerTypeDto = HUMAN,
+        playerOrder: List<String> = listOf("player-1", "player-2"),
+    ) {
+        val player = player(id = "player-1", type = knightPlayerType).also(queries.playerRepository::create).toDto()
+        val enemyPlayer = player(id = "player-2", type = CPU).also(queries.playerRepository::create).toDto()
+        queries.battleRepository.create(battle(players = playerOrder))
+        val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1")
+        battleUnits.forEach { (letter, battleUnitId) ->
+            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter == 'E') enemyPlayer else player))
+        }
+        queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
+    }
 
     @Test
     fun `should select the battle unit when a tile occupied by a battle unit is selected while idle`() {
         // Given
-        val tilesWhereCanBeMoved =
-            setOf(
-                tile(1, 3),
-            )
-        battlefieldHudRepository.create(
-            com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
-                .idle(),
-        )
-        whenever(searchOccupant(1, 2)).thenReturn("battle-unit-1")
-        whenever(movementService.tilesWhereCanMove("battle-unit-1")).thenReturn(tilesWhereCanBeMoved)
+        battlefieldHudRepository.create(idle())
+        givenBattle("K . #")
         // When
-        processTileSelected(1, 2)
+        processTileSelected(0, 0)
         // Then
+        val tilesWhereCanBeMoved = setOf(tile(0, 1))
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
         storedHud.battleUnitId shouldBe "battle-unit-1"
-        storedHud.tile shouldBe tile(1, 2)
+        storedHud.tile shouldBe tile(0, 0)
         storedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
         eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnit(
-                tile =
-                    tile(1, 2),
+                tile = tile(0, 0),
                 battleUnitId = "battle-unit-1",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
@@ -93,11 +91,8 @@ class ProcessTileSelectedTest {
     @Test
     fun `should go idle when an empty tile is selected while idle`() {
         // Given
-        battlefieldHudRepository.create(
-            com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
-                .idle(),
-        )
-        whenever(searchOccupant(0, 0)).thenReturn(null)
+        battlefieldHudRepository.create(idle())
+        givenBattle(". .")
         // When
         processTileSelected(0, 0)
         // Then
@@ -108,33 +103,18 @@ class ProcessTileSelectedTest {
     @Test
     fun `should move the battle unit when a tile within the movement range is selected`() {
         // Given
-        val hud =
-            displayMovementRange(
-                tile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                tilesWhereCanBeMoved =
-                    setOf(
-                        tile(2, 3),
-                    ),
-            )
+        val hud = displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 2)))
         battlefieldHudRepository.create(hud)
-        whenever(searchOccupant(2, 3)).thenReturn(null)
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(
-            com.mkz.rpg.player.domain.PlayerMother
-                .player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
-                .toDto(),
-        )
+        givenBattle("K . .")
         // When
-        processTileSelected(2, 3)
+        processTileSelected(0, 2)
         // Then
         battlefieldHudRepository.search() shouldBe hud
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestMoveBattleUnit(
                 battleUnitId = "battle-unit-1",
-                moveToRow = 2,
-                moveToColumn = 3,
+                moveToRow = 0,
+                moveToColumn = 2,
             ),
         )
     }
@@ -142,26 +122,10 @@ class ProcessTileSelectedTest {
     @Test
     fun `should go idle when a tile outside the movement range is selected`() {
         // Given
-        battlefieldHudRepository.create(
-            displayMovementRange(
-                tile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                tilesWhereCanBeMoved =
-                    setOf(
-                        tile(2, 3),
-                    ),
-            ),
-        )
-        whenever(searchOccupant(5, 5)).thenReturn(null)
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(
-            com.mkz.rpg.player.domain.PlayerMother
-                .player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
-                .toDto(),
-        )
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 2))))
+        givenBattle("K . . .")
         // When
-        processTileSelected(5, 5)
+        processTileSelected(0, 3)
         // Then
         battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
         eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
@@ -170,26 +134,10 @@ class ProcessTileSelectedTest {
     @Test
     fun `should go idle without moving the battle unit when it belongs to a non-human player`() {
         // Given
-        battlefieldHudRepository.create(
-            displayMovementRange(
-                tile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                tilesWhereCanBeMoved =
-                    setOf(
-                        tile(2, 3),
-                    ),
-            ),
-        )
-        whenever(searchOccupant(2, 3)).thenReturn(null)
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchPlayerById("player-1")).thenReturn(
-            com.mkz.rpg.player.domain.PlayerMother
-                .player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU)
-                .toDto(),
-        )
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 2))))
+        givenBattle("K . .", knightPlayerType = CPU)
         // When
-        processTileSelected(2, 3)
+        processTileSelected(0, 2)
         // Then
         battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
         eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
@@ -198,16 +146,10 @@ class ProcessTileSelectedTest {
     @Test
     fun `should go idle when the tile is occupied by the same battle unit`() {
         // Given
-        battlefieldHudRepository.create(
-            displayMovementRange(
-                tile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-            ),
-        )
-        whenever(searchOccupant(1, 1)).thenReturn("battle-unit-1")
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenBattle("K .")
         // When
-        processTileSelected(1, 1)
+        processTileSelected(0, 0)
         // Then
         battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
         eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
@@ -216,31 +158,20 @@ class ProcessTileSelectedTest {
     @Test
     fun `should select the other battle unit when the tile is occupied by another battle unit`() {
         // Given
-        val tilesWhereCanBeMoved =
-            setOf(
-                tile(2, 3),
-            )
-        battlefieldHudRepository.create(
-            displayMovementRange(
-                tile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-            ),
-        )
-        whenever(searchOccupant(2, 2)).thenReturn("battle-unit-2")
-        whenever(movementService.tilesWhereCanMove("battle-unit-2")).thenReturn(tilesWhereCanBeMoved)
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenBattle("K . S .")
         // When
-        processTileSelected(2, 2)
+        processTileSelected(0, 2)
         // Then
+        val tilesWhereCanBeMoved = setOf(tile(0, 1), tile(0, 3))
         val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
         storedHud.battleUnitId shouldBe "battle-unit-2"
-        storedHud.tile shouldBe tile(2, 2)
+        storedHud.tile shouldBe tile(0, 2)
         storedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
         eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.Idle,
             BattlefieldHudEvent.SelectedBattleUnit(
-                tile =
-                    tile(2, 2),
+                tile = tile(0, 2),
                 battleUnitId = "battle-unit-2",
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
@@ -250,9 +181,7 @@ class ProcessTileSelectedTest {
     @Test
     fun `should do nothing when the hud is previewing the ability cast`() {
         // Given
-        val hud =
-            com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
-                .displayAbilityCastPreview()
+        val hud = displayAbilityCastPreview()
         battlefieldHudRepository.create(hud)
         // When
         processTileSelected(1, 1)
@@ -264,24 +193,13 @@ class ProcessTileSelectedTest {
     @Test
     fun `should preview the self ability cast when the selected tile belongs to a cast group with no occupant`() {
         // Given
-        val castGroup = castGroup(tile(1, 1))
+        val castGroup = castGroup(tile(0, 1))
         battlefieldHudRepository.create(
-            displayAbilityCastRange(
-                casterTile = tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroupsWhereCanCast = listOf(castGroup),
-            ),
+            displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", castGroupsWhereCanCast = listOf(castGroup)),
         )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(
-            com.mkz.rpg.battle.domain.BattleMother
-                .battle(players = listOf("player-1", "player-2"))
-                .toDto(),
-        )
-        whenever(searchOccupant(1, 1)).thenReturn(null)
+        givenBattle("K .")
         // When
-        processTileSelected(1, 1)
+        processTileSelected(0, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         storedHud.castGroup shouldBe castGroup
@@ -298,28 +216,13 @@ class ProcessTileSelectedTest {
     @Test
     fun `should preview the enemy ability cast when the selected tile is occupied by an enemy battle unit`() {
         // Given
-        val castGroup = castGroup(tile(1, 1))
+        val castGroup = castGroup(tile(0, 1))
         battlefieldHudRepository.create(
-            displayAbilityCastRange(
-                casterTile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroupsWhereCanCast =
-                    listOf(
-                        castGroup,
-                    ),
-            ),
+            displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", castGroupsWhereCanCast = listOf(castGroup)),
         )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(
-            com.mkz.rpg.battle.domain.BattleMother
-                .battle(players = listOf("player-1", "player-2"))
-                .toDto(),
-        )
-        whenever(searchOccupant(1, 1)).thenReturn("enemy-battle-unit-1")
+        givenBattle("K E")
         // When
-        processTileSelected(1, 1)
+        processTileSelected(0, 1)
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         storedHud.castGroup shouldBe castGroup
@@ -338,25 +241,11 @@ class ProcessTileSelectedTest {
     fun `should go idle when the selected tile does not belong to any cast group`() {
         // Given
         battlefieldHudRepository.create(
-            displayAbilityCastRange(
-                casterTile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroupsWhereCanCast =
-                    listOf(
-                        castGroup(tile(1, 1)),
-                    ),
-            ),
+            displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", castGroupsWhereCanCast = listOf(castGroup(tile(0, 1)))),
         )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(
-            com.mkz.rpg.battle.domain.BattleMother
-                .battle(players = listOf("player-1", "player-2"))
-                .toDto(),
-        )
+        givenBattle("K . .")
         // When
-        processTileSelected(4, 4)
+        processTileSelected(0, 2)
         // Then
         battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
         eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
@@ -366,26 +255,11 @@ class ProcessTileSelectedTest {
     fun `should go idle when the caster is not the current player`() {
         // Given
         battlefieldHudRepository.create(
-            displayAbilityCastRange(
-                casterTile =
-                    tile(0, 0),
-                battleUnitId = "battle-unit-1",
-                abilityId = "ability-1",
-                castGroupsWhereCanCast =
-                    listOf(
-                        castGroup(tile(1, 1)),
-                    ),
-            ),
+            displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", castGroupsWhereCanCast = listOf(castGroup(tile(0, 1)))),
         )
-        whenever(searchBattleUnitById("battle-unit-1")).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(
-            com.mkz.rpg.battle.domain.BattleMother
-                .battle(players = listOf("player-1", "player-2"))
-                .toDto()
-                .copy(currentPlayerTurn = "player-2"),
-        )
+        givenBattle("K .", playerOrder = listOf("player-2", "player-1"))
         // When
-        processTileSelected(1, 1)
+        processTileSelected(0, 1)
         // Then
         battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
         eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
@@ -394,11 +268,9 @@ class ProcessTileSelectedTest {
     @Test
     fun `should do nothing when no battle exists`() {
         // Given
-        val hud =
-            displayAbilityCastRange()
+        val hud = displayAbilityCastRange(battleUnitId = "battle-unit-1")
         battlefieldHudRepository.create(hud)
-        whenever(searchBattleUnitById(any())).thenReturn(battleUnitDto("battle-unit-1", "player-1"))
-        whenever(searchBattle()).thenReturn(null)
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1"))
         // When
         processTileSelected(1, 1)
         // Then

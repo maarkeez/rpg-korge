@@ -3,27 +3,26 @@ package com.mkz.rpg.ability.usecases.queries
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class CalculateImmediateDamageTest {
     private val abilityRepository = InMemoryAbilityRepository()
-    private val searchEffectById: SearchEffectById = mock()
+    private val effectRepository = InMemoryEffectRepository()
     private val calculateImmediateDamage =
         CalculateImmediateDamage(
             abilityRepository = abilityRepository,
-            searchEffectById = searchEffectById,
+            searchEffectById = SearchEffectById(effectRepository),
         )
 
     @Test
     fun `should sum power of immediately applied effects when ability has a mix of immediate and non immediate effects`() {
         // Given
-        val immediateEffect = decreaseHealthEffect(id = "effect-1", damage = 4, applicationType = "IMMEDIATELY").toDto()
-        val onTurnStartedEffect = decreaseHealthEffect(id = "effect-2", damage = 10).toDto()
+        val immediateEffect = decreaseHealthEffect(id = "effect-1", damage = 4, applicationType = "IMMEDIATELY").also(effectRepository::create).toDto()
+        val onTurnStartedEffect = decreaseHealthEffect(id = "effect-2", damage = 10).also(effectRepository::create).toDto()
         val ability =
             ability(
                 effectSpecs =
@@ -34,8 +33,6 @@ class CalculateImmediateDamageTest {
             )
         val abilityDto = ability.toDto()
         abilityRepository.create(ability)
-        whenever(searchEffectById(immediateEffect.id)).thenReturn(immediateEffect)
-        whenever(searchEffectById(onTurnStartedEffect.id)).thenReturn(onTurnStartedEffect)
         // When
         val damage = calculateImmediateDamage(abilityDto.id)
         // Then

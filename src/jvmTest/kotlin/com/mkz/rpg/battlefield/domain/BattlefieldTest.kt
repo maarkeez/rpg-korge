@@ -449,9 +449,9 @@ class BattlefieldTest {
     @Test
     fun `IsInBoundaries should be true when the position is within the battlefield`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield(rows = 3, columns = 3)
+        val battlefield = BattlefieldMother.battlefield(rows = 2, columns = 4)
         // When
-        val result = battlefield.isInBoundaries(row = 1, column = 1)
+        val result = battlefield.isInBoundaries(row = 1, column = 3)
         // Then
         result.shouldBeTrue()
     }
@@ -459,9 +459,9 @@ class BattlefieldTest {
     @Test
     fun `IsInBoundaries should be false when the row is outside the battlefield`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield(rows = 3, columns = 3)
+        val battlefield = BattlefieldMother.battlefield(rows = 2, columns = 4)
         // When
-        val result = battlefield.isInBoundaries(row = 3, column = 0)
+        val result = battlefield.isInBoundaries(row = 2, column = 0)
         // Then
         result.shouldBeFalse()
     }
@@ -469,9 +469,9 @@ class BattlefieldTest {
     @Test
     fun `IsInBoundaries should be false when the column is outside the battlefield`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield(rows = 3, columns = 3)
+        val battlefield = BattlefieldMother.battlefield(rows = 4, columns = 2)
         // When
-        val result = battlefield.isInBoundaries(row = 0, column = 3)
+        val result = battlefield.isInBoundaries(row = 0, column = 2)
         // Then
         result.shouldBeFalse()
     }

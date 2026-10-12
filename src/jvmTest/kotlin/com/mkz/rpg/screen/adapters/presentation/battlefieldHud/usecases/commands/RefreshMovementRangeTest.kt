@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudError
@@ -14,40 +14,40 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class RefreshMovementRangeTest {
-    private val searchPosition: SearchPosition = mock()
-    private val movementService: MovementService = mock()
+    private val queries = InMemoryQueries()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val refreshMovementRange =
         RefreshMovementRange(
-            searchPosition = searchPosition,
+            searchPosition = queries.searchPosition,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = movementService,
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchTilesThatCanBeOccupied, queries.canMoveTo),
         )
 
     @Test
     fun `should display the current tile and movement range of the selected battle unit when the hud is displaying its movement range`() {
         // Given
-        val newTiles = setOf(tile(3, 5), tile(4, 4))
+        // The battle unit has moved from where the hud displays it.
         battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
-        whenever(searchPosition("battle-unit-1")).thenReturn(Battlefield.Dto.PositionDto(row = 3, column = 4))
-        whenever(movementService.tilesWhereCanMove("battle-unit-1")).thenReturn(newTiles)
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
+        val newTiles = setOf(tile(0, 0), tile(0, 2))
         // When
         refreshMovementRange()
         // Then
-        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = tile(3, 4), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles)
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles)
         eventBus.shouldHavePublishedEvents(
-            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(3, 4), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles),
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles),
         )
     }
 
@@ -55,7 +55,7 @@ class RefreshMovementRangeTest {
     fun `should go idle when the selected battle unit is no longer on the battlefield`() {
         // Given
         battlefieldHudRepository.create(displayMovementRange(battleUnitId = "battle-unit-1"))
-        whenever(searchPosition("battle-unit-1")).thenReturn(null)
+        queries.battlefieldRepository.create(battlefield(". ."))
         // When
         refreshMovementRange()
         // Then

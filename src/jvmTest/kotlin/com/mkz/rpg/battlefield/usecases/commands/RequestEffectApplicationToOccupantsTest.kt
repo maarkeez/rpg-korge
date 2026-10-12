@@ -9,20 +9,19 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class RequestEffectApplicationToOccupantsTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val searchTerrainById: SearchTerrainById = mock()
+    private val terrainRepository = InMemoryTerrainRepository()
     private val eventBus = FakeEventBus()
     private val requestEffectApplicationToOccupants =
         RequestEffectApplicationToOccupants(
             battlefieldRepository = battlefieldRepository,
-            searchTerrainById = searchTerrainById,
+            searchTerrainById = SearchTerrainById(terrainRepository),
             eventBus = eventBus,
         )
 
@@ -31,7 +30,7 @@ class RequestEffectApplicationToOccupantsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        whenever(searchTerrainById("sand")).thenReturn(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1"))
+        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
         requestEffectApplicationToOccupants()
         // Then
@@ -57,7 +56,7 @@ class RequestEffectApplicationToOccupantsTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(occupiedBattlefield)
-        whenever(searchTerrainById("sand")).thenReturn(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1"))
+        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
         requestEffectApplicationToOccupants()
         // Then
@@ -85,7 +84,7 @@ class RequestEffectApplicationToOccupantsTest {
     fun `should not request effect applications when the battlefield has no occupant`() {
         // Given
         battlefieldRepository.create(battlefield())
-        whenever(searchTerrainById("sand")).thenReturn(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1"))
+        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
         requestEffectApplicationToOccupants()
         // Then
@@ -97,7 +96,7 @@ class RequestEffectApplicationToOccupantsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        whenever(searchTerrainById("sand")).thenReturn(Terrain.Dto(id = "sand", canBeOccupied = true))
+        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
         // When
         requestEffectApplicationToOccupants()
         // Then

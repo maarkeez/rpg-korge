@@ -4,27 +4,23 @@ import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectEvent.EffectCreated
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
-import com.mkz.rpg.effect.usecases.services.EffectLoader
+import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class InitialiseEffectsTest {
     private val effectRepository = InMemoryEffectRepository()
     private val eventBus = FakeEventBus()
-    private val effectLoader: EffectLoader = mock()
-    private val initialiseEffects = InitialiseEffects(effectLoader, effectRepository, eventBus)
 
     @Test
     fun `should create every loaded effect when effects are initialised`() {
         // Given
         val venom = decreaseHealthEffect(id = "venom").toDto()
         val teleport = teleportEffect(id = "teleport").toDto()
-        whenever(effectLoader.loadEffects()).thenReturn(listOf(venom, teleport))
+        val initialiseEffects = InitialiseEffects(FakeEffectLoader(effects = listOf(venom, teleport)), effectRepository, eventBus)
         // When
         initialiseEffects()
         // Then
@@ -38,7 +34,7 @@ class InitialiseEffectsTest {
         // Given
         val venom = decreaseHealthEffect(id = "venom")
         effectRepository.create(venom)
-        whenever(effectLoader.loadEffects()).thenReturn(listOf(decreaseHealthEffect(id = "venom", damage = 99).toDto()))
+        val initialiseEffects = InitialiseEffects(FakeEffectLoader(effects = listOf(decreaseHealthEffect(id = "venom", damage = 99).toDto())), effectRepository, eventBus)
         // When
         initialiseEffects()
         // Then

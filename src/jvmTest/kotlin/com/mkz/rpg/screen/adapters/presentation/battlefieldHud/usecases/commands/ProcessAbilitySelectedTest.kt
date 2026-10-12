@@ -1,7 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
-import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
+import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -12,25 +15,42 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class ProcessAbilitySelectedTest {
-    private val canCastAbility: CanCastAbility = mock()
-    private val whereCanCast: WhereCanCast = mock()
+    private val queries = InMemoryQueries()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val processAbilitySelected =
         ProcessAbilitySelected(
-            canCastAbility = canCastAbility,
-            whereCanCast = whereCanCast,
+            canCastAbility = queries.canCastAbility,
+            whereCanCast = queries.whereCanCast,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
+
+    // Stores the knight, that knows the given abilities, at (0,0), with a rat on each side: the sword hits one of them, the heal targets the knight.
+    private fun givenKnightBetweenRats(knightAbilities: List<String>) {
+        queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY))
+        queries.abilityRepository.create(ability(id = "ability-2", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(abilities = knightAbilities).toDto(), player = player(id = "human").toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto()))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K R
+                S .
+                """,
+                occupants = mapOf('K' to "battle-unit-1", 'R' to "rat-1", 'S' to "rat-2"),
+            ),
+        )
+    }
 
     @Test
     fun `should select the ability when the hud is displaying the movement range and the battle unit can cast`() {
@@ -38,9 +58,9 @@ class ProcessAbilitySelectedTest {
         val castGroupsWhereCanCast =
             listOf(
                 com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto
-                    .CastGroupDto(tiles = listOf(tile(1, 1))),
+                    .CastGroupDto(tiles = listOf(tile(0, 1))),
                 com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto
-                    .CastGroupDto(tiles = listOf(tile(2, 2))),
+                    .CastGroupDto(tiles = listOf(tile(1, 0))),
             )
         battlefieldHudRepository.create(
             displayMovementRange(
@@ -49,17 +69,7 @@ class ProcessAbilitySelectedTest {
                 battleUnitId = "battle-unit-1",
             ),
         )
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(true)
-        whenever(whereCanCast("battle-unit-1", "ability-1"))
-            .thenReturn(
-                castGroupsWhereCanCast.map { castGroup ->
-                    WhereCanCast.CastGroup(
-                        positions =
-                            castGroup.tiles
-                                .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
-                    )
-                },
-            )
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"))
         // When
         processAbilitySelected("ability-1")
         // Then
@@ -83,7 +93,8 @@ class ProcessAbilitySelectedTest {
         val hud =
             displayMovementRange(battleUnitId = "battle-unit-1")
         battlefieldHudRepository.create(hud)
-        whenever(canCastAbility("battle-unit-1", "ability-1")).thenReturn(false)
+        // The knight does not know the ability.
+        givenKnightBetweenRats(knightAbilities = listOf("ability-2"))
         // When
         processAbilitySelected("ability-1")
         // Then
@@ -130,7 +141,7 @@ class ProcessAbilitySelectedTest {
         val newCastGroupsWhereCanCast =
             listOf(
                 com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto
-                    .CastGroupDto(tiles = listOf(tile(2, 2))),
+                    .CastGroupDto(tiles = listOf(tile(0, 0))),
             )
         battlefieldHudRepository.create(
             displayAbilityCastRange(
@@ -140,16 +151,7 @@ class ProcessAbilitySelectedTest {
                 abilityId = "ability-1",
             ),
         )
-        whenever(whereCanCast("battle-unit-1", "ability-2"))
-            .thenReturn(
-                newCastGroupsWhereCanCast.map { castGroup ->
-                    WhereCanCast.CastGroup(
-                        positions =
-                            castGroup.tiles
-                                .map { tile -> WhereCanCast.PositionDto(row = tile.row, column = tile.column) },
-                    )
-                },
-            )
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1", "ability-2"))
         // When
         processAbilitySelected("ability-2")
         // Then

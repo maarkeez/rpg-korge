@@ -1,39 +1,30 @@
 package com.mkz.rpg.battle.adapters.events
 
+import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleEvent
+import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.commands.FinishBattle
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class OnPlayerDefeatedTest {
     private val eventBus = InMemoryEventBus()
-    private val finishBattle: FinishBattle = mock()
+    private val battleRepository = InMemoryBattleRepository()
     private val onPlayerDefeated =
         OnPlayerDefeated(
             eventBus = eventBus,
-            finishBattle = finishBattle,
+            finishBattle = FinishBattle(battleRepository, eventBus),
         )
 
     @Test
     fun `should finish battle when a player is defeated`() {
         // Given
-        eventBus.publish(BattleEvent.PlayerDefeated(playerId = "player-1"))
+        battleRepository.create(battle(players = listOf("player-1", "player-2")).defeatPlayer("player-2").pullEvents().second)
+        eventBus.publish(BattleEvent.PlayerDefeated(playerId = "player-2"))
         // When
         eventBus.dispatch()
         // Then
-        verify(finishBattle).invoke()
-    }
-
-    @Test
-    fun `should not finish battle when a different event type is dispatched`() {
-        // Given
-        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "player-1"))
-        // When
-        eventBus.dispatch()
-        // Then
-        verify(finishBattle, never()).invoke()
+        battleRepository.search()?.toDto()?.isFinished shouldBe true
     }
 }

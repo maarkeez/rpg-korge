@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.TerrainMother
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import io.kotest.assertions.throwables.shouldThrowAny
@@ -20,18 +21,15 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class RequestBattlefieldCreationTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val searchTerrainById: SearchTerrainById = mock()
+    private val terrainRepository = InMemoryTerrainRepository()
     private val eventBus = FakeEventBus()
     private val requestBattlefieldCreation =
         RequestBattlefieldCreation(
             battlefieldRepository = battlefieldRepository,
-            searchTerrainById = searchTerrainById,
+            searchTerrainById = SearchTerrainById(terrainRepository),
             eventBus = eventBus,
         )
 
@@ -46,7 +44,8 @@ class RequestBattlefieldCreationTest {
                     terrainId()
                 }
             }
-        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain(allowedTransitionTo = setOf("sand", "void")).toDto())
+        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void")))
+        terrainRepository.create(TerrainMother.occupiableTerrain(id = "void", allowedTransitionTo = setOf("sand", "void")))
         // When
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
@@ -82,7 +81,8 @@ class RequestBattlefieldCreationTest {
             listOf(
                 listOf("sand", "void"),
             )
-        whenever(searchTerrainById(any())).thenReturn(TerrainMother.occupiableTerrain().toDto())
+        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand"))
+        terrainRepository.create(TerrainMother.occupiableTerrain(id = "void"))
         // When
         val error = shouldThrowAny { requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles) }
         // Then
@@ -102,12 +102,8 @@ class RequestBattlefieldCreationTest {
             listOf(
                 listOf("void", "sand"),
             )
-        whenever(searchTerrainById("void")).thenReturn(TerrainMother.nonOccupiableTerrain(id = "void").toDto())
-        whenever(searchTerrainById("sand")).thenReturn(
-            TerrainMother
-                .occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void"))
-                .toDto(),
-        )
+        terrainRepository.create(TerrainMother.nonOccupiableTerrain(id = "void"))
+        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void")))
         // When
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then

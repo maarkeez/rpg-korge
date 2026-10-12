@@ -1,40 +1,37 @@
 package com.mkz.rpg.battleUnit.usecases.queries
 
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class WhereCanMoveTest {
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
-    private val canMoveTo: CanMoveTo = mock()
-    private val whereCanMove = WhereCanMove(battleUnitRepository, searchTilesThatCanBeOccupied, canMoveTo)
+    private val queries = InMemoryQueries()
+    private val whereCanMove = queries.whereCanMove
 
     @Test
     fun `should return positions that can be moved to when the battle unit can move`() {
         // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 2).toDto())
-        battleUnitRepository.create(battleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        val firstPosition = PositionDto(0, 1)
-        val secondPosition = PositionDto(0, 2)
-        val thirdPosition = PositionDto(1, 0)
-        whenever(searchTilesThatCanBeOccupied(battleUnitId, 2))
-            .thenReturn(listOf(firstPosition, secondPosition, thirdPosition))
-        whenever(canMoveTo(battleUnitId, firstPosition.row, firstPosition.column)).thenReturn(true)
-        whenever(canMoveTo(battleUnitId, secondPosition.row, secondPosition.column)).thenReturn(false)
-        whenever(canMoveTo(battleUnitId, thirdPosition.row, thirdPosition.column)).thenReturn(true)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 2).toDto()))
+        // The tiles behind the wall are in range, but too far to walk to.
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K # .
+                . # .
+                . . .
+                """,
+                occupants = mapOf('K' to "knight-1"),
+            ),
+        )
         // When
-        val result = whereCanMove(battleUnitId)
+        val result = whereCanMove("knight-1")
         // Then
-        result.shouldContainExactly(firstPosition, thirdPosition)
+        result.shouldContainExactlyInAnyOrder(PositionDto(1, 0), PositionDto(2, 0))
     }
 
     @Test

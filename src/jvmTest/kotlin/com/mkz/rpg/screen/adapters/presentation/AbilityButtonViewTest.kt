@@ -3,12 +3,11 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 class AbilityButtonViewTest : ViewsForTesting() {
     @Test
@@ -107,13 +106,19 @@ class AbilityButtonViewTest : ViewsForTesting() {
         viewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
-            val delegate = mock<AbilityButtonView.Delegate>()
-            abilityButtonView.setDelegate(delegate)
+            val selectedAbilityIds = mutableListOf<String>()
+            abilityButtonView.setDelegate(
+                object : AbilityButtonView.Delegate {
+                    override fun abilitySelected(abilityId: String) {
+                        selectedAbilityIds += abilityId
+                    }
+                },
+            )
             abilityButtonView.display(abilityId = "mushroom", canCast = true)
             addChild(abilityButtonView)
             // When
             clickAbilityButton(abilityButtonView)
             // Then
-            verify(delegate).abilitySelected(abilityId = "mushroom")
+            selectedAbilityIds.shouldContainExactly("mushroom")
         }
 }

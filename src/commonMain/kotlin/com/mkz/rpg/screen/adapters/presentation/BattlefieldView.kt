@@ -31,7 +31,7 @@ import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
 
-class BattlefieldView(
+open class BattlefieldView(
     private val resourcesLoader: BattleSceneResourcesLoader,
 ) : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
     companion object {
@@ -108,11 +108,11 @@ class BattlefieldView(
         addChild(viewport)
     }
 
-    fun setDelegate(delegate: Delegate) {
+    open fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
     }
 
-    fun displayBattlefield(battlefield: Battlefield.Dto) {
+    open fun displayBattlefield(battlefield: Battlefield.Dto) {
         val mapHeight = TILE_SIZE * battlefield.rows
         val mapWidth = TILE_SIZE * battlefield.columns
         battlefieldGrid =
@@ -148,7 +148,7 @@ class BattlefieldView(
         }
     }
 
-    fun terrainTileBitmap(
+    open fun terrainTileBitmap(
         terrainId: String,
         terrainTransition: TerrainTransitionDto?,
     ): Bitmap {
@@ -177,7 +177,7 @@ class BattlefieldView(
         column: Int,
     ): String = "row-$row-column-$column"
 
-    fun displayBattleUnit(
+    open fun displayBattleUnit(
         row: Int,
         column: Int,
         unitId: String,
@@ -194,7 +194,7 @@ class BattlefieldView(
         )
     }
 
-    fun displayPotentialMovement(
+    open fun displayPotentialMovement(
         row: Int,
         column: Int,
     ) {
@@ -202,7 +202,7 @@ class BattlefieldView(
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_3.png"), SELECTION)
     }
 
-    fun displayPotentialCast(
+    open fun displayPotentialCast(
         row: Int,
         column: Int,
     ) {
@@ -211,7 +211,7 @@ class BattlefieldView(
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_2.png"), SELECTION)
     }
 
-    fun displayTileSelection(
+    open fun displayTileSelection(
         row: Int,
         column: Int,
     ) {
@@ -220,7 +220,7 @@ class BattlefieldView(
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_4.png"), SELECTION)
     }
 
-    fun resetTiles() {
+    open fun resetTiles() {
         battlefieldGrid.children.forEach { view ->
             val tileButton = view as UIButton
             tileButton.findViewByName(SELECTION)?.removeFromParent()
@@ -232,7 +232,7 @@ class BattlefieldView(
      * Darkens every tile but the given ones, including the battle units on them, so the tiles that can be selected
      * stand out. Removed when the tiles are reset.
      */
-    fun dimTilesExcept(tiles: Set<PositionDto>) {
+    open fun dimTilesExcept(tiles: Set<PositionDto>) {
         for (row in 0 until battlefieldGrid.rows) {
             for (column in 0 until battlefieldGrid.cols) {
                 if (PositionDto(row, column) in tiles) continue
@@ -246,7 +246,7 @@ class BattlefieldView(
         }
     }
 
-    fun removeBattleUnit(
+    open fun removeBattleUnit(
         row: Int,
         column: Int,
     ) {
@@ -258,7 +258,7 @@ class BattlefieldView(
      * Moves the battle unit tile by tile along the path, stopping on each tile, and scrolls the battlefield so the
      * battle unit stays visible. Path: the tiles walked from the origin (excluded) to the destination (included).
      */
-    suspend fun moveBattleUnit(
+    open suspend fun moveBattleUnit(
         fromRow: Int,
         fromColumn: Int,
         path: List<PositionDto>,
@@ -275,7 +275,7 @@ class BattlefieldView(
     }
 
     /** Tints the visible battlefield with the colour, fading it in and out, e.g.: when a turn starts. */
-    suspend fun tint(color: RGBA) {
+    open suspend fun tint(color: RGBA) {
         val overlay = viewport.solidRect(Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT), color) { alpha = 0.0 }
         tintOverlay = overlay
         val tintAnimator =
@@ -292,7 +292,7 @@ class BattlefieldView(
      * Blinks the battle unit in white, after scrolling the battlefield so the battle unit is visible, e.g.: when it
      * receives an effect.
      */
-    suspend fun flashBattleUnit(
+    open suspend fun flashBattleUnit(
         row: Int,
         column: Int,
         unitId: String,

@@ -15,7 +15,7 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 
-class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
+open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
     companion object {
         // FamiCube palette colours of each player turn.
         val HUMAN_TURN_COLOR = RGBA(0x00, 0x84, 0xFF)
@@ -52,7 +52,7 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
 
     private var displayedRound: Int? = null
 
-    fun displayBattleInfo(
+    open fun displayBattleInfo(
         playerName: String,
         round: Int,
         turnColor: RGBA,
@@ -64,7 +64,7 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
     }
 
     /** Displays the battle info and pops the player turn, and the round when it has changed. */
-    suspend fun announceTurn(
+    open suspend fun announceTurn(
         playerName: String,
         round: Int,
         turnColor: RGBA,
@@ -84,7 +84,7 @@ class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
         popAnimator.awaitComplete()
     }
 
-    fun displayPlayerWin(playerName: String) {
+    open fun displayPlayerWin(playerName: String) {
         this.playerTurn.removeFromParent()
         this.round.removeFromParent()
 

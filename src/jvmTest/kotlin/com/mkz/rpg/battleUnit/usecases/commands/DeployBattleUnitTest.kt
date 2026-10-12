@@ -1,46 +1,37 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class DeployBattleUnitTest {
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val searchUnitById: SearchUnitById = mock()
-    private val searchPlayerById: SearchPlayerById = mock()
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
     private val deployBattleUnit =
         DeployBattleUnit(
-            battleUnitRepository = battleUnitRepository,
+            battleUnitRepository = queries.battleUnitRepository,
             eventBus = eventBus,
-            searchUnitById = searchUnitById,
-            searchPlayerById = searchPlayerById,
-            canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
+            searchUnitById = queries.searchUnitById,
+            searchPlayerById = queries.searchPlayerById,
+            canBattlefieldTileBeOccupied = queries.canBattlefieldTileBeOccupied,
         )
 
     @Test
     fun `should deploy battle unit when the battlefield tile can be occupied`() {
         // Given
-        val unit = unit().toDto()
-        val player = player().toDto()
-        whenever(searchUnitById(unit.id)).thenReturn(unit)
-        whenever(searchPlayerById(player.id)).thenReturn(player)
-        whenever(canBattlefieldTileBeOccupied(0, 0)).thenReturn(true)
+        val unit = unit().also(queries.unitRepository::create).toDto()
+        val player = player().also(queries.playerRepository::create).toDto()
+        queries.battlefieldRepository.create(battlefield(". ."))
         // When
         deployBattleUnit(
             battleUnitId = "battle-unit-1",
@@ -50,9 +41,9 @@ class DeployBattleUnitTest {
             deployAtColumn = 0,
         )
         // Then
-        val storedBattleUnit = battleUnitRepository.searchById("battle-unit-1")?.toDto()
+        val storedBattleUnit = queries.battleUnitRepository.searchById("battle-unit-1")?.toDto()
         storedBattleUnit.shouldNotBeNull()
-        storedBattleUnit!!.playerId shouldBe player.id
+        storedBattleUnit.playerId shouldBe player.id
         storedBattleUnit.unitId shouldBe unit.id
         storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
         eventBus.shouldHavePublishedEvents(
@@ -63,7 +54,6 @@ class DeployBattleUnitTest {
     @Test
     fun `should throw unit not found when the unit does not exist`() {
         // Given
-        whenever(searchUnitById("unknown-unit")).thenReturn(null)
         // When
         val error =
             shouldThrowAny {
@@ -76,11 +66,7 @@ class DeployBattleUnitTest {
     @Test
     fun `should throw player not found when the player does not exist`() {
         // Given
-        val unit =
-            unit()
-                .toDto()
-        whenever(searchUnitById(unit.id)).thenReturn(unit)
-        whenever(searchPlayerById("unknown-player")).thenReturn(null)
+        val unit = unit().also(queries.unitRepository::create).toDto()
         // When
         val error =
             shouldThrowAny {
@@ -93,15 +79,9 @@ class DeployBattleUnitTest {
     @Test
     fun `should throw tile error when the battlefield tile can not be occupied`() {
         // Given
-        val unit =
-            unit()
-                .toDto()
-        val player =
-            player()
-                .toDto()
-        whenever(searchUnitById(unit.id)).thenReturn(unit)
-        whenever(searchPlayerById(player.id)).thenReturn(player)
-        whenever(canBattlefieldTileBeOccupied(0, 0)).thenReturn(false)
+        val unit = unit().also(queries.unitRepository::create).toDto()
+        val player = player().also(queries.playerRepository::create).toDto()
+        queries.battlefieldRepository.create(battlefield("# ."))
         // When
         val error =
             shouldThrowAny {

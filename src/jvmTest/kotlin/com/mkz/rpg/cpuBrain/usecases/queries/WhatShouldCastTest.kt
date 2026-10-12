@@ -9,145 +9,120 @@ import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
-import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast.CastGroup
-import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast.CastDecision
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
-import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import kotlin.random.Random
 
 class WhatShouldCastTest {
-    private val searchBattleUnitById: SearchBattleUnitById = mock()
-    private val searchUnitById: SearchUnitById = mock()
-    private val canCastAbility: CanCastAbility = mock()
-    private val whereCanCast: WhereCanCast = mock()
-    private val searchAbilityById: SearchAbilityById = mock()
-    private val searchEffectById: SearchEffectById = mock()
-    private val searchOccupant: SearchOccupant = mock()
-    private val whatShouldCast =
-        WhatShouldCast(
-            searchBattleUnitById = searchBattleUnitById,
-            searchUnitById = searchUnitById,
-            canCastAbility = canCastAbility,
-            whereCanCast = whereCanCast,
-            searchAbilityById = searchAbilityById,
-            searchEffectById = searchEffectById,
-            searchOccupant = searchOccupant,
-            healingNeed = HealingNeed(searchBattleUnitById, searchUnitById),
-            random = Random(seed = 0),
-        )
+    private val queries = InMemoryQueries(random = Random(seed = 0))
+    private val whatShouldCast = queries.whatShouldCast
 
     // The CPU rat (20 HP) stands at (0,0). Enemies stand next to it.
     private val ratId = "rat-1"
     private val casterPosition = WhereCanCast.PositionDto(row = 0, column = 0)
+    private val east = WhereCanCast.PositionDto(row = 0, column = 1)
+    private val south = WhereCanCast.PositionDto(row = 1, column = 0)
+    private val cpu = player(id = "cpu", type = CPU).toDto()
+    private val human = player(id = "human").toDto()
+    private val knightUnit = unit(id = "knight", healthPoints = 100).toDto()
 
-    private val damageEffect = decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY").toDto()
-    private val bigDamageEffect = decreaseHealthEffect(id = "big-damage", damage = 12, applicationType = "IMMEDIATELY").toDto()
-    private val venomEffect = decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
-    private val healEffect = increaseHealthEffect(id = "heal", healing = 20).toDto()
-    private val teleportEffect = teleportEffect(id = "teleport").toDto()
+    private val sword = ability(id = "sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("damage", SELECTED_TARGET)))
+    private val bigSword = ability(id = "big-sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("big-damage", SELECTED_TARGET)))
+    private val poisonedSword = ability(id = "poisoned-sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("venom", SELECTED_TARGET)))
+    private val whirlwind = ability(id = "whirlwind", cost = 0, cooldown = 0, targeting = ALL_ADJACENT_ENEMIES, effectSpecs = listOf(effectSpec("damage", SELECTED_TARGET)))
+    private val heal = ability(id = "heal", cost = 0, cooldown = 0, targeting = SELF, effectSpecs = listOf(effectSpec("heal", CASTER)))
+    private val teleport = ability(id = "teleport", cost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, effectSpecs = listOf(effectSpec("teleport", CASTER)))
 
-    private val sword = ability(id = "sword", targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec(damageEffect.id, SELECTED_TARGET))).toDto()
-    private val bigSword = ability(id = "big-sword", targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec(bigDamageEffect.id, SELECTED_TARGET))).toDto()
-    private val poisonedSword = ability(id = "poisoned-sword", targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec(venomEffect.id, SELECTED_TARGET))).toDto()
-    private val whirlwind = ability(id = "whirlwind", targeting = ALL_ADJACENT_ENEMIES, effectSpecs = listOf(effectSpec(damageEffect.id, SELECTED_TARGET))).toDto()
-    private val heal = ability(id = "heal", targeting = SELF, effectSpecs = listOf(effectSpec(healEffect.id, CASTER))).toDto()
-    private val teleport = ability(id = "teleport", targeting = VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, effectSpecs = listOf(effectSpec(teleportEffect.id, CASTER))).toDto()
+    // It costs more mana than the rat has.
+    private val unaffordableHeal = ability(id = "heal", cost = 100, cooldown = 0, targeting = SELF, effectSpecs = listOf(effectSpec("heal", CASTER)))
+
+    init {
+        queries.effectRepository.create(decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY"))
+        queries.effectRepository.create(decreaseHealthEffect(id = "big-damage", damage = 12, applicationType = "IMMEDIATELY"))
+        queries.effectRepository.create(decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED"))
+        queries.effectRepository.create(increaseHealthEffect(id = "heal", healing = 20))
+        queries.effectRepository.create(teleportEffect(id = "teleport"))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                . . . .
+                . . . .
+                . . . .
+                """,
+            ),
+        )
+    }
+
+    private fun place(
+        battleUnitId: String,
+        position: WhereCanCast.PositionDto,
+    ) {
+        val battlefield = queries.battlefieldRepository.search()!!
+        queries.battlefieldRepository.update(battlefield.occupy(position.row, position.column, battleUnitId).pullEvents().second)
+    }
 
     private fun givenRat(
         remainingHealthPoints: Int,
-        abilities: List<Ability.Dto>,
+        abilities: List<Ability>,
         remainingCasts: Int = 1,
     ) {
-        val ratUnit = unit(id = "rat", healthPoints = 20, abilities = abilities.map { it.id }).toDto()
-        val rat =
-            battleUnit(id = ratId, unit = ratUnit, player = player(id = "cpu").toDto())
-                .toDto()
-                .let { rat ->
-                    rat.copy(
-                        remainingHealthPoints = remainingHealthPoints,
-                        remainingTurnActions = rat.remainingTurnActions.copy(remainingCasts = remainingCasts),
-                    )
-                }
-        whenever(searchBattleUnitById(ratId)).thenReturn(rat)
-        whenever(searchUnitById("rat")).thenReturn(ratUnit)
-        whenever(canCastAbility(any(), any())).thenReturn(true)
-        abilities.forEach { ability -> whenever(searchAbilityById(ability.id)).thenReturn(ability) }
-        listOf(damageEffect, bigDamageEffect, venomEffect, healEffect, teleportEffect).forEach { effect ->
-            whenever(searchEffectById(effect.id)).thenReturn(effect)
-        }
-        whenever(whereCanCast(ratId, heal.id)).thenReturn(listOf(CastGroup(listOf(casterPosition))))
-        whenever(whereCanCast(ratId, teleport.id)).thenReturn(listOf(CastGroup(listOf(WhereCanCast.PositionDto(row = 5, column = 5)))))
+        abilities.forEach(queries.abilityRepository::create)
+        val ratUnit = unit(id = "rat", healthPoints = 20, manaPoints = 10, abilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
+        val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealthPoints = remainingHealthPoints)
+        // A rat with no casts left has already cast an ability this turn.
+        val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityCost = 0, castGroup = emptyList()).pullEvents().second else rat
+        queries.battleUnitRepository.create(castRat)
+        place(ratId, casterPosition)
     }
 
-    private fun givenAdjacentKnight(
+    private fun givenKnight(
         id: String,
         position: WhereCanCast.PositionDto,
         remainingHealthPoints: Int,
     ) {
-        val knight =
-            battleUnit(id = id, unit = unit(id = "knight", healthPoints = 100).toDto(), player = player(id = "human").toDto())
-                .toDto()
-                .copy(remainingHealthPoints = remainingHealthPoints)
-        whenever(searchBattleUnitById(id)).thenReturn(knight)
-        whenever(searchOccupant(position.row, position.column)).thenReturn(id)
+        queries.battleUnitRepository.create(battleUnit(id = id, unit = knightUnit, player = human, remainingHealthPoints = remainingHealthPoints))
+        place(id, position)
     }
-
-    private fun givenSingleTargets(
-        ability: Ability.Dto,
-        vararg positions: WhereCanCast.PositionDto,
-    ) {
-        whenever(whereCanCast(ratId, ability.id)).thenReturn(positions.map { position -> CastGroup(listOf(position)) })
-    }
-
-    private val east = WhereCanCast.PositionDto(row = 0, column = 1)
-    private val south = WhereCanCast.PositionDto(row = 1, column = 0)
 
     @Test
     fun `should attack the adjacent enemy when the caster is healthy`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
-        givenAdjacentKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenSingleTargets(sword, east)
+        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision shouldBe CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(east)))
+        decision shouldBe CastDecision(abilityId = "sword", castGroup = CastGroup(listOf(east)))
     }
 
     @Test
     fun `should heal when the caster is badly hurt`() {
         // Given
         givenRat(remainingHealthPoints = 4, abilities = listOf(sword, heal))
-        givenAdjacentKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenSingleTargets(sword, east)
+        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision shouldBe CastDecision(abilityId = heal.id, castGroup = CastGroup(listOf(casterPosition)))
+        decision shouldBe CastDecision(abilityId = "heal", castGroup = CastGroup(listOf(casterPosition)))
     }
 
     @Test
     fun `should not cast when the caster is at full health and no enemy is adjacent`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
-        givenSingleTargets(sword)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -158,84 +133,75 @@ class WhatShouldCastTest {
     fun `should attack the enemy it can finish off when several enemies are adjacent`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
-        givenAdjacentKnight(id = "healthy-knight", position = east, remainingHealthPoints = 100)
-        givenAdjacentKnight(id = "weak-knight", position = south, remainingHealthPoints = 8)
-        givenSingleTargets(sword, east, south)
+        givenKnight(id = "healthy-knight", position = east, remainingHealthPoints = 100)
+        givenKnight(id = "weak-knight", position = south, remainingHealthPoints = 8)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision shouldBe CastDecision(abilityId = sword.id, castGroup = CastGroup(listOf(south)))
+        decision shouldBe CastDecision(abilityId = "sword", castGroup = CastGroup(listOf(south)))
     }
 
     @Test
     fun `should heal instead of finishing off an enemy when the caster is close to dying`() {
         // Given
         givenRat(remainingHealthPoints = 6, abilities = listOf(sword, heal))
-        givenAdjacentKnight(id = "weak-knight", position = east, remainingHealthPoints = 10)
-        givenSingleTargets(sword, east)
+        givenKnight(id = "weak-knight", position = east, remainingHealthPoints = 10)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision?.abilityId shouldBe heal.id
+        decision?.abilityId shouldBe "heal"
     }
 
     @Test
     fun `should prefer damage over time when its discounted total is higher than the immediate damage`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, poisonedSword))
-        givenAdjacentKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenSingleTargets(sword, east)
-        givenSingleTargets(poisonedSword, east)
+        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision?.abilityId shouldBe poisonedSword.id
+        decision?.abilityId shouldBe "poisoned-sword"
     }
 
     @Test
     fun `should prefer immediate damage when the discounted total of the damage over time is lower`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(bigSword, poisonedSword))
-        givenAdjacentKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenSingleTargets(bigSword, east)
-        givenSingleTargets(poisonedSword, east)
+        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision?.abilityId shouldBe bigSword.id
+        decision?.abilityId shouldBe "big-sword"
     }
 
     @Test
     fun `should prefer hitting several enemies when the ability hits all the adjacent enemies`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, whirlwind))
-        givenAdjacentKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenAdjacentKnight(id = "knight-2", position = south, remainingHealthPoints = 100)
-        givenSingleTargets(sword, east, south)
-        whenever(whereCanCast(ratId, whirlwind.id)).thenReturn(listOf(CastGroup(listOf(east, south))))
+        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenKnight(id = "knight-2", position = south, remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision shouldBe CastDecision(abilityId = whirlwind.id, castGroup = CastGroup(listOf(east, south)))
+        decision shouldBe CastDecision(abilityId = "whirlwind", castGroup = CastGroup(listOf(east, south)))
     }
 
     @Test
     fun `should cast another ability when no attack or heal is worth it`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal, teleport))
-        givenSingleTargets(sword)
+        // The knight is too far to attack, but the rat can teleport next to it.
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
-        decision?.abilityId shouldBe teleport.id
+        decision?.abilityId shouldBe "teleport"
     }
 
     @Test
     fun `should not heal when the heal can not be cast`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(sword, heal))
-        whenever(canCastAbility(ratId, heal.id)).thenReturn(false)
-        givenSingleTargets(sword)
+        givenRat(remainingHealthPoints = 4, abilities = listOf(sword, unaffordableHeal))
         // When
         val decision = whatShouldCast(ratId)
         // Then

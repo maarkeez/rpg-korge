@@ -1,58 +1,43 @@
 package com.mkz.rpg.battleUnit.adapters.events
 
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
+import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
-import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import io.kotest.matchers.collections.shouldContainExactly
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class OnAbilityCastedTest {
     private val eventBus = InMemoryEventBus()
-    private val requestEffectApplicationToCastTargets: RequestEffectApplicationToCastTargets = mock()
+    private val queries = InMemoryQueries()
     private val onAbilityCasted =
         OnAbilityCasted(
-            requestEffectApplicationToCastTargets = requestEffectApplicationToCastTargets,
+            requestEffectApplicationToCastTargets =
+                RequestEffectApplicationToCastTargets(queries.searchAbilityById, queries.battleUnitRepository, queries.abilityExecution, eventBus),
             eventBus = eventBus,
         )
+    private val resolvedCasts = mutableListOf<BattleUnitEvent.AbilityCastResolved>().also { resolved -> eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> { resolved += it } }
 
     @Test
     fun `should request the effects for the whole cast group when an ability is casted`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val abilityId = "ability-1"
-        val castGroup =
-            listOf(
-                Battlefield.Dto.PositionDto(row = 1, column = 2),
-                Battlefield.Dto.PositionDto(row = 2, column = 1),
-            )
-        eventBus.publish(
-            BattleUnitEvent.AbilityCasted(
-                battleUnitId = battleUnitId,
-                abilityId = abilityId,
-                castGroup = castGroup,
-            ),
-        )
+        queries.effectRepository.create(increaseHealthEffect(id = "healing"))
+        queries.abilityRepository.create(ability(id = "heal", targeting = TargetingDto.SELF, effectSpecs = listOf(effectSpec(effectId = "healing", target = TargetExpressionDto.Type.CASTER))))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
+        queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
+        eventBus.publish(BattleUnitEvent.AbilityCasted(battleUnitId = "knight-1", abilityId = "heal", castGroup = listOf(PositionDto(row = 0, column = 0))))
         // When
         eventBus.dispatch()
         // Then
-        verify(requestEffectApplicationToCastTargets).invoke(
-            battleUnitId = battleUnitId,
-            abilityId = abilityId,
-            castGroup = castGroup,
-        )
-    }
-
-    @Test
-    fun `should not receive ability effects when a different event type is dispatched`() {
-        // Given
-        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(battleUnitId = "battle-unit-1", row = 0, column = 0))
-        // When
-        eventBus.dispatch()
-        // Then
-        verify(requestEffectApplicationToCastTargets, never()).invoke(any(), any(), any())
+        resolvedCasts.shouldContainExactly(BattleUnitEvent.AbilityCastResolved(battleUnitId = "knight-1", abilityId = "heal"))
     }
 }

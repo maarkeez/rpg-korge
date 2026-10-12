@@ -95,7 +95,7 @@ data class Battlefield private constructor(
         column: Int,
     ): Boolean {
         if (row < 0 || row >= rows.value) return false
-        if (column < 0 || column >= rows.value) return false
+        if (column < 0 || column >= columns.value) return false
         return true
     }
 

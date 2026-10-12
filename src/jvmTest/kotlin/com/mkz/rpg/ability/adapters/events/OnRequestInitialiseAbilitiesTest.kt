@@ -1,16 +1,28 @@
 package com.mkz.rpg.ability.adapters.events
 
+import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityEvent
+import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.ability.usecases.commands.InitialiseAbilities
+import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
+import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 class OnRequestInitialiseAbilitiesTest {
     private val eventBus = InMemoryEventBus()
-    private val initialiseAbilities: InitialiseAbilities = mock()
-    private val onRequestInitialiseAbilities = OnRequestInitialiseAbilities(initialiseAbilities, eventBus)
+    private val abilityRepository = InMemoryAbilityRepository()
+    private val effectRepository = InMemoryEffectRepository().also { it.create(decreaseHealthEffect(id = "damage")) }
+    private val sword = ability(id = "sword", effectSpecs = listOf(effectSpec(effectId = "damage"))).toDto()
+    private val onRequestInitialiseAbilities =
+        OnRequestInitialiseAbilities(
+            InitialiseAbilities(FakeAbilityLoader(abilities = listOf(sword)), abilityRepository, SearchEffectById(effectRepository), eventBus),
+            eventBus,
+        )
 
     @Test
     fun `should initialise the abilities when the request is dispatched`() {
@@ -19,6 +31,6 @@ class OnRequestInitialiseAbilitiesTest {
         // When
         eventBus.dispatch()
         // Then
-        verify(initialiseAbilities).invoke()
+        abilityRepository.searchById("sword")?.toDto() shouldBe sword
     }
 }

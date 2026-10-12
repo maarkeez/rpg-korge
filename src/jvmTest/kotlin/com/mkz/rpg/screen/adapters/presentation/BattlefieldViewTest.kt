@@ -21,8 +21,6 @@ import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 
 class BattlefieldViewTest : ViewsForTesting() {
     private companion object {
@@ -511,14 +509,23 @@ class BattlefieldViewTest : ViewsForTesting() {
         viewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val delegate = mock<BattlefieldView.Delegate>()
-            battlefieldView.setDelegate(delegate)
+            val selectedTiles = mutableListOf<Pair<Int, Int>>()
+            battlefieldView.setDelegate(
+                object : BattlefieldView.Delegate {
+                    override fun tileSelected(
+                        row: Int,
+                        column: Int,
+                    ) {
+                        selectedTiles += row to column
+                    }
+                },
+            )
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
             addChild(battlefieldView)
             // When
             clickTile(battlefieldView, row = 0, column = 0)
             // Then
-            verify(delegate).tileSelected(row = 0, column = 0)
+            selectedTiles.shouldContainExactly(0 to 0)
         }
 
     private fun matchesWangTile(

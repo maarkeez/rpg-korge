@@ -8,7 +8,7 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-class AttackPreviewView(
+open class AttackPreviewView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
     private lateinit var casterUnitNameView: UnitNameView
@@ -77,7 +77,7 @@ class AttackPreviewView(
         addChild(layout)
     }
 
-    fun display(
+    open fun display(
         casterBattleUnit: BattleUnit.Dto,
         casterUnit: Unit.Dto,
         manaCost: Int,
@@ -121,7 +121,7 @@ class AttackPreviewView(
         visible = true
     }
 
-    fun hide() {
+    open fun hide() {
         visible = false
     }
 }

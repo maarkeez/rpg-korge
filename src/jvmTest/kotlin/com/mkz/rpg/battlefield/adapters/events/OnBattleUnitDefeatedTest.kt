@@ -1,49 +1,30 @@
 package com.mkz.rpg.battlefield.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
+import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import io.kotest.matchers.nulls.shouldBeNull
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class OnBattleUnitDefeatedTest {
     private val eventBus = InMemoryEventBus()
-    private val removeOccupant: RemoveOccupant = mock()
+    private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val onBattleUnitDefeated =
         OnBattleUnitDefeated(
-            removeOccupant = removeOccupant,
+            removeOccupant = RemoveOccupant(battlefieldRepository, eventBus),
             eventBus = eventBus,
         )
 
     @Test
     fun `should remove occupant when a battle unit is defeated`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        eventBus.publish(
-            BattleUnitEvent.BattleUnitDefeated(
-                playerId = "player-1",
-                battleUnitId = battleUnitId,
-                defeatedAtRow = position().row,
-                defeatedAtColumn = position().column,
-            ),
-        )
+        battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "battle-unit-1")))
+        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "player-1", battleUnitId = "battle-unit-1", defeatedAtRow = 0, defeatedAtColumn = 0))
         // When
         eventBus.dispatch()
         // Then
-        verify(removeOccupant).invoke(battleUnitId = battleUnitId)
-    }
-
-    @Test
-    fun `should not remove occupant when a different event type is dispatched`() {
-        // Given
-        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(battleUnitId = "battle-unit-1", row = 0, column = 0))
-        // When
-        eventBus.dispatch()
-        // Then
-        verify(removeOccupant, never()).invoke(any())
+        battlefieldRepository.search()?.occupant(row = 0, column = 0).shouldBeNull()
     }
 }

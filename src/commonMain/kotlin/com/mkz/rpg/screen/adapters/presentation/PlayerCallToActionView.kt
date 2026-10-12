@@ -3,7 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
-class PlayerCallToActionView : Container() {
+open class PlayerCallToActionView : Container() {
     companion object {
         const val CALL_TO_ACTION = "CALL_TO_ACTION"
     }
@@ -11,11 +11,11 @@ class PlayerCallToActionView : Container() {
     private var onTurnFinished: (() -> Unit)? = null
     private var isFinishTurnEnabled = true
 
-    fun hide() {
+    open fun hide() {
         visible = false
     }
 
-    fun displayFinishTurn(onTurnFinished: () -> Unit) {
+    open fun displayFinishTurn(onTurnFinished: () -> Unit) {
         this.onTurnFinished = onTurnFinished
         val finishTurnView = FinishTurnView(onTurnFinished = onTurnFinished)
         finishTurnView.isEnabled = isFinishTurnEnabled
@@ -23,12 +23,12 @@ class PlayerCallToActionView : Container() {
     }
 
     /** Enables or disables the finish turn, also when it is displayed again later (e.g.: after cancelling a cast). */
-    fun setFinishTurnEnabled(enabled: Boolean) {
+    open fun setFinishTurnEnabled(enabled: Boolean) {
         isFinishTurnEnabled = enabled
         (callToAction as? FinishTurnView)?.isEnabled = enabled
     }
 
-    fun displayCancelAndConfirm(
+    open fun displayCancelAndConfirm(
         onCancelled: () -> Unit,
         onConfirmed: () -> Unit,
     ) {

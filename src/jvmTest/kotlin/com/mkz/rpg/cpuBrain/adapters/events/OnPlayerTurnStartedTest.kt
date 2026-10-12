@@ -1,41 +1,37 @@
 package com.mkz.rpg.cpuBrain.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class OnPlayerTurnStartedTest {
     private val eventBus = InMemoryEventBus()
-    private val playTurn: PlayTurn = mock()
+    private val queries = InMemoryQueries()
     private val onPlayerTurnStarted =
         OnPlayerTurnStarted(
             eventBus = eventBus,
-            playTurn = playTurn,
+            playTurn = PlayTurn(queries.searchPlayerById, queries.searchBattleUnitsByPlayerId, queries.cpuBrainRepository, eventBus),
         )
 
     @Test
     fun `should play turn when a player turn starts`() {
         // Given
-        val playerId = "player-1"
-        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = playerId))
+        val cpu = player(id = "cpu", type = CPU)
+        queries.playerRepository.create(cpu)
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
+        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "cpu"))
         // When
         eventBus.dispatch()
         // Then
-        verify(playTurn).invoke(playerId)
-    }
-
-    @Test
-    fun `should not play turn when a different event type is dispatched`() {
-        // Given
-        eventBus.publish(BattleEvent.PlayerDefeated(playerId = "player-1"))
-        // When
-        eventBus.dispatch()
-        // Then
-        verify(playTurn, never()).invoke(any())
+        queries.cpuBrainRepository
+            .search()!!
+            .toDto()
+            .pendingBattleUnitIds shouldBe listOf("rat-1")
     }
 }

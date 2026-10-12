@@ -1,82 +1,92 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class MoveBattleUnitTest {
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val searchPosition: SearchPosition = mock()
-    private val searchShortestPath: SearchShortestPath = mock()
     private val moveBattleUnit =
         MoveBattleUnit(
-            battleUnitRepository = battleUnitRepository,
+            battleUnitRepository = queries.battleUnitRepository,
             eventBus = eventBus,
-            searchPosition = searchPosition,
-            searchShortestPath = searchShortestPath,
+            searchPosition = queries.searchPosition,
+            searchShortestPath = queries.searchShortestPath,
         )
 
     @Test
     fun `should move battle unit along the shortest path when a reachable position is provided`() {
         // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 5).toDto())
-        battleUnitRepository.create(battleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        val path = listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(0, 0))
-        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 2, toColumn = 1)).thenReturn(path)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K #
+                . #
+                . .
+                """,
+                occupants = mapOf('K' to "knight-1"),
+            ),
+        )
         // When
-        moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 2, moveToColumn = 1)
+        moveBattleUnit(battleUnitId = "knight-1", moveToRow = 2, moveToColumn = 1)
         // Then
-        val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
+        val storedBattleUnit = queries.battleUnitRepository.searchById("knight-1")?.toDto()
         storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 2
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.BattleUnitMoved(battleUnitId, 0, 0, 2, 1, path),
+            BattleUnitEvent.BattleUnitMoved("knight-1", 0, 0, 2, 1, listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))),
         )
     }
 
     @Test
     fun `should spend a step per tile walked when the path is longer than the straight line distance`() {
         // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 5).toDto())
-        battleUnitRepository.create(battleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        val pathAroundAnObstacle = listOf(PositionDto(1, 0), PositionDto(1, 1), PositionDto(1, 2), PositionDto(0, 2))
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(0, 0))
-        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2)).thenReturn(pathAroundAnObstacle)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K # .
+                . . .
+                """,
+                occupants = mapOf('K' to "knight-1"),
+            ),
+        )
         // When
-        moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 0, moveToColumn = 2)
+        moveBattleUnit(battleUnitId = "knight-1", moveToRow = 0, moveToColumn = 2)
         // Then
-        val storedBattleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto()
+        val storedBattleUnit = queries.battleUnitRepository.searchById("knight-1")?.toDto()
         storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 1
     }
 
     @Test
     fun `should not move battle unit when there is no path to the destination`() {
         // Given
-        val battleUnit = battleUnit(unit = unit(movementRange = 5).toDto())
-        battleUnitRepository.create(battleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(0, 0))
-        whenever(searchShortestPath(fromRow = 0, fromColumn = 0, toRow = 2, toColumn = 1)).thenReturn(null)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 5).toDto()))
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                K .
+                # #
+                . .
+                """,
+                occupants = mapOf('K' to "knight-1"),
+            ),
+        )
         // When
-        moveBattleUnit(battleUnitId = battleUnitId, moveToRow = 2, moveToColumn = 1)
+        moveBattleUnit(battleUnitId = "knight-1", moveToRow = 2, moveToColumn = 1)
         // Then
         eventBus.publishedEvents.shouldBeEmpty()
-        battleUnitRepository
-            .searchById(battleUnitId)
+        queries.battleUnitRepository
+            .searchById("knight-1")
             ?.toDto()
             ?.remainingTurnActions
             ?.remainingSteps shouldBe 5
@@ -94,12 +104,10 @@ class MoveBattleUnitTest {
     @Test
     fun `should not move battle unit when the position is not found`() {
         // Given
-        val battleUnit =
-            battleUnit()
-        battleUnitRepository.create(battleUnit)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(null)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
+        queries.battlefieldRepository.create(battlefield(". ."))
         // When
-        moveBattleUnit(battleUnitId = battleUnit.toDto().id, moveToRow = 1, moveToColumn = 0)
+        moveBattleUnit(battleUnitId = "knight-1", moveToRow = 0, moveToColumn = 1)
         // Then
         eventBus.publishedEvents.shouldBeEmpty()
     }

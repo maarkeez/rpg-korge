@@ -11,7 +11,7 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-class BattleUnitInfoView(
+open class BattleUnitInfoView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
     companion object {
@@ -77,11 +77,11 @@ class BattleUnitInfoView(
         addChild(battleUnitInfoLayout)
     }
 
-    fun setDelegate(delegate: AbilityButtonView.Delegate) {
+    open fun setDelegate(delegate: AbilityButtonView.Delegate) {
         abilityButtons.forEach { abilityButton -> abilityButton.setDelegate(delegate) }
     }
 
-    fun display(
+    open fun display(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
     ) {
@@ -118,12 +118,12 @@ class BattleUnitInfoView(
         visible = true
     }
 
-    fun displayAbilitySelected(index: Int) {
+    open fun displayAbilitySelected(index: Int) {
         abilityButtons.forEach(AbilityButtonView::unselect)
         abilityButtons[index].select()
     }
 
-    fun hide() {
+    open fun hide() {
         visible = false
     }
 }

@@ -3,24 +3,24 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class ReplenishManaTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val searchUnitById: SearchUnitById = mock()
-    private val replenishMana = ReplenishMana(battleUnitRepository, searchUnitById)
+    private val unitRepository = InMemoryUnitRepository()
+    private val replenishMana = ReplenishMana(battleUnitRepository, SearchUnitById(unitRepository))
 
     @Test
     fun `should replenish mana when the battle unit has mana below the maximum`() {
         // Given
         val unit =
             unit(manaPoints = 20, abilities = listOf("ability-1"))
+                .also(unitRepository::create)
                 .toDto()
         val player =
             player(id = "player-1")
@@ -32,7 +32,6 @@ class ReplenishManaTest {
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)
-        whenever(searchUnitById(unit.id)).thenReturn(unit)
         // When
         replenishMana("player-1")
         // Then
@@ -43,7 +42,7 @@ class ReplenishManaTest {
     @Test
     fun `should not exceed maximum mana when replenishing`() {
         // Given
-        val unit = unit(manaPoints = 12, abilities = listOf("ability-1")).toDto()
+        val unit = unit(manaPoints = 12, abilities = listOf("ability-1")).also(unitRepository::create).toDto()
         val player = player(id = "player-1").toDto()
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
@@ -52,7 +51,6 @@ class ReplenishManaTest {
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)
-        whenever(searchUnitById(unit.id)).thenReturn(unit)
         // When
         replenishMana("player-1")
         // Then

@@ -6,35 +6,32 @@ import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainError.TerrainAlreadyExists
 import com.mkz.rpg.terrain.domain.TerrainEvent
-import com.mkz.rpg.terrain.usecases.services.TerrainLoader
+import com.mkz.rpg.terrain.usecases.services.FakeTerrainLoader
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class InitialiseTerrainsTest {
     private val terrainRepository = InMemoryTerrainRepository()
     private val eventBus = FakeEventBus()
-    private val terrainLoader: TerrainLoader = mock()
-    private val initialiseTerrains =
-        InitialiseTerrains(
-            terrainLoader = terrainLoader,
-            terrainRepository = terrainRepository,
-            eventBus = eventBus,
-        )
 
     @Test
     fun `should create and store all the terrains when terrains are loaded`() {
         // Given
-        whenever(terrainLoader.loadTerrains()).thenReturn(
-            listOf(
-                Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void")),
-                Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand")),
-            ),
-        )
+        val initialiseTerrains =
+            InitialiseTerrains(
+                FakeTerrainLoader(
+                    terrains =
+                        listOf(
+                            Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void")),
+                            Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand")),
+                        ),
+                ),
+                terrainRepository,
+                eventBus,
+            )
         // When
         initialiseTerrains()
         // Then
@@ -45,12 +42,18 @@ class InitialiseTerrainsTest {
     @Test
     fun `should publish a terrain created event per terrain when the terrains are created`() {
         // Given
-        whenever(terrainLoader.loadTerrains()).thenReturn(
-            listOf(
-                Terrain.Dto(id = "sand", canBeOccupied = true),
-                Terrain.Dto(id = "void", canBeOccupied = false),
-            ),
-        )
+        val initialiseTerrains =
+            InitialiseTerrains(
+                FakeTerrainLoader(
+                    terrains =
+                        listOf(
+                            Terrain.Dto(id = "sand", canBeOccupied = true),
+                            Terrain.Dto(id = "void", canBeOccupied = false),
+                        ),
+                ),
+                terrainRepository,
+                eventBus,
+            )
         // When
         initialiseTerrains()
         // Then
@@ -64,9 +67,7 @@ class InitialiseTerrainsTest {
     fun `should fail when a terrain already exists`() {
         // Given
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
-        whenever(terrainLoader.loadTerrains()).thenReturn(
-            listOf(Terrain.Dto(id = "sand", canBeOccupied = true)),
-        )
+        val initialiseTerrains = InitialiseTerrains(FakeTerrainLoader(terrains = listOf(Terrain.Dto(id = "sand", canBeOccupied = true))), terrainRepository, eventBus)
         // When
         val result = runCatching { initialiseTerrains() }
         // Then
@@ -76,7 +77,7 @@ class InitialiseTerrainsTest {
     @Test
     fun `should not create any terrain when no terrains are loaded`() {
         // Given
-        whenever(terrainLoader.loadTerrains()).thenReturn(emptyList())
+        val initialiseTerrains = InitialiseTerrains(FakeTerrainLoader(terrains = emptyList()), terrainRepository, eventBus)
         // When
         initialiseTerrains()
         // Then

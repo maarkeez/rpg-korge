@@ -1,58 +1,44 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
-import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
-import com.mkz.rpg.player.adapters.presentation.PlayerApi
-import com.mkz.rpg.player.domain.Player
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
-import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.atLeastOnce
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 
 class FinishTurnPresenterTest {
-    private val playerCallToActionView = mock<PlayerCallToActionView>()
-    private val finishPlayerTurn = mock<FinishPlayerTurn>()
-    private val battleApi = mock<BattleApi>().also { whenever(it.finishPlayerTurn).thenReturn(finishPlayerTurn) }
-    private val searchPlayerById = mock<SearchPlayerById>()
-    private val playerApi =
-        mock<PlayerApi>().also {
-            whenever(it.searchPlayerById).thenReturn(searchPlayerById)
-            whenever(searchPlayerById("human")).thenReturn(Player.Dto(id = "human", name = "Human", type = Player.Dto.PlayerTypeDto.HUMAN))
-            whenever(searchPlayerById("cpu")).thenReturn(Player.Dto(id = "cpu", name = "CPU", type = Player.Dto.PlayerTypeDto.CPU))
-        }
-    private val eventBus = InMemoryEventBus()
+    // The battle has started with the human player turn.
+    private val apis =
+        SubdomainApis(
+            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            playerOrder = listOf("human", "cpu"),
+        ).also(SubdomainApis::initialise)
+    private val eventBus = apis.eventBus
+    private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
 
-    private fun createPresenter() = FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
+    private fun createPresenter() = FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, eventBus)
 
     private fun startTurnOf(playerId: String) {
         eventBus.publish(PlayerTurnStarted(playerId = playerId))
         eventBus.dispatch()
     }
 
-    private fun isFinishTurnEnabled(): Boolean {
-        val enabled = argumentCaptor<Boolean>()
-        verify(playerCallToActionView, atLeastOnce()).setFinishTurnEnabled(enabled.capture())
-        return enabled.lastValue
+    // The player clicks on the finish turn the presenter displayed.
+    private fun clickFinishTurn() {
+        playerCallToActionView.onTurnFinished.shouldNotBeNull().invoke()
+        eventBus.dispatch()
     }
 
-    private fun clickFinishTurn() {
-        val onTurnFinished = argumentCaptor<() -> Unit>()
-        verify(playerCallToActionView).displayFinishTurn(onTurnFinished.capture())
-        onTurnFinished.firstValue()
-    }
+    private fun currentPlayerTurn() = apis.battleApi.searchBattle()?.currentPlayerTurn
 
     @Test
     fun `Init should display finish turn when is created`() {
@@ -60,7 +46,7 @@ class FinishTurnPresenterTest {
         // When
         createPresenter()
         // Then
-        verify(playerCallToActionView).displayFinishTurn(any())
+        playerCallToActionView.onTurnFinished.shouldNotBeNull()
     }
 
     @Test
@@ -69,7 +55,7 @@ class FinishTurnPresenterTest {
         // When
         createPresenter()
         // Then
-        isFinishTurnEnabled().shouldBeFalse()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
 
     @Test
@@ -79,7 +65,7 @@ class FinishTurnPresenterTest {
         // When
         startTurnOf("human")
         // Then
-        isFinishTurnEnabled().shouldBeTrue()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeTrue()
     }
 
     @Test
@@ -90,7 +76,7 @@ class FinishTurnPresenterTest {
         // When
         startTurnOf("cpu")
         // Then
-        isFinishTurnEnabled().shouldBeFalse()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
 
     @Test
@@ -101,7 +87,7 @@ class FinishTurnPresenterTest {
         // When
         timeline.playLongStep()
         // Then
-        isFinishTurnEnabled().shouldBeFalse()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
 
     @Test
@@ -110,11 +96,11 @@ class FinishTurnPresenterTest {
         createPresenter()
         val cpuMove = timeline.playLongStep()
         startTurnOf("human")
-        isFinishTurnEnabled().shouldBeFalse()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
         // When
         cpuMove.complete(Unit)
         // Then
-        isFinishTurnEnabled().shouldBeTrue()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeTrue()
     }
 
     @Test
@@ -125,7 +111,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        verify(finishPlayerTurn).invoke()
+        currentPlayerTurn() shouldBe "cpu"
     }
 
     @Test
@@ -136,7 +122,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        isFinishTurnEnabled().shouldBeFalse()
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
 
     @Test
@@ -148,7 +134,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        verify(finishPlayerTurn, never()).invoke()
+        currentPlayerTurn() shouldBe "human"
     }
 
     @Test
@@ -159,7 +145,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        verify(finishPlayerTurn, never()).invoke()
+        currentPlayerTurn() shouldBe "human"
     }
 
     @Test
@@ -170,6 +156,6 @@ class FinishTurnPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        verify(playerCallToActionView).hide()
+        playerCallToActionView.hideCount shouldBe 1
     }
 }

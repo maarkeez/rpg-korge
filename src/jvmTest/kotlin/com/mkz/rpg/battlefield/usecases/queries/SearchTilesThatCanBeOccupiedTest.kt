@@ -1,59 +1,58 @@
 package com.mkz.rpg.battlefield.usecases.queries
 
-import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
-import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class SearchTilesThatCanBeOccupiedTest {
-    private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val canBattlefieldTileBeOccupied = mock<CanBattlefieldTileBeOccupied>()
-    private val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
+    private val queries = InMemoryQueries()
+    private val searchTilesThatCanBeOccupied = queries.searchTilesThatCanBeOccupied
 
     @Test
     fun `should return tiles that can be occupied when the battle unit is deployed`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val battlefield =
-            battlefield()
-                .occupy(1, 1, battleUnitId)
-                .pullEvents()
-                .second
-        battlefieldRepository.create(battlefield)
-        whenever(canBattlefieldTileBeOccupied(any(), any())).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(1, 1)).thenReturn(false)
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                . . . .
+                . K . .
+                . . # .
+                """,
+                occupants = mapOf('K' to "battle-unit-1"),
+            ),
+        )
         // When
-        val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 1)
+        val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 1)
         // Then
         result.shouldContainExactlyInAnyOrder(
-            Battlefield.Dto.PositionDto(0, 0),
-            Battlefield.Dto.PositionDto(0, 1),
-            Battlefield.Dto.PositionDto(0, 2),
-            Battlefield.Dto.PositionDto(1, 0),
-            Battlefield.Dto.PositionDto(1, 2),
-            Battlefield.Dto.PositionDto(2, 0),
-            Battlefield.Dto.PositionDto(2, 1),
-            Battlefield.Dto.PositionDto(2, 2),
+            PositionDto(0, 0),
+            PositionDto(0, 1),
+            PositionDto(0, 2),
+            PositionDto(1, 0),
+            PositionDto(1, 2),
+            PositionDto(2, 0),
+            PositionDto(2, 1),
         )
     }
 
     @Test
     fun `should return empty list when distance is less than or equal to zero`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val battlefield =
-            battlefield()
-                .occupy(1, 1, battleUnitId)
-                .pullEvents()
-                .second
-        battlefieldRepository.create(battlefield)
+        queries.battlefieldRepository.create(
+            battlefield(
+                """
+                . . .
+                . K .
+                . . .
+                """,
+                occupants = mapOf('K' to "battle-unit-1"),
+            ),
+        )
         // When
-        val result = searchTilesThatCanBeOccupied(battleUnitId, distance = 0)
+        val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 0)
         // Then
         result.shouldBeEmpty()
     }
@@ -70,9 +69,7 @@ class SearchTilesThatCanBeOccupiedTest {
     @Test
     fun `should return empty list when the battle unit is not deployed`() {
         // Given
-        battlefieldRepository.create(
-            battlefield(),
-        )
+        queries.battlefieldRepository.create(battlefield(". . ."))
         // When
         val result = searchTilesThatCanBeOccupied("unknown-battle-unit", distance = 1)
         // Then

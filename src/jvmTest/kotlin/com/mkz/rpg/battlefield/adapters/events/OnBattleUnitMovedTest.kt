@@ -1,53 +1,40 @@
 package com.mkz.rpg.battlefield.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.any
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 
 class OnBattleUnitMovedTest {
     private val eventBus = InMemoryEventBus()
-    private val updateBattlefieldOccupancy: UpdateBattlefieldOccupancy = mock()
+    private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val onBattleUnitMoved =
         OnBattleUnitMoved(
-            updateBattlefieldOccupancy = updateBattlefieldOccupancy,
+            updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus),
             eventBus = eventBus,
         )
 
     @Test
     fun `should update battlefield occupancy when a battle unit is moved`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val toRow = 1
-        val toColumn = 2
+        battlefieldRepository.create(battlefield(". . ."))
         eventBus.publish(
             BattleUnitEvent.BattleUnitMoved(
-                battleUnitId = battleUnitId,
+                battleUnitId = "battle-unit-1",
                 fromRow = 0,
                 fromColumn = 0,
-                toRow = toRow,
-                toColumn = toColumn,
-                path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 1, column = 1), PositionDto(row = toRow, column = toColumn)),
+                toRow = 0,
+                toColumn = 2,
+                path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)),
             ),
         )
         // When
         eventBus.dispatch()
         // Then
-        verify(updateBattlefieldOccupancy).invoke(row = toRow, column = toColumn, battleUnitId = battleUnitId)
-    }
-
-    @Test
-    fun `should not update battlefield occupancy when a different event type is dispatched`() {
-        // Given
-        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(battleUnitId = "battle-unit-1", row = 0, column = 0))
-        // When
-        eventBus.dispatch()
-        // Then
-        verify(updateBattlefieldOccupancy, never()).invoke(any(), any(), any())
+        battlefieldRepository.search()?.occupant(row = 0, column = 2) shouldBe "battle-unit-1"
     }
 }

@@ -2,57 +2,49 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.services.DistanceService
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
-import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
-import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class WhereCanCastTest {
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val searchPosition: SearchPosition = mock()
-    private val searchAbilityById: SearchAbilityById = mock()
-    private val searchOccupant: SearchOccupant = mock()
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied = mock()
-    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied = mock()
-    private val distanceService = DistanceService()
-    private val whereCanCast =
-        WhereCanCast(
-            battleUnitRepository = battleUnitRepository,
-            searchPosition = searchPosition,
-            searchAbilityById = searchAbilityById,
-            searchOccupant = searchOccupant,
-            distanceService = distanceService,
-            canBattlefieldTileBeOccupied = canBattlefieldTileBeOccupied,
-            searchTilesThatCanBeOccupied = searchTilesThatCanBeOccupied,
-        )
+    private val queries = InMemoryQueries()
+    private val whereCanCast = queries.whereCanCast
+    private val player = player(id = "player-1").toDto()
+    private val enemyPlayer = player(id = "player-2").toDto()
+
+    private fun storeAbility(targeting: Ability.Dto.TargetingDto) = queries.abilityRepository.create(ability(id = "ability-1", targeting = targeting))
+
+    // Stores the battle units of the given players and the battlefield where they stand.
+    private fun battlefieldWith(
+        map: String,
+        players: Map<Char, String>,
+    ) {
+        players.forEach { (letter, playerId) ->
+            queries.battleUnitRepository.create(battleUnit(id = "$letter-1", player = if (playerId == player.id) player else enemyPlayer))
+        }
+        queries.battlefieldRepository.create(battlefield(map, occupants = players.keys.associateWith { letter -> "$letter-1" }))
+    }
 
     @Test
     fun `should return own position when the ability targets self`() {
         // Given
-        val battleUnit =
-            battleUnit()
-        battleUnitRepository.create(battleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(2, 2))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.SELF)
-                .toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.SELF)
+        battlefieldWith(
+            """
+            . . .
+            . . .
+            . . K
+            """,
+            players = mapOf('K' to player.id),
         )
         // When
-        val result = whereCanCast(battleUnitId, "ability-1")
+        val result = whereCanCast("K-1", "ability-1")
         // Then
         result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(2, 2))))
     }
@@ -60,21 +52,17 @@ class WhereCanCastTest {
     @Test
     fun `should return adjacent enemy positions when the ability targets adjacent enemy`() {
         // Given
-        val player = player(id = "player-1")
-        val enemyPlayer = player(id = "player-2")
-        val battleUnit = battleUnit(player = player.toDto())
-        val enemyBattleUnit = battleUnit(player = enemyPlayer.toDto())
-        battleUnitRepository.create(battleUnit)
-        battleUnitRepository.create(enemyBattleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY)
+        battlefieldWith(
+            """
+            . . .
+            . K R
+            . . .
+            """,
+            players = mapOf('K' to player.id, 'R' to enemyPlayer.id),
         )
-        whenever(searchOccupant(1, 2)).thenReturn(enemyBattleUnit.toDto().id)
-        whenever(searchPosition(enemyBattleUnit.toDto().id)).thenReturn(PositionDto(1, 2))
         // When
-        val result = whereCanCast(battleUnitId, "ability-1")
+        val result = whereCanCast("K-1", "ability-1")
         // Then
         result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))))
     }
@@ -82,21 +70,17 @@ class WhereCanCastTest {
     @Test
     fun `should find enemy in the northern tile when the ability targets adjacent enemy`() {
         // Given
-        val player = player(id = "player-1")
-        val enemyPlayer = player(id = "player-2")
-        val battleUnit = battleUnit(player = player.toDto())
-        val enemyBattleUnit = battleUnit(player = enemyPlayer.toDto())
-        battleUnitRepository.create(battleUnit)
-        battleUnitRepository.create(enemyBattleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY)
+        battlefieldWith(
+            """
+            . R .
+            . K .
+            . . .
+            """,
+            players = mapOf('K' to player.id, 'R' to enemyPlayer.id),
         )
-        whenever(searchOccupant(0, 1)).thenReturn(enemyBattleUnit.toDto().id)
-        whenever(searchPosition(enemyBattleUnit.toDto().id)).thenReturn(PositionDto(0, 1))
         // When
-        val result = whereCanCast(battleUnitId, "ability-1")
+        val result = whereCanCast("K-1", "ability-1")
         // Then
         result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 1))))
     }
@@ -104,33 +88,18 @@ class WhereCanCastTest {
     @Test
     fun `should return a single cast group with all adjacent enemy positions when the ability targets all adjacent enemies`() {
         // Given
-        val player = player(id = "player-1")
-        val enemyPlayer = player(id = "player-2")
-        val battleUnit = battleUnit(player = player.toDto())
-        val adjacentEnemyBattleUnit1 = battleUnit(player = enemyPlayer.toDto())
-        val adjacentEnemyBattleUnit2 = battleUnit(player = enemyPlayer.toDto())
-        val farEnemyBattleUnit = battleUnit(player = enemyPlayer.toDto())
-        val allyBattleUnit = battleUnit(player = player.toDto())
-        battleUnitRepository.create(battleUnit)
-        battleUnitRepository.create(adjacentEnemyBattleUnit1)
-        battleUnitRepository.create(adjacentEnemyBattleUnit2)
-        battleUnitRepository.create(farEnemyBattleUnit)
-        battleUnitRepository.create(allyBattleUnit)
-        val battleUnitId = battleUnit.toDto().id
-        whenever(searchPosition(battleUnitId)).thenReturn(PositionDto(1, 1))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES)
+        // E and F are adjacent enemies, G is a diagonal enemy and A is an ally.
+        battlefieldWith(
+            """
+            . . .
+            A K E
+            . F G
+            """,
+            players = mapOf('K' to player.id, 'A' to player.id, 'E' to enemyPlayer.id, 'F' to enemyPlayer.id, 'G' to enemyPlayer.id),
         )
-        whenever(searchOccupant(1, 2)).thenReturn(adjacentEnemyBattleUnit1.toDto().id)
-        whenever(searchPosition(adjacentEnemyBattleUnit1.toDto().id)).thenReturn(PositionDto(1, 2))
-        whenever(searchOccupant(2, 1)).thenReturn(adjacentEnemyBattleUnit2.toDto().id)
-        whenever(searchPosition(adjacentEnemyBattleUnit2.toDto().id)).thenReturn(PositionDto(2, 1))
-        whenever(searchOccupant(2, 2)).thenReturn(farEnemyBattleUnit.toDto().id)
-        whenever(searchPosition(farEnemyBattleUnit.toDto().id)).thenReturn(PositionDto(2, 2))
-        whenever(searchOccupant(1, 0)).thenReturn(allyBattleUnit.toDto().id)
-        whenever(searchPosition(allyBattleUnit.toDto().id)).thenReturn(PositionDto(1, 0))
         // When
-        val result = whereCanCast(battleUnitId, "ability-1")
+        val result = whereCanCast("K-1", "ability-1")
         // Then
         result.shouldHaveSize(1)
         result.first().positions.shouldContainExactlyInAnyOrder(
@@ -142,14 +111,17 @@ class WhereCanCastTest {
     @Test
     fun `should return empty list when the ability targets all adjacent enemies and there are no adjacent enemies`() {
         // Given
-        val battleUnit = battleUnit()
-        battleUnitRepository.create(battleUnit)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(1, 1))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES)
+        battlefieldWith(
+            """
+            . . .
+            . K .
+            . . .
+            """,
+            players = mapOf('K' to player.id),
         )
         // When
-        val result = whereCanCast(battleUnit.toDto().id, "ability-1")
+        val result = whereCanCast("K-1", "ability-1")
         // Then
         result.shouldBeEmpty()
     }
@@ -157,22 +129,17 @@ class WhereCanCastTest {
     @Test
     fun `should return vacant tiles adjacent to other battle units when the ability targets vacant adjacent tiles`() {
         // Given
-        val caster = battleUnit()
-        val otherBattleUnit = battleUnit()
-        battleUnitRepository.create(caster)
-        battleUnitRepository.create(otherBattleUnit)
-        val casterId = caster.toDto().id
-        whenever(searchPosition(casterId)).thenReturn(PositionDto(0, 0))
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT)
+        battlefieldWith(
+            """
+            C . .
+            . . .
+            . . O
+            """,
+            players = mapOf('C' to player.id, 'O' to enemyPlayer.id),
         )
-        whenever(searchPosition(otherBattleUnit.toDto().id)).thenReturn(PositionDto(2, 2))
-        whenever(canBattlefieldTileBeOccupied(1, 2)).thenReturn(true)
-        whenever(canBattlefieldTileBeOccupied(3, 2)).thenReturn(false)
-        whenever(canBattlefieldTileBeOccupied(2, 3)).thenReturn(false)
-        whenever(canBattlefieldTileBeOccupied(2, 1)).thenReturn(true)
         // When
-        val result = whereCanCast(casterId, "ability-1")
+        val result = whereCanCast("C-1", "ability-1")
         // Then
         result.shouldContainExactlyInAnyOrder(
             WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(1, 2))),
@@ -183,12 +150,16 @@ class WhereCanCastTest {
     @Test
     fun `should return empty list when the ability does not exist`() {
         // Given
-        val battleUnit = battleUnit()
-        battleUnitRepository.create(battleUnit)
-        whenever(searchPosition(battleUnit.toDto().id)).thenReturn(PositionDto(1, 1))
-        whenever(searchAbilityById("unknown-ability")).thenReturn(null)
+        battlefieldWith(
+            """
+            . . .
+            . K .
+            . . .
+            """,
+            players = mapOf('K' to player.id),
+        )
         // When
-        val result = whereCanCast(battleUnit.toDto().id, "unknown-ability")
+        val result = whereCanCast("K-1", "unknown-ability")
         // Then
         result.shouldBeEmpty()
     }
@@ -205,24 +176,18 @@ class WhereCanCastTest {
     @Test
     fun `should return adjacent vacant tiles when the ability targets vacant adjacent tiles to self`() {
         // Given
-        val caster = battleUnit()
-        val otherBattleUnit = battleUnit()
-        battleUnitRepository.create(caster)
-        battleUnitRepository.create(otherBattleUnit)
-        val casterId = caster.toDto().id
-        val casterPosition = PositionDto(0, 0)
-        val adjacentPosition = PositionDto(row = 0, column = 1)
-        val nonAdjacentPosition = PositionDto(row = 1, column = 1)
-        whenever(searchPosition(casterId)).thenReturn(casterPosition)
-        whenever(searchAbilityById("ability-1")).thenReturn(
-            ability(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF).toDto(),
+        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF)
+        // The diagonal tile can be occupied too, but it is not adjacent.
+        battlefieldWith(
+            """
+            C .
+            # .
+            """,
+            players = mapOf('C' to player.id),
         )
-        whenever(searchTilesThatCanBeOccupied(casterId, 1)).thenReturn(listOf(adjacentPosition, nonAdjacentPosition))
         // When
-        val result = whereCanCast(casterId, "ability-1")
+        val result = whereCanCast("C-1", "ability-1")
         // Then
-        result.shouldContainExactly(
-            WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = adjacentPosition.row, column = adjacentPosition.column))),
-        )
+        result.shouldContainExactly(WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(row = 0, column = 1))))
     }
 }

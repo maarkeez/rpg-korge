@@ -4,22 +4,24 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother
+import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class DefeatPlayerTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val hasAllBattleUnitsDefeated: HasAllBattleUnitsDefeated = mock()
+    private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val defeatPlayer =
         DefeatPlayer(
-            hasAllBattleUnitsDefeated = hasAllBattleUnitsDefeated,
+            hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository),
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
@@ -33,7 +35,7 @@ class DefeatPlayerTest {
                 .battle(players),
         )
         val defeatedPlayer = players[1]
-        whenever(hasAllBattleUnitsDefeated(defeatedPlayer)).thenReturn(true)
+        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
         // When
         defeatPlayer(playerId = defeatedPlayer)
         // Then
@@ -51,7 +53,8 @@ class DefeatPlayerTest {
                 .battle(players),
         )
         val defeatedPlayer = players[1]
-        whenever(hasAllBattleUnitsDefeated(defeatedPlayer)).thenReturn(false)
+        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
+        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 10).toDto()))
         // When
         defeatPlayer(playerId = defeatedPlayer)
         // Then

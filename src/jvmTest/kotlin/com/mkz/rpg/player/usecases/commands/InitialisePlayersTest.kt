@@ -5,27 +5,23 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerEvent.PlayerCreated
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.player.usecases.services.PlayerLoader
+import com.mkz.rpg.player.usecases.services.FakePlayerLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 class InitialisePlayersTest {
     private val playerRepository = InMemoryPlayerRepository()
     private val eventBus = FakeEventBus()
-    private val playerLoader: PlayerLoader = mock()
-    private val initialisePlayers = InitialisePlayers(playerLoader, playerRepository, eventBus)
 
     @Test
     fun `should create every loaded player when players are initialised`() {
         // Given
         val human = player(id = "player-one", name = "Human", type = HUMAN).toDto()
         val cpu = player(id = "player-two", name = "CPU", type = CPU).toDto()
-        whenever(playerLoader.loadPlayers()).thenReturn(listOf(human, cpu))
+        val initialisePlayers = InitialisePlayers(FakePlayerLoader(players = listOf(human, cpu)), playerRepository, eventBus)
         // When
         initialisePlayers()
         // Then
@@ -42,7 +38,7 @@ class InitialisePlayersTest {
         // Given
         val human = player(id = "player-one", name = "Human", type = HUMAN)
         playerRepository.create(human)
-        whenever(playerLoader.loadPlayers()).thenReturn(listOf(player(id = "player-one", name = "Other", type = CPU).toDto()))
+        val initialisePlayers = InitialisePlayers(FakePlayerLoader(players = listOf(player(id = "player-one", name = "Other", type = CPU).toDto())), playerRepository, eventBus)
         // When
         initialisePlayers()
         // Then
