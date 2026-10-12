@@ -5,20 +5,22 @@ import org.gradle.kotlin.dsl.register
 import org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask
 
 // The korge plugin bundles kotlin-gradle-plugin 2.0.20 on its classpath; declaring the
-// newer version here forces Gradle to resolve the conflict to 2.2.0 (highest version wins),
-// so the kotlin-multiplatform and kotlinx-serialization plugins are applied from 2.2.0.
+// newer version here forces Gradle to resolve the conflict to 2.2.21 (highest version wins),
+// so the kotlin-multiplatform and kotlinx-serialization plugins are applied from 2.2.21.
+// Note: the JS compiler cannot link a newer stdlib than itself, so the Kotlin version must be at least
+// the one the test libraries (e.g.: Kotest) are built with.
 buildscript {
     repositories { mavenCentral() }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.0")
-        classpath("org.jetbrains.kotlin:kotlin-serialization:2.2.0")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.2.21")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:2.2.21")
     }
     // kotlinter brings kotlin-compiler-embeddable 2.0.21 on the classpath, which bundles a
     // stale copy of org.jetbrains.kotlin.buildtools.api.CompilationService that shadows the
-    // 2.2.0 one from kotlin-build-tools-api and breaks KGP's classpath snapshot transforms.
+    // 2.2.21 one from kotlin-build-tools-api and breaks KGP's classpath snapshot transforms.
     configurations.classpath {
         resolutionStrategy {
-            force("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.0")
+            force("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.2.21")
         }
     }
 }
