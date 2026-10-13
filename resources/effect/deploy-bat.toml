@@ -1,0 +1,6 @@
+[outcome]
+type = "DEPLOY_BATTLE_UNIT"
+unitId = "bat"
+
+[application]
+type = "IMMEDIATELY"

@@ -1,0 +1,5 @@
+name = "Bat"
+healthPoints = 10
+manaPoints = 0
+movementRange = 5
+abilities = ["sword"]
