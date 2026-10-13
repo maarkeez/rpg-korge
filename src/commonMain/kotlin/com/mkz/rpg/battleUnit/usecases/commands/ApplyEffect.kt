@@ -4,6 +4,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
+import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
@@ -12,6 +14,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.random.Random
@@ -22,7 +25,12 @@ class ApplyEffect(
     private val searchEffectById: SearchEffectById,
     private val searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
+    searchPlayerById: SearchPlayerById,
+    canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
 ) {
+    private val battleUnitDeployment =
+        BattleUnitDeployment(battleUnitRepository, searchUnitById, searchPlayerById, canBattlefieldTileBeOccupied)
+
     operator fun invoke(application: EffectApplicationDto) {
         val effect = searchEffectById(application.effectId) ?: throw FailedToReceiveAbilityEffects()
         if (application.target is EffectTargetDto.Tile) {
@@ -41,15 +49,16 @@ class ApplyEffect(
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val casterId = application.source.battleUnitId ?: throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToReceiveAbilityEffects()
-        eventBus.publish(
-            BattleUnitEvent.RequestDeployBattleUnit(
+        // Deployed right away, as the other effects are applied, so the battlefield is occupied before the cast is resolved.
+        val events =
+            battleUnitDeployment.deploy(
                 battleUnitId = "deployed-unit-${Random.nextLong()}",
                 unitId = effect.outcome.deployBattleUnit!!.unitId,
                 playerId = caster.toDto().playerId,
                 deployAtRow = target.row,
                 deployAtColumn = target.column,
-            ),
-        )
+            )
+        eventBus.publish(events)
     }
 
     private fun applyToUnit(

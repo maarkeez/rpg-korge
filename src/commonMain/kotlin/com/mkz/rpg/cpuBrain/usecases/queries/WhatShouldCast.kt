@@ -6,21 +6,25 @@ import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
+import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
+import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.cpuBrain.usecases.services.MINIMUM_UTILITY_GAIN
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.random.Random
 
 /**
  * Decides which ability a CPU battle unit should cast, following the utility AI pattern:
- * every castable ability and target is scored as an attack or a heal, and the best one is cast
+ * every castable ability and target is scored as an attack, a heal or a deploy, and the best one is cast
  * when it beats doing nothing. Otherwise, one of the other abilities (e.g.: teleport) is cast at random.
  */
 class WhatShouldCast(
@@ -31,6 +35,9 @@ class WhatShouldCast(
     private val searchAbilityById: SearchAbilityById,
     private val searchEffectById: SearchEffectById,
     private val searchOccupant: SearchOccupant,
+    private val searchEnemyPlayer: SearchEnemyPlayer,
+    private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
+    private val searchPosition: SearchPosition,
     private val healingNeed: HealingNeed,
     private val random: Random = Random.Default,
 ) {
@@ -65,6 +72,7 @@ class WhatShouldCast(
     private enum class CastKind {
         ATTACK,
         HEAL,
+        DEPLOY,
         OTHER,
     }
 
@@ -81,15 +89,20 @@ class WhatShouldCast(
         caster: BattleUnit.Dto,
         casterMaxHealth: Int,
     ): UtilityEvaluationData {
-        val effects = ability.effectSpecs.mapNotNull { spec -> searchEffectById(spec.effectId)?.let { effect -> spec.target.type to effect } }
+        val effects = effectsOf(ability)
         val damage = expectedAmount(effects, target = TargetExpressionDto.Type.SELECTED_TARGET, outcome = TypeDto.DECREASE_HEALTH)
         val healing = expectedAmount(effects, target = TargetExpressionDto.Type.CASTER, outcome = TypeDto.INCREASE_HEALTH)
+        val deployedUnitId = effects.firstNotNullOfOrNull { (_, effect) -> effect.outcome.deployBattleUnit?.unitId }
         return when {
             damage > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.ATTACK, attackUtility(damage, castGroup, caster, casterMaxHealth))
             healing > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.HEAL, healUtility(healing, caster, casterMaxHealth))
+            deployedUnitId != null -> UtilityEvaluationData(ability.id, castGroup, CastKind.DEPLOY, deployUtility(deployedUnitId, castGroup, caster, casterMaxHealth))
             else -> UtilityEvaluationData(ability.id, castGroup, CastKind.OTHER, utility = 0.0)
         }
     }
+
+    private fun effectsOf(ability: Ability.Dto): List<Pair<TargetExpressionDto.Type, Effect.Dto>> =
+        ability.effectSpecs.mapNotNull { spec -> searchEffectById(spec.effectId)?.let { effect -> spec.target.type to effect } }
 
     // Removing more of what is left of the targets is better, e.g.: finishing off a weak enemy.
     // A badly hurt caster attacks less eagerly, as it does when it moves towards enemies.
@@ -119,6 +132,39 @@ class WhatShouldCast(
         val missingHealth = (casterMaxHealth - caster.remainingHealthPoints).toDouble()
         val usefulHealing = min(healing, missingHealth)
         return healingNeed(battleUnitId = caster.id) * usefulHealing / healing
+    }
+
+    // A deployed battle unit is worth the attack it will make on the enemy nearest to its tile, discounted for every turn it
+    // waits: it acts from the next turn, and may need several turns to walk next to the enemy. As with attacks, a badly hurt
+    // caster deploys less eagerly.
+    private fun deployUtility(
+        deployedUnitId: String,
+        castGroup: WhereCanCast.CastGroup,
+        caster: BattleUnit.Dto,
+        casterMaxHealth: Int,
+    ): Double {
+        val deployedUnit = searchUnitById(id = deployedUnitId) ?: return 0.0
+        val damage =
+            deployedUnit.abilities
+                .mapNotNull { abilityId -> searchAbilityById(abilityId) }
+                .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = TargetExpressionDto.Type.SELECTED_TARGET, outcome = TypeDto.DECREASE_HEALTH) }
+                ?: 0.0
+        val tile = castGroup.positions.firstOrNull() ?: return 0.0
+        val enemyPlayer = searchEnemyPlayer(playerId = caster.playerId) ?: return 0.0
+        val nearestEnemy =
+            searchBattleUnitsByPlayerId(playerId = enemyPlayer.id)
+                .filter { enemy -> enemy.remainingHealthPoints > 0 }
+                .mapNotNull { enemy ->
+                    searchPosition(battleUnitId = enemy.id)?.let { position -> enemy to abs(position.row - tile.row) + abs(position.column - tile.column) }
+                }.minByOrNull { (_, distance) -> distance }
+        if (damage <= 0 || nearestEnemy == null) return 0.0
+        val (enemy, distance) = nearestEnemy
+        val tilesToWalk = distance - 1
+        if (tilesToWalk > 0 && deployedUnit.movementRange <= 0) return 0.0
+        // It moves and attacks in the same turn, so it attacks in the turn it walks its last tile.
+        val turnsToAttack = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.movementRange - 1) / deployedUnit.movementRange
+        val casterHealthRatio = caster.remainingHealthPoints.toDouble() / casterMaxHealth
+        return casterHealthRatio * TURN_DISCOUNT.pow(turnsToAttack) * min(damage, enemy.remainingHealthPoints.toDouble()) / enemy.remainingHealthPoints
     }
 
     // Immediate effects count in full. Effects applied each turn count their total, discounted for every turn they wait.

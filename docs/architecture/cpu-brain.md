@@ -40,7 +40,8 @@ Every ability the unit can cast (enough mana, no cooldown), with every target `W
 |--------|-------------------------------------------------|-----------------------------------|
 | Attack | `DECREASE_HEALTH` on the selected target        | sword, skull, poisoned-sword      |
 | Heal   | `INCREASE_HEALTH` on the caster                 | heal                              |
-| Other  | Anything else                                   | teleport, bee                     |
+| Deploy | `DEPLOY_BATTLE_UNIT`                            | bee, bat                          |
+| Other  | Anything else                                   | teleport                          |
 
 The **expected amount** of an effect is its full amount when it is applied immediately. When it is applied every turn, it is its total discounted by 0.9 for every turn it waits, e.g.: venom (3 per turn for 5 turns) is worth 3 × (0.9 + 0.81 + 0.73 + 0.66 + 0.59) ≈ 11.1.
 
@@ -48,10 +49,15 @@ The **expected amount** of an effect is its full amount when it is applied immed
 |--------|-----------------------------------------------------------------------------------------------------------|
 | Attack | `caster health ratio × Σ min(damage, target remaining HP) / target remaining HP`, the sum capped at 1      |
 | Heal   | `healing need × min(healing, missing HP) / healing`                                                       |
+| Deploy | `caster health ratio × 0.9 ^ turns to attack × min(deployed damage, enemy remaining HP) / enemy remaining HP` |
 
 - Attacks prefer finishing off weak enemies, and badly hurt casters attack less eagerly.
 - Heals are worth more the more the caster needs them, and less when most of the healing would be wasted.
-- The best attack or heal is cast when its utility is higher than `MINIMUM_UTILITY_GAIN`. Otherwise, one of the other abilities is cast at random, if any.
+- Deploys are worth the attack the deployed battle unit will make on the enemy nearest to its tile:
+  - The **deployed damage** is the expected amount of the best attack of the deployed unit.
+  - The deployed battle unit acts from the next turn, and moves and attacks in the same turn, so the **turns to attack** are `max(1, ⌈(distance to the enemy - 1) / its movement range⌉)`, using the Manhattan distance. Hence, the tile nearest to the enemy is preferred.
+  - A deployed unit without an attack, or without an enemy on the battlefield, is worth 0.
+- The best attack, heal or deploy is cast when its utility is higher than `MINIMUM_UTILITY_GAIN`. Otherwise, one of the other abilities is cast at random, if any.
 
 For example, a rat (20 HP, sword dealing 10 and heal restoring 20) next to a knight:
 
@@ -62,6 +68,13 @@ For example, a rat (20 HP, sword dealing 10 and heal restoring 20) next to a kni
 | 10/20  | 100/100   | 0.5 × 0.1 = 0.05 | 0.5 × 0.5 = 0.25  | Heal     |
 | 6/20   | 10/100    | 0.3 × 1.0 = 0.3  | 0.7 × 0.7 = 0.49  | Heal     |
 | 20/20  | 8/100     | 1.0 × 1.0 = 1.0  | 0                 | Attack   |
+
+For example, a goat (30 HP, deploying a bat whose sword deals 10 and walks 5 tiles per turn) far from a knight (100 HP). The bat needs 2 turns to attack the knight from the tile next to the goat:
+
+| Goat HP | Deploy                    | Heal               | Decision |
+|---------|---------------------------|--------------------|----------|
+| 30/30   | 1.0 × 0.81 × 0.1 ≈ 0.081  | 0                  | Deploy   |
+| 15/30   | 0.5 × 0.81 × 0.1 ≈ 0.041  | 0.5 × 0.75 = 0.375 | Heal     |
 
 ## Moving
 

@@ -50,6 +50,9 @@ class CpuBrainApi(
             abilityApi.searchAbilityById,
             effectApi.searchEffectById,
             battlefieldApi.searchOccupant,
+            playerApi.searchEnemyPlayer,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            battlefieldApi.searchPosition,
             healingNeed,
         )
 

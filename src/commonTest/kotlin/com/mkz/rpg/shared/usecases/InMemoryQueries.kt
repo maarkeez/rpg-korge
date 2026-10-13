@@ -110,6 +110,9 @@ class InMemoryQueries(
             searchAbilityById,
             searchEffectById,
             searchOccupant,
+            searchEnemyPlayer,
+            searchBattleUnitsByPlayerId,
+            searchPosition,
             healingNeed,
             random,
         )

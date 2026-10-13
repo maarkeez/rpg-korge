@@ -11,14 +11,6 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
-    data class RequestDeployBattleUnit(
-        val battleUnitId: String,
-        val unitId: String,
-        val playerId: String,
-        val deployAtRow: Int,
-        val deployAtColumn: Int,
-    ) : BattleUnitEvent
-
     object RequestInitialiseBattleUnits : BattleUnitEvent
 
     data class RequestCastAbility(

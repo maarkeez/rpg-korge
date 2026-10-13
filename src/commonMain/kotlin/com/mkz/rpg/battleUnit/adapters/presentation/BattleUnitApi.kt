@@ -6,7 +6,6 @@ import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
-import com.mkz.rpg.battleUnit.adapters.events.OnRequestDeployBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
@@ -133,6 +132,8 @@ class BattleUnitApi(
             effectApi.searchEffectById,
             unitApi.searchUnitById,
             battlefieldApi.searchPosition,
+            playerApi.searchPlayerById,
+            battlefieldApi.canBattlefieldTileBeOccupied,
         )
     val applyOnDefeatedEffectsToNearbyAllies =
         ApplyOnDefeatedEffectsToNearbyAllies(
@@ -171,7 +172,6 @@ class BattleUnitApi(
     private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToNearbyAllies, eventBus)
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
-    private val onRequestDeployBattleUnit = OnRequestDeployBattleUnit(deployBattleUnit, eventBus)
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
 
