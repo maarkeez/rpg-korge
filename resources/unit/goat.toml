@@ -1,0 +1,5 @@
+name = "Goat"
+healthPoints = 30
+manaPoints = 30
+movementRange = 1
+abilities = ["bat", "teleport", "heal"]
