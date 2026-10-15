@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
@@ -62,6 +63,7 @@ class BattleScene : Scene() {
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, battleUnitApi)
+        val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 

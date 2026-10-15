@@ -13,6 +13,7 @@ import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
+import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.usecases.services.FakeLootDropLoader
@@ -62,6 +63,7 @@ class SubdomainApis(
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus, FakeLootDropLoader(lootDrops))
     val battleApi = BattleApi(eventBus, battleUnitApi, FakeBattleLoader(playerOrder))
+    val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
 
     /** Stores the given data, deploys the battle units and starts the battle, dispatching the events it publishes. */
     fun initialise() {

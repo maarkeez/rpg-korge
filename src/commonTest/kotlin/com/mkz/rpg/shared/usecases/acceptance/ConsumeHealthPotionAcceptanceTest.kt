@@ -1,0 +1,78 @@
+package com.mkz.rpg.shared.usecases.acceptance
+
+import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class ConsumeHealthPotionAcceptanceTest {
+    private val eventBus = InMemoryEventBus()
+    private val terrainApi = TerrainApi(eventBus)
+    private val unitApi = UnitApi(eventBus)
+    private val playerApi = PlayerApi(eventBus)
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
+    private val effectApi = EffectApi(eventBus)
+    private val abilityApi = AbilityApi(effectApi, eventBus)
+    private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
+    private val battleSetupApi = BattleSetupApi(eventBus)
+
+    private val playerOneId = "player-one"
+    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+
+    // The knight of the human player starts the battle with 100 health points, and is hit twice for 10 damage.
+    private suspend fun setUp() {
+        terrainApi.init()
+        effectApi.init()
+        lootableItemApi.init()
+        abilityApi.init()
+        unitApi.init()
+        playerApi.init()
+        battlefieldApi.init()
+        battleUnitApi.init()
+        battleApi.init()
+        battleSetupApi.setupBattle()
+        eventBus.dispatch()
+        repeat(2) {
+            battleUnitApi.applyEffect(
+                EffectApplicationDto(
+                    source = ApplicationSourceDto.terrain("lava"),
+                    target = EffectTargetDto.Unit(playerOneKnightBattleUnitId),
+                    effectId = "low-physical-damage",
+                ),
+            )
+        }
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `should heal the knight when the knight consumes a looted health potion`() =
+        scenarioTest(::setUp) {
+            // Given
+            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints == 80)
+            inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
+            // When
+            inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
+            eventBus.dispatch()
+            // Then
+            battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems.shouldBeEmpty()
+        }
+}
