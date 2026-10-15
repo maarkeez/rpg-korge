@@ -1,0 +1,5 @@
+name = "Mana Potion"
+type = "CONSUMABLE"
+
+[consumable]
+effectIds = ["mana-potion-restore"]

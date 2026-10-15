@@ -1,0 +1,6 @@
+[outcome]
+type = "INCREASE_MANA"
+mana = 10
+
+[application]
+type = "IMMEDIATELY"

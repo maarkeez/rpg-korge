@@ -93,6 +93,20 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
+    fun `should store the mana potion when the battle is set up`() =
+        scenarioTest(::setUp) {
+            // Given
+            val manaPotionId = "mana-potion"
+            // When
+            val manaPotion = lootableItemApi.searchLootableItemById(manaPotionId)
+            // Then
+            manaPotion.shouldNotBeNull()
+            manaPotion.name shouldBe "Mana Potion"
+            manaPotion.lootType.type shouldBe CONSUMABLE
+            manaPotion.lootType.consumable?.effectIds shouldBe setOf("mana-potion-restore")
+        }
+
+    @Test
     fun `should store the tier 1 loot table when the battle is set up`() =
         scenarioTest(::setUp) {
             // Given
@@ -103,6 +117,7 @@ class SetupBattleAcceptanceTest {
             tierOneLootTable.shouldNotBeNull()
             tierOneLootTable.entries.shouldContainExactly(
                 EntryDto.lootableItem(lootableItemId = "health-potion", weight = 10),
+                EntryDto.lootableItem(lootableItemId = "mana-potion", weight = 10),
                 EntryDto.nothing(weight = 5),
             )
         }
