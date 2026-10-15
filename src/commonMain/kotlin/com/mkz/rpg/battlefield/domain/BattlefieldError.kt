@@ -7,6 +7,8 @@ sealed class BattlefieldError(
 
     class TileNotFound : BattlefieldError("Tile not found")
 
+    class DroppedItemNotFound : BattlefieldError("Dropped item not found on the tile")
+
     class TileTerrainTransitionNotAllowed(
         val terrainId: String,
         val transitionToTerrainId: String,

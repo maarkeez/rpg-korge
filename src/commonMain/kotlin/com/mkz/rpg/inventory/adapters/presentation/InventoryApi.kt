@@ -2,6 +2,7 @@ package com.mkz.rpg.inventory.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.inventory.adapters.events.OnLootFound
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.commands.ConsumeItem
@@ -35,4 +36,7 @@ class InventoryApi(
     // Queries
     val searchInventoryByBattleUnitId = SearchInventoryByBattleUnitId(inventoryRepository)
     val canStoreItem = CanStoreItem(inventoryRepository)
+
+    // Event Listeners
+    private val onLootFound = OnLootFound(storeLootedItem, eventBus)
 }

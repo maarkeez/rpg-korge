@@ -8,7 +8,7 @@ object InventoryMother {
         storedItems: List<String> = emptyList(),
     ): Inventory =
         storedItems
-            .fold(Inventory.create(battleUnitId)) { inventory, lootableItemId -> inventory.store(lootableItemId) }
+            .fold(Inventory.create(battleUnitId)) { inventory, lootableItemId -> inventory.store(lootableItemId, row = 0, column = 0) }
             .pullEvents()
             .second
 

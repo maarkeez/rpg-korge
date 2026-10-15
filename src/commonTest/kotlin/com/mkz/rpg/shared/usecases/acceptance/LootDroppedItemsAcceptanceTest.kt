@@ -1,0 +1,94 @@
+package com.mkz.rpg.shared.usecases.acceptance
+
+import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.shouldBe
+import kotlin.test.Test
+
+class LootDroppedItemsAcceptanceTest {
+    private val eventBus = InMemoryEventBus()
+    private val terrainApi = TerrainApi(eventBus)
+    private val unitApi = UnitApi(eventBus)
+    private val playerApi = PlayerApi(eventBus)
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
+    private val effectApi = EffectApi(eventBus)
+    private val abilityApi = AbilityApi(effectApi, eventBus)
+    private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
+    private val battleSetupApi = BattleSetupApi(eventBus)
+
+    private val playerOneId = "player-one"
+    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+
+    // The knight of the human player starts the battle at row 6 and column 6, with the sand tiles at its east free.
+    private suspend fun setUp() {
+        terrainApi.init()
+        effectApi.init()
+        lootableItemApi.init()
+        abilityApi.init()
+        unitApi.init()
+        playerApi.init()
+        battlefieldApi.init()
+        battleUnitApi.init()
+        battleApi.init()
+        battleSetupApi.setupBattle()
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `should store the dropped item in the inventory and clear its tile when the knight walks across it`() =
+        scenarioTest(::setUp) {
+            // Given
+            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 6, column = 6))
+            battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 7)
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
+            // When
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("health-potion")
+            battlefieldApi.searchDroppedItems().shouldBeEmpty()
+        }
+
+    @Test
+    fun `should store the dropped item in the inventory and clear its tile when the knight stops on it`() =
+        scenarioTest(::setUp) {
+            // Given
+            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 8)
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
+            // When
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("health-potion")
+            battlefieldApi.searchDroppedItems().shouldBeEmpty()
+        }
+
+    @Test
+    fun `should leave the dropped item on its tile when the knight inventory is full`() =
+        scenarioTest(::setUp) {
+            // Given
+            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            repeat(13) { battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 7) }
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 7)
+            // When
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe List(12) { "health-potion" }
+            battlefieldApi.searchDroppedItems() shouldBe mapOf(PositionDto(row = 6, column = 7) to listOf("health-potion"))
+        }
+}

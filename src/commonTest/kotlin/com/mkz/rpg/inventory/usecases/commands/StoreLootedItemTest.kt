@@ -53,14 +53,14 @@ class StoreLootedItemTest {
     fun `should create the inventory with the item when the human battle unit loots its first item`() {
         // Given
         // When
-        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion")
+        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2)
         // Then
         inventoryRepository
             .searchByBattleUnitId("knight-1")
             ?.toDto()
             ?.storedItems
             .shouldBe(listOf("health-potion"))
-        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
     }
 
     @Test
@@ -68,14 +68,14 @@ class StoreLootedItemTest {
         // Given
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion")))
         // When
-        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion")
+        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2)
         // Then
         inventoryRepository
             .searchByBattleUnitId("knight-1")
             ?.toDto()
             ?.storedItems
             ?.shouldContainExactly("health-potion", "health-potion")
-        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
     }
 
     @Test
@@ -84,17 +84,17 @@ class StoreLootedItemTest {
         val inventory = fullInventory(battleUnitId = "knight-1")
         inventoryRepository.create(inventory)
         // When
-        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion")
+        storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2)
         // Then
         inventoryRepository.searchByBattleUnitId("knight-1")?.toDto() shouldBe inventory.toDto()
-        eventBus.shouldHavePublishedEvents(InventoryFull(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+        eventBus.shouldHavePublishedEvents(InventoryFull(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
     }
 
     @Test
     fun `should not store the item when the battle unit belongs to the CPU player`() {
         // Given
         // When
-        storeLootedItem(battleUnitId = "rat-1", lootableItemId = "health-potion")
+        storeLootedItem(battleUnitId = "rat-1", lootableItemId = "health-potion", row = 1, column = 2)
         // Then
         inventoryRepository.searchByBattleUnitId("rat-1").shouldBeNull()
         eventBus.shouldNotHavePublishedEvents()
@@ -104,7 +104,7 @@ class StoreLootedItemTest {
     fun `should fail when the lootable item does not exist`() {
         // Given
         // When
-        val storing = { storeLootedItem(battleUnitId = "knight-1", lootableItemId = "missing-lootable-item") }
+        val storing = { storeLootedItem(battleUnitId = "knight-1", lootableItemId = "missing-lootable-item", row = 1, column = 2) }
         // Then
         shouldThrow<InventoryLootableItemDoesNotExist> { storing() }
     }
@@ -113,7 +113,7 @@ class StoreLootedItemTest {
     fun `should fail when the battle unit does not exist`() {
         // Given
         // When
-        val storing = { storeLootedItem(battleUnitId = "missing-battle-unit", lootableItemId = "health-potion") }
+        val storing = { storeLootedItem(battleUnitId = "missing-battle-unit", lootableItemId = "health-potion", row = 1, column = 2) }
         // Then
         shouldThrow<InventoryBattleUnitDoesNotExist> { storing() }
     }

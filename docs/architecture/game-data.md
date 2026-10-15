@@ -110,7 +110,7 @@ abilities = ["poisoned-sword", "heal"]
 
 The loot tables a unit rolls on when one of its battle units is defeated. **The file name is the unit id**, so a unit has at most one loot drop, and a unit without one drops nothing. The unit and the loot tables must exist, and a loot table can not be repeated.
 
-One lootable item, or nothing, is picked at random from the entries of all its loot tables merged together, in proportion to their weights, and dropped on the tile where the battle unit was defeated.
+One lootable item, or nothing, is picked at random from the entries of all its loot tables merged together, in proportion to their weights, and dropped on the tile where the battle unit was defeated. It lies there until an inventory stores it, see [Inventory](inventory.md#looting-from-the-battlefield).
 
 ```toml
 lootTableIds = ["tier-1"]

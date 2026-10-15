@@ -67,7 +67,8 @@ class ConsumeHealthPotionAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints == 80)
-            inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
+            battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 7)
+            inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
             eventBus.dispatch()

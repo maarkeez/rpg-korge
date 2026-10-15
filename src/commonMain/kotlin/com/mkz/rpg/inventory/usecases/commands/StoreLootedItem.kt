@@ -10,7 +10,10 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Stores a looted item in the inventory of a battle unit of the human player, creating the inventory with its first item. CPU battle units have none. */
+/**
+ * Stores an item lying on a tile in the inventory of a battle unit of the human player, creating the inventory with its first item. CPU battle
+ * units have none, so the item stays on its tile.
+ */
 class StoreLootedItem(
     private val inventoryRepository: InventoryRepository,
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -21,12 +24,14 @@ class StoreLootedItem(
     operator fun invoke(
         battleUnitId: String,
         lootableItemId: String,
+        row: Int,
+        column: Int,
     ) {
         val battleUnit = searchBattleUnitById(battleUnitId) ?: throw InventoryBattleUnitDoesNotExist()
         if (searchPlayerById(battleUnit.playerId)?.type != HUMAN) return
         searchLootableItemById(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
         val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: Inventory.create(battleUnitId)
-        val (events, updatedInventory) = inventory.store(lootableItemId).pullEvents()
+        val (events, updatedInventory) = inventory.store(lootableItemId, row, column).pullEvents()
         inventoryRepository.create(updatedInventory)
         eventBus.publish(events)
     }

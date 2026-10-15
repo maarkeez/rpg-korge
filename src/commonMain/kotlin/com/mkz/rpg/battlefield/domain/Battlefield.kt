@@ -4,11 +4,15 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
+import com.mkz.rpg.battlefield.domain.BattlefieldError.DroppedItemNotFound
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileIsNotVacant
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileNotFound
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileTerrainTransitionNotAllowed
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.DroppedItemPickedUp
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.DroppedItemPlaced
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.LootFound
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.OccupantRemoved
 import kotlin.jvm.JvmInline
 
@@ -73,6 +77,48 @@ data class Battlefield private constructor(
             )
         return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
     }
+
+    /** Places the item dropped by a defeated battle unit on a tile, where it lies until an inventory stores it. */
+    fun placeDroppedItem(
+        lootableItemId: String,
+        row: Int,
+        column: Int,
+    ): Battlefield {
+        val updatedTiles = tiles.placeDroppedItem(row, column, lootableItemId)
+        val droppedItemPlacedEvent = DroppedItemPlaced(lootableItemId = lootableItemId, row = row, column = column)
+        return copy(tiles = updatedTiles, events = events + droppedItemPlacedEvent)
+    }
+
+    /**
+     * Announces the items lying on each tile of the [path] walked by the battle unit, in walking order. The items stay on their tiles until an
+     * inventory stores them.
+     */
+    fun findLoot(
+        battleUnitId: String,
+        path: List<PositionDto>,
+    ): Battlefield {
+        val lootFoundEvents =
+            path.mapNotNull { position ->
+                val droppedItems = tiles.droppedItems(position.row, position.column)
+                if (droppedItems.isEmpty()) return@mapNotNull null
+                LootFound(battleUnitId = battleUnitId, lootableItemIds = droppedItems, row = position.row, column = position.column)
+            }
+        return copy(events = events + lootFoundEvents)
+    }
+
+    /** Removes one copy of a dropped item from its tile, once an inventory has stored it. */
+    fun pickUpDroppedItem(
+        lootableItemId: String,
+        row: Int,
+        column: Int,
+    ): Battlefield {
+        val updatedTiles = tiles.pickUpDroppedItem(row, column, lootableItemId)
+        val droppedItemPickedUpEvent = DroppedItemPickedUp(lootableItemId = lootableItemId, row = row, column = column)
+        return copy(tiles = updatedTiles, events = events + droppedItemPickedUpEvent)
+    }
+
+    /** The items lying on each tile with dropped items, in the order they were dropped. */
+    fun droppedItems(): Map<PositionDto, List<String>> = tiles.droppedItems()
 
     fun pullEvents() = events to copy(events = emptySet())
 
@@ -160,6 +206,40 @@ data class Battlefield private constructor(
                 }
             return Tiles(updatedTiles)
         }
+
+        fun placeDroppedItem(
+            row: Int,
+            column: Int,
+            lootableItemId: String,
+        ): Tiles {
+            val position = Position(row = row, column = column)
+            val tile = tiles[position] ?: throw TileNotFound()
+            return Tiles(tiles + (position to tile.placeDroppedItem(lootableItemId)))
+        }
+
+        fun pickUpDroppedItem(
+            row: Int,
+            column: Int,
+            lootableItemId: String,
+        ): Tiles {
+            val position = Position(row = row, column = column)
+            val tile = tiles[position] ?: throw TileNotFound()
+            return Tiles(tiles + (position to tile.pickUpDroppedItem(lootableItemId)))
+        }
+
+        fun droppedItems(
+            row: Int,
+            column: Int,
+        ): List<String> {
+            val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
+            return tile.droppedItemIds()
+        }
+
+        fun droppedItems(): Map<PositionDto, List<String>> =
+            tiles
+                .filterValues { tile -> tile.droppedItemIds().isNotEmpty() }
+                .map { (position, tile) -> position.toDto() to tile.droppedItemIds() }
+                .toMap()
 
         fun toDto(): Map<PositionDto, TileDto> =
             this.tiles
@@ -356,6 +436,7 @@ data class Battlefield private constructor(
             private val terrainId: TerrainId,
             private val terrainCanBeOccupied: TerrainCanBeOccupied,
             private val terrainTransition: TerrainTransition?,
+            private val droppedItems: DroppedItems,
         ) {
             companion object {
                 fun create(
@@ -369,6 +450,7 @@ data class Battlefield private constructor(
                     terrainId = TerrainId(terrainId),
                     terrainCanBeOccupied = TerrainCanBeOccupied(terrainCanBeOccupied),
                     terrainTransition = terrainTransition,
+                    droppedItems = DroppedItems(emptyList()),
                 )
             }
 
@@ -383,6 +465,12 @@ data class Battlefield private constructor(
             fun removeOccupant() = copy(occupyingBattleUnitId = null)
 
             fun isOccupiedBy(battleUnitId: String) = occupyingBattleUnitId?.value == battleUnitId
+
+            fun placeDroppedItem(lootableItemId: String) = copy(droppedItems = DroppedItems(droppedItems.value + DroppedItemId(lootableItemId)))
+
+            fun pickUpDroppedItem(lootableItemId: String) = copy(droppedItems = droppedItems.pickUpOne(DroppedItemId(lootableItemId)))
+
+            fun droppedItemIds(): List<String> = droppedItems.value.map(DroppedItemId::value)
 
             fun terrainIdValue() = terrainId.value
 
@@ -423,6 +511,21 @@ data class Battlefield private constructor(
         @JvmInline private value class OccupyingBattleUnitId(
             val value: String,
         )
+
+        @JvmInline private value class DroppedItemId(
+            val value: String,
+        )
+
+        /** The lootable items lying on a tile, in the order they were dropped. */
+        @JvmInline private value class DroppedItems(
+            val value: List<DroppedItemId>,
+        ) {
+            fun pickUpOne(droppedItemId: DroppedItemId): DroppedItems {
+                val index = value.indexOf(droppedItemId)
+                if (index < 0) throw DroppedItemNotFound()
+                return DroppedItems(value.filterIndexed { droppedIndex, _ -> droppedIndex != index })
+            }
+        }
 
         @JvmInline private value class TerrainId(
             val value: String,

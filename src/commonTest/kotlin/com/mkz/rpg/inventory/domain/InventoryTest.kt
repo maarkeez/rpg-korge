@@ -31,10 +31,10 @@ class InventoryTest {
         // Given
         val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion"))
         // When
-        val (events, updatedInventory) = inventory.store("health-potion").pullEvents()
+        val (events, updatedInventory) = inventory.store("health-potion", row = 1, column = 2).pullEvents()
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "health-potion")
-        events.shouldContainExactly(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+        events.shouldContainExactly(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
     }
 
     @Test
@@ -42,7 +42,7 @@ class InventoryTest {
         // Given
         val inventory = inventory(storedItems = List(11) { "health-potion" })
         // When
-        val updatedInventory = inventory.store("helmet")
+        val updatedInventory = inventory.store("helmet", row = 1, column = 2)
         // Then
         updatedInventory.toDto().storedItems.size shouldBe 12
         updatedInventory.toDto().storedItems.last() shouldBe "helmet"
@@ -53,10 +53,10 @@ class InventoryTest {
         // Given
         val inventory = fullInventory(battleUnitId = "knight-1")
         // When
-        val (events, updatedInventory) = inventory.store("health-potion").pullEvents()
+        val (events, updatedInventory) = inventory.store("health-potion", row = 1, column = 2).pullEvents()
         // Then
         updatedInventory.toDto() shouldBe inventory.toDto()
-        events.shouldContainExactly(InventoryFull(battleUnitId = "knight-1", lootableItemId = "health-potion"))
+        events.shouldContainExactly(InventoryFull(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
     }
 
     @Test
@@ -126,7 +126,7 @@ class InventoryTest {
     @Test
     fun `PullEvents should clear the pending events when the events are pulled`() {
         // Given
-        val inventory = Inventory.create("knight-1").store("health-potion")
+        val inventory = Inventory.create("knight-1").store("health-potion", row = 1, column = 2)
         // When
         val (_, clearedInventory) = inventory.pullEvents()
         // Then

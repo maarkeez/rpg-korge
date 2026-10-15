@@ -32,15 +32,22 @@ data class Inventory private constructor(
 
     fun canStore(): Boolean = storedItems.value.size < maximumStorageSpace.value
 
-    /** Stores the item, or announces the inventory is full, so the player chooses whether to discard an item to make room. */
-    fun store(lootableItemId: String): Inventory =
+    /**
+     * Stores the item lying on the tile at [row] and [column], or announces the inventory is full, so the player chooses whether to discard an item
+     * to make room.
+     */
+    fun store(
+        lootableItemId: String,
+        row: Int,
+        column: Int,
+    ): Inventory =
         if (canStore()) {
             copy(
                 storedItems = StoredItems(storedItems.value + LootableItemId(lootableItemId)),
-                events = events + ItemStored(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId),
+                events = events + ItemStored(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column),
             )
         } else {
-            copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId))
+            copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))
         }
 
     fun consume(lootableItemId: String): Inventory =
