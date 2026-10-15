@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -54,6 +55,7 @@ class BattleScene : Scene() {
         val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
         val effectApi = EffectApi(eventBus)
         val abilityApi = AbilityApi(effectApi, eventBus)
+        val lootableItemApi = LootableItemApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val battleApi = BattleApi(eventBus, battleUnitApi)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
@@ -62,6 +64,7 @@ class BattleScene : Scene() {
         // Resources: each subdomain loads its data before the battle is set up
         terrainApi.init()
         effectApi.init()
+        lootableItemApi.init()
         abilityApi.init()
         unitApi.init()
         playerApi.init()

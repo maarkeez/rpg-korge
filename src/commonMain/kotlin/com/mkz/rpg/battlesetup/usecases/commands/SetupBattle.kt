@@ -5,6 +5,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.domain.TerrainEvent
@@ -20,6 +21,7 @@ class SetupBattle(
     operator fun invoke() {
         eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
         eventBus.publish(EffectEvent.RequestInitialiseEffects)
+        eventBus.publish(LootableItemEvent.RequestInitialiseLootableItems)
         eventBus.publish(AbilityEvent.RequestInitialiseAbilities)
         eventBus.publish(UnitEvent.RequestInitialiseUnits)
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)

@@ -11,12 +11,13 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 |---|--------------------------------|-------------------------------|--------------------------------|
 | 1 | `RequestInitialiseTerrains`    | Terrains                      | -                              |
 | 2 | `RequestInitialiseEffects`     | Effects                       | -                              |
-| 3 | `RequestInitialiseAbilities`   | Abilities                     | Their effects                  |
-| 4 | `RequestInitialiseUnits`       | Units                         | -                              |
-| 5 | `RequestInitialisePlayers`     | Players                       | -                              |
-| 6 | `RequestInitialiseBattlefield` | The battlefield               | Its terrains                   |
-| 7 | `RequestInitialiseBattleUnits` | The deployed battle units     | Their units, players and tiles |
-| 8 | `RequestInitialiseBattle`      | The battle and its first round| The deployed battle units      |
+| 3 | `RequestInitialiseLootableItems` | Lootable items              | Their effects                  |
+| 4 | `RequestInitialiseAbilities`   | Abilities                     | Their effects                  |
+| 5 | `RequestInitialiseUnits`       | Units                         | -                              |
+| 6 | `RequestInitialisePlayers`     | Players                       | -                              |
+| 7 | `RequestInitialiseBattlefield` | The battlefield               | Its terrains                   |
+| 8 | `RequestInitialiseBattleUnits` | The deployed battle units     | Their units, players and tiles |
+| 9 | `RequestInitialiseBattle`      | The battle and its first round| The deployed battle units      |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
@@ -60,6 +61,22 @@ targeting = "ADJACENT_ENEMY"   # SELF, ADJACENT_ENEMY, ALL_ADJACENT_ENEMIES, VAC
 [[effects]]
 effectId = "low-physical-damage"
 target = "SELECTED_TARGET"     # CASTER, SELECTED_TARGET, SELECTED_TILE, CASTER_TILE, NEARBY_ALLIES
+```
+
+### `lootableItem/<lootable item id>.toml`
+
+An item a battle unit can loot. Its effects must exist.
+
+```toml
+name = "Health Potion"
+type = "CONSUMABLE"              # CONSUMABLE, EQUIPPABLE
+
+[consumable]                     # Only for CONSUMABLE
+effectIds = ["health-potion-heal"]
+
+# [equippable]                   # Only for EQUIPPABLE
+# effectIds = ["..."]
+# equipmentZone = "HEAD"         # HEAD, BODY, ARMS, LEGS, WEAPON
 ```
 
 ### `unit/<unit id>.toml`
@@ -114,5 +131,11 @@ playerOrder = ["player-one", "player-two"]
 1. Add `resources/unit/<unit id>.toml`.
 2. Add its images, following the [asset conventions](assets.md): `unit/<unit id>.png` and `unit/<unit id>_portrait.png`.
 3. Optionally, deploy it in the battle with a `resources/battleUnit/<battle unit id>.toml` file.
+
+## How to add a lootable item
+
+1. Add the effects it applies, if they do not exist yet: `resources/effect/<effect id>.toml`.
+2. Add `resources/lootableItem/<lootable item id>.toml`.
+3. Add its image, following the [asset conventions](assets.md): `lootableItem/<lootable item id>.png`.
 
 Abilities and effects are added the same way, with their TOML file next to their icon. No Kotlin change is needed.

@@ -6,4 +6,6 @@ sealed interface LootableItemEvent : DomainEvent {
     data class LootableItemCreated(
         val lootableItemId: String,
     ) : LootableItemEvent
+
+    object RequestInitialiseLootableItems : LootableItemEvent
 }

@@ -1,0 +1,6 @@
+[outcome]
+type = "INCREASE_HEALTH"
+healing = 10
+
+[application]
+type = "IMMEDIATELY"

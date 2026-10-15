@@ -1,0 +1,5 @@
+name = "Health Potion"
+type = "CONSUMABLE"
+
+[consumable]
+effectIds = ["health-potion-heal"]
