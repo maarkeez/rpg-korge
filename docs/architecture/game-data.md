@@ -74,7 +74,7 @@ target = "SELECTED_TARGET"     # CASTER, SELECTED_TARGET, SELECTED_TILE, CASTER_
 
 ### `lootableItem/<lootable item id>.toml`
 
-An item a battle unit can loot. Its effects must exist.
+An item a battle unit can loot. Its effects must exist and suit its type: a consumable's effects can not be `WHILE_EQUIPPED`, and an equippable item's effects must all be `WHILE_EQUIPPED`.
 
 ```toml
 name = "Health Potion"
@@ -84,7 +84,7 @@ type = "CONSUMABLE"              # CONSUMABLE, EQUIPPABLE
 effectIds = ["health-potion-heal"]
 
 # [equippable]                   # Only for EQUIPPABLE
-# effectIds = ["..."]
+# effectIds = ["maximum-health-20"]
 # equipmentZone = "HEAD"         # HEAD, BODY, ARMS, LEGS, WEAPON
 ```
 

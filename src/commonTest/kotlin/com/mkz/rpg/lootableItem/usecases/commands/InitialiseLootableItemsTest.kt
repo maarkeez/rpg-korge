@@ -2,9 +2,12 @@ package com.mkz.rpg.lootableItem.usecases.commands
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItem
+import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectAppliedWhileEquipped
+import com.mkz.rpg.lootableItem.domain.LootableItemError.EquippableEffectNotAppliedWhileEquipped
 import com.mkz.rpg.lootableItem.domain.LootableItemError.LootableItemEffectDoesNotExist
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent.LootableItemCreated
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
@@ -31,8 +34,9 @@ class InitialiseLootableItemsTest {
     fun `should create every loaded lootable item when lootable items are initialised`() {
         // Given
         effectRepository.create(increaseHealthEffect(id = "heal"))
+        effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
         val healthPotion = consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))).toDto()
-        val helmet = equippableLootableItem(id = "helmet", equippable = equippable(effectIds = setOf("heal"))).toDto()
+        val helmet = equippableLootableItem(id = "helmet", equippable = equippable(effectIds = setOf("maximum-health-20"))).toDto()
         val initialiseLootableItems = initialiseLootableItems(loadedLootableItems = listOf(healthPotion, helmet))
         // When
         initialiseLootableItems()
@@ -75,5 +79,30 @@ class InitialiseLootableItemsTest {
         val initialisation = { initialiseLootableItems() }
         // Then
         shouldThrow<LootableItemEffectDoesNotExist> { initialisation() }
+    }
+
+    @Test
+    fun `should fail when a consumable lootable item effect is applied while equipped`() {
+        // Given
+        effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
+        val healthPotion = consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("maximum-health-20"))).toDto()
+        val initialiseLootableItems = initialiseLootableItems(loadedLootableItems = listOf(healthPotion))
+        // When
+        val initialisation = { initialiseLootableItems() }
+        // Then
+        shouldThrow<ConsumableEffectAppliedWhileEquipped> { initialisation() }
+    }
+
+    @Test
+    fun `should fail when an equippable lootable item effect is not applied while equipped`() {
+        // Given
+        effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
+        effectRepository.create(increaseHealthEffect(id = "heal"))
+        val helmet = equippableLootableItem(id = "helmet", equippable = equippable(effectIds = setOf("maximum-health-20", "heal"))).toDto()
+        val initialiseLootableItems = initialiseLootableItems(loadedLootableItems = listOf(helmet))
+        // When
+        val initialisation = { initialiseLootableItems() }
+        // Then
+        shouldThrow<EquippableEffectNotAppliedWhileEquipped> { initialisation() }
     }
 }

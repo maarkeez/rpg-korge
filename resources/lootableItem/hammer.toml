@@ -1,0 +1,6 @@
+name = "Hammer"
+type = "EQUIPPABLE"
+
+[equippable]
+effectIds = ["maximum-health-20", "maximum-mana-20"]
+equipmentZone = "WEAPON"

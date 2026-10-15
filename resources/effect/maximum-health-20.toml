@@ -1,0 +1,6 @@
+[outcome]
+type = "INCREASE_MAXIMUM_HEALTH"
+healthPoints = 20
+
+[application]
+type = "WHILE_EQUIPPED"

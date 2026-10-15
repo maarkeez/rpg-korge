@@ -11,7 +11,10 @@ import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.CONSUMABLE
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.EQUIPPABLE
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -107,6 +110,20 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
+    fun `should store the hammer when the battle is set up`() =
+        scenarioTest(::setUp) {
+            // Given
+            val hammerId = "hammer"
+            // When
+            val hammer = lootableItemApi.searchLootableItemById(hammerId)
+            // Then
+            hammer.shouldNotBeNull()
+            hammer.name shouldBe "Hammer"
+            hammer.lootType.type shouldBe EQUIPPABLE
+            hammer.lootType.equippable shouldBe EquippableDto(effectIds = setOf("maximum-health-20", "maximum-mana-20"), equipmentZone = WEAPON)
+        }
+
+    @Test
     fun `should store the tier 1 loot table when the battle is set up`() =
         scenarioTest(::setUp) {
             // Given
@@ -120,5 +137,17 @@ class SetupBattleAcceptanceTest {
                 EntryDto.lootableItem(lootableItemId = "mana-potion", weight = 10),
                 EntryDto.nothing(weight = 5),
             )
+        }
+
+    @Test
+    fun `should store the tier 2 loot table when the battle is set up`() =
+        scenarioTest(::setUp) {
+            // Given
+            val tierTwoLootTableId = "tier-2"
+            // When
+            val tierTwoLootTable = lootTableApi.searchLootTableById(tierTwoLootTableId)
+            // Then
+            tierTwoLootTable.shouldNotBeNull()
+            tierTwoLootTable.entries.shouldContainExactly(EntryDto.lootableItem(lootableItemId = "hammer", weight = 50))
         }
 }
