@@ -6,7 +6,7 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 
 - Each battle unit of the human player has one. CPU battle units have none for now: storing an item for them does nothing, so the item stays on its tile.
 - An inventory is created empty when its battle unit stores its first item, so it has no game data. Until then, `searchInventoryByBattleUnitId` returns `null`, which means the inventory is empty.
-- Each inventory has 12 storage spaces. Each item takes one space, so two health potions take two.
+- Each inventory has 12 storage spaces. Each item takes one space, so two health potions take two. An equipped item keeps taking its space.
 
 ## Using the inventory
 
@@ -15,13 +15,15 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 | `storeLootedItem` | Stores an item lying on a tile, or announces `InventoryFull` without storing it when there is no space left.                                       |
 | `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. |
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
+| `equipItem`       | Equips a stored equippable item in its zone, and requests the application of its effects. See [Equipment](#equipment).                              |
+| `unequipItem`     | Unequips an item, which stays stored, and requests the removal of its effects. See [Equipment](#equipment).                                         |
 
 | Query                           | What it answers                                         |
 |---------------------------------|---------------------------------------------------------|
-| `searchInventoryByBattleUnitId` | The stored items, to display them.                      |
+| `searchInventoryByBattleUnitId` | The stored items and the equipped ones, to display them. |
 | `canStoreItem`                  | Whether there is space left for one more item.          |
 
-- Consuming and discarding do not cost any turn action, but are only allowed during the turn of the battle unit's player.
+- Consuming, discarding, equipping and unequipping do not cost any turn action, but are only allowed during the turn of the battle unit's player.
 - Storing is not limited to the player's turn, as it happens while a battle unit moves.
 
 ## Looting from the battlefield
@@ -42,7 +44,19 @@ Storing an item in a full inventory does not store it: it announces `InventoryFu
 1. To keep the new item: the screen discards one of the stored items with `discardItem`, then stores the new one with `storeLootedItem` and its tile.
 2. To leave the new item behind: nothing is called, and the item stays on its tile, to be looted later.
 
+## Equipment
+
+Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equipped item. Equipped items stay stored, so the inventory exposes them as `equippedItems`, by zone, next to `storedItems`.
+
+1. `equipItem` equips a stored equippable item in its zone, announcing `ItemEquipped`. If the zone held another item, it is a **swap**: the old item is unequipped first, announcing `ItemUnequipped`.
+2. The inventory requests the application of each effect of the new item (`RequestApplyEffect`), with the item as source and its battle unit as target. The battle unit records them under the item: they raise its maximum health and mana, without changing the remaining ones. E.g.: the hammer takes the knight from 100/100 health to 100/120.
+3. `unequipItem` unequips an item, announcing `ItemUnequipped`, and requests the removal of its effects (`RequestRemoveEquippedEffects`). The battle unit lowers its remaining health and mana to the new maximums when they are above them, announcing `EquippedEffectsRemoved`.
+
+- In a swap, the new item's effects are applied **before** the old item's are removed, so the remaining health and mana are only lowered to the final maximums: swapping an item for another with the same effects loses nothing.
+- An item can not be equipped twice. A battle unit can store several copies of the same item, but only one of them is equipped.
+- An equipped item can not be discarded: the player unequips it first. When another copy of it is stored, discarding removes that copy instead.
+- Healing, restoring mana and the mana replenished each turn never go above the maximums, equipment included. The battle unit exposes them as `maximumHealthPoints` and `maximumManaPoints`, and the health and mana bars and the CPU brain use them.
+
 ## Not yet supported
 
-- **Equipment:** equipping, unequipping and swapping equippable items, one per equipment zone, once there is an equippable item and an effect that lasts while it is worn.
-- **The screen:** displaying the inventory, the choice when it is full, consuming items and drawing the dropped items on the battlefield.
+- **The screen:** displaying the inventory, the choice when it is full, consuming and equipping items, and drawing the dropped items on the battlefield.

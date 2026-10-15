@@ -55,9 +55,9 @@ type = "ON_TURN_STARTED"   # IMMEDIATELY, ON_TURN_STARTED, BEFORE_APPLYING_EFFEC
 duration = 5               # Only for ON_TURN_STARTED and BEFORE_APPLYING_EFFECT
 ```
 
-The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 0 to 999. Healing and restoring mana never go above the unit's maximum.
+The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 0 to 999. Healing and restoring mana never go above the battle unit's maximum, equipment included.
 
-`INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` application, and `WHILE_EQUIPPED` only accepts these two outcomes. Battle units do not apply `WHILE_EQUIPPED` effects yet, as items can not be equipped yet.
+`INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` application, and `WHILE_EQUIPPED` only accepts these two outcomes. A battle unit applies them while their item is equipped, see [Inventory](inventory.md#equipment).
 
 ### `ability/<ability id>.toml`
 

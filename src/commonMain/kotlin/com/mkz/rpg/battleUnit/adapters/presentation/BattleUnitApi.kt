@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
@@ -18,6 +19,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
+import com.mkz.rpg.battleUnit.usecases.commands.RemoveEquippedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
@@ -160,11 +162,8 @@ class BattleUnitApi(
             battlefieldApi.searchPosition,
             eventBus,
         )
-    val replenishMana =
-        ReplenishMana(
-            battleUnitRepository,
-            unitApi.searchUnitById,
-        )
+    val replenishMana = ReplenishMana(battleUnitRepository)
+    val removeEquippedEffects = RemoveEquippedEffects(battleUnitRepository, eventBus)
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
@@ -174,6 +173,7 @@ class BattleUnitApi(
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
+    private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)
 
     suspend fun init() {
         battleUnitLoader.initResources()

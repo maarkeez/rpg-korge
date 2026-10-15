@@ -82,6 +82,6 @@ Every tile the unit can move to, plus its current tile, is a candidate. Its util
 
 - **Enemies**: how close the nearest enemy is (normalised between the candidates), weighted by the unit's health ratio. Healthy units approach enemies.
 - **Allies**: how close the nearest ally is (normalised between the candidates), weighted by `1 - health ratio`. Hurt units fall back towards allies.
-- **Terrain**: the health effect of the tile terrain relative to the unit max health, weighted by its healing need. Hurt units look for healing terrain (e.g.: water) and avoid harmful terrain (e.g.: lava).
+- **Terrain**: the health effect of the tile terrain relative to the battle unit max health (equipment included), weighted by its healing need. Hurt units look for healing terrain (e.g.: water) and avoid harmful terrain (e.g.: lava).
 
 The unit moves to the best tile, unless it is worth no more than `MINIMUM_UTILITY_GAIN` above staying still.

@@ -7,7 +7,9 @@ import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.commands.ConsumeItem
 import com.mkz.rpg.inventory.usecases.commands.DiscardItem
+import com.mkz.rpg.inventory.usecases.commands.EquipItem
 import com.mkz.rpg.inventory.usecases.commands.StoreLootedItem
+import com.mkz.rpg.inventory.usecases.commands.UnequipItem
 import com.mkz.rpg.inventory.usecases.queries.CanStoreItem
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoryByBattleUnitId
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
@@ -32,6 +34,8 @@ class InventoryApi(
     val storeLootedItem = StoreLootedItem(inventoryRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById, lootableItemApi.searchLootableItemById, eventBus)
     val consumeItem = ConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
     val discardItem = DiscardItem(inventoryRepository, playerTurnRule, eventBus)
+    val equipItem = EquipItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
+    val unequipItem = UnequipItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
 
     // Queries
     val searchInventoryByBattleUnitId = SearchInventoryByBattleUnitId(inventoryRepository)

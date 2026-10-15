@@ -32,4 +32,8 @@ sealed class BattleUnitError(
     class InvalidEffectApplicationStatus : BattleUnitError("Invalid effect application status")
 
     class BattleUnitDoesNotExists : BattleUnitError("Battle unit does not exist")
+
+    class EquippedEffectAlreadyApplied : BattleUnitError("Equipped effect already applied")
+
+    class EquippedEffectsNotFound : BattleUnitError("Equipped effects not found")
 }

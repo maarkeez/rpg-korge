@@ -3,24 +3,20 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitMother.unit
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class ReplenishManaTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val unitRepository = InMemoryUnitRepository()
-    private val replenishMana = ReplenishMana(battleUnitRepository, SearchUnitById(unitRepository))
+    private val replenishMana = ReplenishMana(battleUnitRepository)
 
     @Test
     fun `should replenish mana when the battle unit has mana below the maximum`() {
         // Given
         val unit =
             unit(manaPoints = 20, abilities = listOf("ability-1"))
-                .also(unitRepository::create)
                 .toDto()
         val player =
             player(id = "player-1")
@@ -42,7 +38,7 @@ class ReplenishManaTest {
     @Test
     fun `should not exceed maximum mana when replenishing`() {
         // Given
-        val unit = unit(manaPoints = 12, abilities = listOf("ability-1")).also(unitRepository::create).toDto()
+        val unit = unit(manaPoints = 12, abilities = listOf("ability-1")).toDto()
         val player = player(id = "player-1").toDto()
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother

@@ -11,5 +11,13 @@ sealed class InventoryError(
 
     class LootableItemNotConsumable : InventoryError("The lootable item is not consumable")
 
+    class LootableItemNotEquippable : InventoryError("The lootable item is not equippable")
+
+    class ItemAlreadyEquipped : InventoryError("The item is already equipped")
+
+    class ItemNotEquipped : InventoryError("The item is not equipped")
+
+    class EquippedItemCanNotBeDiscarded : InventoryError("The item must be unequipped before discarding it")
+
     class NotTheBattleUnitPlayerTurn : InventoryError("The inventory can only be used during the turn of its battle unit player")
 }

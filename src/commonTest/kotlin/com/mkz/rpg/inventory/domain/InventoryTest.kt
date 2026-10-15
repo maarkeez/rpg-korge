@@ -1,12 +1,19 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
+import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.HEAD
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -23,7 +30,7 @@ class InventoryTest {
         // When
         val createdInventory = Inventory.create(battleUnitId)
         // Then
-        createdInventory.toDto() shouldBe Inventory.Dto(battleUnitId = "knight-1", maximumStorageSpace = 12, storedItems = emptyList())
+        createdInventory.toDto() shouldBe Inventory.Dto(battleUnitId = "knight-1", maximumStorageSpace = 12, storedItems = emptyList(), equippedItems = emptyMap())
     }
 
     @Test
@@ -121,6 +128,96 @@ class InventoryTest {
         val result = runCatching { inventory.discard("health-potion") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+    }
+
+    @Test
+    fun `Discard should remove a copy that is not equipped when another copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val updatedInventory = inventory.discard("hammer")
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+    }
+
+    @Test
+    fun `Discard should fail when the only stored copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val result = runCatching { inventory.discard("hammer") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EquippedItemCanNotBeDiscarded>()
+    }
+
+    @Test
+    fun `Equip should equip the item in its zone while it keeps its storage space when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "helmet"), equippedItems = mapOf(HEAD to "helmet"))
+        // When
+        val (events, updatedInventory) = inventory.equip("hammer", WEAPON).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer", "helmet")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(HEAD to "helmet", WEAPON to "hammer")
+        events.shouldContainExactly(ItemEquipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON))
+    }
+
+    @Test
+    fun `Equip should unequip the item the zone held when the zone is already used`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "axe"), equippedItems = mapOf(WEAPON to "axe"))
+        // When
+        val (events, updatedInventory) = inventory.equip("hammer", WEAPON).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer", "axe")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+        events.shouldContainExactly(
+            ItemUnequipped(battleUnitId = "knight-1", lootableItemId = "axe", equipmentZone = WEAPON),
+            ItemEquipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON),
+        )
+    }
+
+    @Test
+    fun `Equip should fail when the item is not stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("helmet"))
+        // When
+        val result = runCatching { inventory.equip("hammer", WEAPON) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+    }
+
+    @Test
+    fun `Equip should fail when the item is already equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val result = runCatching { inventory.equip("hammer", WEAPON) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemAlreadyEquipped>()
+    }
+
+    @Test
+    fun `Unequip should unequip the item while it stays stored when the item is equipped`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val (events, updatedInventory) = inventory.unequip("hammer").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe emptyMap()
+        events.shouldContainExactly(ItemUnequipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON))
+    }
+
+    @Test
+    fun `Unequip should fail when the item is not equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer"))
+        // When
+        val result = runCatching { inventory.unequip("hammer") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotEquipped>()
     }
 
     @Test

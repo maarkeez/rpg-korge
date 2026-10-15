@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto.SourceTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
@@ -23,7 +24,7 @@ class ApplyEffect(
     private val battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
     private val searchEffectById: SearchEffectById,
-    private val searchUnitById: SearchUnitById,
+    searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
     searchPlayerById: SearchPlayerById,
     canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
@@ -68,7 +69,6 @@ class ApplyEffect(
         val target = application.target as? EffectTargetDto.Unit ?: throw FailedToReceiveAbilityEffects()
         val battleUnit = battleUnitRepository.searchById(target.id) ?: throw FailedToReceiveAbilityEffects()
         val position = searchPosition(battleUnit.toDto().id) ?: throw FailedToReceiveAbilityEffects()
-        val unit = searchUnitById(battleUnit.toDto().unitId) ?: throw FailedToReceiveAbilityEffects()
         val (events, appliedBattleUnit) =
             when (effect.application.type) {
                 ApplicationTypeDto.IMMEDIATELY ->
@@ -76,7 +76,6 @@ class ApplyEffect(
                         .receiveImmediateEffect(effectId = effect.id)
                         .applyImmediateEffect(
                             effect = effect,
-                            unit = unit,
                             currentRow = position.row,
                             currentColumn = position.column,
                         ).pullEvents()
@@ -94,8 +93,10 @@ class ApplyEffect(
                     throw FailedToReceiveAbilityEffects()
                 }
                 ApplicationTypeDto.WHILE_EQUIPPED -> {
-                    // TODO: Applied once items can be equipped
-                    throw FailedToReceiveAbilityEffects()
+                    // Only an equipped item applies effects that last while it is equipped.
+                    val lootableItemId = application.source.lootableItemId
+                    if (application.source.type != SourceTypeDto.ITEM || lootableItemId == null) throw FailedToReceiveAbilityEffects()
+                    battleUnit.applyEquippedEffect(lootableItemId = lootableItemId, effect = effect).pullEvents()
                 }
             }
         var pendingEvents: Set<BattleUnitEvent> = events

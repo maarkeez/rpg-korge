@@ -98,12 +98,12 @@ open class BattleUnitInfoView(
         // Health
         healthBarView.display(
             remaining = battleUnit.remainingHealthPoints,
-            maximum = unit.healthPoints,
+            maximum = battleUnit.maximumHealthPoints,
         )
         // Mana
         manaBarView.display(
             remaining = battleUnit.remainingManaPoints,
-            maximum = unit.manaPoints,
+            maximum = battleUnit.maximumManaPoints,
         )
         // Abilities
         val canCast = battleUnit.remainingTurnActions.remainingCasts > 0

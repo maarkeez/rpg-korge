@@ -100,7 +100,7 @@ class InMemoryQueries(
     val abilityExecution = AbilityExecution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, distanceService)
 
     // CPU brain
-    val healingNeed = HealingNeed(searchBattleUnitById, searchUnitById)
+    val healingNeed = HealingNeed(searchBattleUnitById)
     val whatShouldCast =
         WhatShouldCast(
             searchBattleUnitById,
@@ -123,7 +123,6 @@ class InMemoryQueries(
             searchBattleUnitById,
             searchPosition,
             searchEnemyPlayer,
-            searchUnitById,
             healingNeed,
             searchBattlefield,
             searchTerrainById,

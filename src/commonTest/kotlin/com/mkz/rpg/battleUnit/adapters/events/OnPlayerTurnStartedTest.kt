@@ -29,7 +29,7 @@ class OnPlayerTurnStartedTest {
                     searchPosition = queries.searchPosition,
                     eventBus = eventBus,
                 ),
-            replenishMana = ReplenishMana(queries.battleUnitRepository, queries.searchUnitById),
+            replenishMana = ReplenishMana(queries.battleUnitRepository),
             eventBus = eventBus,
         )
 

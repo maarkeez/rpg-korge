@@ -29,6 +29,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent
 
+    // Requested when an item is unequipped, so the battle unit loses the effects it applied while equipped.
+    data class RequestRemoveEquippedEffects(
+        val battleUnitId: String,
+        val lootableItemId: String,
+    ) : BattleUnitEvent
+
     // Path: the tiles walked from the origin (excluded) to the destination (included).
     data class BattleUnitMoved(
         val battleUnitId: String,
@@ -72,6 +78,11 @@ sealed interface BattleUnitEvent : DomainEvent {
 
     data class BattleUnitManaRestored(
         val battleUnitId: String,
+    ) : BattleUnitEvent
+
+    data class EquippedEffectsRemoved(
+        val battleUnitId: String,
+        val lootableItemId: String,
     ) : BattleUnitEvent
 
     data class BattleUnitTeleported(

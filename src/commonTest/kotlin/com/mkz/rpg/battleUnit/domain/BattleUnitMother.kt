@@ -21,7 +21,7 @@ object BattleUnitMother {
         if (damage == 0) return deployedBattleUnit
         // A battle unit can only lose health by receiving damage.
         val damageEffect = decreaseHealthEffect(damage = damage, applicationType = "IMMEDIATELY").toDto()
-        return deployedBattleUnit.applyImmediateEffect(damageEffect, unit, deployAtRow, deployAtColumn).pullEvents().second
+        return deployedBattleUnit.applyImmediateEffect(damageEffect, deployAtRow, deployAtColumn).pullEvents().second
     }
 
     fun id() = "battle-unit-${UUID.randomUUID()}"

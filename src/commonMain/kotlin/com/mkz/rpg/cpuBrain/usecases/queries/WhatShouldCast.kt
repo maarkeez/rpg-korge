@@ -44,7 +44,7 @@ class WhatShouldCast(
     operator fun invoke(battleUnitId: String): CastDecision? {
         val caster = searchBattleUnitById(id = battleUnitId) ?: return null
         if (caster.remainingTurnActions.remainingCasts <= 0) return null
-        val casterMaxHealth = searchUnitById(id = caster.unitId)?.healthPoints ?: return null
+        val casterMaxHealth = caster.maximumHealthPoints
         val candidates =
             caster.abilityCooldowns.keys
                 .filter { abilityId -> canCastAbility(battleUnitId = caster.id, abilityId = abilityId) }

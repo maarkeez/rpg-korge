@@ -1,5 +1,6 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface InventoryEvent : DomainEvent {
@@ -27,5 +28,17 @@ sealed interface InventoryEvent : DomainEvent {
     data class ItemDiscarded(
         val battleUnitId: String,
         val lootableItemId: String,
+    ) : InventoryEvent
+
+    data class ItemEquipped(
+        val battleUnitId: String,
+        val lootableItemId: String,
+        val equipmentZone: EquipmentZoneDto,
+    ) : InventoryEvent
+
+    data class ItemUnequipped(
+        val battleUnitId: String,
+        val lootableItemId: String,
+        val equipmentZone: EquipmentZoneDto,
     ) : InventoryEvent
 }

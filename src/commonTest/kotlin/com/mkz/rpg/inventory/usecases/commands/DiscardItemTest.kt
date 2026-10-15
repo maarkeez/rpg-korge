@@ -7,12 +7,14 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryBattleUnitDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
+import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -59,6 +61,16 @@ class DiscardItemTest {
         val discarding = { discardItem(battleUnitId = "knight-1", lootableItemId = "helmet") }
         // Then
         shouldThrow<InventoryItemNotFound> { discarding() }
+    }
+
+    @Test
+    fun `should fail when the only stored copy of the item is equipped`() {
+        // Given
+        inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")))
+        // When
+        val discarding = { discardItem(battleUnitId = "knight-1", lootableItemId = "hammer") }
+        // Then
+        shouldThrow<EquippedItemCanNotBeDiscarded> { discarding() }
     }
 
     @Test

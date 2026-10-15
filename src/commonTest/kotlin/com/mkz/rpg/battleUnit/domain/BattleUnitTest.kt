@@ -31,6 +31,9 @@ class BattleUnitTest {
         battleUnitDto.playerId shouldBe player.id
         battleUnitDto.remainingHealthPoints shouldBe 10
         battleUnitDto.remainingManaPoints shouldBe 5
+        battleUnitDto.maximumHealthPoints shouldBe 10
+        battleUnitDto.maximumManaPoints shouldBe 5
+        battleUnitDto.equippedEffects shouldBe emptyMap()
         battleUnitDto.remainingTurnActions shouldBe BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
     }
 
@@ -144,7 +147,7 @@ class BattleUnitTest {
                 .battleUnit(unit = unit)
                 .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         // When
-        val replenishedBattleUnit = battleUnit.replenishMana(unit = unit)
+        val replenishedBattleUnit = battleUnit.replenishMana()
         // Then
         replenishedBattleUnit.toDto().remainingManaPoints shouldBe 10
     }
@@ -320,7 +323,6 @@ class BattleUnitTest {
                 .battleUnit(unit = unit)
                 .applyImmediateEffect(
                     effect = EffectMother.decreaseHealthEffect(damage = 1).toDto(),
-                    unit = unit,
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
@@ -373,7 +375,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -394,7 +395,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
-                unit = unit,
                 currentRow = defeatedAtPosition.row,
                 currentColumn = defeatedAtPosition.column,
             )
@@ -421,7 +421,6 @@ class BattleUnitTest {
                 .battleUnit(unit = unit)
                 .applyImmediateEffect(
                     effect = EffectMother.decreaseHealthEffect(damage = 4).toDto(),
-                    unit = unit,
                     currentRow = position().row,
                     currentColumn = position().column,
                 ).pullEvents()
@@ -431,7 +430,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = healingEffect,
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -456,7 +454,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = manaEffect,
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -479,7 +476,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = manaEffect,
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -497,7 +493,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = teleportEffect,
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -679,7 +674,6 @@ class BattleUnitTest {
         val updatedBattleUnit =
             battleUnit.applyImmediateEffect(
                 effect = immediateEffect,
-                unit = unit,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -689,5 +683,154 @@ class BattleUnitTest {
             .toDto()
             .ongoingEffects.onTurnStarted
             .shouldContainExactly("effect-1")
+    }
+
+    @Test
+    fun `ApplyEquippedEffect should raise the maximums without changing the remaining health and mana when the item effects are applied`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealthPoints = 80)
+        val maximumHealthEffect = EffectMother.increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto()
+        val maximumManaEffect = EffectMother.increaseMaximumManaEffect(id = "maximum-mana-20", manaPoints = 20).toDto()
+        // When
+        val updatedBattleUnit =
+            battleUnit
+                .applyEquippedEffect(lootableItemId = "hammer", effect = maximumHealthEffect)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = maximumManaEffect)
+        // Then
+        val battleUnitDto = updatedBattleUnit.toDto()
+        battleUnitDto.maximumHealthPoints shouldBe 120
+        battleUnitDto.maximumManaPoints shouldBe 50
+        battleUnitDto.remainingHealthPoints shouldBe 80
+        battleUnitDto.remainingManaPoints shouldBe 30
+        battleUnitDto.equippedEffects shouldBe mapOf("hammer" to listOf("maximum-health-20", "maximum-mana-20"))
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.shouldContainExactly(
+            BattleUnitEvent.EffectReceived(battleUnitId = battleUnitDto.id, effectId = "maximum-health-20"),
+            BattleUnitEvent.EffectReceived(battleUnitId = battleUnitDto.id, effectId = "maximum-mana-20"),
+        )
+    }
+
+    @Test
+    fun `ApplyEquippedEffect should fail when the item already applied the effect`() {
+        // Given
+        val maximumHealthEffect = EffectMother.increaseMaximumHealthEffect().toDto()
+        val battleUnit = BattleUnitMother.battleUnit().applyEquippedEffect(lootableItemId = "hammer", effect = maximumHealthEffect)
+        // When
+        val result = runCatching { battleUnit.applyEquippedEffect(lootableItemId = "hammer", effect = maximumHealthEffect) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.EquippedEffectAlreadyApplied>()
+    }
+
+    @Test
+    fun `ApplyEquippedEffect should fail when the effect does not last while equipped`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit()
+        // When
+        val result = runCatching { battleUnit.applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseHealthEffect().toDto()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.InvalidEffectApplicationStatus>()
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should increase the health points up to the maximum with the equipped effects when the effect increases health`() {
+        // Given
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(healthPoints = 100).toDto(), remainingHealthPoints = 90)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+        // When
+        val updatedBattleUnit =
+            battleUnit.applyImmediateEffect(
+                effect = EffectMother.increaseHealthEffect(healing = 50).toDto(),
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 120
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should increase the mana points up to the maximum with the equipped effects when the effect increases mana`() {
+        // Given
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(manaPoints = 30).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 20).toDto())
+        // When
+        val updatedBattleUnit =
+            battleUnit.applyImmediateEffect(
+                effect = EffectMother.increaseManaEffect(mana = 50).toDto(),
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingManaPoints shouldBe 50
+    }
+
+    @Test
+    fun `ReplenishMana should replenish the remaining mana points up to the maximum with the equipped effects when mana is replenished`() {
+        // Given
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(manaPoints = 30).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 5).toDto())
+        // When
+        val replenishedBattleUnit = battleUnit.replenishMana()
+        // Then
+        replenishedBattleUnit.toDto().remainingManaPoints shouldBe 35
+    }
+
+    @Test
+    fun `RemoveEquippedEffects should lower the maximums and the remaining health and mana above them when the item effects are removed`() {
+        // Given
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 20).toDto())
+                .applyImmediateEffect(effect = EffectMother.increaseHealthEffect(healing = 20).toDto(), currentRow = 0, currentColumn = 0)
+                .applyImmediateEffect(effect = EffectMother.increaseManaEffect(mana = 20).toDto(), currentRow = 0, currentColumn = 0)
+                .pullEvents()
+                .second
+        require(battleUnit.toDto().remainingHealthPoints == 120 && battleUnit.toDto().remainingManaPoints == 50)
+        // When
+        val updatedBattleUnit = battleUnit.removeEquippedEffects(lootableItemId = "hammer")
+        // Then
+        val battleUnitDto = updatedBattleUnit.toDto()
+        battleUnitDto.maximumHealthPoints shouldBe 100
+        battleUnitDto.maximumManaPoints shouldBe 30
+        battleUnitDto.remainingHealthPoints shouldBe 100
+        battleUnitDto.remainingManaPoints shouldBe 30
+        battleUnitDto.equippedEffects shouldBe emptyMap()
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.shouldContainExactly(BattleUnitEvent.EquippedEffectsRemoved(battleUnitId = battleUnitDto.id, lootableItemId = "hammer"))
+    }
+
+    @Test
+    fun `RemoveEquippedEffects should keep the remaining health and mana when they are within the new maximums`() {
+        // Given
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealthPoints = 70)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "helmet", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 5).toDto())
+        // When
+        val updatedBattleUnit = battleUnit.removeEquippedEffects(lootableItemId = "hammer")
+        // Then
+        val battleUnitDto = updatedBattleUnit.toDto()
+        battleUnitDto.remainingHealthPoints shouldBe 70
+        battleUnitDto.remainingManaPoints shouldBe 30
+        battleUnitDto.maximumManaPoints shouldBe 35
+        battleUnitDto.equippedEffects.keys.shouldContainExactly("helmet")
+    }
+
+    @Test
+    fun `RemoveEquippedEffects should fail when the item applied no effects`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit()
+        // When
+        val result = runCatching { battleUnit.removeEquippedEffects(lootableItemId = "hammer") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.EquippedEffectsNotFound>()
     }
 }

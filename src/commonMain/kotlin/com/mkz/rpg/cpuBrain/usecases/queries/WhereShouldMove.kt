@@ -12,7 +12,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HE
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.math.abs
 
 class WhereShouldMove(
@@ -21,7 +20,6 @@ class WhereShouldMove(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
     private val searchEnemyPlayer: SearchEnemyPlayer,
-    private val searchUnitById: SearchUnitById,
     private val healingNeed: HealingNeed,
     private val searchBattlefield: SearchBattlefield,
     private val searchTerrainById: SearchTerrainById,
@@ -35,9 +33,7 @@ class WhereShouldMove(
                 addAll(whereCanMove(battleUnitId = battleUnit.id))
                 add(currentPosition)
             }
-        val unit = searchUnitById(id = battleUnit.unitId)!!
-
-        val enemyPreference = battleUnit.remainingHealthPoints.toDouble() / unit.healthPoints.toDouble()
+        val enemyPreference = battleUnit.remainingHealthPoints.toDouble() / battleUnit.maximumHealthPoints.toDouble()
         val allyPreference = 1 - enemyPreference
 
         val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId)
@@ -152,7 +148,7 @@ class WhereShouldMove(
                 terrainHealthContribution(
                     terrainHealthEffect = evaluationData.terrainHealthEffect,
                     healingNeed = currentHealingNeed,
-                    maxHealth = unit.healthPoints,
+                    maxHealth = battleUnit.maximumHealthPoints,
                 )
             utilityData[position] =
                 evaluationData.copy(

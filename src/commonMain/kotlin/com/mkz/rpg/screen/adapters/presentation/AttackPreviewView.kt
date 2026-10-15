@@ -89,12 +89,12 @@ open class AttackPreviewView(
         casterUnitNameView.display(unitName = casterUnit.name)
         casterHealthBarView.display(
             remaining = casterBattleUnit.remainingHealthPoints,
-            maximum = casterUnit.healthPoints,
+            maximum = casterBattleUnit.maximumHealthPoints,
         )
         casterManaBarView.display(
             remainingBefore = casterBattleUnit.remainingManaPoints,
             remainingAfter = casterBattleUnit.remainingManaPoints - manaCost,
-            maximum = casterUnit.manaPoints,
+            maximum = casterBattleUnit.maximumManaPoints,
         )
         casterEffectsView.display(casterBattleUnit.ongoingEffects.onTurnStarted + casterBattleUnit.ongoingEffects.onDefeatedEffects)
 
@@ -110,11 +110,11 @@ open class AttackPreviewView(
             receiverHealthBarView.display(
                 remainingBefore = receiverBattleUnit.remainingHealthPoints,
                 remainingAfter = receiverBattleUnit.remainingHealthPoints - damage,
-                maximum = receiverUnit.healthPoints,
+                maximum = receiverBattleUnit.maximumHealthPoints,
             )
             receiverManaBarView.display(
                 remaining = receiverBattleUnit.remainingManaPoints,
-                maximum = receiverUnit.manaPoints,
+                maximum = receiverBattleUnit.maximumManaPoints,
             )
             receiverEffectsView.display(receiverBattleUnit.ongoingEffects.onTurnStarted + receiverBattleUnit.ongoingEffects.onDefeatedEffects)
         }

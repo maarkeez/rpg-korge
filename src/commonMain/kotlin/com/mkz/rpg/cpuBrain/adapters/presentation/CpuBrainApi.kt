@@ -35,11 +35,7 @@ class CpuBrainApi(
     eventBus: EventBus,
 ) {
     // Queries
-    val healingNeed =
-        HealingNeed(
-            battleUnitApi.searchBattleUnitById,
-            unitApi.searchUnitById,
-        )
+    val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
 
     val whatShouldCast =
         WhatShouldCast(
@@ -63,7 +59,6 @@ class CpuBrainApi(
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
             playerApi.searchEnemyPlayer,
-            unitApi.searchUnitById,
             healingNeed,
             battlefieldApi.searchBattlefield,
             terrainApi.searchTerrainById,

@@ -2,6 +2,8 @@ package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EffectNotFound
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectAlreadyApplied
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectsNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidEffectApplicationStatus
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
@@ -15,6 +17,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EquippedEffectsRemoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect
@@ -40,6 +43,9 @@ data class BattleUnit private constructor(
     private val playerId: PlayerId,
     private val remainingHealthPoints: RemainingHealthPoints,
     private val remainingManaPoints: RemainingManaPoints,
+    private val baseMaximumHealthPoints: BaseMaximumHealthPoints,
+    private val baseMaximumManaPoints: BaseMaximumManaPoints,
+    private val equippedEffects: EquippedEffects,
     private val remainingTurnActions: RemainingTurnActions,
     private val abilityCooldowns: AbilityCooldowns,
     private val ongoingEffects: OngoingEffects,
@@ -59,6 +65,9 @@ data class BattleUnit private constructor(
                 PlayerId(player.id),
                 RemainingHealthPoints(unit.healthPoints),
                 RemainingManaPoints(unit.manaPoints),
+                BaseMaximumHealthPoints(unit.healthPoints),
+                BaseMaximumManaPoints(unit.manaPoints),
+                EquippedEffects(),
                 RemainingTurnActions(unit.movementRange),
                 AbilityCooldowns(unit.abilities),
                 OngoingEffects(),
@@ -74,6 +83,9 @@ data class BattleUnit private constructor(
             playerId = playerId.value,
             remainingHealthPoints = remainingHealthPoints.value,
             remainingManaPoints = remainingManaPoints.value,
+            maximumHealthPoints = maximumHealthPoints(),
+            maximumManaPoints = maximumManaPoints(),
+            equippedEffects = equippedEffects.toDto(),
             remainingTurnActions = remainingTurnActions.toDto(),
             abilityCooldowns = abilityCooldowns.toDto(),
             unitId = unitId.value,
@@ -137,9 +149,38 @@ data class BattleUnit private constructor(
         return copy(abilityCooldowns = abilityCooldowns)
     }
 
-    fun replenishMana(unit: Unit.Dto): BattleUnit {
-        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + 10, unit.manaPoints))
+    fun replenishMana(): BattleUnit {
+        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + 10, maximumManaPoints()))
         return copy(remainingManaPoints = remainingManaPoints)
+    }
+
+    /** The unit's maximum health, raised by the effects of the equipped items. */
+    private fun maximumHealthPoints(): Int = baseMaximumHealthPoints.value + equippedEffects.maximumHealthBonus()
+
+    /** The unit's maximum mana, raised by the effects of the equipped items. */
+    private fun maximumManaPoints(): Int = baseMaximumManaPoints.value + equippedEffects.maximumManaBonus()
+
+    /** Raises a maximum stat while the item is equipped. The remaining health and mana do not change. */
+    fun applyEquippedEffect(
+        lootableItemId: String,
+        effect: Effect.Dto,
+    ): BattleUnit {
+        val equippedEffects = equippedEffects.apply(lootableItemId, effect)
+        val effectReceivedEvent = EffectReceived(battleUnitId = id.value, effectId = effect.id)
+        return copy(
+            equippedEffects = equippedEffects,
+            events = events + effectReceivedEvent,
+        )
+    }
+
+    /** Removes the effects of an unequipped item, lowering the remaining health and mana to the new maximums when they are above them. */
+    fun removeEquippedEffects(lootableItemId: String): BattleUnit {
+        val unequipped = copy(equippedEffects = equippedEffects.remove(lootableItemId))
+        return unequipped.copy(
+            remainingHealthPoints = RemainingHealthPoints(min(remainingHealthPoints.value, unequipped.maximumHealthPoints())),
+            remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value, unequipped.maximumManaPoints())),
+            events = events + EquippedEffectsRemoved(battleUnitId = id.value, lootableItemId = lootableItemId),
+        )
     }
 
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
@@ -225,7 +266,6 @@ data class BattleUnit private constructor(
 
     fun applyImmediateEffect(
         effect: Effect.Dto,
-        unit: Unit.Dto,
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
@@ -236,7 +276,7 @@ data class BattleUnit private constructor(
             }
             INCREASE_HEALTH -> {
                 val remainingHealthPoints =
-                    RemainingHealthPoints(min(unit.healthPoints, remainingHealthPoints.value + effect.outcome.increaseHealth!!.healing))
+                    RemainingHealthPoints(min(maximumHealthPoints(), remainingHealthPoints.value + effect.outcome.increaseHealth!!.healing))
                 val healedEvent = BattleUnitHealed(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
@@ -246,7 +286,7 @@ data class BattleUnit private constructor(
             }
             INCREASE_MANA -> {
                 val remainingManaPoints =
-                    RemainingManaPoints(min(unit.manaPoints, remainingManaPoints.value + effect.outcome.increaseMana!!.mana))
+                    RemainingManaPoints(min(maximumManaPoints(), remainingManaPoints.value + effect.outcome.increaseMana!!.mana))
                 val manaRestoredEvent = BattleUnitManaRestored(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
@@ -333,6 +373,77 @@ data class BattleUnit private constructor(
     ) {
         init {
             if (value < 0) throw RemainingManaPointsBelowZero()
+        }
+    }
+
+    @JvmInline private value class BaseMaximumHealthPoints(
+        val value: Int,
+    )
+
+    @JvmInline private value class BaseMaximumManaPoints(
+        val value: Int,
+    )
+
+    /** The effects of the equipped items, which last until their item is unequipped. */
+    @JvmInline private value class EquippedEffects(
+        val value: List<EquippedEffect>,
+    ) {
+        constructor() : this(emptyList())
+
+        fun apply(
+            lootableItemId: String,
+            effect: Effect.Dto,
+        ): EquippedEffects {
+            val bonus =
+                when (effect.outcome.type) {
+                    INCREASE_MAXIMUM_HEALTH -> Bonus.MaximumHealth(effect.outcome.increaseMaximumHealth!!.healthPoints)
+                    INCREASE_MAXIMUM_MANA -> Bonus.MaximumMana(effect.outcome.increaseMaximumMana!!.manaPoints)
+                    else -> throw InvalidEffectApplicationStatus()
+                }
+            val equippedEffect = EquippedEffect(LootableItemId(lootableItemId), EffectId(effect.id), bonus)
+            if (value.any { it.isSameEffect(equippedEffect) }) throw EquippedEffectAlreadyApplied()
+            return EquippedEffects(value + equippedEffect)
+        }
+
+        fun remove(lootableItemId: String): EquippedEffects {
+            val remainingEffects = value.filterNot { it.lootableItemId.value == lootableItemId }
+            if (remainingEffects.size == value.size) throw EquippedEffectsNotFound()
+            return EquippedEffects(remainingEffects)
+        }
+
+        fun maximumHealthBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumHealth)?.healthPoints ?: 0 }
+
+        fun maximumManaBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumMana)?.manaPoints ?: 0 }
+
+        fun toDto(): Map<String, List<String>> =
+            value
+                .groupBy { it.lootableItemId.value }
+                .mapValues { (_, effects) -> effects.map { it.effectId.value } }
+
+        private data class EquippedEffect(
+            val lootableItemId: LootableItemId,
+            val effectId: EffectId,
+            val bonus: Bonus,
+        ) {
+            fun isSameEffect(other: EquippedEffect) = lootableItemId == other.lootableItemId && effectId == other.effectId
+        }
+
+        @JvmInline private value class LootableItemId(
+            val value: String,
+        )
+
+        @JvmInline private value class EffectId(
+            val value: String,
+        )
+
+        private sealed interface Bonus {
+            @JvmInline value class MaximumHealth(
+                val healthPoints: Int,
+            ) : Bonus
+
+            @JvmInline value class MaximumMana(
+                val manaPoints: Int,
+            ) : Bonus
         }
     }
 
@@ -565,6 +676,11 @@ data class BattleUnit private constructor(
         val playerId: String,
         val remainingHealthPoints: Int,
         val remainingManaPoints: Int,
+        // Including the effects of the equipped items.
+        val maximumHealthPoints: Int,
+        val maximumManaPoints: Int,
+        // The effect ids applied by each equipped lootable item id.
+        val equippedEffects: Map<String, List<String>>,
         val remainingTurnActions: RemainingTurnActionsDto,
         val abilityCooldowns: Map<String, Int>,
         val unitId: String,
