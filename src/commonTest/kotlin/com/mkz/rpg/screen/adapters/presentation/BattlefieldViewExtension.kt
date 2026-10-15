@@ -1,9 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
+import korlibs.korge.view.Image
 
 // Page object of [BattlefieldView].
 
@@ -87,6 +89,21 @@ fun BattlefieldView.isTileVisible(
         tileY >= 0 &&
         tileX + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_WIDTH &&
         tileY + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_HEIGHT
+}
+
+/** The image of the loot lying on the tile (an item icon or the chest), or `null` when there is none. */
+fun BattlefieldView.lootBitmapAt(
+    row: Int,
+    column: Int,
+): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.LOOT) as? Image)?.bitmap?.base
+
+/** Whether the loot is drawn right above the terrain, so the battle unit and the selection are drawn over it. */
+fun BattlefieldView.isLootRightAboveTerrainAt(
+    row: Int,
+    column: Int,
+): Boolean {
+    val layerNames = tile(row, column).children.map { child -> child.name }
+    return layerNames.indexOf(BattlefieldView.LOOT) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
 }
 
 suspend fun ViewsForTesting.clickTile(

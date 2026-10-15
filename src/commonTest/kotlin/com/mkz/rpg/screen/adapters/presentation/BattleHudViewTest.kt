@@ -15,7 +15,7 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView)
+            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader()))
             battleHudView.displayAttackPreviewView()
             // When
             battleHudView.displayBattleUnitInfoView()
@@ -29,7 +29,7 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView)
+            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader()))
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.displayAttackPreviewView()
@@ -38,12 +38,26 @@ class BattleHudViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayInventoryView should display inventory view when is displayed`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader())
+            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, AttackPreviewView(loadedResourcesLoader()), inventoryView)
+            battleHudView.displayBattleUnitInfoView()
+            // When
+            battleHudView.displayInventoryView()
+            // Then
+            battleHudView.displayedViews().shouldContainExactly(inventoryView)
+        }
+
+    @Test
     fun `Hide should not display any view when is hidden`() =
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView)
+            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader()))
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.hide()

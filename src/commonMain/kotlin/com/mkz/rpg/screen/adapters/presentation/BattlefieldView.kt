@@ -36,6 +36,7 @@ open class BattlefieldView(
 ) : UIContainer(Size(width = VIEWPORT_WIDTH, height = VIEWPORT_HEIGHT)) {
     companion object {
         const val TERRAIN = "TERRAIN"
+        const val LOOT = "LOOT"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
@@ -46,6 +47,10 @@ open class BattlefieldView(
         const val VISIBLE_TILES = 8
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
+
+        // The loot is drawn smaller than the battle units, so the terrain shows around it.
+        const val LOOT_SCALE = 2.0
+        const val CHEST_PATH = "battlefield/chest.png"
 
         // How long a moving battle unit stops on each tile of its path.
         val MOVE_STEP_DURATION = 150.milliseconds
@@ -185,6 +190,31 @@ open class BattlefieldView(
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val tileButton = tile(row, column)
         tileButton.addImage(unitBitmap, BATTLE_UNIT)
+    }
+
+    /**
+     * Displays the items lying on the tile, below the battle unit standing on it: the item icon when there is one, or
+     * a chest when there are several. Nothing is displayed when there are none.
+     */
+    open fun displayLoot(
+        row: Int,
+        column: Int,
+        lootableItemIds: List<String>,
+    ) {
+        val tileButton = tile(row, column)
+        tileButton.findViewByName(LOOT)?.removeFromParent()
+        val lootBitmap =
+            when (lootableItemIds.size) {
+                0 -> return
+                1 -> resourcesLoader.bitmapOrNull("lootableItem/${lootableItemIds.single()}.png") ?: return
+                else -> resourcesLoader.bitmap(CHEST_PATH)
+            }
+        val terrainIndex = tileButton.children.indexOfFirst { child -> child.name == TERRAIN }
+        tileButton.addImage(lootBitmap, LOOT, scale = LOOT_SCALE)
+        // Moved right above the terrain, so the battle units and the selection are drawn over it.
+        val lootView = tileButton.findViewByName(LOOT)!!
+        lootView.removeFromParent()
+        tileButton.addChildAt(lootView, terrainIndex + 1)
     }
 
     interface Delegate {
@@ -353,11 +383,13 @@ open class BattlefieldView(
     private fun UIButton.addImage(
         bitmap: Bitmap,
         viewName: String,
+        scale: Double = 3.0,
     ) {
         val button = this
+        val imageScale = scale
         button.image(bitmap) {
             name = viewName
-            scale = 3.0
+            this.scale = imageScale
             smoothing = false
             centerOn(button)
         }

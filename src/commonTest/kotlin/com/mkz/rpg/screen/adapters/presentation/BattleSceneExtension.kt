@@ -17,6 +17,9 @@ fun Stage.battleHudView(): BattleHudView? = descendants().filterIsInstance<Battl
 /** The selected battle unit info on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleUnitInfoView(): BattleUnitInfoView? = descendants().filterIsInstance<BattleUnitInfoView>().firstOrNull()
 
+/** The inventory of the selected battle unit, or `null` while the HUD does not display it. */
+fun Stage.inventoryView(): InventoryView? = descendants().filterIsInstance<InventoryView>().firstOrNull()
+
 /** The battle info on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleInfoView(): BattleInfoView? = descendants().filterIsInstance<BattleInfoView>().firstOrNull()
 

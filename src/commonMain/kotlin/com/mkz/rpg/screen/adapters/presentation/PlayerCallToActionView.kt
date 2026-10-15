@@ -3,7 +3,9 @@ package com.mkz.rpg.screen.adapters.presentation
 import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
-open class PlayerCallToActionView : Container() {
+open class PlayerCallToActionView(
+    private val resourcesLoader: BattleSceneResourcesLoader = BattleSceneResourcesLoader(),
+) : Container() {
     companion object {
         const val CALL_TO_ACTION = "CALL_TO_ACTION"
     }
@@ -44,6 +46,37 @@ open class PlayerCallToActionView : Container() {
                 },
             )
         display(cancelAndConfirmView)
+    }
+
+    /** Displays the finish turn again, e.g.: once the player is done with an inventory item. */
+    open fun redisplayFinishTurn() {
+        displayFinishTurn(onTurnFinished = onTurnFinished!!)
+    }
+
+    /** Displays the name of the selected inventory item and its actions. The finish turn is displayed again once an action is selected. */
+    open fun displayItemActions(
+        itemName: String,
+        actions: List<ItemActionsView.Action>,
+    ) {
+        val itemActions =
+            actions.map { action ->
+                action.copy(
+                    onSelected = {
+                        action.onSelected()
+                        redisplayFinishTurn()
+                    },
+                )
+            }
+        display(ItemActionsView(itemName = itemName, actions = itemActions))
+    }
+
+    /** Asks the player what to do with an item found while the inventory is full. */
+    open fun displayInventoryFull(
+        foundItemName: String,
+        foundItemId: String,
+        onLeft: () -> Unit,
+    ) {
+        display(InventoryFullView(foundItemName = foundItemName, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
     }
 
     internal val callToAction: View?

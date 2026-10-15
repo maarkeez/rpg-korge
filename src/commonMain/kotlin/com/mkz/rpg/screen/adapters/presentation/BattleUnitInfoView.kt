@@ -29,6 +29,7 @@ open class BattleUnitInfoView(
     internal val movementPointsView = PointsView(MOVEMENT_POINTS_COLOR)
     internal val castPointsView = PointsView(CAST_POINTS_COLOR)
     internal lateinit var abilityButtons: Array<AbilityButtonView>
+    internal lateinit var bagButton: BagButtonView
     internal lateinit var effectsView: EffectsView
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
@@ -69,6 +70,8 @@ open class BattleUnitInfoView(
                 val abilityButtonSize = Size(width = 48.75, height = 48.75)
                 abilityButtons = Array(6) { AbilityButtonView(abilityButtonSize, resourcesLoader) }
                 abilityButtons.forEach(::addChild)
+                bagButton = BagButtonView(abilityButtonSize, resourcesLoader)
+                addChild(bagButton)
             }
         }
 
@@ -116,6 +119,15 @@ open class BattleUnitInfoView(
         // Effects
         effectsView.display(effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects)
         visible = true
+    }
+
+    /** Displays the bag, which opens the inventory of the battle unit. Only the battle units of the human player have one. */
+    open fun displayBag(onBagSelected: () -> kotlin.Unit) {
+        bagButton.display(onBagSelected)
+    }
+
+    open fun hideBag() {
+        bagButton.hide()
     }
 
     open fun displayAbilitySelected(index: Int) {

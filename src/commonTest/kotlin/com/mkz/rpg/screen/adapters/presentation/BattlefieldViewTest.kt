@@ -347,6 +347,49 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
         }
 
+    @Test
+    fun `DisplayLoot should display the item icon below the battle unit when one item lies on the tile`() =
+        sharedViewsTest {
+            // Given
+            val resourcesLoader = loadedResourcesLoader()
+            val battlefieldView = BattlefieldView(resourcesLoader)
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            // When
+            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            // Then
+            battlefieldView.lootBitmapAt(row = 0, column = 0) shouldBe resourcesLoader.bitmap("lootableItem/health-potion.png")
+            battlefieldView.isLootRightAboveTerrainAt(row = 0, column = 0).shouldBeTrue()
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayLoot should display the chest when several items lie on the tile`() =
+        sharedViewsTest {
+            // Given
+            val resourcesLoader = loadedResourcesLoader()
+            val battlefieldView = BattlefieldView(resourcesLoader)
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
+            // When
+            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
+            // Then
+            battlefieldView.lootBitmapAt(row = 0, column = 0) shouldBe resourcesLoader.bitmap("battlefield/chest.png")
+        }
+
+    @Test
+    fun `DisplayLoot should remove the loot when no item lies on the tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
+            // When
+            battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = emptyList())
+            // Then
+            battlefieldView.lootBitmapAt(row = 0, column = 0).shouldBeNull()
+        }
+
     private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
 
     @Test

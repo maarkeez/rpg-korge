@@ -1,8 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
@@ -147,5 +150,72 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Then
             playerCallToActionView.isDisplayingFinishTurn().shouldBeFalse()
             playerCallToActionView.isDisplayingCancelAndConfirm().shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayItemActions should display the item name and its actions when the item actions are displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            val actions =
+                listOf(
+                    ItemActionsView.Action(label = "Equip") {},
+                    ItemActionsView.Action(label = "Discard", isEnabled = false) {},
+                    ItemActionsView.Action(label = "Cancel") {},
+                )
+            // When
+            playerCallToActionView.displayItemActions(itemName = "Hammer", actions = actions)
+            // Then
+            playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
+            playerCallToActionView.itemName() shouldBe "Hammer"
+            playerCallToActionView.itemActionLabels().shouldContainExactly("Equip", "Discard", "Cancel")
+            playerCallToActionView.enabledItemActionLabels().shouldContainExactly("Equip", "Cancel")
+        }
+
+    @Test
+    fun `DisplayItemActions should run the action and display the finish turn again when an item action is clicked`() =
+        sharedViewsTest {
+            // Given
+            var consumed = false
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            playerCallToActionView.displayItemActions(itemName = "Health Potion", actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
+            addChild(playerCallToActionView)
+            // When
+            clickItemAction(playerCallToActionView, "Consume")
+            // Then
+            consumed.shouldBeTrue()
+            playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayInventoryFull should display the found item and leave it when leave it is clicked`() =
+        sharedViewsTest {
+            // Given
+            var left = false
+            val playerCallToActionView = PlayerCallToActionView(loadedResourcesLoader())
+            addChild(playerCallToActionView)
+            playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemId = "health-potion", onLeft = { left = true })
+            // When
+            clickLeaveIt(playerCallToActionView)
+            // Then
+            playerCallToActionView.isDisplayingInventoryFull().shouldBeTrue()
+            playerCallToActionView.inventoryFullMessage() shouldBe "Tap an item to swap it for the Health Potion"
+            playerCallToActionView.isFoundItemIconDisplayed().shouldBeTrue()
+            left.shouldBeTrue()
+        }
+
+    @Test
+    fun `RedisplayFinishTurn should display the finish turn again when the item actions were displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            playerCallToActionView.displayItemActions(itemName = "Hammer", actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            // When
+            playerCallToActionView.redisplayFinishTurn()
+            // Then
+            playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
         }
 }

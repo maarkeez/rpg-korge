@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.clickOn
 import korlibs.korge.tests.ViewsForTesting
 
 // Page object of [BattleUnitInfoView]. Use `AbilityButtonViewExtension` to inspect each ability button.
@@ -23,6 +24,11 @@ fun BattleUnitInfoView.movementPointColors() = movementPointsView.pointColors()
 fun BattleUnitInfoView.castPointColors() = castPointsView.pointColors()
 
 fun BattleUnitInfoView.selectedAbilityIndexes(): List<Int> = abilityButtons.indices.filter { index -> abilityButtons[index].isSelected() }
+
+/** Whether the bag, which opens the inventory, is displayed. */
+fun BattleUnitInfoView.isBagDisplayed(): Boolean = bagButton.visible && bagButton.findViewByName(BagButtonView.BAG) != null
+
+suspend fun ViewsForTesting.clickBag(battleUnitInfoView: BattleUnitInfoView) = clickOn(battleUnitInfoView.bagButton)
 
 suspend fun ViewsForTesting.clickAbility(
     battleUnitInfoView: BattleUnitInfoView,

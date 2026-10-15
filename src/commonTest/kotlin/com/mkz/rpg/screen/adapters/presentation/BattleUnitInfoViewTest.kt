@@ -124,4 +124,33 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             // Then
             battleUnitInfoView.isVisibleToUser().shouldBeFalse()
         }
+
+    @Test
+    fun `DisplayBag should display the bag and open the inventory when the bag is clicked`() =
+        sharedViewsTest {
+            // Given
+            var bagSelected = false
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val unit = unit().toDto()
+            battleUnitInfoView.display(battleUnit = battleUnit(unit = unit).toDto(), unit = unit)
+            addChild(battleUnitInfoView)
+            battleUnitInfoView.displayBag(onBagSelected = { bagSelected = true })
+            // When
+            clickBag(battleUnitInfoView)
+            // Then
+            battleUnitInfoView.isBagDisplayed().shouldBeTrue()
+            bagSelected.shouldBeTrue()
+        }
+
+    @Test
+    fun `HideBag should not display the bag when the bag is hidden`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            battleUnitInfoView.displayBag(onBagSelected = {})
+            // When
+            battleUnitInfoView.hideBag()
+            // Then
+            battleUnitInfoView.isBagDisplayed().shouldBeFalse()
+        }
 }

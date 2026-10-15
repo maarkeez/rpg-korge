@@ -24,6 +24,7 @@ Drop the image in `resources` following the naming conventions below. Neither th
 | Ability icon                     | `ability/<ability id>.png`            | `ability/poisoned-sword.png`     |
 | Effect icon                      | `effect/<effect id>.png`              | `effect/venom-damage.png`        |
 | Lootable item icon               | `lootableItem/<lootable item id>.png` | `lootableItem/health-potion.png` |
+| Chest (several items on a tile, and the bag) | `battlefield/chest.png`   | `battlefield/chest.png`          |
 | Terrain transition strip         | `terrain/transitions/<from>_to_<to>.png` | `terrain/transitions/sand_to_lava.png` |
 
 - Units and abilities without an image are not displayed.

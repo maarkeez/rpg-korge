@@ -34,6 +34,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
+    // The loot last displayed on each tile.
+    val displayedLoot = mutableMapOf<PositionDto, List<String>>()
+
     override fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
     }
@@ -93,6 +96,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         unitId: String,
     ) {
         movedBattleUnits += MovedBattleUnit(fromRow, fromColumn, path, unitId)
+    }
+
+    override fun displayLoot(
+        row: Int,
+        column: Int,
+        lootableItemIds: List<String>,
+    ) {
+        displayedLoot[PositionDto(row, column)] = lootableItemIds
     }
 
     override suspend fun tint(color: RGBA) {

@@ -89,6 +89,9 @@ class BattlefieldPresenter(
             movementService = movementService,
         )
 
+    // The items displayed on each tile. Changed in timeline order, so each step draws the loot the battle had then.
+    private val displayedLoot = mutableMapOf<PositionDto, List<String>>()
+
     private val subscriptions =
         listOf(
             eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -116,6 +119,12 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
                 refreshMovementRange()
+            },
+            eventBus.subscribe<BattlefieldEvent.DroppedItemPlaced> { event ->
+                timeline.play { changeLoot(event.row, event.column) { lootableItemIds -> lootableItemIds + event.lootableItemId } }
+            },
+            eventBus.subscribe<BattlefieldEvent.DroppedItemPickedUp> { event ->
+                timeline.play { changeLoot(event.row, event.column) { lootableItemIds -> lootableItemIds - event.lootableItemId } }
             },
             // The selection is cleared before the turn is announced, and can not be acted on during the new turn.
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
@@ -186,6 +195,17 @@ class BattlefieldPresenter(
                 unitId = battleUnit.unitId,
             )
         }
+    }
+
+    private fun changeLoot(
+        row: Int,
+        column: Int,
+        change: (List<String>) -> List<String>,
+    ) {
+        val position = PositionDto(row, column)
+        val lootableItemIds = change(displayedLoot[position].orEmpty())
+        displayedLoot[position] = lootableItemIds
+        battlefieldView.displayLoot(row = row, column = column, lootableItemIds = lootableItemIds)
     }
 
     private fun flashUnit(battleUnitId: String) {

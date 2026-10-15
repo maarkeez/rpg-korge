@@ -54,7 +54,7 @@ A battle unit blinks in white every time an effect is applied to it:
 
 ## Selecting tiles
 
-Each battlefield tile draws its content as named layers, from bottom to top: `TERRAIN`, `BATTLE_UNIT`, `SELECTION` (the tile frames) and `DIM`.
+Each battlefield tile draws its content as named layers, from bottom to top: `TERRAIN`, `LOOT` (the dropped items, see [Loot](#loot)), `BATTLE_UNIT`, `SELECTION` (the tile frames) and `DIM`.
 
 When the player selects a battle unit or an ability, the tiles that can be selected keep their frames, and every other tile is darkened with a black mask (`DIM`, at `DIM_ALPHA` 0.4 opacity) by `BattlefieldView.dimTilesExcept`, including the battle units on them:
 
@@ -86,3 +86,47 @@ The selected battle unit info displays its remaining turn actions without text, 
 | Casts  | Gold `#FFBB31`            | The casts per turn (currently 1) |
 
 For example, a knight that walked 1 of its 3 steps and has not cast yet displays ●●○ ●. Both maximums come from the battle unit (`RemainingTurnActionsDto`).
+
+## Loot
+
+The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.displayLoot`, at 2x (32px) centred on the tile, so the terrain shows around them and a battle unit standing on the tile is drawn over them:
+
+| Items on the tile | Drawn as                              |
+|-------------------|---------------------------------------|
+| None              | Nothing                               |
+| One               | Its icon, `lootableItem/<id>.png`     |
+| Several           | The chest, `battlefield/chest.png`    |
+
+`BattlefieldPresenter` keeps the items it has drawn on each tile, and changes them in timeline order:
+
+| Event                 | Step played                                                                                      |
+|-----------------------|--------------------------------------------------------------------------------------------------|
+| `DroppedItemPlaced`   | The item appears, once the defeated battle unit has been removed from its tile                   |
+| `DroppedItemPickedUp` | The item disappears, or the chest becomes the item left, once the battle unit has walked its path |
+
+## Inventory
+
+The selected battle unit info displays a bag (the chest icon) next to its abilities, only for the battle units of the human player. Clicking it opens the inventory of the battle unit in the HUD, instead of its info, through [`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt):
+
+- [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt) displays one slot per storage space (12, in 2 rows of 6), with the stored items in order and the equipped copy of each equipped item framed in gold (`#FFBB31`).
+- Clicking a stored item frames it in white, and the call to action displays its name and actions instead of the finish turn:
+
+| Item                            | Actions                                    |
+|---------------------------------|--------------------------------------------|
+| Consumable                      | Consume, Discard, Cancel                   |
+| Equippable, not equipped        | Equip, Discard, Cancel                     |
+| Equippable, equipped            | Unequip, Discard (disabled), Cancel        |
+| Another copy is equipped        | Equip (disabled), Discard, Cancel          |
+
+- Equipping an item in a zone already used is the swap. Once an action is selected, the finish turn is displayed again.
+- The actions are only offered during the turn of the battle unit player, and ignored while the timeline is playing. Closing the inventory displays the battle unit info again, read again, as the items may have changed it (e.g.: healed it, or raised its maximum health).
+- The inventory is redrawn, in timeline order, when the battle unit stores, consumes, discards, equips or unequips an item. Selecting a battle unit or clearing the selection displays the battle unit info again.
+
+### Inventory full
+
+When an item is found while the inventory is full (`InventoryFull`), a step opens the inventory and the call to action displays "Inventory full", the found item icon and a "Leave it" button. **The step waits for the player to choose**, so the timeline keeps playing and the player can not move, cast, close the inventory or finish the turn meanwhile:
+
+- Clicking a stored item discards it and stores the found item from its tile. An equipped item can not be discarded, so clicking it does nothing.
+- Clicking "Leave it" leaves the found item on its tile.
+
+Several items found in the same walk are asked one after another, in walking order. Each step reads the inventory when it starts, as the previous choice may have changed it.

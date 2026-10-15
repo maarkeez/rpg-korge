@@ -216,6 +216,53 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `DisplayLoot should display the dropped item on its tile when an item is dropped on the battlefield`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion"))
+    }
+
+    @Test
+    fun `DisplayLoot should display every item lying on the tile when several items are dropped on it`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 2, column = 2)
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion", "hammer"))
+    }
+
+    @Test
+    fun `DisplayLoot should display the items left on the tile when a dropped item is picked up`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 2, column = 2)
+        eventBus.dispatch()
+        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("hammer"))
+    }
+
+    @Test
+    fun `DisplayLoot should display the dropped item once the previous steps have been played`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        eventBus.dispatch()
+        require(battlefieldView.displayedLoot.isEmpty())
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion"))
+    }
+
+    @Test
     fun `DimTiles should dim every tile but the movement range and the selected battle unit when a battle unit is selected`() {
         // Given
         eventBus.publish(

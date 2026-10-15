@@ -57,6 +57,10 @@ Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equippe
 - An equipped item can not be discarded: the player unequips it first. When another copy of it is stored, discarding removes that copy instead.
 - Healing, restoring mana and the mana replenished each turn never go above the maximums, equipment included. The battle unit exposes them as `maximumHealthPoints` and `maximumManaPoints`, and the health and mana bars and the CPU brain use them.
 
+## On the screen
+
+The battle scene draws the dropped items on their tiles, and opens the inventory of the selected battle unit behind its bag, where the player consumes, equips, unequips, swaps and discards items, and chooses what to do with an item found while the inventory is full. See [Presentation timeline](presentation-timeline.md#loot) and [Inventory on the screen](presentation-timeline.md#inventory).
+
 ## Not yet supported
 
-- **The screen:** displaying the inventory, the choice when it is full, consuming and equipping items, and drawing the dropped items on the battlefield.
+- **Looking inside a chest:** a tile with several items is drawn as a chest, and its items are only shown once they are looted.
