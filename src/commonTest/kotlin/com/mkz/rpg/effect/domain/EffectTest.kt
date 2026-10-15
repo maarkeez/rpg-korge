@@ -381,6 +381,102 @@ class EffectTest {
     }
 
     @Test
+    fun `Create should create effect when the outcome increases mana`() {
+        // Given
+        val effectDto = EffectMother.increaseManaEffect(mana = 999).toDto()
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.increaseMana!!
+            .mana shouldBe 999
+    }
+
+    @Test
+    fun `Create should create effect when the outcome increases the maximum health while equipped`() {
+        // Given
+        val effectDto = EffectMother.increaseMaximumHealthEffect(healthPoints = 0).toDto()
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect.toDto() shouldBe effectDto
+        createdEffect.toDto().application.type shouldBe ApplicationTypeDto.WHILE_EQUIPPED
+    }
+
+    @Test
+    fun `Create should create effect when the outcome increases the maximum mana while equipped`() {
+        // Given
+        val effectDto = EffectMother.increaseMaximumManaEffect(manaPoints = 999).toDto()
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect
+            .toDto()
+            .outcome.increaseMaximumMana!!
+            .manaPoints shouldBe 999
+    }
+
+    @Test
+    fun `Create should fail when the mana is negative`() {
+        // Given
+        // When
+        val result = runCatching { EffectMother.increaseManaEffect(mana = -1) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativePower>()
+    }
+
+    @Test
+    fun `Create should fail when the maximum health points are above the limit`() {
+        // Given
+        // When
+        val result = runCatching { EffectMother.increaseMaximumHealthEffect(healthPoints = 1000) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.PowerAboveLimit>()
+    }
+
+    @Test
+    fun `Create should fail when the maximum mana points are negative`() {
+        // Given
+        // When
+        val result = runCatching { EffectMother.increaseMaximumManaEffect(manaPoints = -1) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.NegativePower>()
+    }
+
+    @Test
+    fun `Create should fail when the increase mana outcome is missing its details`() {
+        // Given
+        val effectDto = EffectMother.increaseManaEffect().toDto()
+        val invalidEffectDto = effectDto.copy(outcome = effectDto.outcome.copy(increaseMana = null))
+        // When
+        val result = runCatching { Effect.create(invalidEffectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `Create should fail when the outcome increases a maximum stat but is not applied while equipped`() {
+        // Given
+        val effectDto = EffectMother.increaseMaximumHealthEffect().toDto()
+        val invalidEffectDto = effectDto.copy(application = EffectMother.increaseHealthEffect().toDto().application)
+        // When
+        val result = runCatching { Effect.create(invalidEffectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.InvalidEffectApplication>()
+    }
+
+    @Test
+    fun `Create should fail when the effect is applied while equipped but its outcome does not increase a maximum stat`() {
+        // Given
+        val invalidEffectDto = EffectMother.increaseManaEffect().toDto().copy(application = EffectMother.whileEquippedApplication())
+        // When
+        val result = runCatching { Effect.create(invalidEffectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.InvalidEffectApplication>()
+    }
+
+    @Test
     fun `ToDto should expose the effect data when converted to dto`() {
         // Given
         val effect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3)
@@ -428,6 +524,23 @@ class EffectTest {
             )
         // Then
         effectApplication.destination shouldBe destination
+    }
+
+    @Test
+    fun `ToDto should expose the lootable item when the effect application comes from an item`() {
+        // Given
+        val source = ApplicationSourceDto.item("health-potion")
+        // When
+        val effectApplication =
+            Effect.Dto.EffectApplicationDto(
+                source = source,
+                target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-1"),
+                effectId = "health-potion-heal",
+            )
+        // Then
+        effectApplication.source.type shouldBe ApplicationSourceDto.SourceTypeDto.ITEM
+        effectApplication.source.lootableItemId shouldBe "health-potion"
+        effectApplication.source.battleUnitId.shouldBeNull()
     }
 
     @Test

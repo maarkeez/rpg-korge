@@ -10,6 +10,9 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearby
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DeployBattleUnitDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.usecases.services.EffectLoader
 import com.mkz.rpg.shared.adapters.toml.enumOf
@@ -56,6 +59,9 @@ class ResourcesEffectLoader(
         val healing: Int? = null,
         val effectId: String? = null,
         val unitId: String? = null,
+        val mana: Int? = null,
+        val healthPoints: Int? = null,
+        val manaPoints: Int? = null,
     ) {
         fun toDto(): EffectOutcomeDto {
             val outcomeType = enumOf<TypeDto>("outcome.type", type)
@@ -70,6 +76,19 @@ class ResourcesEffectLoader(
                         null
                     },
                 deployBattleUnit = if (outcomeType == TypeDto.DEPLOY_BATTLE_UNIT) DeployBattleUnitDto(required("outcome.unitId", unitId)) else null,
+                increaseMana = if (outcomeType == TypeDto.INCREASE_MANA) IncreaseManaDto(required("outcome.mana", mana)) else null,
+                increaseMaximumHealth =
+                    if (outcomeType == TypeDto.INCREASE_MAXIMUM_HEALTH) {
+                        IncreaseMaximumHealthDto(required("outcome.healthPoints", healthPoints))
+                    } else {
+                        null
+                    },
+                increaseMaximumMana =
+                    if (outcomeType == TypeDto.INCREASE_MAXIMUM_MANA) {
+                        IncreaseMaximumManaDto(required("outcome.manaPoints", manaPoints))
+                    } else {
+                        null
+                    },
             )
         }
     }

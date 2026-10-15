@@ -35,7 +35,7 @@ class ConsumeItem(
                 RequestApplyEffect(
                     application =
                         EffectApplicationDto(
-                            source = ApplicationSourceDto.battleUnit(battleUnitId),
+                            source = ApplicationSourceDto.item(lootableItemId),
                             target = EffectTargetDto.Unit(battleUnitId),
                             effectId = effectId,
                         ),

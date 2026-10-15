@@ -41,16 +41,23 @@ Unless stated otherwise, there is one file per entity and **the file name is the
 
 ```toml
 [outcome]
-type = "DECREASE_HEALTH"   # DECREASE_HEALTH, INCREASE_HEALTH, TELEPORT, APPLY_EFFECT_ON_NEARBY_ALLIES, DEPLOY_BATTLE_UNIT
+type = "DECREASE_HEALTH"   # DECREASE_HEALTH, INCREASE_HEALTH, INCREASE_MANA, INCREASE_MAXIMUM_HEALTH, INCREASE_MAXIMUM_MANA, TELEPORT, APPLY_EFFECT_ON_NEARBY_ALLIES, DEPLOY_BATTLE_UNIT
 damage = 3                 # Only for DECREASE_HEALTH
 # healing = 5              # Only for INCREASE_HEALTH
+# mana = 5                 # Only for INCREASE_MANA
+# healthPoints = 20        # Only for INCREASE_MAXIMUM_HEALTH
+# manaPoints = 20          # Only for INCREASE_MAXIMUM_MANA
 # effectId = "..."         # Only for APPLY_EFFECT_ON_NEARBY_ALLIES
 # unitId = "..."           # Only for DEPLOY_BATTLE_UNIT
 
 [application]
-type = "ON_TURN_STARTED"   # IMMEDIATELY, ON_TURN_STARTED, BEFORE_APPLYING_EFFECT, ON_DEFEATED
+type = "ON_TURN_STARTED"   # IMMEDIATELY, ON_TURN_STARTED, BEFORE_APPLYING_EFFECT, ON_DEFEATED, WHILE_EQUIPPED
 duration = 5               # Only for ON_TURN_STARTED and BEFORE_APPLYING_EFFECT
 ```
+
+The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 0 to 999. Healing and restoring mana never go above the unit's maximum.
+
+`INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` application, and `WHILE_EQUIPPED` only accepts these two outcomes. Battle units do not apply `WHILE_EQUIPPED` effects yet, as items can not be equipped yet.
 
 ### `ability/<ability id>.toml`
 

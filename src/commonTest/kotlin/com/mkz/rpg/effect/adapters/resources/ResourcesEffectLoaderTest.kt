@@ -4,6 +4,9 @@ import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnNearbyAlliesEffect
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.increaseManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumManaEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
@@ -24,6 +27,9 @@ class ResourcesEffectLoaderTest {
                     "effect/teleport.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                     "effect/curse.toml" to "[outcome]\ntype = \"APPLY_EFFECT_ON_NEARBY_ALLIES\"\neffectId = \"venom\"\n\n[application]\ntype = \"ON_DEFEATED\"\n",
                     "effect/summon.toml" to "[outcome]\ntype = \"DEPLOY_BATTLE_UNIT\"\nunitId = \"bee\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/ether.toml" to "[outcome]\ntype = \"INCREASE_MANA\"\nmana = 15\n\n[application]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/sturdy.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_HEALTH\"\nhealthPoints = 20\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
+                    "effect/wise.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_MANA\"\nmanaPoints = 5\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
                 )["effect"]
             val loader = ResourcesEffectLoader(effectRoot = effectRoot)
             // When
@@ -31,10 +37,13 @@ class ResourcesEffectLoaderTest {
             // Then
             loader.loadEffects().shouldContainExactly(
                 applyEffectOnNearbyAlliesEffect(id = "curse", effectId = "venom").toDto(),
+                increaseManaEffect(id = "ether", mana = 15).toDto(),
                 increaseHealthEffect(id = "heal", healing = 7).toDto(),
+                increaseMaximumHealthEffect(id = "sturdy", healthPoints = 20).toDto(),
                 deployBattleUnitEffect(id = "summon", unitId = "bee").toDto(),
                 teleportEffect(id = "teleport").toDto(),
                 decreaseHealthEffect(id = "venom", damage = 3).toDto(),
+                increaseMaximumManaEffect(id = "wise", manaPoints = 5).toDto(),
             )
         }
 

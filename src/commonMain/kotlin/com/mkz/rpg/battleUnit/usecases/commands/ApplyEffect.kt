@@ -93,6 +93,10 @@ class ApplyEffect(
                     // TODO: We are missing business logic, this application type is not yet implemented
                     throw FailedToReceiveAbilityEffects()
                 }
+                ApplicationTypeDto.WHILE_EQUIPPED -> {
+                    // TODO: Applied once items can be equipped
+                    throw FailedToReceiveAbilityEffects()
+                }
             }
         var pendingEvents: Set<BattleUnitEvent> = events
         var updatedBattleUnit: BattleUnit = appliedBattleUnit

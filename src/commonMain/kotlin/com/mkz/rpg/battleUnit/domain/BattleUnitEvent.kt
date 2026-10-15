@@ -70,6 +70,10 @@ sealed interface BattleUnitEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleUnitEvent
 
+    data class BattleUnitManaRestored(
+        val battleUnitId: String,
+    ) : BattleUnitEvent
+
     data class BattleUnitTeleported(
         val battleUnitId: String,
     ) : BattleUnitEvent

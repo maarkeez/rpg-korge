@@ -13,7 +13,7 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 | Command           | What it does                                                                                                                                       |
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `storeLootedItem` | Stores an item lying on a tile, or announces `InventoryFull` without storing it when there is no space left.                                       |
-| `consumeItem`     | Removes a consumable and requests the application of its effects, with its battle unit as source and target. E.g.: the health potion heals 10. |
+| `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. |
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
 
 | Query                           | What it answers                                         |

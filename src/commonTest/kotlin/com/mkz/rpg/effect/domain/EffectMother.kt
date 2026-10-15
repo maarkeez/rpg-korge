@@ -7,10 +7,16 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearby
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DeployBattleUnitDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import korlibs.io.util.UUID
 
@@ -74,6 +80,78 @@ object EffectMother {
             ),
         ).pullEvents()
         .second
+
+    fun increaseManaEffect(
+        id: String = effectId(),
+        mana: Int = 3,
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = INCREASE_MANA,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        increaseMana = IncreaseManaDto(mana = mana),
+                    ),
+                application =
+                    ApplicationDto(
+                        type = ApplicationTypeDto.IMMEDIATELY,
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            ),
+        ).pullEvents()
+        .second
+
+    fun increaseMaximumHealthEffect(
+        id: String = effectId(),
+        healthPoints: Int = 10,
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = INCREASE_MAXIMUM_HEALTH,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        increaseMaximumHealth = IncreaseMaximumHealthDto(healthPoints = healthPoints),
+                    ),
+                application = whileEquippedApplication(),
+            ),
+        ).pullEvents()
+        .second
+
+    fun increaseMaximumManaEffect(
+        id: String = effectId(),
+        manaPoints: Int = 10,
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = INCREASE_MAXIMUM_MANA,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        increaseMaximumMana = IncreaseMaximumManaDto(manaPoints = manaPoints),
+                    ),
+                application = whileEquippedApplication(),
+            ),
+        ).pullEvents()
+        .second
+
+    fun whileEquippedApplication() =
+        ApplicationDto(
+            type = ApplicationTypeDto.WHILE_EQUIPPED,
+            onTurnStarted = null,
+            beforeApplyingEffect = null,
+        )
 
     fun teleportEffect(id: String = effectId()) =
         Effect

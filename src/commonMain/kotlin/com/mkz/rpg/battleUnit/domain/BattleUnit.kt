@@ -11,6 +11,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDamaged
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
@@ -21,6 +22,9 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFEC
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
@@ -240,6 +244,16 @@ data class BattleUnit private constructor(
                     events = events + healedEvent,
                 )
             }
+            INCREASE_MANA -> {
+                val remainingManaPoints =
+                    RemainingManaPoints(min(unit.manaPoints, remainingManaPoints.value + effect.outcome.increaseMana!!.mana))
+                val manaRestoredEvent = BattleUnitManaRestored(id.value)
+                copy(
+                    ongoingEffects = ongoingEffects,
+                    remainingManaPoints = remainingManaPoints,
+                    events = events + manaRestoredEvent,
+                )
+            }
             TELEPORT -> {
                 copy(
                     events = events + BattleUnitTeleported(battleUnitId = id.value),
@@ -248,6 +262,8 @@ data class BattleUnit private constructor(
             NEGATE_INCREASE_HEALTH,
             APPLY_EFFECT_ON_NEARBY_ALLIES,
             DEPLOY_BATTLE_UNIT,
+            INCREASE_MAXIMUM_HEALTH,
+            INCREASE_MAXIMUM_MANA,
             -> TODO("Not implemented")
         }
     }

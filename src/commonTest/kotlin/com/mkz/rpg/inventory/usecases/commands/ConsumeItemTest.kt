@@ -55,7 +55,7 @@ class ConsumeItemTest {
     }
 
     @Test
-    fun `should remove the consumable and request the application of its effects to its battle unit when the consumable is stored`() {
+    fun `should remove the consumable and request the application of its effects from the item to its battle unit when the consumable is stored`() {
         // Given
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion", "helmet")))
         // When
@@ -68,8 +68,8 @@ class ConsumeItemTest {
             ?.shouldContainExactly("helmet")
         eventBus.shouldHavePublishedEvents(
             ItemConsumed(battleUnitId = "knight-1", lootableItemId = "health-potion"),
-            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.battleUnit("knight-1"), target = EffectTargetDto.Unit("knight-1"), effectId = "heal")),
-            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.battleUnit("knight-1"), target = EffectTargetDto.Unit("knight-1"), effectId = "cure")),
+            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.item("health-potion"), target = EffectTargetDto.Unit("knight-1"), effectId = "heal")),
+            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.item("health-potion"), target = EffectTargetDto.Unit("knight-1"), effectId = "cure")),
         )
     }
 

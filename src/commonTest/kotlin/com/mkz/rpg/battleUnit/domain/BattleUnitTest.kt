@@ -442,6 +442,52 @@ class BattleUnitTest {
     }
 
     @Test
+    fun `ApplyImmediateEffect should increase the mana points and publish the mana restored event when the effect increases mana`() {
+        // Given
+        val unit = UnitMother.unit(manaPoints = 10).toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 7, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        val manaEffect = EffectMother.increaseManaEffect(mana = 5).toDto()
+        // When
+        val updatedBattleUnit =
+            battleUnit.applyImmediateEffect(
+                effect = manaEffect,
+                unit = unit,
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingManaPoints shouldBe 8
+        val (events, _) = updatedBattleUnit.pullEvents()
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitManaRestored(battleUnitId = updatedBattleUnit.toDto().id))
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should increase the mana points up to the unit maximum when the effect restores more mana than spent`() {
+        // Given
+        val unit = UnitMother.unit(manaPoints = 10).toDto()
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+        val manaEffect = EffectMother.increaseManaEffect(mana = 20).toDto()
+        // When
+        val updatedBattleUnit =
+            battleUnit.applyImmediateEffect(
+                effect = manaEffect,
+                unit = unit,
+                currentRow = position().row,
+                currentColumn = position().column,
+            )
+        // Then
+        updatedBattleUnit.toDto().remainingManaPoints shouldBe 10
+    }
+
+    @Test
     fun `ApplyImmediateEffect should publish the teleported event when the effect teleports the battle unit`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
