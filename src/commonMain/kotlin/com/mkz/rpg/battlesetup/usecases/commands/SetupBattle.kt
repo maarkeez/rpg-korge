@@ -5,6 +5,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.lootTable.domain.LootTableEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.player.domain.PlayerEvent
@@ -26,6 +27,7 @@ class SetupBattle(
         eventBus.publish(LootTableEvent.RequestInitialiseLootTables)
         eventBus.publish(AbilityEvent.RequestInitialiseAbilities)
         eventBus.publish(UnitEvent.RequestInitialiseUnits)
+        eventBus.publish(LootDropEvent.RequestInitialiseLootDrops)
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)

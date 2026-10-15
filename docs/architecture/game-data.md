@@ -15,10 +15,11 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 | 4  | `RequestInitialiseLootTables`    | Loot tables                    | Their lootable items           |
 | 5  | `RequestInitialiseAbilities`     | Abilities                      | Their effects                  |
 | 6  | `RequestInitialiseUnits`         | Units                          | -                              |
-| 7  | `RequestInitialisePlayers`       | Players                        | -                              |
-| 8  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
-| 9  | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
-| 10 | `RequestInitialiseBattle`        | The battle and its first round | The deployed battle units      |
+| 7  | `RequestInitialiseLootDrops`     | Loot drops                     | Their units and loot tables    |
+| 8  | `RequestInitialisePlayers`       | Players                        | -                              |
+| 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
+| 10 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
+| 11 | `RequestInitialiseBattle`        | The battle and its first round | The deployed battle units      |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
@@ -105,6 +106,16 @@ movementRange = 3
 abilities = ["poisoned-sword", "heal"]
 ```
 
+### `lootDrop/<unit id>.toml`
+
+The loot tables a unit rolls on when one of its battle units is defeated. **The file name is the unit id**, so a unit has at most one loot drop, and a unit without one drops nothing. The unit and the loot tables must exist, and a loot table can not be repeated.
+
+One lootable item, or nothing, is picked at random from the entries of all its loot tables merged together, in proportion to their weights, and dropped on the tile where the battle unit was defeated.
+
+```toml
+lootTableIds = ["tier-1"]
+```
+
 ### `player/<player id>.toml`
 
 ```toml
@@ -158,5 +169,10 @@ playerOrder = ["player-one", "player-two"]
 
 1. Add the lootable items it drops, if they do not exist yet. See [How to add a lootable item](#how-to-add-a-lootable-item).
 2. Add `resources/lootTable/<loot table id>.toml`.
+
+## How to make a unit drop loot
+
+1. Add the loot tables it rolls on, if they do not exist yet. See [How to add a loot table](#how-to-add-a-loot-table).
+2. Add `resources/lootDrop/<unit id>.toml`.
 
 Abilities and effects are added the same way, with their TOML file next to their icon. No Kotlin change is needed.

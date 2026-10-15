@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
@@ -32,6 +33,7 @@ class SetupBattleAcceptanceTest {
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
     private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
     private val battleApi = BattleApi(eventBus, battleUnitApi)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
@@ -46,6 +48,7 @@ class SetupBattleAcceptanceTest {
         lootTableApi.init()
         abilityApi.init()
         unitApi.init()
+        lootDropApi.init()
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
