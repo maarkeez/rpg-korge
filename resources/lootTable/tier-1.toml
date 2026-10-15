@@ -1,0 +1,8 @@
+[[entries]]
+type = "LOOTABLE_ITEM"
+lootableItemId = "health-potion"
+weight = 10
+
+[[entries]]
+type = "NOTHING"
+weight = 5

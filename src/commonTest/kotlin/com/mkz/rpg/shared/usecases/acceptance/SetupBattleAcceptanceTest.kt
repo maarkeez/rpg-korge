@@ -7,12 +7,15 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
+import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.CONSUMABLE
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -27,6 +30,7 @@ class SetupBattleAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, battleUnitApi)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
@@ -39,6 +43,7 @@ class SetupBattleAcceptanceTest {
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
+        lootTableApi.init()
         abilityApi.init()
         unitApi.init()
         playerApi.init()
@@ -82,5 +87,20 @@ class SetupBattleAcceptanceTest {
             healthPotion.name shouldBe "Health Potion"
             healthPotion.lootType.type shouldBe CONSUMABLE
             healthPotion.lootType.consumable?.effectIds shouldBe setOf("health-potion-heal")
+        }
+
+    @Test
+    fun `should store the tier 1 loot table when the battle is set up`() =
+        scenarioTest(::setUp) {
+            // Given
+            val tierOneLootTableId = "tier-1"
+            // When
+            val tierOneLootTable = lootTableApi.searchLootTableById(tierOneLootTableId)
+            // Then
+            tierOneLootTable.shouldNotBeNull()
+            tierOneLootTable.entries.shouldContainExactly(
+                EntryDto.lootableItem(lootableItemId = "health-potion", weight = 10),
+                EntryDto.nothing(weight = 5),
+            )
         }
 }

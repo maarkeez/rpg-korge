@@ -7,17 +7,18 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files. Reading resources is asynchronous, so it happens before the battle is set up.
 2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order:
 
-| # | Event                          | Creates                       | Requires                       |
-|---|--------------------------------|-------------------------------|--------------------------------|
-| 1 | `RequestInitialiseTerrains`    | Terrains                      | -                              |
-| 2 | `RequestInitialiseEffects`     | Effects                       | -                              |
-| 3 | `RequestInitialiseLootableItems` | Lootable items              | Their effects                  |
-| 4 | `RequestInitialiseAbilities`   | Abilities                     | Their effects                  |
-| 5 | `RequestInitialiseUnits`       | Units                         | -                              |
-| 6 | `RequestInitialisePlayers`     | Players                       | -                              |
-| 7 | `RequestInitialiseBattlefield` | The battlefield               | Its terrains                   |
-| 8 | `RequestInitialiseBattleUnits` | The deployed battle units     | Their units, players and tiles |
-| 9 | `RequestInitialiseBattle`      | The battle and its first round| The deployed battle units      |
+| #  | Event                            | Creates                        | Requires                       |
+|----|----------------------------------|--------------------------------|--------------------------------|
+| 1  | `RequestInitialiseTerrains`      | Terrains                       | -                              |
+| 2  | `RequestInitialiseEffects`       | Effects                        | -                              |
+| 3  | `RequestInitialiseLootableItems` | Lootable items                 | Their effects                  |
+| 4  | `RequestInitialiseLootTables`    | Loot tables                    | Their lootable items           |
+| 5  | `RequestInitialiseAbilities`     | Abilities                      | Their effects                  |
+| 6  | `RequestInitialiseUnits`         | Units                          | -                              |
+| 7  | `RequestInitialisePlayers`       | Players                        | -                              |
+| 8  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
+| 9  | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
+| 10 | `RequestInitialiseBattle`        | The battle and its first round | The deployed battle units      |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
@@ -79,6 +80,21 @@ effectIds = ["health-potion-heal"]
 # equipmentZone = "HEAD"         # HEAD, BODY, ARMS, LEGS, WEAPON
 ```
 
+### `lootTable/<loot table id>.toml`
+
+The weighted entries a defeated unit may drop. Each entry is a lootable item, which must exist, or nothing. Weights must be greater than 0, and a loot table can not repeat a lootable item nor nothing. The loot table only holds the weights: they are turned into chances when the loot is dropped.
+
+```toml
+[[entries]]
+type = "LOOTABLE_ITEM"           # LOOTABLE_ITEM, NOTHING
+lootableItemId = "health-potion" # Only for LOOTABLE_ITEM
+weight = 10
+
+[[entries]]
+type = "NOTHING"
+weight = 5
+```
+
 ### `unit/<unit id>.toml`
 
 ```toml
@@ -137,5 +153,10 @@ playerOrder = ["player-one", "player-two"]
 1. Add the effects it applies, if they do not exist yet: `resources/effect/<effect id>.toml`.
 2. Add `resources/lootableItem/<lootable item id>.toml`.
 3. Add its image, following the [asset conventions](assets.md): `lootableItem/<lootable item id>.png`.
+
+## How to add a loot table
+
+1. Add the lootable items it drops, if they do not exist yet. See [How to add a lootable item](#how-to-add-a-lootable-item).
+2. Add `resources/lootTable/<loot table id>.toml`.
 
 Abilities and effects are added the same way, with their TOML file next to their icon. No Kotlin change is needed.

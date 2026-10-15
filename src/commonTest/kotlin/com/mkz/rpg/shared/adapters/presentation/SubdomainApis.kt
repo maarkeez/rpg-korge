@@ -13,6 +13,9 @@ import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
+import com.mkz.rpg.lootTable.domain.LootTable
+import com.mkz.rpg.lootTable.usecases.services.FakeLootTableLoader
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem
 import com.mkz.rpg.lootableItem.usecases.services.FakeLootableItemLoader
@@ -36,6 +39,7 @@ class SubdomainApis(
     terrains: List<Terrain.Dto> = emptyList(),
     effects: List<Effect.Dto> = emptyList(),
     lootableItems: List<LootableItem.Dto> = emptyList(),
+    lootTables: List<LootTable.Dto> = emptyList(),
     abilities: List<Ability.Dto> = emptyList(),
     units: List<Unit.Dto> = emptyList(),
     players: List<Player.Dto> = emptyList(),
@@ -50,6 +54,7 @@ class SubdomainApis(
     val effectApi = EffectApi(eventBus, FakeEffectLoader(effects))
     val abilityApi = AbilityApi(effectApi, eventBus, FakeAbilityLoader(abilities))
     val lootableItemApi = LootableItemApi(effectApi, eventBus, FakeLootableItemLoader(lootableItems))
+    val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val battleApi = BattleApi(eventBus, battleUnitApi, FakeBattleLoader(playerOrder))
 
@@ -58,6 +63,7 @@ class SubdomainApis(
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
         lootableItemApi.initialiseLootableItems()
+        lootTableApi.initialiseLootTables()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
         playerApi.initialisePlayers()

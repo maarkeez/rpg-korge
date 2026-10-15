@@ -5,6 +5,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.lootTable.domain.LootTableEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -27,6 +28,7 @@ class SetupBattleTest {
             TerrainEvent.RequestInitialiseTerrains,
             EffectEvent.RequestInitialiseEffects,
             LootableItemEvent.RequestInitialiseLootableItems,
+            LootTableEvent.RequestInitialiseLootTables,
             AbilityEvent.RequestInitialiseAbilities,
             UnitEvent.RequestInitialiseUnits,
             PlayerEvent.RequestInitialisePlayers,
