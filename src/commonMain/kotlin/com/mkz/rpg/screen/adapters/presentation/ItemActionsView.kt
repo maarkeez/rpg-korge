@@ -39,8 +39,8 @@ class ItemActionsView(
                     actions.map { action ->
                         uiButton(action.label) {
                             width = buttonWidth
-                            bgColorOut = RGBA(0, 136, 255)
-                            bgColorOver = RGBA(30, 110, 244)
+                            bgColorOut = Colors.DIMGRAY
+                            bgColorOver = RGBA(85, 85, 85)
                             background.borderColor = Colors.LIGHTGRAY
                             enabled = action.isEnabled
                             onClick { action.onSelected() }

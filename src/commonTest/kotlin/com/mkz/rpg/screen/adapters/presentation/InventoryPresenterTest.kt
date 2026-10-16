@@ -207,7 +207,7 @@ class InventoryPresenterTest {
         inventoryView.selectedSlot shouldBe 0
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
         itemActions.itemName shouldBe "Health Potion"
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Consume" to true, "Discard" to true, "Cancel" to true)
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
     }
 
     @Test
@@ -219,7 +219,7 @@ class InventoryPresenterTest {
         clickSlot(0)
         // Then
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Equip" to true, "Discard" to true, "Cancel" to true)
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to true)
     }
 
     @Test
@@ -233,7 +233,7 @@ class InventoryPresenterTest {
         clickSlot(0)
         // Then
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Unequip" to true, "Discard" to false, "Cancel" to true)
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to false, "Unequip" to true)
     }
 
     @Test
@@ -248,7 +248,7 @@ class InventoryPresenterTest {
         clickSlot(1)
         // Then
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Equip" to false, "Discard" to true, "Cancel" to true)
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to false)
     }
 
     @Test

@@ -173,6 +173,8 @@ class InventoryPresenter(
         val isItemEquipped = displayedSlots.any { displayedSlot -> displayedSlot.lootableItemId == slot.lootableItemId && displayedSlot.isEquipped }
         val actions =
             buildList {
+                add(action("Cancel") {})
+                add(action("Discard", isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
                 when (lootableItem.lootType.type) {
                     CONSUMABLE -> add(action("Consume") { inventoryApi.consumeItem(battleUnitId, slot.lootableItemId) })
                     EQUIPPABLE ->
@@ -183,8 +185,6 @@ class InventoryPresenter(
                             add(action("Equip", isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
                         }
                 }
-                add(action("Discard", isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
-                add(action("Cancel") {})
             }
         timeline.play {
             selectedSlotIndex = slotIndex
