@@ -4,6 +4,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
@@ -53,6 +54,53 @@ class EffectsViewTest : ViewsForTesting() {
             effectsView.display(effectIds = effectIds)
             // Then
             effectsView.displayedEffectCount() shouldBe effectsView.effectSlotCount()
+        }
+
+    @Test
+    fun `Display should display the new effects blinking after the current ones when new effects are displayed`() =
+        sharedViewsTest {
+            // Given
+            val effectsView = EffectsView(loadedResourcesLoader())
+            // When
+            effectsView.display(effectIds = listOf("venom-damage"), newEffectIds = listOf("venom-on-death", "venom-damage"))
+            // Then
+            effectsView.blinkingEffects().shouldContainExactly(false, true, true)
+        }
+
+    @Test
+    fun `Display should stop blinking the previous new effects when is displayed again`() =
+        sharedViewsTest {
+            // Given
+            val effectsView = EffectsView(loadedResourcesLoader())
+            effectsView.display(effectIds = emptyList(), newEffectIds = listOf("venom-damage"))
+            // When
+            effectsView.display(effectIds = listOf("venom-damage"))
+            // Then
+            effectsView.blinkingEffects().shouldContainExactly(false)
+        }
+
+    @Test
+    fun `Display should display the plus sign when there are more effects than slots`() =
+        sharedViewsTest {
+            // Given
+            val effectsView = EffectsView(loadedResourcesLoader())
+            val effectIds = List(effectsView.effectSlotCount()) { "venom-damage" }
+            // When
+            effectsView.display(effectIds = effectIds, newEffectIds = listOf("venom-on-death"))
+            // Then
+            effectsView.isOverflowDisplayed().shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should not display the plus sign when the effects fit in the slots`() =
+        sharedViewsTest {
+            // Given
+            val effectsView = EffectsView(loadedResourcesLoader())
+            val effectIds = List(effectsView.effectSlotCount()) { "venom-damage" }
+            // When
+            effectsView.display(effectIds = effectIds)
+            // Then
+            effectsView.isOverflowDisplayed().shouldBeFalse()
         }
 
     @Test

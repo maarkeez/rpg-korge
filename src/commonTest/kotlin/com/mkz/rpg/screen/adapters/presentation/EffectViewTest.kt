@@ -1,10 +1,14 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.doubles.shouldBeGreaterThan
+import io.kotest.matchers.doubles.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import korlibs.korge.tests.ViewsForTesting
@@ -12,6 +16,11 @@ import korlibs.math.geom.Size
 import kotlin.test.Test
 
 class EffectViewTest : ViewsForTesting() {
+    private companion object {
+        // A blink fades the icon out and in for over a second, and each test frame lasts 10ms.
+        const val BLINK_FRAMES = 150
+    }
+
     private val size = Size(width = 16, height = 16)
 
     @Test
@@ -35,6 +44,49 @@ class EffectViewTest : ViewsForTesting() {
             effectView.displayEffect("venom-on-death")
             // Then
             effectView.effectIconCount() shouldBe 1
+        }
+
+    @Test
+    fun `DisplayEffect should blink the effect icon when it is a new effect`() =
+        sharedViewsTest {
+            // Given
+            val effectView = EffectView(size, loadedResourcesLoader())
+            addChild(effectView)
+            // When
+            effectView.displayEffect("venom-damage", isNew = true)
+            // Then
+            val alphas = List(BLINK_FRAMES) { effectView.iconAlpha().also { nextFrame() } }
+            effectView.isBlinking().shouldBeTrue()
+            alphas.min() shouldBeLessThan 0.75
+            alphas.max() shouldBeGreaterThan 0.75
+        }
+
+    @Test
+    fun `DisplayEffect should not blink the effect icon when it is not a new effect`() =
+        sharedViewsTest {
+            // Given
+            val effectView = EffectView(size, loadedResourcesLoader())
+            addChild(effectView)
+            // When
+            effectView.displayEffect("venom-damage")
+            // Then
+            val alphas = List(BLINK_FRAMES) { effectView.iconAlpha().also { nextFrame() } }
+            effectView.isBlinking().shouldBeFalse()
+            alphas.distinct().shouldContainExactly(1.0)
+        }
+
+    @Test
+    fun `Hide should stop blinking the effect icon when is hidden`() =
+        sharedViewsTest {
+            // Given
+            val effectView = EffectView(size, loadedResourcesLoader())
+            addChild(effectView)
+            effectView.displayEffect("venom-damage", isNew = true)
+            // When
+            effectView.hide()
+            // Then
+            effectView.isBlinking().shouldBeFalse()
+            effectView.iconAlpha() shouldBe 1.0
         }
 
     @Test

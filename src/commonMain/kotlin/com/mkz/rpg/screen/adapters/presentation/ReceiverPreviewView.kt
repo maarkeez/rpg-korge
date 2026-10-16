@@ -57,6 +57,7 @@ class ReceiverPreviewView(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
         damage: Int,
+        newEffectIds: List<String>,
         position: Int,
         count: Int,
     ) {
@@ -71,7 +72,10 @@ class ReceiverPreviewView(
             remaining = battleUnit.remainingManaPoints,
             maximum = battleUnit.maximumManaPoints,
         )
-        effectsView.display(battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects)
+        effectsView.display(
+            effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
+            newEffectIds = newEffectIds,
+        )
         counterLabel.setText("$position/$count")
         counterLabel.visible = count > 1
         visible = true

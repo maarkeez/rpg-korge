@@ -1,9 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.ColorPalette
-import korlibs.korge.animate.alpha
-import korlibs.korge.animate.animator
-import korlibs.korge.animate.wait
+import com.mkz.rpg.shared.adapters.presentation.blink
+import korlibs.korge.animate.Animator
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
@@ -13,12 +12,16 @@ import korlibs.korge.view.roundRect
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
-import korlibs.time.milliseconds
 
 class BattlefieldHealthBarPreviewView(
     size: Size,
 ) : UIContainer(size) {
+    // The blinks of the previous preview are cancelled, as removing their views does not stop them.
+    internal val blinkAnimators = mutableListOf<Animator>()
+
     fun display(previewOption: PreviewOption) {
+        blinkAnimators.forEach(Animator::cancel)
+        blinkAnimators.clear()
         removeChildren()
 
         val paddingUnit = 1
@@ -68,25 +71,11 @@ class BattlefieldHealthBarPreviewView(
     }
 
     private fun blinkEmpty(view: View) {
-        animator(parallel = true, looped = true) {
-            sequence(looped = true) {
-                alpha(view, 0.5)
-                wait(200.milliseconds)
-                alpha(view, 0.0)
-                wait(200.milliseconds)
-            }
-        }
+        blinkAnimators += view.blink(firstAlpha = 0.5, secondAlpha = 0.0)
     }
 
     private fun blinkFull(view: View) {
-        animator(parallel = true, looped = true) {
-            sequence(looped = true) {
-                alpha(view, 0.5)
-                wait(200.milliseconds)
-                alpha(view, 1.0)
-                wait(200.milliseconds)
-            }
-        }
+        blinkAnimators += view.blink(firstAlpha = 0.5, secondAlpha = 1.0)
     }
 
     enum class PreviewOption {

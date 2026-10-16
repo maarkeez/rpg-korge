@@ -35,11 +35,12 @@ open class AttackPreviewView(
         private val SNAP_DURATION = 150.milliseconds
     }
 
-    /** A battle unit receiving the cast, and the damage it receives. */
+    /** A battle unit receiving the cast, the damage it receives and the effects that would stay on it. */
     data class Receiver(
         val battleUnit: BattleUnit.Dto,
         val unit: Unit.Dto,
         val damage: Int,
+        val newEffectIds: List<String> = emptyList(),
     )
 
     private lateinit var casterUnitNameView: UnitNameView
@@ -99,6 +100,7 @@ open class AttackPreviewView(
         casterUnit: Unit.Dto,
         manaCost: Int,
         receivers: List<Receiver>,
+        casterNewEffectIds: List<String> = emptyList(),
     ) {
         casterUnitPortraitView.display(casterBattleUnit.unitId)
         casterUnitNameView.display(unitName = casterUnit.name)
@@ -111,7 +113,10 @@ open class AttackPreviewView(
             remainingAfter = casterBattleUnit.remainingManaPoints - manaCost,
             maximum = casterBattleUnit.maximumManaPoints,
         )
-        casterEffectsView.display(casterBattleUnit.ongoingEffects.onTurnStarted + casterBattleUnit.ongoingEffects.onDefeatedEffects)
+        casterEffectsView.display(
+            effectIds = casterBattleUnit.ongoingEffects.onTurnStarted + casterBattleUnit.ongoingEffects.onDefeatedEffects,
+            newEffectIds = casterNewEffectIds,
+        )
 
         while (receiverViews.size < receivers.size) {
             val receiverView = ReceiverPreviewView(resourcesLoader)
@@ -128,6 +133,7 @@ open class AttackPreviewView(
                     battleUnit = receiver.battleUnit,
                     unit = receiver.unit,
                     damage = receiver.damage,
+                    newEffectIds = receiver.newEffectIds,
                     position = index + 1,
                     count = receivers.size,
                 )

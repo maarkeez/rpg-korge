@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.CancelCast
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ConfirmCast
@@ -263,12 +264,14 @@ class BattlefieldPresenter(
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
+        val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         return {
             attackPreviewView.display(
                 casterBattleUnit = casterBattleUnit,
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
                 receivers = emptyList(),
+                casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
             event.castGroup.tiles.forEach { tilePosition ->
                 battlefieldView.displayTileSelection(
@@ -286,11 +289,17 @@ class BattlefieldPresenter(
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
         // TODO: Preview effect applications and display them instead of only calculating damage
         val damage = abilityApi.calculateImmediateDamage(ability.id)
+        val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         val receivers =
             event.enemyBattleUnitIds.map { enemyBattleUnitId ->
                 val enemyBattleUnit = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
                 val enemyUnit = unitApi.searchUnitById(enemyBattleUnit.unitId)!!
-                AttackPreviewView.Receiver(battleUnit = enemyBattleUnit, unit = enemyUnit, damage = damage)
+                AttackPreviewView.Receiver(
+                    battleUnit = enemyBattleUnit,
+                    unit = enemyUnit,
+                    damage = damage,
+                    newEffectIds = newEffectIds[enemyBattleUnitId].orEmpty(),
+                )
             }
         return {
             attackPreviewView.display(
@@ -298,6 +307,7 @@ class BattlefieldPresenter(
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
                 receivers = receivers,
+                casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
             event.castGroup.tiles.forEach { tilePosition ->
                 battlefieldView.displayTileSelection(
@@ -308,6 +318,18 @@ class BattlefieldPresenter(
             displayAttackPreview()
         }
     }
+
+    // The effects that would stay on each battle unit once the ability is cast on the cast group, keyed by battle unit id.
+    private fun previewCastOngoingEffects(
+        casterBattleUnitId: String,
+        abilityId: String,
+        castGroup: CastGroupDto,
+    ): Map<String, List<String>> =
+        battleUnitApi.previewCastOngoingEffects(
+            battleUnitId = casterBattleUnitId,
+            abilityId = abilityId,
+            castGroup = castGroup.tiles.map { tile -> PositionDto(row = tile.row, column = tile.column) },
+        )
 
     private fun displayAttackPreview() {
         battleHudView.displayAttackPreviewView()

@@ -26,6 +26,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceC
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastOngoingEffects
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -92,6 +93,12 @@ class BattleUnitApi(
             battlefieldApi.searchOccupant,
             effectApi.searchEffectById,
             distanceService,
+        )
+    val previewCastOngoingEffects =
+        PreviewCastOngoingEffects(
+            abilityApi.searchAbilityById,
+            effectApi.searchEffectById,
+            abilityExecution,
         )
 
     // Commands

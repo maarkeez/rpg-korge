@@ -40,14 +40,26 @@ import kotlin.test.Test
 
 class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1 stands at (1,1) and can walk 3 tiles,
-    // and the cpu rat-1 and rat-2 stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight can cast the mushroom, dealing 7 damage.
+    // and the cpu rat-1 and rat-2 stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight can cast the mushroom, dealing 7 damage and leaving a venom.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
-            effects = listOf(decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto()),
-            abilities = listOf(ability(id = "mushroom", cost = 10, effectSpecs = listOf(effectSpec(effectId = "poison", target = SELECTED_TARGET)), targeting = ALL_ADJACENT_ENEMIES).toDto()),
+            effects =
+                listOf(
+                    decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto(),
+                    decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED").toDto(),
+                ),
+            abilities =
+                listOf(
+                    ability(
+                        id = "mushroom",
+                        cost = 10,
+                        effectSpecs = listOf(effectSpec(effectId = "poison", target = SELECTED_TARGET), effectSpec(effectId = "venom", target = SELECTED_TARGET)),
+                        targeting = ALL_ADJACENT_ENEMIES,
+                    ).toDto(),
+                ),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
                 listOf(
@@ -418,5 +430,24 @@ class BattlefieldPresenterTest {
         preview.receivers.map { receiver -> receiver.battleUnit.id }.shouldContainExactly("rat-1", "rat-2")
         preview.receivers.map { receiver -> receiver.unit.id }.shouldContainExactly("rat", "rat")
         preview.receivers.map { receiver -> receiver.damage }.shouldContainExactly(7, 7)
+    }
+
+    @Test
+    fun `DisplayEnemyAbilityCastPreview should preview the effects that would stay on each enemy when an enemy ability cast is previewed`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        val preview = attackPreviewView.displayedAttackPreviews.single()
+        preview.receivers.map { receiver -> receiver.newEffectIds }.shouldContainExactly(listOf("venom"), listOf("venom"))
+        preview.casterNewEffectIds.shouldBeEmpty()
     }
 }
