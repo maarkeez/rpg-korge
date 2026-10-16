@@ -15,7 +15,7 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 
-class HealthBarPreviewV2(
+class BattlefieldHealthBarPreviewView(
     size: Size,
 ) : UIContainer(size) {
     fun display(previewOption: PreviewOption) {
