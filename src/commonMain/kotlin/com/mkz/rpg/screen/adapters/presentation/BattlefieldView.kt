@@ -93,7 +93,7 @@ open class BattlefieldView(
             }
         }
     }
-    private lateinit var battlefieldAnimator: Animator
+    internal lateinit var battlefieldAnimator: Animator
 
     // White silhouette of each unit image, keyed by unit id.
     private val flashBitMaps = mutableMapOf<String, Bitmap>()
@@ -130,8 +130,15 @@ open class BattlefieldView(
         battlefieldAnimator = battlefieldGrid.animator(parallel = true)
         minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
         minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
+        // The drag offsets are relative to where the drag started, not to the previous drag event.
+        var dragStartX = 0.0
+        var dragStartY = 0.0
         viewport.onMouseDrag { event ->
-            scrollTo(x = battlefieldGrid.x + event.dx, y = battlefieldGrid.y + event.dy)
+            if (event.start) {
+                dragStartX = battlefieldGrid.x
+                dragStartY = battlefieldGrid.y
+            }
+            scrollTo(x = dragStartX + event.dx, y = dragStartY + event.dy)
         }
         battlefieldGrid.rows = battlefield.rows
         battlefieldGrid.cols = battlefield.columns

@@ -6,6 +6,7 @@ import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Image
+import korlibs.math.geom.Point
 
 // Page object of [BattlefieldView].
 
@@ -104,6 +105,24 @@ fun BattlefieldView.isLootRightAboveTerrainAt(
 ): Boolean {
     val layerNames = tile(row, column).children.map { child -> child.name }
     return layerNames.indexOf(BattlefieldView.LOOT) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
+}
+
+/**
+ * Drags the battlefield from the center of its viewport through each of the [offsets], as (dx, dy) from where the drag
+ * started, letting the scroll finish at each one. The battlefield must be on the stage.
+ */
+suspend fun ViewsForTesting.dragBattlefield(
+    battlefieldView: BattlefieldView,
+    vararg offsets: Pair<Double, Double>,
+) {
+    val start = battlefieldView.localToGlobal(Point(BattlefieldView.VIEWPORT_WIDTH / 2.0, BattlefieldView.VIEWPORT_HEIGHT / 2.0))
+    mouseMoveTo(start.x, start.y)
+    mouseDown()
+    offsets.forEach { (dx, dy) ->
+        mouseMoveTo(start.x + dx, start.y + dy)
+        battlefieldView.battlefieldAnimator.awaitComplete()
+    }
+    mouseUp()
 }
 
 suspend fun ViewsForTesting.clickTile(

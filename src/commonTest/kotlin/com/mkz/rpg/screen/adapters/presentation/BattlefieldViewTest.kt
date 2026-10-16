@@ -47,6 +47,19 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayBattlefield should scroll the battlefield by the distance dragged when is dragged`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            addChild(battlefieldView)
+            // When
+            dragBattlefield(battlefieldView, -48.0 to -48.0, -96.0 to -96.0)
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-96.0 to -96.0)
+        }
+
+    @Test
     fun `DisplayBattlefield should display battlefield tiles when battlefield is displayed`() =
         sharedViewsTest {
             // Given
