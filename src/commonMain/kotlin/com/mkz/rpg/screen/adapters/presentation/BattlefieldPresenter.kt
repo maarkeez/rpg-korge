@@ -264,6 +264,8 @@ class BattlefieldPresenter(
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
+        val remainingHealth = previewCastRemainingHealth(event.casterBattleUnitId, event.abilityId, event.castGroup)
+        val castGroupTiles = castGroupTiles(event.castGroup, remainingHealth)
         val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         return {
             attackPreviewView.display(
@@ -271,14 +273,10 @@ class BattlefieldPresenter(
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
                 receivers = emptyList(),
+                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
-            event.castGroup.tiles.forEach { tilePosition ->
-                battlefieldView.displayTileSelection(
-                    row = tilePosition.row,
-                    column = tilePosition.column,
-                )
-            }
+            displayCastGroup(castGroupTiles)
             displayAttackPreview()
         }
     }
@@ -287,8 +285,8 @@ class BattlefieldPresenter(
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
-        // TODO: Preview effect applications and display them instead of only calculating damage
-        val damage = abilityApi.calculateImmediateDamage(ability.id)
+        val remainingHealth = previewCastRemainingHealth(event.casterBattleUnitId, event.abilityId, event.castGroup)
+        val castGroupTiles = castGroupTiles(event.castGroup, remainingHealth)
         val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         val receivers =
             event.enemyBattleUnitIds.map { enemyBattleUnitId ->
@@ -297,7 +295,7 @@ class BattlefieldPresenter(
                 AttackPreviewView.Receiver(
                     battleUnit = enemyBattleUnit,
                     unit = enemyUnit,
-                    damage = damage,
+                    remainingHealthPoints = remainingHealth[enemyBattleUnitId] ?: enemyBattleUnit.remainingHealthPoints,
                     newEffectIds = newEffectIds[enemyBattleUnitId].orEmpty(),
                 )
             }
@@ -307,15 +305,58 @@ class BattlefieldPresenter(
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
                 receivers = receivers,
+                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
-            event.castGroup.tiles.forEach { tilePosition ->
-                battlefieldView.displayTileSelection(
-                    row = tilePosition.row,
-                    column = tilePosition.column,
-                )
-            }
+            displayCastGroup(castGroupTiles)
             displayAttackPreview()
+        }
+    }
+
+    /** A tile of the previewed cast group, and the health its battle unit would have left. Null when the tile is vacant. */
+    private data class CastGroupTile(
+        val row: Int,
+        val column: Int,
+        val healthPreview: BattlefieldHealthBarPreviewView.PreviewOption?,
+    )
+
+    // The health each battle unit would have left once the ability is cast on the cast group, keyed by battle unit id.
+    // Only the battle units whose health the cast changes are listed.
+    private fun previewCastRemainingHealth(
+        casterBattleUnitId: String,
+        abilityId: String,
+        castGroup: CastGroupDto,
+    ): Map<String, Int> =
+        battleUnitApi.previewCastRemainingHealth(
+            battleUnitId = casterBattleUnitId,
+            abilityId = abilityId,
+            castGroup = castGroup.tiles.map { tile -> PositionDto(row = tile.row, column = tile.column) },
+        )
+
+    private fun castGroupTiles(
+        castGroup: CastGroupDto,
+        remainingHealth: Map<String, Int>,
+    ): List<CastGroupTile> =
+        castGroup.tiles.map { tile ->
+            val battleUnit = battlefieldApi.searchOccupant(tile.row, tile.column)?.let { battleUnitId -> battleUnitApi.searchBattleUnitById(battleUnitId) }
+            val healthPreview =
+                battleUnit?.let {
+                    BattlefieldHealthBarPreviewView.PreviewOption.of(
+                        remaining = remainingHealth[battleUnit.id] ?: battleUnit.remainingHealthPoints,
+                        maximum = battleUnit.maximumHealthPoints,
+                    )
+                }
+            CastGroupTile(row = tile.row, column = tile.column, healthPreview = healthPreview)
+        }
+
+    // The battle units of the cast group display the health they would have left, and the vacant tiles are selected.
+    private fun displayCastGroup(castGroupTiles: List<CastGroupTile>) {
+        castGroupTiles.forEach { tile ->
+            if (tile.healthPreview == null) {
+                battlefieldView.displayTileSelection(row = tile.row, column = tile.column)
+            } else {
+                battlefieldView.displayHealthPreview(row = tile.row, column = tile.column, previewOption = tile.healthPreview)
+            }
         }
     }
 

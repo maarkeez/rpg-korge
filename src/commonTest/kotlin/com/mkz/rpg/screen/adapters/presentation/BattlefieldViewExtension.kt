@@ -134,3 +134,33 @@ suspend fun ViewsForTesting.clickTile(
 private fun UIButton.hasLayer(layerName: String): Boolean = layerCount(layerName) > 0
 
 private fun UIButton.layerCount(layerName: String): Int = children.count { child -> child.name == layerName }
+
+/** Where a view is drawn inside its tile, and its size. */
+data class TilePlacement(
+    val x: Double,
+    val y: Double,
+    val width: Double,
+    val height: Double,
+)
+
+private fun BattlefieldView.healthPreview(
+    row: Int,
+    column: Int,
+): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_PREVIEW) as? BattlefieldHealthBarPreviewView
+
+/** The health preview displayed on the tile, or `null` when there is none. */
+fun BattlefieldView.healthPreviewAt(
+    row: Int,
+    column: Int,
+): BattlefieldHealthBarPreviewView.PreviewOption? = healthPreview(row, column)?.previewOption
+
+fun BattlefieldView.healthPreviewPlacementAt(
+    row: Int,
+    column: Int,
+): TilePlacement? = healthPreview(row, column)?.let { preview -> TilePlacement(preview.x, preview.y, preview.width, preview.height) }
+
+/** The blinks of the health preview displayed on the tile, to check later whether they are still blinking. */
+fun BattlefieldView.healthPreviewBlinksAt(
+    row: Int,
+    column: Int,
+) = healthPreview(row, column)?.blinks().orEmpty()

@@ -27,6 +27,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastOngoingEffects
+import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastRemainingHealth
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -98,6 +99,14 @@ class BattleUnitApi(
         PreviewCastOngoingEffects(
             abilityApi.searchAbilityById,
             effectApi.searchEffectById,
+            abilityExecution,
+        )
+    val previewCastRemainingHealth =
+        PreviewCastRemainingHealth(
+            abilityApi.searchAbilityById,
+            effectApi.searchEffectById,
+            battleUnitRepository,
+            battlefieldApi.searchPosition,
             abilityExecution,
         )
 

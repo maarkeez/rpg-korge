@@ -7,7 +7,6 @@ import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityRepository
 import com.mkz.rpg.ability.usecases.commands.InitialiseAbilities
 import com.mkz.rpg.ability.usecases.commands.RequestAbilityCreation
-import com.mkz.rpg.ability.usecases.queries.CalculateImmediateDamage
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.ability.usecases.services.AbilityLoader
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
@@ -27,7 +26,6 @@ class AbilityApi(
 
     // Queries
     val searchAbilityById = SearchAbilityById(abilityRepository)
-    val calculateImmediateDamage = CalculateImmediateDamage(abilityRepository, effectApi.searchEffectById)
 
     // Events
     private val onRequestAbilityCreation = OnRequestAbilityCreation(requestAbilityCreation, eventBus)

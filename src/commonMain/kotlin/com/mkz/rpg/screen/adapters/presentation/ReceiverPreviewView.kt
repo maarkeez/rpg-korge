@@ -12,7 +12,7 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.setText
 import korlibs.math.geom.Size
 
-/** A battle unit receiving the previewed cast, with its health once the damage is received. A row of [AttackPreviewView]. */
+/** A battle unit receiving the previewed cast, with the health it would have left. A row of [AttackPreviewView]. */
 class ReceiverPreviewView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
@@ -56,7 +56,7 @@ class ReceiverPreviewView(
     fun display(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
-        damage: Int,
+        remainingHealthPoints: Int,
         newEffectIds: List<String>,
         position: Int,
         count: Int,
@@ -65,7 +65,7 @@ class ReceiverPreviewView(
         unitNameView.display(unitName = unit.name)
         healthBarView.display(
             remainingBefore = battleUnit.remainingHealthPoints,
-            remainingAfter = battleUnit.remainingHealthPoints - damage,
+            remainingAfter = remainingHealthPoints,
             maximum = battleUnit.maximumHealthPoints,
         )
         manaBarView.display(

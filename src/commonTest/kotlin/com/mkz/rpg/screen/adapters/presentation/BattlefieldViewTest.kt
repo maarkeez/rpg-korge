@@ -4,6 +4,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
@@ -12,6 +13,7 @@ import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -57,6 +59,64 @@ class BattlefieldViewTest : ViewsForTesting() {
             dragBattlefield(battlefieldView, -48.0 to -48.0, -96.0 to -96.0)
             // Then
             battlefieldView.scrollOffset() shouldBe (-96.0 to -96.0)
+        }
+
+    @Test
+    fun `DisplayHealthPreview should display the health preview instead of the selection when is displayed on a tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayPotentialCast(row = 0, column = 0)
+            // When
+            battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.TWO_OUT_OF_THREE)
+            // Then
+            battlefieldView.healthPreviewAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayHealthPreview should display the health preview at the top of the tile, as wide as the tile and a fifth as high`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.FULL)
+            // Then
+            val tileSize = BattlefieldView.TILE_SIZE.toDouble()
+            battlefieldView.healthPreviewPlacementAt(row = 0, column = 0) shouldBe TilePlacement(x = 0.0, y = 0.0, width = tileSize, height = tileSize / 5)
+        }
+
+    @Test
+    fun `DisplayHealthPreview should replace the previous health preview when is displayed again on the tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE)
+            val previousBlinks = battlefieldView.healthPreviewBlinksAt(row = 0, column = 0)
+            // When
+            battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.FULL)
+            // Then
+            battlefieldView.healthPreviewAt(row = 0, column = 0) shouldBe PreviewOption.FULL
+            previousBlinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+        }
+
+    @Test
+    fun `ResetTiles should remove the health previews and stop their blinks when the tiles are reset`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE)
+            val blinks = battlefieldView.healthPreviewBlinksAt(row = 0, column = 0)
+            // When
+            battlefieldView.resetTiles()
+            // Then
+            battlefieldView.healthPreviewAt(row = 0, column = 0).shouldBeNull()
+            blinks.shouldNotBeEmpty()
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
         }
 
     @Test

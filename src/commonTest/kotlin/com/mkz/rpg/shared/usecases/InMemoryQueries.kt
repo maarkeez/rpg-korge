@@ -1,7 +1,6 @@
 package com.mkz.rpg.shared.usecases
 
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
-import com.mkz.rpg.ability.usecases.queries.CalculateImmediateDamage
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
@@ -66,7 +65,6 @@ class InMemoryQueries(
 
     // Ability
     val searchAbilityById = SearchAbilityById(abilityRepository)
-    val calculateImmediateDamage = CalculateImmediateDamage(abilityRepository, searchEffectById)
 
     // Battle
     val searchBattle = SearchBattle(battleRepository)

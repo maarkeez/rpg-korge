@@ -41,6 +41,7 @@ open class BattlefieldView(
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
         const val DIM = "DIM"
+        const val HEALTH_PREVIEW = "HEALTH_PREVIEW"
 
         const val TILE_SIZE = 48
         const val TILE_PIXEL_SIZE = 16
@@ -257,12 +258,37 @@ open class BattlefieldView(
         tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_4.png"), SELECTION)
     }
 
+    /**
+     * Displays the health the battle unit on the tile would have left, e.g.: after a cast, at the top of the tile.
+     * Replaces the selection of the tile, so only the battle unit and its health are displayed.
+     */
+    open fun displayHealthPreview(
+        row: Int,
+        column: Int,
+        previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
+    ) {
+        val tileButton = tile(row, column)
+        tileButton.findViewByName(SELECTION)?.removeFromParent()
+        removeHealthPreview(tileButton)
+        val healthPreview = BattlefieldHealthBarPreviewView(Size(TILE_SIZE, TILE_SIZE / 5.0))
+        healthPreview.name = HEALTH_PREVIEW
+        healthPreview.display(previewOption)
+        tileButton.addChild(healthPreview)
+    }
+
     open fun resetTiles() {
         battlefieldGrid.children.forEach { view ->
             val tileButton = view as UIButton
             tileButton.findViewByName(SELECTION)?.removeFromParent()
             tileButton.findViewByName(DIM)?.removeFromParent()
+            removeHealthPreview(tileButton)
         }
+    }
+
+    private fun removeHealthPreview(tileButton: UIButton) {
+        val healthPreview = tileButton.findViewByName(HEALTH_PREVIEW) as? BattlefieldHealthBarPreviewView ?: return
+        healthPreview.stop()
+        healthPreview.removeFromParent()
     }
 
     /**

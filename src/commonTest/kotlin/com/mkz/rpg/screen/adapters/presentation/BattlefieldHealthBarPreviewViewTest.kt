@@ -47,4 +47,32 @@ class BattlefieldHealthBarPreviewViewTest : ViewsForTesting() {
             // Then
             healthBarPreviewView.blinkingCount() shouldBe 0
         }
+
+    @Test
+    fun `Of should be empty when no health would be left`() {
+        PreviewOption.of(remaining = 0, maximum = 30) shouldBe PreviewOption.EMPTY
+    }
+
+    @Test
+    fun `Of should be one out of three when up to a third of the health would be left`() {
+        PreviewOption.of(remaining = 1, maximum = 30) shouldBe PreviewOption.ONE_OUT_OF_THREE
+        PreviewOption.of(remaining = 10, maximum = 30) shouldBe PreviewOption.ONE_OUT_OF_THREE
+    }
+
+    @Test
+    fun `Of should be two out of three when up to two thirds of the health would be left`() {
+        PreviewOption.of(remaining = 11, maximum = 30) shouldBe PreviewOption.TWO_OUT_OF_THREE
+        PreviewOption.of(remaining = 20, maximum = 30) shouldBe PreviewOption.TWO_OUT_OF_THREE
+    }
+
+    @Test
+    fun `Of should be three out of three when more than two thirds but not all the health would be left`() {
+        PreviewOption.of(remaining = 21, maximum = 30) shouldBe PreviewOption.THREE_OUT_OF_THREE
+        PreviewOption.of(remaining = 29, maximum = 30) shouldBe PreviewOption.THREE_OUT_OF_THREE
+    }
+
+    @Test
+    fun `Of should be full when all the health would be left`() {
+        PreviewOption.of(remaining = 30, maximum = 30) shouldBe PreviewOption.FULL
+    }
 }

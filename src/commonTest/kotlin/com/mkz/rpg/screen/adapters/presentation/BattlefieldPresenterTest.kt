@@ -1,7 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
@@ -14,12 +18,18 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
+import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
@@ -35,21 +45,25 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class BattlefieldPresenterTest {
-    // The battle has started with the human player turn. The human knight-1 stands at (1,1) and can walk 3 tiles,
-    // and the cpu rat-1 and rat-2 stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight can cast the mushroom, dealing 7 damage and leaving a venom.
+    // The battle has started with the human player turn. The human knight-1, with 30 health points, stands at (1,1) and can walk 3 tiles,
+    // and the cpu rat-1 and rat-2, with 21 health points, stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight
+    // can cast the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
+            units = listOf(unit(id = "knight", movementRange = 3, healthPoints = 30).toDto(), unit(id = "rat", healthPoints = 21).toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             effects =
                 listOf(
                     decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto(),
                     decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED").toDto(),
+                    increaseHealthEffect(id = "cure", healing = 5).toDto(),
+                    deployBattleUnitEffect(id = "summon", unitId = "rat").toDto(),
                 ),
             abilities =
                 listOf(
@@ -59,6 +73,8 @@ class BattlefieldPresenterTest {
                         effectSpecs = listOf(effectSpec(effectId = "poison", target = SELECTED_TARGET), effectSpec(effectId = "venom", target = SELECTED_TARGET)),
                         targeting = ALL_ADJACENT_ENEMIES,
                     ).toDto(),
+                    ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto(),
+                    ability(id = "bee", cost = 10, effectSpecs = listOf(effectSpec(effectId = "summon", target = SELECTED_TILE)), targeting = VACANT_TILE_ADJACENT_TO_SELF).toDto(),
                 ),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
@@ -429,7 +445,7 @@ class BattlefieldPresenterTest {
         preview.manaCost shouldBe 10
         preview.receivers.map { receiver -> receiver.battleUnit.id }.shouldContainExactly("rat-1", "rat-2")
         preview.receivers.map { receiver -> receiver.unit.id }.shouldContainExactly("rat", "rat")
-        preview.receivers.map { receiver -> receiver.damage }.shouldContainExactly(7, 7)
+        preview.receivers.map { receiver -> receiver.remainingHealthPoints }.shouldContainExactly(14, 14)
     }
 
     @Test
@@ -449,5 +465,76 @@ class BattlefieldPresenterTest {
         val preview = attackPreviewView.displayedAttackPreviews.single()
         preview.receivers.map { receiver -> receiver.newEffectIds }.shouldContainExactly(listOf("venom"), listOf("venom"))
         preview.casterNewEffectIds.shouldBeEmpty()
+    }
+
+    @Test
+    fun `DisplayCastGroup should display the health each enemy would have left instead of the selection when an enemy ability cast is previewed`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.healthPreviews shouldBe mapOf(position(1, 3) to PreviewOption.TWO_OUT_OF_THREE, position(0, 3) to PreviewOption.TWO_OUT_OF_THREE)
+        battlefieldView.tileSelections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `DisplayCastGroup should display the health the caster would have left when a self ability cast is previewed on it`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "heal",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 1))),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.healthPreviews shouldBe mapOf(position(1, 1) to PreviewOption.FULL)
+        battlefieldView.tileSelections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `DisplaySelfAbilityCastPreview should preview the health the caster would have left when it is healed`() {
+        // Given
+        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.Unit(id = "knight-1"), effectId = "poison")
+        apis.battleUnitApi.applyEffect(poisoning)
+        val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
+        eventBus.publish(
+            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "heal",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 1))),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        attackPreviewView.displayedAttackPreviews.single().casterRemainingHealthPoints shouldBe knight.maximumHealthPoints - 7 + 5
+    }
+
+    @Test
+    fun `DisplayCastGroup should select the vacant tiles when a self ability cast is previewed on them`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.SelfAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "bee",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 2))),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.tileSelections.shouldContainExactly(position(1, 2))
+        battlefieldView.healthPreviews.shouldBeEmpty()
     }
 }

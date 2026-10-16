@@ -35,17 +35,17 @@ open class AttackPreviewView(
         private val SNAP_DURATION = 150.milliseconds
     }
 
-    /** A battle unit receiving the cast, the damage it receives and the effects that would stay on it. */
+    /** A battle unit receiving the cast, the health it would have left and the effects that would stay on it. */
     data class Receiver(
         val battleUnit: BattleUnit.Dto,
         val unit: Unit.Dto,
-        val damage: Int,
+        val remainingHealthPoints: Int,
         val newEffectIds: List<String> = emptyList(),
     )
 
     private lateinit var casterUnitNameView: UnitNameView
     internal lateinit var casterUnitPortraitView: UnitPortraitView
-    private lateinit var casterHealthBarView: HealthBarView
+    private lateinit var casterHealthBarView: HealthBarPreviewView
     private lateinit var casterManaBarView: ManaBarPreviewView
     internal lateinit var casterEffectsView: EffectsView
 
@@ -70,7 +70,7 @@ open class AttackPreviewView(
                 addChild(casterUnitNameView)
 
                 uiSpacing(Size(0, 15))
-                casterHealthBarView = HealthBarView(Size(281.5, 16))
+                casterHealthBarView = HealthBarPreviewView(Size(281.5, 16))
                 addChild(casterHealthBarView)
 
                 uiSpacing(Size(0, 4))
@@ -100,12 +100,14 @@ open class AttackPreviewView(
         casterUnit: Unit.Dto,
         manaCost: Int,
         receivers: List<Receiver>,
+        casterRemainingHealthPoints: Int = casterBattleUnit.remainingHealthPoints,
         casterNewEffectIds: List<String> = emptyList(),
     ) {
         casterUnitPortraitView.display(casterBattleUnit.unitId)
         casterUnitNameView.display(unitName = casterUnit.name)
         casterHealthBarView.display(
-            remaining = casterBattleUnit.remainingHealthPoints,
+            remainingBefore = casterBattleUnit.remainingHealthPoints,
+            remainingAfter = casterRemainingHealthPoints,
             maximum = casterBattleUnit.maximumHealthPoints,
         )
         casterManaBarView.display(
@@ -132,7 +134,7 @@ open class AttackPreviewView(
                 receiverView.display(
                     battleUnit = receiver.battleUnit,
                     unit = receiver.unit,
-                    damage = receiver.damage,
+                    remainingHealthPoints = receiver.remainingHealthPoints,
                     newEffectIds = receiver.newEffectIds,
                     position = index + 1,
                     count = receivers.size,

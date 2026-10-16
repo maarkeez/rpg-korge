@@ -10,6 +10,7 @@ class FakeAttackPreviewView : AttackPreviewView(BattleSceneResourcesLoader()) {
         val casterUnit: Unit.Dto,
         val manaCost: Int,
         val receivers: List<Receiver>,
+        val casterRemainingHealthPoints: Int,
         val casterNewEffectIds: List<String>,
     )
 
@@ -22,9 +23,10 @@ class FakeAttackPreviewView : AttackPreviewView(BattleSceneResourcesLoader()) {
         casterUnit: Unit.Dto,
         manaCost: Int,
         receivers: List<Receiver>,
+        casterRemainingHealthPoints: Int,
         casterNewEffectIds: List<String>,
     ) {
-        displayedAttackPreviews += DisplayedAttackPreview(casterBattleUnit, casterUnit, manaCost, receivers, casterNewEffectIds)
+        displayedAttackPreviews += DisplayedAttackPreview(casterBattleUnit, casterUnit, manaCost, receivers, casterRemainingHealthPoints, casterNewEffectIds)
     }
 
     override fun hide() {

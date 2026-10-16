@@ -26,6 +26,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val potentialMovements = mutableListOf<PositionDto>()
     val potentialCasts = mutableListOf<PositionDto>()
     val tileSelections = mutableListOf<PositionDto>()
+
+    // The health preview last displayed on each tile.
+    val healthPreviews = mutableMapOf<PositionDto, BattlefieldHealthBarPreviewView.PreviewOption>()
     var resetTilesCount = 0
         private set
     val tilesNotDimmed = mutableListOf<Set<PositionDto>>()
@@ -72,6 +75,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         column: Int,
     ) {
         tileSelections += PositionDto(row, column)
+    }
+
+    override fun displayHealthPreview(
+        row: Int,
+        column: Int,
+        previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
+    ) {
+        healthPreviews[PositionDto(row, column)] = previewOption
     }
 
     override fun resetTiles() {

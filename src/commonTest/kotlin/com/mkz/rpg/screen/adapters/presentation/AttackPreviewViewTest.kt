@@ -20,7 +20,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
             AttackPreviewView.Receiver(
                 battleUnit = battleUnit(unit = unit(id = "rat").toDto()).toDto(),
                 unit = unit(id = "rat").toDto(),
-                damage = 10,
+                remainingHealthPoints = 10,
             )
         }
 

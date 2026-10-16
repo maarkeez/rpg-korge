@@ -3,26 +3,31 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.shared.adapters.presentation.ColorPalette
 import com.mkz.rpg.shared.adapters.presentation.blink
 import korlibs.korge.animate.Animator
+import korlibs.korge.style.styles
 import korlibs.korge.ui.UIContainer
+import korlibs.korge.ui.uiBackgroundColor
 import korlibs.korge.ui.uiHorizontalStack
+import korlibs.korge.ui.uiProgressBar
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.View
-import korlibs.korge.view.roundRect
 import korlibs.korge.view.solidRect
-import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
+/** The health a battle unit would have left after a cast, in thirds of its maximum health, displayed over its tile. */
 class BattlefieldHealthBarPreviewView(
     size: Size,
 ) : UIContainer(size) {
     // The blinks of the previous preview are cancelled, as removing their views does not stop them.
     internal val blinkAnimators = mutableListOf<Animator>()
 
+    internal var previewOption: PreviewOption? = null
+        private set
+
     fun display(previewOption: PreviewOption) {
-        blinkAnimators.forEach(Animator::cancel)
-        blinkAnimators.clear()
+        stop()
         removeChildren()
+        this.previewOption = previewOption
 
         val paddingUnit = 1
         val previewUnit = 3
@@ -33,7 +38,11 @@ class BattlefieldHealthBarPreviewView(
         val previewHeight = size.height * 0.4
         val totalSize = size
         val totalWidth = totalSize.width
-        roundRect(totalSize, radius = RectCorners(3), fill = ColorPalette.SystemGray5.INCREASED_CONTRAST)
+        // An empty progress bar draws the round background, as it is cut by the clip containers (e.g.: when the
+        // battlefield is scrolled), unlike the round rect views.
+        uiProgressBar(size = totalSize, current = 0.0, maximum = 1.0).also { progressBar ->
+            progressBar.styles.uiBackgroundColor = ColorPalette.SystemGray5.INCREASED_CONTRAST
+        }
 
         uiHorizontalStack {
             uiSpacing(size = Size(width = totalWidth * 0.1, height = 0.0))
@@ -70,6 +79,12 @@ class BattlefieldHealthBarPreviewView(
         }
     }
 
+    /** Stops blinking, e.g.: before the preview is removed. */
+    fun stop() {
+        blinkAnimators.forEach(Animator::cancel)
+        blinkAnimators.clear()
+    }
+
     private fun blinkEmpty(view: View) {
         blinkAnimators += view.blink(firstAlpha = 0.5, secondAlpha = 0.0)
     }
@@ -84,5 +99,21 @@ class BattlefieldHealthBarPreviewView(
         TWO_OUT_OF_THREE,
         THREE_OUT_OF_THREE,
         FULL,
+        ;
+
+        companion object {
+            /** The third of the [maximum] health the [remaining] health falls in. Only a battle unit with full health is [FULL]. */
+            fun of(
+                remaining: Int,
+                maximum: Int,
+            ): PreviewOption =
+                when {
+                    remaining <= 0 -> EMPTY
+                    remaining * 3 <= maximum -> ONE_OUT_OF_THREE
+                    remaining * 3 <= maximum * 2 -> TWO_OUT_OF_THREE
+                    remaining < maximum -> THREE_OUT_OF_THREE
+                    else -> FULL
+                }
+        }
     }
 }
