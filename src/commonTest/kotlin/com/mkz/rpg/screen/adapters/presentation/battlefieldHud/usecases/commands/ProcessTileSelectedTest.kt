@@ -25,7 +25,6 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
@@ -50,6 +49,7 @@ class ProcessTileSelectedTest {
      * - `K` is battle-unit-1, of the [knightPlayerType] player-1.
      * - `S` is battle-unit-2, of player-1.
      * - `E` is enemy-battle-unit-1, of player-2.
+     * - `F` is enemy-battle-unit-2, of player-2.
      */
     private fun givenBattle(
         map: String,
@@ -59,9 +59,9 @@ class ProcessTileSelectedTest {
         val player = player(id = "player-1", type = knightPlayerType).also(queries.playerRepository::create).toDto()
         val enemyPlayer = player(id = "player-2", type = CPU).also(queries.playerRepository::create).toDto()
         queries.battleRepository.create(battle(players = playerOrder))
-        val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1")
+        val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1", 'F' to "enemy-battle-unit-2")
         battleUnits.forEach { (letter, battleUnitId) ->
-            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter == 'E') enemyPlayer else player))
+            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter in "EF") enemyPlayer else player))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
     }
@@ -203,7 +203,7 @@ class ProcessTileSelectedTest {
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         storedHud.castGroup shouldBe castGroup
-        storedHud.enemyBattleUnitId.shouldBeNull()
+        storedHud.enemyBattleUnitIds.shouldBeEmpty()
         eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelfAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
@@ -226,13 +226,36 @@ class ProcessTileSelectedTest {
         // Then
         val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
         storedHud.castGroup shouldBe castGroup
-        storedHud.enemyBattleUnitId shouldBe "enemy-battle-unit-1"
+        storedHud.enemyBattleUnitIds shouldBe listOf("enemy-battle-unit-1")
         eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                 casterBattleUnitId = "battle-unit-1",
                 abilityId = "ability-1",
                 castGroup = castGroup,
-                enemyBattleUnitId = "enemy-battle-unit-1",
+                enemyBattleUnitIds = listOf("enemy-battle-unit-1"),
+            ),
+        )
+    }
+
+    @Test
+    fun `should preview the enemy ability cast on every enemy of the cast group by row and column when one of them is selected`() {
+        // Given
+        val castGroup = castGroup(tile(1, 1), tile(0, 1))
+        battlefieldHudRepository.create(
+            displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", castGroupsWhereCanCast = listOf(castGroup)),
+        )
+        givenBattle("K F\n. E")
+        // When
+        processTileSelected(1, 1)
+        // Then
+        val storedHud = battlefieldHudRepository.search() as DisplayAbilityCastPreview
+        storedHud.enemyBattleUnitIds shouldBe listOf("enemy-battle-unit-2", "enemy-battle-unit-1")
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+                castGroup = castGroup,
+                enemyBattleUnitIds = listOf("enemy-battle-unit-2", "enemy-battle-unit-1"),
             ),
         )
     }

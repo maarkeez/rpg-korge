@@ -46,7 +46,7 @@ object BattlefieldHudMother {
         tilesWhereCanBeMoved: Set<TileDto> = setOf(tile(0, 1)),
         castGroupsWhereCanCast: List<CastGroupDto> = listOf(castGroup(tile(1, 1))),
         castGroup: CastGroupDto = castGroup(tile(1, 1)),
-        enemyBattleUnitId: String? = null,
+        enemyBattleUnitIds: List<String> = emptyList(),
     ): DisplayAbilityCastPreview =
         DisplayAbilityCastPreview(
             casterTile = casterTile,
@@ -55,7 +55,7 @@ object BattlefieldHudMother {
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             castGroupsWhereCanCast = castGroupsWhereCanCast,
             castGroup = castGroup,
-            enemyBattleUnitId = enemyBattleUnitId,
+            enemyBattleUnitIds = enemyBattleUnitIds,
             events = emptySet(),
         )
 

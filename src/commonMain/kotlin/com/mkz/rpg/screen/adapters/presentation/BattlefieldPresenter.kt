@@ -268,9 +268,7 @@ class BattlefieldPresenter(
                 casterBattleUnit = casterBattleUnit,
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
-                receiverBattleUnit = null,
-                receiverUnit = null,
-                damage = null,
+                receivers = emptyList(),
             )
             event.castGroup.tiles.forEach { tilePosition ->
                 battlefieldView.displayTileSelection(
@@ -286,18 +284,20 @@ class BattlefieldPresenter(
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
         val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
-        val targetBattleUnit = battleUnitApi.searchBattleUnitById(event.enemyBattleUnitId)!!
-        val targetUnit = unitApi.searchUnitById(targetBattleUnit.unitId)!!
         // TODO: Preview effect applications and display them instead of only calculating damage
         val damage = abilityApi.calculateImmediateDamage(ability.id)
+        val receivers =
+            event.enemyBattleUnitIds.map { enemyBattleUnitId ->
+                val enemyBattleUnit = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
+                val enemyUnit = unitApi.searchUnitById(enemyBattleUnit.unitId)!!
+                AttackPreviewView.Receiver(battleUnit = enemyBattleUnit, unit = enemyUnit, damage = damage)
+            }
         return {
             attackPreviewView.display(
                 casterBattleUnit = casterBattleUnit,
                 casterUnit = casterUnit,
                 manaCost = ability.cost,
-                receiverBattleUnit = targetBattleUnit,
-                receiverUnit = targetUnit,
-                damage = damage,
+                receivers = receivers,
             )
             event.castGroup.tiles.forEach { tilePosition ->
                 battlefieldView.displayTileSelection(

@@ -4,6 +4,6 @@ package com.mkz.rpg.shared.adapters.presentation
 
 fun PreviewBarView.labelText(): String = label.text
 
-fun PreviewBarView.filledWidth(): Double = filled.width
+fun PreviewBarView.filledWidth(): Double = filled.width * filled.ratio.toDouble()
 
-fun PreviewBarView.previewWidth(): Double = preview.width
+fun PreviewBarView.previewWidth(): Double = preview.width * preview.ratio.toDouble()

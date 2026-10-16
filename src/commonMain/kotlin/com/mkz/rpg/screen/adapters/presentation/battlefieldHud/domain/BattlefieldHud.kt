@@ -129,7 +129,7 @@ sealed interface BattlefieldHud {
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
                 castGroupsWhereCanCast = castGroupsWhereCanCast,
                 castGroup = castGroup,
-                enemyBattleUnitId = null,
+                enemyBattleUnitIds = emptyList(),
                 events =
                     events +
                         SelfAbilityCastPreviewed(
@@ -143,7 +143,7 @@ sealed interface BattlefieldHud {
 
         fun previewEnemyAbilityCast(
             castGroup: Dto.CastGroupDto,
-            enemyBattleUnitId: String,
+            enemyBattleUnitIds: List<String>,
         ) = DisplayAbilityCastPreview(
             casterTile = casterTile,
             battleUnitId = battleUnitId,
@@ -151,14 +151,14 @@ sealed interface BattlefieldHud {
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             castGroupsWhereCanCast = castGroupsWhereCanCast,
             castGroup = castGroup,
-            enemyBattleUnitId = enemyBattleUnitId,
+            enemyBattleUnitIds = enemyBattleUnitIds,
             events =
                 events +
                     BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                         casterBattleUnitId = battleUnitId,
                         abilityId = abilityId,
                         castGroup = castGroup,
-                        enemyBattleUnitId = enemyBattleUnitId,
+                        enemyBattleUnitIds = enemyBattleUnitIds,
                     ),
         )
     }
@@ -170,7 +170,8 @@ sealed interface BattlefieldHud {
         val tilesWhereCanBeMoved: Set<Dto.TileDto>,
         val castGroupsWhereCanCast: List<Dto.CastGroupDto>,
         val castGroup: Dto.CastGroupDto,
-        val enemyBattleUnitId: String?,
+        // The battle units receiving the cast, by row and column. Empty when the cast does not target any enemy.
+        val enemyBattleUnitIds: List<String>,
         private val events: Set<BattlefieldHudEvent>,
     ) : BattlefieldHud {
         fun pullEvents() = events to copy(events = emptySet())

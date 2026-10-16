@@ -136,9 +136,15 @@ class ProcessTileSelected(
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)
             } else {
+                // Every enemy of the cast group receives the cast, not only the selected one.
+                val enemyBattleUnitIds =
+                    selectedCastGroup.tiles
+                        .sortedWith(compareBy(TileDto::row, TileDto::column))
+                        .mapNotNull { castTile -> searchOccupant(castTile.row, castTile.column) }
+                        .filterNot { battleUnitId -> battleUnitId == casterBattleUnit.id }
                 val (events, updatedBattlefieldHud) =
                     battlefieldHud
-                        .previewEnemyAbilityCast(castGroup = selectedCastGroup, enemyBattleUnitId = targetBattleUnitId)
+                        .previewEnemyAbilityCast(castGroup = selectedCastGroup, enemyBattleUnitIds = enemyBattleUnitIds)
                         .pullEvents()
                 battlefieldHudRepository.update(updatedBattlefieldHud)
                 eventBus.publish(events)

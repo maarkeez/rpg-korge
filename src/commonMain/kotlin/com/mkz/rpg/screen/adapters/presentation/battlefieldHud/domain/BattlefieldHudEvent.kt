@@ -34,6 +34,7 @@ sealed interface BattlefieldHudEvent : DomainEvent {
         val casterBattleUnitId: String,
         val abilityId: String,
         val castGroup: CastGroupDto,
-        val enemyBattleUnitId: String,
+        // By row and column.
+        val enemyBattleUnitIds: List<String>,
     ) : BattlefieldHudEvent
 }

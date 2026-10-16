@@ -6,7 +6,6 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldNotBeEmpty
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
@@ -176,7 +175,7 @@ class BattlefieldHudTest {
         preview.casterTile shouldBe hud.casterTile
         preview.abilityId shouldBe hud.abilityId
         preview.castGroup shouldBe castGroup
-        preview.enemyBattleUnitId.shouldBeNull()
+        preview.enemyBattleUnitIds.shouldBeEmpty()
         val (events, _) = updatedHud.pullEvents()
         events.shouldContainExactly(
             BattlefieldHudEvent.SelfAbilityCastPreviewed(
@@ -191,22 +190,22 @@ class BattlefieldHudTest {
     fun `DisplayAbilityCastRange should preview the enemy ability cast and publish the event when an enemy cast group is chosen`() {
         // Given
         val hud = BattlefieldHudMother.displayAbilityCastRange()
-        val castGroup = castGroup(tile(2, 2))
-        val enemyBattleUnitId = "battle-unit-2"
+        val castGroup = castGroup(tile(2, 2), tile(2, 3))
+        val enemyBattleUnitIds = listOf("battle-unit-2", "battle-unit-3")
         // When
-        val updatedHud = hud.previewEnemyAbilityCast(castGroup = castGroup, enemyBattleUnitId = enemyBattleUnitId)
+        val updatedHud = hud.previewEnemyAbilityCast(castGroup = castGroup, enemyBattleUnitIds = enemyBattleUnitIds)
         // Then
         updatedHud.shouldBeInstanceOf<BattlefieldHud.DisplayAbilityCastPreview>()
         val preview = updatedHud as BattlefieldHud.DisplayAbilityCastPreview
         preview.castGroup shouldBe castGroup
-        preview.enemyBattleUnitId shouldBe enemyBattleUnitId
+        preview.enemyBattleUnitIds shouldBe enemyBattleUnitIds
         val (events, _) = updatedHud.pullEvents()
         events.shouldContainExactly(
             BattlefieldHudEvent.EnemyAbilityCastPreviewed(
                 casterBattleUnitId = hud.battleUnitId,
                 abilityId = hud.abilityId,
                 castGroup = castGroup,
-                enemyBattleUnitId = enemyBattleUnitId,
+                enemyBattleUnitIds = enemyBattleUnitIds,
             ),
         )
     }

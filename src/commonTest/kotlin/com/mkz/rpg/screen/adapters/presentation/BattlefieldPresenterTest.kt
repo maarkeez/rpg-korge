@@ -1,5 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
+import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
@@ -10,6 +14,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -35,23 +40,27 @@ import kotlin.test.Test
 
 class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1 stands at (1,1) and can walk 3 tiles,
-    // and the cpu rat-1 stands at (1,3), on a 4x4 sand battlefield.
+    // and the cpu rat-1 and rat-2 stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight can cast the mushroom, dealing 7 damage.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            effects = listOf(decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto()),
+            abilities = listOf(ability(id = "mushroom", cost = 10, effectSpecs = listOf(effectSpec(effectId = "poison", target = SELECTED_TARGET)), targeting = ALL_ADJACENT_ENEMIES).toDto()),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
                 listOf(
                     Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
                     Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 3),
+                    Deployment(battleUnitId = "rat-2", unitId = "rat", playerId = "cpu", row = 0, column = 3),
                 ),
             playerOrder = listOf("human", "cpu"),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val battlefieldView = FakeBattlefieldView()
     private val battleUnitInfoView = FakeBattleUnitInfoView()
+    private val attackPreviewView = FakeAttackPreviewView()
     private val timeline = battleSceneTimeline()
 
     // The presenter is created once the battle has started, so it only reacts to what the test publishes.
@@ -59,7 +68,7 @@ class BattlefieldPresenterTest {
         BattlefieldPresenter(
             battlefieldView = battlefieldView,
             battleUnitInfoView = battleUnitInfoView,
-            attackPreviewView = FakeAttackPreviewView(),
+            attackPreviewView = attackPreviewView,
             playerCallToActionView = FakePlayerCallToActionView(),
             battleHudView = FakeBattleHudView(),
             battlefieldApi = apis.battlefieldApi,
@@ -387,5 +396,27 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         selections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `DisplayEnemyAbilityCastPreview should preview every enemy receiving the cast in order when an enemy ability cast is previewed`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        val preview = attackPreviewView.displayedAttackPreviews.single()
+        preview.casterBattleUnit.id shouldBe "knight-1"
+        preview.manaCost shouldBe 10
+        preview.receivers.map { receiver -> receiver.battleUnit.id }.shouldContainExactly("rat-1", "rat-2")
+        preview.receivers.map { receiver -> receiver.unit.id }.shouldContainExactly("rat", "rat")
+        preview.receivers.map { receiver -> receiver.damage }.shouldContainExactly(7, 7)
     }
 }
