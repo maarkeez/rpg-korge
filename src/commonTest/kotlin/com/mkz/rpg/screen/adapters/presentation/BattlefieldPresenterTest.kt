@@ -24,6 +24,8 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
+import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -32,6 +34,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLo
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleUnit
+import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.PickedUpLoot
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -53,6 +56,7 @@ class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1, with 30 health points, stands at (1,1) and can walk 3 tiles,
     // and the cpu rat-1 and rat-2, with 21 health points, stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight
     // can cast the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat.
+    // A health potion, healing 5, can be looted.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -76,6 +80,7 @@ class BattlefieldPresenterTest {
                     ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto(),
                     ability(id = "bee", cost = 10, effectSpecs = listOf(effectSpec(effectId = "summon", target = SELECTED_TILE)), targeting = VACANT_TILE_ADJACENT_TO_SELF).toDto(),
                 ),
+            lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
                 listOf(
@@ -297,6 +302,60 @@ class BattlefieldPresenterTest {
         previousStep.complete(Unit)
         // Then
         battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to listOf("health-potion"))
+    }
+
+    @Test
+    fun `PickUpLoot should lift the item off its tile when a dropped item is picked up`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        eventBus.dispatch()
+        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.pickedUpLoot.shouldContainExactly(PickedUpLoot(row = 2, column = 2, lootableItemId = "health-potion"))
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 2) to emptyList())
+    }
+
+    @Test
+    fun `PickUpLoot should lift the item off its tile once the previous steps have been played`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        eventBus.dispatch()
+        val previousStep = timeline.playLongStep()
+        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        eventBus.dispatch()
+        require(battlefieldView.pickedUpLoot.isEmpty())
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.pickedUpLoot.shouldContainExactly(PickedUpLoot(row = 2, column = 2, lootableItemId = "health-potion"))
+    }
+
+    @Test
+    fun `PickUpLoot should lift the item off its tile once the battle unit has walked over it when a human battle unit walks over loot`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 1)
+        eventBus.dispatch()
+        // When
+        publish(RequestMoveBattleUnit(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 1))
+        // Then
+        battlefieldView.movedBattleUnits.single().path shouldBe listOf(position(2, 1), position(3, 1))
+        battlefieldView.pickedUpLoot.shouldContainExactly(PickedUpLoot(row = 2, column = 1, lootableItemId = "health-potion"))
+    }
+
+    @Test
+    fun `PickUpLoot should not lift anything when a cpu battle unit walks over loot`() {
+        // Given
+        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 3)
+        eventBus.dispatch()
+        publish(PlayerTurnStarted(playerId = "cpu"))
+        // When
+        publish(RequestMoveBattleUnit(battleUnitId = "rat-1", moveToRow = 2, moveToColumn = 3))
+        // Then
+        battlefieldView.movedBattleUnits.shouldHaveSize(1)
+        battlefieldView.pickedUpLoot.shouldBeEmpty()
+        battlefieldView.displayedLoot shouldBe mapOf(position(2, 3) to listOf("health-potion"))
     }
 
     @Test

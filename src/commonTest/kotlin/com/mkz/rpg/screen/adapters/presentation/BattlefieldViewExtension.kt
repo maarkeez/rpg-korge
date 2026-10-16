@@ -107,6 +107,37 @@ fun BattlefieldView.isLootRightAboveTerrainAt(
     return layerNames.indexOf(BattlefieldView.LOOT) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
 }
 
+/** The icon of the picked up item lifted off the tile: how far it has risen from the tile center, its scale and opacity. */
+data class LiftedLoot(
+    val bitmap: Bitmap?,
+    val rise: Double,
+    val scale: Double,
+    val alpha: Double,
+)
+
+/** The picked up item being lifted off the tile, or `null` when none is. */
+fun BattlefieldView.liftedLootAt(
+    row: Int,
+    column: Int,
+): LiftedLoot? {
+    val liftedView = tile(row, column).findViewByName(BattlefieldView.PICKED_UP_LOOT) as? Image ?: return null
+    return LiftedLoot(
+        bitmap = liftedView.bitmap.base,
+        rise = BattlefieldView.TILE_SIZE / 2.0 - liftedView.y,
+        scale = liftedView.scaleX,
+        alpha = liftedView.alpha,
+    )
+}
+
+/** Whether the picked up item is drawn over the battle unit standing on the tile. */
+fun BattlefieldView.isLiftedLootOverBattleUnitAt(
+    row: Int,
+    column: Int,
+): Boolean {
+    val layerNames = tile(row, column).children.map { child -> child.name }
+    return layerNames.indexOf(BattlefieldView.PICKED_UP_LOOT) > layerNames.indexOf(BattlefieldView.BATTLE_UNIT)
+}
+
 /**
  * Drags the battlefield from the center of its viewport through each of the [offsets], as (dx, dy) from where the drag
  * started, letting the scroll finish at each one. The battlefield must be on the stage.

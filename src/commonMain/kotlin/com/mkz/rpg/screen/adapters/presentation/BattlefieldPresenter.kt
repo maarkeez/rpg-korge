@@ -122,10 +122,10 @@ class BattlefieldPresenter(
                 refreshMovementRange()
             },
             eventBus.subscribe<BattlefieldEvent.DroppedItemPlaced> { event ->
-                timeline.play { changeLoot(event.row, event.column) { lootableItemIds -> lootableItemIds + event.lootableItemId } }
+                timeline.play { dropLoot(event.row, event.column, event.lootableItemId) }
             },
             eventBus.subscribe<BattlefieldEvent.DroppedItemPickedUp> { event ->
-                timeline.play { changeLoot(event.row, event.column) { lootableItemIds -> lootableItemIds - event.lootableItemId } }
+                timeline.play { pickUpLoot(event.row, event.column, event.lootableItemId) }
             },
             // The selection is cleared before the turn is announced, and can not be acted on during the new turn.
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
@@ -198,15 +198,26 @@ class BattlefieldPresenter(
         }
     }
 
-    private fun changeLoot(
+    private fun dropLoot(
         row: Int,
         column: Int,
-        change: (List<String>) -> List<String>,
+        lootableItemId: String,
     ) {
         val position = PositionDto(row, column)
-        val lootableItemIds = change(displayedLoot[position].orEmpty())
+        val lootableItemIds = displayedLoot[position].orEmpty() + lootableItemId
         displayedLoot[position] = lootableItemIds
         battlefieldView.displayLoot(row = row, column = column, lootableItemIds = lootableItemIds)
+    }
+
+    private suspend fun pickUpLoot(
+        row: Int,
+        column: Int,
+        lootableItemId: String,
+    ) {
+        val position = PositionDto(row, column)
+        val remainingLootableItemIds = displayedLoot[position].orEmpty() - lootableItemId
+        displayedLoot[position] = remainingLootableItemIds
+        battlefieldView.pickUpLoot(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
     }
 
     private fun flashUnit(battleUnitId: String) {

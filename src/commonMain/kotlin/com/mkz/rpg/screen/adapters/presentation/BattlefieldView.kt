@@ -10,7 +10,9 @@ import korlibs.image.color.RGBA
 import korlibs.korge.animate.Animator
 import korlibs.korge.animate.alpha
 import korlibs.korge.animate.animator
+import korlibs.korge.animate.moveBy
 import korlibs.korge.animate.moveTo
+import korlibs.korge.animate.scaleTo
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onMouseDrag
 import korlibs.korge.time.delay
@@ -21,12 +23,15 @@ import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
 import korlibs.korge.view.SolidRect
 import korlibs.korge.view.align.centerOn
+import korlibs.korge.view.anchor
 import korlibs.korge.view.clipContainer
 import korlibs.korge.view.image
 import korlibs.korge.view.solidRect
 import korlibs.math.clamp
+import korlibs.math.geom.Anchor
 import korlibs.math.geom.Size
 import korlibs.math.geom.Spacing
+import korlibs.math.interpolation.EASE_IN_QUAD
 import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
@@ -37,6 +42,7 @@ open class BattlefieldView(
     companion object {
         const val TERRAIN = "TERRAIN"
         const val LOOT = "LOOT"
+        const val PICKED_UP_LOOT = "PICKED_UP_LOOT"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
@@ -52,6 +58,11 @@ open class BattlefieldView(
         // The loot is drawn smaller than the battle units, so the terrain shows around it.
         const val LOOT_SCALE = 2.0
         const val CHEST_PATH = "battlefield/chest.png"
+
+        // A picked up item rises this far from the center of its tile, growing to this scale while it fades out.
+        const val PICK_UP_RISE = TILE_SIZE / 2.0
+        const val PICK_UP_SCALE = 3.0
+        val PICK_UP_DURATION = 400.milliseconds
 
         // How long a moving battle unit stops on each tile of its path.
         val MOVE_STEP_DURATION = 150.milliseconds
@@ -223,6 +234,39 @@ open class BattlefieldView(
         val lootView = tileButton.findViewByName(LOOT)!!
         lootView.removeFromParent()
         tileButton.addChildAt(lootView, terrainIndex + 1)
+    }
+
+    /**
+     * Lifts the picked up item off its tile, after scrolling the battlefield so the tile is visible: its icon rises over
+     * the battle unit, growing and fading out, while the tile displays the items left on it. Nothing is lifted when the
+     * item has no image.
+     */
+    open suspend fun pickUpLoot(
+        row: Int,
+        column: Int,
+        lootableItemId: String,
+        remainingLootableItemIds: List<String>,
+    ) {
+        displayLoot(row = row, column = column, lootableItemIds = remainingLootableItemIds)
+        val itemBitmap = resourcesLoader.bitmapOrNull("lootableItem/$lootableItemId.png") ?: return
+        followTile(row, column)
+        // Anchored on its center, so it grows around it.
+        val pickedUpView =
+            tile(row, column).image(itemBitmap) {
+                name = PICKED_UP_LOOT
+                scale = LOOT_SCALE
+                smoothing = false
+                anchor(Anchor.CENTER)
+                x = TILE_SIZE / 2.0
+                y = TILE_SIZE / 2.0
+            }
+        pickedUpView
+            .animator(parallel = true) {
+                moveBy(pickedUpView, x = 0.0, y = -PICK_UP_RISE, time = PICK_UP_DURATION, easing = Easing.EASE_OUT_QUAD)
+                scaleTo(pickedUpView, PICK_UP_SCALE, time = PICK_UP_DURATION)
+                alpha(pickedUpView, 0.0, time = PICK_UP_DURATION, easing = Easing.EASE_IN_QUAD)
+            }.awaitComplete()
+        pickedUpView.removeFromParent()
     }
 
     interface Delegate {
