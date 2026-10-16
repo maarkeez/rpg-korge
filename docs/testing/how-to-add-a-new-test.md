@@ -368,6 +368,7 @@ The tests in `src/commonTest` run on both the JVM and JS, so they MUST only depe
 - The JS tests read the game resources from `build/processedResources/js/test`, which [`karma.config.d/resources.js`](../../karma.config.d/resources.js) serves to the browser as the game does.
 - Each JS test MUST finish within 30 seconds, set in [`karma.config.d/timeout.js`](../../karma.config.d/timeout.js), as the end-to-end tests boot the whole game.
 - Chrome rejects a fetch now and then without sending it ("Failed to fetch"), so the JS tests retry it, which is done by [`karma/fetch-retry.js`](../../karma/fetch-retry.js). A retry is logged as `Retrying the fetch of ...`.
+- The Kotlin test reporter writes every JS test result on a single line, which Gradle stops reading past 1MB, leaving the next tests unreported and their failures unnoticed. [`karma.config.d/reporter-newlines.js`](../../karma.config.d/reporter-newlines.js) writes each result on its own line.
 
 ## Run tests
 
