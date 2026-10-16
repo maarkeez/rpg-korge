@@ -14,7 +14,6 @@ import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.slotBitmaps
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -32,7 +31,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should open the empty inventory of the knight and go back to its info when the human player opens and closes its bag`() =
         sharedViewsTest {
             // Given
-            startGame()
+            startNewGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
@@ -52,7 +51,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should not display the bag when the human player selects a cpu rat`() =
         sharedViewsTest {
             // Given
-            startGame()
+            startNewGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(0, 0) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When

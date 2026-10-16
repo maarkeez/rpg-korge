@@ -15,4 +15,6 @@ class InMemoryTerrainRepository : TerrainRepository {
     }
 
     override fun searchById(id: String): Terrain? = terrains[id]
+
+    override fun searchAll(): List<Terrain> = terrains.values.toList()
 }

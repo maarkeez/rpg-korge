@@ -9,7 +9,6 @@ import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -24,7 +23,7 @@ class FinishTurnEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should disable finish turn while the cpu turn is displayed and enable it again when the human turn is announced`() =
         sharedViewsTest {
             // Given
-            startGame()
+            startNewGame()
             waitUntil { canHumanPlayerAct() }
             val playerCallToActionView = requireNotNull(playerCallToActionView()) { "The call to action is not displayed" }
             val battleInfoView = requireNotNull(battleInfoView()) { "The battle info is not displayed" }

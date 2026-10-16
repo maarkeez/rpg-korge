@@ -6,4 +6,6 @@ interface TerrainRepository {
     fun update(terrain: Terrain)
 
     fun searchById(id: String): Terrain?
+
+    fun searchAll(): List<Terrain>
 }

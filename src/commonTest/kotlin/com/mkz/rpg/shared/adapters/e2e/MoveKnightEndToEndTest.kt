@@ -12,7 +12,6 @@ import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
 import com.mkz.rpg.screen.adapters.presentation.maximumSteps
 import com.mkz.rpg.screen.adapters.presentation.remainingSteps
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -33,7 +32,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
         sharedViewsTest {
             // Given
-            startGame()
+            startNewGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
@@ -50,7 +49,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should dim the tiles out of the knight movement range when the human player selects the knight`() =
         sharedViewsTest {
             // Given
-            startGame()
+            startNewGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
@@ -67,7 +66,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         sharedViewsTest {
             // Given
             val farTargetColumn = 4
-            startGame()
+            startNewGame()
             waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)

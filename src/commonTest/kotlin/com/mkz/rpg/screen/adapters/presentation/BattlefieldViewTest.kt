@@ -421,6 +421,68 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayBattlefield should replace the displayed battlefield when a battlefield is displayed again`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            // When
+            battlefieldView.displayBattlefield(battlefield(rows = 4, columns = 6).toDto())
+            // Then
+            battlefieldView.displayedBattlefieldCount() shouldBe 1
+            battlefieldView.tileCount() shouldBe 24
+        }
+
+    @Test
+    fun `DisplayBattlefield should keep the scroll as far as the new size allows when a battlefield is displayed again`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            addChild(battlefieldView)
+            dragBattlefield(battlefieldView, -48.0 to -300.0)
+            // When
+            battlefieldView.displayBattlefield(battlefield(rows = 10, columns = 16).toDto())
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-48.0 to -96.0)
+        }
+
+    @Test
+    fun `DisplayBattlefield should scroll the battlefield by the distance dragged when it is dragged after being displayed again`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            addChild(battlefieldView)
+            // When
+            dragBattlefield(battlefieldView, -48.0 to -96.0)
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-48.0 to -96.0)
+        }
+
+    @Test
+    fun `UpdateTerrain should draw again the terrain and the transitions of the tiles when the terrain is updated`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(map = ". . .").toDto())
+            // As in the game, only sand has a transition to void.
+            val paintedTiles = listOf(listOf("sand", "void", "sand"))
+            val paintedBattlefield = battlefield(1, 3, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toDto()
+            // When
+            battlefieldView.updateTerrain(paintedBattlefield, listOf(Battlefield.Dto.PositionDto(0, 0), Battlefield.Dto.PositionDto(0, 1)))
+            // Then
+            val tileBitmap = { column: Int ->
+                val tile = paintedBattlefield.tiles.getValue(Battlefield.Dto.PositionDto(0, column))
+                battlefieldView.terrainTileBitmap(tile.terrainId, tile.terrainTransition)
+            }
+            battlefieldView.terrainBitmapAt(row = 0, column = 0) shouldBe tileBitmap(0)
+            battlefieldView.terrainBitmapAt(row = 0, column = 1) shouldBe tileBitmap(1)
+            battlefieldView.terrainBitmapAt(row = 0, column = 2) shouldBe battlefieldView.terrainTileBitmap("sand", terrainTransition = null)
+        }
+
+    @Test
     fun `DisplayLoot should display the item icon below the battle unit when one item lies on the tile`() =
         sharedViewsTest {
             // Given

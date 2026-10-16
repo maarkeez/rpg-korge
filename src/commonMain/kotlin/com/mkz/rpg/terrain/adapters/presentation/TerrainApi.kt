@@ -8,6 +8,7 @@ import com.mkz.rpg.terrain.domain.TerrainRepository
 import com.mkz.rpg.terrain.usecases.commands.InitialiseTerrains
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
+import com.mkz.rpg.terrain.usecases.queries.SearchTerrains
 import com.mkz.rpg.terrain.usecases.services.TerrainLoader
 
 class TerrainApi(
@@ -26,6 +27,7 @@ class TerrainApi(
     // Queries
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val isTransitionAllowed = IsTransitionAllowed(terrainRepository)
+    val searchTerrains = SearchTerrains(terrainRepository)
 
     // Events
     private val onRequestInitialiseTerrains = OnRequestInitialiseTerrains(initialiseTerrains, eventBus)

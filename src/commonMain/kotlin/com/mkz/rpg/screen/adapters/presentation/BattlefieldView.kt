@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
+import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.animate.Animator
@@ -21,6 +22,7 @@ import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIGridFill
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiGridFill
+import korlibs.korge.view.Image
 import korlibs.korge.view.SolidRect
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.anchor
@@ -123,35 +125,48 @@ open class BattlefieldView(
 
     init {
         addChild(viewport)
-    }
-
-    open fun setDelegate(delegate: Delegate) {
-        this.delegate = delegate
-    }
-
-    open fun displayBattlefield(battlefield: Battlefield.Dto) {
-        val mapHeight = TILE_SIZE * battlefield.rows
-        val mapWidth = TILE_SIZE * battlefield.columns
-        battlefieldGrid =
-            viewport.uiGridFill(
-                size = Size(width = mapWidth, height = mapHeight),
-                spacing = Spacing(0.0, 0.0),
-                cols = 0,
-                rows = 0,
-            )
-        battlefieldAnimator = battlefieldGrid.animator(parallel = true)
-        minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
-        minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
         // The drag offsets are relative to where the drag started, not to the previous drag event.
         var dragStartX = 0.0
         var dragStartY = 0.0
         viewport.onMouseDrag { event ->
+            if (!isDisplayed) return@onMouseDrag
             if (event.start) {
                 dragStartX = battlefieldGrid.x
                 dragStartY = battlefieldGrid.y
             }
             scrollTo(x = dragStartX + event.dx, y = dragStartY + event.dy)
         }
+    }
+
+    open fun setDelegate(delegate: Delegate) {
+        this.delegate = delegate
+    }
+
+    /**
+     * Displays the battlefield terrain. When a battlefield is already displayed (e.g.: a map resized while it is designed),
+     * it is replaced, keeping how far it was scrolled as far as the new size allows.
+     */
+    open fun displayBattlefield(battlefield: Battlefield.Dto) {
+        val mapHeight = TILE_SIZE * battlefield.rows
+        val mapWidth = TILE_SIZE * battlefield.columns
+        val previousScroll = if (isDisplayed) battlefieldGrid.x to battlefieldGrid.y else 0.0 to 0.0
+        if (isDisplayed) {
+            battlefieldAnimator.cancel()
+            battlefieldGrid.removeFromParent()
+        }
+        minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
+        minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
+        battlefieldGrid =
+            viewport.uiGridFill(
+                size = Size(width = mapWidth, height = mapHeight),
+                spacing = Spacing(0.0, 0.0),
+                cols = 0,
+                rows = 0,
+            ) {
+                x = previousScroll.first.clamp(minScrollX, 0.0)
+                y = previousScroll.second.clamp(minScrollY, 0.0)
+            }
+        battlefieldAnimator = battlefieldGrid.animator(parallel = true)
         battlefieldGrid.rows = battlefield.rows
         battlefieldGrid.cols = battlefield.columns
         for (row in 0 until battlefield.rows) {
@@ -169,6 +184,18 @@ open class BattlefieldView(
                     }
                 }
             }
+        }
+    }
+
+    /** Draws again the terrain of the tiles, e.g.: a painted tile and its neighbours, whose transitions may have changed. */
+    open fun updateTerrain(
+        battlefield: Battlefield.Dto,
+        positions: Collection<PositionDto>,
+    ) {
+        positions.forEach { position ->
+            val tileDto = battlefield.tiles[position] ?: return@forEach
+            val terrainImage = tile(position.row, position.column).findViewByName(TERRAIN) as Image
+            terrainImage.bitmap = terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition).slice()
         }
     }
 

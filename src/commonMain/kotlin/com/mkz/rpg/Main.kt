@@ -1,6 +1,6 @@
 package com.mkz.rpg
 
-import com.mkz.rpg.screen.adapters.presentation.BattleScene
+import com.mkz.rpg.screen.adapters.presentation.MenuScene
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer
@@ -18,5 +18,5 @@ suspend fun main() =
 suspend fun Stage.startGame() {
     val sceneContainer = sceneContainer()
 
-    sceneContainer.changeTo { BattleScene() }
+    sceneContainer.changeTo { MenuScene() }
 }

@@ -5,6 +5,7 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
+import korlibs.korge.ui.UIGridFill
 import korlibs.korge.view.Image
 import korlibs.math.geom.Point
 
@@ -91,6 +92,15 @@ fun BattlefieldView.isTileVisible(
         tileX + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_WIDTH &&
         tileY + BattlefieldView.TILE_SIZE <= BattlefieldView.VIEWPORT_HEIGHT
 }
+
+/** The terrain image of the tile. */
+fun BattlefieldView.terrainBitmapAt(
+    row: Int,
+    column: Int,
+): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.TERRAIN) as? Image)?.bitmap?.base
+
+/** How many battlefields are displayed in the viewport: one once a battlefield is displayed, however many times. */
+fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else battlefieldGrid.parent!!.children.count { child -> child is UIGridFill }
 
 /** The image of the loot lying on the tile (an item icon or the chest), or `null` when there is none. */
 fun BattlefieldView.lootBitmapAt(

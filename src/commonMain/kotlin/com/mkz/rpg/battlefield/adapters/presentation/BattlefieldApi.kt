@@ -8,6 +8,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.FindLoot
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
@@ -18,12 +19,15 @@ import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.commands.RequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
+import com.mkz.rpg.battlefield.usecases.queries.PreviewBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchDroppedItems
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldEncoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -32,6 +36,7 @@ class BattlefieldApi(
     terrainApi: TerrainApi,
     eventBus: EventBus,
     private val battlefieldLoader: BattlefieldLoader = ResourcesBattlefieldLoader(),
+    battlefieldEncoder: BattlefieldEncoder = TomlBattlefieldEncoder(),
 ) {
     // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
@@ -70,6 +75,8 @@ class BattlefieldApi(
     val searchPosition = SearchPosition(battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
     val searchDroppedItems = SearchDroppedItems(battlefieldRepository)
+    val previewBattlefield = PreviewBattlefield(battlefieldRepository, terrainApi.searchTerrainById)
+    val exportBattlefield = ExportBattlefield(battlefieldEncoder)
 
     // Event Listeners
     private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)

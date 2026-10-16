@@ -2,6 +2,8 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import korlibs.image.bitmap.Bitmap
+import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.RGBA
 
 // Records what the presenters ask the battlefield view to display, instead of drawing it.
@@ -10,6 +12,11 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         val row: Int,
         val column: Int,
         val unitId: String,
+    )
+
+    data class UpdatedTerrain(
+        val battlefield: Battlefield.Dto,
+        val positions: Set<PositionDto>,
     )
 
     data class PickedUpLoot(
@@ -46,6 +53,10 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     // The loot last displayed on each tile.
     val displayedLoot = mutableMapOf<PositionDto, List<String>>()
     val pickedUpLoot = mutableListOf<PickedUpLoot>()
+    val updatedTerrains = mutableListOf<UpdatedTerrain>()
+
+    // The image of each terrain, so presenters can display it elsewhere (e.g.: the map builder palette).
+    val terrainBitmaps = mutableMapOf<String, Bitmap>()
 
     override fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
@@ -123,6 +134,18 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     ) {
         displayedLoot[PositionDto(row, column)] = lootableItemIds
     }
+
+    override fun updateTerrain(
+        battlefield: Battlefield.Dto,
+        positions: Collection<PositionDto>,
+    ) {
+        updatedTerrains += UpdatedTerrain(battlefield, positions.toSet())
+    }
+
+    override fun terrainTileBitmap(
+        terrainId: String,
+        terrainTransition: Battlefield.Dto.TerrainTransitionDto?,
+    ): Bitmap = terrainBitmaps.getOrPut(terrainId) { Bitmap32(1, 1) }
 
     override suspend fun pickUpLoot(
         row: Int,
