@@ -43,14 +43,21 @@ open class BattleUnitInfoView(
 
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
-                    unitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
-                    addChild(unitNameView)
+                    uiHorizontalStack(padding = 1.0) {
+                        uiVerticalStack(width = 244.0) {
+                            unitNameView = UnitNameView(size = Size(width = this.width, height = 14))
+                            addChild(unitNameView)
 
-                    uiSpacing(Size(0, ROWS_SPACING))
-                    val remainingTurnActionsView = UIContainer(Size(width = 281.5, height = 14))
-                    remainingTurnActionsView.addChild(movementPointsView)
-                    remainingTurnActionsView.addChild(castPointsView)
-                    addChild(remainingTurnActionsView)
+                            uiSpacing(Size(0, ROWS_SPACING))
+                            val remainingTurnActionsView = UIContainer(Size(width = this.width, height = 14))
+                            remainingTurnActionsView.addChild(movementPointsView)
+                            remainingTurnActionsView.addChild(castPointsView)
+                            addChild(remainingTurnActionsView)
+                        }
+                        bagButton = BagButtonView(Size(width = 29, height = 29), resourcesLoader)
+                        addChild(bagButton)
+                    }
+
                     // Minus the space added above the remaining turn actions (the spacing and the stack padding),
                     // so the health bar stays where it was.
                     uiSpacing(Size(0, 15 - ROWS_SPACING - 1))
@@ -70,8 +77,6 @@ open class BattleUnitInfoView(
                 val abilityButtonSize = Size(width = 48.75, height = 48.75)
                 abilityButtons = Array(6) { AbilityButtonView(abilityButtonSize, resourcesLoader) }
                 abilityButtons.forEach(::addChild)
-                bagButton = BagButtonView(abilityButtonSize, resourcesLoader)
-                addChild(bagButton)
             }
         }
 
