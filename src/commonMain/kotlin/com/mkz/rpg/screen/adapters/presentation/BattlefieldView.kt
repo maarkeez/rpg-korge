@@ -498,10 +498,11 @@ open class BattlefieldView(
         path: List<PositionDto>,
         unitId: String,
         stepDuration: Duration = MOVE_STEP_DURATION,
+        followsTiles: Boolean = true,
     ) {
         var previousPosition = PositionDto(fromRow, fromColumn)
         path.forEach { position ->
-            followTile(position.row, position.column)
+            if (followsTiles) followTile(position.row, position.column)
             removeBattleUnit(previousPosition.row, previousPosition.column)
             displayBattleUnit(position.row, position.column, unitId)
             delay(stepDuration)

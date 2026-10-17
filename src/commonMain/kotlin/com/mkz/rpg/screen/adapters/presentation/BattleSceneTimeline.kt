@@ -43,4 +43,12 @@ class BattleSceneTimeline(
             }
         }
     }
+
+    /**
+     * Plays the step straight away, alongside the other steps, e.g.: a CPU battle unit wandering while the party walks.
+     * The timeline is not playing because of it, so the player can still act meanwhile.
+     */
+    fun playAlongside(step: suspend () -> Unit) {
+        coroutineScope.launchImmediately { step() }
+    }
 }

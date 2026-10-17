@@ -127,6 +127,12 @@ data class Battlefield private constructor(
         column: Int,
     ): Boolean = tiles.isVacant(row, column) && tiles.isTerrainOccupiable(row, column)
 
+    /** Whether the terrain of the tile can be occupied (e.g.: not void), whether a battle unit stands on it or not. */
+    fun canTerrainBeOccupied(
+        row: Int,
+        column: Int,
+    ): Boolean = tiles.isTerrainOccupiable(row, column)
+
     fun occupant(
         row: Int,
         column: Int,

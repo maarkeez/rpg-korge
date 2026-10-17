@@ -6,6 +6,7 @@ import com.mkz.rpg.exploration.domain.ExplorationError.PartyRequired
 import com.mkz.rpg.exploration.domain.ExplorationError.StepsRequired
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationPaused
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
+import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationSecondStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.PartyWalked
 import kotlin.jvm.JvmInline
@@ -121,7 +122,11 @@ data class Exploration private constructor(
     fun standingBattleUnitIds(battleUnitIds: Set<String>): Set<String> = battleUnitIds - movedBattleUnits.value
 
     /** Starts the next second, in which no battle unit has moved yet. */
-    fun startNextSecond(): Exploration = copy(movedBattleUnits = MovedBattleUnits(emptySet()))
+    fun startNextSecond(): Exploration =
+        copy(
+            movedBattleUnits = MovedBattleUnits(emptySet()),
+            events = events + ExplorationSecondStarted(playerId = playerId.value),
+        )
 
     fun pullEvents() = events to copy(events = emptySet())
 

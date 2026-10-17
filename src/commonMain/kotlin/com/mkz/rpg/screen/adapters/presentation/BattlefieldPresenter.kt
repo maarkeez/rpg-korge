@@ -4,12 +4,14 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -34,7 +36,7 @@ class BattlefieldPresenter(
     private val battleHudView: BattleHudView,
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
-    playerApi: PlayerApi,
+    private val playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
@@ -192,6 +194,21 @@ class BattlefieldPresenter(
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return
+        // While exploring, the CPU battle units wander alongside the timeline, so the party keeps walking smoothly, and
+        // without scrolling the battlefield away from the party. The selection (e.g.: to use the inventory) is kept.
+        if (!isBattling() && isCpuBattleUnit(battleUnit)) {
+            timeline.playAlongside {
+                battlefieldView.moveBattleUnit(
+                    fromRow = event.fromRow,
+                    fromColumn = event.fromColumn,
+                    path = event.path,
+                    unitId = battleUnit.unitId,
+                    stepDuration = BattlefieldView.EXPLORING_STEP_DURATION,
+                    followsTiles = false,
+                )
+            }
+            return
+        }
         val stepDuration = if (isBattling()) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
         timeline.play {
             battlefieldView.resetTiles()
@@ -405,6 +422,8 @@ class BattlefieldPresenter(
 
     // Out of a battle (e.g.: while exploring), the battle units are not selected.
     private fun isBattling(): Boolean = battleApi.searchBattle()?.isFinished == false
+
+    private fun isCpuBattleUnit(battleUnit: BattleUnit.Dto): Boolean = playerApi.searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.CPU
 
     // Delegates
     override fun tileSelected(

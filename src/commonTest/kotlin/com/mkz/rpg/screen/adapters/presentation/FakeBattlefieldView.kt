@@ -49,6 +49,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val removedBattleUnits = mutableListOf<PositionDto>()
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
     val moveStepDurations = mutableListOf<Duration>()
+
+    // The moves that do not scroll the battlefield to follow the battle unit (e.g.: a CPU battle unit wandering).
+    val unfollowedMoves = mutableListOf<MovedBattleUnit>()
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
@@ -126,9 +129,11 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         path: List<PositionDto>,
         unitId: String,
         stepDuration: Duration,
+        followsTiles: Boolean,
     ) {
         movedBattleUnits += MovedBattleUnit(fromRow, fromColumn, path, unitId)
         moveStepDurations += stepDuration
+        if (!followsTiles) unfollowedMoves += MovedBattleUnit(fromRow, fromColumn, path, unitId)
     }
 
     override fun displayLoot(

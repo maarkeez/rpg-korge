@@ -16,6 +16,7 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import com.mkz.rpg.wandering.adapters.presentation.WanderingApi
 import korlibs.korge.scene.Scene
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
@@ -23,8 +24,12 @@ import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.korge.view.container
 import korlibs.math.geom.Size
+import kotlin.random.Random
 
-class BattleScene : Scene() {
+// Random: the rolls of the CPU brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
+class BattleScene(
+    private val random: Random = Random.Default,
+) : Scene() {
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
     // the views are only changed from that loop. KorGE adds it to the views coroutine context when running the game,
     // but not when running the headless tests (ViewsForTesting), which would run them on Dispatchers.Default instead.
@@ -69,7 +74,8 @@ class BattleScene : Scene() {
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
-        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
+        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
+        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 

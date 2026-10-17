@@ -26,4 +26,9 @@ sealed interface ExplorationEvent : DomainEvent {
         val playerId: String,
         val battleUnitIds: List<String>,
     ) : ExplorationEvent
+
+    /** A new second starts while exploring, e.g.: the CPU battle units wander every second. */
+    data class ExplorationSecondStarted(
+        val playerId: String,
+    ) : ExplorationEvent
 }

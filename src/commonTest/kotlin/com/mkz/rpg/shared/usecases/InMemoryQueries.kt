@@ -15,6 +15,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
@@ -25,8 +26,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
+import com.mkz.rpg.cpuBrain.usecases.queries.SearchTerrainHealthEffect
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
+import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
@@ -78,9 +81,10 @@ class InMemoryQueries(
     val searchOccupant = SearchOccupant(battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
     val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
+    val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
-    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied, canBattlefieldTerrainBeOccupied)
 
     // Battle unit
     val distanceService = DistanceService()
@@ -104,6 +108,7 @@ class InMemoryQueries(
 
     // CPU brain
     val healingNeed = HealingNeed(searchBattleUnitById)
+    val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchBattlefield, searchTerrainById, searchEffectById)
     val searchEnemiesWithinReach = SearchEnemiesWithinReach(searchBattleUnitById, searchEnemyPlayer, searchBattleUnitsByPlayerId, searchPosition, searchWalkingDistance)
     val whatShouldCast =
         WhatShouldCast(
@@ -127,8 +132,16 @@ class InMemoryQueries(
             searchPosition,
             searchEnemiesWithinReach,
             healingNeed,
-            searchBattlefield,
-            searchTerrainById,
-            searchEffectById,
+            searchTerrainHealthEffect,
+        )
+    val whereShouldWander =
+        WhereShouldWander(
+            searchBattleUnitById,
+            searchPosition,
+            canBattlefieldTileBeOccupied,
+            searchWalkingDistance,
+            healingNeed,
+            searchTerrainHealthEffect,
+            random,
         )
 }

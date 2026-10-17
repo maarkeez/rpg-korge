@@ -13,6 +13,7 @@ import com.mkz.rpg.screen.adapters.presentation.mapBuilderHudView
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.paletteTerrainIds
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
+import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.delay
@@ -36,9 +37,12 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
     }
 }
 
-/** Starts the game as the player does, and plays a new game from the menu. */
+/**
+ * Starts the game as the player does, and plays a new game from the menu. The CPU battle units always rest instead of
+ * wandering, so they stand where the battle setup deploys them.
+ */
 suspend fun ViewsForTesting.startNewGame() {
-    stage.startGame()
+    stage.startGame(random = FixedDoublesRandom(0.0))
     waitUntil { stage.menuView() != null }
     clickPlayNewGame(requireNotNull(stage.menuView()) { "The menu is not displayed" })
 }

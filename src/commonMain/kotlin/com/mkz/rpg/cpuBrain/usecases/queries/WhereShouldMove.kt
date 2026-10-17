@@ -4,13 +4,9 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.cpuBrain.usecases.services.MINIMUM_UTILITY_GAIN
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.usecases.queries.SearchEffectById
-import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
+import com.mkz.rpg.cpuBrain.usecases.services.terrainHealthContribution
 import kotlin.math.abs
 
 class WhereShouldMove(
@@ -20,9 +16,7 @@ class WhereShouldMove(
     private val searchPosition: SearchPosition,
     private val searchEnemiesWithinReach: SearchEnemiesWithinReach,
     private val healingNeed: HealingNeed,
-    private val searchBattlefield: SearchBattlefield,
-    private val searchTerrainById: SearchTerrainById,
-    private val searchEffectById: SearchEffectById,
+    private val searchTerrainHealthEffect: SearchTerrainHealthEffect,
 ) {
     operator fun invoke(battleUnitId: String): Battlefield.Dto.PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId)!!
@@ -116,11 +110,10 @@ class WhereShouldMove(
             }
         }
         // Evaluate the health effect of the terrain of every candidate
-        val battlefield = searchBattlefield()
         candidatePositions.forEach { position ->
             utilityData[position] =
                 utilityData[position]!!.copy(
-                    terrainHealthEffect = terrainHealthEffect(battlefield, position),
+                    terrainHealthEffect = searchTerrainHealthEffect(row = position.row, column = position.column),
                 )
         }
         // Calculate utility contribution
@@ -140,7 +133,7 @@ class WhereShouldMove(
                 }
             val terrainContribution =
                 terrainHealthContribution(
-                    terrainHealthEffect = evaluationData.terrainHealthEffect,
+                    terrainHealthEffect = evaluationData.terrainHealthEffect ?: 0,
                     healingNeed = currentHealingNeed,
                     maxHealth = battleUnit.maximumHealthPoints,
                 )
@@ -182,27 +175,4 @@ class WhereShouldMove(
         from: Battlefield.Dto.PositionDto,
         to: Battlefield.Dto.PositionDto,
     ): Int = (abs(from.row - to.row) + abs(from.column - to.column))
-
-    private fun terrainHealthEffect(
-        battlefield: Battlefield.Dto?,
-        position: Battlefield.Dto.PositionDto,
-    ): Int {
-        val terrainId = battlefield?.tiles?.get(position)?.terrainId ?: return 0
-        val effectId = searchTerrainById(terrainId)?.effectId ?: return 0
-        val effect = searchEffectById(effectId) ?: return 0
-        return when (effect.outcome.type) {
-            INCREASE_HEALTH -> effect.outcome.increaseHealth!!.healing
-            DECREASE_HEALTH -> -effect.outcome.decreaseHealth!!.damage
-            else -> 0
-        }
-    }
-
-    private fun terrainHealthContribution(
-        terrainHealthEffect: Int?,
-        healingNeed: Double,
-        maxHealth: Int,
-    ): Double {
-        if (terrainHealthEffect == null || terrainHealthEffect == 0 || maxHealth <= 0) return 0.0
-        return healingNeed * terrainHealthEffect / maxHealth.toDouble()
-    }
 }

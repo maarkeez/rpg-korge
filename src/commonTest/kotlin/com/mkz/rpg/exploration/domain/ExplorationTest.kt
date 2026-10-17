@@ -209,6 +209,14 @@ class ExplorationTest {
     }
 
     @Test
+    fun `StartNextSecond should announce the next second`() {
+        // When
+        val (events, _) = exploration().startNextSecond().pullEvents()
+        // Then
+        events shouldBe setOf(ExplorationEvent.ExplorationSecondStarted(playerId = "human"))
+    }
+
+    @Test
     fun `MarkMoved should not remember the battle units moving while battling`() {
         // When
         val exploration = exploration().pause().markMoved("knight-1")

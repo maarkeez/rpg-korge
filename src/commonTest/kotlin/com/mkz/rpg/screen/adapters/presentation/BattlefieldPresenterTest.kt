@@ -212,21 +212,23 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.MOVE_STEP_DURATION)
+        battlefieldView.unfollowedMoves.shouldBeEmpty()
     }
 
     // The same battlefield, before any battle has started: the human player explores it.
-    private fun exploringApis() =
+    private fun exploringApis(deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1))) =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            units = listOf(unit(id = "knight", movementRange = 3).toDto()),
+            units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat", movementRange = 2).toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(4) { List(4) { "sand" } },
-            deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
+            deployments = deployments,
         ).also(SubdomainApis::initialise)
 
     private fun exploringPresenter(
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,
+        timeline: BattleSceneTimeline = battleSceneTimeline(),
     ) = BattlefieldPresenter(
         battlefieldView = battlefieldView,
         battleUnitInfoView = FakeBattleUnitInfoView(),
@@ -239,7 +241,7 @@ class BattlefieldPresenterTest {
         unitApi = apis.unitApi,
         abilityApi = apis.abilityApi,
         battleApi = apis.battleApi,
-        timeline = battleSceneTimeline(),
+        timeline = timeline,
         eventBus = apis.eventBus,
     )
 
@@ -254,6 +256,33 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.EXPLORING_STEP_DURATION)
+        exploringBattlefieldView.unfollowedMoves.shouldBeEmpty()
+    }
+
+    @Test
+    fun `MoveUnit should move a cpu battle unit wandering while exploring alongside the timeline, without following it`() {
+        // Given
+        val exploringApis =
+            exploringApis(
+                deployments =
+                    listOf(
+                        Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
+                        Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 3, column = 3),
+                    ),
+            )
+        val exploringBattlefieldView = FakeBattlefieldView()
+        val timeline = battleSceneTimeline()
+        exploringPresenter(exploringApis, exploringBattlefieldView, timeline)
+        timeline.playLongStep()
+        val path = listOf(position(3, 2))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
+        val resetTilesCount = exploringBattlefieldView.resetTilesCount
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.EXPLORING_STEP_DURATION)
+        exploringBattlefieldView.resetTilesCount shouldBe resetTilesCount
     }
 
     @Test

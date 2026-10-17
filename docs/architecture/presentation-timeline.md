@@ -41,6 +41,8 @@ When a player turn starts, two animations play together, in the colour of the pl
 
 `BattlefieldView.moveBattleUnit` displays the battle unit on each tile of the path, stopping `MOVE_STEP_DURATION` (150ms) on each one. Before each step, it scrolls the battlefield to center the tile when the tile is out of the viewport or on its edge. A battlefield smaller than the viewport is never scrolled.
 
+While exploring, the CPU battle units [wander](cpu-brain.md#wandering) every second. Their steps are played alongside the timeline (`playAlongside`), rather than in it, so the party keeps walking smoothly: the step starts straight away, in parallel with the playing steps, and does not make the timeline playing. They do not scroll the battlefield, so the party stays in view, nor reset the tiles, so the selection is kept (e.g.: to use the inventory).
+
 ## Applying effects
 
 A battle unit blinks in white every time an effect is applied to it:

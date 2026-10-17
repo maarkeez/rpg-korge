@@ -20,6 +20,7 @@ import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.commands.RequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
+import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.ParseBattlefield
@@ -77,10 +78,11 @@ class BattlefieldApi(
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
     val searchOccupant = SearchOccupant(battlefieldRepository)
     val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
+    val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
-    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied, canBattlefieldTerrainBeOccupied)
     val searchDroppedItems = SearchDroppedItems(battlefieldRepository)
     val previewBattlefield = PreviewBattlefield(battlefieldRepository, terrainApi.searchTerrainById)
     val exportBattlefield = ExportBattlefield(battlefieldEncoder)

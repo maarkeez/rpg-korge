@@ -98,3 +98,32 @@ Every tile the unit can move to, plus its current tile, is a candidate. Its util
 - **Terrain**: the health effect of the tile terrain relative to the battle unit max health (equipment included), weighted by its healing need. Hurt units look for healing terrain (e.g.: water) and avoid harmful terrain (e.g.: lava).
 
 The unit moves to the best tile, unless it is worth no more than `MINIMUM_UTILITY_GAIN` above staying still.
+
+## Wandering
+
+While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on, also during a battle (e.g.: a bat deployed by a goat). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
+
+The [`wandering`](../../src/commonMain/kotlin/com/mkz/rpg/wandering) subdomain remembers the homes, and walks the CPU battle units every second, while the CPU brain decides where each one steps:
+
+1. [`ClaimHome`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ClaimHome.kt) remembers the tile of every CPU battle unit deployed (`BattleUnitDeployed`).
+2. Every second while exploring (`ExplorationSecondStarted`), [`WanderWhileExploring`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/WanderWhileExploring.kt) lets each CPU battle unit rest or take one step, one after another, in their deployment order.
+3. [`WhereShouldWander`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldWander.kt) decides it. Each step is requested with `RequestWalkBattleUnit`, as the party steps, so it spends no turn action.
+4. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolveWanderingStep`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ResolveWanderingStep.kt)), so the next battle unit decides with the battlefield as it is then: two battle units never step on the same tile.
+5. Once every CPU battle unit has wandered (`BattleUnitsWanderedWhileExploring`), [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) engages the party when a CPU battle unit wandered within its reach.
+
+Within its territory, a CPU battle unit rests at random (`REST_CHANCE`, 0.5), but on harmful terrain. Otherwise, every free tile next to it that is within its territory and not harmful (e.g.: lava) is a candidate. It steps to one of them at random, each one as likely as its utility, which adds up three contributions:
+
+- **Roam**: how much further from home the tile is (normalised between the candidates and the current tile), weighted by `1 - distance from home / WANDER_DISTANCE`. Near home, the battle unit walks away from it.
+- **Home**: how much nearer to home the tile is (normalised the same way), weighted by `distance from home / WANDER_DISTANCE`. Far from home, the battle unit walks back to it.
+- **Terrain**: the health effect of the tile terrain relative to the battle unit max health, weighted by its healing need, as when [moving](#moving). Hurt battle units prefer healing terrain (e.g.: water).
+
+The distance from home is the walking distance through the battle units. Picking at random, rather than the best tile, lets the battle unit reach the edge of its territory now and then, instead of going back and forth between the same two tiles. For example, on open sand:
+
+| Distance from home | Steps (utility)                                          |
+|--------------------|----------------------------------------------------------|
+| 0 (home)           | Every tile next to it (1 each): it walks away in any direction |
+| 1                  | Further (0.67), along (0.5), back home (0.33)            |
+| 2                  | Back (0.67), along (0.5), further, to the edge (0.33)    |
+| 3 (edge)           | Back (1), along the edge (0): it always walks back       |
+
+A CPU battle unit outside its territory (e.g.: after chasing the party in a battle) stays where it is. The CPU battle units do not wander while battling.

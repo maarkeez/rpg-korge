@@ -3,6 +3,7 @@ package com.mkz.rpg.exploration.usecases.commands
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.exploration.adapters.storage.InMemoryExplorationRepository
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.exploration.domain.ExplorationMother.exploration
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -30,7 +31,10 @@ class ApplyStandingTerrainEffectsTest {
         // When
         applyStandingTerrainEffects()
         // Then
-        eventBus.shouldHavePublishedEvents(BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1")))
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1")),
+            ExplorationEvent.ExplorationSecondStarted(playerId = "human"),
+        )
     }
 
     @Test
@@ -41,7 +45,10 @@ class ApplyStandingTerrainEffectsTest {
         // When
         applyStandingTerrainEffects()
         // Then
-        eventBus.shouldHavePublishedEvents(BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-2", "rat-1")))
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-2", "rat-1")),
+            ExplorationEvent.ExplorationSecondStarted(playerId = "human"),
+        )
     }
 
     @Test
@@ -53,7 +60,7 @@ class ApplyStandingTerrainEffectsTest {
         // When
         applyStandingTerrainEffects()
         // Then
-        eventBus.publishedEvents.last() shouldBe BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1"))
+        eventBus.publishedEvents.takeLast(2).first() shouldBe BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1"))
     }
 
     @Test
@@ -68,14 +75,14 @@ class ApplyStandingTerrainEffectsTest {
     }
 
     @Test
-    fun `should not request the terrain effects when every battle unit moved during the second`() {
+    fun `should only start the next second when every battle unit moved during the second`() {
         // Given
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         explorationRepository.save(exploration(battleUnitIds = listOf("knight-1")).markMoved("knight-1"))
         // When
         applyStandingTerrainEffects()
         // Then
-        eventBus.shouldNotHavePublishedEvents()
+        eventBus.shouldHavePublishedEvents(ExplorationEvent.ExplorationSecondStarted(playerId = "human"))
     }
 
     @Test

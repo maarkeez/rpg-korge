@@ -8,7 +8,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Engages the exploring player when any CPU battle unit has one of their battle units within reach, with the same rule
- * the CPU battle units engage enemies in a battle. Otherwise, the CPU battle units stand still.
+ * the CPU battle units engage enemies in a battle: after the party walks, and after the CPU battle units wander.
  */
 class EngageEnemies(
     private val searchEnemyPlayer: SearchEnemyPlayer,

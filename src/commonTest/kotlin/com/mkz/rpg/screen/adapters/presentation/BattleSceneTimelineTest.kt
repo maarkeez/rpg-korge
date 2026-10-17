@@ -6,6 +6,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 
 class BattleSceneTimelineTest {
@@ -111,5 +112,26 @@ class BattleSceneTimelineTest {
         val isPlaying = timeline.isPlaying
         // Then
         isPlaying.shouldBeFalse()
+    }
+
+    @Test
+    fun `PlayAlongside should play the step straight away when another step is still playing`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        timeline.playLongStep()
+        // When
+        timeline.playAlongside { playedSteps += "alongside" }
+        // Then
+        playedSteps.shouldContainExactly("alongside")
+    }
+
+    @Test
+    fun `PlayAlongside should not make the timeline playing while its step plays`() {
+        // Given
+        val alongsideStep = CompletableDeferred<Unit>()
+        // When
+        timeline.playAlongside { alongsideStep.await() }
+        // Then
+        timeline.isPlaying.shouldBeFalse()
     }
 }
