@@ -3,6 +3,8 @@ package com.mkz.rpg.shared.adapters.e2e
 import com.mkz.rpg.screen.adapters.presentation.MapBuilderPresenter
 import com.mkz.rpg.screen.adapters.presentation.actionLabels
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.clickMenuButton
+import com.mkz.rpg.screen.adapters.presentation.clickMenuOption
 import com.mkz.rpg.screen.adapters.presentation.clickPaletteTerrain
 import com.mkz.rpg.screen.adapters.presentation.clickPrimaryAction
 import com.mkz.rpg.screen.adapters.presentation.clickRowsStep
@@ -11,6 +13,7 @@ import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.mapBuilderCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.mapBuilderHudView
 import com.mkz.rpg.screen.adapters.presentation.mapBuilderInfoView
+import com.mkz.rpg.screen.adapters.presentation.mapBuilderMenuView
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.subtitleText
 import com.mkz.rpg.screen.adapters.presentation.terrainBitmapAt
@@ -121,5 +124,21 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             callToActionView.actionLabels() shouldBe ("Back" to "Export")
             menuView() shouldBe null
             battlefieldView() shouldNotBe null
+        }
+
+    // The clipboard of the test window is always empty.
+    @Test
+    fun `should tell there is nothing to import when importing from an empty clipboard`() =
+        sharedViewsTest {
+            // Given
+            startMapBuilder()
+            val menuView = mapBuilderMenuView()!!
+            clickMenuButton(menuView)
+            // When
+            clickMenuOption(menuView, "Import")
+            // Then
+            waitUntil { mapBuilderInfoView()!!.subtitleText() == MapBuilderPresenter.NOTHING_TO_IMPORT }
+            mapBuilderInfoView()!!.subtitleText() shouldBe MapBuilderPresenter.NOTHING_TO_IMPORT
+            battlefieldView()!!.tileCount() shouldBe 256
         }
 }

@@ -32,6 +32,7 @@ class MapBuilderPresenterTest {
     private val infoView = FakeMapBuilderInfoView()
     private val hudView = FakeMapBuilderHudView()
     private val callToActionView = FakeMapBuilderCallToActionView()
+    private val menuView = FakeMapBuilderMenuView()
     private val clipboard = FakeClipboard()
     private var leftCount = 0
 
@@ -41,6 +42,7 @@ class MapBuilderPresenterTest {
             infoView = infoView,
             hudView = hudView,
             callToActionView = callToActionView,
+            menuView = menuView,
             mapBuilderApi = mapBuilderApi,
             battlefieldApi = apis.battlefieldApi,
             terrainApi = apis.terrainApi,
@@ -217,5 +219,82 @@ class MapBuilderPresenterTest {
         // Then
         battlefieldView.updatedTerrains.shouldBeEmpty()
         infoView.errors.shouldBeEmpty()
+    }
+
+    private fun importFromClipboard(text: String?) {
+        clipboard.textToPaste = text
+        menuView.select("Import")
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `MapBuilderMenuView should offer importing a map when the map builder is displayed`() {
+        // Then
+        menuView.displayedOptions.map(MapBuilderMenuView.Option::label).shouldContainExactly("Import")
+    }
+
+    @Test
+    fun `Import should display the map copied and tell it when a map is imported`() {
+        // Given
+        givenMapCreated()
+        val tiles = listOf(listOf("sand", "lava", "sand"), listOf("sand", "sand", "water"))
+        // When
+        importFromClipboard(apis.battlefieldApi.exportBattlefield(tiles))
+        // Then
+        battlefieldView.displayedBattlefields.last() shouldBe apis.battlefieldApi.previewBattlefield(tiles)
+        infoView.displayedSize shouldBe (2 to 3)
+        hudView.displayedSize shouldBe (2 to 3)
+        infoView.infos.shouldContainExactly(MapBuilderPresenter.MAP_IMPORTED)
+    }
+
+    @Test
+    fun `Import should display why and keep the map when the clipboard is empty or can not be read`() {
+        // Given
+        givenMapCreated()
+        // When
+        importFromClipboard(null)
+        // Then
+        infoView.errors.shouldContainExactly(MapBuilderPresenter.NOTHING_TO_IMPORT)
+        battlefieldView.displayedBattlefields.shouldHaveSize(1)
+    }
+
+    @Test
+    fun `Import should display why when the clipboard has no map`() {
+        // Given
+        givenMapCreated()
+        // When
+        importFromClipboard("Hello, map builder!")
+        // Then
+        infoView.errors.shouldContainExactly(MapBuilderPresenter.NOT_A_MAP)
+    }
+
+    @Test
+    fun `Import should display why when the copied map is larger than allowed`() {
+        // Given
+        givenMapCreated()
+        // When
+        importFromClipboard(apis.battlefieldApi.exportBattlefield(List(129) { List(2) { "sand" } }))
+        // Then
+        infoView.errors.shouldContainExactly("The map must be 1 to 128 tiles wide and tall")
+    }
+
+    @Test
+    fun `Import should display the terrain when the copied map has an unknown terrain`() {
+        // Given
+        givenMapCreated()
+        // When
+        importFromClipboard(apis.battlefieldApi.exportBattlefield(listOf(listOf("sand", "forest"))))
+        // Then
+        infoView.errors.shouldContainExactly("Unknown terrain: forest")
+    }
+
+    @Test
+    fun `Import should display the terrains when two neighbours of the copied map can not be next to each other`() {
+        // Given
+        givenMapCreated()
+        // When
+        importFromClipboard(apis.battlefieldApi.exportBattlefield(listOf(listOf("water", "lava"))))
+        // Then
+        infoView.errors.shouldContainExactly("Water can not be next to lava")
     }
 }

@@ -2,6 +2,9 @@ package com.mkz.rpg.mapBuilder.domain
 
 import com.mkz.rpg.mapBuilder.domain.MapBuilderError.TileNotFound
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapCreated
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImportRejected
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImportRejected.Reason
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImported
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapResized
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.TerrainSelected
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.TilePaintRejected
@@ -87,6 +90,51 @@ data class MapBuilder private constructor(
             tiles = tiles.paint(row, column, selectedTerrainId),
             events = events + TilePainted(row = row, column = column, terrainId = terrainId),
         )
+    }
+
+    /**
+     * Replaces the map with the imported tiles, keeping the selected terrain. The import is rejected, leaving the map
+     * unchanged, when [tiles] is `null` (the imported text is not a map), when its size is out of [MINIMUM_SIZE] to
+     * [MAXIMUM_SIZE], when [isKnownTerrain] does not know one of its terrains, or when two neighbouring tiles have
+     * terrains that [canBeNeighbours] tells can not be next to each other.
+     */
+    fun import(
+        tiles: List<List<String>>?,
+        isKnownTerrain: (terrainId: String) -> Boolean,
+        canBeNeighbours: (terrainId: String, neighbourTerrainId: String) -> Boolean,
+    ): MapBuilder {
+        if (tiles == null) return rejectImport(Reason.NOT_A_MAP)
+        if (!isValidSize(tiles.size) || !isValidSize(tiles.first().size)) return rejectImport(Reason.SIZE_OUT_OF_RANGE)
+        tiles.flatten().firstOrNull { terrainId -> !isKnownTerrain(terrainId) }?.let { terrainId ->
+            return rejectImport(Reason.UNKNOWN_TERRAIN, terrainId = terrainId)
+        }
+        forbiddenNeighbours(tiles, canBeNeighbours)?.let { (terrainId, neighbourTerrainId) ->
+            return rejectImport(Reason.FORBIDDEN_NEIGHBOURS, terrainId = terrainId, neighbourTerrainId = neighbourTerrainId)
+        }
+        val importedTiles = Tiles(tiles.map { row -> row.map(::TerrainId) })
+        return copy(tiles = importedTiles, events = events + MapImported(rows = importedTiles.rows, columns = importedTiles.columns))
+    }
+
+    private fun rejectImport(
+        reason: Reason,
+        terrainId: String? = null,
+        neighbourTerrainId: String? = null,
+    ): MapBuilder = copy(events = events + MapImportRejected(reason = reason, terrainId = terrainId, neighbourTerrainId = neighbourTerrainId))
+
+    // The first two different terrains next to each other that can not be neighbours, checking each tile with the tiles
+    // to its east and to its south.
+    private fun forbiddenNeighbours(
+        tiles: List<List<String>>,
+        canBeNeighbours: (terrainId: String, neighbourTerrainId: String) -> Boolean,
+    ): Pair<String, String>? {
+        tiles.forEachIndexed { row, terrainIds ->
+            terrainIds.forEachIndexed { column, terrainId ->
+                listOfNotNull(terrainIds.getOrNull(column + 1), tiles.getOrNull(row + 1)?.get(column)).forEach { neighbourTerrainId ->
+                    if (neighbourTerrainId != terrainId && !canBeNeighbours(terrainId, neighbourTerrainId)) return terrainId to neighbourTerrainId
+                }
+            }
+        }
+        return null
     }
 
     private fun isValidSize(size: Int): Boolean = size in MINIMUM_SIZE..MAXIMUM_SIZE

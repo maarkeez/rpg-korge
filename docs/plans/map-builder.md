@@ -125,6 +125,22 @@ Laid out like the battle screen, within the 390 x 844 window:
 - **Export** copies `exportMap()` to the clipboard, through a `Clipboard` port (the game window clipboard in the game,
   a fake in the tests), and displays "Map copied to the clipboard" in the subtitle.
 
+## Importing a map
+
+A hamburger menu at the top right corner of the map builder lists **Import**. It replaces the map with the one in the
+clipboard, e.g.: exported earlier, right away: the current map is lost.
+
+| Topic          | Decision                                                                                                                                                 |
+|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Format         | The format of `resources/battlefield/battlefield.toml`, read by the battlefield `parseBattlefield` query with the same definition as the battlefield loader. |
+| Invalid maps   | The whole import is rejected, keeping the map, and the subtitle displays why: the clipboard is empty or can not be read, has no map, the size is out of 1 to 128, a terrain does not exist, or two neighbours can not be next to each other. |
+| Selected terrain | Kept.                                                                                                                                                  |
+| Menu           | Choosing an option, the menu button again, or anywhere else on the screen closes it. A tap out of the menu only closes it, e.g.: it does not paint.     |
+| Scope          | Only the map builder has the menu.                                                                                                                      |
+
+Browsers ask for permission to read the clipboard (e.g.: Safari on iOS shows a "Paste" bubble to tap). When it is
+denied, the import tells the clipboard can not be read.
+
 ## Risks
 
 ### Large maps

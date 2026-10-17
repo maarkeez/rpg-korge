@@ -2,6 +2,9 @@ package com.mkz.rpg.mapBuilder.domain
 
 import com.mkz.rpg.mapBuilder.domain.MapBuilderError.TileNotFound
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapCreated
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImportRejected
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImportRejected.Reason
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImported
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapResized
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.TerrainSelected
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.TilePaintRejected
@@ -126,5 +129,65 @@ class MapBuilderTest {
         val paint = { newMap().paint(row = 16, column = 0, canBeNeighbours) }
         // Then
         shouldThrow<TileNotFound> { paint() }
+    }
+
+    private val isKnownTerrain = { terrainId: String -> terrainId in setOf("sand", "lava", "water") }
+
+    @Test
+    fun `should replace the tiles and keep the selected terrain when a map is imported`() {
+        // Given
+        val mapBuilder = newMap().selectTerrain("lava").pullEvents().second
+        val tiles = listOf(listOf("sand", "lava", "lava"), listOf("water", "sand", "sand"))
+        // When
+        val (events, imported) = mapBuilder.import(tiles, isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        imported.toDto() shouldBe MapBuilder.Dto(rows = 2, columns = 3, tiles = tiles, selectedTerrainId = "lava")
+        events.shouldContainExactly(MapImported(rows = 2, columns = 3))
+    }
+
+    @Test
+    fun `should reject the import and keep the map when the imported text is not a map`() {
+        // Given
+        val mapBuilder = newMap()
+        // When
+        val (events, rejected) = mapBuilder.import(tiles = null, isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        rejected shouldBe mapBuilder
+        events.shouldContainExactly(MapImportRejected(reason = Reason.NOT_A_MAP))
+    }
+
+    @Test
+    fun `should reject the import when the imported map is larger than 128 rows or columns`() {
+        // When
+        val (events, _) = newMap().import(List(129) { List(4) { "sand" } }, isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        events.shouldContainExactly(MapImportRejected(reason = Reason.SIZE_OUT_OF_RANGE))
+    }
+
+    @Test
+    fun `should reject the import when the imported map has no columns`() {
+        // When
+        val (events, _) = newMap().import(listOf(emptyList()), isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        events.shouldContainExactly(MapImportRejected(reason = Reason.SIZE_OUT_OF_RANGE))
+    }
+
+    @Test
+    fun `should reject the import with the terrain when the imported map has an unknown terrain`() {
+        // When
+        val (events, _) = newMap().import(listOf(listOf("sand", "forest")), isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        events.shouldContainExactly(MapImportRejected(reason = Reason.UNKNOWN_TERRAIN, terrainId = "forest"))
+    }
+
+    @Test
+    fun `should reject the import with the terrains when two neighbours of the imported map can not be next to each other`() {
+        // Given
+        val tiles = listOf(listOf("lava", "sand"), listOf("water", "sand"))
+        // When
+        val (events, rejected) = newMap().import(tiles, isKnownTerrain, canBeNeighbours).pullEvents()
+        // Then
+        events.shouldContainExactly(MapImportRejected(reason = Reason.FORBIDDEN_NEIGHBOURS, terrainId = "lava", neighbourTerrainId = "water"))
+        rejected.toDto().rows shouldBe 16
     }
 }

@@ -13,4 +13,8 @@ sealed class BattlefieldError(
         val terrainId: String,
         val transitionToTerrainId: String,
     ) : BattlefieldError("Tile terrain transition from '$terrainId' to '$transitionToTerrainId' is not allowed")
+
+    class InvalidBattlefieldFormat(
+        reason: String?,
+    ) : BattlefieldError("The text is not a battlefield: $reason")
 }

@@ -3,7 +3,9 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
+import com.mkz.rpg.mapBuilder.domain.MapBuilder
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent
+import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent.MapImportRejected.Reason
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -13,13 +15,14 @@ import kotlinx.coroutines.CoroutineScope
 
 /**
  * Displays the map being designed on the battlefield, as the battle would display it, and lets the player resize it,
- * paint its tiles, export it to the clipboard, and leave once they confirm it.
+ * paint its tiles, export it to the clipboard or import one from it, and leave once they confirm it.
  */
 class MapBuilderPresenter(
     private val battlefieldView: BattlefieldView,
     private val infoView: MapBuilderInfoView,
     private val hudView: MapBuilderHudView,
     private val callToActionView: MapBuilderCallToActionView,
+    private val menuView: MapBuilderMenuView,
     private val mapBuilderApi: MapBuilderApi,
     private val battlefieldApi: BattlefieldApi,
     private val terrainApi: TerrainApi,
@@ -32,6 +35,10 @@ class MapBuilderPresenter(
     companion object {
         const val MAP_COPIED = "Map copied to the clipboard"
         const val MAP_LOST_WHEN_LEAVING = "The map is lost when leaving"
+        const val MAP_IMPORTED = "Map imported"
+        const val NOTHING_TO_IMPORT = "The clipboard is empty or can not be read"
+        const val NOT_A_MAP = "The clipboard has no map"
+        val MAP_SIZE_OUT_OF_RANGE = "The map must be ${MapBuilder.MINIMUM_SIZE} to ${MapBuilder.MAXIMUM_SIZE} tiles wide and tall"
     }
 
     private val subscriptions =
@@ -44,13 +51,19 @@ class MapBuilderPresenter(
             eventBus.subscribe<MapBuilderEvent.TerrainSelected> { event -> hudView.selectTerrain(event.terrainId) },
             eventBus.subscribe<MapBuilderEvent.TilePainted> { event -> displayPaintedTile(event.row, event.column) },
             eventBus.subscribe<MapBuilderEvent.TilePaintRejected> { event ->
-                infoView.displayError("${terrainName(event.terrainId)} can not be next to ${terrainName(event.neighbourTerrainId).lowercase()}")
+                infoView.displayError(forbiddenNeighboursMessage(event.terrainId, event.neighbourTerrainId))
             },
+            eventBus.subscribe<MapBuilderEvent.MapImported> {
+                displayMap()
+                infoView.displayInfo(MAP_IMPORTED)
+            },
+            eventBus.subscribe<MapBuilderEvent.MapImportRejected> { event -> infoView.displayError(importRejectedMessage(event)) },
         )
 
     init {
         battlefieldView.setDelegate(this)
         hudView.setDelegate(this)
+        menuView.displayOptions(listOf(MapBuilderMenuView.Option(label = "Import") { importMap() }))
         displayExportAndBack()
     }
 
@@ -98,6 +111,31 @@ class MapBuilderPresenter(
             infoView.displayInfo(MAP_COPIED)
         }
     }
+
+    // Replaces the map with the one copied, e.g.: exported earlier. The current map is lost.
+    private fun importMap() {
+        coroutineScope.launchImmediately {
+            val text = clipboard.paste()
+            if (text.isNullOrBlank()) {
+                infoView.displayError(NOTHING_TO_IMPORT)
+            } else {
+                mapBuilderApi.importMap(text)
+            }
+        }
+    }
+
+    private fun importRejectedMessage(event: MapBuilderEvent.MapImportRejected): String =
+        when (event.reason) {
+            Reason.NOT_A_MAP -> NOT_A_MAP
+            Reason.SIZE_OUT_OF_RANGE -> MAP_SIZE_OUT_OF_RANGE
+            Reason.UNKNOWN_TERRAIN -> "Unknown terrain: ${event.terrainId}"
+            Reason.FORBIDDEN_NEIGHBOURS -> forbiddenNeighboursMessage(event.terrainId!!, event.neighbourTerrainId!!)
+        }
+
+    private fun forbiddenNeighboursMessage(
+        terrainId: String,
+        neighbourTerrainId: String,
+    ): String = "${terrainName(terrainId)} can not be next to ${terrainName(neighbourTerrainId).lowercase()}"
 
     private fun askToLeave() {
         infoView.displayInfo(MAP_LOST_WHEN_LEAVING)

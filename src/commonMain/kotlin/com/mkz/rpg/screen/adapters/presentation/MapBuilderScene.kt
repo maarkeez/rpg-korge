@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -14,6 +15,10 @@ import korlibs.math.geom.Size
 
 /** Designs a battlefield map, laid out like the battle: the title, the battlefield, the HUD and the calls to action. */
 class MapBuilderScene : Scene() {
+    private companion object {
+        const val MENU_MARGIN = 6.0
+    }
+
     // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
@@ -22,6 +27,7 @@ class MapBuilderScene : Scene() {
     val infoView = MapBuilderInfoView()
     val hudView = MapBuilderHudView()
     val callToActionView = MapBuilderCallToActionView()
+    val menuView = MapBuilderMenuView()
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -46,6 +52,7 @@ class MapBuilderScene : Scene() {
             infoView = infoView,
             hudView = hudView,
             callToActionView = callToActionView,
+            menuView = menuView,
             mapBuilderApi = mapBuilderApi,
             battlefieldApi = battlefieldApi,
             terrainApi = terrainApi,
@@ -66,6 +73,11 @@ class MapBuilderScene : Scene() {
                 addChild(callToActionView)
             }
         }
+
+        // At the top right corner, over the rest of the scene, so the open menu covers it.
+        menuView.x = GAME_WINDOW_SIZE.width - MapBuilderMenuView.BUTTON_WIDTH - MENU_MARGIN
+        menuView.y = MENU_MARGIN
+        addChild(menuView)
 
         mapBuilderApi.createMap()
     }
