@@ -17,6 +17,7 @@ import kotlin.test.Test
 
 class WhereShouldWanderTest {
     // The first roll decides whether the rat rests (below 0.5), and the next one picks the step, weighted by utility.
+    // Outside its territory, it does not roll whether it rests, so the first roll picks the step.
     private fun whereShouldWander(
         vararg rolls: Double,
         battleUnitId: String = "rat-1",
@@ -153,12 +154,84 @@ class WhereShouldWanderTest {
     }
 
     @Test
-    fun `should stay when it stands outside its territory`() {
+    fun `should still rest when it stands at the edge of its territory`() {
+        // Given
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand sand sand", occupants = mapOf("rat-1" to (0 to 3)))
+        // When
+        val step = whereShouldWander(0.0, 0.0, homeRow = 0, homeColumn = 0)
+        // Then
+        step.shouldBeNull()
+    }
+
+    @Test
+    fun `should walk back towards home when it stands outside its territory`() {
         // Given
         givenBattleUnits("rat-1")
         givenBattlefield("sand sand sand sand sand sand", occupants = mapOf("rat-1" to (0 to 4)))
         // When
         val step = whereShouldWander(0.5, 0.0, homeRow = 0, homeColumn = 0)
+        // Then
+        step shouldBe position(0, 3)
+    }
+
+    @Test
+    fun `should never rest when it stands outside its territory`() {
+        // Given
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand sand sand sand", occupants = mapOf("rat-1" to (0 to 5)))
+        // When
+        val step = whereShouldWander(0.0, 0.0, homeRow = 0, homeColumn = 0)
+        // Then
+        step shouldBe position(0, 4)
+    }
+
+    @Test
+    fun `should step to any tile nearer to home when it stands outside its territory`() {
+        // Given: the rat is 7 tiles away from home, and both the tile to the north and to the west are 6 tiles away.
+        givenBattleUnits("rat-1")
+        givenBattlefield(
+            """
+            sand sand sand sand sand sand
+            sand sand sand sand sand sand
+            sand sand sand sand sand sand
+            """,
+            occupants = mapOf("rat-1" to (2 to 5)),
+        )
+        // When
+        val northStep = whereShouldWander(0.0, homeRow = 0, homeColumn = 0)
+        val westStep = whereShouldWander(0.99, homeRow = 0, homeColumn = 0)
+        // Then
+        northStep shouldBe position(1, 5)
+        westStep shouldBe position(2, 4)
+    }
+
+    @Test
+    fun `should walk around the void on its way home`() {
+        // Given: the void blocks the straight way home, so it is 6 tiles away through the row below, rather than 4.
+        givenBattleUnits("rat-1")
+        givenBattlefield(
+            """
+            sand void void sand sand
+            sand sand sand sand sand
+            """,
+            occupants = mapOf("rat-1" to (0 to 4)),
+        )
+        // When
+        val southStep = whereShouldWander(0.0, homeRow = 0, homeColumn = 0)
+        val westStep = whereShouldWander(0.99, homeRow = 0, homeColumn = 0)
+        // Then: both are 5 tiles away from home, through the row below.
+        southStep shouldBe position(1, 4)
+        westStep shouldBe position(0, 3)
+    }
+
+    @Test
+    fun `should stay when home can not be walked to`() {
+        // Given
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand void sand sand", occupants = mapOf("rat-1" to (0 to 3)))
+        // When
+        val step = whereShouldWander(0.0, 0.0, homeRow = 0, homeColumn = 0)
         // Then
         step.shouldBeNull()
     }

@@ -16,12 +16,14 @@ import kotlin.random.Random
  * fewer, through the battle units, as only the terrain bounds it.
  *
  * Within its territory, it rests at random ([REST_CHANCE]), but on harmful terrain (e.g.: lava). Otherwise, it scores
- * the free tiles next to it that are not harmful, and steps to one of them at random, weighted by their utility:
+ * the free tiles next to it that are not harmful, within its territory or nearer to home, and steps to one of them at
+ * random, weighted by their utility:
  * - Roam: how much further from home the tile is, weighted by how near home the battle unit is. Near home, it walks away.
  * - Home: how much nearer to home the tile is, weighted by how far from home the battle unit is. Far from home, it walks back.
  * - Terrain: the health effect of the tile terrain, weighted by its healing need, as when moving in a battle.
  *
- * Outside its territory (e.g.: after a battle), it stays where it is.
+ * Outside its territory (e.g.: after chasing the party in a battle), it never rests, and only steps nearer to home, so
+ * it heads back home. It stays when home can not be walked to.
  */
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -41,14 +43,16 @@ class WhereShouldWander(
         val position = searchPosition(battleUnitId = battleUnitId) ?: return null
         val home = PositionDto(row = homeRow, column = homeColumn)
         val distanceFromHome = distanceFromHome(home, position) ?: return null
+        val isInTerritory = distanceFromHome <= WANDER_DISTANCE
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0
-        if (!isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
-        // The free tiles next to it, within its territory and not harmful, with their distance from home.
+        if (isInTerritory && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
+        // The free tiles next to it that are not harmful, with their distance from home, within its territory or nearer to home.
         val steps =
             adjacentPositions(position)
                 .filter { step -> canBattlefieldTileBeOccupied(row = step.row, column = step.column) }
                 .filter { step -> terrainHealthEffect(step) >= 0 }
                 .mapNotNull { step -> distanceFromHome(home, step)?.let { distance -> step to distance } }
+                .filter { (_, distance) -> distance <= WANDER_DISTANCE || distance < distanceFromHome }
         if (steps.isEmpty()) return null
         // The distances are normalised between the steps and the current tile, so staying is the reference.
         val distances = steps.map { (_, distance) -> distance } + distanceFromHome
@@ -81,7 +85,8 @@ class WhereShouldWander(
             fromColumn = home.column,
             toRow = position.row,
             toColumn = position.column,
-            maximumDistance = WANDER_DISTANCE,
+            // Anywhere on the battlefield, as a battle unit may be far from home (e.g.: after a battle).
+            maximumDistance = Int.MAX_VALUE,
             throughBattleUnits = true,
         )
 

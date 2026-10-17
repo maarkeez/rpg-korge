@@ -111,7 +111,7 @@ The [`wandering`](../../src/commonMain/kotlin/com/mkz/rpg/wandering) subdomain r
 4. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolveWanderingStep`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ResolveWanderingStep.kt)), so the next battle unit decides with the battlefield as it is then: two battle units never step on the same tile.
 5. Once every CPU battle unit has wandered (`BattleUnitsWanderedWhileExploring`), [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) engages the party when a CPU battle unit wandered within its reach.
 
-Within its territory, a CPU battle unit rests at random (`REST_CHANCE`, 0.5), but on harmful terrain. Otherwise, every free tile next to it that is within its territory and not harmful (e.g.: lava) is a candidate. It steps to one of them at random, each one as likely as its utility, which adds up three contributions:
+Within its territory, a CPU battle unit rests at random (`REST_CHANCE`, 0.5), but on harmful terrain. Otherwise, every free tile next to it that is not harmful (e.g.: lava) and within its territory, or nearer to home, is a candidate. It steps to one of them at random, each one as likely as its utility, which adds up three contributions:
 
 - **Roam**: how much further from home the tile is (normalised between the candidates and the current tile), weighted by `1 - distance from home / WANDER_DISTANCE`. Near home, the battle unit walks away from it.
 - **Home**: how much nearer to home the tile is (normalised the same way), weighted by `distance from home / WANDER_DISTANCE`. Far from home, the battle unit walks back to it.
@@ -126,4 +126,6 @@ The distance from home is the walking distance through the battle units. Picking
 | 2                  | Back (0.67), along (0.5), further, to the edge (0.33)    |
 | 3 (edge)           | Back (1), along the edge (0): it always walks back       |
 
-A CPU battle unit outside its territory (e.g.: after chasing the party in a battle) stays where it is. The CPU battle units do not wander while battling.
+A CPU battle unit outside its territory (e.g.: after chasing the party in a battle, as an engaged battle unit is not tied to its home) heads back home: it never rests, and only steps to the tiles nearer to home, picking one of them at random. It stays when home can not be walked to, e.g.: walled off by void, or only through harmful terrain. Once back in its territory, it wanders as before.
+
+The CPU battle units do not wander while battling.

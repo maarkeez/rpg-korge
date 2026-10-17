@@ -132,4 +132,26 @@ class WanderingAcceptanceTest {
                 .shouldBeFalse()
         }
     }
+
+    @Test
+    fun `should walk back home without resting when it is left outside its territory`() {
+        // Given: the rat is deployed at (0,7), and left 5 tiles away from home, at (5,7), e.g.: after chasing the party.
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.battleUnitApi.walkBattleUnit(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 7)
+            game.eventBus.dispatch()
+            // When
+            val positions =
+                List(3) {
+                    game.waitASecond()
+                    game.ratPosition()
+                }
+            // Then: it heads home until it is back in its territory, where it rests.
+            positions.shouldContainExactly(
+                PositionDto(4, 7),
+                PositionDto(3, 7),
+                PositionDto(3, 7),
+            )
+        }
+    }
 }
