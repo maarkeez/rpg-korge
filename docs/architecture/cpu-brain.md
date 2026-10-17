@@ -34,13 +34,13 @@ An option must beat doing nothing by more than `MINIMUM_UTILITY_GAIN` (0.05), de
 
 ## Engaging
 
-A battle unit only engages the enemies **within reach**: the ones it can walk to in `ENGAGEMENT_DISTANCE` (3) tiles or fewer, counting their tile, found by [`SearchEnemiesWithinReach`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/SearchEnemiesWithinReach.kt). The other enemies are ignored, so the CPU battle units wait until the human battle units come close.
+A battle unit only engages the enemies **within reach**: the ones it can walk to in `ENGAGEMENT_DISTANCE` (5) tiles or fewer, counting their tile, found by [`SearchEnemiesWithinReach`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/SearchEnemiesWithinReach.kt). The other enemies are ignored, so the CPU battle units wait until the human battle units come close.
 
 - The walk only steps on tiles the battle unit could stand on: other battle units (allies included) and terrains that can not be occupied (e.g.: void) block it, while terrains that hurt (e.g.: lava) do not. It is counted by the battlefield [`SearchWalkingDistance`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchWalkingDistance.kt).
 - It is checked at every decision, with the battlefield as it is then, and nothing is remembered: an enemy walking out of reach is no longer followed.
 - Without an enemy within reach, the battle unit does not approach, attack, deploy or cast its other abilities (e.g.: teleport). It still heals, and still falls back towards its allies and healing terrain when hurt.
 
-For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat four tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
+For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat six tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
 
 ## Casting
 

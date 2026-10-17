@@ -33,23 +33,23 @@ class SearchEnemiesWithinReachTest {
     }
 
     @Test
-    fun `should return the enemy when it is walked to in 3 tiles`() {
+    fun `should return the enemy when it is walked to in 5 tiles`() {
         // When
-        val enemyIds = enemyIdsWithinReach("R . . K")
+        val enemyIds = enemyIdsWithinReach("R . . . . K")
         // Then
         enemyIds.shouldContainExactly("knight-1")
     }
 
     @Test
-    fun `should not return the enemy when it is walked to in 4 tiles`() {
+    fun `should not return the enemy when it is walked to in 6 tiles`() {
         // When
-        val enemyIds = enemyIdsWithinReach("R . . . K")
+        val enemyIds = enemyIdsWithinReach("R . . . . . K")
         // Then
         enemyIds.shouldBeEmpty()
     }
 
     @Test
-    fun `should not return the enemy when the tiles walked around a wall are more than 3`() {
+    fun `should not return the enemy when the tiles walked around a wall are more than 5`() {
         // When
         val enemyIds =
             enemyIdsWithinReach(
@@ -66,7 +66,7 @@ class SearchEnemiesWithinReachTest {
     @Test
     fun `should only return the enemies within reach when some are out of reach`() {
         // When
-        val enemyIds = enemyIdsWithinReach("K . R . . . L")
+        val enemyIds = enemyIdsWithinReach("K . R . . . . . L")
         // Then
         enemyIds.shouldContainExactly("knight-1")
     }

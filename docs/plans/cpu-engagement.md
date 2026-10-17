@@ -1,6 +1,6 @@
 # Plan: CPU battle units engage only nearby enemies
 
-> **Status:** implemented.
+> **Status:** implemented. The reach distance was raised from 3 to 5 tiles afterwards.
 >
 > **Summary:** A CPU battle unit approaches and casts at the human battle units only when one of them can be walked to
 > in 3 tiles or fewer. Otherwise, it ignores them: it does not walk towards them, attack them, deploy battle units

@@ -78,8 +78,8 @@ class WhereShouldMoveTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealthPoints = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealthPoints = 10)
-        // The battle unit walks 4 tiles to the enemy, further than it engages enemies.
-        givenBattlefieldRow(List(5) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 4))
+        // The battle unit walks 6 tiles to the enemy, further than it engages enemies.
+        givenBattlefieldRow(List(7) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 6))
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
@@ -92,11 +92,11 @@ class WhereShouldMoveTest {
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealthPoints = 1)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealthPoints = 10)
         givenBattleUnit(id = "ally-battle-unit", playerId = "player-1", remainingHealthPoints = 10)
-        givenBattlefieldRow(List(9) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 4, "ally-battle-unit" to 8))
+        givenBattlefieldRow(List(13) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 6, "ally-battle-unit" to 12))
         // When
         val result = whereShouldMove("battle-unit-1")
         // Then
-        result shouldBe position(0, 6)
+        result shouldBe position(0, 8)
     }
 
     @Test

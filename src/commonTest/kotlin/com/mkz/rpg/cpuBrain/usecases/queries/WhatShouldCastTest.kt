@@ -73,9 +73,9 @@ class WhatShouldCastTest {
         queries.battlefieldRepository.create(
             battlefield(
                 """
-                . . . .
-                . . . .
-                . . . .
+                . . . . . .
+                . . . . . .
+                . . . . . .
                 """,
             ),
         )
@@ -298,8 +298,8 @@ class WhatShouldCastTest {
         decision.shouldBeNull()
     }
 
-    // The rat walks 5 tiles to the knight, further than it engages enemies.
-    private val outOfReach = WhereCanCast.PositionDto(row = 2, column = 3)
+    // The rat walks 7 tiles to the knight, further than it engages enemies.
+    private val outOfReach = WhereCanCast.PositionDto(row = 2, column = 5)
 
     @Test
     fun `should not deploy a battle unit when the enemy is out of reach`() {
