@@ -1,6 +1,6 @@
 # Plan: main menu and map builder
 
-> **Status:** implemented.
+> **Status:** implemented, except importing a map from a file instead of the clipboard, which is planned.
 >
 > **Summary:** The game opens on a menu offering to play a new game or to build a map. The map builder lets the player
 > design a rectangular battlefield on a mobile screen, painting its tiles with terrains, and copies it to the clipboard
@@ -127,19 +127,42 @@ Laid out like the battle screen, within the 390 x 844 window:
 
 ## Importing a map
 
-A hamburger menu at the top right corner of the map builder lists **Import**. It replaces the map with the one in the
-clipboard, e.g.: exported earlier, right away: the current map is lost.
+A hamburger menu at the top right corner of the map builder lists **Import**. It opens the file picker of the device,
+and replaces the map with the one in the picked file, e.g.: exported earlier and saved as a `.toml` file, right away:
+the current map is lost.
 
-| Topic          | Decision                                                                                                                                                 |
-|----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Format         | The format of `resources/battlefield/battlefield.toml`, read by the battlefield `parseBattlefield` query with the same definition as the battlefield loader. |
-| Invalid maps   | The whole import is rejected, keeping the map, and the subtitle displays why: the clipboard is empty or can not be read, has no map, the size is out of 1 to 128, a terrain does not exist, or two neighbours can not be next to each other. |
-| Selected terrain | Kept.                                                                                                                                                  |
-| Menu           | Choosing an option, the menu button again, or anywhere else on the screen closes it. A tap out of the menu only closes it, e.g.: it does not paint.     |
-| Scope          | Only the map builder has the menu.                                                                                                                      |
+| Topic            | Decision                                                                                                                                                 |
+|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Source           | A file, picked with the file picker KorGE opens on every platform (`GameWindow.openFileDialog`): the system file dialog on the JVM, and the browser file picker on the web, e.g.: the Files app on iOS. The clipboard is not read, as Safari on iOS does not let the game read it. |
+| Format           | The format of `resources/battlefield/battlefield.toml`, read by the battlefield `parseBattlefield` query with the same definition as the battlefield loader. |
+| Invalid maps     | The whole import is rejected, keeping the map, and the subtitle displays why: the file can not be read, has no map, the size is out of 1 to 128, a terrain does not exist, or two neighbours can not be next to each other. |
+| Cancelling       | Nothing happens: the map is kept and no message is displayed.                                                                                            |
+| Selected terrain | Kept.                                                                                                                                                    |
+| Menu             | Choosing an option, the menu button again, or anywhere else on the screen closes it. A tap out of the menu only closes it, e.g.: it does not paint.     |
+| Scope            | Only the map builder has the menu. Export keeps copying the map to the clipboard. Dropping a file on the game is not planned.                           |
 
-Browsers ask for permission to read the clipboard (e.g.: Safari on iOS shows a "Paste" bubble to tap). When it is
-denied, the import tells the clipboard can not be read.
+### Why not pasting
+
+Importing first read the clipboard, as export writes to it. Safari on iOS never answers the game reading it, so nothing
+happened, and the alternatives need code of our own for each platform:
+
+- A paste box of our own in the browser page, where the player pastes the map. It worked around Safari, but it is a
+  browser element over the game, with a different look and code for the web only.
+- KorGE `UITextInput` pastes with Cmd or Ctrl + V only, by reading the clipboard as well. On a phone, KorGE types into
+  a hidden single line browser field to open the keyboard, and drops what is pasted into it.
+- KorGE `prompt` opens the browser prompt, a single line field: a pasted map loses its line breaks, and its header
+  comment then comments the whole map out.
+
+The file picker is the same for every platform, and comes with KorGE.
+
+### Design
+
+- A `MapFilePicker` port, `pickMap(): String?`, with the text of the picked file, or `null` when the player cancels. It
+  throws when the file can not be read. `GameWindowMapFilePicker` implements it with `openFileDialog`, filtering
+  `.toml` files where the platform supports it, and a fake in the tests.
+- `Clipboard` keeps `copy` only, for export, with the game window clipboard on every platform. The paste box of the
+  browser and its tests are removed.
+- `MapBuilderPresenter` opens the picker when **Import** is chosen, and passes the text to `importMap`, as before.
 
 ## Risks
 
@@ -174,6 +197,16 @@ maps grow further.
 
 Browsers only let a page write to the clipboard after a user action (a tap) and on secure pages (HTTPS or localhost).
 Export is a tap, so it is expected to work. KorGE logs the error in the browser console when the write is refused.
+
+### File picker on the browser
+
+- Browsers only open the file picker on a user action. KorGE turns a tap into a click while the browser handles the
+  tap, and the presenter opens the picker before suspending (`launchImmediately`), so the picker opens within it.
+- When the player cancels the browser picker, KorGE never answers, so the import waits forever. It is harmless, as
+  cancelling does nothing.
+- KorGE removes its file field from the page 100 ms after opening the picker. Browsers still announce the picked file,
+  but it is to be checked on Safari on iOS.
+- KorGE does not filter the files on the web, so iOS may offer photos and the camera next to the files.
 
 ## Implementation steps
 
