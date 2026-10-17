@@ -56,7 +56,7 @@ class MapBuilderScene : Scene() {
             mapBuilderApi = mapBuilderApi,
             battlefieldApi = battlefieldApi,
             terrainApi = terrainApi,
-            clipboard = GameWindowClipboard(views.gameWindow),
+            clipboard = deviceClipboard(views.gameWindow),
             coroutineScope = this@MapBuilderScene,
             onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene() } } },
             eventBus = eventBus,

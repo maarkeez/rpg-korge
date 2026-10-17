@@ -7,9 +7,15 @@ import korlibs.render.TextClipboardData
 interface Clipboard {
     suspend fun copy(text: String)
 
-    /** The text copied, or `null` when there is none or it can not be read (e.g.: the browser is not allowed to). */
+    /**
+     * The text copied, or `null` when there is none or it can not be read (e.g.: the browser is not allowed to). The
+     * coroutine is cancelled when the player cancels pasting.
+     */
     suspend fun paste(): String?
 }
+
+/** The clipboard of the device the game runs on, with the means of the platform to paste, e.g.: a paste box in the browser. */
+expect fun deviceClipboard(gameWindow: GameWindow): Clipboard
 
 /** The clipboard of the device the game runs on. */
 class GameWindowClipboard(
