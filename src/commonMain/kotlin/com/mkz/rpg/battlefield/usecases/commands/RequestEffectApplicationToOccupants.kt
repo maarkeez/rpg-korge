@@ -8,12 +8,13 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
+/** Requests the effect of each terrain for the battle units standing on it, among the given ones (e.g.: those in the battle). */
 class RequestEffectApplicationToOccupants(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke() {
+    operator fun invoke(battleUnitIds: Set<String>) {
         val battlefield = battlefieldRepository.search() ?: return
         val terrainEffectIds =
             battlefield
@@ -25,7 +26,10 @@ class RequestEffectApplicationToOccupants(
                 .associateWith { terrainId -> searchTerrainById(terrainId)?.effectId }
                 .filterValues { it != null }
                 .mapValues { it.value!! }
-        val applications = battlefield.effectApplicationsToOccupants(terrainEffectIds)
+        val applications =
+            battlefield
+                .effectApplicationsToOccupants(terrainEffectIds)
+                .filter { application -> application.occupantBattleUnitId in battleUnitIds }
         applications.forEach { application ->
             eventBus.publish(
                 BattleUnitEvent.RequestApplyEffect(

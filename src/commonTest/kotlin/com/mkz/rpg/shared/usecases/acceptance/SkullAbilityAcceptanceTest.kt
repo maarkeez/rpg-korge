@@ -5,6 +5,7 @@ import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -32,7 +33,8 @@ class SkullAbilityAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val battleLoader = FakeBattleLoader()
+    private val battleApi = BattleApi(eventBus, battleUnitApi, battleLoader)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
 
     private val humanPlayerId = PlayerMother.id()
@@ -162,7 +164,8 @@ class SkullAbilityAcceptanceTest {
             deployAtRow = 0,
             deployAtColumn = 2,
         )
-        battleApi.startFirstRound(listOf(humanPlayerId, cpuPlayerId))
+        battleLoader.playerOrder = listOf(humanPlayerId, cpuPlayerId)
+        battleApi.initialiseBattle()
         eventBus.dispatch()
     }
 

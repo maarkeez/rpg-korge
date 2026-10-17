@@ -1,6 +1,7 @@
 package com.mkz.rpg.battle.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDefeated
+import com.mkz.rpg.battle.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battle.adapters.events.OnPlayerDefeated
 import com.mkz.rpg.battle.adapters.events.OnRequestFinishPlayerTurn
 import com.mkz.rpg.battle.adapters.events.OnRequestInitialiseBattle
@@ -12,7 +13,8 @@ import com.mkz.rpg.battle.usecases.commands.DefeatPlayer
 import com.mkz.rpg.battle.usecases.commands.FinishBattle
 import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
 import com.mkz.rpg.battle.usecases.commands.InitialiseBattle
-import com.mkz.rpg.battle.usecases.commands.StartFirstRound
+import com.mkz.rpg.battle.usecases.commands.JoinBattle
+import com.mkz.rpg.battle.usecases.commands.LeaveBattle
 import com.mkz.rpg.battle.usecases.commands.StartNextRound
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battle.usecases.services.BattleLoader
@@ -31,8 +33,9 @@ class BattleApi(
     val defeatPlayer = DefeatPlayer(battleUnitApi.hasAllBattleUnitsDefeated, battleRepository, eventBus)
     val finishBattle = FinishBattle(battleRepository, eventBus)
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
-    val startFirstRound = StartFirstRound(battleRepository, eventBus)
-    val initialiseBattle = InitialiseBattle(battleLoader, battleRepository, eventBus)
+    val initialiseBattle = InitialiseBattle(battleLoader, battleUnitApi.searchBattleUnitsByPlayerId, battleRepository, eventBus)
+    val joinBattle = JoinBattle(battleRepository)
+    val leaveBattle = LeaveBattle(battleRepository)
     val startNextRound = StartNextRound(battleRepository, eventBus)
 
     // Queries
@@ -40,7 +43,8 @@ class BattleApi(
 
     // Event Listeners
     val onTurnFinished = OnRoundFinished(eventBus, startNextRound)
-    val onBattleUnitDefeated = OnBattleUnitDefeated(eventBus, defeatPlayer)
+    val onBattleUnitDeployed = OnBattleUnitDeployed(eventBus, joinBattle)
+    val onBattleUnitDefeated = OnBattleUnitDefeated(eventBus, leaveBattle, defeatPlayer)
     val onPlayerDefeated = OnPlayerDefeated(eventBus, finishBattle)
     private val onRequestInitialiseBattle = OnRequestInitialiseBattle(initialiseBattle, eventBus)
     private val onRequestFinishPlayerTurn = OnRequestFinishPlayerTurn(finishPlayerTurn, eventBus)

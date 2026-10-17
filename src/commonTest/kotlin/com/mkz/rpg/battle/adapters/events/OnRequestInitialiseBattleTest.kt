@@ -6,14 +6,19 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.usecases.commands.InitialiseBattle
 import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class OnRequestInitialiseBattleTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
+    private val queries = InMemoryQueries()
     private val onRequestInitialiseBattle =
-        OnRequestInitialiseBattle(InitialiseBattle(FakeBattleLoader(playerOrder = listOf("player-1", "player-2")), battleRepository, eventBus), eventBus)
+        OnRequestInitialiseBattle(
+            InitialiseBattle(FakeBattleLoader(playerOrder = listOf("player-1", "player-2")), queries.searchBattleUnitsByPlayerId, battleRepository, eventBus),
+            eventBus,
+        )
 
     @Test
     fun `should initialise the battle when the request is dispatched`() {
@@ -22,6 +27,6 @@ class OnRequestInitialiseBattleTest {
         // When
         eventBus.dispatch()
         // Then
-        battleRepository.search()?.toDto() shouldBe Battle.Dto(currentPlayerTurn = "player-1", currentRound = 1, isFinished = false)
+        battleRepository.search()?.toDto() shouldBe Battle.Dto(currentPlayerTurn = "player-1", currentRound = 1, isFinished = false, battleUnitIds = emptySet())
     }
 }

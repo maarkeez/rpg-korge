@@ -28,7 +28,7 @@ class FinishTurnPresenterTest {
     private fun createPresenter() = FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, eventBus)
 
     private fun startTurnOf(playerId: String) {
-        eventBus.publish(PlayerTurnStarted(playerId = playerId))
+        eventBus.publish(PlayerTurnStarted(playerId = playerId, battleUnitIds = emptySet()))
         eventBus.dispatch()
     }
 

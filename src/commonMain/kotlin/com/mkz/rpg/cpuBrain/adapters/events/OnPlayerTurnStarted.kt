@@ -11,6 +11,6 @@ class OnPlayerTurnStarted(
 ) {
     private val subscription =
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
-            playTurn(event.playerId)
+            playTurn(event.playerId, event.battleUnitIds)
         }
 }

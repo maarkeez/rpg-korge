@@ -10,7 +10,7 @@ class OnBattleRoundStarted(
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattleEvent.BattleRoundStarted> {
-            requestEffectApplicationToOccupants()
+        eventBus.subscribe<BattleEvent.BattleRoundStarted> { event ->
+            requestEffectApplicationToOccupants(event.battleUnitIds)
         }
 }

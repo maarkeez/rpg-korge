@@ -48,7 +48,7 @@ class OnPlayerTurnStartedTest {
                 .pullEvents()
                 .second,
         )
-        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "human"))
+        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "human", battleUnitIds = setOf("knight-1")))
         // When
         eventBus.dispatch()
         // Then

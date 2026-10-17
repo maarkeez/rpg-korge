@@ -6,6 +6,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 
+/** Battle units: those in the battle. The battle units of the player outside it stay as they are. */
 class ApplyOnTurnStartedEffects(
     private val searchEffectById: SearchEffectById,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
@@ -13,8 +14,14 @@ class ApplyOnTurnStartedEffects(
     private val searchPosition: SearchPosition,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(playerId: String) {
-        val battleUnits = searchBattleUnitsByPlayerId(playerId).map { battleUnitRepository.searchById(it.id)!! }
+    operator fun invoke(
+        playerId: String,
+        battleUnitIds: Set<String>,
+    ) {
+        val battleUnits =
+            searchBattleUnitsByPlayerId(playerId)
+                .filter { battleUnit -> battleUnit.id in battleUnitIds }
+                .map { battleUnit -> battleUnitRepository.searchById(battleUnit.id)!! }
         battleUnits
             .filter { battleUnit -> battleUnit.hasOnTurnStartedEffects() }
             .forEach { battleUnit ->

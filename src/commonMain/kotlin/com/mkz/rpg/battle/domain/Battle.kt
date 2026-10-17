@@ -12,20 +12,26 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class Battle private constructor(
     private val turnQueue: TurnQueue,
+    private val battleUnits: BattleUnits,
     private val currentRound: CurrentRound,
     private val currentPlayerTurn: CurrentPlayerTurn,
     private val isFinished: IsFinished,
     private val events: Set<BattleEvent>,
 ) {
     companion object {
-        fun startFirstRound(players: List<String>): Battle {
+        /** Players: in the order they play each round. Battle units: those in the battle, which the turns and rounds affect. */
+        fun startFirstRound(
+            players: List<String>,
+            battleUnitIds: Set<String>,
+        ): Battle {
             if (players.size < 2) throw MinimumTwoPlayersRequired()
             return Battle(
                 turnQueue = TurnQueue(players),
+                battleUnits = BattleUnits(battleUnitIds),
                 currentRound = CurrentRound(1),
                 currentPlayerTurn = CurrentPlayerTurn(players.first()),
                 isFinished = IsFinished(false),
-                events = setOf(BattleStarted, PlayerTurnStarted(players.first())),
+                events = setOf(BattleStarted, PlayerTurnStarted(players.first(), battleUnitIds)),
             )
         }
     }
@@ -35,6 +41,7 @@ data class Battle private constructor(
             currentPlayerTurn = currentPlayerTurn.value,
             currentRound = currentRound.value,
             isFinished = isFinished.value,
+            battleUnitIds = battleUnits.value,
         )
 
     fun startNextRound(): Battle {
@@ -43,7 +50,12 @@ data class Battle private constructor(
         return copy(
             currentRound = nextRound,
             currentPlayerTurn = CurrentPlayerTurn(turnQueue.value.first()),
-            events = events + setOf(BattleRoundStarted(nextRound.value), PlayerTurnStarted(nextPlayerTurn.value)),
+            events =
+                events +
+                    setOf(
+                        BattleRoundStarted(nextRound.value, battleUnits.value),
+                        PlayerTurnStarted(nextPlayerTurn.value, battleUnits.value),
+                    ),
         )
     }
 
@@ -59,10 +71,16 @@ data class Battle private constructor(
             val nextPlayerTurn = turnQueue.value[nextPlayerTurnIndex]
             return copy(
                 currentPlayerTurn = CurrentPlayerTurn(nextPlayerTurn),
-                events = events + setOf(PlayerTurnStarted(nextPlayerTurn)),
+                events = events + setOf(PlayerTurnStarted(nextPlayerTurn, battleUnits.value)),
             )
         }
     }
+
+    /** Adds the battle unit to the battle, e.g.: when it is deployed during the battle. */
+    fun join(battleUnitId: String): Battle = copy(battleUnits = BattleUnits(battleUnits.value + battleUnitId))
+
+    /** Removes the battle unit from the battle, e.g.: when it is defeated. */
+    fun leave(battleUnitId: String): Battle = copy(battleUnits = BattleUnits(battleUnits.value - battleUnitId))
 
     fun isBattleFinished(): Boolean = turnQueue.value.size == 1
 
@@ -91,6 +109,10 @@ data class Battle private constructor(
         val value: List<String>,
     )
 
+    @JvmInline private value class BattleUnits(
+        val value: Set<String>,
+    )
+
     @JvmInline private value class CurrentRound(
         val value: Int,
     )
@@ -107,5 +129,6 @@ data class Battle private constructor(
         val currentPlayerTurn: String,
         val currentRound: Int,
         val isFinished: Boolean,
+        val battleUnitIds: Set<String>,
     )
 }

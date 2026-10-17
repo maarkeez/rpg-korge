@@ -31,7 +31,7 @@ class PlayTurnTest {
     fun `should not play turn when the player does not exist`() {
         // Given
         // When
-        playTurn("player-1")
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
         cpuBrainRepository.search().shouldBeNull()
@@ -42,7 +42,7 @@ class PlayTurnTest {
         // Given
         queries.playerRepository.create(player(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN))
         // When
-        playTurn("player-1")
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
         cpuBrainRepository.search().shouldBeNull()
@@ -55,7 +55,7 @@ class PlayTurnTest {
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", player = cpuPlayer.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-2", player = cpuPlayer.toDto()))
         // When
-        playTurn("player-1")
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
         // Then
         cpuBrainRepository
             .search()
@@ -66,11 +66,38 @@ class PlayTurnTest {
     }
 
     @Test
+    fun `should only manage the battle units in the battle when the player is a cpu`() {
+        // Given
+        queries.playerRepository.create(cpuPlayer)
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", player = cpuPlayer.toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-3", player = cpuPlayer.toDto()))
+        // When
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
+        // Then
+        cpuBrainRepository
+            .search()
+            ?.toDto()
+            ?.pendingBattleUnitIds
+            .shouldContainExactly("battle-unit-1")
+    }
+
+    @Test
+    fun `should finish the turn when the cpu player has no battle units in the battle`() {
+        // Given
+        queries.playerRepository.create(cpuPlayer)
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-3", player = cpuPlayer.toDto()))
+        // When
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
+        // Then
+        eventBus.shouldHavePublishedEvents(BattleEvent.RequestFinishPlayerTurn)
+    }
+
+    @Test
     fun `should finish the turn when the cpu player has no battle units`() {
         // Given
         queries.playerRepository.create(cpuPlayer)
         // When
-        playTurn("player-1")
+        playTurn("player-1", setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(BattleEvent.RequestFinishPlayerTurn)
     }

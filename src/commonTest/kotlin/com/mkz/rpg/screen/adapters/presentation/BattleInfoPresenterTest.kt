@@ -62,7 +62,7 @@ class BattleInfoPresenterTest {
     fun `AnnounceTurn should announce the turn when player turn starts`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
-        apis.eventBus.publish(PlayerTurnStarted(playerId = "player-1"))
+        apis.eventBus.publish(PlayerTurnStarted(playerId = "player-1", battleUnitIds = emptySet()))
         // When
         apis.eventBus.dispatch()
         // Then
@@ -74,7 +74,7 @@ class BattleInfoPresenterTest {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human", round = 2)
         val cpuMove = timeline.playLongStep()
-        apis.eventBus.publish(PlayerTurnStarted(playerId = "player-1"))
+        apis.eventBus.publish(PlayerTurnStarted(playerId = "player-1", battleUnitIds = emptySet()))
         apis.eventBus.dispatch()
         battleInfoView.announcedTurns.shouldBeEmpty()
         battlefieldView.tints.shouldBeEmpty()

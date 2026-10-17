@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -27,7 +28,8 @@ class CpuCastingBadlyHurtRatAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val battleLoader = FakeBattleLoader()
+    private val battleApi = BattleApi(eventBus, battleUnitApi, battleLoader)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
 
     private val humanPlayerId = "human"
@@ -49,7 +51,8 @@ class CpuCastingBadlyHurtRatAcceptanceTest {
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
         battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 1, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit(ratBattleUnitId, "rat", cpuPlayerId, deployAtRow = 1, deployAtColumn = 2)
-        battleApi.startFirstRound(listOf(humanPlayerId, cpuPlayerId))
+        battleLoader.playerOrder = listOf(humanPlayerId, cpuPlayerId)
+        battleApi.initialiseBattle()
         eventBus.dispatch()
         // The knight's skull leaves the rat at 10 of 20 HP. Its damage is applied through several events,
         // so it is applied here, before the CPU turn starts.

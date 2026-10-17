@@ -25,7 +25,7 @@ class OnPlayerTurnStartedTest {
         val cpu = player(id = "cpu", type = CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
-        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "cpu"))
+        eventBus.publish(BattleEvent.PlayerTurnStarted(playerId = "cpu", battleUnitIds = setOf("rat-1")))
         // When
         eventBus.dispatch()
         // Then

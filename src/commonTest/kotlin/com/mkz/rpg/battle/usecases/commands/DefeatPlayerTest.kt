@@ -16,6 +16,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class DefeatPlayerTest {
+    private val battleUnitIds = setOf("battle-unit-1", "battle-unit-2")
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
@@ -32,7 +33,7 @@ class DefeatPlayerTest {
         val players = listOf("player-1", "player-2")
         battleRepository.create(
             BattleMother
-                .battle(players),
+                .battle(players, battleUnitIds),
         )
         val defeatedPlayer = players[1]
         battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
@@ -40,7 +41,7 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
 
@@ -50,7 +51,7 @@ class DefeatPlayerTest {
         val players = listOf("player-1", "player-2")
         battleRepository.create(
             BattleMother
-                .battle(players),
+                .battle(players, battleUnitIds),
         )
         val defeatedPlayer = players[1]
         battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
@@ -59,7 +60,7 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false)
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.publishedEvents.shouldBeEmpty()
     }
 }

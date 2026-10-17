@@ -29,7 +29,7 @@ class ReplenishManaTest {
                 .second
         battleUnitRepository.create(depletedBattleUnit)
         // When
-        replenishMana("player-1")
+        replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
         storedBattleUnit!!.remainingManaPoints shouldBe 15
@@ -48,17 +48,36 @@ class ReplenishManaTest {
                 .second
         battleUnitRepository.create(depletedBattleUnit)
         // When
-        replenishMana("player-1")
+        replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
         storedBattleUnit!!.remainingManaPoints shouldBe 12
     }
 
     @Test
+    fun `should not replenish mana when the battle unit is not in the battle`() {
+        // Given
+        val unit = unit(manaPoints = 20, abilities = listOf("ability-1")).toDto()
+        val player = player(id = "player-1").toDto()
+        val depletedBattleUnit =
+            com.mkz.rpg.battleUnit.domain.BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        battleUnitRepository.create(depletedBattleUnit)
+        // When
+        replenishMana("player-1", setOf("another-battle-unit"))
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
+        storedBattleUnit!!.remainingManaPoints shouldBe 5
+    }
+
+    @Test
     fun `should not update any battle unit when the player has no battle units`() {
         // Given
         // When
-        replenishMana("player-1")
+        replenishMana("player-1", emptySet())
         // Then
         battleUnitRepository.searchAll().shouldBeEmpty()
     }

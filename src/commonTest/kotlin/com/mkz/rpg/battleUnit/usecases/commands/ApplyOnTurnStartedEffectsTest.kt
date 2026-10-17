@@ -41,7 +41,7 @@ class ApplyOnTurnStartedEffectsTest {
         battleUnitRepository.create(battleUnit)
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         // When
-        applyOnTurnStartedEffects("player-1")
+        applyOnTurnStartedEffects("player-1", setOf("knight-1"))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
         storedBattleUnit!!.remainingHealthPoints shouldBe 7
@@ -55,7 +55,7 @@ class ApplyOnTurnStartedEffectsTest {
     fun `should not apply any effect when the player has no battle units`() {
         // Given
         // When
-        applyOnTurnStartedEffects("player-1")
+        applyOnTurnStartedEffects("player-1", emptySet())
         // Then
         eventBus.publishedEvents.shouldBeEmpty()
     }
@@ -63,10 +63,30 @@ class ApplyOnTurnStartedEffectsTest {
     @Test
     fun `should not apply any effect when the battle unit has no delayed ongoing effects`() {
         // Given
-        battleUnitRepository.create(battleUnit(player = player(id = "player-1").toDto()))
+        val battleUnit = battleUnit(player = player(id = "player-1").toDto())
+        battleUnitRepository.create(battleUnit)
         // When
-        applyOnTurnStartedEffects("player-1")
+        applyOnTurnStartedEffects("player-1", setOf(battleUnit.toDto().id))
         // Then
+        eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
+    fun `should not apply on turn started effect when the battle unit is not in the battle`() {
+        // Given
+        val effectId = "effect-1"
+        queries.effectRepository.create(decreaseHealthEffect(id = effectId, damage = 3, applicationType = "ON_TURN_STARTED"))
+        val battleUnit =
+            battleUnit(id = "knight-1", unit = unit(healthPoints = 10).toDto(), player = player(id = "player-1").toDto())
+                .receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 1)
+                .pullEvents()
+                .second
+        battleUnitRepository.create(battleUnit)
+        queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
+        // When
+        applyOnTurnStartedEffects("player-1", setOf("another-battle-unit"))
+        // Then
+        battleUnitRepository.searchById("knight-1")!!.toDto().remainingHealthPoints shouldBe 10
         eventBus.publishedEvents.shouldBeEmpty()
     }
 }

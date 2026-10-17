@@ -349,7 +349,7 @@ class BattlefieldPresenterTest {
         // Given
         apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 3)
         eventBus.dispatch()
-        publish(PlayerTurnStarted(playerId = "cpu"))
+        publish(PlayerTurnStarted(playerId = "cpu", battleUnitIds = emptySet()))
         // When
         publish(RequestMoveBattleUnit(battleUnitId = "rat-1", moveToRow = 2, moveToColumn = 3))
         // Then
@@ -452,7 +452,7 @@ class BattlefieldPresenterTest {
         selectKnight()
         val requestedMoves = mutableListOf<RequestMoveBattleUnit>()
         eventBus.subscribe<RequestMoveBattleUnit> { event -> requestedMoves += event }
-        publish(PlayerTurnStarted(playerId = "human"))
+        publish(PlayerTurnStarted(playerId = "human", battleUnitIds = emptySet()))
         // When
         battlefieldPresenter.tileSelected(row = 1, column = 2)
         eventBus.dispatch()

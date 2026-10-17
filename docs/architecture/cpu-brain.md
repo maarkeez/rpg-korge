@@ -6,7 +6,7 @@ The CPU player decides what its battle units do following the **utility AI** pat
 
 A CPU turn is played one action at a time by the [`CpuBrain`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/domain/CpuBrain.kt), so every decision is based on the state left by the previous action. This allows, for example, a unit to move next to an enemy and attack it in the same turn.
 
-1. [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) starts the CPU brain with the battle units to manage, in order (`CpuBrainInitialized`).
+1. [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) starts the CPU brain with the battle units to manage, in order (`CpuBrainInitialized`): those of the CPU player in the battle, which `PlayerTurnStarted` carries.
 2. [`ManageCpuBattleUnit`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/ManageCpuBattleUnit.kt) takes one action with the next battle unit:
    - It casts when [`WhatShouldCast`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhatShouldCast.kt) decides to cast.
    - Otherwise, it moves when [`WhereShouldMove`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldMove.kt) returns a tile.

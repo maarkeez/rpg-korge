@@ -32,7 +32,7 @@ class RequestEffectApplicationToOccupantsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants()
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -58,7 +58,7 @@ class RequestEffectApplicationToOccupantsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants()
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
@@ -81,12 +81,38 @@ class RequestEffectApplicationToOccupantsTest {
     }
 
     @Test
+    fun `should only request the effect application to the given battle units when other battle units occupy the terrain with an effect`() {
+        // Given
+        val occupiedBattlefield =
+            battlefield()
+                .occupy(0, 0, "battle-unit-1")
+                .occupy(2, 2, "battle-unit-3")
+                .pullEvents()
+                .second
+        battlefieldRepository.create(occupiedBattlefield)
+        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        // When
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestApplyEffect(
+                application =
+                    EffectApplicationDto(
+                        source = ApplicationSourceDto.terrain("sand"),
+                        target = EffectTargetDto.Unit(id = "battle-unit-1"),
+                        effectId = "effect-1",
+                    ),
+            ),
+        )
+    }
+
+    @Test
     fun `should not request effect applications when the battlefield has no occupant`() {
         // Given
         battlefieldRepository.create(battlefield())
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants()
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -98,7 +124,7 @@ class RequestEffectApplicationToOccupantsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
         // When
-        requestEffectApplicationToOccupants()
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -106,7 +132,7 @@ class RequestEffectApplicationToOccupantsTest {
     @Test
     fun `should not request effect applications when the battlefield does not exist`() {
         // When
-        requestEffectApplicationToOccupants()
+        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

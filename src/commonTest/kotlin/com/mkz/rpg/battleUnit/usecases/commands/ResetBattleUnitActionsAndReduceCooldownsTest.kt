@@ -27,7 +27,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
                 .second
         battleUnitRepository.create(exhaustedBattleUnit)
         // When
-        resetBattleUnitActionsAndReduceCooldowns("player-1")
+        resetBattleUnitActionsAndReduceCooldowns("player-1", setOf(exhaustedBattleUnit.toDto().id))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(exhaustedBattleUnit.toDto().id)?.toDto()
         storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 4
@@ -36,10 +36,32 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
     }
 
     @Test
+    fun `should not reset actions nor reduce cooldowns when the battle unit is not in the battle`() {
+        // Given
+        val unit = unit(movementRange = 4, abilities = listOf("ability-1")).toDto()
+        val player = player(id = "player-1").toDto()
+        val exhaustedBattleUnit =
+            com.mkz.rpg.battleUnit.domain.BattleUnitMother
+                .battleUnit(unit = unit, player = player)
+                .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        battleUnitRepository.create(exhaustedBattleUnit)
+        // When
+        resetBattleUnitActionsAndReduceCooldowns("player-1", setOf("another-battle-unit"))
+        // Then
+        val storedBattleUnit = battleUnitRepository.searchById(exhaustedBattleUnit.toDto().id)?.toDto()
+        storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 2
+        storedBattleUnit.remainingTurnActions.remainingCasts shouldBe 0
+        storedBattleUnit.abilityCooldowns["ability-1"] shouldBe 3
+    }
+
+    @Test
     fun `should not update any battle unit when the player has no battle units`() {
         // Given
         // When
-        resetBattleUnitActionsAndReduceCooldowns("player-1")
+        resetBattleUnitActionsAndReduceCooldowns("player-1", emptySet())
         // Then
         battleUnitRepository.searchAll().shouldBeEmpty()
     }

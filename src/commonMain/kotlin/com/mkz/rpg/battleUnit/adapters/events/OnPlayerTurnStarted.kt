@@ -15,8 +15,8 @@ class OnPlayerTurnStarted(
 ) {
     val subscription =
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
-            resetBattleUnitActionsAndReduceCooldowns(playerId = event.playerId)
-            applyOnTurnStartedEffects(playerId = event.playerId)
-            replenishMana(playerId = event.playerId)
+            resetBattleUnitActionsAndReduceCooldowns(playerId = event.playerId, battleUnitIds = event.battleUnitIds)
+            applyOnTurnStartedEffects(playerId = event.playerId, battleUnitIds = event.battleUnitIds)
+            replenishMana(playerId = event.playerId, battleUnitIds = event.battleUnitIds)
         }
 }

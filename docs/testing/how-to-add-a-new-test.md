@@ -65,7 +65,7 @@ For example:
 ```kotlin
 // Class under test
 class Battle {
-    fun startFirstRound(players: List<String>): Battle { ... }
+    fun startFirstRound(players: List<String>, battleUnitIds: Set<String>): Battle { ... }
 
     fun toDto(): Dto { ... }
 }
@@ -252,7 +252,7 @@ class FinishTurnPresenterTest {
     fun `FinishTurn should finish the player turn when the player finishes the turn`() {
         // Given
         FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
-        apis.eventBus.publish(PlayerTurnStarted(playerId = "human"))
+        apis.eventBus.publish(PlayerTurnStarted(playerId = "human", battleUnitIds = emptySet()))
         apis.eventBus.dispatch()
         // When
         playerCallToActionView.onTurnFinished.shouldNotBeNull().invoke()

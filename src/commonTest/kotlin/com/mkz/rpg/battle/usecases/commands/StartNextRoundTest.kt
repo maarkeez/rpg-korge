@@ -12,6 +12,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class StartNextRoundTest {
+    private val battleUnitIds = setOf("battle-unit-1", "battle-unit-2")
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
     private val startNextRound =
@@ -24,15 +25,15 @@ class StartNextRoundTest {
     fun `should start next round when a battle exists`() {
         // Given
         val players = listOf("player-1", "player-2")
-        battleRepository.create(battle(players))
+        battleRepository.create(battle(players, battleUnitIds))
         // When
         startNextRound()
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false)
+        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.shouldHavePublishedEvents(
-            BattleEvent.BattleRoundStarted(2),
-            BattleEvent.PlayerTurnStarted(players.first()),
+            BattleEvent.BattleRoundStarted(2, battleUnitIds),
+            BattleEvent.PlayerTurnStarted(players.first(), battleUnitIds),
         )
     }
 

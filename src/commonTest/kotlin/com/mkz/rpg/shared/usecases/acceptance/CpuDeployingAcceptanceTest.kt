@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield
@@ -13,6 +14,7 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -28,7 +30,8 @@ class CpuDeployingAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val battleLoader = FakeBattleLoader()
+    private val battleApi = BattleApi(eventBus, battleUnitApi, battleLoader)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
 
     private val humanPlayerId = "human"
@@ -54,7 +57,8 @@ class CpuDeployingAcceptanceTest {
     // Deploys the knight on the first row, as the goat, and starts the battle.
     private fun startBattleWithKnightAt(column: Int) {
         battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 0, deployAtColumn = column)
-        battleApi.startFirstRound(listOf(humanPlayerId, cpuPlayerId))
+        battleLoader.playerOrder = listOf(humanPlayerId, cpuPlayerId)
+        battleApi.initialiseBattle()
         eventBus.dispatch()
     }
 
@@ -72,6 +76,8 @@ class CpuDeployingAcceptanceTest {
             val deployedBattleUnitId = deployedBattleUnitIds.single()
             battleUnitApi.searchBattleUnitById(deployedBattleUnitId)!!.unitId shouldBe "bat"
             battlefieldApi.searchOccupant(row = 0, column = 1) shouldBe deployedBattleUnitId
+            // The bat joins the battle, so it plays the next CPU turns.
+            battleApi.searchBattle()!!.battleUnitIds shouldContain deployedBattleUnitId
             battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
         }
 
