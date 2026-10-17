@@ -5,7 +5,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 ## How the battle is set up
 
 1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files. Reading resources is asynchronous, so it happens before the battle is set up.
-2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order:
+2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring:
 
 | #  | Event                            | Creates                        | Requires                       |
 |----|----------------------------------|--------------------------------|--------------------------------|
@@ -19,7 +19,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 | 8  | `RequestInitialisePlayers`       | Players                        | -                              |
 | 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
 | 10 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
-| 11 | `RequestInitialiseBattle`        | The battle and its first round | The deployed battle units      |
+| 11 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
@@ -143,21 +143,13 @@ tiles = [
 
 ### `battleUnit/<battle unit id>.toml`
 
-A battle unit deployed when the battle starts.
+A battle unit deployed when the game starts. The battle units of the human player explore as a party, the first one leading (see [Exploration](exploration.md)). The battles start when the CPU engages, so there is no file for them.
 
 ```toml
 unitId = "knight"
 playerId = "player-one"
 row = 6
 column = 6
-```
-
-### `battle/battle.toml`
-
-A single file with the ids of the players, in the order they play each round.
-
-```toml
-playerOrder = ["player-one", "player-two"]
 ```
 
 ## How to add a unit

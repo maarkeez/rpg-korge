@@ -1,0 +1,33 @@
+package com.mkz.rpg.battle.usecases.commands
+
+import com.mkz.rpg.battle.domain.Battle
+import com.mkz.rpg.battle.domain.BattleRepository
+import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import com.mkz.rpg.shared.domain.EventBus
+
+/**
+ * Starts the first round of a battle, e.g.: when the CPU engages the exploring player. The engaging player plays first,
+ * with the battle units that engaged, and the engaged player second, with all their battle units.
+ */
+class StartBattle(
+    private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
+    private val battleRepository: BattleRepository,
+    private val eventBus: EventBus,
+) {
+    operator fun invoke(
+        engagingPlayerId: String,
+        engagedPlayerId: String,
+        engagingBattleUnitIds: List<String>,
+    ) {
+        if (battleRepository.search() != null) return
+        val engagedBattleUnitIds = searchBattleUnitsByPlayerId(engagedPlayerId).map { battleUnit -> battleUnit.id }
+        val (events, battle) =
+            Battle
+                .startFirstRound(
+                    players = listOf(engagingPlayerId, engagedPlayerId),
+                    battleUnitIds = (engagingBattleUnitIds + engagedBattleUnitIds).toSet(),
+                ).pullEvents()
+        battleRepository.create(battle)
+        eventBus.publish(events)
+    }
+}

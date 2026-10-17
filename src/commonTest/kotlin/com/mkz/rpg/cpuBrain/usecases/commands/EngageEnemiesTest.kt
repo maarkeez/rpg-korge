@@ -36,7 +36,7 @@ class EngageEnemiesTest {
         // When
         engageEnemies(exploringPlayerId = "human")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBrainEvent.CombatEngaged(playerId = "cpu", battleUnitIds = listOf("rat-1")))
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
     }
 
     @Test

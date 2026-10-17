@@ -13,8 +13,10 @@ sealed interface BattleEvent : DomainEvent {
         val battleUnitIds: Set<String>,
     ) : BattleEvent
 
+    /** Battle units: those in the battle. */
     data class BattleRoundFinished(
         val round: Int,
+        val battleUnitIds: Set<String>,
     ) : BattleEvent
 
     /** Battle units: those in the battle, of every player. */

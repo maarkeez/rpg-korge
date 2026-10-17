@@ -23,7 +23,9 @@ Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/c
 
 After the party starts exploring and every time it has walked, the CPU brain [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) looks for the CPU battle units that have a battle unit of the party within reach, with the same rule as in a battle (see [CPU brain](cpu-brain.md#engaging)). When there is any, the combat is engaged (`CombatEngaged`):
 
-- The battle starts, with the players playing in the loaded order and every battle unit in the battle.
+- The battle starts between the CPU battle units that engaged and the whole party. The CPU plays first, as it engaged. The other CPU battle units stay out of the battle: they neither play nor change.
+- When a battle round finishes, the CPU brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/UpdateEngagement.kt) has the CPU battle units out of the battle that now have a battle unit of the party within reach join it (`EngagementUpdated`). The next round only starts then, so they play from it.
+- Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
 - The battle info announces the battle, and the battle HUD and the player call to action take the place of the virtual pad.
 

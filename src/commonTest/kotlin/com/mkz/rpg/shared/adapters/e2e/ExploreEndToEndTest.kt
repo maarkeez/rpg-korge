@@ -74,6 +74,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Then
             withClue("Expected the virtual pad to be hidden while battling") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
             withClue("Expected the battle HUD to be displayed while battling") { isBattleHudShown().shouldBeTrue() }
+            // The CPU played first, as it engaged.
             battleInfoView()?.roundText() shouldBe "Round 1"
             battleInfoView()?.playerTurnText() shouldBe "Human turn"
         }

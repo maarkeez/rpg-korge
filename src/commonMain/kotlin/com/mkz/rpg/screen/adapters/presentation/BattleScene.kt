@@ -84,7 +84,6 @@ class BattleScene : Scene() {
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
-        battleApi.init()
 
         // Main scene: the presenters replay the battle events in order on the timeline
         val timeline = BattleSceneTimeline(this@BattleScene)

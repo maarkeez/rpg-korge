@@ -116,7 +116,7 @@ class BattleTest {
         // Then
         nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.BattleRoundFinished(1))
+        events.shouldContainExactly(BattleEvent.BattleRoundFinished(1, battleUnitIds))
     }
 
     @Test

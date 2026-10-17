@@ -65,7 +65,7 @@ data class Battle private constructor(
         val roundFinished = nextPlayerTurnIndex >= turnQueue.value.size
         if (roundFinished) {
             return copy(
-                events = events + setOf(BattleRoundFinished(currentRound.value)),
+                events = events + setOf(BattleRoundFinished(currentRound.value, battleUnits.value)),
             )
         } else {
             val nextPlayerTurn = turnQueue.value[nextPlayerTurnIndex]

@@ -34,6 +34,6 @@ class OnPartyWalkedTest {
         // When
         eventBus.dispatch()
         // Then
-        engagements.shouldContainExactly(CpuBrainEvent.CombatEngaged(playerId = "cpu", battleUnitIds = listOf("rat-1")))
+        engagements.shouldContainExactly(CpuBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
     }
 }

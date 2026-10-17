@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
@@ -43,11 +44,10 @@ class ConsumeManaPotionAcceptanceTest {
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
-        battleApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
-        // The setup starts exploring: the battle starts as if the CPU engaged.
-        battleApi.initialiseBattle()
+        // The setup starts exploring: the battle starts as if the players engaged each other.
+        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
         val castGroup = battleUnitApi.whereCanCast(playerOneKnightBattleUnitId, "heal").single()
         battleUnitApi.castAbility(battleUnitId = playerOneKnightBattleUnitId, abilityId = "heal", castGroup = castGroup)

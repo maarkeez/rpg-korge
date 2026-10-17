@@ -53,7 +53,8 @@ private data class RouteStep(
 /**
  * The battle setup deploys the knights at (6,6), which leads, and (7,6). Walking north twice and west three times
  * leaves the leader at (4,3) and the other knight at (4,4), where the CPU rat at (1,1) has the leader within reach: 5
- * tiles. No tile walked before is within reach of a CPU battle unit.
+ * tiles. No tile walked before is within reach of a CPU battle unit. The rat engages and plays first, alone: it walks to
+ * (2,3), and the other CPU battle units stay out of the battle.
  */
 private val ROUTE_TO_BATTLE =
     listOf(
@@ -70,7 +71,7 @@ const val LEADER_COLUMN_IN_BATTLE = 3
 
 /**
  * Plays a new game and walks the party with the virtual pad until the CPU engages, as the player does. Returns once
- * the human player can act on the first turn of the battle.
+ * the human player can act on their first turn, after the CPU one.
  */
 suspend fun ViewsForTesting.startNewBattle() {
     startNewGame()

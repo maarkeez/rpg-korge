@@ -41,11 +41,17 @@ class ProcessTileSelected(
         }
     }
 
+    // The battle unit on the tile, when it is in the battle. Battle units out of it can not be selected, as an empty tile.
+    private fun occupantInBattle(tile: TileDto): String? {
+        val battleUnitId = searchOccupant(row = tile.row, column = tile.column) ?: return null
+        return battleUnitId.takeIf { it in searchBattle()?.battleUnitIds.orEmpty() }
+    }
+
     private fun selectTileWhenDisplayingMovement(
         battlefieldHud: DisplayMovementRange,
         tile: TileDto,
     ) {
-        val battleUnitId = searchOccupant(row = tile.row, column = tile.column)
+        val battleUnitId = occupantInBattle(tile)
         if (battleUnitId == null) {
             val battleUnit = searchBattleUnitById(battlefieldHud.battleUnitId)!!
             val selectedTileInMovementRange = battlefieldHud.tilesWhereCanBeMoved.contains(tile)
@@ -95,7 +101,7 @@ class ProcessTileSelected(
         battlefieldHud: Idle,
         tile: TileDto,
     ) {
-        val battleUnitId = searchOccupant(row = tile.row, column = tile.column)
+        val battleUnitId = occupantInBattle(tile)
         if (battleUnitId == null) {
             val (events, updatedBattlefieldHud) = battlefieldHud.idle().pullEvents()
             battlefieldHudRepository.update(updatedBattlefieldHud)

@@ -34,7 +34,7 @@ class BattleInfoPresenterTest {
                 players = listOf(player(id = "player-1", name = playerName, type = type).toDto(), player(id = "player-2").toDto()),
                 playerOrder = listOf("player-1", "player-2"),
             ).also(SubdomainApis::initialise)
-        repeat(round - 1) { apis.battleApi.startNextRound() }
+        repeat(round - 1) { apis.battleApi.startNextRound(emptyList()) }
         apis.eventBus.dispatch()
         battleInfoPresenter = BattleInfoPresenter(battleInfoView, battlefieldView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
     }

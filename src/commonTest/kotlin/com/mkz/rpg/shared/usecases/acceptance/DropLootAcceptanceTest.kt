@@ -49,7 +49,6 @@ class DropLootAcceptanceTest {
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
-        battleApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
     }

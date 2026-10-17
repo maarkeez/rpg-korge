@@ -2,7 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
+import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield
@@ -30,8 +30,7 @@ class CpuDeployingAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleLoader = FakeBattleLoader()
-    private val battleApi = BattleApi(eventBus, battleUnitApi, battleLoader)
+    private val battleApi = BattleApi(eventBus, battleUnitApi)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
 
     private val humanPlayerId = "human"
@@ -57,8 +56,7 @@ class CpuDeployingAcceptanceTest {
     // Deploys the knight on the first row, as the goat, and starts the battle.
     private fun startBattleWithKnightAt(column: Int) {
         battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 0, deployAtColumn = column)
-        battleLoader.playerOrder = listOf(humanPlayerId, cpuPlayerId)
-        battleApi.initialiseBattle()
+        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, cpuPlayerId)
         eventBus.dispatch()
     }
 

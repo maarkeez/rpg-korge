@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBrain.adapters.events.OnAbilityCastResolved
+import com.mkz.rpg.cpuBrain.adapters.events.OnBattleRoundFinished
 import com.mkz.rpg.cpuBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBattleUnitActionResolved
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBattleUnitManaged
@@ -18,6 +19,7 @@ import com.mkz.rpg.cpuBrain.usecases.commands.ManageCpuBattleUnit
 import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitCast
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitMove
+import com.mkz.rpg.cpuBrain.usecases.commands.UpdateEngagement
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
@@ -103,6 +105,14 @@ class CpuBrainApi(
             searchEnemiesWithinReach,
             eventBus,
         )
+    val updateEngagement =
+        UpdateEngagement(
+            playerApi.searchHumanPlayer,
+            playerApi.searchEnemyPlayer,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            searchEnemiesWithinReach,
+            eventBus,
+        )
     val resolveCpuBattleUnitMove = ResolveCpuBattleUnitMove(cpuBrainRepository, eventBus)
     val resolveCpuBattleUnitCast = ResolveCpuBattleUnitCast(cpuBrainRepository, eventBus)
 
@@ -115,4 +125,5 @@ class CpuBrainApi(
     private val onAbilityCastResolved = OnAbilityCastResolved(resolveCpuBattleUnitCast, eventBus)
     private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)
     private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
+    private val onBattleRoundFinished = OnBattleRoundFinished(updateEngagement, eventBus)
 }

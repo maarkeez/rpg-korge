@@ -4,7 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
+import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
@@ -63,7 +63,7 @@ class SubdomainApis(
     val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus, FakeLootDropLoader(lootDrops))
-    val battleApi = BattleApi(eventBus, battleUnitApi, FakeBattleLoader(playerOrder))
+    val battleApi = BattleApi(eventBus, battleUnitApi)
     val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
     val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
@@ -81,7 +81,7 @@ class SubdomainApis(
         eventBus.dispatch()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()
-        if (playerOrder.isNotEmpty()) battleApi.initialiseBattle()
+        if (playerOrder.isNotEmpty()) battleApi.startBattleWithEveryBattleUnit(battleUnitApi, playerOrder[0], playerOrder[1])
         eventBus.dispatch()
     }
 }

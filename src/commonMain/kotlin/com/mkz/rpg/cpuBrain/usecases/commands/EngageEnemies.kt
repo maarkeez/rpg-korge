@@ -23,6 +23,6 @@ class EngageEnemies(
                 .map { battleUnit -> battleUnit.id }
                 .filter { battleUnitId -> searchEnemiesWithinReach(battleUnitId = battleUnitId).isNotEmpty() }
         if (engagingBattleUnitIds.isEmpty()) return
-        eventBus.publish(CpuBrainEvent.CombatEngaged(playerId = cpuPlayer.id, battleUnitIds = engagingBattleUnitIds))
+        eventBus.publish(CpuBrainEvent.CombatEngaged(playerId = cpuPlayer.id, engagedPlayerId = exploringPlayerId, battleUnitIds = engagingBattleUnitIds))
     }
 }

@@ -47,6 +47,6 @@ class FinishPlayerTurnTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         storedBattle shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleRoundFinished(1))
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleRoundFinished(1, battleUnitIds))
     }
 }

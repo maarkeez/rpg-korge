@@ -50,16 +50,19 @@ class ProcessTileSelectedTest {
      * - `S` is battle-unit-2, of player-1.
      * - `E` is enemy-battle-unit-1, of player-2.
      * - `F` is enemy-battle-unit-2, of player-2.
+     *
+     * Every battle unit is in the battle, but the [outOfBattle] ones.
      */
     private fun givenBattle(
         map: String,
         knightPlayerType: Player.Dto.PlayerTypeDto = HUMAN,
         playerOrder: List<String> = listOf("player-1", "player-2"),
+        outOfBattle: Set<String> = emptySet(),
     ) {
         val player = player(id = "player-1", type = knightPlayerType).also(queries.playerRepository::create).toDto()
         val enemyPlayer = player(id = "player-2", type = CPU).also(queries.playerRepository::create).toDto()
-        queries.battleRepository.create(battle(players = playerOrder))
         val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1", 'F' to "enemy-battle-unit-2")
+        queries.battleRepository.create(battle(players = playerOrder, battleUnitIds = battleUnits.values.toSet() - outOfBattle))
         battleUnits.forEach { (letter, battleUnitId) ->
             queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter in "EF") enemyPlayer else player))
         }
@@ -86,6 +89,30 @@ class ProcessTileSelectedTest {
                 tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             ),
         )
+    }
+
+    @Test
+    fun `should go idle when a battle unit out of the battle is selected while idle`() {
+        // Given
+        battlefieldHudRepository.create(idle())
+        givenBattle("K E", outOfBattle = setOf("enemy-battle-unit-1"))
+        // When
+        processTileSelected(0, 1)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should go idle instead of selecting a battle unit out of the battle while displaying the movement range`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 1))))
+        givenBattle("K . E", outOfBattle = setOf("enemy-battle-unit-1"))
+        // When
+        processTileSelected(0, 2)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
     }
 
     @Test
