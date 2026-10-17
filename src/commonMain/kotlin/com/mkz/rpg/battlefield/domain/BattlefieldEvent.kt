@@ -7,6 +7,11 @@ sealed interface BattlefieldEvent : DomainEvent {
 
     object RequestInitialiseBattlefield : BattlefieldEvent
 
+    /** Requests the effect of each terrain for the given battle units standing on it, e.g.: those standing still while exploring. */
+    data class RequestEffectApplicationToOccupants(
+        val battleUnitIds: Set<String>,
+    ) : BattlefieldEvent
+
     data class BattlefieldTileOccupied(
         val row: Int,
         val column: Int,

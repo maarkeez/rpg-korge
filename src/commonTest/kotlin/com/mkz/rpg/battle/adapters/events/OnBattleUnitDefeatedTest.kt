@@ -9,7 +9,9 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -25,7 +27,7 @@ class OnBattleUnitDefeatedTest {
         OnBattleUnitDefeated(
             eventBus = eventBus,
             leaveBattle = LeaveBattle(battleRepository),
-            defeatPlayer = DefeatPlayer(HasAllBattleUnitsDefeated(battleUnitRepository), battleRepository, eventBus),
+            defeatPlayer = DefeatPlayer(HasAllBattleUnitsDefeated(battleUnitRepository), SearchEnemyPlayer(InMemoryPlayerRepository()), battleRepository, eventBus),
         )
     private val defeatedPlayers = mutableListOf<PlayerDefeated>().also { defeated -> eventBus.subscribe<PlayerDefeated> { defeated += it } }
 

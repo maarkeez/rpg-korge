@@ -296,4 +296,18 @@ class BattleTest {
             BattleEvent.PlayerTurnStarted(players.first(), joinedBattleUnitIds),
         )
     }
+
+    @Test
+    fun `DefeatWhileExploring should defeat the player and leave the winner as the only player when the game finishes out of the battles`() {
+        // When
+        val battle = Battle.defeatWhileExploring(defeatedPlayerId = "player-1", winnerPlayerId = "player-2")
+        // Then
+        battle.isBattleFinished().shouldBeTrue()
+        battle.toDto().isFinished.shouldBeFalse()
+        battle.toDto().battleUnitIds.shouldBeEmpty()
+        val (events, defeatedBattle) = battle.pullEvents()
+        events.shouldContainExactly(BattleEvent.PlayerDefeated("player-1"))
+        val (victoryEvents, _) = defeatedBattle.finishBattle().pullEvents()
+        victoryEvents.shouldContainExactly(BattleEvent.PlayerVictory("player-2"))
+    }
 }

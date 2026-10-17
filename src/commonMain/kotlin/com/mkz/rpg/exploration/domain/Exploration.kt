@@ -16,6 +16,9 @@ import kotlin.jvm.JvmInline
  *
  * The party walks one step at a time: each step is awaited until its battle unit occupies its tile, so the next battle
  * unit can step on the tile it left.
+ *
+ * Every second while exploring, the battle units that stood still during it receive the effect of their terrain, so it
+ * remembers the battle units that moved during the current second.
  */
 @ConsistentCopyVisibility
 data class Exploration private constructor(
@@ -24,6 +27,7 @@ data class Exploration private constructor(
     private val mode: Mode,
     private val pendingSteps: PendingSteps,
     private val awaitedStep: Step?,
+    private val movedBattleUnits: MovedBattleUnits,
     private val events: Set<ExplorationEvent>,
 ) {
     companion object {
@@ -39,6 +43,7 @@ data class Exploration private constructor(
                 mode = Mode.EXPLORING,
                 pendingSteps = PendingSteps(emptyList()),
                 awaitedStep = null,
+                movedBattleUnits = MovedBattleUnits(emptySet()),
                 events = setOf(ExplorationStarted(playerId = playerId, battleUnitIds = battleUnitIds)),
             )
         }
@@ -92,6 +97,7 @@ data class Exploration private constructor(
             mode = Mode.BATTLING,
             pendingSteps = PendingSteps(emptyList()),
             awaitedStep = null,
+            movedBattleUnits = MovedBattleUnits(emptySet()),
             events = events + ExplorationPaused(playerId = playerId.value),
         )
 
@@ -104,6 +110,18 @@ data class Exploration private constructor(
 
     /** Removes the battle unit from the party, e.g.: when it is defeated. The next one leads when it was leading. */
     fun leave(battleUnitId: String): Exploration = copy(party = Party(party.value - battleUnitId))
+
+    /** Remembers that the battle unit moved during the current second, any battle unit (e.g.: a CPU one). Only while exploring. */
+    fun markMoved(battleUnitId: String): Exploration {
+        if (mode != Mode.EXPLORING) return this
+        return copy(movedBattleUnits = MovedBattleUnits(movedBattleUnits.value + battleUnitId))
+    }
+
+    /** The given battle units (e.g.: the battlefield occupants) that did not move during the current second. */
+    fun standingBattleUnitIds(battleUnitIds: Set<String>): Set<String> = battleUnitIds - movedBattleUnits.value
+
+    /** Starts the next second, in which no battle unit has moved yet. */
+    fun startNextSecond(): Exploration = copy(movedBattleUnits = MovedBattleUnits(emptySet()))
 
     fun pullEvents() = events to copy(events = emptySet())
 
@@ -129,6 +147,10 @@ data class Exploration private constructor(
 
     @JvmInline private value class PendingSteps(
         val value: List<Step>,
+    )
+
+    @JvmInline private value class MovedBattleUnits(
+        val value: Set<String>,
     )
 
     @JvmInline private value class Step(

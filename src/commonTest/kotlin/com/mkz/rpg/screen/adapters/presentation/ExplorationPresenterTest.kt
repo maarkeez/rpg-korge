@@ -1,7 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
@@ -10,12 +12,17 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
+import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class ExplorationPresenterTest {
     // The knight explores the sand from (1,1). There is no battle yet.
@@ -113,5 +120,45 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    private fun requestedTerrainEffects() =
+        mutableListOf<Set<String>>().also { requests ->
+            eventBus.subscribe<BattlefieldEvent.RequestEffectApplicationToOccupants> { requests += it.battleUnitIds }
+        }
+
+    @Test
+    fun `Tick should apply the terrain effects of the battle units standing still every second while exploring`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(999.milliseconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+        // When
+        presenter.tick(1.milliseconds)
+        presenter.tick(2.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldContainExactly(setOf("knight-1"), setOf("knight-1"), setOf("knight-1"))
+    }
+
+    @Test
+    fun `Tick should no longer apply the terrain effects and the virtual pad should be hidden when the game is over`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        val requests = requestedTerrainEffects()
+        eventBus.publish(PlayerVictory(playerId = "cpu"))
+        eventBus.dispatch()
+        // When
+        presenter.tick(1.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+        virtualPadView.visible.shouldBeFalse()
     }
 }

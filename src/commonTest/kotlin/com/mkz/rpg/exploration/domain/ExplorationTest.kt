@@ -189,4 +189,38 @@ class ExplorationTest {
         exploration.toDto().leaderBattleUnitId.shouldBeNull()
         exploration.toDto().battleUnitIds.shouldBeEmpty()
     }
+
+    @Test
+    fun `StandingBattleUnitIds should leave out the battle units that moved during the second when they are marked as moved`() {
+        // When
+        val exploration = exploration().markMoved("knight-1").markMoved("rat-1")
+        // Then
+        exploration.standingBattleUnitIds(setOf("knight-1", "knight-2", "rat-1", "rat-2")) shouldBe setOf("knight-2", "rat-2")
+    }
+
+    @Test
+    fun `StartNextSecond should have every battle unit standing when the next second starts`() {
+        // Given
+        val exploration = exploration().markMoved("knight-1")
+        // When
+        val nextSecondExploration = exploration.startNextSecond()
+        // Then
+        nextSecondExploration.standingBattleUnitIds(setOf("knight-1", "knight-2")) shouldBe setOf("knight-1", "knight-2")
+    }
+
+    @Test
+    fun `MarkMoved should not remember the battle units moving while battling`() {
+        // When
+        val exploration = exploration().pause().markMoved("knight-1")
+        // Then
+        exploration.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
+    }
+
+    @Test
+    fun `Pause should forget the battle units that moved while exploring when a battle starts`() {
+        // When
+        val exploration = exploration().markMoved("knight-1").pause().resume()
+        // Then
+        exploration.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
+    }
 }

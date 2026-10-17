@@ -32,7 +32,7 @@ class MushroomAbilityAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
 
     private val humanPlayerId = PlayerMother.id()

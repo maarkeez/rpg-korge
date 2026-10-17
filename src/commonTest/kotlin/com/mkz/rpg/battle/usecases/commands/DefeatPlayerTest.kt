@@ -7,7 +7,9 @@ import com.mkz.rpg.battle.domain.BattleMother
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -20,9 +22,11 @@ class DefeatPlayerTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
     private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val playerRepository = InMemoryPlayerRepository()
     private val defeatPlayer =
         DefeatPlayer(
             hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository),
+            searchEnemyPlayer = SearchEnemyPlayer(playerRepository),
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
@@ -62,5 +66,42 @@ class DefeatPlayerTest {
         val storedBattle = battleRepository.search()?.toDto()
         storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
+    fun `should defeat the player and leave their enemy as the only player when all their battle units are defeated while exploring`() {
+        // Given
+        playerRepository.create(player(id = "human"))
+        playerRepository.create(player(id = "cpu"))
+        battleUnitRepository.create(battleUnit(player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
+        // When
+        defeatPlayer(playerId = "cpu")
+        // Then
+        val storedBattle = battleRepository.search()!!
+        storedBattle.isBattleFinished() shouldBe true
+        storedBattle.toDto().currentPlayerTurn shouldBe "human"
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated("cpu"))
+    }
+
+    @Test
+    fun `should defeat the player in place of the finished battle when all their battle units are defeated while exploring again`() {
+        // Given
+        playerRepository.create(player(id = "human"))
+        playerRepository.create(player(id = "cpu"))
+        // The battle finished once the human turn, the last one of the round, finished.
+        battleRepository.create(
+            BattleMother
+                .battle(listOf("cpu", "human"))
+                .finishPlayerTurn()
+                .finishWithoutWinner()
+                .pullEvents()
+                .second,
+        )
+        battleUnitRepository.create(battleUnit(player = player(id = "human").toDto(), unit = unit(healthPoints = 0).toDto()))
+        // When
+        defeatPlayer(playerId = "human")
+        // Then
+        battleRepository.search()!!.toDto().currentPlayerTurn shouldBe "cpu"
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated("human"))
     }
 }

@@ -5,11 +5,14 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.exploration.adapters.events.OnBattleFinished
 import com.mkz.rpg.exploration.adapters.events.OnBattleStarted
 import com.mkz.rpg.exploration.adapters.events.OnBattleUnitDefeated
+import com.mkz.rpg.exploration.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.exploration.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.exploration.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.exploration.adapters.storage.InMemoryExplorationRepository
 import com.mkz.rpg.exploration.domain.ExplorationRepository
+import com.mkz.rpg.exploration.usecases.commands.ApplyStandingTerrainEffects
 import com.mkz.rpg.exploration.usecases.commands.LeaveParty
+import com.mkz.rpg.exploration.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.exploration.usecases.commands.PauseExploration
 import com.mkz.rpg.exploration.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.exploration.usecases.commands.ResumeExploration
@@ -39,6 +42,8 @@ class ExplorationApi(
     val pauseExploration = PauseExploration(explorationRepository, eventBus)
     val resumeExploration = ResumeExploration(explorationRepository, eventBus)
     val leaveParty = LeaveParty(explorationRepository)
+    val markBattleUnitMoved = MarkBattleUnitMoved(explorationRepository)
+    val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, battlefieldApi.searchBattlefield, eventBus)
 
     // Queries
     val searchExploration = SearchExploration(explorationRepository)
@@ -49,4 +54,5 @@ class ExplorationApi(
     private val onBattleStarted = OnBattleStarted(pauseExploration, eventBus)
     private val onBattleFinished = OnBattleFinished(resumeExploration, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
+    private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
 }

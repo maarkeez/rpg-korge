@@ -1,6 +1,6 @@
 # Plan: open world exploration
 
-> **Status:** in progress, milestone 4 of 6 done.
+> **Status:** in progress, milestone 5 of 6 done.
 >
 > **Summary:** A new game starts exploring the battlefield instead of battling. There are no turns. The human player
 > walks one battle unit with a virtual pad (north, east, south and west arrows, as on the SNES) and their other battle
@@ -56,7 +56,10 @@ battle units follow it in, and which battle units stood still during the last se
 - A service, `PartyWalking`, requests the steps for both, and skips the steps whose battle unit can not reach its
   tile, so the party always finishes walking.
 - `ApplyStandingTerrainEffects`: every second while exploring, it requests the terrain effects for the battle units
-  that did not move during that second, the CPU battle units included, as they stand still.
+  that did not move during that second, the CPU battle units included, as they stand still. It requests them to the
+  battlefield with `BattlefieldEvent.RequestEffectApplicationToOccupants`, and starts the next second.
+- `MarkBattleUnitMoved`: on `BattleUnitMoved`, it remembers the battle unit moved during the current second, only while
+  exploring.
 - `PauseExploration`: on `BattleStarted`, so the pad no longer walks the party and the seconds no longer apply terrain
   effects.
 - `ResumeExploration`: on `BattleFinished`, the party walks again.
@@ -82,7 +85,7 @@ battle units follow it in, and which battle units stood still during the last se
 
 - `OnRequestStartExploration`, `OnBattleStarted` and `OnBattleFinished`.
 - `OnBattlefieldTileOccupied`, which resolves the awaited step.
-- `OnBattleUnitMoved`, which marks the battle units that moved during the current second.
+- `OnBattleUnitMoved`, which marks the battle units that moved during the current second (`MarkBattleUnitMoved`).
 - `OnBattleUnitDefeated`, which removes the battle unit from the party (`LeaveParty`).
 
 ## battle
@@ -97,7 +100,10 @@ battle units follow it in, and which battle units stood still during the last se
   - it finishes without a winner (`BattleFinished`) when only one player is left with battle units in it, e.g.: no CPU
     battle unit is left in it (defeated or left behind). It is checked when a round finishes, so defeating the last CPU
     battle unit in it during the human turn still needs the turn to be finished;
-  - `PlayerVictory` still ends the game when a player has no battle units left on the battlefield.
+  - `PlayerVictory` still ends the game when a player has no battle units left on the battlefield, also while exploring
+    (e.g.: defeated by the lava): `DefeatPlayer` then stores a battle with only the winner left
+    (`Battle.defeatWhileExploring`), which finishes as any battle with a single player left. `BattleApi` uses
+    `SearchEnemyPlayer` for it.
 - Modify `BattleEvent.PlayerTurnStarted`, `BattleEvent.BattleRoundStarted` and `BattleEvent.BattleRoundFinished` because the other subdomains must leave
   out the battle units outside the battle. They carry the ids of the battle units in the battle, so the other
   subdomains do not depend on `battle`.
@@ -190,7 +196,8 @@ battle units follow it in, and which battle units stood still during the last se
 #### Commands
 
 - Modify `RequestEffectApplicationToOccupants` so it can be limited to some battle units: those standing while
-  exploring, and those in the battle when a round starts.
+  exploring, and those in the battle when a round starts. The exploration requests it with
+  `BattlefieldEvent.RequestEffectApplicationToOccupants`.
 
 #### Queries
 
@@ -201,6 +208,7 @@ battle units follow it in, and which battle units stood still during the last se
 #### Events
 
 - Modify `OnBattleRoundStarted` so it passes the battle units in the battle.
+- Add `OnRequestEffectApplicationToOccupants`, for the battle units standing still while exploring.
 
 ## cpuBrain
 
@@ -306,8 +314,9 @@ battle units follow it in, and which battle units stood still during the last se
   - it swaps the pad and the battle HUD when exploring pauses and resumes.
 - Modify `BattleScene`:
   - it creates the exploration API and presenter, and the pad;
-  - it ticks `ExplorationApi.applyStandingTerrainEffects` every second, from the frames, as it dispatches the event
-    bus today.
+  - it passes the time elapsed on every frame to the `ExplorationPresenter`, which calls
+    `ExplorationApi.applyStandingTerrainEffects` every second. The presenter counts the seconds, so it can be tested,
+    and stops counting them once the game is over, when it also hides the pad.
 - Modify `BattlefieldPresenter`:
   - it ignores tile taps while exploring;
   - it keeps the leader in the viewport (`followTile`);
@@ -328,7 +337,7 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 | 2 | ✅   | Exploring until a CPU engages   | `exploration` subdomain: `StartExploration`, `WalkParty`, `ResolvePartyStep`, `PauseExploration`, `ExplorationApi`. `SearchHumanPlayer`. `BattleUnit.walk` and `WalkBattleUnit`. `EngageEnemies` and `CombatEngaged`. `SetupBattle` starts exploring. `CombatEngaged` starts the battle as today: every battle unit, the loaded player order. `VirtualPadView`, `ExplorationPresenter`, the "Exploring" info, the battle announcement, tile taps ignored while exploring. The knights deployed in a line. | The party explores with the pad. The first CPU battle unit within reach starts the turn-based battle of today, played until a player is defeated.                |
 | 3 | ✅   | Only the engaged battle units   | `StartBattle` with the engaged CPU battle units and the human party, the CPU first. `UpdateEngagement`, `EngagementUpdated`, and `StartNextRound` with the joining battle units: the CPU battle units getting an enemy within reach join when a round finishes. Only the battle units in the battle can be selected. `DefeatPlayer` and `FinishBattle` against the battle units on the battlefield, as they already are. Delete `battle.toml`, `BattleLoader`, `ResourcesBattleLoader` and `InitialiseBattle`. | The battle involves the engaged CPU battle units only, the CPU playing first. The rest join when the party walks within their reach, until a player is defeated. |
 | 4 | ✅   | Back to exploring               | The CPU battle units without an enemy within reach leave the battle when a round finishes. `BattleFinished` when only one player is left with battle units in the battle. `ResumeExploration`, and `LeaveParty` (defeated battle units leave the party, the next one leads). `StartBattle` replaces the finished battle. The battle end announcement, and the selection cleared.                                                   | Exploring resumes once no CPU battle unit is left in the battle, and the next engagement starts a new battle.                                                     |
-| 5 |      | Terrain effects while exploring | `ApplyStandingTerrainEffects`, ticked every second by `BattleScene`. `OnBattleUnitMoved` marks the battle units that moved. `RequestEffectApplicationToOccupants` limited to some battle units.                                                                                                                                                                                                                                        | Standing on lava hurts and standing on water heals while exploring, every second.                                                                                |
+| 5 | ✅   | Terrain effects while exploring | `ApplyStandingTerrainEffects`, called every second by the `ExplorationPresenter` from the `BattleScene` frames. `OnBattleUnitMoved` and `MarkBattleUnitMoved` mark the battle units that moved. `RequestEffectApplicationToOccupants` limited to some battle units, requested with `BattlefieldEvent.RequestEffectApplicationToOccupants`. The game over while exploring.                                                     | Standing on lava hurts and standing on water heals while exploring, every second.                                                                                |
 | 6 |      | Inventory while exploring       | `PlayerTurnRule` lets the inventory be used while exploring.                                                                                                                                                                                                                                                                                                                                                                                | Items can be consumed, equipped and discarded while exploring.                                                                                                   |
 
 The tests that expect the battle to start with the game change in milestone 2: they either walk the party within reach

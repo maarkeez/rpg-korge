@@ -17,17 +17,19 @@ import com.mkz.rpg.battle.usecases.commands.StartBattle
 import com.mkz.rpg.battle.usecases.commands.StartNextRound
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 
 class BattleApi(
     eventBus: EventBus,
+    playerApi: PlayerApi,
     battleUnitApi: BattleUnitApi,
 ) {
     // Storage
     private val battleRepository: BattleRepository = InMemoryBattleRepository()
 
     // Commands
-    val defeatPlayer = DefeatPlayer(battleUnitApi.hasAllBattleUnitsDefeated, battleRepository, eventBus)
+    val defeatPlayer = DefeatPlayer(battleUnitApi.hasAllBattleUnitsDefeated, playerApi.searchEnemyPlayer, battleRepository, eventBus)
     val finishBattle = FinishBattle(battleRepository, eventBus)
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
     val startBattle = StartBattle(battleUnitApi.searchBattleUnitsByPlayerId, battleRepository, eventBus)

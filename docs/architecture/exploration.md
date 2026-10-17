@@ -20,6 +20,17 @@ The party walks one tile at a time, towards the arrow held on the virtual pad (n
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
 
+## Terrain effects
+
+Every second while exploring, the battle units that stood still during that second receive the effect of their terrain (e.g.: lava hurts, water heals), the CPU battle units included, as they stand still:
+
+- [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) counts the time elapsed on every frame, and calls [`ApplyStandingTerrainEffects`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ApplyStandingTerrainEffects.kt) every second (`STANDING_TERRAIN_EFFECT_INTERVAL`).
+- The exploration remembers the battle units that moved during the current second (`BattleUnitMoved`, see [`MarkBattleUnitMoved`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/MarkBattleUnitMoved.kt)), so walking over a tile does not apply its effect. A battle unit that walks onto lava is hurt once it has stood on it for a whole second.
+- The effects are requested to the battlefield (`BattlefieldEvent.RequestEffectApplicationToOccupants`) for the battle units standing still, as they are for the battle units in the battle when a round starts.
+- Nothing is applied while battling: the battle applies the terrain effects when its rounds start instead.
+
+A battle unit defeated by its terrain while exploring leaves the party. A player whose last battle units are defeated while exploring loses the game, as in a battle (`PlayerVictory` for their enemy, see [`DefeatPlayer`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt)). Once the game is over, the virtual pad is hidden and the seconds are no longer counted.
+
 ## Engaging
 
 After the party starts exploring and every time it has walked, the CPU brain [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) looks for the CPU battle units that have a battle unit of the party within reach, with the same rule as in a battle (see [CPU brain](cpu-brain.md#engaging)). When there is any, the combat is engaged (`CombatEngaged`):

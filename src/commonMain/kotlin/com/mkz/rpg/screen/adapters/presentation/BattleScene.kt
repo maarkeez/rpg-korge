@@ -67,7 +67,7 @@ class BattleScene : Scene() {
         val lootTableApi = LootTableApi(lootableItemApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
-        val battleApi = BattleApi(eventBus, battleUnitApi)
+        val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
@@ -149,7 +149,8 @@ class BattleScene : Scene() {
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
-                ExplorationPresenter(virtualPadView, battleHudView, playerCallToActionView, explorationApi, timeline, eventBus)
+                val explorationPresenter = ExplorationPresenter(virtualPadView, battleHudView, playerCallToActionView, explorationApi, timeline, eventBus)
+                addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }
 

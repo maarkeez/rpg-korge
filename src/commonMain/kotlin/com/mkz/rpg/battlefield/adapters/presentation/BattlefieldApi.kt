@@ -6,6 +6,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
+import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
@@ -91,6 +92,7 @@ class BattlefieldApi(
     private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
     private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)
     private val onBattleRoundStarted = OnBattleRoundStarted(requestEffectApplicationToOccupants, eventBus)
+    private val onRequestEffectApplicationToOccupants = OnRequestEffectApplicationToOccupants(requestEffectApplicationToOccupants, eventBus)
     private val onLootDropped = OnLootDropped(placeDroppedItem, eventBus)
     private val onItemStored = OnItemStored(pickUpDroppedItem, eventBus)
 

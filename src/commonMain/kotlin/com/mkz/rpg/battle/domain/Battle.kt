@@ -35,6 +35,23 @@ data class Battle private constructor(
                 events = setOf(BattleStarted, PlayerTurnStarted(players.first(), battleUnitIds)),
             )
         }
+
+        /**
+         * Defeats the player out of the battles, e.g.: when their last battle units are defeated by the terrain while
+         * exploring. Only the winner is left in it, so it finishes as a battle with a single player left.
+         */
+        fun defeatWhileExploring(
+            defeatedPlayerId: String,
+            winnerPlayerId: String,
+        ): Battle =
+            Battle(
+                turnQueue = TurnQueue(listOf(winnerPlayerId)),
+                battleUnits = BattleUnits(emptySet()),
+                currentRound = CurrentRound(0),
+                currentPlayerTurn = CurrentPlayerTurn(winnerPlayerId),
+                isFinished = IsFinished(false),
+                events = setOf(PlayerDefeated(defeatedPlayerId)),
+            )
     }
 
     fun toDto() =
