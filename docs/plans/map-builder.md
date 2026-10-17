@@ -1,6 +1,6 @@
 # Plan: main menu and map builder
 
-> **Status:** implemented, except importing a map from a file instead of the clipboard, which is planned.
+> **Status:** implemented.
 >
 > **Summary:** The game opens on a menu offering to play a new game or to build a map. The map builder lets the player
 > design a rectangular battlefield on a mobile screen, painting its tiles with terrains, and copies it to the clipboard

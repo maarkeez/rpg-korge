@@ -126,9 +126,9 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             battlefieldView() shouldNotBe null
         }
 
-    // The clipboard of the test window is always empty.
+    // KorGE opens no file picker without a window, so the file can never be read in the tests.
     @Test
-    fun `should tell there is nothing to import when importing from an empty clipboard`() =
+    fun `should tell the file can not be read when importing without a file picker`() =
         sharedViewsTest {
             // Given
             startMapBuilder()
@@ -137,8 +137,8 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             // When
             clickMenuOption(menuView, "Import")
             // Then
-            waitUntil { mapBuilderInfoView()!!.subtitleText() == MapBuilderPresenter.NOTHING_TO_IMPORT }
-            mapBuilderInfoView()!!.subtitleText() shouldBe MapBuilderPresenter.NOTHING_TO_IMPORT
+            waitUntil { mapBuilderInfoView()!!.subtitleText() == MapBuilderPresenter.FILE_NOT_READ }
+            mapBuilderInfoView()!!.subtitleText() shouldBe MapBuilderPresenter.FILE_NOT_READ
             battlefieldView()!!.tileCount() shouldBe 256
         }
 }

@@ -11,11 +11,12 @@ import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import korlibs.io.async.launchImmediately
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 
 /**
  * Displays the map being designed on the battlefield, as the battle would display it, and lets the player resize it,
- * paint its tiles, export it to the clipboard or import one from it, and leave once they confirm it.
+ * paint its tiles, export it to the clipboard, import one from a file, and leave once they confirm it.
  */
 class MapBuilderPresenter(
     private val battlefieldView: BattlefieldView,
@@ -27,6 +28,7 @@ class MapBuilderPresenter(
     private val battlefieldApi: BattlefieldApi,
     private val terrainApi: TerrainApi,
     private val clipboard: Clipboard,
+    private val mapFilePicker: MapFilePicker,
     private val coroutineScope: CoroutineScope,
     private val onLeft: () -> Unit,
     eventBus: EventBus,
@@ -36,8 +38,8 @@ class MapBuilderPresenter(
         const val MAP_COPIED = "Map copied to the clipboard"
         const val MAP_LOST_WHEN_LEAVING = "The map is lost when leaving"
         const val MAP_IMPORTED = "Map imported"
-        const val NOTHING_TO_IMPORT = "The clipboard is empty or can not be read"
-        const val NOT_A_MAP = "The clipboard has no map"
+        const val FILE_NOT_READ = "The file can not be read"
+        const val NOT_A_MAP = "The file has no map"
         val MAP_SIZE_OUT_OF_RANGE = "The map must be ${MapBuilder.MINIMUM_SIZE} to ${MapBuilder.MAXIMUM_SIZE} tiles wide and tall"
     }
 
@@ -112,15 +114,20 @@ class MapBuilderPresenter(
         }
     }
 
-    // Replaces the map with the one copied, e.g.: exported earlier. The current map is lost.
+    // Replaces the map with the one in the picked file, e.g.: exported earlier. The current map is lost. The picker is
+    // opened before suspending, as browsers only open it while handling the tap.
     private fun importMap() {
         coroutineScope.launchImmediately {
-            val text = clipboard.paste()
-            if (text.isNullOrBlank()) {
-                infoView.displayError(NOTHING_TO_IMPORT)
-            } else {
-                mapBuilderApi.importMap(text)
-            }
+            val text =
+                try {
+                    mapFilePicker.pickMap()
+                } catch (exception: CancellationException) {
+                    throw exception
+                } catch (_: Exception) {
+                    infoView.displayError(FILE_NOT_READ)
+                    return@launchImmediately
+                }
+            if (text != null) mapBuilderApi.importMap(text)
         }
     }
 
