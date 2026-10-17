@@ -6,4 +6,6 @@ interface PlayerRepository {
     fun searchById(id: String): Player?
 
     fun searchEnemy(playerId: String): Player
+
+    fun searchAll(): List<Player>
 }

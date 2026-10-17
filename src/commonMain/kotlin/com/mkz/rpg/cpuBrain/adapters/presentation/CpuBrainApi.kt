@@ -8,9 +8,12 @@ import com.mkz.rpg.cpuBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBattleUnitActionResolved
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBattleUnitManaged
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBrainInitialized
+import com.mkz.rpg.cpuBrain.adapters.events.OnExplorationStarted
+import com.mkz.rpg.cpuBrain.adapters.events.OnPartyWalked
 import com.mkz.rpg.cpuBrain.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.domain.CpuBrainRepository
+import com.mkz.rpg.cpuBrain.usecases.commands.EngageEnemies
 import com.mkz.rpg.cpuBrain.usecases.commands.ManageCpuBattleUnit
 import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitCast
@@ -93,6 +96,13 @@ class CpuBrainApi(
             whereShouldMove,
             eventBus,
         )
+    val engageEnemies =
+        EngageEnemies(
+            playerApi.searchEnemyPlayer,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            searchEnemiesWithinReach,
+            eventBus,
+        )
     val resolveCpuBattleUnitMove = ResolveCpuBattleUnitMove(cpuBrainRepository, eventBus)
     val resolveCpuBattleUnitCast = ResolveCpuBattleUnitCast(cpuBrainRepository, eventBus)
 
@@ -103,4 +113,6 @@ class CpuBrainApi(
     private val onCpuBattleUnitManaged = OnCpuBattleUnitManaged(manageCpuBattleUnit, eventBus)
     private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveCpuBattleUnitMove, eventBus)
     private val onAbilityCastResolved = OnAbilityCastResolved(resolveCpuBattleUnitCast, eventBus)
+    private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)
+    private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
 }

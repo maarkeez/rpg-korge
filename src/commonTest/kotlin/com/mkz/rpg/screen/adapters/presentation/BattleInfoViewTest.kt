@@ -82,6 +82,51 @@ class BattleInfoViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayExploring should display that the player explores without a player turn when exploring`() =
+        sharedViewsTest {
+            // Given
+            val battleInfoView = BattleInfoView()
+            battleInfoView.displayBattleInfo(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
+            // When
+            battleInfoView.displayExploring()
+            // Then
+            battleInfoView.roundText() shouldBe "Exploring"
+            battleInfoView.playerTurnText() shouldBe ""
+        }
+
+    @Test
+    fun `AnnounceBattle should display and pop that a battle starts when combat is engaged`() =
+        sharedViewsTest {
+            // Given
+            val battleInfoView = BattleInfoView()
+            addChild(battleInfoView)
+            battleInfoView.displayExploring()
+            // When
+            val announcing = startAnimation { battleInfoView.announceBattle() }
+            val scales = sampleUntilCompletion(announcing) { battleInfoView.roundScale() }
+            // Then
+            battleInfoView.roundText() shouldBe "Battle!"
+            battleInfoView.playerTurnText() shouldBe ""
+            scales.max() shouldBe (BattleInfoView.POP_SCALE plusOrMinus 0.05)
+            battleInfoView.roundScale() shouldBe 1.0
+        }
+
+    @Test
+    fun `AnnounceTurn should pop the round when the first turn is announced after the battle`() =
+        sharedViewsTest {
+            // Given
+            val battleInfoView = BattleInfoView()
+            addChild(battleInfoView)
+            awaitCompletion(startAnimation { battleInfoView.announceBattle() })
+            // When
+            val announcing = startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
+            val scales = sampleUntilCompletion(announcing) { battleInfoView.roundScale() }
+            // Then
+            battleInfoView.roundText() shouldBe "Round 1"
+            scales.max() shouldBe (BattleInfoView.POP_SCALE plusOrMinus 0.05)
+        }
+
+    @Test
     fun `DisplayPlayerWin should display player name when player wins`() =
         sharedViewsTest {
             // Given

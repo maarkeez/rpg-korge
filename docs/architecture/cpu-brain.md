@@ -42,6 +42,8 @@ A battle unit only engages the enemies **within reach**: the ones it can walk to
 
 For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat six tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
 
+The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts (see [Exploration](exploration.md#engaging)).
+
 ## Casting
 
 Every ability the unit can cast (enough mana, no cooldown), with every target `WhereCanCast` allows, is a candidate, but only heals when no enemy is within reach. Each ability is classified by its effects:

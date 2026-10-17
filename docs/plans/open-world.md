@@ -1,6 +1,6 @@
 # Plan: open world exploration
 
-> **Status:** in progress, milestone 1 of 6 done.
+> **Status:** in progress, milestone 2 of 6 done.
 >
 > **Summary:** A new game starts exploring the battlefield instead of battling. There are no turns. The human player
 > walks one battle unit with a virtual pad (north, east, south and west arrows, as on the SNES) and their other battle
@@ -34,13 +34,14 @@ battle units follow it in, and which battle units stood still during the last se
   - the leading battle unit id;
   - the following battle unit ids, in order;
   - the mode, `EXPLORING` or `BATTLING`;
+  - the walk in progress: the steps left, and the step awaited until its battle unit occupies its tile;
   - the battle units that moved since the last second.
 
   It walks the party one tile at a time: the leader steps towards the direction, and each follower steps to the tile
-  the battle unit ahead of it left.
+  the battle unit ahead of it left. The steps are walked one after another, as a battle unit can only step on the tile
+  the one ahead left once the battlefield has it vacant.
 - Add the `ExplorationEvent`s because the other subdomains and the screen react to them:
-  - `RequestStartExploration`, `ExplorationStarted`, `PartyWalked`, `ExplorationPaused` and `ExplorationResumed`;
-  - `RequestWalkBattleUnit`, one per battle unit of the party, in walking order.
+  - `RequestStartExploration`, `ExplorationStarted`, `PartyWalked`, `ExplorationPaused` and `ExplorationResumed`.
 
 ### Use cases
 
@@ -49,7 +50,11 @@ battle units follow it in, and which battle units stood still during the last se
 - `StartExploration`: once the battle units are deployed, the first human battle unit leads and the rest follow in
   the loaded order.
 - `WalkParty(direction)`: only while exploring, and only when the leader can occupy the next tile (e.g.: not void,
-  not another battle unit). It walks the party and publishes `PartyWalked`.
+  not another battle unit). It requests the walk of the first step (`BattleUnitEvent.RequestWalkBattleUnit`).
+- `ResolvePartyStep`: on `BattlefieldTileOccupied`, once the awaited battle unit occupies its tile, it requests the
+  walk of the next step. Once the last step is walked, it publishes `PartyWalked`.
+- A service, `PartyWalking`, requests the steps for both, and skips the steps whose battle unit can not reach its
+  tile, so the party always finishes walking.
 - `ApplyStandingTerrainEffects`: every second while exploring, it requests the terrain effects for the battle units
   that did not move during that second, the CPU battle units included, as they stand still.
 - `PauseExploration`: on `BattleStarted`, so the pad no longer walks the party and the seconds no longer apply terrain
@@ -74,6 +79,7 @@ battle units follow it in, and which battle units stood still during the last se
 #### Events
 
 - `OnRequestStartExploration`, `OnBattleStarted` and `OnBattleFinished`.
+- `OnBattlefieldTileOccupied`, which resolves the awaited step.
 - `OnBattleUnitMoved`, which marks the battle units that moved during the current second.
 - `OnBattleUnitDefeated`, which removes the battle unit from the party.
 
@@ -136,6 +142,8 @@ battle units follow it in, and which battle units stood still during the last se
 - Add `BattleUnit.walk` because walking while exploring spends no turn action, unlike `move`. It publishes the same
   `BattleUnitMoved`, so the battlefield occupancy, the loot found on the way and the animation keep working as they do
   today.
+- Add `BattleUnitEvent.RequestWalkBattleUnit` because the exploration requests each walk, as the CPU brain requests
+  each move with `RequestMoveBattleUnit`.
 
 ### Use cases
 
@@ -197,8 +205,8 @@ battle units follow it in, and which battle units stood still during the last se
 
 #### Commands
 
-- Add `EngageEnemies`: on `PartyWalked`, when any CPU battle unit has an enemy within reach, it publishes
-  `CombatEngaged` with those CPU battle units.
+- Add `EngageEnemies`: on `ExplorationStarted` and `PartyWalked`, when any CPU battle unit has an enemy within reach,
+  it publishes `CombatEngaged` with those CPU battle units.
 - Add `UpdateEngagement`: when a battle round finishes, it publishes `EngagementUpdated` with the CPU battle units
   that joined (an enemy is now within reach) and left (no enemy is within reach any more).
 - Modify `PlayTurn` so it only manages the CPU battle units in the battle.
@@ -211,8 +219,24 @@ battle units follow it in, and which battle units stood still during the last se
 
 #### Events
 
-- Add `OnPartyWalked` and `OnBattleRoundFinished`.
+- Add `OnExplorationStarted`, `OnPartyWalked` and `OnBattleRoundFinished`.
 - Modify `OnPlayerTurnStarted` so it passes the battle units in the battle.
+
+## player
+
+### Domain
+
+- Modify `PlayerRepository`, so it can search every player.
+
+### Use cases
+
+#### Queries
+
+- Add `SearchHumanPlayer` because the exploration starts with the battle units of the human player.
+
+### Adapters
+
+- Nothing changes.
 
 ## inventory
 
@@ -290,9 +314,9 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 | # | Done | Milestone                       | Changes                                                                                                                                                                                                                                                                                                                                                                                                                                     | The game after it                                                                                                                                                |
 |---|------|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | 1 | ✅   | Battle units in the battle      | `Battle` holds the battle units in the battle: every battle unit, for now. The battle units deployed during it join it (e.g.: a bat deployed by a goat), and the defeated ones leave it. `PlayerTurnStarted` and `BattleRoundStarted` carry them, and the turn resets, the round terrain effects and `PlayTurn` only change those. `SearchBattle` returns them. Delete `StartFirstRound`.                                                                                                                                                                | Unchanged: the battle starts with the game, with every battle unit.                                                                                              |
-| 2 |      | Exploring until a CPU engages   | `exploration` subdomain: `StartExploration`, `WalkParty`, `ExplorationApi`. `BattleUnit.walk` and `WalkBattleUnit`. `EngageEnemies` and `CombatEngaged`. `SetupBattle` starts exploring. `CombatEngaged` starts the battle as today: every battle unit, the loaded player order. `VirtualPadView`, `ExplorationPresenter`, the "Exploring" info, the battle announcement, tile taps ignored while exploring. The knights deployed in a line. | The party explores with the pad. The first CPU battle unit within reach starts the turn-based battle of today, played until a player is defeated.                |
+| 2 | ✅   | Exploring until a CPU engages   | `exploration` subdomain: `StartExploration`, `WalkParty`, `ResolvePartyStep`, `PauseExploration`, `ExplorationApi`. `SearchHumanPlayer`. `BattleUnit.walk` and `WalkBattleUnit`. `EngageEnemies` and `CombatEngaged`. `SetupBattle` starts exploring. `CombatEngaged` starts the battle as today: every battle unit, the loaded player order. `VirtualPadView`, `ExplorationPresenter`, the "Exploring" info, the battle announcement, tile taps ignored while exploring. The knights deployed in a line. | The party explores with the pad. The first CPU battle unit within reach starts the turn-based battle of today, played until a player is defeated.                |
 | 3 |      | Only the engaged battle units   | `StartBattle` with the engaged CPU battle units and the human party, the CPU first. `UpdateEngagement`, `EngagementUpdated` and `UpdateBattleUnits`: the CPU battle units getting an enemy within reach join when a round finishes. Only the battle units in the battle can be selected. `DefeatPlayer` and `FinishBattle` against the battle units on the battlefield. Delete `battle.toml`, `BattleLoader`, `ResourcesBattleLoader` and `InitialiseBattle`. | The battle involves the engaged CPU battle units only, the CPU playing first. The rest join when the party walks within their reach, until a player is defeated. |
-| 4 |      | Back to exploring               | The CPU battle units without an enemy within reach leave the battle when a round finishes. `BattleFinished`, `PauseExploration`, `ResumeExploration` (defeated battle units leave the party, the next one leads). `InMemoryBattleRepository` replaces the finished battle. The battle end announcement.                                                                                                                                 | Exploring resumes once no CPU battle unit is left in the battle, and the next engagement starts a new battle.                                                     |
+| 4 |      | Back to exploring               | The CPU battle units without an enemy within reach leave the battle when a round finishes. `BattleFinished`, `ResumeExploration` (defeated battle units leave the party, the next one leads). `InMemoryBattleRepository` replaces the finished battle. The battle end announcement.                                                                                                                                 | Exploring resumes once no CPU battle unit is left in the battle, and the next engagement starts a new battle.                                                     |
 | 5 |      | Terrain effects while exploring | `ApplyStandingTerrainEffects`, ticked every second by `BattleScene`. `OnBattleUnitMoved` marks the battle units that moved. `RequestEffectApplicationToOccupants` limited to some battle units.                                                                                                                                                                                                                                        | Standing on lava hurts and standing on water heals while exploring, every second.                                                                                |
 | 6 |      | Inventory while exploring       | `PlayerTurnRule` lets the inventory be used while exploring.                                                                                                                                                                                                                                                                                                                                                                                | Items can be consumed, equipped and discarded while exploring.                                                                                                   |
 

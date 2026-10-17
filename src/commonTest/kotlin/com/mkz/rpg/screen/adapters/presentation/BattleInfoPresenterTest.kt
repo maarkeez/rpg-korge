@@ -1,7 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
@@ -10,6 +12,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattleInfoView.BattleInfo
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class BattleInfoPresenterTest {
@@ -83,6 +86,28 @@ class BattleInfoPresenterTest {
         // Then
         battleInfoView.announcedTurns.shouldContainExactly(BattleInfo(playerName = "Human", round = 2, turnColor = BattleInfoView.HUMAN_TURN_COLOR))
         battlefieldView.tints.shouldContainExactly(BattleInfoView.HUMAN_TURN_COLOR)
+    }
+
+    @Test
+    fun `DisplayExploring should display that the player explores when the exploration starts`() {
+        // Given
+        turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
+        apis.eventBus.publish(ExplorationEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1")))
+        // When
+        apis.eventBus.dispatch()
+        // Then
+        battleInfoView.explorationDisplays shouldBe 1
+    }
+
+    @Test
+    fun `AnnounceBattle should announce the battle when it starts`() {
+        // Given
+        turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
+        apis.eventBus.publish(BattleEvent.BattleStarted)
+        // When
+        apis.eventBus.dispatch()
+        // Then
+        battleInfoView.announcedBattles shouldBe 1
     }
 
     @Test

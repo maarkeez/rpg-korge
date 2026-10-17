@@ -117,6 +117,28 @@ data class BattleUnit private constructor(
         )
     }
 
+    /**
+     * Walks outside a battle (e.g.: while exploring), so it spends no turn action.
+     * Path: the tiles walked from the origin (excluded) to the destination (included).
+     */
+    fun walk(
+        fromRow: Int,
+        fromColumn: Int,
+        path: List<Battlefield.Dto.PositionDto>,
+    ): BattleUnit {
+        val destination = path.last()
+        val movedEvent =
+            BattleUnitMoved(
+                battleUnitId = id.value,
+                fromRow = fromRow,
+                fromColumn = fromColumn,
+                toRow = destination.row,
+                toColumn = destination.column,
+                path = path,
+            )
+        return copy(events = events + movedEvent)
+    }
+
     fun teleport(
         fromRow: Int,
         fromColumn: Int,

@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.RGBA
+import kotlin.time.Duration
 
 // Records what the presenters ask the battlefield view to display, instead of drawing it.
 class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
@@ -47,6 +48,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val tilesNotDimmed = mutableListOf<Set<PositionDto>>()
     val removedBattleUnits = mutableListOf<PositionDto>()
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
+    val moveStepDurations = mutableListOf<Duration>()
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
@@ -123,8 +125,10 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         fromColumn: Int,
         path: List<PositionDto>,
         unitId: String,
+        stepDuration: Duration,
     ) {
         movedBattleUnits += MovedBattleUnit(fromRow, fromColumn, path, unitId)
+        moveStepDurations += stepDuration
     }
 
     override fun displayLoot(

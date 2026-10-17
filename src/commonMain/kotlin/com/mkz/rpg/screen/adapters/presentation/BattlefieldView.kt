@@ -37,6 +37,7 @@ import korlibs.math.interpolation.EASE_IN_QUAD
 import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
+import kotlin.time.Duration
 
 open class BattlefieldView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -80,6 +81,9 @@ open class BattlefieldView(
 
         // How long a moving battle unit stops on each tile of its path.
         val MOVE_STEP_DURATION = 150.milliseconds
+
+        // Exploring, a step is quicker, as the party walks one tile at a time, the battle units one after another.
+        val EXPLORING_STEP_DURATION = 75.milliseconds
         val SCROLL_DURATION = 300.milliseconds
 
         // Opacity of the black mask over the tiles that can not be selected.
@@ -493,13 +497,14 @@ open class BattlefieldView(
         fromColumn: Int,
         path: List<PositionDto>,
         unitId: String,
+        stepDuration: Duration = MOVE_STEP_DURATION,
     ) {
         var previousPosition = PositionDto(fromRow, fromColumn)
         path.forEach { position ->
             followTile(position.row, position.column)
             removeBattleUnit(previousPosition.row, previousPosition.column)
             displayBattleUnit(position.row, position.column, unitId)
-            delay(MOVE_STEP_DURATION)
+            delay(stepDuration)
             previousPosition = position
         }
     }

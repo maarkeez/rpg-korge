@@ -4,11 +4,9 @@ import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battleHudView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
-import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickBag
 import com.mkz.rpg.screen.adapters.presentation.clickClose
 import com.mkz.rpg.screen.adapters.presentation.clickTile
-import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.inventoryView
 import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
@@ -23,16 +21,16 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup deploys a human player knight at (6,6) and a cpu rat at (0,0). Nothing has been looted yet.
-    private val knightRow = 6
-    private val knightColumn = 6
+    // The party walks to the battle with the leading knight at (4,3). The battle setup deploys a cpu rat at (0,0).
+    // Nothing has been looted yet.
+    private val knightRow = LEADER_ROW_IN_BATTLE
+    private val knightColumn = LEADER_COLUMN_IN_BATTLE
 
     @Test
     fun `should open the empty inventory of the knight and go back to its info when the human player opens and closes its bag`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battleUnitInfoView()?.isBagDisplayed() == true }
@@ -51,8 +49,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should not display the bag when the human player selects a cpu rat`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(0, 0) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
             clickTile(battlefieldView, 0, 0)

@@ -4,7 +4,6 @@ import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battleHudView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
-import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickAbility
 import com.mkz.rpg.screen.adapters.presentation.clickConfirm
 import com.mkz.rpg.screen.adapters.presentation.clickTile
@@ -23,14 +22,14 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup deploys a human player knight at (6,6), which can walk 3 tiles. (6,5) is an adjacent sand tile.
-    private val knightRow = 6
-    private val knightColumn = 6
-    private val tileInMovementRangeRow = 6
-    private val tileInMovementRangeColumn = 5
+    // The party walks to the battle with the leading knight at (4,3), which can walk 3 tiles. (4,2) is an adjacent sand tile.
+    private val knightRow = LEADER_ROW_IN_BATTLE
+    private val knightColumn = LEADER_COLUMN_IN_BATTLE
+    private val tileInMovementRangeRow = 4
+    private val tileInMovementRangeColumn = 2
 
-    // (6,4) is only reachable within 3 steps through (6,5): the paths around it take 4 steps.
-    private val tileBehindAdjacentTileColumn = 4
+    // (4,1) is only reachable within 3 steps through (4,2): the paths around it take 4 steps.
+    private val tileBehindAdjacentTileColumn = 1
 
     // The knight abilities are poisoned-sword, mushroom, skull, teleport, bee and heal, which is cast on the knight.
     // Bee deploys a bee on a vacant tile adjacent to the knight.
@@ -41,8 +40,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should keep the knight selected when the human player casts heal on the knight`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
@@ -67,12 +65,11 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should update the knight movement range when the human player deploys a bee on an adjacent tile`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
-            require(!battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn)) { "(6,4) should be reachable before the bee is deployed" }
+            require(!battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn)) { "(4,1) should be reachable before the bee is deployed" }
             clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, beeAbilityIndex)
             waitUntil { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn) }
             clickTile(battlefieldView, tileInMovementRangeRow, tileInMovementRangeColumn)
@@ -89,7 +86,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             }
             withClue("Expected the knight movement range to be displayed after deploying the bee") { battlefieldView.isDimmedAt(knightRow - 1, knightColumn).shouldBeFalse() }
             withClue(
-                "Expected (6,4) to be out of the knight movement range once the bee blocks the way",
+                "Expected (4,1) to be out of the knight movement range once the bee blocks the way",
             ) { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn).shouldBeTrue() }
         }
 }

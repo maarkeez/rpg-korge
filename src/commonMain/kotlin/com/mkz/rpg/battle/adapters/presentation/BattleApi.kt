@@ -2,9 +2,9 @@ package com.mkz.rpg.battle.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDeployed
+import com.mkz.rpg.battle.adapters.events.OnCombatEngaged
 import com.mkz.rpg.battle.adapters.events.OnPlayerDefeated
 import com.mkz.rpg.battle.adapters.events.OnRequestFinishPlayerTurn
-import com.mkz.rpg.battle.adapters.events.OnRequestInitialiseBattle
 import com.mkz.rpg.battle.adapters.events.OnRoundFinished
 import com.mkz.rpg.battle.adapters.resources.ResourcesBattleLoader
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
@@ -46,7 +46,7 @@ class BattleApi(
     val onBattleUnitDeployed = OnBattleUnitDeployed(eventBus, joinBattle)
     val onBattleUnitDefeated = OnBattleUnitDefeated(eventBus, leaveBattle, defeatPlayer)
     val onPlayerDefeated = OnPlayerDefeated(eventBus, finishBattle)
-    private val onRequestInitialiseBattle = OnRequestInitialiseBattle(initialiseBattle, eventBus)
+    private val onCombatEngaged = OnCombatEngaged(initialiseBattle, eventBus)
     private val onRequestFinishPlayerTurn = OnRequestFinishPlayerTurn(finishPlayerTurn, eventBus)
 
     suspend fun init() {

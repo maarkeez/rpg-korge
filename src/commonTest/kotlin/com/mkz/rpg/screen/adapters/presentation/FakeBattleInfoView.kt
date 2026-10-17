@@ -13,6 +13,16 @@ class FakeBattleInfoView : BattleInfoView() {
     val displayedBattleInfos = mutableListOf<BattleInfo>()
     val announcedTurns = mutableListOf<BattleInfo>()
     val displayedPlayerWins = mutableListOf<String>()
+    var explorationDisplays = 0
+    var announcedBattles = 0
+
+    override fun displayExploring() {
+        explorationDisplays++
+    }
+
+    override suspend fun announceBattle() {
+        announcedBattles++
+    }
 
     override fun displayBattleInfo(
         playerName: String,

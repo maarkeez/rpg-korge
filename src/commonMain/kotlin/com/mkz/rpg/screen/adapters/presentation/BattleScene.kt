@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
@@ -20,6 +21,7 @@ import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
+import korlibs.korge.view.container
 import korlibs.math.geom.Size
 
 class BattleScene : Scene() {
@@ -41,6 +43,7 @@ class BattleScene : Scene() {
             inventoryView,
         )
     val playerCallToActionView = PlayerCallToActionView(resourcesLoader)
+    val virtualPadView = VirtualPadView(Size(390, 300))
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -67,6 +70,7 @@ class BattleScene : Scene() {
         val battleApi = BattleApi(eventBus, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
+        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Resources: each subdomain loads its data before the battle is set up
@@ -135,13 +139,18 @@ class BattleScene : Scene() {
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-                addChild(battleHudView)
+                // While exploring, the virtual pad takes the place of the battle HUD.
+                container {
+                    addChild(battleHudView)
+                    addChild(virtualPadView)
+                }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
                 // addChild(finishTurnView)
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
+                ExplorationPresenter(virtualPadView, battleHudView, playerCallToActionView, explorationApi, timeline, eventBus)
             }
         }
 

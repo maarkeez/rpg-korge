@@ -1,10 +1,10 @@
 package com.mkz.rpg.battlesetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.AbilityEvent
-import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.lootTable.domain.LootTableEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
@@ -14,8 +14,8 @@ import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 
 /**
- * Initialises each subdomain from its resources. The order matters, as each subdomain
- * requires the ones it refers to (e.g.: abilities require their effects).
+ * Initialises each subdomain from its resources, then starts exploring. The order matters, as each subdomain
+ * requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
  */
 class SetupBattle(
     private val eventBus: EventBus,
@@ -31,6 +31,6 @@ class SetupBattle(
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
-        eventBus.publish(BattleEvent.RequestInitialiseBattle)
+        eventBus.publish(ExplorationEvent.RequestStartExploration)
     }
 }

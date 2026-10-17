@@ -1,8 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.shared.domain.EventBus
@@ -22,6 +24,12 @@ class BattleInfoPresenter(
 ) {
     private val subscriptions =
         listOf(
+            eventBus.subscribe<ExplorationStarted> {
+                timeline.play { battleInfoView.displayExploring() }
+            },
+            eventBus.subscribe<BattleStarted> {
+                timeline.play { battleInfoView.announceBattle() }
+            },
             eventBus.subscribe<PlayerTurnStarted> {
                 announceTurn()
             },

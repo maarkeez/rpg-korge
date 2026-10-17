@@ -203,6 +203,71 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `MoveUnit should move the battle unit at the battle pace when battling`() {
+        // Given
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.MOVE_STEP_DURATION)
+    }
+
+    // The same battlefield, before any battle has started: the human player explores it.
+    private fun exploringApis() =
+        SubdomainApis(
+            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            units = listOf(unit(id = "knight", movementRange = 3).toDto()),
+            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            tiles = List(4) { List(4) { "sand" } },
+            deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
+        ).also(SubdomainApis::initialise)
+
+    private fun exploringPresenter(
+        apis: SubdomainApis,
+        battlefieldView: FakeBattlefieldView,
+    ) = BattlefieldPresenter(
+        battlefieldView = battlefieldView,
+        battleUnitInfoView = FakeBattleUnitInfoView(),
+        attackPreviewView = FakeAttackPreviewView(),
+        playerCallToActionView = FakePlayerCallToActionView(),
+        battleHudView = FakeBattleHudView(),
+        battlefieldApi = apis.battlefieldApi,
+        battleUnitApi = apis.battleUnitApi,
+        playerApi = apis.playerApi,
+        unitApi = apis.unitApi,
+        abilityApi = apis.abilityApi,
+        battleApi = apis.battleApi,
+        timeline = battleSceneTimeline(),
+        eventBus = apis.eventBus,
+    )
+
+    @Test
+    fun `MoveUnit should move the battle unit quicker when exploring`() {
+        // Given
+        val exploringApis = exploringApis()
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = listOf(position(0, 1))))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.EXPLORING_STEP_DURATION)
+    }
+
+    @Test
+    fun `TileSelected should not select the battle unit when exploring`() {
+        // Given
+        val exploringApis = exploringApis()
+        val exploringBattlefieldView = FakeBattlefieldView()
+        val presenter = exploringPresenter(exploringApis, exploringBattlefieldView)
+        // When
+        presenter.tileSelected(row = 1, column = 1)
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.potentialMovements.shouldBeEmpty()
+    }
+
+    @Test
     fun `MoveUnit should not move the battle unit on view when the battle unit is not found`() {
         // Given
         val path = listOf(position(3, 0))

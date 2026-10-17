@@ -37,7 +37,7 @@ class BattlefieldPresenter(
     playerApi: PlayerApi,
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
-    battleApi: BattleApi,
+    private val battleApi: BattleApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
@@ -187,6 +187,7 @@ class BattlefieldPresenter(
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return
+        val stepDuration = if (isBattling()) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
         timeline.play {
             battlefieldView.resetTiles()
             battlefieldView.moveBattleUnit(
@@ -194,6 +195,7 @@ class BattlefieldPresenter(
                 fromColumn = event.fromColumn,
                 path = event.path,
                 unitId = battleUnit.unitId,
+                stepDuration = stepDuration,
             )
         }
     }
@@ -396,11 +398,14 @@ class BattlefieldPresenter(
         if (!timeline.isPlaying) action()
     }
 
+    // Out of a battle (e.g.: while exploring), the battle units are not selected.
+    private fun isBattling(): Boolean = battleApi.searchBattle()?.isFinished == false
+
     // Delegates
     override fun tileSelected(
         row: Int,
         column: Int,
-    ) = whenIdle { processTileSelected(row = row, column = column) }
+    ) = whenIdle { if (isBattling()) processTileSelected(row = row, column = column) }
 
     override fun abilitySelected(abilityId: String) = whenIdle { processAbilitySelected(abilityId) }
 }

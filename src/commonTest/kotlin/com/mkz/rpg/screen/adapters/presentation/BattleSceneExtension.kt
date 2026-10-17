@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.descendants
+import com.mkz.rpg.shared.adapters.presentation.isShown
 import korlibs.korge.view.Stage
 
 // Page object of [BattleScene], used by the end-to-end tests to find the scene views on the stage.
@@ -10,6 +11,9 @@ fun Stage.battlefieldView(): BattlefieldView? = descendants().filterIsInstance<B
 
 /** The player call to action on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.playerCallToActionView(): PlayerCallToActionView? = descendants().filterIsInstance<PlayerCallToActionView>().firstOrNull()
+
+/** The virtual pad on the screen, or `null` while the battle scene is not on the stage yet. */
+fun Stage.virtualPadView(): VirtualPadView? = descendants().filterIsInstance<VirtualPadView>().firstOrNull()
 
 /** The battle HUD on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleHudView(): BattleHudView? = descendants().filterIsInstance<BattleHudView>().firstOrNull()
@@ -40,3 +44,6 @@ fun Stage.isTurnAnnounced(): Boolean {
  * the battle, as shown by the finish turn being enabled. End-to-end tests should wait for it before clicking.
  */
 fun Stage.canHumanPlayerAct(): Boolean = isTurnAnnounced() && playerCallToActionView()?.isFinishTurnEnabled() == true
+
+/** Whether the battle HUD and the player call to action are on the screen, which they are only while battling. */
+fun Stage.isBattleHudShown(): Boolean = battleHudView()?.isShown() == true && playerCallToActionView()?.isShown() == true

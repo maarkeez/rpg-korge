@@ -31,6 +31,7 @@ import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
@@ -62,6 +63,7 @@ class InMemoryQueries(
     val searchUnitById = SearchUnitById(unitRepository)
     val searchPlayerById = SearchPlayerById(playerRepository)
     val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
+    val searchHumanPlayer = SearchHumanPlayer(playerRepository)
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val isTransitionAllowed = IsTransitionAllowed(terrainRepository)
 

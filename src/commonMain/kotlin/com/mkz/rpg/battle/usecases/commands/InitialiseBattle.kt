@@ -6,7 +6,10 @@ import com.mkz.rpg.battle.usecases.services.BattleLoader
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Starts the first round of the battle, with the players playing in the loaded order, and all their battle units in the battle. */
+/**
+ * Starts the first round of the battle, e.g.: when the CPU engages the exploring player, with the players playing in the
+ * loaded order, and all their battle units in the battle.
+ */
 class InitialiseBattle(
     private val battleLoader: BattleLoader,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,

@@ -94,6 +94,28 @@ class BattleUnitTest {
     }
 
     @Test
+    fun `Walk should publish the moved event and keep the remaining steps when the battle unit walks out of a battle`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
+        val path = (1..5).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+        // When
+        val walkedBattleUnit = battleUnit.walk(fromRow = 0, fromColumn = 0, path = path)
+        // Then
+        walkedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 3
+        val (events, _) = walkedBattleUnit.pullEvents()
+        events.shouldContainExactly(
+            BattleUnitEvent.BattleUnitMoved(
+                battleUnitId = walkedBattleUnit.toDto().id,
+                fromRow = 0,
+                fromColumn = 0,
+                toRow = 0,
+                toColumn = 5,
+                path = path,
+            ),
+        )
+    }
+
+    @Test
     fun `Teleport should publish the moved event and keep the remaining steps when the battle unit is teleported`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())

@@ -1,10 +1,10 @@
 package com.mkz.rpg.battlesetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.AbilityEvent
-import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.effect.domain.EffectEvent
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.lootTable.domain.LootTableEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
@@ -20,7 +20,7 @@ class SetupBattleTest {
     private val setupBattle = SetupBattle(eventBus)
 
     @Test
-    fun `should request each subdomain initialisation after the subdomains it refers to when the battle is set up`() {
+    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, when the battle is set up`() {
         // Given
         // When
         setupBattle()
@@ -36,7 +36,7 @@ class SetupBattleTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BattleUnitEvent.RequestInitialiseBattleUnits,
-            BattleEvent.RequestInitialiseBattle,
+            ExplorationEvent.RequestStartExploration,
         )
     }
 }

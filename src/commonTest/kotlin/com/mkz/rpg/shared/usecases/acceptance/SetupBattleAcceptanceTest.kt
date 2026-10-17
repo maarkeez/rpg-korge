@@ -58,6 +58,9 @@ class SetupBattleAcceptanceTest {
         battleApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
+        // The setup starts exploring: the battle starts as if the CPU engaged.
+        battleApi.initialiseBattle()
+        eventBus.dispatch()
     }
 
     @Test

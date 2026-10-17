@@ -25,6 +25,13 @@ sealed interface BattleUnitEvent : DomainEvent {
         val moveToColumn: Int,
     ) : BattleUnitEvent
 
+    // Requested outside a battle (e.g.: while exploring), so the walk spends no turn action.
+    data class RequestWalkBattleUnit(
+        val battleUnitId: String,
+        val walkToRow: Int,
+        val walkToColumn: Int,
+    ) : BattleUnitEvent
+
     data class RequestApplyEffect(
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent

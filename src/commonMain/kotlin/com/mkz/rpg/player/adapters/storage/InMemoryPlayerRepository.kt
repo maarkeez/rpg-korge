@@ -13,4 +13,6 @@ class InMemoryPlayerRepository : PlayerRepository {
     override fun searchById(id: String) = players[id]
 
     override fun searchEnemy(playerId: String) = players.entries.first { it.key != playerId }.value
+
+    override fun searchAll(): List<Player> = players.values.toList()
 }

@@ -2,28 +2,28 @@ package com.mkz.rpg.battle.adapters.events
 
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.Battle
-import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.usecases.commands.InitialiseBattle
 import com.mkz.rpg.battle.usecases.services.FakeBattleLoader
+import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class OnRequestInitialiseBattleTest {
+class OnCombatEngagedTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
     private val queries = InMemoryQueries()
-    private val onRequestInitialiseBattle =
-        OnRequestInitialiseBattle(
+    private val onCombatEngaged =
+        OnCombatEngaged(
             InitialiseBattle(FakeBattleLoader(playerOrder = listOf("player-1", "player-2")), queries.searchBattleUnitsByPlayerId, battleRepository, eventBus),
             eventBus,
         )
 
     @Test
-    fun `should initialise the battle when the request is dispatched`() {
+    fun `should start the battle when the cpu engages`() {
         // Given
-        eventBus.publish(BattleEvent.RequestInitialiseBattle)
+        eventBus.publish(CpuBrainEvent.CombatEngaged(playerId = "player-2", battleUnitIds = listOf("rat-1")))
         // When
         eventBus.dispatch()
         // Then

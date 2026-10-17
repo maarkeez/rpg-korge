@@ -4,7 +4,6 @@ import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitPositions
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
-import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
@@ -22,18 +21,17 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup deploys a human player knight at (6,6), which can walk 3 tiles. (6,5) and (6,4) are sand tiles.
-    private val knightRow = 6
-    private val knightColumn = 6
-    private val targetRow = 6
-    private val targetColumn = 5
+    // The party walks to the battle with the leading knight at (4,3), which can walk 3 tiles. (4,2) and (4,1) are sand tiles.
+    private val knightRow = LEADER_ROW_IN_BATTLE
+    private val knightColumn = LEADER_COLUMN_IN_BATTLE
+    private val targetRow = 4
+    private val targetColumn = 2
 
     @Test
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
@@ -49,8 +47,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should dim the tiles out of the knight movement range when the human player selects the knight`() =
         sharedViewsTest {
             // Given
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
             clickTile(battlefieldView, knightRow, knightColumn)
@@ -65,9 +62,8 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should walk the knight tile by tile when the human player moves it two tiles away`() =
         sharedViewsTest {
             // Given
-            val farTargetColumn = 4
-            startNewGame()
-            waitUntil { battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true && canHumanPlayerAct() }
+            val farTargetColumn = 1
+            startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, farTargetColumn) }

@@ -50,6 +50,9 @@ class EquipHammerAcceptanceTest {
         battleApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
+        // The setup starts exploring: the battle starts as if the CPU engaged.
+        battleApi.initialiseBattle()
+        eventBus.dispatch()
         battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 6, column = 7)
         inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "hammer", row = 6, column = 7)
         eventBus.dispatch()

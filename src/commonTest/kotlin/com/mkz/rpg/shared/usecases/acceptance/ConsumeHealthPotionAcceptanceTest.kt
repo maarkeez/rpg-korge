@@ -49,6 +49,9 @@ class ConsumeHealthPotionAcceptanceTest {
         battleApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
+        // The setup starts exploring: the battle starts as if the CPU engaged.
+        battleApi.initialiseBattle()
+        eventBus.dispatch()
         repeat(2) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(

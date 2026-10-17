@@ -52,6 +52,21 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
 
     private var displayedRound: Int? = null
 
+    /** Displays that the player is exploring, out of the battles. */
+    open fun displayExploring() {
+        this.round.text = "Exploring"
+        this.playerTurn.text = ""
+        displayedRound = null
+    }
+
+    /** Displays and pops that a battle starts, e.g.: when the CPU engages the exploring player. */
+    open suspend fun announceBattle() {
+        this.round.text = "Battle!"
+        this.playerTurn.text = ""
+        displayedRound = null
+        pop(listOf(this.round))
+    }
+
     open fun displayBattleInfo(
         playerName: String,
         round: Int,
@@ -71,7 +86,11 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
     ) {
         val isNewRound = round != displayedRound
         displayBattleInfo(playerName, round, turnColor)
-        val poppingLines = if (isNewRound) listOf(this.round, playerTurn) else listOf(playerTurn)
+        pop(if (isNewRound) listOf(this.round, playerTurn) else listOf(playerTurn))
+    }
+
+    // The lines grow to the pop scale and shrink back.
+    private suspend fun pop(poppingLines: List<UIText>) {
         val popAnimator =
             animator(parallel = true) {
                 poppingLines.forEach { line ->

@@ -17,6 +17,12 @@ sealed interface CpuBrainEvent : DomainEvent {
         val battleUnitId: String,
     ) : CpuBrainEvent
 
+    /** Battle units: the CPU battle units with an enemy within reach, which engage it. */
+    data class CombatEngaged(
+        val playerId: String,
+        val battleUnitIds: List<String>,
+    ) : CpuBrainEvent
+
     data class CpuTurnFinished(
         val playerId: String,
     ) : CpuBrainEvent

@@ -5,8 +5,6 @@ import com.mkz.rpg.shared.domain.DomainEvent
 sealed interface BattleEvent : DomainEvent {
     object BattleStarted : BattleEvent
 
-    object RequestInitialiseBattle : BattleEvent
-
     object RequestFinishPlayerTurn : BattleEvent
 
     /** Battle units: those in the battle. */
