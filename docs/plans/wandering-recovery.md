@@ -1,6 +1,6 @@
 # Plan: wandering CPU battle units recover health and mana
 
-> **Status:** in progress, milestone 1 is done.
+> **Status:** implemented, the 2 milestones are done.
 >
 > **Summary:** A CPU battle unit out of a battle recovers 10% of its maximum health and mana every time it wanders:
 > every second while exploring, and once per round for those out of a battle. A CPU battle unit hurt in a battle and
@@ -78,8 +78,8 @@ For example, with the units of the resources:
 
 ## Impact
 
-- The acceptance tests that wire the `WanderingApi` and hurt a CPU battle unit out of the battle (e.g.: the engagement
-  ones) see it recover once per round. They are checked, and updated where they assert its health.
+- The acceptance tests that wire the `WanderingApi` and hurt a CPU battle unit out of the battle would see it recover
+  once per round. None of them asserts the health of one, so none changed.
 - [CPU brain](../architecture/cpu-brain.md#wandering) explains the recovery.
 
 ## Milestones
@@ -89,4 +89,4 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 | # | Done | Milestone                    | Changes                                                                                                                              | The game after it                                                                                          |
 |---|------|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------|
 | 1 | ✅    | Recovering while exploring   | `BattleUnit.recover`, `RequestRecoverBattleUnits`, `RecoverBattleUnits`, `OnRequestRecoverBattleUnits`. `WanderWhileExploring` requests it. | The CPU battle units recover 10% of their health and mana every second while the party explores.            |
-| 2 | ⬜    | Recovering when a round ends | `WanderAfterRound` requests it for the CPU battle units out of the battle.                                                           | During a battle, the CPU battle units out of it recover once per round too.                                |
+| 2 | ✅    | Recovering when a round ends | `WanderAfterRound` requests it for the CPU battle units out of the battle.                                                           | During a battle, the CPU battle units out of it recover once per round too.                                |

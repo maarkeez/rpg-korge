@@ -226,4 +226,18 @@ class WanderingAcceptanceTest {
             game.ratHealth() shouldBe 0
         }
     }
+
+    @Test
+    fun `should recover a tenth of its health once per round while it is out of the battle`() {
+        // Given: rat-2 engages the knight-2 at (1,0) and battles, while the rat stays out of the battle, hit down to 10.
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
+            game.hitRat()
+            // When
+            game.battleApi.finishPlayerTurn()
+            game.eventBus.dispatch()
+            // Then
+            game.ratHealth() shouldBe 12
+        }
+    }
 }

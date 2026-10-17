@@ -17,7 +17,7 @@ class OnBattleRoundFinishedTest {
     private val queries = InMemoryQueries(random = FixedDoublesRandom(0.0))
     private val wanderingRepository = InMemoryWanderingRepository()
     private val onBattleRoundFinished =
-        OnBattleRoundFinished(WanderAfterRound(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus)), eventBus)
+        OnBattleRoundFinished(WanderAfterRound(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus), eventBus), eventBus)
     private val wanderedEvents =
         mutableListOf<WanderingEvent.BattleUnitsWanderedAfterRound>().also { wandered -> eventBus.subscribe<WanderingEvent.BattleUnitsWanderedAfterRound> { wandered += it } }
 
