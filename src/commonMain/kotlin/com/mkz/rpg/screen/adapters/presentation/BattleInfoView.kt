@@ -67,6 +67,14 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
         pop(listOf(this.round))
     }
 
+    /** Displays and pops that the battle is over, e.g.: when no CPU battle unit is left in it. */
+    open suspend fun announceBattleEnd() {
+        this.round.text = "Battle over!"
+        this.playerTurn.text = ""
+        displayedRound = null
+        pop(listOf(this.round))
+    }
+
     open fun displayBattleInfo(
         playerName: String,
         round: Int,

@@ -1,6 +1,7 @@
 package com.mkz.rpg.battle.domain
 
 import com.mkz.rpg.battle.domain.BattleError.MinimumTwoPlayersRequired
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundStarted
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
@@ -83,6 +84,16 @@ data class Battle private constructor(
     fun leave(battleUnitId: String): Battle = copy(battleUnits = BattleUnits(battleUnits.value - battleUnitId))
 
     fun isBattleFinished(): Boolean = turnQueue.value.size == 1
+
+    /** Players in the battle: the players with battle units in it. It is disengaged when fewer than two players are left in it. */
+    fun isDisengaged(playersInBattle: Set<String>): Boolean = turnQueue.value.count { playerId -> playerId in playersInBattle } < 2
+
+    /** Finishes the battle without a winner, e.g.: when it is disengaged. */
+    fun finishWithoutWinner(): Battle =
+        copy(
+            isFinished = IsFinished(true),
+            events = events + BattleFinished,
+        )
 
     fun finishBattle(): Battle =
         copy(

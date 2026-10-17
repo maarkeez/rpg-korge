@@ -26,6 +26,6 @@ class OnBattleRoundFinishedTest {
         // When
         eventBus.dispatch()
         // Then
-        updates.shouldContainExactly(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList()))
+        updates.shouldContainExactly(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
     }
 }

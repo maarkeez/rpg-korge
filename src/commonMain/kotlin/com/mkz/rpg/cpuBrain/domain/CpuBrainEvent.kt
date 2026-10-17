@@ -24,9 +24,13 @@ sealed interface CpuBrainEvent : DomainEvent {
         val battleUnitIds: List<String>,
     ) : CpuBrainEvent
 
-    /** Joining battle units: the CPU battle units out of the battle that now have an enemy within reach, so they join it. */
+    /**
+     * Joining battle units: the CPU battle units out of the battle that now have an enemy within reach, so they join it.
+     * Leaving battle units: the CPU battle units in the battle without any enemy within reach, so they leave it.
+     */
     data class EngagementUpdated(
         val joiningBattleUnitIds: List<String>,
+        val leavingBattleUnitIds: List<String>,
     ) : CpuBrainEvent
 
     data class CpuTurnFinished(

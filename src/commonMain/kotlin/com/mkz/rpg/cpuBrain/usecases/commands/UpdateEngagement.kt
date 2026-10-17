@@ -9,7 +9,8 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Once a battle round finishes, the CPU battle units out of the battle that now have an enemy within reach join it, so
- * they play from the next round. The engagement is updated even when nobody joins, as the next round starts on it.
+ * they play from the next round, and the CPU battle units in the battle without any enemy within reach leave it (e.g.:
+ * left behind). The engagement is updated even when nobody joins nor leaves, as the next round starts on it.
  * Battle units: those in the battle.
  */
 class UpdateEngagement(
@@ -21,13 +22,16 @@ class UpdateEngagement(
 ) {
     operator fun invoke(battleUnitIds: Set<String>) {
         val cpuPlayer = searchHumanPlayer()?.let { humanPlayer -> searchEnemyPlayer(playerId = humanPlayer.id) }
-        val joiningBattleUnitIds =
+        val (cpuBattleUnitIdsInBattle, cpuBattleUnitIdsOutOfBattle) =
             cpuPlayer
                 ?.let { searchBattleUnitsByPlayerId(playerId = it.id) }
                 .orEmpty()
                 .map { battleUnit -> battleUnit.id }
-                .filter { battleUnitId -> battleUnitId !in battleUnitIds }
-                .filter { battleUnitId -> searchEnemiesWithinReach(battleUnitId = battleUnitId).isNotEmpty() }
-        eventBus.publish(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = joiningBattleUnitIds))
+                .partition { battleUnitId -> battleUnitId in battleUnitIds }
+        val joiningBattleUnitIds = cpuBattleUnitIdsOutOfBattle.filter { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
+        val leavingBattleUnitIds = cpuBattleUnitIdsInBattle.filterNot { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
+        eventBus.publish(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds))
     }
+
+    private fun hasEnemyWithinReach(battleUnitId: String) = searchEnemiesWithinReach(battleUnitId = battleUnitId).isNotEmpty()
 }

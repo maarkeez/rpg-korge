@@ -148,4 +148,45 @@ class ExplorationTest {
         pausedExploration.canWalk().shouldBeFalse()
         pausedExploration.pullEvents().first.shouldContainExactly(ExplorationEvent.ExplorationPaused(playerId = "human"))
     }
+
+    @Test
+    fun `Resume should explore again with the party when a battle finishes`() {
+        // Given
+        val pausedExploration = exploration().pause().pullEvents().second
+        // When
+        val resumedExploration = pausedExploration.resume()
+        // Then
+        resumedExploration.toDto().isExploring.shouldBeTrue()
+        resumedExploration.canWalk().shouldBeTrue()
+        resumedExploration.pullEvents().first.shouldContainExactly(
+            ExplorationEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
+        )
+    }
+
+    @Test
+    fun `Leave should have the next battle unit lead when the leader leaves the party`() {
+        // When
+        val exploration = exploration(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).leave("knight-1")
+        // Then
+        exploration.toDto().leaderBattleUnitId shouldBe "knight-2"
+        exploration.toDto().battleUnitIds.shouldContainExactly("knight-2", "knight-3")
+    }
+
+    @Test
+    fun `Leave should keep the leader when a follower leaves the party`() {
+        // When
+        val exploration = exploration(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).leave("knight-2")
+        // Then
+        exploration.toDto().leaderBattleUnitId shouldBe "knight-1"
+        exploration.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-3")
+    }
+
+    @Test
+    fun `Leave should have no leader when the last battle unit leaves the party`() {
+        // When
+        val exploration = exploration(battleUnitIds = listOf("knight-1")).leave("knight-1")
+        // Then
+        exploration.toDto().leaderBattleUnitId.shouldBeNull()
+        exploration.toDto().battleUnitIds.shouldBeEmpty()
+    }
 }

@@ -102,6 +102,16 @@ class TerrainEffectAcceptanceTest {
             deployAtColumn = 0,
         )
 
+        // The player two battles with a battle unit on the forest, within reach of the player one battle units, so the battle
+        // goes on to the next round.
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = "battle-unit-player-two",
+            unitId = "unit-forest",
+            playerId = playerTwoId,
+            deployAtRow = 0,
+            deployAtColumn = 2,
+        )
+
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, playerOneId, playerTwoId)
         eventBus.dispatch()
     }

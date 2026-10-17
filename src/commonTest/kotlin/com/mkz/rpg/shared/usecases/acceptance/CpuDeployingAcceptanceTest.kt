@@ -14,6 +14,7 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
@@ -90,6 +91,7 @@ class CpuDeployingAcceptanceTest {
             // Then
             battleUnitApi.searchBattleUnitsByPlayerId(cpuPlayerId).map { it.id }.shouldContainExactly(goatBattleUnitId)
             battlefieldApi.searchPosition(goatBattleUnitId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 0)
-            battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
+            // The goat finishes its turn, and leaves the battle once the round finishes, as the knight is out of its reach.
+            battleApi.searchBattle()!!.isFinished.shouldBeTrue()
         }
 }

@@ -8,6 +8,7 @@ import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
@@ -48,6 +49,7 @@ import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -468,6 +470,19 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.resetTilesCount shouldBe 1
+    }
+
+    @Test
+    fun `ClearSelection should reset the tiles and hide the selected battle unit when the battle finishes`() {
+        // Given
+        selectKnight()
+        val resetTilesCount = battlefieldView.resetTilesCount
+        val hideCount = battleUnitInfoView.hideCount
+        // When
+        publish(BattleFinished)
+        // Then
+        battlefieldView.resetTilesCount shouldBeGreaterThan resetTilesCount
+        battleUnitInfoView.hideCount shouldBeGreaterThan hideCount
     }
 
     // The player selects the knight-1, so its movement range is displayed.

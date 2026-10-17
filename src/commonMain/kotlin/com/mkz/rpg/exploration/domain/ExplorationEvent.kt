@@ -20,4 +20,10 @@ sealed interface ExplorationEvent : DomainEvent {
     data class ExplorationPaused(
         val playerId: String,
     ) : ExplorationEvent
+
+    /** Battle units: the party, the leader first. */
+    data class ExplorationResumed(
+        val playerId: String,
+        val battleUnitIds: List<String>,
+    ) : ExplorationEvent
 }

@@ -5,6 +5,7 @@ import com.mkz.rpg.exploration.domain.ExplorationError.NotExploring
 import com.mkz.rpg.exploration.domain.ExplorationError.PartyRequired
 import com.mkz.rpg.exploration.domain.ExplorationError.StepsRequired
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationPaused
+import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.PartyWalked
 import kotlin.jvm.JvmInline
@@ -46,7 +47,7 @@ data class Exploration private constructor(
     fun toDto() =
         Dto(
             playerId = playerId.value,
-            leaderBattleUnitId = party.value.first(),
+            leaderBattleUnitId = party.value.firstOrNull(),
             battleUnitIds = party.value,
             isExploring = mode == Mode.EXPLORING,
             isWalking = isWalking(),
@@ -94,6 +95,16 @@ data class Exploration private constructor(
             events = events + ExplorationPaused(playerId = playerId.value),
         )
 
+    /** Explores again, e.g.: when a battle finishes. */
+    fun resume(): Exploration =
+        copy(
+            mode = Mode.EXPLORING,
+            events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = party.value),
+        )
+
+    /** Removes the battle unit from the party, e.g.: when it is defeated. The next one leads when it was leading. */
+    fun leave(battleUnitId: String): Exploration = copy(party = Party(party.value - battleUnitId))
+
     fun pullEvents() = events to copy(events = emptySet())
 
     private fun isWalking(): Boolean = awaitedStep != null || pendingSteps.value.isNotEmpty()
@@ -126,9 +137,10 @@ data class Exploration private constructor(
         fun toDto() = value
     }
 
+    /** Leader: `null` once every battle unit of the party has been defeated. */
     data class Dto(
         val playerId: String,
-        val leaderBattleUnitId: String,
+        val leaderBattleUnitId: String?,
         val battleUnitIds: List<String>,
         val isExploring: Boolean,
         val isWalking: Boolean,

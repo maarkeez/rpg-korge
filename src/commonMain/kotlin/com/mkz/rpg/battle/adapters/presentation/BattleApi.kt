@@ -33,7 +33,7 @@ class BattleApi(
     val startBattle = StartBattle(battleUnitApi.searchBattleUnitsByPlayerId, battleRepository, eventBus)
     val joinBattle = JoinBattle(battleRepository)
     val leaveBattle = LeaveBattle(battleRepository)
-    val startNextRound = StartNextRound(battleRepository, eventBus)
+    val startNextRound = StartNextRound(battleUnitApi.searchBattleUnitById, battleRepository, eventBus)
 
     // Queries
     val searchBattle = SearchBattle(battleRepository)

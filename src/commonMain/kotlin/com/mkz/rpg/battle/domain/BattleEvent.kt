@@ -7,6 +7,9 @@ sealed interface BattleEvent : DomainEvent {
 
     object RequestFinishPlayerTurn : BattleEvent
 
+    /** The battle finished without a winner, as only one player is left with battle units in it (e.g.: the CPU battle units were defeated or left behind). */
+    object BattleFinished : BattleEvent
+
     /** Battle units: those in the battle. */
     data class BattleRoundStarted(
         val round: Int,

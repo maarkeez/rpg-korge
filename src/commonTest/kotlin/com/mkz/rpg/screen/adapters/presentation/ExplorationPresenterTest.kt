@@ -75,6 +75,22 @@ class ExplorationPresenterTest {
     }
 
     @Test
+    fun `DisplayExploring should display the virtual pad in place of the battle HUD and the call to action when the exploration resumes`() {
+        // Given
+        createPresenter()
+        startExploring()
+        eventBus.publish(ExplorationEvent.ExplorationPaused(playerId = "human"))
+        eventBus.dispatch()
+        // When
+        eventBus.publish(ExplorationEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeTrue()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
     fun `WalkParty should walk the party towards the held arrow when the scene is idle`() {
         // Given
         createPresenter()

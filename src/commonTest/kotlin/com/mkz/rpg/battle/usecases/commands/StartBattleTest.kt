@@ -62,4 +62,19 @@ class StartBattleTest {
         battleRepository.search()?.toDto()?.currentPlayerTurn shouldBe "human"
         eventBus.shouldNotHavePublishedEvents()
     }
+
+    @Test
+    fun `should start a new battle in place of the finished one when the cpu engages again`() {
+        // Given
+        givenBattleUnits()
+        battleRepository.create(battle(players = listOf("human", "cpu")).finishWithoutWinner().pullEvents().second)
+        // When
+        startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-2"))
+        // Then
+        val battle = battleRepository.search()!!.toDto()
+        battle.isFinished shouldBe false
+        battle.currentPlayerTurn shouldBe "cpu"
+        battle.battleUnitIds shouldBe setOf("rat-2", "knight-1")
+        eventBus.shouldHavePublishedEvents(BattleStarted, PlayerTurnStarted("cpu", setOf("rat-2", "knight-1")))
+    }
 }

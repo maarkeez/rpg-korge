@@ -7,7 +7,8 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Starts the first round of a battle, e.g.: when the CPU engages the exploring player. The engaging player plays first,
- * with the battle units that engaged, and the engaged player second, with all their battle units.
+ * with the battle units that engaged, and the engaged player second, with all their battle units. Nothing happens while
+ * another battle is in progress. A new battle replaces the finished one.
  */
 class StartBattle(
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
@@ -19,7 +20,7 @@ class StartBattle(
         engagedPlayerId: String,
         engagingBattleUnitIds: List<String>,
     ) {
-        if (battleRepository.search() != null) return
+        if (battleRepository.search()?.toDto()?.isFinished == false) return
         val engagedBattleUnitIds = searchBattleUnitsByPlayerId(engagedPlayerId).map { battleUnit -> battleUnit.id }
         val (events, battle) =
             Battle

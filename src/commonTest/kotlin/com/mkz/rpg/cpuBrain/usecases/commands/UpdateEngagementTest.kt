@@ -43,7 +43,7 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "rat-1"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = listOf("rat-2")))
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()))
     }
 
     @Test
@@ -53,14 +53,24 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
     }
 
     @Test
-    fun `should update the engagement without anybody joining when there is no human player`() {
+    fun `should have the cpu battle units in the battle leave it when they have no enemy within reach`() {
+        // Given
+        givenBattle()
+        // When
+        updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2", "rat-3"))
+        // Then
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")))
+    }
+
+    @Test
+    fun `should update the engagement without anybody joining nor leaving when there is no human player`() {
         // When
         updateEngagement(battleUnitIds = emptySet())
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
     }
 }

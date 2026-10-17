@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationPaused
+import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -27,6 +28,9 @@ class ExplorationPresenter(
             },
             eventBus.subscribe<ExplorationPaused> {
                 timeline.play { displayExploring(isExploring = false) }
+            },
+            eventBus.subscribe<ExplorationResumed> {
+                timeline.play { displayExploring(isExploring = true) }
             },
         )
 

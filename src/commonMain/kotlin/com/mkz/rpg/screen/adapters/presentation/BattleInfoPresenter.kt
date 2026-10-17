@@ -1,9 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
@@ -29,6 +31,12 @@ class BattleInfoPresenter(
             },
             eventBus.subscribe<BattleStarted> {
                 timeline.play { battleInfoView.announceBattle() }
+            },
+            eventBus.subscribe<BattleFinished> {
+                timeline.play { battleInfoView.announceBattleEnd() }
+            },
+            eventBus.subscribe<ExplorationResumed> {
+                timeline.play { battleInfoView.displayExploring() }
             },
             eventBus.subscribe<PlayerTurnStarted> {
                 announceTurn()

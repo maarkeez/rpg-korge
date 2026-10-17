@@ -142,6 +142,41 @@ class BattleTest {
     }
 
     @Test
+    fun `IsDisengaged should be disengaged when only one player has battle units in the battle`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players, battleUnitIds)
+        // When
+        val result = battle.isDisengaged(playersInBattle = setOf("player-2"))
+        // Then
+        result.shouldBeTrue()
+    }
+
+    @Test
+    fun `IsDisengaged should not be disengaged when every player has battle units in the battle`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players, battleUnitIds)
+        // When
+        val result = battle.isDisengaged(playersInBattle = setOf("player-1", "player-2"))
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `FinishWithoutWinner should finish the battle and publish that it finished when it is disengaged`() {
+        // Given
+        val players = listOf("player-1", "player-2")
+        val battle = battle(players, battleUnitIds)
+        // When
+        val finishedBattle = battle.finishWithoutWinner()
+        // Then
+        finishedBattle.toDto().isFinished.shouldBeTrue()
+        val (events, _) = finishedBattle.pullEvents()
+        events.shouldContainExactly(BattleEvent.BattleFinished)
+    }
+
+    @Test
     fun `FinishBattle should publish the player victory when a single player remains`() {
         // Given
         val players = listOf("player-1", "player-2")

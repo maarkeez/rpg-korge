@@ -6,6 +6,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 - Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
 - The CPU battle units stand still while the party explores.
+- A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
 
 ## Walking
 
@@ -24,9 +25,19 @@ Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/c
 After the party starts exploring and every time it has walked, the CPU brain [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) looks for the CPU battle units that have a battle unit of the party within reach, with the same rule as in a battle (see [CPU brain](cpu-brain.md#engaging)). When there is any, the combat is engaged (`CombatEngaged`):
 
 - The battle starts between the CPU battle units that engaged and the whole party. The CPU plays first, as it engaged. The other CPU battle units stay out of the battle: they neither play nor change.
-- When a battle round finishes, the CPU brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/UpdateEngagement.kt) has the CPU battle units out of the battle that now have a battle unit of the party within reach join it (`EngagementUpdated`). The next round only starts then, so they play from it.
+- When a battle round finishes, the CPU brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/UpdateEngagement.kt) updates the engagement (`EngagementUpdated`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
 - Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
 - The battle info announces the battle, and the battle HUD and the player call to action take the place of the virtual pad.
 
 While exploring, tapping a battle unit does not select it, and the battle info displays "Exploring".
+
+## Back to exploring
+
+When the engagement is updated and only one player is left with battle units in the battle (e.g.: every CPU battle unit in it was defeated or left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes the battle without a winner (`BattleFinished`) instead of starting the next round:
+
+- The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
+- The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, and the virtual pad takes the place of the battle HUD and the player call to action.
+- The next engagement starts a new battle, which replaces the finished one.
+
+So the battle only finishes when a round does: defeating the last CPU battle unit in it during the human turn still needs the turn to be finished. A player with no battle units left on the battlefield still loses the game (`PlayerVictory`), and the game does not go back to exploring then.

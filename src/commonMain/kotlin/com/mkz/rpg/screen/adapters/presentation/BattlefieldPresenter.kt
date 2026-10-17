@@ -132,6 +132,11 @@ class BattlefieldPresenter(
                 timeline.play { clearSelection() }
                 deselectBattleUnit()
             },
+            // The selection is cleared when the battle finishes, as the party explores again.
+            eventBus.subscribe<BattleEvent.BattleFinished> {
+                timeline.play { clearSelection() }
+                deselectBattleUnit()
+            },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 timeline.play(displayMovementRange(event))
             },
