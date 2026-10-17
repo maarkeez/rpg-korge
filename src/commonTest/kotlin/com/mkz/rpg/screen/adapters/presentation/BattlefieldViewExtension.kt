@@ -5,7 +5,6 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
-import korlibs.korge.ui.UIGridFill
 import korlibs.korge.view.Image
 import korlibs.math.geom.Point
 
@@ -13,7 +12,20 @@ import korlibs.math.geom.Point
 
 fun BattlefieldView.isBattlefieldDisplayed(): Boolean = isDisplayed
 
-fun BattlefieldView.tileCount(): Int = if (isDisplayed) tiles.size else 0
+/** The tiles of the displayed battlefield, also the ones not created as they are far from the viewport. */
+fun BattlefieldView.tileCount(): Int = if (isDisplayed) rows * columns else 0
+
+/** The tiles created so far: on the screen, or kept out of it as they hold more than their terrain (e.g.: a battle unit). */
+fun BattlefieldView.createdTileCount(): Int = if (isDisplayed) tiles.size else 0
+
+/** Whether the tile is on the screen, i.e.: in the viewport or around it. */
+fun BattlefieldView.isTileOnScreen(
+    row: Int,
+    column: Int,
+): Boolean = tileOrNull(row, column)?.parent != null
+
+/** The tiles on the screen: the ones in the viewport and around it. */
+fun BattlefieldView.tilesOnScreenCount(): Int = if (isDisplayed) battlefieldGrid.children.count { child -> child is UIButton } else 0
 
 fun BattlefieldView.hasTerrainAt(
     row: Int,
@@ -23,13 +35,13 @@ fun BattlefieldView.hasTerrainAt(
 fun BattlefieldView.hasBattleUnitAt(
     row: Int,
     column: Int,
-): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.BATTLE_UNIT)
+): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.BATTLE_UNIT) == true
 
 /** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
 fun BattlefieldView.isFlashingAt(
     row: Int,
     column: Int,
-): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.FLASH)
+): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.FLASH) == true
 
 /** The colour the battlefield is tinted with, or `null` when it is not tinted. */
 fun BattlefieldView.tintColor(): RGBA? = tintOverlay?.color?.withA(255)
@@ -59,8 +71,8 @@ fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
     if (!isDisplayed) {
         emptyList()
     } else {
-        (0 until battlefieldGrid.rows)
-            .flatMap { row -> (0 until battlefieldGrid.cols).map { column -> row to column } }
+        (0 until rows)
+            .flatMap { row -> (0 until columns).map { column -> row to column } }
             .filter { (row, column) -> hasBattleUnitAt(row, column) }
     }
 
@@ -68,7 +80,7 @@ fun BattlefieldView.battleUnitPositions(): List<Pair<Int, Int>> =
 fun BattlefieldView.hasSelectionAt(
     row: Int,
     column: Int,
-): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.SELECTION)
+): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.SELECTION) == true
 
 fun BattlefieldView.selectionCountAt(
     row: Int,
@@ -100,7 +112,7 @@ fun BattlefieldView.terrainBitmapAt(
 ): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.TERRAIN) as? Image)?.bitmap?.base
 
 /** How many battlefields are displayed in the viewport: one once a battlefield is displayed, however many times. */
-fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else battlefieldGrid.parent!!.children.count { child -> child is UIGridFill }
+fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else battlefieldGrid.parent!!.children.count { child -> child.name == BattlefieldView.BATTLEFIELD }
 
 /** The image of the loot lying on the tile (an item icon or the chest), or `null` when there is none. */
 fun BattlefieldView.lootBitmapAt(

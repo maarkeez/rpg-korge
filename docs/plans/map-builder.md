@@ -1,6 +1,6 @@
 # Plan: main menu and map builder
 
-> **Status:** implemented, with maps up to 32 x 32: see [Large maps](#large-maps).
+> **Status:** implemented.
 >
 > **Summary:** The game opens on a menu offering to play a new game or to build a map. The map builder lets the player
 > design a rectangular battlefield on a mobile screen, painting its tiles with terrains, and copies it to the clipboard
@@ -14,7 +14,7 @@
 - A map builder screen laid out like the battle screen, so it is usable on mobiles: a title at the top, then the
   battlefield, then the HUD, then the calls to action.
 - The map builder can:
-  - Set the battlefield size (rows and columns, from 1 to 32 each). A new map is 16 x 16 sand tiles.
+  - Set the battlefield size (rows and columns, from 1 to 128 each). A new map is 16 x 16 sand tiles.
   - Select a terrain (e.g.: sand, grass, lava, water, void) and tap tiles to paint them with it.
   - Export the map as TOML, copied to the clipboard. The battle reads it the same way once it is pasted into
     `resources/battlefield/battlefield.toml`.
@@ -26,7 +26,7 @@
 | Export               | The TOML is copied to the clipboard.                                                                                                                                                                                                                               |
 | Forbidden neighbours | Only the transitions in `resources/terrain/transitions` are allowed (today: sand to grass, lava, void and water). A tap that would leave two terrains next to each other without a transition (e.g.: lava next to water) is rejected: the tile does not change, and the subtitle displays why. |
 | Temporary messages   | The subtitle under the title displays the map size. Messages (a rejected tap, the map copied) replace it for a while with a pop animation, like the battle round and player turn, and then the size comes back.                                                   |
-| Size                 | From 1 to 32 rows and columns (128 was planned, see [Large maps](#large-maps)). Resizing keeps the painted tiles that still fit and fills the new ones with sand.                                                                                                                                                 |
+| Size                 | From 1 to 128 rows and columns. Resizing keeps the painted tiles that still fit and fills the new ones with sand.                                                                                                                                                 |
 | Painting             | One tile per tap. Dragging keeps scrolling the battlefield.                                                                                                                                                                                                       |
 | Back                 | The **Back** call to action asks for confirmation in the same call to action area, with two buttons: one to leave (the map is lost) and one to stay.                                                                                                              |
 | Using a map          | Out of scope: the exported TOML is pasted into `resources/battlefield/battlefield.toml` by hand. Choosing a map from the menu is not planned.                                                                                                                      |
@@ -99,7 +99,7 @@ structure, so it needs no exception in [Package structure](../architecture/packa
 | Command                      | Announces                                                                                                                         |
 |------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|
 | `createMap()`                | `MapCreated`, with the size and the tiles.                                                                                        |
-| `resizeMap(rows, columns)`   | `MapResized`, with the new size and tiles. A size out of 1 to 32 is ignored.                                                    |
+| `resizeMap(rows, columns)`   | `MapResized`, with the new size and tiles. A size out of 1 to 128 is ignored.                                                    |
 | `selectTerrain(terrainId)`   | `TerrainSelected`.                                                                                                                |
 | `paintTile(row, column)`     | `TilePainted` with the tile, or `TilePaintRejected` with the two terrains that can not be neighbours. Only the painted tile neighbours are checked, with the terrain `isTransitionAllowed` in either direction, as the battlefield does. |
 
@@ -113,7 +113,7 @@ Laid out like the battle screen, within the 390 x 844 window:
 2. **Battlefield:** the reused `BattlefieldView`.
 3. **HUD:**
    - Two steppers, rows and columns, with buttons changing the size by -8, -1, +1 and +8, so a large map takes a few
-     taps. The buttons that would leave 1 to 32 are disabled.
+     taps. The buttons that would leave 1 to 128 are disabled.
    - A terrain palette: one button per terrain, with its tile image, highlighting the selected one.
 4. **Calls to action:** **Export** (primary) and **Back** (secondary). Back switches them to **Leave** and **Stay**.
 
@@ -129,20 +129,30 @@ Laid out like the battle screen, within the 390 x 844 window:
 
 ### Large maps
 
-The battlefield view creates one button per tile, and every frame goes through all of them, also the ones out of the
-viewport. Measured on the JVM, without rendering:
+The battlefield view first created one button per tile, and every frame went through all of them, also the ones out of
+the viewport. Measured on the JVM, without rendering:
 
-| Size      | Tiles  | Displaying the map | Each frame | Painting a tile |
-|-----------|--------|--------------------|------------|-----------------|
-| 16 x 16   | 256    | 58 ms              | 6 ms       | < 1 ms          |
-| 32 x 32   | 1024   | 46 ms              | 12.5 ms    | 1.4 ms          |
-| 48 x 48   | 2304   | 64 ms              | 19 ms      | 2.3 ms          |
-| 64 x 64   | 4096   | 148 ms             | 24 ms      | 3 ms            |
-| 128 x 128 | 16384  | 1.8 s              | 135 to 600 ms | 12 ms        |
+| Size      | Tiles  | Displaying the map | Each frame    | Painting a tile |
+|-----------|--------|--------------------|---------------|-----------------|
+| 16 x 16   | 256    | 58 ms              | 6 ms          | < 1 ms          |
+| 32 x 32   | 1024   | 46 ms              | 12.5 ms       | 1.4 ms          |
+| 64 x 64   | 4096   | 148 ms             | 24 ms         | 3 ms            |
+| 128 x 128 | 16384  | 1.8 s              | 135 to 600 ms | 12 ms           |
 
-Hiding the tiles out of the viewport only brings a 128 x 128 frame down to 25 ms, as they are still gone through.
-Supporting 128 x 128 needs the view to only create the tiles in and around the viewport, reusing them while scrolling.
-So the limit is 32 x 32 for now, whose frames stay close to the battle ones. Larger maps need that change first.
+Hiding the tiles out of the viewport only brought a 128 x 128 frame down to 25 ms, as they were still gone through. So
+the view now only creates the tiles in the viewport and one more around it, and creates or drops tiles while it is
+scrolled. A tile holding more than its terrain (e.g.: a battle unit, loot, a selection) is kept off the screen until it
+comes back, and the other tiles are created again from the battlefield. The size of the battlefield no longer matters:
+
+| Size      | Displaying the map | Each frame | Painting a tile |
+|-----------|--------------------|------------|-----------------|
+| 16 x 16   | 43 ms              | 4.8 ms     | < 1 ms          |
+| 64 x 64   | 7 ms               | 3.5 ms     | 4 ms            |
+| 128 x 128 | 6 ms               | 1.3 ms     | 10 ms           |
+| 256 x 256 | 4.5 ms             | 1.3 ms     | -               |
+
+Painting a tile builds the whole map again with the battlefield rules (27 ms for 256 x 256), which is the limit if
+maps grow further.
 
 ### Clipboard on the browser
 

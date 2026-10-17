@@ -44,12 +44,12 @@ class MapBuilderHudViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplaySize should disable the steps out of 1 to 32 when the size is close to the limits`() =
+    fun `DisplaySize should disable the steps out of 1 to 128 when the size is close to the limits`() =
         sharedViewsTest {
             // Given
             val hudView = hudView()
             // When
-            hudView.displaySize(rows = 5, columns = 28)
+            hudView.displaySize(rows = 5, columns = 124)
             // Then
             hudView.enabledRowsSteps().shouldContainExactly(-1, 1, 8)
             hudView.enabledColumnsSteps().shouldContainExactly(-8, -1, 1)

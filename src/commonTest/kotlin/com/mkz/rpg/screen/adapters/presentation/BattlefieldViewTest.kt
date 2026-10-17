@@ -32,6 +32,9 @@ class BattlefieldViewTest : ViewsForTesting() {
 
         // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
+
+        // The tiles on the screen in each direction when the battlefield is not scrolled: the 8 in the viewport and 1 more.
+        const val WINDOW_TILES = BattlefieldView.VISIBLE_TILES + BattlefieldView.TILE_WINDOW_MARGIN
     }
 
     @Test
@@ -459,6 +462,99 @@ class BattlefieldViewTest : ViewsForTesting() {
             dragBattlefield(battlefieldView, -48.0 to -96.0)
             // Then
             battlefieldView.scrollOffset() shouldBe (-48.0 to -96.0)
+        }
+
+    @Test
+    fun `DisplayBattlefield should only create the tiles in the viewport and around it when the battlefield is large`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            // When
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            // Then
+            battlefieldView.tileCount() shouldBe 128 * 128
+            battlefieldView.createdTileCount() shouldBe WINDOW_TILES * WINDOW_TILES
+            battlefieldView.tilesOnScreenCount() shouldBe WINDOW_TILES * WINDOW_TILES
+        }
+
+    @Test
+    fun `DisplayBattlefield should put the scrolled tiles on the screen and drop the far ones when a large battlefield is scrolled`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            addChild(battlefieldView)
+            // When
+            dragBattlefield(battlefieldView, -2400.0 to -2400.0)
+            // Then
+            battlefieldView.isTileVisible(row = 52, column = 52).shouldBeTrue()
+            battlefieldView.hasTerrainAt(row = 52, column = 52).shouldBeTrue()
+            battlefieldView.tilesOnScreenCount() shouldBe (WINDOW_TILES + 1) * (WINDOW_TILES + 1)
+            battlefieldView.createdTileCount() shouldBe (WINDOW_TILES + 1) * (WINDOW_TILES + 1)
+        }
+
+    @Test
+    fun `DisplayBattlefield should keep the battle unit of a tile when the tile is scrolled out and back`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            battlefieldView.displayBattleUnit(row = 1, column = 1, unitId = "knight")
+            addChild(battlefieldView)
+            dragBattlefield(battlefieldView, -1200.0 to -1200.0)
+            require(!battlefieldView.isTileVisible(row = 1, column = 1))
+            // When
+            dragBattlefield(battlefieldView, 0.0 to 0.0, 1200.0 to 1200.0)
+            // Then
+            battlefieldView.hasBattleUnitAt(row = 1, column = 1).shouldBeTrue()
+            battlefieldView.isTileOnScreen(row = 1, column = 1).shouldBeTrue()
+        }
+
+    @Test
+    fun `DimTilesExcept should dim the tiles created later when they are scrolled into the viewport`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            addChild(battlefieldView)
+            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(30, 31)))
+            // When
+            dragBattlefield(battlefieldView, -1300.0 to -1300.0)
+            // Then
+            battlefieldView.isDimmedAt(row = 30, column = 30).shouldBeTrue()
+            battlefieldView.isDimmedAt(row = 30, column = 31).shouldBeFalse()
+        }
+
+    @Test
+    fun `UpdateTerrain should create the tiles scrolled into the viewport with the updated terrain when they were not created`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            addChild(battlefieldView)
+            val paintedTiles = List(64) { row -> List(64) { column -> if (row == 30 && column == 30) "void" else "sand" } }
+            val paintedBattlefield = battlefield(64, 64, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toDto()
+            battlefieldView.updateTerrain(paintedBattlefield, listOf(Battlefield.Dto.PositionDto(30, 30)))
+            // When
+            dragBattlefield(battlefieldView, -1300.0 to -1300.0)
+            // Then
+            battlefieldView.terrainBitmapAt(row = 30, column = 30) shouldBe battlefieldView.terrainTileBitmap("void", terrainTransition = null)
+        }
+
+    @Test
+    fun `PickUpLoot should finish lifting the item when its tile is scrolled out of the viewport meanwhile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            addChild(battlefieldView)
+            val pickingUp = startAnimation { battlefieldView.pickUpLoot(row = 0, column = 0, lootableItemId = "health-potion", remainingLootableItemIds = emptyList()) }
+            // When
+            dragBattlefield(battlefieldView, -1200.0 to -1200.0)
+            awaitCompletion(pickingUp)
+            // Then
+            pickingUp.isCompleted.shouldBeTrue()
+            battlefieldView.liftedLootAt(row = 0, column = 0).shouldBeNull()
         }
 
     @Test

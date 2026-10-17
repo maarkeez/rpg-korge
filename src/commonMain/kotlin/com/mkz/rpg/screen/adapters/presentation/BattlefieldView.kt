@@ -19,20 +19,20 @@ import korlibs.korge.input.onMouseDrag
 import korlibs.korge.time.delay
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
-import korlibs.korge.ui.UIGridFill
-import korlibs.korge.ui.uiButton
-import korlibs.korge.ui.uiGridFill
+import korlibs.korge.view.Container
 import korlibs.korge.view.Image
 import korlibs.korge.view.SolidRect
+import korlibs.korge.view.View
+import korlibs.korge.view.addUpdater
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.anchor
 import korlibs.korge.view.clipContainer
+import korlibs.korge.view.container
 import korlibs.korge.view.image
 import korlibs.korge.view.solidRect
 import korlibs.math.clamp
 import korlibs.math.geom.Anchor
 import korlibs.math.geom.Size
-import korlibs.math.geom.Spacing
 import korlibs.math.interpolation.EASE_IN_QUAD
 import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
@@ -50,6 +50,18 @@ open class BattlefieldView(
         const val FLASH = "FLASH"
         const val DIM = "DIM"
         const val HEALTH_PREVIEW = "HEALTH_PREVIEW"
+        const val BATTLEFIELD = "BATTLEFIELD"
+
+        // The tiles are only created in the viewport and this many tiles around it, so a battlefield of any size
+        // displays as fast as a small one.
+        const val TILE_WINDOW_MARGIN = 1
+
+        // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
+        // from the battlefield when they come back into it.
+        private val KEPT_LAYERS = setOf(LOOT, BATTLE_UNIT, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
+
+        // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
+        private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
 
         const val TILE_SIZE = 48
         const val TILE_PIXEL_SIZE = 16
@@ -120,8 +132,24 @@ open class BattlefieldView(
         clipContainer(
             size = Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT),
         )
-    internal lateinit var battlefieldGrid: UIGridFill
+
+    // Holds the tiles at their position in the battlefield, and scrolls them inside the viewport.
+    internal lateinit var battlefieldGrid: Container
     internal var tintOverlay: SolidRect? = null
+
+    // The displayed battlefield, which the tiles are created from.
+    private lateinit var battlefield: Battlefield.Dto
+    internal val rows: Int get() = battlefield.rows
+    internal val columns: Int get() = battlefield.columns
+
+    // The tiles created so far, on the screen or kept out of the window.
+    private val createdTiles = mutableMapOf<PositionDto, UIButton>()
+
+    // The tiles left undimmed while the others are dimmed, or `null` when no tile is dimmed.
+    private var undimmedTiles: Set<PositionDto>? = null
+
+    // The scroll the tiles on the screen were chosen for.
+    private var windowScroll: Pair<Double, Double>? = null
 
     init {
         addChild(viewport)
@@ -152,49 +180,98 @@ open class BattlefieldView(
         val previousScroll = if (isDisplayed) battlefieldGrid.x to battlefieldGrid.y else 0.0 to 0.0
         if (isDisplayed) {
             battlefieldAnimator.cancel()
+            createdTiles.values.forEach(::removeHealthPreview)
             battlefieldGrid.removeFromParent()
         }
+        createdTiles.clear()
+        undimmedTiles = null
+        windowScroll = null
+        this.battlefield = battlefield
         minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
         minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
         battlefieldGrid =
-            viewport.uiGridFill(
-                size = Size(width = mapWidth, height = mapHeight),
-                spacing = Spacing(0.0, 0.0),
-                cols = 0,
-                rows = 0,
-            ) {
+            viewport.container {
+                name = BATTLEFIELD
                 x = previousScroll.first.clamp(minScrollX, 0.0)
                 y = previousScroll.second.clamp(minScrollY, 0.0)
             }
         battlefieldAnimator = battlefieldGrid.animator(parallel = true)
-        battlefieldGrid.rows = battlefield.rows
-        battlefieldGrid.cols = battlefield.columns
-        for (row in 0 until battlefield.rows) {
-            for (column in 0 until battlefield.columns) {
-                battlefieldGrid.uiButton(label = "").also { tileButton ->
-                    tileButton.bgColorOut = Colors.TRANSPARENT
-                    tileButton.bgColorOver = Colors.TRANSPARENT
-                    tileButton.background.borderColor = Colors.TRANSPARENT
-                    tileButton.background.bgColor = Colors.TRANSPARENT
-                    tileButton.name = tileName(row, column)
-                    val tileDto = battlefield.tiles[PositionDto(row, column)]!!
-                    tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
-                    tileButton.onClick {
-                        delegate?.tileSelected(row, column)
-                    }
-                }
-            }
-        }
+        // The tiles on the screen follow the scroll, e.g.: while it is dragged or animated.
+        battlefieldGrid.addUpdater { refreshTileWindow() }
+        refreshTileWindow()
     }
 
-    /** Draws again the terrain of the tiles, e.g.: a painted tile and its neighbours, whose transitions may have changed. */
+    // The rows and the columns of the tiles in the viewport and around it.
+    private fun tileWindow(): Pair<IntRange, IntRange> {
+        val firstRow = (-battlefieldGrid.y / TILE_SIZE).toInt() - TILE_WINDOW_MARGIN
+        val lastRow = ((-battlefieldGrid.y + VIEWPORT_HEIGHT - 1) / TILE_SIZE).toInt() + TILE_WINDOW_MARGIN
+        val firstColumn = (-battlefieldGrid.x / TILE_SIZE).toInt() - TILE_WINDOW_MARGIN
+        val lastColumn = ((-battlefieldGrid.x + VIEWPORT_WIDTH - 1) / TILE_SIZE).toInt() + TILE_WINDOW_MARGIN
+        return firstRow.coerceAtLeast(0)..lastRow.coerceAtMost(rows - 1) to firstColumn.coerceAtLeast(0)..lastColumn.coerceAtMost(columns - 1)
+    }
+
+    private fun isInTileWindow(position: PositionDto): Boolean {
+        val (windowRows, windowColumns) = tileWindow()
+        return position.row in windowRows && position.column in windowColumns
+    }
+
+    /**
+     * Puts on the screen the tiles in the window, creating them when needed, and takes the others off it. The tiles off
+     * the screen are only kept when they hold more than their terrain (e.g.: a battle unit).
+     */
+    private fun refreshTileWindow() {
+        val scroll = battlefieldGrid.x to battlefieldGrid.y
+        if (scroll == windowScroll) return
+        windowScroll = scroll
+        // Copied as pairs, as the entries of a map can not be read once it changes (e.g.: on JS).
+        createdTiles.toList().forEach { (position, tileButton) ->
+            if (isInTileWindow(position) || tileButton.hasLayerIn(ANIMATED_LAYERS)) return@forEach
+            tileButton.removeFromParent()
+            if (!tileButton.hasLayerIn(KEPT_LAYERS)) createdTiles.remove(position)
+        }
+        val (windowRows, windowColumns) = tileWindow()
+        for (row in windowRows) {
+            for (column in windowColumns) {
+                val tileButton = tile(row, column)
+                if (tileButton.parent == null) battlefieldGrid.addChild(tileButton)
+            }
+        }
+        // Each row is drawn over the previous one, e.g.: so a picked up item rises over the tile above.
+        battlefieldGrid.sortChildrenBy(compareBy<View>({ view -> view.y }, { view -> view.x }))
+    }
+
+    private fun UIButton.hasLayerIn(layers: Set<String>): Boolean = children.any { child -> child.name in layers }
+
+    private fun createTile(position: PositionDto): UIButton {
+        val tileButton = UIButton(size = Size(TILE_SIZE, TILE_SIZE), text = "")
+        tileButton.bgColorOut = Colors.TRANSPARENT
+        tileButton.bgColorOver = Colors.TRANSPARENT
+        tileButton.background.borderColor = Colors.TRANSPARENT
+        tileButton.background.bgColor = Colors.TRANSPARENT
+        tileButton.name = tileName(position.row, position.column)
+        tileButton.x = position.column * TILE_SIZE.toDouble()
+        tileButton.y = position.row * TILE_SIZE.toDouble()
+        val tileDto = battlefield.tiles.getValue(position)
+        tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
+        if (undimmedTiles?.contains(position) == false) tileButton.dim()
+        tileButton.onClick {
+            delegate?.tileSelected(position.row, position.column)
+        }
+        return tileButton
+    }
+
+    /**
+     * Draws again the terrain of the tiles, e.g.: a painted tile and its neighbours, whose transitions may have changed.
+     * The tiles not created yet will be created with it.
+     */
     open fun updateTerrain(
         battlefield: Battlefield.Dto,
         positions: Collection<PositionDto>,
     ) {
+        this.battlefield = battlefield
         positions.forEach { position ->
             val tileDto = battlefield.tiles[position] ?: return@forEach
-            val terrainImage = tile(position.row, position.column).findViewByName(TERRAIN) as Image
+            val terrainImage = createdTiles[position]?.findViewByName(TERRAIN) as? Image ?: return@forEach
             terrainImage.bitmap = terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition).slice()
         }
     }
@@ -215,13 +292,31 @@ open class BattlefieldView(
     internal val isDisplayed: Boolean
         get() = ::battlefieldGrid.isInitialized
 
+    /** The tiles created so far: the ones on the screen, and the ones kept out of the window. */
     internal val tiles: List<UIButton>
-        get() = battlefieldGrid.children.filterIsInstance<UIButton>()
+        get() = createdTiles.values.toList()
 
+    /** The tile, created when it was not. It is on the screen when it is in the window. */
     internal fun tile(
         row: Int,
         column: Int,
-    ): UIButton = battlefieldGrid.findViewByName(tileName(row, column)) as UIButton
+    ): UIButton {
+        val position = PositionDto(row, column)
+        createdTiles[position]?.let { tileButton -> return tileButton }
+        val tileButton = createTile(position)
+        createdTiles[position] = tileButton
+        if (isInTileWindow(position)) {
+            battlefieldGrid.addChild(tileButton)
+            battlefieldGrid.sortChildrenBy(compareBy<View>({ view -> view.y }, { view -> view.x }))
+        }
+        return tileButton
+    }
+
+    /** The tile, or `null` when it has not been created, so it only displays its terrain. */
+    internal fun tileOrNull(
+        row: Int,
+        column: Int,
+    ): UIButton? = createdTiles[PositionDto(row, column)]
 
     private fun tileName(
         row: Int,
@@ -348,8 +443,8 @@ open class BattlefieldView(
     }
 
     open fun resetTiles() {
-        battlefieldGrid.children.forEach { view ->
-            val tileButton = view as UIButton
+        undimmedTiles = null
+        createdTiles.values.forEach { tileButton ->
             tileButton.findViewByName(SELECTION)?.removeFromParent()
             tileButton.findViewByName(DIM)?.removeFromParent()
             removeHealthPreview(tileButton)
@@ -367,16 +462,17 @@ open class BattlefieldView(
      * stand out. Removed when the tiles are reset.
      */
     open fun dimTilesExcept(tiles: Set<PositionDto>) {
-        for (row in 0 until battlefieldGrid.rows) {
-            for (column in 0 until battlefieldGrid.cols) {
-                if (PositionDto(row, column) in tiles) continue
-                val tileButton = tile(row, column)
-                if (tileButton.findViewByName(DIM) != null) continue
-                tileButton.solidRect(Size(TILE_SIZE, TILE_SIZE), Colors.BLACK) {
-                    name = DIM
-                    alpha = DIM_ALPHA
-                }
-            }
+        // The tiles not created yet are dimmed when they are created.
+        val undimmed = undimmedTiles?.intersect(tiles) ?: tiles
+        undimmedTiles = undimmed
+        createdTiles.forEach { (position, tileButton) -> if (position !in undimmed) tileButton.dim() }
+    }
+
+    private fun UIButton.dim() {
+        if (findViewByName(DIM) != null) return
+        solidRect(Size(TILE_SIZE, TILE_SIZE), Colors.BLACK) {
+            name = DIM
+            alpha = DIM_ALPHA
         }
     }
 

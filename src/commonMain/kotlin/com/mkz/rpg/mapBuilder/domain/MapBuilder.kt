@@ -20,9 +20,7 @@ data class MapBuilder private constructor(
 ) {
     companion object {
         const val MINIMUM_SIZE = 1
-
-        // Larger maps are too slow to display, as the battlefield view creates every tile: see docs/plans/map-builder.md.
-        const val MAXIMUM_SIZE = 32
+        const val MAXIMUM_SIZE = 128
         const val DEFAULT_SIZE = 16
         const val DEFAULT_TERRAIN_ID = "sand"
 

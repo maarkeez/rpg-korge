@@ -45,11 +45,11 @@ class MapBuilderTest {
     }
 
     @Test
-    fun `should grow up to 32 rows and columns when it is resized to the maximum size`() {
+    fun `should grow up to 128 rows and columns when it is resized to the maximum size`() {
         // When
-        val resized = newMap().resize(rows = 32, columns = 32)
+        val resized = newMap().resize(rows = 128, columns = 128)
         // Then
-        (resized.toDto().rows to resized.toDto().columns) shouldBe (32 to 32)
+        (resized.toDto().rows to resized.toDto().columns) shouldBe (128 to 128)
         resized
             .toDto()
             .tiles
@@ -58,11 +58,11 @@ class MapBuilderTest {
     }
 
     @Test
-    fun `should be ignored when it is resized out of 1 to 32 rows or columns`() {
+    fun `should be ignored when it is resized out of 1 to 128 rows or columns`() {
         // Given
         val mapBuilder = newMap()
         // When
-        val resizedMaps = listOf(mapBuilder.resize(rows = 0, columns = 16), mapBuilder.resize(rows = 16, columns = 33))
+        val resizedMaps = listOf(mapBuilder.resize(rows = 0, columns = 16), mapBuilder.resize(rows = 16, columns = 129))
         // Then
         resizedMaps.forEach { resized -> resized shouldBe mapBuilder }
     }
