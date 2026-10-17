@@ -74,6 +74,32 @@ class WhereShouldMoveTest {
     }
 
     @Test
+    fun `should not move when the only enemy is out of reach`() {
+        // Given
+        givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealthPoints = 10)
+        givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealthPoints = 10)
+        // The battle unit walks 4 tiles to the enemy, further than it engages enemies.
+        givenBattlefieldRow(List(5) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 4))
+        // When
+        val result = whereShouldMove("battle-unit-1")
+        // Then
+        result.shouldBeNull()
+    }
+
+    @Test
+    fun `should move to the position closest to the ally when the battle unit is hurt and the enemy is out of reach`() {
+        // Given
+        givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealthPoints = 1)
+        givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealthPoints = 10)
+        givenBattleUnit(id = "ally-battle-unit", playerId = "player-1", remainingHealthPoints = 10)
+        givenBattlefieldRow(List(9) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 4, "ally-battle-unit" to 8))
+        // When
+        val result = whereShouldMove("battle-unit-1")
+        // Then
+        result shouldBe position(0, 6)
+    }
+
+    @Test
     fun `should move to the position closest to the ally when the battle unit is hurt`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealthPoints = 1)

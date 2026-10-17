@@ -237,7 +237,7 @@ class WhatShouldCastTest {
     fun `should deploy a battle unit instead of casting another ability when the deployed battle unit can reach an enemy`() {
         // Given
         givenRat(remainingHealthPoints = 20, abilities = listOf(heal, deployBat, teleport))
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 2, column = 3), remainingHealthPoints = 100)
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -296,5 +296,41 @@ class WhatShouldCastTest {
         val decision = whatShouldCast(ratId)
         // Then
         decision.shouldBeNull()
+    }
+
+    // The rat walks 5 tiles to the knight, further than it engages enemies.
+    private val outOfReach = WhereCanCast.PositionDto(row = 2, column = 3)
+
+    @Test
+    fun `should not deploy a battle unit when the enemy is out of reach`() {
+        // Given
+        givenRat(remainingHealthPoints = 20, abilities = listOf(deployBat))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        // When
+        val decision = whatShouldCast(ratId)
+        // Then
+        decision.shouldBeNull()
+    }
+
+    @Test
+    fun `should not cast another ability when the enemy is out of reach`() {
+        // Given
+        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal, teleport))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        // When
+        val decision = whatShouldCast(ratId)
+        // Then
+        decision.shouldBeNull()
+    }
+
+    @Test
+    fun `should heal when the caster is badly hurt and the enemy is out of reach`() {
+        // Given
+        givenRat(remainingHealthPoints = 4, abilities = listOf(heal, deployBat, teleport))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        // When
+        val decision = whatShouldCast(ratId)
+        // Then
+        decision?.abilityId shouldBe "heal"
     }
 }

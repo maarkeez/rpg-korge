@@ -86,8 +86,9 @@ class CpuTurnAcceptanceTest {
     fun `should move each cpu rat to a different tile next to the knight and attack with both when they are two tiles away`() =
         scenarioTest(::setUp) {
             // Given
+            // On both sides of the knight, so the first rat to move does not stand in the way of the other.
             deployRat(battleUnitId = "cpu-rat-1", row = 3, column = 5)
-            deployRat(battleUnitId = "cpu-rat-2", row = 1, column = 3)
+            deployRat(battleUnitId = "cpu-rat-2", row = 3, column = 1)
             startBattle()
             battleApi.finishPlayerTurn()
             // When

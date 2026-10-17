@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -12,10 +13,11 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUM
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-// Uses the effects, abilities and units defined in the resources: a CPU goat (bat, teleport and heal) far from a human knight.
+// Uses the effects, abilities and units defined in the resources: a CPU goat (bat, teleport and heal) and a human knight.
 // The bat (sword dealing 10, walking 5 tiles per turn) is deployed on a vacant tile next to the goat.
 class CpuDeployingAcceptanceTest {
     private val eventBus = InMemoryEventBus()
@@ -46,16 +48,21 @@ class CpuDeployingAcceptanceTest {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
-        battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 0, deployAtColumn = 7)
         battleUnitApi.deployBattleUnit(goatBattleUnitId, "goat", cpuPlayerId, deployAtRow = 0, deployAtColumn = 0)
+    }
+
+    // Deploys the knight on the first row, as the goat, and starts the battle.
+    private fun startBattleWithKnightAt(column: Int) {
+        battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 0, deployAtColumn = column)
         battleApi.startFirstRound(listOf(humanPlayerId, cpuPlayerId))
         eventBus.dispatch()
     }
 
     @Test
-    fun `should deploy a bat on the tile nearest to the knight when the cpu goat is far from the knight`() =
+    fun `should deploy a bat on the tile nearest to the knight when the knight is within reach of the cpu goat`() =
         scenarioTest(::setUp) {
             // Given
+            startBattleWithKnightAt(column = 3)
             battleApi.finishPlayerTurn()
             // When
             eventBus.dispatch()
@@ -65,6 +72,20 @@ class CpuDeployingAcceptanceTest {
             val deployedBattleUnitId = deployedBattleUnitIds.single()
             battleUnitApi.searchBattleUnitById(deployedBattleUnitId)!!.unitId shouldBe "bat"
             battlefieldApi.searchOccupant(row = 0, column = 1) shouldBe deployedBattleUnitId
+            battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
+        }
+
+    @Test
+    fun `should not deploy a bat when the knight is out of reach of the cpu goat`() =
+        scenarioTest(::setUp) {
+            // Given
+            startBattleWithKnightAt(column = 7)
+            battleApi.finishPlayerTurn()
+            // When
+            eventBus.dispatch()
+            // Then
+            battleUnitApi.searchBattleUnitsByPlayerId(cpuPlayerId).map { it.id }.shouldContainExactly(goatBattleUnitId)
+            battlefieldApi.searchPosition(goatBattleUnitId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 0)
             battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
         }
 }

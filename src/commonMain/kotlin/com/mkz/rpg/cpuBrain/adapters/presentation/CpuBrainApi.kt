@@ -16,6 +16,7 @@ import com.mkz.rpg.cpuBrain.usecases.commands.PlayTurn
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitCast
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitMove
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
@@ -37,6 +38,15 @@ class CpuBrainApi(
     // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
 
+    val searchEnemiesWithinReach =
+        SearchEnemiesWithinReach(
+            battleUnitApi.searchBattleUnitById,
+            playerApi.searchEnemyPlayer,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            battlefieldApi.searchPosition,
+            battlefieldApi.searchWalkingDistance,
+        )
+
     val whatShouldCast =
         WhatShouldCast(
             battleUnitApi.searchBattleUnitById,
@@ -46,9 +56,8 @@ class CpuBrainApi(
             abilityApi.searchAbilityById,
             effectApi.searchEffectById,
             battlefieldApi.searchOccupant,
-            playerApi.searchEnemyPlayer,
-            battleUnitApi.searchBattleUnitsByPlayerId,
             battlefieldApi.searchPosition,
+            searchEnemiesWithinReach,
             healingNeed,
         )
 
@@ -58,7 +67,7 @@ class CpuBrainApi(
             battleUnitApi.whereCanMove,
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
-            playerApi.searchEnemyPlayer,
+            searchEnemiesWithinReach,
             healingNeed,
             battlefieldApi.searchBattlefield,
             terrainApi.searchTerrainById,

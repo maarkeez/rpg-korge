@@ -10,7 +10,6 @@ import com.mkz.rpg.cpuBrain.usecases.services.MINIMUM_UTILITY_GAIN
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import kotlin.math.abs
 
@@ -19,7 +18,7 @@ class WhereShouldMove(
     private val whereCanMove: WhereCanMove,
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
-    private val searchEnemyPlayer: SearchEnemyPlayer,
+    private val searchEnemiesWithinReach: SearchEnemiesWithinReach,
     private val healingNeed: HealingNeed,
     private val searchBattlefield: SearchBattlefield,
     private val searchTerrainById: SearchTerrainById,
@@ -36,13 +35,8 @@ class WhereShouldMove(
         val enemyPreference = battleUnit.remainingHealthPoints.toDouble() / battleUnit.maximumHealthPoints.toDouble()
         val allyPreference = 1 - enemyPreference
 
-        val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId)
-        val enemyBattleUnits =
-            if (enemyPlayer != null) {
-                searchBattleUnitsByPlayerId(playerId = enemyPlayer.id)
-            } else {
-                emptyList()
-            }
+        // Only the enemies within reach attract the battle unit: the others are ignored.
+        val enemyBattleUnits = searchEnemiesWithinReach(battleUnitId = battleUnit.id)
         val enemyBattleUnitsPositions =
             enemyBattleUnits.associate { battleUnit ->
                 battleUnit.id to searchPosition(battleUnitId = battleUnit.id)

@@ -21,8 +21,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
@@ -76,6 +78,7 @@ class InMemoryQueries(
     val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
 
     // Battle unit
     val distanceService = DistanceService()
@@ -99,6 +102,7 @@ class InMemoryQueries(
 
     // CPU brain
     val healingNeed = HealingNeed(searchBattleUnitById)
+    val searchEnemiesWithinReach = SearchEnemiesWithinReach(searchBattleUnitById, searchEnemyPlayer, searchBattleUnitsByPlayerId, searchPosition, searchWalkingDistance)
     val whatShouldCast =
         WhatShouldCast(
             searchBattleUnitById,
@@ -108,9 +112,8 @@ class InMemoryQueries(
             searchAbilityById,
             searchEffectById,
             searchOccupant,
-            searchEnemyPlayer,
-            searchBattleUnitsByPlayerId,
             searchPosition,
+            searchEnemiesWithinReach,
             healingNeed,
             random,
         )
@@ -120,7 +123,7 @@ class InMemoryQueries(
             whereCanMove,
             searchBattleUnitById,
             searchPosition,
-            searchEnemyPlayer,
+            searchEnemiesWithinReach,
             healingNeed,
             searchBattlefield,
             searchTerrainById,

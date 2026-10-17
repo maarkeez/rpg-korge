@@ -32,9 +32,19 @@ Known limitations:
 
 An option must beat doing nothing by more than `MINIMUM_UTILITY_GAIN` (0.05), defined in [`Utility.kt`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/services/Utility.kt).
 
+## Engaging
+
+A battle unit only engages the enemies **within reach**: the ones it can walk to in `ENGAGEMENT_DISTANCE` (3) tiles or fewer, counting their tile, found by [`SearchEnemiesWithinReach`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/SearchEnemiesWithinReach.kt). The other enemies are ignored, so the CPU battle units wait until the human battle units come close.
+
+- The walk only steps on tiles the battle unit could stand on: other battle units (allies included) and terrains that can not be occupied (e.g.: void) block it, while terrains that hurt (e.g.: lava) do not. It is counted by the battlefield [`SearchWalkingDistance`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchWalkingDistance.kt).
+- It is checked at every decision, with the battlefield as it is then, and nothing is remembered: an enemy walking out of reach is no longer followed.
+- Without an enemy within reach, the battle unit does not approach, attack, deploy or cast its other abilities (e.g.: teleport). It still heals, and still falls back towards its allies and healing terrain when hurt.
+
+For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat four tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
+
 ## Casting
 
-Every ability the unit can cast (enough mana, no cooldown), with every target `WhereCanCast` allows, is a candidate. Each ability is classified by its effects:
+Every ability the unit can cast (enough mana, no cooldown), with every target `WhereCanCast` allows, is a candidate, but only heals when no enemy is within reach. Each ability is classified by its effects:
 
 | Kind   | Effects                                         | Examples                          |
 |--------|-------------------------------------------------|-----------------------------------|
@@ -53,10 +63,11 @@ The **expected amount** of an effect is its full amount when it is applied immed
 
 - Attacks prefer finishing off weak enemies, and badly hurt casters attack less eagerly.
 - Heals are worth more the more the caster needs them, and less when most of the healing would be wasted.
-- Deploys are worth the attack the deployed battle unit will make on the enemy nearest to its tile:
+- Attacks only count the targets within reach.
+- Deploys are worth the attack the deployed battle unit will make on the enemy within reach of the caster nearest to its tile:
   - The **deployed damage** is the expected amount of the best attack of the deployed unit.
   - The deployed battle unit acts from the next turn, and moves and attacks in the same turn, so the **turns to attack** are `max(1, ⌈(distance to the enemy - 1) / its movement range⌉)`, using the Manhattan distance. Hence, the tile nearest to the enemy is preferred.
-  - A deployed unit without an attack, or without an enemy on the battlefield, is worth 0.
+  - A deployed unit without an attack, or without an enemy within reach, is worth 0.
 - The best attack, heal or deploy is cast when its utility is higher than `MINIMUM_UTILITY_GAIN`. Otherwise, one of the other abilities is cast at random, if any.
 
 For example, a rat (20 HP, sword dealing 10 and heal restoring 20) next to a knight:
@@ -69,18 +80,18 @@ For example, a rat (20 HP, sword dealing 10 and heal restoring 20) next to a kni
 | 6/20   | 10/100    | 0.3 × 1.0 = 0.3  | 0.7 × 0.7 = 0.49  | Heal     |
 | 20/20  | 8/100     | 1.0 × 1.0 = 1.0  | 0                 | Attack   |
 
-For example, a goat (30 HP, deploying a bat whose sword deals 10 and walks 5 tiles per turn) far from a knight (100 HP). The bat needs 2 turns to attack the knight from the tile next to the goat:
+For example, a goat (30 HP, deploying a bat whose sword deals 10 and walks 5 tiles per turn) within reach of a knight (100 HP). The bat attacks the knight in its first turn from the tile next to the goat:
 
-| Goat HP | Deploy                    | Heal               | Decision |
-|---------|---------------------------|--------------------|----------|
-| 30/30   | 1.0 × 0.81 × 0.1 ≈ 0.081  | 0                  | Deploy   |
-| 15/30   | 0.5 × 0.81 × 0.1 ≈ 0.041  | 0.5 × 0.75 = 0.375 | Heal     |
+| Goat HP | Deploy                  | Heal               | Decision |
+|---------|-------------------------|--------------------|----------|
+| 30/30   | 1.0 × 0.9 × 0.1 = 0.09  | 0                  | Deploy   |
+| 15/30   | 0.5 × 0.9 × 0.1 = 0.045 | 0.5 × 0.75 = 0.375 | Heal     |
 
 ## Moving
 
 Every tile the unit can move to, plus its current tile, is a candidate. Its utility adds up three contributions:
 
-- **Enemies**: how close the nearest enemy is (normalised between the candidates), weighted by the unit's health ratio. Healthy units approach enemies.
+- **Enemies**: how close the nearest enemy within reach is (normalised between the candidates), weighted by the unit's health ratio. Healthy units approach the enemies within reach, and add nothing without any.
 - **Allies**: how close the nearest ally is (normalised between the candidates), weighted by `1 - health ratio`. Hurt units fall back towards allies.
 - **Terrain**: the health effect of the tile terrain relative to the battle unit max health (equipment included), weighted by its healing need. Hurt units look for healing terrain (e.g.: water) and avoid harmful terrain (e.g.: lava).
 

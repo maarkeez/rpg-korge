@@ -29,6 +29,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldDecoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldEncoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
@@ -78,6 +79,7 @@ class BattlefieldApi(
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
     val searchDroppedItems = SearchDroppedItems(battlefieldRepository)
     val previewBattlefield = PreviewBattlefield(battlefieldRepository, terrainApi.searchTerrainById)
     val exportBattlefield = ExportBattlefield(battlefieldEncoder)
