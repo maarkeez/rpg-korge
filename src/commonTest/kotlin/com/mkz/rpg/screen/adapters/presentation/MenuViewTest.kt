@@ -44,4 +44,52 @@ class MenuViewTest : ViewsForTesting() {
             // Then
             selections.shouldContainExactly("map builder")
         }
+
+    @Test
+    fun `MenuView should display its options when it is displayed`() =
+        sharedViewsTest {
+            // When
+            val menuView = newMenuView()
+            addChild(menuView)
+            // Then
+            menuView.areOptionsShown() shouldBe true
+        }
+
+    @Test
+    fun `PlayNewGame should hide the options when it is clicked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickPlayNewGame(menuView)
+            // Then
+            menuView.areOptionsShown() shouldBe false
+        }
+
+    @Test
+    fun `BuildMap should hide the options when it is clicked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickBuildMap(menuView)
+            // Then
+            menuView.areOptionsShown() shouldBe false
+        }
+
+    @Test
+    fun `MenuView should ignore other clicks once an option is selected`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            clickPlayNewGame(menuView)
+            // When
+            clickPlayNewGame(menuView)
+            clickBuildMap(menuView)
+            // Then
+            selections.shouldContainExactly("new game")
+        }
 }
