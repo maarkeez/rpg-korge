@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
@@ -20,6 +21,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
+import com.mkz.rpg.battleUnit.usecases.commands.RecoverBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.RemoveEquippedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
@@ -188,6 +190,7 @@ class BattleUnitApi(
             eventBus,
         )
     val replenishMana = ReplenishMana(battleUnitRepository)
+    val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
     val removeEquippedEffects = RemoveEquippedEffects(battleUnitRepository, eventBus)
 
     // Events
@@ -197,6 +200,7 @@ class BattleUnitApi(
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
     private val onRequestWalkBattleUnit = OnRequestWalkBattleUnit(walkBattleUnit, eventBus)
+    private val onRequestRecoverBattleUnits = OnRequestRecoverBattleUnits(recoverBattleUnits, eventBus)
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
     private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)

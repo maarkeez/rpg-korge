@@ -32,6 +32,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val walkToColumn: Int,
     ) : BattleUnitEvent
 
+    // Requested for the CPU battle units wandering out of the battles, which recover a percentage of their maximum health and mana.
+    data class RequestRecoverBattleUnits(
+        val battleUnitIds: List<String>,
+        val percentage: Int,
+    ) : BattleUnitEvent
+
     data class RequestApplyEffect(
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent

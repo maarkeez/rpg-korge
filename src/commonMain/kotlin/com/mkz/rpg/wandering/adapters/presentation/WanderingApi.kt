@@ -32,7 +32,7 @@ class WanderingApi(
 
     // Commands
     val claimHome = ClaimHome(wanderingRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById)
-    val wanderWhileExploring = WanderWhileExploring(wanderingRepository, wanderingSteps)
+    val wanderWhileExploring = WanderWhileExploring(wanderingRepository, wanderingSteps, eventBus)
     val wanderAfterRound = WanderAfterRound(wanderingRepository, wanderingSteps)
     val resolveWanderingStep = ResolveWanderingStep(wanderingRepository, wanderingSteps)
 

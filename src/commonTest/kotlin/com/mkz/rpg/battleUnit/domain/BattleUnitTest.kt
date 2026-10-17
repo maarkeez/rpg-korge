@@ -855,4 +855,74 @@ class BattleUnitTest {
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.EquippedEffectsNotFound>()
     }
+
+    // A battle unit of a unit with 20 health points and 10 mana points, hurt and with some mana spent.
+    private fun hurtBattleUnit(
+        remainingHealthPoints: Int,
+        spentManaPoints: Int,
+        healthPoints: Int = 20,
+        manaPoints: Int = 10,
+    ): BattleUnit {
+        val unit = UnitMother.unit(healthPoints = healthPoints, manaPoints = manaPoints).toDto()
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealthPoints = remainingHealthPoints)
+        if (spentManaPoints == 0) return battleUnit
+        return battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = spentManaPoints, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+    }
+
+    @Test
+    fun `Recover should recover the percentage of the maximum health and mana`() {
+        // Given
+        val battleUnit = hurtBattleUnit(remainingHealthPoints = 10, spentManaPoints = 5)
+        // When
+        val recoveredBattleUnit = battleUnit.recover(percentage = 10)
+        // Then
+        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 12
+        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 6
+    }
+
+    @Test
+    fun `Recover should round the recovered health and mana up`() {
+        // Given: 10% of 15 health points and of 5 mana points are 1.5 and 0.5.
+        val battleUnit = hurtBattleUnit(remainingHealthPoints = 5, spentManaPoints = 5, healthPoints = 15, manaPoints = 5)
+        // When
+        val recoveredBattleUnit = battleUnit.recover(percentage = 10)
+        // Then
+        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 1
+    }
+
+    @Test
+    fun `Recover should not recover above the maximum health and mana`() {
+        // Given
+        val battleUnit = hurtBattleUnit(remainingHealthPoints = 19, spentManaPoints = 0)
+        // When
+        val recoveredBattleUnit = battleUnit.recover(percentage = 10)
+        // Then
+        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 20
+        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 10
+    }
+
+    @Test
+    fun `Recover should recover the percentage of the maximums raised by the equipped effects`() {
+        // Given: the hammer raises the maximum health from 20 to 40.
+        val battleUnit =
+            hurtBattleUnit(remainingHealthPoints = 10, spentManaPoints = 0)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+        // When
+        val recoveredBattleUnit = battleUnit.recover(percentage = 10)
+        // Then
+        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 14
+    }
+
+    @Test
+    fun `Recover should not recover a defeated battle unit`() {
+        // Given
+        val battleUnit = hurtBattleUnit(remainingHealthPoints = 0, spentManaPoints = 5)
+        // When
+        val recoveredBattleUnit = battleUnit.recover(percentage = 10)
+        // Then
+        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 0
+        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 5
+        recoveredBattleUnit.isDefeated().shouldBeTrue()
+    }
 }

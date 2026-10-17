@@ -8,6 +8,9 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
@@ -83,6 +86,20 @@ class WanderingAcceptanceTest {
         }
 
         fun ratPosition() = battlefieldApi.searchPosition("rat-1")
+
+        fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealthPoints
+
+        // The sword hits the rat: 10 damage.
+        fun hitRat() {
+            battleUnitApi.applyEffect(
+                EffectApplicationDto(
+                    source = ApplicationSourceDto.terrain("lava"),
+                    target = EffectTargetDto.Unit("rat-1"),
+                    effectId = "low-physical-damage",
+                ),
+            )
+            eventBus.dispatch()
+        }
     }
 
     @Test
@@ -176,6 +193,37 @@ class WanderingAcceptanceTest {
             // Then: it joins the battle, so it approaches the party once the next round starts.
             ratMoves.first() shouldBe PositionDto(0, 5)
             game.battleApi.searchBattle()!!.battleUnitIds shouldContain "rat-1"
+        }
+    }
+
+    @Test
+    fun `should recover a tenth of its health every second while it wanders`() {
+        // Given: the rat has 20 health points, and is hit down to 10.
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.hitRat()
+            // When
+            val healths =
+                List(3) {
+                    game.waitASecond()
+                    game.ratHealth()
+                }
+            // Then
+            healths.shouldContainExactly(12, 14, 16)
+        }
+    }
+
+    @Test
+    fun `should not recover once it is defeated`() {
+        // Given
+        val game = Game(0.0)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
+            game.hitRat()
+            game.hitRat()
+            // When
+            game.waitASecond()
+            // Then
+            game.ratHealth() shouldBe 0
         }
     }
 }

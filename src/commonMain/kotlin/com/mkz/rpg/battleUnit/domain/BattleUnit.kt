@@ -176,6 +176,23 @@ data class BattleUnit private constructor(
         return copy(remainingManaPoints = remainingManaPoints)
     }
 
+    /**
+     * Recovers the percentage of its maximum health and mana (e.g.: while wandering out of the battles), rounded up and
+     * up to the maximums. A defeated battle unit does not recover, so it stays defeated.
+     */
+    fun recover(percentage: Int): BattleUnit {
+        if (isDefeated()) return this
+        val remainingHealthPoints = RemainingHealthPoints(min(remainingHealthPoints.value + shareOf(maximumHealthPoints(), percentage), maximumHealthPoints()))
+        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + shareOf(maximumManaPoints(), percentage), maximumManaPoints()))
+        return copy(remainingHealthPoints = remainingHealthPoints, remainingManaPoints = remainingManaPoints)
+    }
+
+    // The percentage of the maximum, rounded up, so any maximum gives at least 1.
+    private fun shareOf(
+        maximum: Int,
+        percentage: Int,
+    ): Int = (maximum * percentage + 99) / 100
+
     /** The unit's maximum health, raised by the effects of the equipped items. */
     private fun maximumHealthPoints(): Int = baseMaximumHealthPoints.value + equippedEffects.maximumHealthBonus()
 

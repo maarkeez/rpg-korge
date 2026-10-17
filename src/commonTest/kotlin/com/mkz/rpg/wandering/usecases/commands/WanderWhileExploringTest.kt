@@ -11,10 +11,13 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.wandering.adapters.storage.InMemoryWanderingRepository
+import com.mkz.rpg.wandering.domain.Wandering
 import com.mkz.rpg.wandering.domain.WanderingEvent
 import com.mkz.rpg.wandering.domain.WanderingMother.wandering
+import com.mkz.rpg.wandering.usecases.services.WANDERING_RECOVERY_PERCENTAGE
 import com.mkz.rpg.wandering.usecases.services.WanderingSteps
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class WanderWhileExploringTest {
@@ -37,7 +40,7 @@ class WanderWhileExploringTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('A' to "rat-1", 'B' to "rat-2")))
-        val wanderWhileExploring = WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus))
+        val wanderWhileExploring = WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus), eventBus)
         wanderWhileExploring(exploringPlayerId = "human")
     }
 
@@ -48,7 +51,10 @@ class WanderWhileExploringTest {
         // When
         wanderWhileExploring(0.9, 0.9)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0),
+        )
         wanderingRepository
             .search()!!
             .toDto()
@@ -63,7 +69,10 @@ class WanderWhileExploringTest {
         // When
         wanderWhileExploring(0.0, 0.9)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
+        )
     }
 
     @Test
@@ -73,7 +82,10 @@ class WanderWhileExploringTest {
         // When
         wanderWhileExploring(0.0)
         // Then
-        eventBus.shouldHavePublishedEvents(WanderingEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            WanderingEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+        )
     }
 
     @Test
@@ -83,11 +95,34 @@ class WanderWhileExploringTest {
         // When
         wanderWhileExploring(0.9, 0.9, map = ". . .\n. . .\n. . B")
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
+        )
     }
 
     @Test
-    fun `should do nothing when no cpu battle unit has a home`() {
+    fun `should request the recovery of every cpu battle unit with a home, whether it rests or steps`() {
+        // Given
+        wanderingRepository.save(wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
+        // When
+        wanderWhileExploring(0.0, 0.9)
+        // Then
+        eventBus.publishedEvents.first() shouldBe BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = WANDERING_RECOVERY_PERCENTAGE)
+    }
+
+    @Test
+    fun `should not request any recovery when no cpu battle unit has a home`() {
+        // Given
+        wanderingRepository.save(Wandering.create())
+        // When
+        wanderWhileExploring(0.9)
+        // Then
+        eventBus.shouldHavePublishedEvents(WanderingEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+    }
+
+    @Test
+    fun `should do nothing when nobody has claimed a home yet`() {
         // When
         wanderWhileExploring(0.9)
         // Then
