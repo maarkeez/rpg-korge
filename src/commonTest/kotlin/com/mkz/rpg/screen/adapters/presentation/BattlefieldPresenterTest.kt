@@ -257,7 +257,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `TileSelected should not select the battle unit when exploring`() {
+    fun `TileSelected should not display any movement range when a battle unit is selected while exploring`() {
         // Given
         val exploringApis = exploringApis()
         val exploringBattlefieldView = FakeBattlefieldView()

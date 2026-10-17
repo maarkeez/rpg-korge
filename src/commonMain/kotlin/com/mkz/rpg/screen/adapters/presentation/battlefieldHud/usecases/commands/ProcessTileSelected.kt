@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
@@ -31,14 +32,45 @@ class ProcessTileSelected(
     ) {
         val tile = TileDto(row = row, column = column)
         val battlefieldHud = battlefieldHudRepository.search() ?: throw BattlefieldHudNotFound()
+        val isBattleInProgress = searchBattle()?.isFinished == false
         when (battlefieldHud) {
-            is Idle -> selectTileWhenIdle(battlefieldHud, tile)
-            is DisplayMovementRange -> selectTileWhenDisplayingMovement(battlefieldHud, tile)
+            is Idle -> if (isBattleInProgress) selectTileWhenIdle(battlefieldHud, tile) else selectTileWhileExploring(battlefieldHud, tile)
+            is DisplayMovementRange -> if (isBattleInProgress) selectTileWhenDisplayingMovement(battlefieldHud, tile) else selectTileWhileExploring(battlefieldHud, tile)
             is DisplayAbilityCastRange -> selectTileWhenDisplayingAbilityCastRange(battlefieldHud, tile)
             is DisplayAbilityCastPreview -> {
                 // Do nothing
             }
         }
+    }
+
+    // Out of the battles (e.g.: while exploring), only the battle units of the human player can be selected, to use their
+    // inventory. They can not move by selecting a tile, so they have no movement range. Anything else goes idle.
+    private fun selectTileWhileExploring(
+        battlefieldHud: BattlefieldHud,
+        tile: TileDto,
+    ) {
+        val selectedBattleUnitId = (battlefieldHud as? DisplayMovementRange)?.battleUnitId
+        val battleUnitId = humanOccupant(tile)?.takeIf { it != selectedBattleUnitId }
+        val idleBattlefieldHud =
+            when (battlefieldHud) {
+                is Idle -> if (battleUnitId == null) battlefieldHud.idle() else battlefieldHud
+                is DisplayMovementRange -> battlefieldHud.idle()
+                else -> return
+            }
+        val (events, updatedBattlefieldHud) =
+            if (battleUnitId == null) {
+                idleBattlefieldHud.pullEvents()
+            } else {
+                idleBattlefieldHud.selectBattleUnit(tile = tile, battleUnitId = battleUnitId, tilesWhereCanBeMoved = emptySet()).pullEvents()
+            }
+        battlefieldHudRepository.update(updatedBattlefieldHud)
+        eventBus.publish(events)
+    }
+
+    private fun humanOccupant(tile: TileDto): String? {
+        val battleUnitId = searchOccupant(row = tile.row, column = tile.column) ?: return null
+        val battleUnit = searchBattleUnitById(battleUnitId) ?: return null
+        return battleUnitId.takeIf { searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.HUMAN }
     }
 
     // The battle unit on the tile, when it is in the battle. Battle units out of it can not be selected, as an empty tile.

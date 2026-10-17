@@ -51,18 +51,20 @@ class ProcessTileSelectedTest {
      * - `E` is enemy-battle-unit-1, of player-2.
      * - `F` is enemy-battle-unit-2, of player-2.
      *
-     * Every battle unit is in the battle, but the [outOfBattle] ones.
+     * Every battle unit is in the battle, but the [outOfBattle] ones. Without [isBattleStarted], no battle is stored, as
+     * while exploring before the first one.
      */
     private fun givenBattle(
         map: String,
         knightPlayerType: Player.Dto.PlayerTypeDto = HUMAN,
         playerOrder: List<String> = listOf("player-1", "player-2"),
         outOfBattle: Set<String> = emptySet(),
+        isBattleStarted: Boolean = true,
     ) {
         val player = player(id = "player-1", type = knightPlayerType).also(queries.playerRepository::create).toDto()
         val enemyPlayer = player(id = "player-2", type = CPU).also(queries.playerRepository::create).toDto()
         val battleUnits = mapOf('K' to "battle-unit-1", 'S' to "battle-unit-2", 'E' to "enemy-battle-unit-1", 'F' to "enemy-battle-unit-2")
-        queries.battleRepository.create(battle(players = playerOrder, battleUnitIds = battleUnits.values.toSet() - outOfBattle))
+        if (isBattleStarted) queries.battleRepository.create(battle(players = playerOrder, battleUnitIds = battleUnits.values.toSet() - outOfBattle))
         battleUnits.forEach { (letter, battleUnitId) ->
             queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter in "EF") enemyPlayer else player))
         }
@@ -326,5 +328,89 @@ class ProcessTileSelectedTest {
         // Then
         battlefieldHudRepository.search() shouldBe hud
         eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    // Out of the battles: the players and the battle units on the map are stored as for a battle, but the battle has finished.
+    private fun givenExploring(map: String) {
+        givenBattle(map)
+        queries.battleRepository.create(battle(players = listOf("player-2", "player-1")).finishWithoutWinner())
+    }
+
+    @Test
+    fun `should select a battle unit of the human player without any movement range when it is selected while exploring`() {
+        // Given
+        battlefieldHudRepository.create(idle())
+        givenExploring("K . .")
+        // When
+        processTileSelected(0, 0)
+        // Then
+        val storedHud = battlefieldHudRepository.search() as DisplayMovementRange
+        storedHud.battleUnitId shouldBe "battle-unit-1"
+        storedHud.tilesWhereCanBeMoved.shouldBeEmpty()
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()),
+        )
+    }
+
+    @Test
+    fun `should select a battle unit of the human player when it is selected while exploring before any battle`() {
+        // Given
+        battlefieldHudRepository.create(idle())
+        givenBattle("K . .", isBattleStarted = false)
+        // When
+        processTileSelected(0, 0)
+        // Then
+        (battlefieldHudRepository.search() as DisplayMovementRange).battleUnitId shouldBe "battle-unit-1"
+    }
+
+    @Test
+    fun `should go idle when a cpu battle unit is selected while exploring`() {
+        // Given
+        battlefieldHudRepository.create(idle())
+        givenExploring("K . E")
+        // When
+        processTileSelected(0, 2)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should go idle without moving the selected battle unit when an empty tile is selected while exploring`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = setOf(tile(0, 1))))
+        givenExploring("K . .")
+        // When
+        processTileSelected(0, 1)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should go idle when the selected battle unit is selected again while exploring`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()))
+        givenExploring("K S .")
+        // When
+        processTileSelected(0, 0)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<Idle>()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should select the other battle unit of the human player when it is selected while exploring`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()))
+        givenExploring("K S .")
+        // When
+        processTileSelected(0, 1)
+        // Then
+        (battlefieldHudRepository.search() as DisplayMovementRange).battleUnitId shouldBe "battle-unit-2"
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.Idle,
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 1), battleUnitId = "battle-unit-2", tilesWhereCanBeMoved = emptySet()),
+        )
     }
 }

@@ -168,7 +168,7 @@ class InventoryPresenter(
     private fun selectItem(slotIndex: Int) {
         val battleUnitId = displayedBattleUnitId ?: return
         val slot = displayedSlots.getOrNull(slotIndex) ?: return
-        if (!isPlayerTurnOf(battleUnitId)) return
+        if (!canUseInventoryOf(battleUnitId)) return
         val lootableItem = lootableItemApi.searchLootableItemById(slot.lootableItemId) ?: return
         val isItemEquipped = displayedSlots.any { displayedSlot -> displayedSlot.lootableItemId == slot.lootableItemId && displayedSlot.isEquipped }
         val actions =
@@ -211,10 +211,12 @@ class InventoryPresenter(
         return playerApi.searchPlayerById(battleUnit.playerId)?.type == PlayerTypeDto.HUMAN
     }
 
-    // The inventory can only be used during the turn of its battle unit player.
-    private fun isPlayerTurnOf(battleUnitId: String): Boolean {
+    // In a battle, the inventory can only be used during the turn of its battle unit player. Out of the battles (e.g.:
+    // while exploring), it can always be used.
+    private fun canUseInventoryOf(battleUnitId: String): Boolean {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return false
-        return battleApi.searchBattle()?.currentPlayerTurn == battleUnit.playerId
+        val battle = battleApi.searchBattle()?.takeIf { battle -> !battle.isFinished } ?: return true
+        return battle.currentPlayerTurn == battleUnit.playerId
     }
 
     // The player can only act once the scene shows the current state of the battle, and has chosen what to do with the found item.

@@ -23,7 +23,7 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 | `searchInventoryByBattleUnitId` | The stored items and the equipped ones, to display them. |
 | `canStoreItem`                  | Whether there is space left for one more item.          |
 
-- Consuming, discarding, equipping and unequipping do not cost any turn action, but are only allowed during the turn of the battle unit's player.
+- Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
 - Storing is not limited to the player's turn, as it happens while a battle unit moves.
 
 ## Looting from the battlefield

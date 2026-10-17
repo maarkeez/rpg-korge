@@ -410,7 +410,8 @@ class BattlefieldPresenter(
     override fun tileSelected(
         row: Int,
         column: Int,
-    ) = whenIdle { if (isBattling()) processTileSelected(row = row, column = column) }
+    ) = whenIdle { processTileSelected(row = row, column = column) }
 
-    override fun abilitySelected(abilityId: String) = whenIdle { processAbilitySelected(abilityId) }
+    // The abilities can only be cast in a battle.
+    override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) processAbilitySelected(abilityId) }
 }

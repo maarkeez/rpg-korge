@@ -26,6 +26,7 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -110,5 +111,20 @@ class ConsumeItemTest {
         val consumption = { consumeItem(battleUnitId = "rat-1", lootableItemId = "health-potion") }
         // Then
         shouldThrow<NotTheBattleUnitPlayerTurn> { consumption() }
+    }
+
+    @Test
+    fun `should consume the item of any battle unit out of the battles when the battle has finished`() {
+        // Given
+        battleRepository.create(battle(players = listOf("human", "cpu")).finishWithoutWinner())
+        inventoryRepository.create(inventory(battleUnitId = "rat-1", storedItems = listOf("health-potion")))
+        // When
+        consumeItem(battleUnitId = "rat-1", lootableItemId = "health-potion")
+        // Then
+        inventoryRepository
+            .searchByBattleUnitId("rat-1")!!
+            .toDto()
+            .storedItems
+            .shouldBeEmpty()
     }
 }

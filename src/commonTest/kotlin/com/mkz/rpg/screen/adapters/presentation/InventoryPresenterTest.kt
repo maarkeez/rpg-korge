@@ -366,4 +366,38 @@ class InventoryPresenterTest {
         battleHudView.displays.last() shouldBe Display.INVENTORY
         playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
     }
+
+    @Test
+    fun `SelectItem should not display the item actions during the turn of another player in a battle`() {
+        // Given
+        loot("knight-1", "health-potion")
+        apis.battleApi.finishPlayerTurn()
+        eventBus.dispatch()
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        playerCallToActionView.displayedItemActions.shouldBeNull()
+    }
+
+    @Test
+    fun `ConsumeItem should consume the item out of the battles when the battle has finished while exploring`() {
+        // Given
+        loot("knight-1", "health-potion")
+        // The battle finishes during the cpu turn, as the rat leaves it.
+        apis.battleApi.finishPlayerTurn()
+        eventBus.dispatch()
+        apis.battleApi.startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))
+        eventBus.dispatch()
+        apis.battleApi
+            .searchBattle()!!
+            .isFinished
+            .shouldBeTrue()
+        openKnightInventory()
+        clickSlot(0)
+        // When
+        clickItemAction("Consume")
+        // Then
+        inventoryView.displayedSlots.last().shouldBeEmpty()
+    }
 }

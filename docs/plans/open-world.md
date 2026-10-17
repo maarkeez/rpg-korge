@@ -1,6 +1,6 @@
 # Plan: open world exploration
 
-> **Status:** in progress, milestone 5 of 6 done.
+> **Status:** implemented, the 6 milestones are done.
 >
 > **Summary:** A new game starts exploring the battlefield instead of battling. There are no turns. The human player
 > walks one battle unit with a virtual pad (north, east, south and west arrows, as on the SNES) and their other battle
@@ -266,7 +266,8 @@ battle units follow it in, and which battle units stood still during the last se
 
 #### Commands
 
-- Modify `PlayerTurnRule` so the inventory can be used while exploring, as there are no turns then.
+- Modify `PlayerTurnRule` so the inventory can be used while exploring, as there are no turns then: it is only
+  limited to the turn of the battle unit player while a battle is in progress.
 
 #### Queries
 
@@ -326,6 +327,14 @@ battle units follow it in, and which battle units stood still during the last se
 - Modify `BattleInfoPresenter`: it shows "Exploring" instead of the round and the player turn, announces the battle
   when combat is engaged, and announces its end ("Battle over!").
 - Modify `FinishTurnPresenter` so its call to action is hidden while exploring.
+- To use the inventory while exploring, which the plan missed, as it is only reachable from the selected battle unit:
+  - `ProcessTileSelected` selects a battle unit of the party, without any movement range, when no battle is in
+    progress. Anything else clears the selection;
+  - `BattlefieldPresenter` no longer ignores the tile taps while exploring, and ignores the abilities instead;
+  - `ExplorationPresenter` displays the battle HUD and the call to action in place of the pad while a battle unit is
+    selected, and straight away when a found item does not fit in the inventory (`InventoryFull`), which waited
+    behind the hidden HUD otherwise. It does not walk the party while the pad is hidden;
+  - `InventoryPresenter` offers the item actions out of the battles.
 
 ## Milestones
 
@@ -338,7 +347,7 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 | 3 | ✅   | Only the engaged battle units   | `StartBattle` with the engaged CPU battle units and the human party, the CPU first. `UpdateEngagement`, `EngagementUpdated`, and `StartNextRound` with the joining battle units: the CPU battle units getting an enemy within reach join when a round finishes. Only the battle units in the battle can be selected. `DefeatPlayer` and `FinishBattle` against the battle units on the battlefield, as they already are. Delete `battle.toml`, `BattleLoader`, `ResourcesBattleLoader` and `InitialiseBattle`. | The battle involves the engaged CPU battle units only, the CPU playing first. The rest join when the party walks within their reach, until a player is defeated. |
 | 4 | ✅   | Back to exploring               | The CPU battle units without an enemy within reach leave the battle when a round finishes. `BattleFinished` when only one player is left with battle units in the battle. `ResumeExploration`, and `LeaveParty` (defeated battle units leave the party, the next one leads). `StartBattle` replaces the finished battle. The battle end announcement, and the selection cleared.                                                   | Exploring resumes once no CPU battle unit is left in the battle, and the next engagement starts a new battle.                                                     |
 | 5 | ✅   | Terrain effects while exploring | `ApplyStandingTerrainEffects`, called every second by the `ExplorationPresenter` from the `BattleScene` frames. `OnBattleUnitMoved` and `MarkBattleUnitMoved` mark the battle units that moved. `RequestEffectApplicationToOccupants` limited to some battle units, requested with `BattlefieldEvent.RequestEffectApplicationToOccupants`. The game over while exploring.                                                     | Standing on lava hurts and standing on water heals while exploring, every second.                                                                                |
-| 6 |      | Inventory while exploring       | `PlayerTurnRule` lets the inventory be used while exploring.                                                                                                                                                                                                                                                                                                                                                                                | Items can be consumed, equipped and discarded while exploring.                                                                                                   |
+| 6 | ✅   | Inventory while exploring       | `PlayerTurnRule` lets the inventory be used while exploring. Tapping a battle unit of the party displays its info and bag in place of the pad, and the found item that does not fit in the inventory is asked while exploring too.                                                                                                                                                                                             | Items can be consumed, equipped and discarded while exploring.                                                                                                   |
 
 The tests that expect the battle to start with the game change in milestone 2: they either walk the party within reach
 of a CPU battle unit first, or deploy them within reach of each other.

@@ -6,11 +6,14 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.exploration.domain.ExplorationEvent
+import com.mkz.rpg.inventory.domain.InventoryEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -160,5 +163,81 @@ class ExplorationPresenterTest {
         // Then
         requests.shouldBeEmpty()
         virtualPadView.visible.shouldBeFalse()
+    }
+
+    private val knightSelected = BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", tilesWhereCanBeMoved = emptySet())
+
+    @Test
+    fun `DisplayVirtualPad should display the battle HUD and the call to action in place of the pad when a battle unit is selected while exploring`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        eventBus.publish(knightSelected)
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeTrue()
+        playerCallToActionView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `DisplayVirtualPad should display the pad again when the battlefield HUD goes idle while exploring`() {
+        // Given
+        createPresenter()
+        startExploring()
+        eventBus.publish(knightSelected)
+        eventBus.dispatch()
+        // When
+        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeTrue()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `DisplayVirtualPad should keep the battle HUD when the battlefield HUD goes idle while battling`() {
+        // Given
+        createPresenter()
+        startExploring()
+        apis.explorationApi.pauseExploration()
+        eventBus.dispatch()
+        // When
+        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `DisplayVirtualPad should display the battle HUD straight away when a found item does not fit in the inventory while exploring`() {
+        // Given
+        createPresenter()
+        startExploring()
+        timeline.playLongStep()
+        // When
+        eventBus.publish(InventoryEvent.InventoryFull(battleUnitId = "knight-1", lootableItemId = "hammer", row = 1, column = 1))
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeTrue()
+        playerCallToActionView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `WalkParty should not walk the party while the pad is hidden, even when an arrow is still held`() {
+        // Given
+        createPresenter()
+        startExploring()
+        eventBus.publish(knightSelected)
+        eventBus.dispatch()
+        // When
+        virtualPadView.holdArrow(DirectionDto.NORTH)
+        eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
     }
 }

@@ -20,6 +20,15 @@ The party walks one tile at a time, towards the arrow held on the virtual pad (n
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
 
+## Inventory
+
+There are no turns while exploring, so the inventory of the party can always be used:
+
+- Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag, and the call to action its item actions, in place of the virtual pad. It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
+- Tapping an empty tile, a CPU battle unit or the selected battle unit again clears the selection, and the virtual pad is displayed again. Tapping another battle unit of the party selects it instead.
+- When an item found on the way does not fit in the inventory (`InventoryFull`), the battle HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
+- The party does not walk while the virtual pad is hidden, even when an arrow is still held.
+
 ## Terrain effects
 
 Every second while exploring, the battle units that stood still during that second receive the effect of their terrain (e.g.: lava hurts, water heals), the CPU battle units included, as they stand still:
@@ -41,7 +50,7 @@ After the party starts exploring and every time it has walked, the CPU brain [`E
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
 - The battle info announces the battle, and the battle HUD and the player call to action take the place of the virtual pad.
 
-While exploring, tapping a battle unit does not select it, and the battle info displays "Exploring".
+While exploring, the battle info displays "Exploring".
 
 ## Back to exploring
 

@@ -2,13 +2,16 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.screen.adapters.presentation.battleHudView
 import com.mkz.rpg.screen.adapters.presentation.battleInfoView
+import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
-import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
+import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isBattleHudShown
+import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
@@ -53,7 +56,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should not select a knight when the human player taps it while exploring`() =
+    fun `should display the knight info and its bag in place of the virtual pad when the human player taps it while exploring`() =
         sharedViewsTest {
             // Given
             startNewGame()
@@ -62,8 +65,29 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // When
             clickTile(battlefieldView, 6, 6)
             // Then
-            withClue("Expected the knight not to be selected while exploring") { battlefieldView.hasSelectionAt(6, 6).shouldBeFalse() }
-            withClue("Expected the battle HUD to stay hidden while exploring") { isBattleHudShown().shouldBeFalse() }
+            waitUntil { isBattleHudShown() && battleUnitInfoView()?.isBagDisplayed() == true }
+            withClue("Expected the battle HUD to display the knight info") { battleHudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
+            withClue("Expected the bag of the knight to be displayed") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeTrue() }
+            withClue("Expected the virtual pad to be hidden while the knight is selected") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
+        }
+
+    @Test
+    fun `should display the virtual pad again without moving the knight when the human player taps an empty tile while exploring`() =
+        sharedViewsTest {
+            // Given
+            startNewGame()
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
+            clickTile(battlefieldView, 6, 6)
+            waitUntil { isBattleHudShown() }
+            // When
+            clickTile(battlefieldView, 5, 6)
+            // Then
+            waitUntil { virtualPadView()?.isPadShown() == true }
+            withClue("Expected the virtual pad to be displayed again") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
+            withClue("Expected the battle HUD to be hidden again") { isBattleHudShown().shouldBeFalse() }
+            withClue("Expected the knight to stay at (6,6)") { battlefieldView.hasBattleUnitAt(6, 6).shouldBeTrue() }
+            withClue("Expected the knight not to walk to the tapped tile") { battlefieldView.hasBattleUnitAt(5, 6).shouldBeFalse() }
         }
 
     @Test
