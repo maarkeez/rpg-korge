@@ -194,19 +194,8 @@ class BattlefieldPresenter(
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return
-        // While exploring, the CPU battle units wander alongside the timeline, so the party keeps walking smoothly, and
-        // without scrolling the battlefield away from the party. The selection (e.g.: to use the inventory) is kept.
-        if (!isBattling() && isCpuBattleUnit(battleUnit)) {
-            timeline.playAlongside {
-                battlefieldView.moveBattleUnit(
-                    fromRow = event.fromRow,
-                    fromColumn = event.fromColumn,
-                    path = event.path,
-                    unitId = battleUnit.unitId,
-                    stepDuration = BattlefieldView.EXPLORING_STEP_DURATION,
-                    followsTiles = false,
-                )
-            }
+        if (isWandering(battleUnit)) {
+            wanderUnit(event, battleUnit.unitId)
             return
         }
         val stepDuration = if (isBattling()) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
@@ -220,6 +209,28 @@ class BattlefieldPresenter(
                 stepDuration = stepDuration,
             )
         }
+    }
+
+    // The CPU battle units out of the battles wander without scrolling the battlefield away from the party, nor clearing
+    // the selection (e.g.: to use the inventory). While exploring, alongside the timeline, so the party keeps walking
+    // smoothly. When a round finishes, in the timeline, so they are seen before the next round starts.
+    private fun wanderUnit(
+        event: BattleUnitEvent.BattleUnitMoved,
+        unitId: String,
+    ) {
+        val isBattling = isBattling()
+        val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
+        val step: suspend () -> Unit = {
+            battlefieldView.moveBattleUnit(
+                fromRow = event.fromRow,
+                fromColumn = event.fromColumn,
+                path = event.path,
+                unitId = unitId,
+                stepDuration = stepDuration,
+                followsTiles = false,
+            )
+        }
+        if (isBattling) timeline.play(step) else timeline.playAlongside(step)
     }
 
     private fun dropLoot(
@@ -424,6 +435,13 @@ class BattlefieldPresenter(
     private fun isBattling(): Boolean = battleApi.searchBattle()?.isFinished == false
 
     private fun isCpuBattleUnit(battleUnit: BattleUnit.Dto): Boolean = playerApi.searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.CPU
+
+    // A CPU battle unit out of the battles moves only to wander: while exploring, or out of the battle in progress.
+    private fun isWandering(battleUnit: BattleUnit.Dto): Boolean {
+        if (!isCpuBattleUnit(battleUnit)) return false
+        val battle = battleApi.searchBattle()?.takeIf { battle -> !battle.isFinished } ?: return true
+        return battleUnit.id !in battle.battleUnitIds
+    }
 
     // Delegates
     override fun tileSelected(

@@ -4,7 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBrain.adapters.events.OnAbilityCastResolved
-import com.mkz.rpg.cpuBrain.adapters.events.OnBattleRoundFinished
+import com.mkz.rpg.cpuBrain.adapters.events.OnBattleUnitsWanderedAfterRound
 import com.mkz.rpg.cpuBrain.adapters.events.OnBattleUnitsWanderedWhileExploring
 import com.mkz.rpg.cpuBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBrain.adapters.events.OnCpuBattleUnitActionResolved
@@ -142,5 +142,5 @@ class CpuBrainApi(
     private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)
     private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
     private val onBattleUnitsWanderedWhileExploring = OnBattleUnitsWanderedWhileExploring(engageEnemies, eventBus)
-    private val onBattleRoundFinished = OnBattleRoundFinished(updateEngagement, eventBus)
+    private val onBattleUnitsWanderedAfterRound = OnBattleUnitsWanderedAfterRound(updateEngagement, eventBus)
 }

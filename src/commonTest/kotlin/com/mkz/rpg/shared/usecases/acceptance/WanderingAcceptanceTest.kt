@@ -3,6 +3,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
@@ -13,12 +14,14 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
+import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.wandering.adapters.presentation.WanderingApi
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -46,11 +49,13 @@ class WanderingAcceptanceTest {
         val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
-        // The knights explore from the left side of an 8x8 battlefield, one above the other, and the rat is deployed at the given tile.
+        // The knights explore from the left side of an 8x8 battlefield, one above the other, and the rat is deployed at the
+        // given tile, as the other rats.
         suspend fun start(
             ratRow: Int,
             ratColumn: Int,
             knightRow: Int,
+            otherRats: Map<String, Pair<Int, Int>> = emptyMap(),
         ) {
             terrainApi.init()
             effectApi.init()
@@ -66,6 +71,7 @@ class WanderingAcceptanceTest {
             battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = knightRow, deployAtColumn = 0)
             battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = knightRow + 1, deployAtColumn = 0)
             battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = ratRow, deployAtColumn = ratColumn)
+            otherRats.forEach { (battleUnitId, tile) -> battleUnitApi.deployBattleUnit(battleUnitId, "rat", cpuPlayerId, deployAtRow = tile.first, deployAtColumn = tile.second) }
             explorationApi.startExploration()
             eventBus.dispatch()
         }
@@ -152,6 +158,24 @@ class WanderingAcceptanceTest {
                 PositionDto(3, 7),
                 PositionDto(3, 7),
             )
+        }
+    }
+
+    @Test
+    fun `should join the battle when it wanders within reach of the party once a round finishes`() {
+        // Given: rat-2 engages the knight-2 at (1,0) and battles. The rat at (0,6) stays out of the battle, 6 tiles away
+        // from the leader at (0,0), one more than its reach, and steps west when the round finishes.
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 6, knightRow = 0, otherRats = mapOf("rat-2" to (3 to 0))) }) {
+            game.battleApi.searchBattle()!!.battleUnitIds shouldNotContain "rat-1"
+            val ratMoves = mutableListOf<PositionDto>()
+            game.eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event -> if (event.battleUnitId == "rat-1") ratMoves += PositionDto(event.toRow, event.toColumn) }
+            // When
+            game.battleApi.finishPlayerTurn()
+            game.eventBus.dispatch()
+            // Then: it joins the battle, so it approaches the party once the next round starts.
+            ratMoves.first() shouldBe PositionDto(0, 5)
+            game.battleApi.searchBattle()!!.battleUnitIds shouldContain "rat-1"
         }
     }
 }

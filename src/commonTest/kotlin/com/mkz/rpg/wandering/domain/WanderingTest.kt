@@ -163,4 +163,35 @@ class WanderingTest {
             .first
             .shouldBeEmpty()
     }
+
+    @Test
+    fun `StartAfterRound should wander the battle units with a home out of the battle, in the order they were deployed`() {
+        // When
+        val wandering =
+            wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2), "rat-3" to (4 to 4)))
+                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"))
+        // Then
+        wandering.toDto().pendingBattleUnitIds.shouldContainExactly("rat-1", "rat-3")
+    }
+
+    @Test
+    fun `StartAfterRound should announce at once that the battle units wandered, with the battle units in the battle, when every one is in the battle`() {
+        // When
+        val (events, _) = wandering(homes = mapOf("rat-1" to (0 to 0))).startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-1")).pullEvents()
+        // Then
+        events shouldBe setOf(WanderingEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
+    }
+
+    @Test
+    fun `ResolveStep should announce that the battle units wandered after the round when the last step is walked`() {
+        // Given
+        val wandering =
+            wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2)))
+                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"))
+                .requestStep(battleUnitId = "rat-1", row = 0, column = 1)
+        // When
+        val (events, _) = wandering.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
+        // Then
+        events shouldBe setOf(WanderingEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")))
+    }
 }

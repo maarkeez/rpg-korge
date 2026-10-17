@@ -2,11 +2,13 @@ package com.mkz.rpg.wandering.domain
 
 import com.mkz.rpg.wandering.domain.WanderingError.AlreadyAwaitingAStep
 import com.mkz.rpg.wandering.domain.WanderingError.NotTheNextBattleUnit
+import com.mkz.rpg.wandering.domain.WanderingEvent.BattleUnitsWanderedAfterRound
 import com.mkz.rpg.wandering.domain.WanderingEvent.BattleUnitsWanderedWhileExploring
 import kotlin.jvm.JvmInline
 
 /**
- * The CPU battle units wandering around their home, the tile each one was deployed on, while they are out of a battle.
+ * The CPU battle units wandering around their home, the tile each one was deployed on, while they are out of a battle:
+ * every second while the player explores, and when a battle round finishes.
  *
  * The battle units wander one after another: each one rests or steps to a tile next to it, and its step is awaited
  * until it occupies its tile, so the next one decides with the battlefield as it is then (e.g.: two battle units never
@@ -64,6 +66,17 @@ data class Wandering private constructor(
             purpose = Purpose.Exploring(exploringPlayerId),
         ).finishWhenDone()
 
+    /**
+     * Battle units in the battle: the ones that do not wander when a round finishes. The other battle units with a home
+     * wander, in the order they were deployed. A wandering in progress is abandoned.
+     */
+    fun startAfterRound(battleUnitIdsInBattle: Set<String>): Wandering =
+        copy(
+            pendingBattleUnits = PendingBattleUnits(homes.value.keys.filter { battleUnitId -> battleUnitId !in battleUnitIdsInBattle }),
+            awaitedStep = null,
+            purpose = Purpose.AfterRound(battleUnitIdsInBattle),
+        ).finishWhenDone()
+
     /** The battle unit to wander next, or `null` while awaiting the previous step or when every battle unit has wandered. */
     fun nextBattleUnitId(): String? = if (awaitedStep == null) pendingBattleUnits.value.firstOrNull() else null
 
@@ -105,12 +118,14 @@ data class Wandering private constructor(
         if (pendingBattleUnits.value.firstOrNull() != battleUnitId) throw NotTheNextBattleUnit()
     }
 
-    // Once every battle unit has wandered, it announces it, for what follows (e.g.: engaging the exploring player).
+    // Once every battle unit has wandered, it announces it, for what follows (e.g.: engaging the exploring player, or
+    // updating the engagement of the battle).
     private fun finishWhenDone(): Wandering {
         if (isWandering()) return this
         val finishedEvent =
             when (purpose) {
                 is Purpose.Exploring -> BattleUnitsWanderedWhileExploring(exploringPlayerId = purpose.exploringPlayerId)
+                is Purpose.AfterRound -> BattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle)
                 null -> return this
             }
         return copy(events = events + finishedEvent)
@@ -131,6 +146,10 @@ data class Wandering private constructor(
     private sealed interface Purpose {
         data class Exploring(
             val exploringPlayerId: String,
+        ) : Purpose
+
+        data class AfterRound(
+            val battleUnitIdsInBattle: Set<String>,
         ) : Purpose
     }
 

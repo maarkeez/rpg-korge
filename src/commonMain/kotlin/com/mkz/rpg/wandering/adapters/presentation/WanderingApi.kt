@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.wandering.adapters.events.OnBattleRoundFinished
 import com.mkz.rpg.wandering.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.wandering.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.wandering.adapters.events.OnExplorationSecondStarted
@@ -12,6 +13,7 @@ import com.mkz.rpg.wandering.adapters.storage.InMemoryWanderingRepository
 import com.mkz.rpg.wandering.domain.WanderingRepository
 import com.mkz.rpg.wandering.usecases.commands.ClaimHome
 import com.mkz.rpg.wandering.usecases.commands.ResolveWanderingStep
+import com.mkz.rpg.wandering.usecases.commands.WanderAfterRound
 import com.mkz.rpg.wandering.usecases.commands.WanderWhileExploring
 import com.mkz.rpg.wandering.usecases.services.WanderingSteps
 
@@ -31,10 +33,12 @@ class WanderingApi(
     // Commands
     val claimHome = ClaimHome(wanderingRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById)
     val wanderWhileExploring = WanderWhileExploring(wanderingRepository, wanderingSteps)
+    val wanderAfterRound = WanderAfterRound(wanderingRepository, wanderingSteps)
     val resolveWanderingStep = ResolveWanderingStep(wanderingRepository, wanderingSteps)
 
     // Events
     private val onBattleUnitDeployed = OnBattleUnitDeployed(claimHome, eventBus)
     private val onExplorationSecondStarted = OnExplorationSecondStarted(wanderWhileExploring, eventBus)
     private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveWanderingStep, eventBus)
+    private val onBattleRoundFinished = OnBattleRoundFinished(wanderAfterRound, eventBus)
 }

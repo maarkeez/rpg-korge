@@ -286,6 +286,35 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `MoveUnit should move a cpu battle unit out of the battle in the timeline, without following it, when it wanders after a round`() {
+        // Given: rat-1 engaged the knight, and rat-2 stays out of the battle.
+        val battlingApis =
+            exploringApis(
+                deployments =
+                    listOf(
+                        Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
+                        Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 2),
+                        Deployment(battleUnitId = "rat-2", unitId = "rat", playerId = "cpu", row = 3, column = 3),
+                    ),
+            )
+        battlingApis.battleApi.startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"))
+        battlingApis.eventBus.dispatch()
+        val battlingBattlefieldView = FakeBattlefieldView()
+        val timeline = battleSceneTimeline()
+        exploringPresenter(battlingApis, battlingBattlefieldView, timeline)
+        val previousStep = timeline.playLongStep()
+        val path = listOf(position(3, 2))
+        battlingApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-2", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
+        battlingApis.eventBus.dispatch()
+        battlingBattlefieldView.movedBattleUnits.shouldBeEmpty()
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlingBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        battlingBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.MOVE_STEP_DURATION)
+    }
+
+    @Test
     fun `TileSelected should not display any movement range when a battle unit is selected while exploring`() {
         // Given
         val exploringApis = exploringApis()

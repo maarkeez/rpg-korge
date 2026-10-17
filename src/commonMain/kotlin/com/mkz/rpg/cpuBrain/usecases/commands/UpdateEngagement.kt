@@ -8,9 +8,9 @@ import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Once a battle round finishes, the CPU battle units out of the battle that now have an enemy within reach join it, so
- * they play from the next round, and the CPU battle units in the battle without any enemy within reach leave it (e.g.:
- * left behind). The engagement is updated even when nobody joins nor leaves, as the next round starts on it.
+ * Once a battle round finishes and the CPU battle units out of the battle have wandered, those that now have an enemy
+ * within reach join it, so they play from the next round, and the CPU battle units in the battle without any enemy
+ * within reach leave it (e.g.: left behind). The engagement is updated even when nobody joins nor leaves, as the next round starts on it.
  * Battle units: those in the battle.
  */
 class UpdateEngagement(

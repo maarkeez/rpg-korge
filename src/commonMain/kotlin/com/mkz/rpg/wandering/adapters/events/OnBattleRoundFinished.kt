@@ -1,16 +1,16 @@
-package com.mkz.rpg.cpuBrain.adapters.events
+package com.mkz.rpg.wandering.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
-import com.mkz.rpg.cpuBrain.usecases.commands.UpdateEngagement
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.wandering.usecases.commands.WanderAfterRound
 
 class OnBattleRoundFinished(
-    updateEngagement: UpdateEngagement,
+    wanderAfterRound: WanderAfterRound,
     eventBus: EventBus,
 ) {
     private val subscription =
         eventBus.subscribe<BattleEvent.BattleRoundFinished> { event ->
-            updateEngagement(battleUnitIds = event.battleUnitIds)
+            wanderAfterRound(battleUnitIds = event.battleUnitIds)
         }
 }

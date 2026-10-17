@@ -1,6 +1,6 @@
 # Plan: CPU battle units wander around their home
 
-> **Status:** in progress, milestones 1 and 2 are done.
+> **Status:** implemented, the 3 milestones are done.
 >
 > **Summary:** A CPU battle unit that is not engaged in a battle wanders around the tile it was deployed on, its
 > **home**, up to 3 walkable tiles away. Near home, it tends to walk away from it. Far from it, it tends to walk back.
@@ -223,7 +223,8 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 |---|------|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
 | 1 | ✅    | Wandering while exploring    | `wandering` subdomain: `Wandering`, `ClaimHome`, `WanderWhileExploring`, `ResolveWanderingStep`, `WanderingSteps`. `SearchWalkingDistance` through the battle units. `WhereShouldWander`, inside the territory only. `ExplorationSecondStarted`. `EngageEnemies` after wandering. `playAlongside`, and the moves without following the tiles. The end-to-end tests make the CPU battle units rest. | While exploring, the CPU battle units wander around their home, and engage the party when they wander into its reach. |
 | 2 | ✅    | Back home                    | `WhereShouldWander` outside the territory: only towards home, never resting.                                                                                                                                                                                                                                                                                              | The CPU battle units left behind by a party that ran away walk back home once the party explores again.               |
-| 3 | ⬜    | Wandering when a round ends  | `WanderAfterRound` on `BattleRoundFinished` with the CPU battle units out of the battle, played in the timeline. `UpdateEngagement` on `BattleUnitsWanderedAfterRound`.                                                                                                                                                                                            | During a battle, the CPU battle units out of it wander once per round, and may wander into reach and join the battle.  |
+| 3 | ✅    | Wandering when a round ends  | `WanderAfterRound` on `BattleRoundFinished` with the CPU battle units out of the battle, played in the timeline. `UpdateEngagement` on `BattleUnitsWanderedAfterRound`.                                                                                                                                                                                            | During a battle, the CPU battle units out of it wander once per round, and may wander into reach and join the battle.  |
 
-Until milestone 2, a CPU battle unit outside its territory (e.g.: after a battle) has nowhere to step to, so it stands
-still, as today.
+Until milestone 2, a CPU battle unit outside its territory (e.g.: after a battle) had nowhere to step to, so it stood
+still. From milestone 3, the acceptance tests that play rounds also wire the `WanderingApi`, as the engagement is only
+updated once the CPU battle units out of the battle have wandered, and make them rest.

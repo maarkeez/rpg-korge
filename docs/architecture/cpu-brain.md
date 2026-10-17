@@ -42,7 +42,7 @@ A battle unit only engages the enemies **within reach**: the ones it can walk to
 
 For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat six tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
 
-The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts. When a round finishes, the CPU battle units that got an enemy within reach join the battle, and those without any leave it, until none is left and the party explores again (see [Exploration](exploration.md#engaging)).
+The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts. When a round finishes, the CPU battle units out of the battle wander, then those that got an enemy within reach join the battle, and those without any leave it, until none is left and the party explores again (see [Exploration](exploration.md#engaging)).
 
 ## Casting
 
@@ -128,4 +128,4 @@ The distance from home is the walking distance through the battle units. Picking
 
 A CPU battle unit outside its territory (e.g.: after chasing the party in a battle, as an engaged battle unit is not tied to its home) heads back home: it never rests, and only steps to the tiles nearer to home, picking one of them at random. It stays when home can not be walked to, e.g.: walled off by void, or only through harmful terrain. Once back in its territory, it wanders as before.
 
-The CPU battle units do not wander while battling.
+When a battle round finishes (`BattleRoundFinished`), the CPU battle units out of the battle wander once too, as every second while exploring ([`WanderAfterRound`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/WanderAfterRound.kt)). Once they have (`BattleUnitsWanderedAfterRound`), [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/UpdateEngagement.kt) updates the engagement, so a CPU battle unit that wandered within reach of the party joins the battle from the next round. It is announced also when no CPU battle unit is out of the battle, as the next round starts on it. The CPU battle units in the battle do not wander: they move as in any battle, not tied to their home.
