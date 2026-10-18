@@ -17,6 +17,8 @@ import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.startGame
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.delay
+import kotlin.random.Random
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
@@ -38,11 +40,11 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
 }
 
 /**
- * Starts the game as the player does, and plays a new game from the menu. The CPU battle units always rest instead of
- * wandering, so they stand where the battle setup deploys them.
+ * Starts the game as the player does, and plays a new game from the menu. By default, the CPU battle units always rest
+ * instead of wandering, so they stand where the battle setup deploys them.
  */
-suspend fun ViewsForTesting.startNewGame() {
-    stage.startGame(random = FixedDoublesRandom(0.0))
+suspend fun ViewsForTesting.startNewGame(random: Random = FixedDoublesRandom(0.0)) {
+    stage.startGame(random = random)
     waitUntil { stage.menuView() != null }
     clickPlayNewGame(requireNotNull(stage.menuView()) { "The menu is not displayed" })
 }
@@ -105,4 +107,9 @@ suspend fun ViewsForTesting.startMapBuilder() {
     waitUntil { stage.menuView() != null }
     clickBuildMap(requireNotNull(stage.menuView()) { "The menu is not displayed" })
     waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.mapBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }
+}
+
+/** Lets the game run for the given game time, frame by frame. */
+suspend fun ViewsForTesting.waitFor(duration: Duration) {
+    repeat((duration / frameTime).toInt()) { delay(frameTime) }
 }

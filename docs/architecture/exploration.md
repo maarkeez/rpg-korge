@@ -45,6 +45,7 @@ A battle starting while talking (`PauseExploration`) abandons the talk, and the 
 There are no turns while exploring, so the inventory of the party can always be used:
 
 - Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag, and the call to action its item actions, in place of the virtual pad. It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
+- The selection stays as it is while the CPU battle units wander, so the inventory stays open until the player closes it: a tile occupied or vacated only displays the selected battle unit again when its own tile changes ([`RefreshMovementRange`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt)).
 - Tapping an empty tile, a CPU battle unit or the selected battle unit again clears the selection, and the virtual pad is displayed again. Tapping another battle unit of the party selects it instead.
 - When an item found on the way does not fit in the inventory (`InventoryFull`), the battle HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
 - The party does not walk while the virtual pad is hidden, even when an arrow is still held.

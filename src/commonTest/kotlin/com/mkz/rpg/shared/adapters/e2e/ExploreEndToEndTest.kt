@@ -7,8 +7,10 @@ import com.mkz.rpg.screen.adapters.presentation.battleInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
+import com.mkz.rpg.screen.adapters.presentation.clickBag
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.inventoryView
 import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isBattleHudShown
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
@@ -17,12 +19,15 @@ import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
+import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 
 class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     // The battle setup deploys the knights at (6,6), which leads, and (7,6), far from the CPU battle units.
@@ -69,6 +74,25 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the battle HUD to display the knight info") { battleHudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
             withClue("Expected the bag of the knight to be displayed") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeTrue() }
             withClue("Expected the virtual pad to be hidden while the knight is selected") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
+        }
+
+    @Test
+    fun `should keep the inventory of the knight open while the cpu battle units wander when the human player opens its bag while exploring`() =
+        sharedViewsTest {
+            // Given
+            // The CPU battle units always step instead of resting, so a tile is occupied every second.
+            startNewGame(random = FixedDoublesRandom(0.99))
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
+            clickTile(battlefieldView, 6, 6)
+            waitUntil { battleUnitInfoView()?.isBagDisplayed() == true }
+            // When
+            clickBag(requireNotNull(battleUnitInfoView()))
+            waitUntil { inventoryView() != null }
+            // Then
+            inventoryView().shouldNotBeNull()
+            waitFor(3.seconds)
+            withClue("Expected the inventory of the knight to stay open until the human player closes it") { inventoryView().shouldNotBeNull() }
         }
 
     @Test

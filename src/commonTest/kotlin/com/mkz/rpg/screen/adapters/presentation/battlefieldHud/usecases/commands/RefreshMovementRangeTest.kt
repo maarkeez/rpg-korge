@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
+import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -29,6 +30,7 @@ class RefreshMovementRangeTest {
     private val refreshMovementRange =
         RefreshMovementRange(
             searchPosition = queries.searchPosition,
+            searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = MovementService(queries.searchBattleUnitById, queries.searchTilesThatCanBeOccupied, queries.canMoveTo),
@@ -37,6 +39,7 @@ class RefreshMovementRangeTest {
     @Test
     fun `should display the current tile and movement range of the selected battle unit when the hud is displaying its movement range`() {
         // Given
+        queries.battleRepository.create(battle(battleUnitIds = setOf("battle-unit-1")))
         // The battle unit has moved from where the hud displays it.
         battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
@@ -49,6 +52,36 @@ class RefreshMovementRangeTest {
         eventBus.shouldHavePublishedEvents(
             BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = newTiles),
         )
+    }
+
+    @Test
+    fun `should display the current tile of the selected battle unit with no movement range when it has moved out of the battles`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
+        // When
+        refreshMovementRange()
+        // Then
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet())
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()),
+        )
+    }
+
+    @Test
+    fun `should not display the selected battle unit again when it has not moved out of the battles`() {
+        // Given
+        // E.g.: a CPU battle unit wandering next to it while its inventory is displayed.
+        val hud = displayMovementRange(tile = tile(0, 1), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet())
+        battlefieldHudRepository.create(hud)
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(movementRange = 1).toDto()))
+        queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
+        // When
+        refreshMovementRange()
+        // Then
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
     }
 
     @Test

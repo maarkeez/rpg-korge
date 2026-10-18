@@ -90,6 +90,7 @@ class BattlefieldPresenter(
     private val refreshMovementRange =
         RefreshMovementRange(
             searchPosition = battlefieldApi.searchPosition,
+            searchBattle = battleApi.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = movementService,
