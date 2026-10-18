@@ -90,7 +90,7 @@ class BattleTest {
     }
 
     @Test
-    fun `FinishPlayerTurn should start the next player turn when another player remains in the queue`() {
+    fun `FinishPlayerTurn should finish the player turn, then start the next one when another player remains in the queue`() {
         // Given
         val players = listOf("player-1", "player-2")
         val battle = battle(players, battleUnitIds)
@@ -99,11 +99,11 @@ class BattleTest {
         // Then
         nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.PlayerTurnStarted(players[1], battleUnitIds))
+        events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[0], battleUnitIds), BattleEvent.PlayerTurnStarted(players[1], battleUnitIds))
     }
 
     @Test
-    fun `FinishPlayerTurn should finish the round when the current player is the last one in the queue`() {
+    fun `FinishPlayerTurn should finish the player turn, then the round when the current player is the last one in the queue`() {
         // Given
         val players = listOf("player-1", "player-2")
         val battle =
@@ -116,7 +116,7 @@ class BattleTest {
         // Then
         nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.BattleRoundFinished(1, battleUnitIds))
+        events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[1], battleUnitIds), BattleEvent.BattleRoundFinished(1, battleUnitIds))
     }
 
     @Test
@@ -278,7 +278,7 @@ class BattleTest {
         val nextBattle = battle.finishPlayerTurn()
         // Then
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.PlayerTurnStarted(players[1], setOf("battle-unit-1")))
+        events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[0], setOf("battle-unit-1")), BattleEvent.PlayerTurnStarted(players[1], setOf("battle-unit-1")))
     }
 
     @Test

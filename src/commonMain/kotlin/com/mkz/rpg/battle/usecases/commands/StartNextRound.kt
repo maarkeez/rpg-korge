@@ -7,7 +7,8 @@ import com.mkz.rpg.shared.domain.EventBus
 /**
  * Starts the next round, once the battle units joining the battle (e.g.: the CPU battle units engaging) have joined it,
  * and those leaving it (e.g.: the CPU battle units left behind) have left it. The battle finishes without a winner
- * instead, when only one player is left with battle units in it.
+ * instead, when only one player is left with battle units in it. Nothing starts once the battle is finished (e.g.: the
+ * last battle unit of a player vanished as the round finished, which defeated it).
  */
 class StartNextRound(
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -19,6 +20,7 @@ class StartNextRound(
         leavingBattleUnitIds: List<String>,
     ) {
         val storedBattle = battleRepository.search() ?: return
+        if (storedBattle.toDto().isFinished || storedBattle.isBattleFinished()) return
         val joinedBattle = joiningBattleUnitIds.fold(storedBattle) { battle, battleUnitId -> battle.join(battleUnitId) }
         val updatedBattle = leavingBattleUnitIds.fold(joinedBattle) { battle, battleUnitId -> battle.leave(battleUnitId) }
         val playersInBattle =

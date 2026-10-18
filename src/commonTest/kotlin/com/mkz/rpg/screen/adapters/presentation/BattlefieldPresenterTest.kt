@@ -13,6 +13,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
@@ -368,6 +369,16 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.flashedBattleUnits.shouldBeEmpty()
+    }
+
+    @Test
+    fun `FlashUnit should flash a vanished summon on the tile it vanished from, as it is deleted`() {
+        // Given
+        eventBus.publish(BattleUnitVanished(playerId = "human", battleUnitId = "bee-1", unitId = "bee", row = 2, column = 3))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "bee"))
     }
 
     @Test

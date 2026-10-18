@@ -15,8 +15,9 @@ object BattleUnitMother {
         deployAtRow: Int = 0,
         deployAtColumn: Int = 0,
         remainingHealthPoints: Int = unit.healthPoints,
+        remainingTurns: Int? = null,
     ): BattleUnit {
-        val deployedBattleUnit = BattleUnit.deploy(id, unit, player, deployAtRow, deployAtColumn).pullEvents().second
+        val deployedBattleUnit = BattleUnit.deploy(id, unit, player, deployAtRow, deployAtColumn, remainingTurns).pullEvents().second
         val damage = unit.healthPoints - remainingHealthPoints
         if (damage == 0) return deployedBattleUnit
         // A battle unit can only lose health by receiving damage.

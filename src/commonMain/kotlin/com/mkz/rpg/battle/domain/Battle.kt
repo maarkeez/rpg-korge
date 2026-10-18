@@ -6,6 +6,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundStarted
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerDefeated
+import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnFinished
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import kotlin.jvm.JvmInline
@@ -81,15 +82,16 @@ data class Battle private constructor(
         val currentPlayerTurnIndex = turnQueue.value.indexOf(currentPlayerTurn.value)
         val nextPlayerTurnIndex = currentPlayerTurnIndex + 1
         val roundFinished = nextPlayerTurnIndex >= turnQueue.value.size
+        val turnFinished = PlayerTurnFinished(currentPlayerTurn.value, battleUnits.value)
         if (roundFinished) {
             return copy(
-                events = events + setOf(BattleRoundFinished(currentRound.value, battleUnits.value)),
+                events = events + setOf(turnFinished, BattleRoundFinished(currentRound.value, battleUnits.value)),
             )
         } else {
             val nextPlayerTurn = turnQueue.value[nextPlayerTurnIndex]
             return copy(
                 currentPlayerTurn = CurrentPlayerTurn(nextPlayerTurn),
-                events = events + setOf(PlayerTurnStarted(nextPlayerTurn, battleUnits.value)),
+                events = events + setOf(turnFinished, PlayerTurnStarted(nextPlayerTurn, battleUnits.value)),
             )
         }
     }

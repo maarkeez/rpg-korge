@@ -5,6 +5,8 @@ interface BattleUnitRepository {
 
     fun update(battleUnit: BattleUnit)
 
+    fun delete(battleUnitId: String)
+
     fun searchById(id: String): BattleUnit?
 
     fun searchByPlayerId(playerId: String): List<BattleUnit>

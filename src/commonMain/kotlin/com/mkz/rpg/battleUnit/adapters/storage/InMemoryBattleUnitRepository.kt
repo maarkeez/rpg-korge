@@ -14,6 +14,10 @@ class InMemoryBattleUnitRepository : BattleUnitRepository {
         battleUnits[battleUnit.toDto().id] = battleUnit
     }
 
+    override fun delete(battleUnitId: String) {
+        battleUnits.remove(battleUnitId)
+    }
+
     override fun searchById(id: String) = battleUnits[id]
 
     override fun searchByPlayerId(playerId: String) =

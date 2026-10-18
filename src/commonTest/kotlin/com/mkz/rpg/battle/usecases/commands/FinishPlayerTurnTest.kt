@@ -29,7 +29,7 @@ class FinishPlayerTurnTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         storedBattle shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
-        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerTurnStarted(players[1], battleUnitIds))
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerTurnFinished(players[0], battleUnitIds), BattleEvent.PlayerTurnStarted(players[1], battleUnitIds))
     }
 
     @Test
@@ -47,6 +47,6 @@ class FinishPlayerTurnTest {
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         storedBattle shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleRoundFinished(1, battleUnitIds))
+        eventBus.shouldHavePublishedEvents(BattleEvent.PlayerTurnFinished(players[1], battleUnitIds), BattleEvent.BattleRoundFinished(1, battleUnitIds))
     }
 }

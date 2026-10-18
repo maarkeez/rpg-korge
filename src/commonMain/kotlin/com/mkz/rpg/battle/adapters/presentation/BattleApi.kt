@@ -2,6 +2,7 @@ package com.mkz.rpg.battle.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battle.adapters.events.OnBattleUnitDeployed
+import com.mkz.rpg.battle.adapters.events.OnBattleUnitVanished
 import com.mkz.rpg.battle.adapters.events.OnCombatEngaged
 import com.mkz.rpg.battle.adapters.events.OnEngagementUpdated
 import com.mkz.rpg.battle.adapters.events.OnPlayerDefeated
@@ -44,6 +45,7 @@ class BattleApi(
     val onEngagementUpdated = OnEngagementUpdated(eventBus, startNextRound)
     val onBattleUnitDeployed = OnBattleUnitDeployed(eventBus, joinBattle)
     val onBattleUnitDefeated = OnBattleUnitDefeated(eventBus, leaveBattle, defeatPlayer)
+    val onBattleUnitVanished = OnBattleUnitVanished(eventBus, leaveBattle, defeatPlayer)
     val onPlayerDefeated = OnPlayerDefeated(eventBus, finishBattle)
     private val onCombatEngaged = OnCombatEngaged(startBattle, eventBus)
     private val onRequestFinishPlayerTurn = OnRequestFinishPlayerTurn(finishPlayerTurn, eventBus)

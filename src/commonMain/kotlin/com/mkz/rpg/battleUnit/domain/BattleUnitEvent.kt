@@ -102,6 +102,15 @@ sealed interface BattleUnitEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleUnitEvent
 
+    // A summon whose turns are over: it is gone, not defeated. It carries its unit and its tile, as it is deleted.
+    data class BattleUnitVanished(
+        val playerId: String,
+        val battleUnitId: String,
+        val unitId: String,
+        val row: Int,
+        val column: Int,
+    ) : BattleUnitEvent
+
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,

@@ -6,7 +6,10 @@ import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.wandering.domain.Wandering
 import com.mkz.rpg.wandering.domain.WanderingRepository
 
-/** Remembers the tile a CPU battle unit is deployed on as its home, which it wanders around while out of a battle. */
+/**
+ * Remembers the tile a CPU battle unit is deployed on as its home, which it wanders around while out of a battle. The
+ * summons claim none, as they never wander: they vanish once their turns are over.
+ */
 class ClaimHome(
     private val wanderingRepository: WanderingRepository,
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -18,6 +21,7 @@ class ClaimHome(
         column: Int,
     ) {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return
+        if (battleUnit.remainingTurns != null) return
         val player = searchPlayerById(id = battleUnit.playerId) ?: return
         if (player.type != PlayerTypeDto.CPU) return
         val wandering = wanderingRepository.search() ?: Wandering.create()

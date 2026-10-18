@@ -22,6 +22,12 @@ sealed interface BattleEvent : DomainEvent {
         val battleUnitIds: Set<String>,
     ) : BattleEvent
 
+    /** Published before the next turn starts or the round finishes. Battle units: those in the battle, of every player. */
+    data class PlayerTurnFinished(
+        val playerId: String,
+        val battleUnitIds: Set<String>,
+    ) : BattleEvent
+
     /** Battle units: those in the battle, of every player. */
     data class PlayerTurnStarted(
         val playerId: String,

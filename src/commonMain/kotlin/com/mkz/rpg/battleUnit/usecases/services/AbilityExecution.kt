@@ -41,7 +41,7 @@ class AbilityExecution(
                 selectedColumn = selectedColumn,
             ).map { target ->
                 EffectApplicationDto(
-                    source = EffectApplicationDto.ApplicationSourceDto.battleUnit(casterId),
+                    source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId = casterId, abilityId = ability.id),
                     target = target,
                     effectId = effectSpec.effectId,
                     destination = destinationFor(effectId = effectSpec.effectId, selectedRow = selectedRow, selectedColumn = selectedColumn),

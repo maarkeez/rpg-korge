@@ -925,4 +925,67 @@ class BattleUnitTest {
         recoveredBattleUnit.toDto().remainingManaPoints shouldBe 5
         recoveredBattleUnit.isDefeated().shouldBeTrue()
     }
+
+    @Test
+    fun `Deploy should deploy a battle unit that never vanishes when it has no remaining turns`() {
+        // When
+        val deployedBattleUnit = BattleUnit.deploy(id = "battle-unit-1", unit = UnitMother.unit().toDto(), player = PlayerMother.player().toDto(), deployAtRow = 2, deployAtColumn = 3)
+        // Then
+        deployedBattleUnit.toDto().remainingTurns shouldBe null
+    }
+
+    @Test
+    fun `Deploy should deploy a summon with its remaining turns`() {
+        // When
+        val deployedBattleUnit =
+            BattleUnit.deploy(id = "battle-unit-1", unit = UnitMother.unit().toDto(), player = PlayerMother.player().toDto(), deployAtRow = 2, deployAtColumn = 3, remainingTurns = 5)
+        // Then
+        deployedBattleUnit.toDto().remainingTurns shouldBe 5
+    }
+
+    @Test
+    fun `FinishTurn should leave a summon with one turn fewer when it has turns left`() {
+        // Given
+        val summon = BattleUnitMother.battleUnit(remainingTurns = 5)
+        // When
+        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        // Then
+        finishedBattleUnit.toDto().remainingTurns shouldBe 4
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `FinishTurn should vanish a summon on its tile when it finishes its last turn`() {
+        // Given
+        val unit = UnitMother.unit().toDto()
+        val player = PlayerMother.player().toDto()
+        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingTurns = 1)
+        // When
+        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        // Then
+        finishedBattleUnit.toDto().remainingTurns shouldBe 0
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3))
+    }
+
+    @Test
+    fun `FinishTurn should not change a battle unit that never vanishes`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit()
+        // When
+        val (events, finishedBattleUnit) = battleUnit.finishTurn(row = 2, column = 3).pullEvents()
+        // Then
+        finishedBattleUnit shouldBe battleUnit
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `FinishTurn should not vanish a defeated summon`() {
+        // Given
+        val summon = BattleUnitMother.battleUnit(remainingHealthPoints = 0, remainingTurns = 1)
+        // When
+        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        // Then
+        finishedBattleUnit.toDto().remainingTurns shouldBe 1
+        events.shouldBeEmpty()
+    }
 }

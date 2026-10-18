@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -119,5 +120,18 @@ class StartNextRoundTest {
         // Then
         battleRepository.search().shouldBeNull()
         eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
+    fun `should not start the next round when the battle is finished`() {
+        // Given: the last battle unit of the cpu vanished as the round finished, which defeated it.
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
+        val finishedBattle = battle(players, battleUnitIds).defeatPlayer("cpu").pullEvents().second
+        battleRepository.create(finishedBattle)
+        // When
+        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
+        // Then
+        battleRepository.search() shouldBe finishedBattle
+        eventBus.shouldNotHavePublishedEvents()
     }
 }

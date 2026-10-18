@@ -118,6 +118,10 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
                 flashUnit(event.battleUnitId)
             },
+            // A vanished summon is deleted, so it is flashed from the event, before its tile is vacated.
+            eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
+                timeline.play { battlefieldView.flashBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
+            },
             // A vacated tile (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)

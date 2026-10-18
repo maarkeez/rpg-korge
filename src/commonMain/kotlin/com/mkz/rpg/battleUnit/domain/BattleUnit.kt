@@ -16,6 +16,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EquippedEffectsRemoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
@@ -49,6 +50,7 @@ data class BattleUnit private constructor(
     private val remainingTurnActions: RemainingTurnActions,
     private val abilityCooldowns: AbilityCooldowns,
     private val ongoingEffects: OngoingEffects,
+    private val remainingTurns: RemainingTurns?,
     private val events: Set<BattleUnitEvent>,
 ) {
     companion object {
@@ -58,6 +60,7 @@ data class BattleUnit private constructor(
             player: Player.Dto,
             deployAtRow: Int,
             deployAtColumn: Int,
+            remainingTurns: Int? = null,
         ): BattleUnit =
             BattleUnit(
                 Id(id),
@@ -71,6 +74,7 @@ data class BattleUnit private constructor(
                 RemainingTurnActions(unit.movementRange),
                 AbilityCooldowns(unit.abilities),
                 OngoingEffects(),
+                remainingTurns?.let(::RemainingTurns),
                 events = setOf(BattleUnitDeployed(battleUnitId = id, row = deployAtRow, column = deployAtColumn)),
             )
     }
@@ -90,6 +94,7 @@ data class BattleUnit private constructor(
             abilityCooldowns = abilityCooldowns.toDto(),
             unitId = unitId.value,
             ongoingEffects = ongoingEffects.toDto(),
+            remainingTurns = remainingTurns?.value,
         )
 
     /**
@@ -160,6 +165,39 @@ data class BattleUnit private constructor(
             events = events + movedEvent,
         )
     }
+
+    /**
+     * A summon counts the turns of its player: once the turn it is on finishes, it has one turn fewer, and it vanishes
+     * when none is left. Nothing changes for the other battle units, nor once defeated.
+     */
+    fun finishTurn(
+        row: Int,
+        column: Int,
+    ): BattleUnit {
+        if (remainingTurns == null || isDefeated()) return this
+        val turnsLeft = remainingTurns.finishTurn()
+        return if (turnsLeft.isOver()) {
+            copy(remainingTurns = turnsLeft).vanishFrom(row = row, column = column)
+        } else {
+            copy(remainingTurns = turnsLeft)
+        }
+    }
+
+    private fun vanishFrom(
+        row: Int,
+        column: Int,
+    ): BattleUnit =
+        copy(
+            events =
+                events +
+                    BattleUnitVanished(
+                        playerId = playerId.value,
+                        battleUnitId = id.value,
+                        unitId = unitId.value,
+                        row = row,
+                        column = column,
+                    ),
+        )
 
     fun resetActions(): BattleUnit {
         val remainingTurnActions = remainingTurnActions.reset()
@@ -402,6 +440,15 @@ data class BattleUnit private constructor(
     @JvmInline private value class PlayerId(
         val value: String,
     )
+
+    /** The turns a summon has left, counting the one it is on. */
+    @JvmInline private value class RemainingTurns(
+        val value: Int,
+    ) {
+        fun finishTurn() = RemainingTurns(max(0, value - 1))
+
+        fun isOver() = value == 0
+    }
 
     @JvmInline private value class RemainingHealthPoints(
         val value: Int,
@@ -724,6 +771,8 @@ data class BattleUnit private constructor(
         val abilityCooldowns: Map<String, Int>,
         val unitId: String,
         val ongoingEffects: OngoingEffectsDto,
+        // The turns a summon has left, counting the one it is on. None for the battle units that never vanish.
+        val remainingTurns: Int? = null,
     ) {
         data class RemainingTurnActionsDto(
             val remainingCasts: Int,

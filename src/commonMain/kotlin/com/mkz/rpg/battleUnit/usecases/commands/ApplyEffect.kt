@@ -1,5 +1,6 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
+import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
@@ -28,6 +29,7 @@ class ApplyEffect(
     private val searchPosition: SearchPosition,
     searchPlayerById: SearchPlayerById,
     canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val searchAbilityById: SearchAbilityById,
 ) {
     private val battleUnitDeployment =
         BattleUnitDeployment(battleUnitRepository, searchUnitById, searchPlayerById, canBattlefieldTileBeOccupied)
@@ -50,6 +52,9 @@ class ApplyEffect(
         if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
         val casterId = application.source.battleUnitId ?: throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToReceiveAbilityEffects()
+        // The summon lasts the turns of the ability it is cast with.
+        val abilityId = application.source.abilityId ?: throw FailedToReceiveAbilityEffects()
+        val ability = searchAbilityById(abilityId) ?: throw FailedToReceiveAbilityEffects()
         // Deployed right away, as the other effects are applied, so the battlefield is occupied before the cast is resolved.
         val events =
             battleUnitDeployment.deploy(
@@ -58,6 +63,7 @@ class ApplyEffect(
                 playerId = caster.toDto().playerId,
                 deployAtRow = target.row,
                 deployAtColumn = target.column,
+                remainingTurns = ability.turnsDuration,
             )
         eventBus.publish(events)
     }

@@ -66,4 +66,19 @@ class ClaimHomeTest {
         // Then
         wanderingRepository.search().shouldBeNull()
     }
+
+    @Test
+    fun `should not give a home to a cpu summon`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "bat-1", player = player(id = "cpu", type = PlayerTypeDto.CPU).toDto(), remainingTurns = 5))
+        // When
+        claimHome(battleUnitId = "bat-1", row = 1, column = 2)
+        // Then
+        wanderingRepository
+            .search()
+            ?.toDto()
+            ?.homes
+            .orEmpty()
+            .shouldBeEmpty()
+    }
 }

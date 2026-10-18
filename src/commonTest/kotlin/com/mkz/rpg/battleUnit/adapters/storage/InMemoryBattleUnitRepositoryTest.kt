@@ -101,4 +101,18 @@ class InMemoryBattleUnitRepositoryTest {
         // Then
         storedBattleUnits.shouldBeEmpty()
     }
+
+    @Test
+    fun `Delete should remove the battle unit when it is stored`() {
+        // Given
+        val deletedBattleUnit = BattleUnitMother.battleUnit()
+        val keptBattleUnit = BattleUnitMother.battleUnit()
+        battleUnitRepository.create(deletedBattleUnit)
+        battleUnitRepository.create(keptBattleUnit)
+        // When
+        battleUnitRepository.delete(battleUnitId = deletedBattleUnit.toDto().id)
+        // Then
+        battleUnitRepository.searchById(deletedBattleUnit.toDto().id) shouldBe null
+        battleUnitRepository.searchAll().shouldContainExactlyInAnyOrder(keptBattleUnit)
+    }
 }

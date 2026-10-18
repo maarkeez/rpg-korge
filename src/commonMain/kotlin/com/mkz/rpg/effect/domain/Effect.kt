@@ -306,6 +306,8 @@ data class Effect private constructor(
                 val battleUnitId: String? = null,
                 val terrainId: String? = null,
                 val lootableItemId: String? = null,
+                // The ability a battle unit cast, when the effect is applied by a cast.
+                val abilityId: String? = null,
             ) {
                 enum class SourceTypeDto {
                     BATTLE_UNIT,
@@ -314,12 +316,15 @@ data class Effect private constructor(
                 }
 
                 companion object {
-                    fun battleUnit(battleUnitId: String) =
-                        ApplicationSourceDto(
-                            type = SourceTypeDto.BATTLE_UNIT,
-                            battleUnitId = battleUnitId,
-                            terrainId = null,
-                        )
+                    fun battleUnit(
+                        battleUnitId: String,
+                        abilityId: String? = null,
+                    ) = ApplicationSourceDto(
+                        type = SourceTypeDto.BATTLE_UNIT,
+                        battleUnitId = battleUnitId,
+                        terrainId = null,
+                        abilityId = abilityId,
+                    )
 
                     fun terrain(terrainId: String) =
                         ApplicationSourceDto(
