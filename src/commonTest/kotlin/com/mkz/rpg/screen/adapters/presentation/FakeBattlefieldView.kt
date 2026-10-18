@@ -19,6 +19,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         val row: Int,
         val column: Int,
         val npcId: String,
+        val unitId: String? = null,
     )
 
     data class UpdatedTerrain(
@@ -90,8 +91,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         row: Int,
         column: Int,
         npcId: String,
+        unitId: String?,
     ) {
-        displayedNpcs += NpcAt(row, column, npcId)
+        displayedNpcs += NpcAt(row, column, npcId, unitId)
     }
 
     override fun displayPotentialMovement(

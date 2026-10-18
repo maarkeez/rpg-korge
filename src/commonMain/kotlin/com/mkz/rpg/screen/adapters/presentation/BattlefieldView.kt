@@ -338,13 +338,14 @@ open class BattlefieldView(
         tileButton.addImage(unitBitmap, BATTLE_UNIT)
     }
 
-    /** Displays the npc standing on the tile, as a battle unit. */
+    /** Displays the npc standing on the tile, as a battle unit. Unit: a recruitable npc is displayed as its unit. */
     open fun displayNpc(
         row: Int,
         column: Int,
         npcId: String,
+        unitId: String?,
     ) {
-        val npcBitmap = resourcesLoader.bitmapOrNull("npc/$npcId.png") ?: return
+        val npcBitmap = resourcesLoader.bitmapOrNull(unitId?.let { "unit/$it.png" } ?: "npc/$npcId.png") ?: return
         tile(row, column).addImage(npcBitmap, NPC)
     }
 

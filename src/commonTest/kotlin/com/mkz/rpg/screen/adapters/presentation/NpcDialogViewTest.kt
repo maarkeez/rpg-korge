@@ -41,6 +41,17 @@ class NpcDialogViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Display should display the portrait of the unit of a recruitable npc`() =
+        sharedViewsTest {
+            // Given
+            val dialog = newNpcDialogView()
+            // When
+            dialog.display(npc(id = "a-knight-to-recruit", unitId = "knight").toDto())
+            // Then
+            dialog.portraitSize() shouldBe (96.0 to 96.0)
+        }
+
+    @Test
     fun `Display should leave the portrait out when the npc has none`() =
         sharedViewsTest {
             // Given

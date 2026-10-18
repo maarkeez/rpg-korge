@@ -284,10 +284,22 @@ class BattlefieldViewTest : ViewsForTesting() {
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
             // When
-            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy")
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy", unitId = null)
             // Then
             battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeTrue()
             battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayNpc should display a recruitable npc with the image of its unit`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "a-knight-to-recruit", unitId = "knight")
+            // Then
+            battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeTrue()
         }
 
     @Test
@@ -297,7 +309,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
             // When
-            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-ghost")
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-ghost", unitId = null)
             // Then
             battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeFalse()
         }

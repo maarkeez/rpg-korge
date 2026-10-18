@@ -29,6 +29,17 @@ class NpcTest {
     }
 
     @Test
+    fun `Place should place a recruitable npc with its unit, in the npc placed event too, when its unit is given`() {
+        // Given
+        val viking = Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 12, column = 2, unitId = "viking")
+        // When
+        val (events, npc) = Npc.place(viking).pullEvents()
+        // Then
+        npc.toDto() shouldBe viking
+        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "viking", row = 12, column = 2, unitId = "viking"))
+    }
+
+    @Test
     fun `Place should fail when the name is empty`() {
         // When
         val result = runCatching { Npc.place(theGuy.copy(name = " ")) }

@@ -1,6 +1,6 @@
 # Plan: Recruiting the viking
 
-> **Status:** planned, no milestone is done yet.
+> **Status:** in progress, milestone 1 is done.
 >
 > **Summary:** A viking stands as an NPC at row 12, column 2, two tiles south of The Guy. Talking to it with A displays
 > "Viking: For Valhalla!", and once its dialog is closed, it joins the party: it becomes a battle unit of the human
@@ -178,5 +178,5 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 
 | # | Done | Milestone             | Changes                                                                                                                                                                                                                                                                                 | The game after it                                                                    |
 |---|------|-----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| 1 |      | The viking as an NPC  | The viking unit, sprite and portrait. `npc/viking.toml`. `Npc.unitId`, `NpcPlaced.unitId`, `InitialiseNpcs` checking the unit, `ResourcesNpcLoader`, `NpcApi` with `unitApi`. `BattlefieldView.displayNpc` and `NpcDialogView` with the unit images. Game data and assets docs.          | The viking stands at (12,2), and pressing A next to it displays "For Valhalla!".     |
+| 1 | ✅   | The viking as an NPC  | The viking unit, sprite and portrait. `npc/viking.toml`. `Npc.unitId`, `NpcPlaced.unitId`, `InitialiseNpcs` checking the unit, `ResourcesNpcLoader`, `NpcApi` with `unitApi`. `BattlefieldView.displayNpc` and `NpcDialogView` with the unit images. Game data and assets docs.          | The viking stands at (12,2), and pressing A next to it displays "For Valhalla!".     |
 | 2 |      | Recruiting the viking | `NpcTalkFinished.npcId`, `Npc.recruit`, `NpcRecruited`, `NpcRepository.delete`, `RecruitNpc`, `OnNpcTalkFinished`, `RequestDeployBattleUnit`, `OnRequestDeployBattleUnit`, the battlefield `OnNpcRecruited`, `Exploration.join`, `JoinParty`, `PartyJoined`, `BattlefieldView.removeNpc`, `BattlefieldPresenter`. Exploration docs. | Closing the viking's dialog recruits it: it flashes, and follows the party last.      |

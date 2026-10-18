@@ -17,7 +17,7 @@ class OnRequestInitialiseNpcsTest {
     private val npcRepository = InMemoryNpcRepository()
     private val theGuy = npc(id = "the-guy").toDto()
     private val onRequestInitialiseNpcs =
-        OnRequestInitialiseNpcs(InitialiseNpcs(FakeNpcLoader(listOf(theGuy)), npcRepository, queries.canBattlefieldTileBeOccupied, eventBus), eventBus)
+        OnRequestInitialiseNpcs(InitialiseNpcs(FakeNpcLoader(listOf(theGuy)), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, eventBus), eventBus)
 
     @Test
     fun `should initialise the npcs when the request is dispatched`() {

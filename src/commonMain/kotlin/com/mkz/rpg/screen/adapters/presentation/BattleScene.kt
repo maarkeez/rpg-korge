@@ -73,7 +73,7 @@ class BattleScene(
         val lootableItemApi = LootableItemApi(effectApi, eventBus)
         val lootTableApi = LootTableApi(lootableItemApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-        val npcApi = NpcApi(battlefieldApi, eventBus)
+        val npcApi = NpcApi(battlefieldApi, unitApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)

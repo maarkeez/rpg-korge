@@ -51,7 +51,7 @@ class WanderingAcceptanceTest {
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(*rolls))
         val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
-        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, eventBus), eventBus)
+        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
         // The knights explore from the left side of an 8x8 battlefield of sand, one above the other, unless told otherwise,
         // and the rat is deployed at the given tile, as the other rats.

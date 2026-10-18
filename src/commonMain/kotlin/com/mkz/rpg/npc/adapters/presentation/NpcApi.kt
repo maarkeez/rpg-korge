@@ -10,9 +10,11 @@ import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.npc.usecases.services.NpcLoader
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class NpcApi(
     battlefieldApi: BattlefieldApi,
+    unitApi: UnitApi,
     eventBus: EventBus,
     private val npcLoader: NpcLoader = ResourcesNpcLoader(),
 ) {
@@ -20,7 +22,7 @@ class NpcApi(
     private val npcRepository: NpcRepository = InMemoryNpcRepository()
 
     // Commands
-    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
+    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, unitApi.searchUnitById, eventBus)
 
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)

@@ -9,7 +9,8 @@ object NpcMother {
         line: String = "G'day bloke!",
         row: Int = 0,
         column: Int = 0,
-    ): Npc = Npc.place(Npc.Dto(id = id, name = name, line = line, row = row, column = column)).pullEvents().second
+        unitId: String? = null,
+    ): Npc = Npc.place(Npc.Dto(id = id, name = name, line = line, row = row, column = column, unitId = unitId)).pullEvents().second
 
     fun id() = "npc-${UUID.randomUUID()}"
 }

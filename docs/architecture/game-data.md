@@ -169,6 +169,16 @@ row = 10
 column = 2
 ```
 
+An npc with a `unitId` is recruitable: it joins the party as a battle unit of that unit (e.g.: the viking). The game fails to start when the unit does not exist (`NpcUnitNotFound`).
+
+```toml
+name = "Viking"
+line = "For Valhalla!"
+row = 12
+column = 2
+unitId = "viking"
+```
+
 ## How to add a unit
 
 1. Add `resources/unit/<unit id>.toml`.
@@ -178,7 +188,7 @@ column = 2
 ## How to add an npc
 
 1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied and where no battle unit is deployed.
-2. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`.
+2. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
 
 ## How to add a lootable item
 

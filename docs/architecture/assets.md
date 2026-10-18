@@ -23,6 +23,7 @@ Drop the image in `resources` following the naming conventions below. Neither th
 | Battle unit portrait             | `unit/<unit id>_portrait.png`         | `unit/knight_portrait.png`       |
 | Npc on the battlefield           | `npc/<npc id>.png`                    | `npc/the-guy.png`                |
 | Npc portrait (in its dialog)     | `npc/<npc id>_portrait.png`           | `npc/the-guy_portrait.png`       |
+| Recruitable npc (as its unit)    | `unit/<unit id>.png` and `unit/<unit id>_portrait.png` | `unit/viking.png`  |
 | Ability icon                     | `ability/<ability id>.png`            | `ability/poisoned-sword.png`     |
 | Effect icon                      | `effect/<effect id>.png`              | `effect/venom-damage.png`        |
 | Lootable item icon               | `lootableItem/<lootable item id>.png` | `lootableItem/health-potion.png` |

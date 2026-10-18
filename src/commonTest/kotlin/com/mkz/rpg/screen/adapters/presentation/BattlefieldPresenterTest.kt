@@ -225,6 +225,14 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `DisplayNpc should display a placed recruitable npc with its unit`() {
+        // When
+        publish(NpcPlaced(npcId = "viking", row = 2, column = 2, unitId = "viking"))
+        // Then
+        battlefieldView.displayedNpcs.shouldContainExactly(NpcAt(row = 2, column = 2, npcId = "viking", unitId = "viking"))
+    }
+
+    @Test
     fun `MoveUnit should move the battle unit along its path on view when the battle unit is moved`() {
         // Given
         val path = listOf(position(2, 3), position(3, 3))

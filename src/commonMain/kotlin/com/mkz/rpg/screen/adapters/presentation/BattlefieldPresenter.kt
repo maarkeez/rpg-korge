@@ -109,7 +109,7 @@ class BattlefieldPresenter(
                 displayUnit(event.row, event.column, event.battleUnitId)
             },
             eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
-                timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId) }
+                timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId, event.unitId) }
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)

@@ -69,11 +69,14 @@ open class NpcDialogView(
         onTapped?.invoke()
     }
 
-    /** Displays the npc saying its line. Its portrait is left out when it has none. */
+    /**
+     * Displays the npc saying its line, with its portrait: the one of its unit for a recruitable npc. Its portrait is
+     * left out when it has none.
+     */
     open fun display(npc: Npc.Dto) {
         portrait?.removeFromParent()
         portrait =
-            resourcesLoader.bitmapOrNull("npc/${npc.id}_portrait.png")?.let { portraitBitmap ->
+            resourcesLoader.bitmapOrNull(npc.unitId?.let { unitId -> "unit/${unitId}_portrait.png" } ?: "npc/${npc.id}_portrait.png")?.let { portraitBitmap ->
                 image(portraitBitmap) {
                     smoothing = false
                     scale = PORTRAIT_SCALE

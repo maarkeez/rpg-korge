@@ -11,6 +11,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -21,7 +22,7 @@ class InitialiseNpcsTest {
     private val npcRepository = InMemoryNpcRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, eventBus)()
+    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, eventBus)()
 
     @Test
     fun `should place every loaded npc on its tile when the npcs are initialised`() {
@@ -38,6 +39,30 @@ class InitialiseNpcsTest {
             NpcPlaced(npcId = "the-guy", row = 1, column = 2),
             NpcPlaced(npcId = "the-girl", row = 0, column = 0),
         )
+    }
+
+    @Test
+    fun `should place a recruitable npc when its unit exists`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". ."))
+        queries.unitRepository.create(unit(id = "viking"))
+        val viking = npc(id = "viking", row = 0, column = 1, unitId = "viking").toDto()
+        // When
+        initialiseNpcs(viking)
+        // Then
+        npcRepository.searchById("viking")?.toDto() shouldBe viking
+        eventBus.shouldHavePublishedEvents(NpcPlaced(npcId = "viking", row = 0, column = 1, unitId = "viking"))
+    }
+
+    @Test
+    fun `should fail when the unit of a recruitable npc does not exist`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". ."))
+        // When
+        val result = runCatching { initialiseNpcs(npc(id = "viking", row = 0, column = 1, unitId = "dragon").toDto()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcUnitNotFound>()
+        npcRepository.searchById("viking").shouldBeNull()
     }
 
     @Test

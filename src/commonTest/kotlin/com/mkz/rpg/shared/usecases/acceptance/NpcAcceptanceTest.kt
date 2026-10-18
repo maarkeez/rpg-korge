@@ -42,7 +42,7 @@ class NpcAcceptanceTest {
 
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
-    private val npcApi by lazy { NpcApi(battlefieldApi, eventBus, FakeNpcLoader(npcs)) }
+    private val npcApi by lazy { NpcApi(battlefieldApi, unitApi, eventBus, FakeNpcLoader(npcs)) }
     private val explorationApi by lazy { ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus) }
     private val secondsStarted =
         mutableListOf<ExplorationEvent.ExplorationSecondStarted>().also { seconds -> eventBus.subscribe<ExplorationEvent.ExplorationSecondStarted> { seconds += it } }
