@@ -20,6 +20,19 @@ fun VirtualPadView.arrow(direction: DirectionDto): UIButton =
         DirectionDto.WEST -> westArrow
     }
 
+fun VirtualPadView.aButton(): UIButton = aButton
+
+fun VirtualPadView.bButton(): UIButton = bButton
+
+/** The label written on the button, e.g.: `A`. */
+fun UIButton.label(): String = text
+
+/** Taps the A button, as the player. */
+suspend fun ViewsForTesting.clickA(virtualPadView: VirtualPadView) = clickOn(virtualPadView.aButton)
+
+/** Taps the B button, as the player. */
+suspend fun ViewsForTesting.clickB(virtualPadView: VirtualPadView) = clickOn(virtualPadView.bButton)
+
 /** Presses and releases the arrow, as a tap of the player. */
 suspend fun ViewsForTesting.clickArrow(
     virtualPadView: VirtualPadView,

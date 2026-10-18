@@ -9,9 +9,17 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 - A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU brain](cpu-brain.md#respawning)).
 - A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
 
+## The virtual pad
+
+[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
+
+- The arrows walk the party (see [Walking](#walking)).
+- A is tapped once per press, and calls its listener (`setOnAPressed`).
+- B is displayed, but does nothing for now.
+
 ## Walking
 
-The party walks one tile at a time, towards the arrow held on the virtual pad (north, east, south or west).
+The party walks one tile at a time, towards the arrow held on the virtual pad (north, east, south or west). An npc blocks its tile as a battle unit does, so the party walks around it.
 
 1. [`WalkParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/WalkParty.kt) plans a step for each battle unit of the party: the leader walks one tile towards the direction, and each follower walks to the tile the battle unit ahead of it left. Nothing happens when the leader can not occupy that tile (e.g.: void, another battle unit, out of the battlefield), or while the party is still walking or battling.
 2. The steps are walked one after another, with `RequestWalkBattleUnit`. A walk spends no turn action, unlike a move in a battle, and publishes the same `BattleUnitMoved`, so the battlefield occupancy, the loot found on the way and the animation work as in a battle.
