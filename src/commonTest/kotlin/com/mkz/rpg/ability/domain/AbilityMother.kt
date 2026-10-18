@@ -13,6 +13,7 @@ object AbilityMother {
         cooldown: Int = cooldown(),
         effectSpecs: List<Ability.Dto.EffectSpecDto> = effectSpecs(),
         targeting: Ability.Dto.TargetingDto = targeting(),
+        turnsDuration: Int? = null,
     ) = Ability.create(
         dto =
             Ability.Dto(
@@ -22,6 +23,7 @@ object AbilityMother {
                 cooldown = cooldown,
                 effectSpecs = effectSpecs,
                 targeting = targeting,
+                turnsDuration = turnsDuration,
             ),
     )
 

@@ -66,11 +66,14 @@ name = "Skull"
 cost = 10
 cooldown = 0
 targeting = "ADJACENT_ENEMY"   # SELF, ADJACENT_ENEMY, ALL_ADJACENT_ENEMIES, VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, VACANT_TILE_ADJACENT_TO_SELF
+# turnsDuration = 5            # Only when an effect is DEPLOY_BATTLE_UNIT
 
 [[effects]]
 effectId = "low-physical-damage"
 target = "SELECTED_TARGET"     # CASTER, SELECTED_TARGET, SELECTED_TILE, CASTER_TILE, NEARBY_ALLIES
 ```
+
+`turnsDuration` goes from 1 to 99: how many turns of its player the battle unit the ability deploys (a summon) lasts. An ability with a `DEPLOY_BATTLE_UNIT` effect must have one, and the others can not.
 
 ### `lootableItem/<lootable item id>.toml`
 

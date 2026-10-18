@@ -2,6 +2,7 @@ name = "Bat"
 cost = 10
 cooldown = 0
 targeting = "VACANT_TILE_ADJACENT_TO_SELF"
+turnsDuration = 5
 
 [[effects]]
 effectId = "deploy-bat"

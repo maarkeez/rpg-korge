@@ -80,7 +80,7 @@ class BattlefieldPresenterTest {
                         targeting = ALL_ADJACENT_ENEMIES,
                     ).toDto(),
                     ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto(),
-                    ability(id = "bee", cost = 10, effectSpecs = listOf(effectSpec(effectId = "summon", target = SELECTED_TILE)), targeting = VACANT_TILE_ADJACENT_TO_SELF).toDto(),
+                    ability(id = "bee", cost = 10, effectSpecs = listOf(effectSpec(effectId = "summon", target = SELECTED_TILE)), targeting = VACANT_TILE_ADJACENT_TO_SELF, turnsDuration = 5).toDto(),
                 ),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
             tiles = List(4) { List(4) { "sand" } },

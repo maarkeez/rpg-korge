@@ -67,6 +67,7 @@ class DeployBattleUnitEffectAcceptanceTest {
                 cooldown = 0,
                 effectSpecs = listOf(AbilityMother.effectSpec(effectId = deployEffectId, target = TargetExpressionDto.Type.SELECTED_TILE)),
                 targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+                turnsDuration = 5,
             )
         abilityApi.requestAbilityCreation(deployAbility.toDto())
 

@@ -21,6 +21,14 @@ sealed class AbilityError(
 
     class AbilityCooldownAboveLimit : AbilityError(message = "Ability cooldown is higher than 99")
 
+    class AbilityTurnsDurationBelowMinimum : AbilityError(message = "Ability turns duration is lower than 1")
+
+    class AbilityTurnsDurationAboveLimit : AbilityError(message = "Ability turns duration is higher than 99")
+
+    class AbilityTurnsDurationMissing : AbilityError(message = "Ability deploying a battle unit requires a turns duration")
+
+    class AbilityTurnsDurationNotAllowed : AbilityError(message = "Only an ability deploying a battle unit can have a turns duration")
+
     class AbilityEmptyEffects : AbilityError(message = "At least one effect is required")
 
     class AbilityEffectsAboveLimit : AbilityError(message = "Maximum of 3 effects are allowed")

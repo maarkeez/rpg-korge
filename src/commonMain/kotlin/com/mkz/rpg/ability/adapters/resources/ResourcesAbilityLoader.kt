@@ -34,6 +34,7 @@ class ResourcesAbilityLoader(
         val cooldown: Int,
         val targeting: String,
         val effects: List<EffectSpecDefinition>,
+        val turnsDuration: Int? = null,
     ) {
         fun toDto(abilityId: String): Ability.Dto =
             Ability.Dto(
@@ -43,6 +44,7 @@ class ResourcesAbilityLoader(
                 cooldown = cooldown,
                 targeting = enumOf<TargetingDto>("targeting", targeting),
                 effectSpecs = effects.map { it.toDto() },
+                turnsDuration = turnsDuration,
             )
     }
 

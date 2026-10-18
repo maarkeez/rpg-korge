@@ -5,6 +5,8 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
 import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
+import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
@@ -18,6 +20,7 @@ data class Ability private constructor(
     private val name: Name,
     private val cost: Cost,
     private val cooldown: Cooldown,
+    private val turnsDuration: TurnsDuration?,
     private val targeting: Targeting,
     private val effectSpecs: EffectSpecs,
     private val events: Set<AbilityEvent>,
@@ -29,6 +32,7 @@ data class Ability private constructor(
                 name = Name(dto.name),
                 cost = Cost(dto.cost),
                 cooldown = Cooldown(dto.cooldown),
+                turnsDuration = dto.turnsDuration?.let(::TurnsDuration),
                 targeting = Targeting(dto.targeting),
                 effectSpecs = EffectSpecs.fromDtos(dto.effectSpecs),
                 events = setOf(AbilityCreated(abilityId = dto.id)),
@@ -43,6 +47,7 @@ data class Ability private constructor(
             cooldown = cooldown.value,
             targeting = targeting.toDto(),
             effectSpecs = effectSpecs.toDto(),
+            turnsDuration = turnsDuration?.value,
         )
 
     fun pullEvents() = events to copy(events = emptySet())
@@ -79,6 +84,16 @@ data class Ability private constructor(
         init {
             if (value < 0) throw NegativeAbilityCooldown()
             if (value > 99) throw AbilityCooldownAboveLimit()
+        }
+    }
+
+    // How many turns of its player the battle unit the ability deploys lasts.
+    @JvmInline private value class TurnsDuration(
+        val value: Int,
+    ) {
+        init {
+            if (value < 1) throw AbilityTurnsDurationBelowMinimum()
+            if (value > 99) throw AbilityTurnsDurationAboveLimit()
         }
     }
 
@@ -181,6 +196,7 @@ data class Ability private constructor(
         val cooldown: Int,
         val targeting: TargetingDto,
         val effectSpecs: List<EffectSpecDto>,
+        val turnsDuration: Int? = null,
     ) {
         enum class TargetingDto {
             SELF,

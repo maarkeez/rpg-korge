@@ -5,6 +5,8 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
 import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
+import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
@@ -181,6 +183,58 @@ class AbilityTest {
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
         createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityCooldownAboveLimit>()
+    }
+
+    @Test
+    fun `Create should create ability when the turns duration is at the minimum`() {
+        // Given
+        val dto =
+            ability()
+                .toDto()
+                .copy(turnsDuration = 1)
+        // When
+        val createdAbility = Ability.create(dto = dto)
+        // Then
+        createdAbility.toDto().turnsDuration shouldBe 1
+    }
+
+    @Test
+    fun `Create should create ability when the turns duration is at the limit`() {
+        // Given
+        val dto =
+            ability()
+                .toDto()
+                .copy(turnsDuration = 99)
+        // When
+        val createdAbility = Ability.create(dto = dto)
+        // Then
+        createdAbility.toDto().turnsDuration shouldBe 99
+    }
+
+    @Test
+    fun `Create should fail when the turns duration is below the minimum`() {
+        // Given
+        val dto =
+            ability()
+                .toDto()
+                .copy(turnsDuration = 0)
+        // When
+        val createdAbility = runCatching { Ability.create(dto = dto) }
+        // Then
+        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityTurnsDurationBelowMinimum>()
+    }
+
+    @Test
+    fun `Create should fail when the turns duration is above the limit`() {
+        // Given
+        val dto =
+            ability()
+                .toDto()
+                .copy(turnsDuration = 100)
+        // When
+        val createdAbility = runCatching { Ability.create(dto = dto) }
+        // Then
+        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityTurnsDurationAboveLimit>()
     }
 
     @Test

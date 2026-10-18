@@ -2,7 +2,9 @@ package com.mkz.rpg.ability.adapters.resources
 
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import io.kotest.assertions.throwables.shouldThrow
@@ -47,6 +49,42 @@ class ResourcesAbilityLoaderTest {
                     cooldown = 1,
                     targeting = ADJACENT_ENEMY,
                     effectSpecs = listOf(effectSpec(effectId = "damage", target = SELECTED_TARGET), effectSpec(effectId = "heal", target = CASTER)),
+                ).toDto(),
+            )
+        }
+
+    @Test
+    fun `should load the turns duration of an ability deploying a battle unit`() =
+        runTest {
+            // Given
+            val abilityRoot =
+                MemoryVfsMix(
+                    "ability/bat.toml" to
+                        """
+                        name = "Bat"
+                        cost = 10
+                        cooldown = 0
+                        targeting = "VACANT_TILE_ADJACENT_TO_SELF"
+                        turnsDuration = 5
+
+                        [[effects]]
+                        effectId = "deploy-bat"
+                        target = "SELECTED_TILE"
+                        """.trimIndent(),
+                )["ability"]
+            val loader = ResourcesAbilityLoader(abilityRoot = abilityRoot)
+            // When
+            loader.initResources()
+            // Then
+            loader.loadAbilities().shouldContainExactly(
+                ability(
+                    id = "bat",
+                    name = "Bat",
+                    cost = 10,
+                    cooldown = 0,
+                    targeting = VACANT_TILE_ADJACENT_TO_SELF,
+                    effectSpecs = listOf(effectSpec(effectId = "deploy-bat", target = SELECTED_TILE)),
+                    turnsDuration = 5,
                 ).toDto(),
             )
         }
