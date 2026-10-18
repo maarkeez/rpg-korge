@@ -15,6 +15,12 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         val unitId: String,
     )
 
+    data class NpcAt(
+        val row: Int,
+        val column: Int,
+        val npcId: String,
+    )
+
     data class UpdatedTerrain(
         val battlefield: Battlefield.Dto,
         val positions: Set<PositionDto>,
@@ -37,6 +43,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         private set
     val displayedBattlefields = mutableListOf<Battlefield.Dto>()
     val displayedBattleUnits = mutableListOf<BattleUnitAt>()
+    val displayedNpcs = mutableListOf<NpcAt>()
     val potentialMovements = mutableListOf<PositionDto>()
     val potentialCasts = mutableListOf<PositionDto>()
     val tileSelections = mutableListOf<PositionDto>()
@@ -77,6 +84,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         unitId: String,
     ) {
         displayedBattleUnits += BattleUnitAt(row, column, unitId)
+    }
+
+    override fun displayNpc(
+        row: Int,
+        column: Int,
+        npcId: String,
+    ) {
+        displayedNpcs += NpcAt(row, column, npcId)
     }
 
     override fun displayPotentialMovement(

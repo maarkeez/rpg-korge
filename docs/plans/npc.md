@@ -1,6 +1,6 @@
 # Plan: NPCs and talking to them
 
-> **Status:** planned, none of the 3 milestones is done.
+> **Status:** in progress, milestone 1 of 3 is done.
 >
 > **Summary:** NPCs stand on the battlefield: The Guy stands at row 10, column 2. An NPC is no battle unit: it blocks its
 > tile for everyone, and nobody can attack it. The virtual pad gets a Game Boy Color layout, with an A and a B button.
@@ -192,6 +192,6 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 
 | # | Done | Milestone                    | Changes                                                                                                                                                                                                          | The game after it                                                                     |
 |---|------|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| 1 | ⬜   | NPCs on the battlefield      | The `npc` subdomain, `SetupBattle`, the battlefield `OnNpcPlaced`, `ApplyStandingTerrainEffects`, `BattlefieldView.displayNpc`, `BattlefieldPresenter` on `NpcPlaced`. The Guy's resources. Game data and assets docs. | The Guy stands at (10,2), blocks the way, and nobody can attack it.                   |
+| 1 | ✅   | NPCs on the battlefield      | The `npc` subdomain, `SetupBattle`, the battlefield `OnNpcPlaced`, `ApplyStandingTerrainEffects`, `BattlefieldView.displayNpc`, `BattlefieldPresenter` on `NpcPlaced`. The Guy's resources. Game data and assets docs. | The Guy stands at (10,2), blocks the way, and nobody can attack it.                   |
 | 2 | ⬜   | The Game Boy Color pad       | `VirtualPadView` layout, A and B buttons. Exploration docs.                                                                                                                                                        | The pad has an A and a B button, which do nothing yet.                                |
 | 3 | ⬜   | Talking to an NPC            | The `TALKING` mode, `talk`, `finishTalk`, `NpcTalkStarted`, `NpcTalkFinished`, `TalkToAdjacentNpc`, `FinishTalk`, `NpcDialogView`, `ExplorationPresenter`, `BattlefieldPresenter` taps, `BattleScene`. Exploration docs. | Pressing A next to The Guy displays "G'day bloke!" until the dialog is tapped.        |

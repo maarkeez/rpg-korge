@@ -43,7 +43,7 @@ class ExplorationApi(
     val resumeExploration = ResumeExploration(explorationRepository, eventBus)
     val leaveParty = LeaveParty(explorationRepository)
     val markBattleUnitMoved = MarkBattleUnitMoved(explorationRepository)
-    val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, battlefieldApi.searchBattlefield, eventBus)
+    val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, battlefieldApi.searchBattlefield, battleUnitApi.searchBattleUnitById, eventBus)
 
     // Queries
     val searchExploration = SearchExploration(explorationRepository)

@@ -1,0 +1,75 @@
+package com.mkz.rpg.npc.usecases.commands
+
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
+import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.npc.domain.NpcError
+import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
+import com.mkz.rpg.npc.domain.NpcMother.npc
+import com.mkz.rpg.npc.usecases.services.FakeNpcLoader
+import com.mkz.rpg.shared.domain.FakeEventBus
+import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
+import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import com.mkz.rpg.shared.usecases.InMemoryQueries
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
+import kotlin.test.Test
+
+class InitialiseNpcsTest {
+    private val queries = InMemoryQueries()
+    private val npcRepository = InMemoryNpcRepository()
+    private val eventBus = FakeEventBus()
+
+    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, eventBus)()
+
+    @Test
+    fun `should place every loaded npc on its tile when the npcs are initialised`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". . .\n. . ."))
+        val theGuy = npc(id = "the-guy", row = 1, column = 2).toDto()
+        val theGirl = npc(id = "the-girl", row = 0, column = 0).toDto()
+        // When
+        initialiseNpcs(theGuy, theGirl)
+        // Then
+        npcRepository.searchById("the-guy")?.toDto() shouldBe theGuy
+        npcRepository.searchById("the-girl")?.toDto() shouldBe theGirl
+        eventBus.shouldHavePublishedEvents(
+            NpcPlaced(npcId = "the-guy", row = 1, column = 2),
+            NpcPlaced(npcId = "the-girl", row = 0, column = 0),
+        )
+    }
+
+    @Test
+    fun `should not place an npc again when it is already placed`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". . ."))
+        npcRepository.save(npc(id = "the-guy", row = 0, column = 0))
+        // When
+        initialiseNpcs(npc(id = "the-guy", row = 0, column = 2).toDto())
+        // Then
+        npcRepository.searchById("the-guy")?.toDto()?.column shouldBe 0
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
+    fun `should fail when the tile of the npc is void`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". #"))
+        // When
+        val result = runCatching { initialiseNpcs(npc(id = "the-guy", row = 0, column = 1).toDto()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileCanNotBeOccupied>()
+        npcRepository.searchById("the-guy").shouldBeNull()
+    }
+
+    @Test
+    fun `should fail when the tile of the npc is out of the battlefield`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". ."))
+        // When
+        val result = runCatching { initialiseNpcs(npc(id = "the-guy", row = 3, column = 0).toDto()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileCanNotBeOccupied>()
+    }
+}

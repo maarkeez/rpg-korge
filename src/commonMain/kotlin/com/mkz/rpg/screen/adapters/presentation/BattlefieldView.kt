@@ -47,6 +47,7 @@ open class BattlefieldView(
         const val LOOT = "LOOT"
         const val PICKED_UP_LOOT = "PICKED_UP_LOOT"
         const val BATTLE_UNIT = "BATTLE_UNIT"
+        const val NPC = "NPC"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
         const val DIM = "DIM"
@@ -59,7 +60,7 @@ open class BattlefieldView(
 
         // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
         // from the battlefield when they come back into it.
-        private val KEPT_LAYERS = setOf(LOOT, BATTLE_UNIT, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
+        private val KEPT_LAYERS = setOf(LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
 
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
         private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
@@ -335,6 +336,16 @@ open class BattlefieldView(
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val tileButton = tile(row, column)
         tileButton.addImage(unitBitmap, BATTLE_UNIT)
+    }
+
+    /** Displays the npc standing on the tile, as a battle unit. */
+    open fun displayNpc(
+        row: Int,
+        column: Int,
+        npcId: String,
+    ) {
+        val npcBitmap = resourcesLoader.bitmapOrNull("npc/$npcId.png") ?: return
+        tile(row, column).addImage(npcBitmap, NPC)
     }
 
     /**

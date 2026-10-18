@@ -1,5 +1,6 @@
 package com.mkz.rpg.exploration.usecases.commands
 
+import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.exploration.adapters.storage.InMemoryExplorationRepository
@@ -16,11 +17,16 @@ class ApplyStandingTerrainEffectsTest {
     private val queries = InMemoryQueries()
     private val explorationRepository = InMemoryExplorationRepository()
     private val eventBus = FakeEventBus()
-    private val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, queries.searchBattlefield, eventBus)
+    private val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, queries.searchBattlefield, queries.searchBattleUnitById, eventBus)
 
     // The knights explore, and the rat stands still.
     private fun givenBattlefield() {
+        givenBattleUnits("knight-1", "knight-2", "rat-1")
         queries.battlefieldRepository.create(battlefield("K L . R", occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'R' to "rat-1")))
+    }
+
+    private fun givenBattleUnits(vararg battleUnitIds: String) {
+        battleUnitIds.forEach { battleUnitId -> queries.battleUnitRepository.create(battleUnit(id = battleUnitId)) }
     }
 
     @Test
@@ -64,6 +70,21 @@ class ApplyStandingTerrainEffectsTest {
     }
 
     @Test
+    fun `should leave out the occupants that are no battle units when a second passes`() {
+        // Given
+        givenBattleUnits("knight-1", "knight-2")
+        queries.battlefieldRepository.create(battlefield("K L N", occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'N' to "the-guy")))
+        explorationRepository.save(exploration())
+        // When
+        applyStandingTerrainEffects()
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2")),
+            ExplorationEvent.ExplorationSecondStarted(playerId = "human"),
+        )
+    }
+
+    @Test
     fun `should not request the terrain effects while battling`() {
         // Given
         givenBattlefield()
@@ -77,6 +98,7 @@ class ApplyStandingTerrainEffectsTest {
     @Test
     fun `should only start the next second when every battle unit moved during the second`() {
         // Given
+        givenBattleUnits("knight-1")
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         explorationRepository.save(exploration(battleUnitIds = listOf("knight-1")).markMoved("knight-1"))
         // When

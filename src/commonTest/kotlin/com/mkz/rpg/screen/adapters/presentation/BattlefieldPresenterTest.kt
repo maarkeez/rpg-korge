@@ -29,6 +29,7 @@ import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
+import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -37,6 +38,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLo
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleUnit
+import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.NpcAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.PickedUpLoot
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
@@ -205,6 +207,18 @@ class BattlefieldPresenterTest {
         previousStep.complete(Unit)
         // Then
         battlefieldView.displayedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "rat"))
+    }
+
+    @Test
+    fun `DisplayNpc should display the placed npc once the previous steps have been played`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        publish(NpcPlaced(npcId = "the-guy", row = 2, column = 2))
+        battlefieldView.displayedNpcs.shouldBeEmpty()
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.displayedNpcs.shouldContainExactly(NpcAt(row = 2, column = 2, npcId = "the-guy"))
     }
 
     @Test

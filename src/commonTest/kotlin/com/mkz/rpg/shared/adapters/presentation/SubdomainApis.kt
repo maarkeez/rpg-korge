@@ -24,6 +24,9 @@ import com.mkz.rpg.lootTable.usecases.services.FakeLootTableLoader
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem
 import com.mkz.rpg.lootableItem.usecases.services.FakeLootableItemLoader
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.npc.usecases.services.FakeNpcLoader
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.services.FakePlayerLoader
@@ -51,6 +54,7 @@ class SubdomainApis(
     players: List<Player.Dto> = emptyList(),
     private val tiles: List<List<String>> = emptyList(),
     deployments: List<Deployment> = emptyList(),
+    npcs: List<Npc.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
 ) {
     val terrainApi = TerrainApi(eventBus, FakeTerrainLoader(terrains))
@@ -63,11 +67,12 @@ class SubdomainApis(
     val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus, FakeLootDropLoader(lootDrops))
+    val npcApi = NpcApi(battlefieldApi, eventBus, FakeNpcLoader(npcs))
     val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
     val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
-    /** Stores the given data, deploys the battle units and starts the battle, dispatching the events it publishes. */
+    /** Stores the given data, deploys the battle units, places the npcs and starts the battle, dispatching the events it publishes. */
     fun initialise() {
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
@@ -80,6 +85,8 @@ class SubdomainApis(
         if (tiles.isNotEmpty()) battlefieldApi.initialiseBattlefield()
         eventBus.dispatch()
         battleUnitApi.initialiseBattleUnits()
+        eventBus.dispatch()
+        npcApi.initialiseNpcs()
         eventBus.dispatch()
         if (playerOrder.isNotEmpty()) battleApi.startBattleWithEveryBattleUnit(battleUnitApi, playerOrder[0], playerOrder[1])
         eventBus.dispatch()

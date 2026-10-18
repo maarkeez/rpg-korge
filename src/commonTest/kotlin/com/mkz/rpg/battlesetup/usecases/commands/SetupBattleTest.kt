@@ -8,6 +8,7 @@ import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.lootTable.domain.LootTableEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
+import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.player.domain.PlayerEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -36,6 +37,7 @@ class SetupBattleTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BattleUnitEvent.RequestInitialiseBattleUnits,
+            NpcEvent.RequestInitialiseNpcs,
             ExplorationEvent.RequestStartExploration,
         )
     }

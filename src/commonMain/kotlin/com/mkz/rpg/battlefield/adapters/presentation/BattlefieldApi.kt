@@ -8,6 +8,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitRespawned
 import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitVanished
 import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
+import com.mkz.rpg.battlefield.adapters.events.OnNpcPlaced
 import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
@@ -93,6 +94,7 @@ class BattlefieldApi(
     // Event Listeners
     private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitRespawned = OnBattleUnitRespawned(updateBattlefieldOccupancy, eventBus)
+    private val onNpcPlaced = OnNpcPlaced(updateBattlefieldOccupancy, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(updateBattlefieldOccupancy, findLoot, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
     private val onBattleUnitVanished = OnBattleUnitVanished(removeOccupant, eventBus)

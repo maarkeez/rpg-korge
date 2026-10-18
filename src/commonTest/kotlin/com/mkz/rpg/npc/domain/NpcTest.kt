@@ -1,0 +1,63 @@
+package com.mkz.rpg.npc.domain
+
+import com.mkz.rpg.npc.domain.NpcMother.npc
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeTypeOf
+import kotlin.test.Test
+
+class NpcTest {
+    private val theGuy = Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 10, column = 2)
+
+    @Test
+    fun `Place should place the npc on its tile when its name and line are given`() {
+        // When
+        val npc = Npc.place(theGuy)
+        // Then
+        npc.toDto() shouldBe theGuy
+    }
+
+    @Test
+    fun `Place should publish the npc placed event when the npc is placed`() {
+        // When
+        val (events, _) = Npc.place(theGuy).pullEvents()
+        // Then
+        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "the-guy", row = 10, column = 2))
+    }
+
+    @Test
+    fun `Place should fail when the name is empty`() {
+        // When
+        val result = runCatching { Npc.place(theGuy.copy(name = " ")) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcNameRequired>()
+    }
+
+    @Test
+    fun `Place should fail when the line is empty`() {
+        // When
+        val result = runCatching { Npc.place(theGuy.copy(line = "")) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcLineRequired>()
+    }
+
+    @Test
+    fun `IsAt should tell whether the npc stands on the tile`() {
+        // Given
+        val npc = npc(row = 10, column = 2)
+        // Then
+        npc.isAt(row = 10, column = 2).shouldBeTrue()
+        npc.isAt(row = 10, column = 3).shouldBeFalse()
+    }
+
+    @Test
+    fun `PullEvents should not pull events when there are no pending events`() {
+        // When
+        val (events, _) = npc().pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
+}

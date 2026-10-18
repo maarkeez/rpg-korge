@@ -12,6 +12,7 @@ import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -71,6 +72,7 @@ class BattleScene(
         val lootableItemApi = LootableItemApi(effectApi, eventBus)
         val lootTableApi = LootTableApi(lootableItemApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+        val npcApi = NpcApi(battlefieldApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
@@ -90,6 +92,7 @@ class BattleScene(
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
+        npcApi.init()
 
         // Main scene: the presenters replay the battle events in order on the timeline
         val timeline = BattleSceneTimeline(this@BattleScene)

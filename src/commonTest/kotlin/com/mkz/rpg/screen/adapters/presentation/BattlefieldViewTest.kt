@@ -278,6 +278,31 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayNpc should display the npc on its tile, and no battle unit, when is displayed`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy")
+            // Then
+            battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeTrue()
+            battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayNpc should not display the npc when it has no image`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-ghost")
+            // Then
+            battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
     fun `DisplayPotentialMovement should display selection on tile when potential movement is displayed`() =
         sharedViewsTest {
             // Given

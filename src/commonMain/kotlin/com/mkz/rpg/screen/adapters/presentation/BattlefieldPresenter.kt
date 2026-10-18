@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -103,6 +104,9 @@ class BattlefieldPresenter(
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitRespawned> { event ->
                 displayUnit(event.row, event.column, event.battleUnitId)
+            },
+            eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
+                timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId) }
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
