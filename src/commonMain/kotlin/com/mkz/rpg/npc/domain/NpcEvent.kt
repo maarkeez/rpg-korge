@@ -11,5 +11,12 @@ sealed interface NpcEvent : DomainEvent {
         val unitId: String? = null,
     ) : NpcEvent
 
+    // The npc leaves its tile, as it joins the party.
+    data class NpcRecruited(
+        val npcId: String,
+        val row: Int,
+        val column: Int,
+    ) : NpcEvent
+
     object RequestInitialiseNpcs : NpcEvent
 }

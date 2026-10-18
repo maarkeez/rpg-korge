@@ -2,7 +2,9 @@ package com.mkz.rpg.npc.domain
 
 import com.mkz.rpg.npc.domain.NpcError.NpcLineRequired
 import com.mkz.rpg.npc.domain.NpcError.NpcNameRequired
+import com.mkz.rpg.npc.domain.NpcError.NpcNotRecruitable
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
+import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import kotlin.jvm.JvmInline
 
 /**
@@ -41,6 +43,15 @@ data class Npc private constructor(
             column = tile.column,
             unitId = unitId?.value,
         )
+
+    /** Whether it joins the party once talked to: it has a unit. */
+    fun isRecruitable(): Boolean = unitId != null
+
+    /** Recruits it, so it leaves its tile and joins the party as its unit. Fails when it is not recruitable. */
+    fun recruit(): Npc {
+        if (!isRecruitable()) throw NpcNotRecruitable()
+        return copy(events = events + NpcRecruited(npcId = id.value, row = tile.row, column = tile.column))
+    }
 
     fun isAt(
         row: Int,

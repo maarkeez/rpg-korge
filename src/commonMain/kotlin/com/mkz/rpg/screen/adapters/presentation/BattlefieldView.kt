@@ -492,6 +492,14 @@ open class BattlefieldView(
         }
     }
 
+    /** Removes the npc standing on the tile, e.g.: once recruited. */
+    open fun removeNpc(
+        row: Int,
+        column: Int,
+    ) {
+        tile(row, column).findViewByName(NPC)?.removeFromParent()
+    }
+
     open fun removeBattleUnit(
         row: Int,
         column: Int,

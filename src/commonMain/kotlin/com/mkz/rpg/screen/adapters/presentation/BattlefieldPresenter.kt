@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
@@ -110,6 +111,13 @@ class BattlefieldPresenter(
             },
             eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
                 timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId, event.unitId) }
+            },
+            // A recruited npc leaves its tile, where the battle unit it joins the party as is displayed, flashing once it has joined.
+            eventBus.subscribe<NpcEvent.NpcRecruited> { event ->
+                timeline.play { battlefieldView.removeNpc(event.row, event.column) }
+            },
+            eventBus.subscribe<ExplorationEvent.PartyJoined> { event ->
+                flashUnit(event.battleUnitId)
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)

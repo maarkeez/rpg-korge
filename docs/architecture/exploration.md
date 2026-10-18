@@ -14,7 +14,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
 
 - The arrows walk the party (see [Walking](#walking)).
-- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)).
+- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), and recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)).
 - B is displayed, but does nothing for now.
 
 ## Walking
@@ -39,6 +39,17 @@ An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Gam
 4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
 A battle starting while talking (`PauseExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
+
+## Recruiting an npc
+
+An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game data](game-data.md)): it joins the party once the talk with it is finished. Until then, it is an npc as any other, displayed with the images of its unit.
+
+1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: The Guy.
+2. The npc leaves its tile (`NpcRecruited`): the battlefield vacates it, and the screen removes the npc.
+3. A battle unit of its unit is deployed for the human player on that tile (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
+4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
+
+The events are dispatched in the order they are published, so the tile is vacated before the battle unit is deployed on it, and the battle unit is deployed before it joins the party. Once recruited, it is a party member as any other: it has a bag, and leaves the party once defeated.
 
 ## Inventory
 

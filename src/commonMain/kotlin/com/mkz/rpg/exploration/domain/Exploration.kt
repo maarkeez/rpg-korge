@@ -10,6 +10,7 @@ import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationSecondStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkFinished
 import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkStarted
+import com.mkz.rpg.exploration.domain.ExplorationEvent.PartyJoined
 import com.mkz.rpg.exploration.domain.ExplorationEvent.PartyWalked
 import kotlin.jvm.JvmInline
 
@@ -111,11 +112,11 @@ data class Exploration private constructor(
 
     /** Explores again once the talk is finished. Nothing changes when it is not talking. */
     fun finishTalk(): Exploration {
-        if (mode != Mode.TALKING) return this
+        val npcId = talkingNpcId ?: return this
         return copy(
             mode = Mode.EXPLORING,
             talkingNpcId = null,
-            events = events + NpcTalkFinished(playerId = playerId.value),
+            events = events + NpcTalkFinished(playerId = playerId.value, npcId = npcId.value),
         )
     }
 
@@ -136,6 +137,15 @@ data class Exploration private constructor(
             mode = Mode.EXPLORING,
             events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = party.value),
         )
+
+    /** Adds the battle unit to the party, last, e.g.: a recruited npc. Nothing changes when it is already in it. */
+    fun join(battleUnitId: String): Exploration {
+        if (battleUnitId in party.value) return this
+        return copy(
+            party = Party(party.value + battleUnitId),
+            events = events + PartyJoined(playerId = playerId.value, battleUnitId = battleUnitId),
+        )
+    }
 
     /** Removes the battle unit from the party, e.g.: when it is defeated. The next one leads when it was leading. */
     fun leave(battleUnitId: String): Exploration = copy(party = Party(party.value - battleUnitId))

@@ -303,6 +303,19 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `RemoveNpc should remove the npc from its tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy", unitId = null)
+            // When
+            battlefieldView.removeNpc(row = 0, column = 0)
+            // Then
+            battlefieldView.hasNpcAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
     fun `DisplayNpc should not display the npc when it has no image`() =
         sharedViewsTest {
             // Given

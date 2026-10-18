@@ -20,6 +20,16 @@ class InMemoryNpcRepositoryTest {
     }
 
     @Test
+    fun `Delete should remove the npc`() {
+        // Given
+        npcRepository.save(npc(id = "viking"))
+        // When
+        npcRepository.delete("viking")
+        // Then
+        npcRepository.searchById("viking").shouldBeNull()
+    }
+
+    @Test
     fun `SearchById should return null when the npc is not stored`() {
         // When
         val npc = npcRepository.searchById("unknown")

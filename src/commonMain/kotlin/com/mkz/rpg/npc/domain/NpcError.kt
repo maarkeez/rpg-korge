@@ -10,4 +10,6 @@ sealed class NpcError(
     class NpcTileCanNotBeOccupied : NpcError("The npc tile can not be occupied")
 
     class NpcUnitNotFound : NpcError("The npc unit was not found")
+
+    class NpcNotRecruitable : NpcError("The npc is not recruitable")
 }

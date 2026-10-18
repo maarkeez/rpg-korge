@@ -1,11 +1,13 @@
 package com.mkz.rpg.npc.adapters.presentation
 
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.npc.adapters.events.OnNpcTalkFinished
 import com.mkz.rpg.npc.adapters.events.OnRequestInitialiseNpcs
 import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.npc.usecases.commands.InitialiseNpcs
+import com.mkz.rpg.npc.usecases.commands.RecruitNpc
 import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.npc.usecases.services.NpcLoader
@@ -23,6 +25,7 @@ class NpcApi(
 
     // Commands
     val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, unitApi.searchUnitById, eventBus)
+    val recruitNpc = RecruitNpc(npcRepository, eventBus)
 
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)
@@ -30,6 +33,7 @@ class NpcApi(
 
     // Events
     private val onRequestInitialiseNpcs = OnRequestInitialiseNpcs(initialiseNpcs, eventBus)
+    private val onNpcTalkFinished = OnNpcTalkFinished(recruitNpc, eventBus)
 
     suspend fun init() {
         npcLoader.initResources()

@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnFinished
 import com.mkz.rpg.battleUnit.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestDeployBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
@@ -214,6 +215,7 @@ class BattleUnitApi(
     private val onRequestWalkBattleUnit = OnRequestWalkBattleUnit(walkBattleUnit, eventBus)
     private val onRequestRecoverBattleUnits = OnRequestRecoverBattleUnits(recoverBattleUnits, eventBus)
     private val onRequestRespawnBattleUnit = OnRequestRespawnBattleUnit(respawnBattleUnit, eventBus)
+    private val onRequestDeployBattleUnit = OnRequestDeployBattleUnit(deployBattleUnit, eventBus)
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
     private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)

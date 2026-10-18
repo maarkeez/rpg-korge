@@ -13,4 +13,8 @@ class InMemoryNpcRepository : NpcRepository {
     override fun searchById(id: String) = npcs[id]
 
     override fun searchAll() = npcs.values.toList()
+
+    override fun delete(id: String) {
+        npcs.remove(id)
+    }
 }

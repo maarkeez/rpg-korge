@@ -6,4 +6,6 @@ interface NpcRepository {
     fun searchById(id: String): Npc?
 
     fun searchAll(): List<Npc>
+
+    fun delete(id: String)
 }

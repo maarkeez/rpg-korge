@@ -38,6 +38,15 @@ sealed interface BattleUnitEvent : DomainEvent {
         val percentage: Int,
     ) : BattleUnitEvent
 
+    // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
+    data class RequestDeployBattleUnit(
+        val battleUnitId: String,
+        val unitId: String,
+        val playerId: String,
+        val row: Int,
+        val column: Int,
+    ) : BattleUnitEvent
+
     // Requested for the defeated CPU battle units the wandering brings back home.
     data class RequestRespawnBattleUnit(
         val battleUnitId: String,

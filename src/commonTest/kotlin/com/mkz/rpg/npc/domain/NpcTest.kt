@@ -40,6 +40,29 @@ class NpcTest {
     }
 
     @Test
+    fun `IsRecruitable should tell whether the npc has a unit`() {
+        // Then
+        npc(unitId = "viking").isRecruitable().shouldBeTrue()
+        npc(unitId = null).isRecruitable().shouldBeFalse()
+    }
+
+    @Test
+    fun `Recruit should publish the npc recruited event, with its tile, when the npc is recruitable`() {
+        // When
+        val (events, _) = npc(id = "viking", row = 12, column = 2, unitId = "viking").recruit().pullEvents()
+        // Then
+        events.shouldContainExactly(NpcEvent.NpcRecruited(npcId = "viking", row = 12, column = 2))
+    }
+
+    @Test
+    fun `Recruit should fail when the npc is not recruitable`() {
+        // When
+        val result = runCatching { npc(unitId = null).recruit() }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcNotRecruitable>()
+    }
+
+    @Test
     fun `Place should fail when the name is empty`() {
         // When
         val result = runCatching { Npc.place(theGuy.copy(name = " ")) }

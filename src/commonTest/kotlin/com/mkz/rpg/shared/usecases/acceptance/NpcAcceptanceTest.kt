@@ -40,6 +40,9 @@ class NpcAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val theGuy = Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 0, column = 0)
 
+    // Recruitable, as the viking of the resources: 150 health points.
+    private val viking = Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 0, column = 3, unitId = "viking")
+
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
     private val npcApi by lazy { NpcApi(battlefieldApi, unitApi, eventBus, FakeNpcLoader(npcs)) }
@@ -89,6 +92,72 @@ class NpcAcceptanceTest {
         explorationApi.finishTalk()
         eventBus.dispatch()
     }
+
+    // The leader walks east to (0,2), next to the viking at (0,3), and the knight-2 follows it to (0,1).
+    private fun recruitTheViking() {
+        walk(DirectionDto.EAST)
+        talk()
+        finishTalk()
+    }
+
+    @Test
+    fun `should deploy the viking as a battle unit of the human player on its tile, last in the party, once the talk with it is finished`() =
+        scenarioTest({
+            npcs = listOf(theGuy, viking)
+            setUp()
+        }) {
+            // When
+            recruitTheViking()
+            // Then
+            val vikingBattleUnit = battleUnitApi.searchBattleUnitById("viking")!!
+            vikingBattleUnit.playerId shouldBe "human"
+            vikingBattleUnit.remainingHealthPoints shouldBe 150
+            battlefieldApi.searchOccupant(row = 0, column = 3) shouldBe "viking"
+            explorationApi.searchExploration()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2", "viking")
+            npcApi.searchNpcById("viking").shouldBeNull()
+        }
+
+    @Test
+    fun `should have the recruited viking follow the party when it walks`() =
+        scenarioTest({
+            npcs = listOf(theGuy, viking)
+            setUp()
+        }) {
+            // Given
+            recruitTheViking()
+            // When
+            walk(DirectionDto.SOUTH)
+            // Then
+            battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 2)
+            battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 0, column = 2)
+            battlefieldApi.searchPosition("viking") shouldBe PositionDto(row = 0, column = 1)
+        }
+
+    @Test
+    fun `should not talk to the viking again once recruited`() =
+        scenarioTest({
+            npcs = listOf(theGuy, viking)
+            setUp()
+        }) {
+            // Given
+            recruitTheViking()
+            // When
+            talk()
+            // Then
+            explorationApi.searchExploration()!!.talkingNpcId.shouldBeNull()
+        }
+
+    @Test
+    fun `should recruit no one once the talk with an npc that is not recruitable is finished`() =
+        scenarioTest(::setUp) {
+            // Given
+            talk()
+            // When
+            finishTalk()
+            // Then
+            battlefieldApi.searchOccupant(row = 0, column = 0) shouldBe "the-guy"
+            explorationApi.searchExploration()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2")
+        }
 
     @Test
     fun `should have the npc occupy its tile when it is placed`() =

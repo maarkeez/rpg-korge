@@ -27,9 +27,11 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
 import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
@@ -389,6 +391,28 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+    }
+
+    @Test
+    fun `FlashUnit should flash the battle unit on view when it joins the party`() {
+        // Given
+        eventBus.publish(ExplorationEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1"))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+    }
+
+    @Test
+    fun `RemoveNpc should remove the recruited npc from its tile once the previous steps have been played`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        publish(NpcEvent.NpcRecruited(npcId = "viking", row = 2, column = 2))
+        battlefieldView.removedNpcs.shouldBeEmpty()
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.removedNpcs.shouldContainExactly(PositionDto(2, 2))
     }
 
     @Test

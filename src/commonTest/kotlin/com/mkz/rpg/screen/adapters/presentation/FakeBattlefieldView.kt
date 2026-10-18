@@ -55,6 +55,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         private set
     val tilesNotDimmed = mutableListOf<Set<PositionDto>>()
     val removedBattleUnits = mutableListOf<PositionDto>()
+    val removedNpcs = mutableListOf<PositionDto>()
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
     val moveStepDurations = mutableListOf<Duration>()
 
@@ -131,6 +132,13 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
 
     override fun dimTilesExcept(tiles: Set<PositionDto>) {
         tilesNotDimmed += tiles
+    }
+
+    override fun removeNpc(
+        row: Int,
+        column: Int,
+    ) {
+        removedNpcs += PositionDto(row, column)
     }
 
     override fun removeBattleUnit(

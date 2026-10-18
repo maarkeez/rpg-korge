@@ -174,6 +174,26 @@ class ExplorationTest {
     }
 
     @Test
+    fun `Join should add the battle unit to the party, last, when it is not in it`() {
+        // When
+        val exploration = exploration(battleUnitIds = listOf("knight-1", "knight-2")).join("viking")
+        // Then
+        exploration.toDto().leaderBattleUnitId shouldBe "knight-1"
+        exploration.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-2", "viking")
+        exploration.pullEvents().first.shouldContainExactly(ExplorationEvent.PartyJoined(playerId = "human", battleUnitId = "viking"))
+    }
+
+    @Test
+    fun `Join should not change when the battle unit is already in the party`() {
+        // Given
+        val party = exploration(battleUnitIds = listOf("knight-1", "knight-2"))
+        // When
+        val exploration = party.join("knight-2")
+        // Then
+        exploration shouldBe party
+    }
+
+    @Test
     fun `Leave should keep the leader when a follower leaves the party`() {
         // When
         val exploration = exploration(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).leave("knight-2")
@@ -292,7 +312,7 @@ class ExplorationTest {
         exploration.toDto().talkingNpcId.shouldBeNull()
         exploration.toDto().isExploring.shouldBeTrue()
         exploration.canWalk().shouldBeTrue()
-        exploration.pullEvents().first.shouldContainExactly(ExplorationEvent.NpcTalkFinished(playerId = "human"))
+        exploration.pullEvents().first.shouldContainExactly(ExplorationEvent.NpcTalkFinished(playerId = "human", npcId = "the-guy"))
     }
 
     @Test

@@ -38,7 +38,20 @@ sealed interface ExplorationEvent : DomainEvent {
         val npcId: String,
     ) : ExplorationEvent
 
+    /** Npc: the npc talked to, which joins the party when it is recruitable. */
     data class NpcTalkFinished(
         val playerId: String,
+        val npcId: String,
+    ) : ExplorationEvent
+
+    // Requested for a recruited npc, once deployed as a battle unit.
+    data class RequestJoinParty(
+        val battleUnitId: String,
+    ) : ExplorationEvent
+
+    /** The battle unit joins the party, last. */
+    data class PartyJoined(
+        val playerId: String,
+        val battleUnitId: String,
     ) : ExplorationEvent
 }

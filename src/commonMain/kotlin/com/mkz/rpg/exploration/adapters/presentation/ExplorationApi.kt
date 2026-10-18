@@ -7,11 +7,13 @@ import com.mkz.rpg.exploration.adapters.events.OnBattleStarted
 import com.mkz.rpg.exploration.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.exploration.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.exploration.adapters.events.OnBattlefieldTileOccupied
+import com.mkz.rpg.exploration.adapters.events.OnRequestJoinParty
 import com.mkz.rpg.exploration.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.exploration.adapters.storage.InMemoryExplorationRepository
 import com.mkz.rpg.exploration.domain.ExplorationRepository
 import com.mkz.rpg.exploration.usecases.commands.ApplyStandingTerrainEffects
 import com.mkz.rpg.exploration.usecases.commands.FinishTalk
+import com.mkz.rpg.exploration.usecases.commands.JoinParty
 import com.mkz.rpg.exploration.usecases.commands.LeaveParty
 import com.mkz.rpg.exploration.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.exploration.usecases.commands.PauseExploration
@@ -46,6 +48,7 @@ class ExplorationApi(
     val pauseExploration = PauseExploration(explorationRepository, eventBus)
     val resumeExploration = ResumeExploration(explorationRepository, eventBus)
     val leaveParty = LeaveParty(explorationRepository)
+    val joinParty = JoinParty(explorationRepository, eventBus)
     val markBattleUnitMoved = MarkBattleUnitMoved(explorationRepository)
     val talkToAdjacentNpc = TalkToAdjacentNpc(explorationRepository, battlefieldApi.searchPosition, npcApi.searchNpcAt, eventBus)
     val finishTalk = FinishTalk(explorationRepository, eventBus)
@@ -61,4 +64,5 @@ class ExplorationApi(
     private val onBattleFinished = OnBattleFinished(resumeExploration, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
+    private val onRequestJoinParty = OnRequestJoinParty(joinParty, eventBus)
 }

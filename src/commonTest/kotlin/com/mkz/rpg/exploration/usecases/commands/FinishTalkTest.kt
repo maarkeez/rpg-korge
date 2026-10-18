@@ -25,7 +25,7 @@ class FinishTalkTest {
         val explorationDto = explorationRepository.search()!!.toDto()
         explorationDto.talkingNpcId.shouldBeNull()
         explorationDto.isExploring.shouldBeTrue()
-        eventBus.shouldHavePublishedEvents(ExplorationEvent.NpcTalkFinished(playerId = "human"))
+        eventBus.shouldHavePublishedEvents(ExplorationEvent.NpcTalkFinished(playerId = "human", npcId = "the-guy"))
     }
 
     @Test
