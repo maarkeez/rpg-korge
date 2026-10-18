@@ -185,4 +185,36 @@ class CpuBrainTest {
         updatedCpuBrain.nextBattleUnitId().shouldBeNull()
         events.shouldContainExactly(CpuTurnFinished(playerId = "cpu"))
     }
+
+    @Test
+    fun `AddBattleUnit should manage the battle unit after the ones already pending when the turn is being played`() {
+        // Given
+        val cpuBrain = cpuBrain(battleUnitIds = listOf("goat-1", "rat-1")).requestCast(battleUnitId = "goat-1", abilityId = "bat")
+        // When
+        val joinedCpuBrain = cpuBrain.addBattleUnit("bat-1")
+        // Then
+        joinedCpuBrain.toDto().pendingBattleUnitIds.shouldContainExactly("goat-1", "rat-1", "bat-1")
+        joinedCpuBrain.toDto().isAwaitingAction.shouldBeTrue()
+    }
+
+    @Test
+    fun `AddBattleUnit should not manage the battle unit twice`() {
+        // Given
+        val cpuBrain = cpuBrain(battleUnitIds = listOf("goat-1", "bat-1"))
+        // When
+        val joinedCpuBrain = cpuBrain.addBattleUnit("bat-1")
+        // Then
+        joinedCpuBrain.toDto().pendingBattleUnitIds.shouldContainExactly("goat-1", "bat-1")
+    }
+
+    @Test
+    fun `AddBattleUnit should not manage the battle unit once the turn is over`() {
+        // Given
+        val cpuBrain = cpuBrain(battleUnitIds = listOf("goat-1")).finishTurn().pullEvents().second
+        // When
+        val joinedCpuBrain = cpuBrain.addBattleUnit("bat-1")
+        // Then
+        joinedCpuBrain.toDto().pendingBattleUnitIds.shouldBeEmpty()
+        joinedCpuBrain.isPlayingTurn().shouldBeFalse()
+    }
 }

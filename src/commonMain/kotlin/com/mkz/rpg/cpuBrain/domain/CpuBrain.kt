@@ -86,6 +86,18 @@ data class CpuBrain private constructor(
         )
     }
 
+    /** Whether the turn is being played: some battle units are still to be managed. */
+    fun isPlayingTurn(): Boolean = pendingBattleUnits.value.isNotEmpty()
+
+    /**
+     * Manages the battle unit after the ones already pending, e.g.: a battle unit summoned during the turn, which plays
+     * it too. Nothing changes once the turn is over, nor when it is already pending.
+     */
+    fun addBattleUnit(battleUnitId: String): CpuBrain {
+        if (!isPlayingTurn() || battleUnitId in pendingBattleUnits.value) return this
+        return copy(pendingBattleUnits = PendingBattleUnits(pendingBattleUnits.value + battleUnitId))
+    }
+
     fun finishTurn(): CpuBrain =
         copy(
             pendingBattleUnits = PendingBattleUnits(emptyList()),

@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
@@ -13,6 +14,7 @@ import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
+import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.wandering.adapters.presentation.WanderingApi
@@ -43,6 +45,7 @@ class CpuDeployingAcceptanceTest {
     private val cpuPlayerId = "cpu"
     private val knightBattleUnitId = "human-knight"
     private val goatBattleUnitId = "cpu-goat"
+    private val deployments = mutableListOf<BattleUnitEvent.BattleUnitDeployed>().also { deployments -> eventBus.subscribe<BattleUnitEvent.BattleUnitDeployed> { deployments += it } }
 
     private suspend fun setUp() {
         terrainApi.init()
@@ -79,7 +82,7 @@ class CpuDeployingAcceptanceTest {
             deployedBattleUnitIds.size shouldBe 1
             val deployedBattleUnitId = deployedBattleUnitIds.single()
             battleUnitApi.searchBattleUnitById(deployedBattleUnitId)!!.unitId shouldBe "bat"
-            battlefieldApi.searchOccupant(row = 0, column = 1) shouldBe deployedBattleUnitId
+            deployments.last() shouldBe BattleUnitEvent.BattleUnitDeployed(battleUnitId = deployedBattleUnitId, row = 0, column = 1)
             // The bat joins the battle, so it plays the next CPU turns.
             battleApi.searchBattle()!!.battleUnitIds shouldContain deployedBattleUnitId
             battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
@@ -98,5 +101,20 @@ class CpuDeployingAcceptanceTest {
             battlefieldApi.searchPosition(goatBattleUnitId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 0)
             // The goat finishes its turn, and leaves the battle once the round finishes, as the knight is out of its reach.
             battleApi.searchBattle()!!.isFinished.shouldBeTrue()
+        }
+
+    @Test
+    fun `should have the bat attack the knight in the turn the cpu goat summons it`() =
+        scenarioTest(::setUp) {
+            // Given
+            startBattleWithKnightAt(column = 3)
+            battleApi.finishPlayerTurn()
+            // When
+            eventBus.dispatch()
+            // Then: the bat, summoned at (0,1), walks next to the knight and strikes it with its sword.
+            val batId = (battleUnitApi.searchBattleUnitsByPlayerId(cpuPlayerId).map { it.id } - goatBattleUnitId).single()
+            battlefieldApi.searchPosition(batId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 2)
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
         }
 }

@@ -6,7 +6,7 @@ The CPU player decides what its battle units do following the **utility AI** pat
 
 A CPU turn is played one action at a time by the [`CpuBrain`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/domain/CpuBrain.kt), so every decision is based on the state left by the previous action. This allows, for example, a unit to move next to an enemy and attack it in the same turn.
 
-1. [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) starts the CPU brain with the battle units to manage, in order (`CpuBrainInitialized`): those of the CPU player in the battle, which `PlayerTurnStarted` carries.
+1. [`PlayTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/PlayTurn.kt) starts the CPU brain with the battle units to manage, in order (`CpuBrainInitialized`): those of the CPU player in the battle, which `PlayerTurnStarted` carries. A battle unit summoned during the turn (e.g.: a bat a goat summons) is added after them by [`JoinCpuTurn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/JoinCpuTurn.kt), as its deploy (`BattleUnitDeployed`) is handled before the cast summoning it is resolved, so it plays the turn too.
 2. [`ManageCpuBattleUnit`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/ManageCpuBattleUnit.kt) takes one action with the next battle unit:
    - It casts when [`WhatShouldCast`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhatShouldCast.kt) decides to cast.
    - Otherwise, it moves when [`WhereShouldMove`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldMove.kt) returns a tile.
@@ -46,7 +46,7 @@ The same rule starts the battles: while the human player explores, a CPU battle 
 
 ### Summons
 
-A summoned battle unit (e.g.: the bat a goat summons) lasts only some turns, and spends them attacking: every enemy it can walk to is within its reach, however far, so it approaches and attacks the nearest one. It never leaves the battle when a round finishes, even with no enemy it can walk to, and claims no home, so it never wanders: it vanishes once its turns are over.
+A summoned battle unit (e.g.: the bat a goat summons) lasts only some turns, and spends them attacking: every enemy it can walk to is within its reach, however far, so it approaches and attacks the nearest one. It plays the turn it is summoned in, after the battle units already playing it. It never leaves the battle when a round finishes, even with no enemy it can walk to, and claims no home, so it never wanders: it vanishes once its turns are over.
 
 ## Casting
 
@@ -72,7 +72,7 @@ The **expected amount** of an effect is its full amount when it is applied immed
 - Attacks only count the targets within reach.
 - Deploys are worth the attack the deployed battle unit will make on the enemy within reach of the caster nearest to its tile:
   - The **deployed damage** is the expected amount of the best attack of the deployed unit.
-  - The deployed battle unit acts from the next turn, and moves and attacks in the same turn, so the **turns to attack** are `max(1, ⌈(distance to the enemy - 1) / its movement range⌉)`, using the Manhattan distance. Hence, the tile nearest to the enemy is preferred.
+  - The deployed battle unit acts in the turn it is deployed in, after the battle units already playing it, and moves and attacks in the same turn, so the **turns to attack** are `max(1, ⌈(distance to the enemy - 1) / its movement range⌉)`, using the Manhattan distance. Hence, the tile nearest to the enemy is preferred.
   - A deployed unit without an attack, or without an enemy within reach, is worth 0.
 - The best attack, heal or deploy is cast when its utility is higher than `MINIMUM_UTILITY_GAIN`. Otherwise, one of the other abilities is cast at random, if any.
 
@@ -105,11 +105,11 @@ The unit moves to the best tile, unless it is worth no more than `MINIMUM_UTILIT
 
 ## Wandering
 
-While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on, also during a battle (e.g.: a bat deployed by a goat). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer, without stepping on harmful terrain (e.g.: lava), as they never step on it while they wander. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
+While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on. The summons (e.g.: a bat deployed by a goat) have none, as they never wander (see [Summons](#summons)). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer, without stepping on harmful terrain (e.g.: lava), as they never step on it while they wander. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
 
 The [`wandering`](../../src/commonMain/kotlin/com/mkz/rpg/wandering) subdomain remembers the homes, and walks the CPU battle units every second, while the CPU brain decides where each one steps:
 
-1. [`ClaimHome`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ClaimHome.kt) remembers the tile of every CPU battle unit deployed (`BattleUnitDeployed`).
+1. [`ClaimHome`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ClaimHome.kt) remembers the tile of every CPU battle unit deployed (`BattleUnitDeployed`), but the summons.
 2. Every second while exploring (`ExplorationSecondStarted`), [`WanderWhileExploring`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/WanderWhileExploring.kt) lets each CPU battle unit rest or take one step, one after another, in their deployment order.
 3. [`WhereShouldWander`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/WhereShouldWander.kt) decides it. Each step is requested with `RequestWalkBattleUnit`, as the party steps, so it spends no turn action.
 4. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolveWanderingStep`](../../src/commonMain/kotlin/com/mkz/rpg/wandering/usecases/commands/ResolveWanderingStep.kt)), so the next battle unit decides with the battlefield as it is then: two battle units never step on the same tile.
