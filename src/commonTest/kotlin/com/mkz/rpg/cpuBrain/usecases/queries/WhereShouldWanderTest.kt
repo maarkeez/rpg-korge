@@ -17,15 +17,16 @@ import kotlin.test.Test
 
 class WhereShouldWanderTest {
     // The first roll decides whether the rat rests (below 0.5), and the next one picks the step, weighted by utility.
-    // Outside its territory, it does not roll whether it rests, so the first roll picks the step.
+    // Outside its territory, or while returning home, it does not roll whether it rests, so the first roll picks the step.
     private fun whereShouldWander(
         vararg rolls: Double,
         battleUnitId: String = "rat-1",
         homeRow: Int,
         homeColumn: Int,
+        isReturning: Boolean = false,
     ): Battlefield.Dto.PositionDto? {
         val whereShouldWander = queries(*rolls).whereShouldWander
-        return whereShouldWander(battleUnitId = battleUnitId, homeRow = homeRow, homeColumn = homeColumn)
+        return whereShouldWander(battleUnitId = battleUnitId, homeRow = homeRow, homeColumn = homeColumn, isReturning = isReturning)
     }
 
     private val givens = mutableListOf<(InMemoryQueries) -> Unit>()
@@ -204,6 +205,39 @@ class WhereShouldWanderTest {
         // Then
         northStep shouldBe position(1, 5)
         westStep shouldBe position(2, 4)
+    }
+
+    @Test
+    fun `should keep heading home without resting while it returns, within its territory`() {
+        // Given: the rat left its territory, and is now 2 tiles away from home.
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand sand", occupants = mapOf("rat-1" to (0 to 2)))
+        // When
+        val step = whereShouldWander(0.0, homeRow = 0, homeColumn = 0, isReturning = true)
+        // Then
+        step shouldBe position(0, 1)
+    }
+
+    @Test
+    fun `should only step nearer to home while it returns`() {
+        // Given: the rat is 1 tile away from home, where it would rather walk away from it.
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand sand", occupants = mapOf("rat-1" to (0 to 1)))
+        // When
+        val step = whereShouldWander(0.99, homeRow = 0, homeColumn = 0, isReturning = true)
+        // Then
+        step shouldBe position(0, 0)
+    }
+
+    @Test
+    fun `should wander again once it is back home after returning`() {
+        // Given
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand", occupants = mapOf("rat-1" to (0 to 0)))
+        // When
+        val step = whereShouldWander(0.5, 0.0, homeRow = 0, homeColumn = 0, isReturning = true)
+        // Then: it walks away from home again.
+        step shouldBe position(0, 1)
     }
 
     @Test

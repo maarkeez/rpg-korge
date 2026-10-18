@@ -21,8 +21,11 @@ import kotlin.random.Random
  * - Home: how much nearer to home the tile is, weighted by how far from home the battle unit is. Far from home, it walks back.
  * - Terrain: the health effect of the tile terrain, weighted by its healing need, as when moving in a battle.
  *
- * Outside its territory (e.g.: after chasing the party in a battle), it never rests, and only steps nearer to home, so
- * it heads back home, around the harmful terrain. It stays when home can not be walked to.
+ * Outside its territory (e.g.: after chasing the party in a battle), and while [isReturning] home after leaving it, it
+ * heads home: it never rests, and only steps nearer to home, around the harmful terrain. Once home, it wanders again. It
+ * stays when home can not be walked to.
+ *
+ * Is returning: whether it left its territory and has not been back home since, as the wandering remembers.
  */
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -37,21 +40,23 @@ class WhereShouldWander(
         battleUnitId: String,
         homeRow: Int,
         homeColumn: Int,
+        isReturning: Boolean = false,
     ): PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return null
         val position = searchPosition(battleUnitId = battleUnitId) ?: return null
         val distancesFromHome = searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)
-        val distanceFromHome = distanceFromHome(distancesFromHome, position) ?: return null
-        val isInTerritory = distanceFromHome <= WANDER_DISTANCE
+        val distanceFromHome = distancesFromHome[position] ?: return null
+        val isHeadingHome = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0
-        if (isInTerritory && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
-        // The free tiles next to it that are not harmful, with their distance from home, within its territory or nearer to home.
+        if (!isHeadingHome && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
+        // The free tiles next to it that are not harmful, with their distance from home: nearer to home when it heads
+        // home, and within its territory otherwise.
         val steps =
             adjacentPositions(position)
                 .filter { step -> canBattlefieldTileBeOccupied(row = step.row, column = step.column) }
                 .filter { step -> terrainHealthEffect(step) >= 0 }
                 .mapNotNull { step -> distancesFromHome[step]?.let { distance -> step to distance } }
-                .filter { (_, distance) -> distance <= WANDER_DISTANCE || distance < distanceFromHome }
+                .filter { (_, distance) -> if (isHeadingHome) distance < distanceFromHome else distance <= WANDER_DISTANCE }
         if (steps.isEmpty()) return null
         // The distances are normalised between the steps and the current tile, so staying is the reference.
         val distances = steps.map { (_, distance) -> distance } + distanceFromHome
@@ -74,13 +79,6 @@ class WhereShouldWander(
             }
         return pickWeighted(utilities)
     }
-
-    // On harmful terrain, which it can not wander to (e.g.: after chasing the party onto lava), through the nearest tile
-    // next to it.
-    private fun distanceFromHome(
-        distancesFromHome: Map<PositionDto, Int>,
-        position: PositionDto,
-    ): Int? = distancesFromHome[position] ?: adjacentPositions(position).mapNotNull { adjacentPosition -> distancesFromHome[adjacentPosition] }.minOrNull()?.plus(1)
 
     private fun terrainHealthEffect(position: PositionDto): Int = searchTerrainHealthEffect(row = position.row, column = position.column)
 

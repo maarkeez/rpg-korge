@@ -13,10 +13,14 @@ import kotlin.jvm.JvmInline
  * The battle units wander one after another: each one rests or steps to a tile next to it, and its step is awaited
  * until it occupies its tile, so the next one decides with the battlefield as it is then (e.g.: two battle units never
  * step on the same tile).
+ *
+ * A battle unit that leaves its territory (e.g.: chasing the party in a battle) returns: it heads all the way back home,
+ * to the tile itself, before it wanders around it again.
  */
 @ConsistentCopyVisibility
 data class Wandering private constructor(
     private val homes: Homes,
+    private val returningBattleUnits: ReturningBattleUnits,
     private val pendingBattleUnits: PendingBattleUnits,
     private val awaitedStep: Step?,
     private val purpose: Purpose?,
@@ -26,6 +30,7 @@ data class Wandering private constructor(
         fun create(): Wandering =
             Wandering(
                 homes = Homes(emptyMap()),
+                returningBattleUnits = ReturningBattleUnits(emptySet()),
                 pendingBattleUnits = PendingBattleUnits(emptyList()),
                 awaitedStep = null,
                 purpose = null,
@@ -36,6 +41,7 @@ data class Wandering private constructor(
     fun toDto() =
         Dto(
             homes = homes.value.map { (battleUnitId, home) -> Dto.HomeDto(battleUnitId = battleUnitId, row = home.row, column = home.column) },
+            returningBattleUnitIds = returningBattleUnits.value,
             pendingBattleUnitIds = pendingBattleUnits.value,
             isWandering = isWandering(),
         )
@@ -51,6 +57,14 @@ data class Wandering private constructor(
     }
 
     fun homeOf(battleUnitId: String): Dto.HomeDto? = homes.value[battleUnitId]?.let { home -> Dto.HomeDto(battleUnitId = battleUnitId, row = home.row, column = home.column) }
+
+    /** The battle unit stands outside its territory, so it returns home. */
+    fun leaveTerritory(battleUnitId: String): Wandering = copy(returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value + battleUnitId))
+
+    /** The battle unit stands at home, so it no longer returns: it wanders around it again. */
+    fun arriveHome(battleUnitId: String): Wandering = copy(returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value - battleUnitId))
+
+    fun isReturning(battleUnitId: String): Boolean = battleUnitId in returningBattleUnits.value
 
     /**
      * Battle units: those to wander, in order, while the player explores. The ones without a home are left out. A
@@ -157,12 +171,17 @@ data class Wandering private constructor(
         val value: Map<String, Home>,
     )
 
+    @JvmInline private value class ReturningBattleUnits(
+        val value: Set<String>,
+    )
+
     @JvmInline private value class PendingBattleUnits(
         val value: List<String>,
     )
 
     data class Dto(
         val homes: List<HomeDto>,
+        val returningBattleUnitIds: Set<String>,
         val pendingBattleUnitIds: List<String>,
         val isWandering: Boolean,
     ) {

@@ -25,6 +25,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.IsOutsideTerritory
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchDistancesFromHome
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchTerrainHealthEffect
@@ -111,6 +112,7 @@ class InMemoryQueries(
     val healingNeed = HealingNeed(searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchBattlefield, searchTerrainById, searchEffectById)
     val searchDistancesFromHome = SearchDistancesFromHome(canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
+    val isOutsideTerritory = IsOutsideTerritory(searchPosition, searchDistancesFromHome)
     val searchEnemiesWithinReach = SearchEnemiesWithinReach(searchBattleUnitById, searchEnemyPlayer, searchBattleUnitsByPlayerId, searchPosition, searchWalkingDistance)
     val whatShouldCast =
         WhatShouldCast(

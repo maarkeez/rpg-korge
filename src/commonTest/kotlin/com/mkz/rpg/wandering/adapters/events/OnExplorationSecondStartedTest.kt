@@ -23,7 +23,7 @@ class OnExplorationSecondStartedTest {
     private val wanderingRepository = InMemoryWanderingRepository()
     private val onExplorationSecondStarted =
         OnExplorationSecondStarted(
-            WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus), eventBus),
+            WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus),
             eventBus,
         )
     private val walkRequests = mutableListOf<BattleUnitEvent.RequestWalkBattleUnit>().also { requests -> eventBus.subscribe<BattleUnitEvent.RequestWalkBattleUnit> { requests += it } }

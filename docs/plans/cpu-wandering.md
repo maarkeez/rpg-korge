@@ -236,3 +236,8 @@ updated once the CPU battle units out of the battle have wandered, and make them
   it for good (e.g.: below the lava strip of the battlefield). The distance from home now only walks over the tiles a
   wandering battle unit can step on (`SearchDistancesFromHome`), so it walks around the harmful terrain, and the
   territory leaves it out. `SearchWalkingDistance` no longer walks through the battle units, as nothing else needed it.
+- **All the way home**: a battle unit outside its territory first walked back only to its edge, the nearest side to
+  where it chased the party, and wandered from there. It now returns: the wandering remembers it once it is outside its
+  territory (`IsOutsideTerritory`), and it heads home without resting, through its territory, until it stands on its
+  home tile. The harmful tiles now get a distance from home, from the nearest walked tile, without being walked
+  through, so a battle unit standing on one knows how far it is from home.

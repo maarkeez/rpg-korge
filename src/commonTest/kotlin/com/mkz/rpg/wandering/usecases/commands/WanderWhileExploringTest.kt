@@ -16,6 +16,8 @@ import com.mkz.rpg.wandering.domain.WanderingEvent
 import com.mkz.rpg.wandering.domain.WanderingMother.wandering
 import com.mkz.rpg.wandering.usecases.services.WANDERING_RECOVERY_PERCENTAGE
 import com.mkz.rpg.wandering.usecases.services.WanderingSteps
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -40,7 +42,8 @@ class WanderWhileExploringTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('A' to "rat-1", 'B' to "rat-2")))
-        val wanderWhileExploring = WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus), eventBus)
+        val wanderWhileExploring =
+            WanderWhileExploring(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus)
         wanderWhileExploring(exploringPlayerId = "human")
     }
 
@@ -99,6 +102,48 @@ class WanderWhileExploringTest {
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
             BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
         )
+    }
+
+    @Test
+    fun `should make a cpu battle unit outside its territory return home`() {
+        // Given: rat-1 is 4 tiles away from home, at (0,0), and rat-2 is not on the battlefield.
+        wanderingRepository.save(wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
+        // When
+        wanderWhileExploring(0.9, map = ". . . . A")
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 3),
+        )
+        wanderingRepository.search()!!.isReturning("rat-1").shouldBeTrue()
+    }
+
+    @Test
+    fun `should keep a returning cpu battle unit heading home without resting within its territory`() {
+        // Given: rat-1 left its territory, and is now 2 tiles away from home, at (0,0).
+        wanderingRepository.save(wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
+        // When
+        wanderWhileExploring(0.0, map = ". . A")
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 1),
+        )
+        wanderingRepository.search()!!.isReturning("rat-1").shouldBeTrue()
+    }
+
+    @Test
+    fun `should let a returning cpu battle unit wander again once it is back home`() {
+        // Given: rat-1 left its territory, and is now back home, at (0,0).
+        wanderingRepository.save(wandering(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
+        // When
+        wanderWhileExploring(0.0, map = "A . .")
+        // Then: it rests, as any wandering battle unit at home may.
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            WanderingEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+        )
+        wanderingRepository.search()!!.isReturning("rat-1").shouldBeFalse()
     }
 
     @Test

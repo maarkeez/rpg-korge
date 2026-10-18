@@ -18,7 +18,10 @@ class OnBattlefieldTileOccupiedTest {
     private val queries = InMemoryQueries(random = FixedDoublesRandom(0.9))
     private val wanderingRepository = InMemoryWanderingRepository()
     private val onBattlefieldTileOccupied =
-        OnBattlefieldTileOccupied(ResolveWanderingStep(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus)), eventBus)
+        OnBattlefieldTileOccupied(
+            ResolveWanderingStep(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus)),
+            eventBus,
+        )
     private val wanderedEvents =
         mutableListOf<WanderingEvent.BattleUnitsWanderedWhileExploring>().also { wandered -> eventBus.subscribe<WanderingEvent.BattleUnitsWanderedWhileExploring> { wandered += it } }
 

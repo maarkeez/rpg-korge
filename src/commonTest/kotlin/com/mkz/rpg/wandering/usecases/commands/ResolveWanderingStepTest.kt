@@ -20,7 +20,8 @@ class ResolveWanderingStepTest {
     private val queries = InMemoryQueries(random = FixedDoublesRandom(0.9))
     private val wanderingRepository = InMemoryWanderingRepository()
     private val eventBus = FakeEventBus()
-    private val resolveWanderingStep = ResolveWanderingStep(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus))
+    private val resolveWanderingStep =
+        ResolveWanderingStep(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus))
 
     // rat-1 stepped from its home (0,0) to (1,0), and rat-2 wanders next from its home (2,2).
     private fun givenRatStepped(battleUnitIds: List<String>) {

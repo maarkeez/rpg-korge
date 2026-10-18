@@ -28,7 +28,7 @@ class WanderingApi(
     private val wanderingRepository: WanderingRepository = InMemoryWanderingRepository()
 
     // Services
-    private val wanderingSteps = WanderingSteps(wanderingRepository, cpuBrainApi.whereShouldWander, eventBus)
+    private val wanderingSteps = WanderingSteps(wanderingRepository, cpuBrainApi.whereShouldWander, cpuBrainApi.isOutsideTerritory, battlefieldApi.searchPosition, eventBus)
 
     // Commands
     val claimHome = ClaimHome(wanderingRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById)

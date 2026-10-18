@@ -81,7 +81,7 @@ class SearchDistancesFromHomeTest {
     }
 
     @Test
-    fun `should walk around harmful terrain, which it never wanders to`() {
+    fun `should walk around harmful terrain, which it never wanders to, but count it from the nearest walked tile`() {
         // Given
         givenBattlefield(
             """
@@ -95,6 +95,7 @@ class SearchDistancesFromHomeTest {
         distances shouldContainExactly
             mapOf(
                 position(0, 0) to 0,
+                position(0, 1) to 1,
                 position(1, 0) to 1,
                 position(1, 1) to 2,
                 position(1, 2) to 3,
@@ -139,7 +140,7 @@ class SearchDistancesFromHomeTest {
         // When
         val distances = searchDistancesFromHome(homeRow = 0, homeColumn = 2)
         // Then
-        distances shouldContainExactly mapOf(position(0, 2) to 0)
+        distances shouldContainExactly mapOf(position(0, 2) to 0, position(0, 3) to 1)
     }
 
     @Test

@@ -28,7 +28,8 @@ class WanderAfterRoundTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield("A . .\n. . .\n. . B", occupants = mapOf('A' to "rat-1", 'B' to "rat-2")))
-        val wanderAfterRound = WanderAfterRound(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, eventBus), eventBus)
+        val wanderAfterRound =
+            WanderAfterRound(wanderingRepository, WanderingSteps(wanderingRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus)
         wanderAfterRound(battleUnitIds = setOf("knight-1", "rat-1"))
     }
 

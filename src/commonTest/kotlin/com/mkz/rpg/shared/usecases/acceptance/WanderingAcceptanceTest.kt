@@ -159,7 +159,7 @@ class WanderingAcceptanceTest {
     }
 
     @Test
-    fun `should walk back home without resting when it is left outside its territory`() {
+    fun `should walk all the way back home without resting when it is left outside its territory`() {
         // Given: the rat is deployed at (0,7), and left 5 tiles away from home, at (5,7), e.g.: after chasing the party.
         val game = Game(0.0)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
@@ -167,15 +167,18 @@ class WanderingAcceptanceTest {
             game.eventBus.dispatch()
             // When
             val positions =
-                List(3) {
+                List(6) {
                     game.waitASecond()
                     game.ratPosition()
                 }
-            // Then: it heads home until it is back in its territory, where it rests.
+            // Then: it heads home, through its territory, until it is back at home, where it rests again.
             positions.shouldContainExactly(
                 PositionDto(4, 7),
                 PositionDto(3, 7),
-                PositionDto(3, 7),
+                PositionDto(2, 7),
+                PositionDto(1, 7),
+                PositionDto(0, 7),
+                PositionDto(0, 7),
             )
         }
     }
@@ -191,11 +194,11 @@ class WanderingAcceptanceTest {
             game.eventBus.dispatch()
             // When
             val positions =
-                List(6) {
+                List(9) {
                     game.waitASecond()
                     game.ratPosition()
                 }
-            // Then: it walks around the lava, rather than stopping in front of it, until it is back in its territory.
+            // Then: it walks around the lava, rather than stopping in front of it, all the way back home.
             positions.shouldContainExactly(
                 PositionDto(5, 1),
                 PositionDto(5, 0),
@@ -203,6 +206,9 @@ class WanderingAcceptanceTest {
                 PositionDto(3, 0),
                 PositionDto(2, 0),
                 PositionDto(2, 1),
+                PositionDto(2, 2),
+                PositionDto(1, 2),
+                PositionDto(0, 2),
             )
         }
     }

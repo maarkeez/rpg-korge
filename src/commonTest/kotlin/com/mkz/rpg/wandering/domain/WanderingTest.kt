@@ -16,7 +16,7 @@ class WanderingTest {
         // When
         val wandering = Wandering.create()
         // Then
-        wandering.toDto() shouldBe Wandering.Dto(homes = emptyList(), pendingBattleUnitIds = emptyList(), isWandering = false)
+        wandering.toDto() shouldBe Wandering.Dto(homes = emptyList(), returningBattleUnitIds = emptySet(), pendingBattleUnitIds = emptyList(), isWandering = false)
     }
 
     @Test
@@ -42,6 +42,33 @@ class WanderingTest {
         val home = wandering().homeOf("knight-1")
         // Then
         home.shouldBeNull()
+    }
+
+    @Test
+    fun `LeaveTerritory should make the battle unit return home`() {
+        // When
+        val wandering = wandering().leaveTerritory("rat-1")
+        // Then
+        wandering.isReturning("rat-1").shouldBeTrue()
+        wandering.isReturning("rat-2").shouldBeFalse()
+        wandering.toDto().returningBattleUnitIds shouldBe setOf("rat-1")
+    }
+
+    @Test
+    fun `ArriveHome should make the battle unit no longer return home`() {
+        // When
+        val wandering = wandering().leaveTerritory("rat-1").leaveTerritory("rat-2").arriveHome("rat-1")
+        // Then
+        wandering.isReturning("rat-1").shouldBeFalse()
+        wandering.toDto().returningBattleUnitIds shouldBe setOf("rat-2")
+    }
+
+    @Test
+    fun `ArriveHome should change nothing when the battle unit is not returning`() {
+        // When
+        val wandering = wandering().arriveHome("rat-1")
+        // Then
+        wandering shouldBe wandering()
     }
 
     @Test
