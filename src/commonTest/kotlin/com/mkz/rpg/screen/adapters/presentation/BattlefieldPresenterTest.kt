@@ -13,6 +13,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
@@ -192,6 +193,18 @@ class BattlefieldPresenterTest {
         previousStep.complete(Unit)
         // Then
         battlefieldView.displayedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 2, unitId = "knight"))
+    }
+
+    @Test
+    fun `DisplayUnitInOrder should display the respawned battle unit once the previous steps have been played`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        publish(BattleUnitRespawned(playerId = "cpu", battleUnitId = "rat-1", row = 2, column = 3))
+        battlefieldView.displayedBattleUnits.shouldBeEmpty()
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.displayedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "rat"))
     }
 
     @Test

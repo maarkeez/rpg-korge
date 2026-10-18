@@ -38,6 +38,13 @@ sealed interface BattleUnitEvent : DomainEvent {
         val percentage: Int,
     ) : BattleUnitEvent
 
+    // Requested for the defeated CPU battle units the wandering brings back home.
+    data class RequestRespawnBattleUnit(
+        val battleUnitId: String,
+        val row: Int,
+        val column: Int,
+    ) : BattleUnitEvent
+
     data class RequestApplyEffect(
         val application: Effect.Dto.EffectApplicationDto,
     ) : BattleUnitEvent
@@ -107,6 +114,14 @@ sealed interface BattleUnitEvent : DomainEvent {
         val playerId: String,
         val battleUnitId: String,
         val unitId: String,
+        val row: Int,
+        val column: Int,
+    ) : BattleUnitEvent
+
+    // A defeated battle unit back on the battlefield, as it was deployed.
+    data class BattleUnitRespawned(
+        val playerId: String,
+        val battleUnitId: String,
         val row: Int,
         val column: Int,
     ) : BattleUnitEvent

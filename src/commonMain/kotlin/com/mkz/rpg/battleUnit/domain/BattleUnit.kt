@@ -15,6 +15,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
@@ -199,6 +200,30 @@ data class BattleUnit private constructor(
                         row = row,
                         column = column,
                     ),
+        )
+    }
+
+    /**
+     * A defeated battle unit comes back on the tile as it was deployed with its unit: full health and mana, no equipped
+     * effects, no cooldowns, no ongoing effects. It keeps its id and its player. Nothing changes when it is not defeated.
+     */
+    fun respawn(
+        unit: Unit.Dto,
+        row: Int,
+        column: Int,
+    ): BattleUnit {
+        if (!isDefeated()) return this
+        return copy(
+            unitId = UnitId(unit.id),
+            remainingHealthPoints = RemainingHealthPoints(unit.healthPoints),
+            remainingManaPoints = RemainingManaPoints(unit.manaPoints),
+            baseMaximumHealthPoints = BaseMaximumHealthPoints(unit.healthPoints),
+            baseMaximumManaPoints = BaseMaximumManaPoints(unit.manaPoints),
+            equippedEffects = EquippedEffects(),
+            remainingTurnActions = RemainingTurnActions(unit.movementRange),
+            abilityCooldowns = AbilityCooldowns(unit.abilities),
+            ongoingEffects = OngoingEffects(),
+            events = events + BattleUnitRespawned(playerId = playerId.value, battleUnitId = id.value, row = row, column = column),
         )
     }
 

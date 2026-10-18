@@ -1,6 +1,6 @@
 # Plan: defeated CPU battle units respawn
 
-> **Status:** planned, waiting for review.
+> **Status:** in progress, milestone 1 is done.
 >
 > **Summary:** A defeated CPU battle unit respawns on its home once the party has walked 50 steps since its defeat. It
 > is the same battle unit, back as it was deployed: full health and mana, no cooldowns, no ongoing effects. It waits
@@ -142,5 +142,5 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 
 | # | Done | Milestone                           | Changes                                                                                                                                                              | The game after it                                                                                       |
 |---|------|-------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| 1 |      | Respawning a battle unit            | `BattleUnit.respawn`, `BattleUnitRespawned`, `RequestRespawnBattleUnit`, `RespawnBattleUnit`, `OnRequestRespawnBattleUnit`, the battlefield `OnBattleUnitRespawned`, `BattlefieldPresenter`. | As before: a battle unit can respawn, but nothing requests it yet.                                       |
+| 1 | ✅   | Respawning a battle unit            | `BattleUnit.respawn`, `BattleUnitRespawned`, `RequestRespawnBattleUnit`, `RespawnBattleUnit`, `OnRequestRespawnBattleUnit`, the battlefield `OnBattleUnitRespawned`, `BattlefieldPresenter`. | As before: a battle unit can respawn, but nothing requests it yet.                                       |
 | 2 |      | Respawning after 50 party steps     | `RESPAWN_STEPS`, `Wandering.Respawns` and its methods, `AwaitRespawn`, `RespawnDefeatedBattleUnits`, `ResolveRespawn`, the wandering event listeners. CPU brain and exploration docs. | A defeated CPU battle unit respawns on its home once the party has walked 50 steps, when its home is free. |

@@ -101,6 +101,9 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.BattleUnitDeployed> { event ->
                 displayUnit(event.row, event.column, event.battleUnitId)
             },
+            eventBus.subscribe<BattleUnitEvent.BattleUnitRespawned> { event ->
+                displayUnit(event.row, event.column, event.battleUnitId)
+            },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
             },

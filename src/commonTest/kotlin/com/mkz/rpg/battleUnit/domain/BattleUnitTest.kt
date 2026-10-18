@@ -1022,4 +1022,37 @@ class BattleUnitTest {
         // Then
         events.shouldBeEmpty()
     }
+
+    @Test
+    fun `Respawn should bring a defeated battle unit back as it was deployed`() {
+        // Given: it spent mana and a cast, its ability is cooling down, and it equipped the hammer before being defeated.
+        val unit = UnitMother.unit(healthPoints = 20, manaPoints = 10).toDto()
+        val player = PlayerMother.player().toDto()
+        val defeatedBattleUnit =
+            BattleUnitMother
+                .battleUnit(id = "rat-1", unit = unit, player = player)
+                .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 40, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .pullEvents()
+                .second
+        require(defeatedBattleUnit.isDefeated())
+        // When
+        val (events, respawnedBattleUnit) = defeatedBattleUnit.respawn(unit = unit, row = 2, column = 3).pullEvents()
+        // Then
+        respawnedBattleUnit.toDto() shouldBe BattleUnitMother.battleUnit(id = "rat-1", unit = unit, player = player).toDto()
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitRespawned(playerId = player.id, battleUnitId = "rat-1", row = 2, column = 3))
+    }
+
+    @Test
+    fun `Respawn should not change a battle unit that is not defeated`() {
+        // Given
+        val unit = UnitMother.unit(healthPoints = 20).toDto()
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealthPoints = 5)
+        // When
+        val (events, respawnedBattleUnit) = battleUnit.respawn(unit = unit, row = 2, column = 3).pullEvents()
+        // Then
+        respawnedBattleUnit shouldBe battleUnit
+        events.shouldBeEmpty()
+    }
 }

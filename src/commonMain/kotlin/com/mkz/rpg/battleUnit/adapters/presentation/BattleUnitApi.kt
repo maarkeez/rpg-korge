@@ -12,6 +12,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
@@ -29,6 +30,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.RemoveEquippedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
+import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummonedBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
@@ -196,6 +198,7 @@ class BattleUnitApi(
         )
     val replenishMana = ReplenishMana(battleUnitRepository)
     val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
+    val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, unitApi.searchUnitById, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
     val removeEquippedEffects = RemoveEquippedEffects(battleUnitRepository, eventBus)
     val finishSummonedBattleUnitsTurn = FinishSummonedBattleUnitsTurn(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
     val vanishSummonedBattleUnits = VanishSummonedBattleUnits(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
@@ -210,6 +213,7 @@ class BattleUnitApi(
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
     private val onRequestWalkBattleUnit = OnRequestWalkBattleUnit(walkBattleUnit, eventBus)
     private val onRequestRecoverBattleUnits = OnRequestRecoverBattleUnits(recoverBattleUnits, eventBus)
+    private val onRequestRespawnBattleUnit = OnRequestRespawnBattleUnit(respawnBattleUnit, eventBus)
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
     private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)
