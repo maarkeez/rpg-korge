@@ -7,6 +7,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.nulls.shouldBeNull
 import kotlin.test.Test
 
 class PauseExplorationTest {
@@ -26,6 +27,21 @@ class PauseExplorationTest {
             .toDto()
             .isExploring
             .shouldBeFalse()
+        eventBus.shouldHavePublishedEvents(ExplorationEvent.ExplorationPaused(playerId = "human"))
+    }
+
+    @Test
+    fun `should stop talking when a battle starts while the party is talking`() {
+        // Given
+        explorationRepository.save(exploration(playerId = "human").talk("the-guy").pullEvents().second)
+        // When
+        pauseExploration()
+        // Then
+        explorationRepository
+            .search()!!
+            .toDto()
+            .talkingNpcId
+            .shouldBeNull()
         eventBus.shouldHavePublishedEvents(ExplorationEvent.ExplorationPaused(playerId = "human"))
     }
 

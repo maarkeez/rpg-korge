@@ -69,7 +69,7 @@ open class VirtualPadView(
     private val buttonsCenterX = size.width * BUTTONS_CENTER_RATIO
     private val buttonsCenterY = size.height / 2
     internal val bButton = button("B", centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) {}
-    internal val aButton = button("A", centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { onAPressed?.invoke() }
+    internal val aButton = button("A", centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
 
     init {
         addUpdater { heldDirection?.let { direction -> onDirectionHeld?.invoke(direction) } }
@@ -81,6 +81,10 @@ open class VirtualPadView(
 
     open fun setOnAPressed(listener: () -> Unit) {
         onAPressed = listener
+    }
+
+    internal fun pressA() {
+        onAPressed?.invoke()
     }
 
     internal fun hold(direction: DirectionDto) {

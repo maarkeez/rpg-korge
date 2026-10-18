@@ -8,6 +8,8 @@ import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationPaused
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationSecondStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
+import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkFinished
+import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkStarted
 import com.mkz.rpg.exploration.domain.ExplorationEvent.PartyWalked
 import kotlin.jvm.JvmInline
 
@@ -20,6 +22,8 @@ import kotlin.jvm.JvmInline
  *
  * Every second while exploring, the battle units that stood still during it receive the effect of their terrain, so it
  * remembers the battle units that moved during the current second.
+ *
+ * The party can talk to an npc while exploring. Time stops while talking: the party does not walk, and no second starts.
  */
 @ConsistentCopyVisibility
 data class Exploration private constructor(
@@ -29,6 +33,7 @@ data class Exploration private constructor(
     private val pendingSteps: PendingSteps,
     private val awaitedStep: Step?,
     private val movedBattleUnits: MovedBattleUnits,
+    private val talkingNpcId: NpcId?,
     private val events: Set<ExplorationEvent>,
 ) {
     companion object {
@@ -45,6 +50,7 @@ data class Exploration private constructor(
                 pendingSteps = PendingSteps(emptyList()),
                 awaitedStep = null,
                 movedBattleUnits = MovedBattleUnits(emptySet()),
+                talkingNpcId = null,
                 events = setOf(ExplorationStarted(playerId = playerId, battleUnitIds = battleUnitIds)),
             )
         }
@@ -57,6 +63,7 @@ data class Exploration private constructor(
             battleUnitIds = party.value,
             isExploring = mode == Mode.EXPLORING,
             isWalking = isWalking(),
+            talkingNpcId = talkingNpcId?.value,
         )
 
     /** Whether the party can walk: it is exploring and has finished walking. */
@@ -92,13 +99,34 @@ data class Exploration private constructor(
         return copy(awaitedStep = null).finishWalkWhenDone()
     }
 
-    /** Stops exploring, e.g.: when a battle starts. A walk in progress is abandoned. */
+    /** Talks to the npc, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    fun talk(npcId: String): Exploration {
+        if (!canWalk()) return this
+        return copy(
+            mode = Mode.TALKING,
+            talkingNpcId = NpcId(npcId),
+            events = events + NpcTalkStarted(playerId = playerId.value, npcId = npcId),
+        )
+    }
+
+    /** Explores again once the talk is finished. Nothing changes when it is not talking. */
+    fun finishTalk(): Exploration {
+        if (mode != Mode.TALKING) return this
+        return copy(
+            mode = Mode.EXPLORING,
+            talkingNpcId = null,
+            events = events + NpcTalkFinished(playerId = playerId.value),
+        )
+    }
+
+    /** Stops exploring, e.g.: when a battle starts. A walk or a talk in progress is abandoned. */
     fun pause(): Exploration =
         copy(
             mode = Mode.BATTLING,
             pendingSteps = PendingSteps(emptyList()),
             awaitedStep = null,
             movedBattleUnits = MovedBattleUnits(emptySet()),
+            talkingNpcId = null,
             events = events + ExplorationPaused(playerId = playerId.value),
         )
 
@@ -139,10 +167,15 @@ data class Exploration private constructor(
 
     private enum class Mode {
         EXPLORING,
+        TALKING,
         BATTLING,
     }
 
     @JvmInline private value class PlayerId(
+        val value: String,
+    )
+
+    @JvmInline private value class NpcId(
         val value: String,
     )
 
@@ -164,13 +197,17 @@ data class Exploration private constructor(
         fun toDto() = value
     }
 
-    /** Leader: `null` once every battle unit of the party has been defeated. */
+    /**
+     * Leader: `null` once every battle unit of the party has been defeated. Exploring: `false` while battling and while
+     * talking. Talking npc: the npc the party talks to, or `null` when it talks to none.
+     */
     data class Dto(
         val playerId: String,
         val leaderBattleUnitId: String?,
         val battleUnitIds: List<String>,
         val isExploring: Boolean,
         val isWalking: Boolean,
+        val talkingNpcId: String?,
     ) {
         /** Where the leader walks to, one tile away. */
         enum class DirectionDto(

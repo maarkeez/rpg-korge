@@ -34,6 +34,9 @@ import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
+import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
+import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
@@ -59,6 +62,7 @@ class InMemoryQueries(
     val battleUnitRepository = InMemoryBattleUnitRepository()
     val cpuBrainRepository = InMemoryCpuBrainRepository()
     val effectRepository = InMemoryEffectRepository()
+    val npcRepository = InMemoryNpcRepository()
     val playerRepository = InMemoryPlayerRepository()
     val terrainRepository = InMemoryTerrainRepository()
     val unitRepository = InMemoryUnitRepository()
@@ -71,6 +75,10 @@ class InMemoryQueries(
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val isTransitionAllowed = IsTransitionAllowed(terrainRepository)
+
+    // Npc
+    val searchNpcById = SearchNpcById(npcRepository)
+    val searchNpcAt = SearchNpcAt(npcRepository)
 
     // Ability
     val searchAbilityById = SearchAbilityById(abilityRepository)

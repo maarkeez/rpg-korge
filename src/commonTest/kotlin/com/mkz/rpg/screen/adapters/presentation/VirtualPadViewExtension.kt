@@ -27,6 +27,9 @@ fun VirtualPadView.bButton(): UIButton = bButton
 /** The label written on the button, e.g.: `A`. */
 fun UIButton.label(): String = text
 
+/** Presses A, as the player tapping it. */
+fun VirtualPadView.pressAButton() = pressA()
+
 /** Taps the A button, as the player. */
 suspend fun ViewsForTesting.clickA(virtualPadView: VirtualPadView) = clickOn(virtualPadView.aButton)
 

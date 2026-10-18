@@ -14,7 +14,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
 
 - The arrows walk the party (see [Walking](#walking)).
-- A is tapped once per press, and calls its listener (`setOnAPressed`).
+- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)).
 - B is displayed, but does nothing for now.
 
 ## Walking
@@ -28,6 +28,17 @@ The party walks one tile at a time, towards the arrow held on the virtual pad (n
 5. Once every step has been walked or skipped, the party has walked (`PartyWalked`).
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
+
+## Talking to an npc
+
+An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands next to the leader.
+
+1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces, and talks to the first one (`NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
+2. While talking, the exploration is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
+3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
+4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+
+A battle starting while talking (`PauseExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
 
 ## Inventory
 

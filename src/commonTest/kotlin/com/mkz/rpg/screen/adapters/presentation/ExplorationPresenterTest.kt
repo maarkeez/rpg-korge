@@ -7,6 +7,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.inventory.domain.InventoryEvent
+import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -23,12 +24,13 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import korlibs.math.geom.Size
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class ExplorationPresenterTest {
-    // The knight explores the sand from (1,1). There is no battle yet.
+    // The knight explores the sand from (1,1), next to The Guy, who stands west of it at (1,0). There is no battle yet.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -36,14 +38,16 @@ class ExplorationPresenterTest {
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(3) { List(3) { "sand" } },
             deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
+            npcs = listOf(npc(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 1, column = 0).toDto()),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
+    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
     private val battleHudView = FakeBattleHudView()
     private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
 
-    private fun createPresenter() = ExplorationPresenter(virtualPadView, battleHudView, playerCallToActionView, apis.explorationApi, timeline, eventBus)
+    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.explorationApi, apis.npcApi, timeline, eventBus)
 
     private fun startExploring() {
         apis.explorationApi.startExploration()
@@ -239,5 +243,112 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    private fun talk() {
+        virtualPadView.pressAButton()
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should display the dialog of the npc next to the leader in place of the pad when A is pressed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        talk()
+        // Then
+        npcDialogView.visible.shouldBeTrue()
+        npcDialogView.displayedName() shouldBe "The Guy"
+        npcDialogView.displayedLine() shouldBe "G'day bloke!"
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should not talk while the scene plays the previous steps`() {
+        // Given
+        createPresenter()
+        startExploring()
+        timeline.playLongStep()
+        // When
+        talk()
+        // Then
+        apis.explorationApi.searchExploration()!!.talkingNpcId shouldBe null
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should do nothing when no npc is next to the leader`() {
+        // Given
+        createPresenter()
+        startExploring()
+        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.releaseArrow()
+        eventBus.dispatch()
+        // When
+        talk()
+        // Then
+        npcDialogView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `Tick should not apply the terrain effects while talking`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        talk()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(3.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+    }
+
+    @Test
+    fun `WalkParty should not walk the party while talking, even when an arrow is still held`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talk()
+        // When
+        virtualPadView.holdArrow(DirectionDto.NORTH)
+        eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    @Test
+    fun `FinishTalk should display the pad again and explore when the dialog is tapped`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talk()
+        // When
+        npcDialogView.tapDialog()
+        eventBus.dispatch()
+        // Then
+        npcDialogView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+        apis.explorationApi
+            .searchExploration()!!
+            .isExploring
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `DisplayExploring should close the dialog when the exploration pauses while talking`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talk()
+        // When
+        eventBus.publish(ExplorationEvent.ExplorationPaused(playerId = "human"))
+        eventBus.dispatch()
+        // Then
+        npcDialogView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeTrue()
     }
 }

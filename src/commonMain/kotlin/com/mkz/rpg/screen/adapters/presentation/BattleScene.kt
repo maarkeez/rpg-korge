@@ -50,6 +50,7 @@ class BattleScene(
         )
     val playerCallToActionView = PlayerCallToActionView(resourcesLoader)
     val virtualPadView = VirtualPadView(Size(390, 300))
+    val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -78,7 +79,7 @@ class BattleScene(
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
         val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
-        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Resources: each subdomain loads its data before the battle is set up
@@ -109,6 +110,7 @@ class BattleScene(
                 unitApi,
                 abilityApi,
                 battleApi,
+                explorationApi,
                 timeline,
                 eventBus,
             )
@@ -147,10 +149,11 @@ class BattleScene(
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-                // While exploring, the virtual pad takes the place of the battle HUD.
+                // While exploring, the virtual pad takes the place of the battle HUD, and an npc dialog the place of the pad.
                 container {
                     addChild(battleHudView)
                     addChild(virtualPadView)
+                    addChild(npcDialogView)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
@@ -158,7 +161,7 @@ class BattleScene(
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
-                val explorationPresenter = ExplorationPresenter(virtualPadView, battleHudView, playerCallToActionView, explorationApi, timeline, eventBus)
+                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, explorationApi, npcApi, timeline, eventBus)
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

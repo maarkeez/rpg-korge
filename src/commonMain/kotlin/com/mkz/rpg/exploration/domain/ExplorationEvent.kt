@@ -31,4 +31,14 @@ sealed interface ExplorationEvent : DomainEvent {
     data class ExplorationSecondStarted(
         val playerId: String,
     ) : ExplorationEvent
+
+    /** The party talks to the npc: time stops until the talk is finished. */
+    data class NpcTalkStarted(
+        val playerId: String,
+        val npcId: String,
+    ) : ExplorationEvent
+
+    data class NpcTalkFinished(
+        val playerId: String,
+    ) : ExplorationEvent
 }

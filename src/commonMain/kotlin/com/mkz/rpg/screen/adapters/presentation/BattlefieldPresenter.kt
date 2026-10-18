@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
@@ -41,6 +42,7 @@ class BattlefieldPresenter(
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
+    private val explorationApi: ExplorationApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
@@ -454,11 +456,14 @@ class BattlefieldPresenter(
         return battleUnit.id !in battle.battleUnitIds
     }
 
+    // While talking to an npc, time stops: the tiles can not be selected.
+    private fun isTalking(): Boolean = explorationApi.searchExploration()?.talkingNpcId != null
+
     // Delegates
     override fun tileSelected(
         row: Int,
         column: Int,
-    ) = whenIdle { processTileSelected(row = row, column = column) }
+    ) = whenIdle { if (!isTalking()) processTileSelected(row = row, column = column) }
 
     // The abilities can only be cast in a battle.
     override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) processAbilitySelected(abilityId) }

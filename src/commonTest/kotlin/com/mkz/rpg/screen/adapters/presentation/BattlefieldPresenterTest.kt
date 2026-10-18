@@ -29,7 +29,9 @@ import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
+import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
+import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -116,6 +118,7 @@ class BattlefieldPresenterTest {
             unitApi = apis.unitApi,
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
+            explorationApi = apis.explorationApi,
             timeline = timeline,
             eventBus = eventBus,
         )
@@ -244,14 +247,17 @@ class BattlefieldPresenterTest {
     }
 
     // The same battlefield, before any battle has started: the human player explores it.
-    private fun exploringApis(deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1))) =
-        SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat", movementRange = 2).toDto()),
-            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
-            tiles = List(4) { List(4) { "sand" } },
-            deployments = deployments,
-        ).also(SubdomainApis::initialise)
+    private fun exploringApis(
+        deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
+        npcs: List<Npc.Dto> = emptyList(),
+    ) = SubdomainApis(
+        terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+        units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat", movementRange = 2).toDto()),
+        players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+        tiles = List(4) { List(4) { "sand" } },
+        deployments = deployments,
+        npcs = npcs,
+    ).also(SubdomainApis::initialise)
 
     private fun exploringPresenter(
         apis: SubdomainApis,
@@ -269,6 +275,7 @@ class BattlefieldPresenterTest {
         unitApi = apis.unitApi,
         abilityApi = apis.abilityApi,
         battleApi = apis.battleApi,
+        explorationApi = apis.explorationApi,
         timeline = timeline,
         eventBus = apis.eventBus,
     )
@@ -634,6 +641,23 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         requestedMoves.shouldBeEmpty()
+    }
+
+    @Test
+    fun `TileSelected should ignore the selected tile while talking to an npc`() {
+        // Given
+        val exploringApis = exploringApis(npcs = listOf(npc(id = "the-guy", row = 1, column = 0).toDto()))
+        val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
+        exploringApis.explorationApi.startExploration()
+        exploringApis.explorationApi.talkToAdjacentNpc()
+        exploringApis.eventBus.dispatch()
+        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
+        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        // When
+        presenter.tileSelected(row = 1, column = 1)
+        exploringApis.eventBus.dispatch()
+        // Then
+        selections.shouldBeEmpty()
     }
 
     @Test

@@ -27,6 +27,7 @@ class ExplorationTest {
                 battleUnitIds = listOf("knight-1", "knight-2"),
                 isExploring = true,
                 isWalking = false,
+                talkingNpcId = null,
             )
         exploration.pullEvents().first.shouldContainExactly(
             ExplorationEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
@@ -230,5 +231,88 @@ class ExplorationTest {
         val exploration = exploration().markMoved("knight-1").pause().resume()
         // Then
         exploration.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
+    }
+
+    @Test
+    fun `Talk should talk to the npc and stop exploring when the party can walk`() {
+        // When
+        val talkingExploration = exploration().talk("the-guy")
+        // Then
+        talkingExploration.toDto().talkingNpcId shouldBe "the-guy"
+        talkingExploration.toDto().isExploring.shouldBeFalse()
+        talkingExploration.canWalk().shouldBeFalse()
+        talkingExploration.pullEvents().first.shouldContainExactly(ExplorationEvent.NpcTalkStarted(playerId = "human", npcId = "the-guy"))
+    }
+
+    @Test
+    fun `Talk should not talk while the party is walking`() {
+        // Given
+        val walkingExploration = exploration().walkParty(listOf(leaderStep, followerStep))
+        // When
+        val exploration = walkingExploration.talk("the-guy")
+        // Then
+        exploration shouldBe walkingExploration
+    }
+
+    @Test
+    fun `Talk should not talk while battling`() {
+        // Given
+        val pausedExploration = exploration().pause().pullEvents().second
+        // When
+        val exploration = pausedExploration.talk("the-guy")
+        // Then
+        exploration shouldBe pausedExploration
+    }
+
+    @Test
+    fun `Talk should not talk to another npc while talking`() {
+        // Given
+        val talkingExploration = exploration().talk("the-guy").pullEvents().second
+        // When
+        val exploration = talkingExploration.talk("the-girl")
+        // Then
+        exploration shouldBe talkingExploration
+    }
+
+    @Test
+    fun `MarkMoved should not remember the battle units moving while talking`() {
+        // When
+        val exploration = exploration().talk("the-guy").markMoved("knight-1").finishTalk()
+        // Then
+        exploration.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
+    }
+
+    @Test
+    fun `FinishTalk should explore again when the party is talking`() {
+        // Given
+        val talkingExploration = exploration().talk("the-guy").pullEvents().second
+        // When
+        val exploration = talkingExploration.finishTalk()
+        // Then
+        exploration.toDto().talkingNpcId.shouldBeNull()
+        exploration.toDto().isExploring.shouldBeTrue()
+        exploration.canWalk().shouldBeTrue()
+        exploration.pullEvents().first.shouldContainExactly(ExplorationEvent.NpcTalkFinished(playerId = "human"))
+    }
+
+    @Test
+    fun `FinishTalk should not change when the party is not talking`() {
+        // Given
+        val exploringExploration = exploration()
+        // When
+        val exploration = exploringExploration.finishTalk()
+        // Then
+        exploration shouldBe exploringExploration
+    }
+
+    @Test
+    fun `Pause should abandon the talk when a battle starts`() {
+        // Given
+        val talkingExploration = exploration().talk("the-guy").pullEvents().second
+        // When
+        val pausedExploration = talkingExploration.pause().resume()
+        // Then
+        pausedExploration.toDto().talkingNpcId.shouldBeNull()
+        pausedExploration.canWalk().shouldBeTrue()
     }
 }

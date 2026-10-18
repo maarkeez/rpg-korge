@@ -11,15 +11,18 @@ import com.mkz.rpg.exploration.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.exploration.adapters.storage.InMemoryExplorationRepository
 import com.mkz.rpg.exploration.domain.ExplorationRepository
 import com.mkz.rpg.exploration.usecases.commands.ApplyStandingTerrainEffects
+import com.mkz.rpg.exploration.usecases.commands.FinishTalk
 import com.mkz.rpg.exploration.usecases.commands.LeaveParty
 import com.mkz.rpg.exploration.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.exploration.usecases.commands.PauseExploration
 import com.mkz.rpg.exploration.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.exploration.usecases.commands.ResumeExploration
 import com.mkz.rpg.exploration.usecases.commands.StartExploration
+import com.mkz.rpg.exploration.usecases.commands.TalkToAdjacentNpc
 import com.mkz.rpg.exploration.usecases.commands.WalkParty
 import com.mkz.rpg.exploration.usecases.queries.SearchExploration
 import com.mkz.rpg.exploration.usecases.services.PartyWalking
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -27,6 +30,7 @@ class ExplorationApi(
     playerApi: PlayerApi,
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
+    npcApi: NpcApi,
     eventBus: EventBus,
 ) {
     // Storage
@@ -43,6 +47,8 @@ class ExplorationApi(
     val resumeExploration = ResumeExploration(explorationRepository, eventBus)
     val leaveParty = LeaveParty(explorationRepository)
     val markBattleUnitMoved = MarkBattleUnitMoved(explorationRepository)
+    val talkToAdjacentNpc = TalkToAdjacentNpc(explorationRepository, battlefieldApi.searchPosition, npcApi.searchNpcAt, eventBus)
+    val finishTalk = FinishTalk(explorationRepository, eventBus)
     val applyStandingTerrainEffects = ApplyStandingTerrainEffects(explorationRepository, battlefieldApi.searchBattlefield, battleUnitApi.searchBattleUnitById, eventBus)
 
     // Queries
