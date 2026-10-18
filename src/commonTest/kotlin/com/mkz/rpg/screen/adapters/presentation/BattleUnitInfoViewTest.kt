@@ -81,6 +81,34 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Display should tell how many turns a summon has left, after its remaining casts`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val unit = unit(movementRange = 5).toDto()
+            val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
+            // When
+            battleUnitInfoView.display(battleUnit = summon, unit = unit)
+            // Then
+            battleUnitInfoView.remainingTurnsText() shouldBe "Vanishes in 3 turns"
+            battleUnitInfoView.isRemainingTurnsAfterCasts().shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should not tell any turns left when the battle unit never vanishes`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val unit = unit().toDto()
+            val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
+            battleUnitInfoView.display(battleUnit = summon, unit = unit)
+            // When
+            battleUnitInfoView.display(battleUnit = battleUnit(unit = unit).toDto(), unit = unit)
+            // Then
+            battleUnitInfoView.remainingTurnsText() shouldBe null
+        }
+
+    @Test
     fun `DisplayAbilitySelected should select ability button when ability is selected`() =
         sharedViewsTest {
             // Given

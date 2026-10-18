@@ -28,6 +28,7 @@ open class BattleUnitInfoView(
     internal lateinit var unitNameView: UnitNameView
     internal val movementPointsView = PointsView(MOVEMENT_POINTS_COLOR)
     internal val castPointsView = PointsView(CAST_POINTS_COLOR)
+    internal lateinit var remainingTurnsView: RemainingTurnsView
     internal lateinit var abilityButtons: Array<AbilityButtonView>
     internal lateinit var bagButton: BagButtonView
     internal lateinit var effectsView: EffectsView
@@ -52,6 +53,8 @@ open class BattleUnitInfoView(
                             val remainingTurnActionsView = UIContainer(Size(width = this.width, height = 14))
                             remainingTurnActionsView.addChild(movementPointsView)
                             remainingTurnActionsView.addChild(castPointsView)
+                            remainingTurnsView = RemainingTurnsView(Size(width = this.width, height = 14))
+                            remainingTurnActionsView.addChild(remainingTurnsView)
                             addChild(remainingTurnActionsView)
                         }
                         bagButton = BagButtonView(Size(width = 29, height = 29), resourcesLoader)
@@ -103,6 +106,10 @@ open class BattleUnitInfoView(
         movementPointsView.display(remaining = remainingTurnActions.remainingSteps, maximum = remainingTurnActions.maximumSteps)
         castPointsView.display(remaining = remainingTurnActions.remainingCasts, maximum = remainingTurnActions.maximumCasts)
         castPointsView.x = movementPointsView.width + TURN_ACTIONS_SPACING
+        // Turns left, only for the summons, after the casts
+        val remainingTurns = battleUnit.remainingTurns
+        if (remainingTurns != null) remainingTurnsView.display(remainingTurns) else remainingTurnsView.hide()
+        remainingTurnsView.x = castPointsView.x + castPointsView.width + TURN_ACTIONS_SPACING
         // Health
         healthBarView.display(
             remaining = battleUnit.remainingHealthPoints,

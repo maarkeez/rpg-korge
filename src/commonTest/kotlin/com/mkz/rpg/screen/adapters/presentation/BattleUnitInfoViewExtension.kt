@@ -19,6 +19,12 @@ fun BattleUnitInfoView.remainingCasts(): Int = castPointsView.filledPoints()
 /** The maximum casts per turn: as many golden points as displayed, filled or hollow. */
 fun BattleUnitInfoView.maximumCasts(): Int = castPointsView.filledPoints() + castPointsView.hollowPoints()
 
+/** The turns a summon has left before vanishing, as told, or null when none is told (e.g.: it never vanishes). */
+fun BattleUnitInfoView.remainingTurnsText(): String? = if (remainingTurnsView.visible) remainingTurnsView.remainingTurnsText() else null
+
+/** Whether the turns left are told after the remaining casts, on their line. */
+fun BattleUnitInfoView.isRemainingTurnsAfterCasts(): Boolean = remainingTurnsView.x > castPointsView.x + castPointsView.width && remainingTurnsView.y == castPointsView.y
+
 fun BattleUnitInfoView.movementPointColors() = movementPointsView.pointColors()
 
 fun BattleUnitInfoView.castPointColors() = castPointsView.pointColors()
