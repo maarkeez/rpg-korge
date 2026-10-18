@@ -6,13 +6,19 @@ import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.wandering.adapters.events.OnBattleRoundFinished
+import com.mkz.rpg.wandering.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.wandering.adapters.events.OnBattleUnitDeployed
+import com.mkz.rpg.wandering.adapters.events.OnBattleUnitRespawned
 import com.mkz.rpg.wandering.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.wandering.adapters.events.OnExplorationSecondStarted
+import com.mkz.rpg.wandering.adapters.events.OnPartyWalked
 import com.mkz.rpg.wandering.adapters.storage.InMemoryWanderingRepository
 import com.mkz.rpg.wandering.domain.WanderingRepository
+import com.mkz.rpg.wandering.usecases.commands.AwaitRespawn
 import com.mkz.rpg.wandering.usecases.commands.ClaimHome
+import com.mkz.rpg.wandering.usecases.commands.ResolveRespawn
 import com.mkz.rpg.wandering.usecases.commands.ResolveWanderingStep
+import com.mkz.rpg.wandering.usecases.commands.RespawnDefeatedBattleUnits
 import com.mkz.rpg.wandering.usecases.commands.WanderAfterRound
 import com.mkz.rpg.wandering.usecases.commands.WanderWhileExploring
 import com.mkz.rpg.wandering.usecases.services.WanderingSteps
@@ -35,10 +41,16 @@ class WanderingApi(
     val wanderWhileExploring = WanderWhileExploring(wanderingRepository, wanderingSteps, eventBus)
     val wanderAfterRound = WanderAfterRound(wanderingRepository, wanderingSteps, eventBus)
     val resolveWanderingStep = ResolveWanderingStep(wanderingRepository, wanderingSteps)
+    val awaitRespawn = AwaitRespawn(wanderingRepository)
+    val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(wanderingRepository, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
+    val resolveRespawn = ResolveRespawn(wanderingRepository)
 
     // Events
     private val onBattleUnitDeployed = OnBattleUnitDeployed(claimHome, eventBus)
     private val onExplorationSecondStarted = OnExplorationSecondStarted(wanderWhileExploring, eventBus)
     private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveWanderingStep, eventBus)
     private val onBattleRoundFinished = OnBattleRoundFinished(wanderAfterRound, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(awaitRespawn, eventBus)
+    private val onPartyWalked = OnPartyWalked(respawnDefeatedBattleUnits, eventBus)
+    private val onBattleUnitRespawned = OnBattleUnitRespawned(resolveRespawn, eventBus)
 }

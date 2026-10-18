@@ -6,6 +6,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 - Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
 - The CPU battle units wander around the tile they were deployed on while the party explores (see [CPU brain](cpu-brain.md#wandering)).
+- A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU brain](cpu-brain.md#respawning)).
 - A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
 
 ## Walking

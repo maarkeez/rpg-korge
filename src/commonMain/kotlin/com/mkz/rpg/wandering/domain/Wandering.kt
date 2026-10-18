@@ -6,6 +6,9 @@ import com.mkz.rpg.wandering.domain.WanderingEvent.BattleUnitsWanderedAfterRound
 import com.mkz.rpg.wandering.domain.WanderingEvent.BattleUnitsWanderedWhileExploring
 import kotlin.jvm.JvmInline
 
+/** The party steps a defeated battle unit waits before it respawns on its home. */
+const val RESPAWN_STEPS = 50
+
 /**
  * The CPU battle units wandering around their home, the tile each one was deployed on, while they are out of a battle:
  * every second while the player explores, and when a battle round finishes.
@@ -16,11 +19,15 @@ import kotlin.jvm.JvmInline
  *
  * A battle unit that leaves its territory (e.g.: chasing the party in a battle) returns: it heads all the way back home,
  * to the tile itself, before it wanders around it again.
+ *
+ * A defeated battle unit with a home counts the party steps since its defeat, and respawns on its home once it has
+ * counted [RESPAWN_STEPS].
  */
 @ConsistentCopyVisibility
 data class Wandering private constructor(
     private val homes: Homes,
     private val returningBattleUnits: ReturningBattleUnits,
+    private val respawns: Respawns,
     private val pendingBattleUnits: PendingBattleUnits,
     private val awaitedStep: Step?,
     private val purpose: Purpose?,
@@ -31,6 +38,7 @@ data class Wandering private constructor(
             Wandering(
                 homes = Homes(emptyMap()),
                 returningBattleUnits = ReturningBattleUnits(emptySet()),
+                respawns = Respawns(emptyMap()),
                 pendingBattleUnits = PendingBattleUnits(emptyList()),
                 awaitedStep = null,
                 purpose = null,
@@ -44,6 +52,7 @@ data class Wandering private constructor(
             returningBattleUnitIds = returningBattleUnits.value,
             pendingBattleUnitIds = pendingBattleUnits.value,
             isWandering = isWandering(),
+            respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
         )
 
     /** Remembers the tile the battle unit was deployed on as its home. A home never changes. */
@@ -65,6 +74,28 @@ data class Wandering private constructor(
     fun arriveHome(battleUnitId: String): Wandering = copy(returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value - battleUnitId))
 
     fun isReturning(battleUnitId: String): Boolean = battleUnitId in returningBattleUnits.value
+
+    /** The battle unit is defeated: it starts counting the party steps, when it has a home. The others are ignored. */
+    fun defeat(battleUnitId: String): Wandering {
+        if (battleUnitId !in homes.value) return this
+        return copy(respawns = Respawns(respawns.value + (battleUnitId to 0)))
+    }
+
+    /** The party walked a step: every defeated battle unit counts it. */
+    fun walkPartyStep(): Wandering = copy(respawns = Respawns(respawns.value.mapValues { (_, partySteps) -> partySteps + 1 }))
+
+    /** The defeated battle units that have counted [RESPAWN_STEPS] party steps, with their home, in their deployment order. */
+    fun dueRespawns(): List<Dto.HomeDto> =
+        homes.value
+            .filterKeys { battleUnitId -> (respawns.value[battleUnitId] ?: 0) >= RESPAWN_STEPS }
+            .map { (battleUnitId, home) -> Dto.HomeDto(battleUnitId = battleUnitId, row = home.row, column = home.column) }
+
+    /** The battle unit respawned on its home: it no longer counts, nor returns, as it stands at home. */
+    fun respawn(battleUnitId: String): Wandering =
+        copy(
+            respawns = Respawns(respawns.value - battleUnitId),
+            returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value - battleUnitId),
+        )
 
     /**
      * Battle units: those to wander, in order, while the player explores. The ones without a home are left out. A
@@ -175,6 +206,11 @@ data class Wandering private constructor(
         val value: Set<String>,
     )
 
+    // The party steps each defeated battle unit has counted since its defeat.
+    @JvmInline private value class Respawns(
+        val value: Map<String, Int>,
+    )
+
     @JvmInline private value class PendingBattleUnits(
         val value: List<String>,
     )
@@ -184,11 +220,17 @@ data class Wandering private constructor(
         val returningBattleUnitIds: Set<String>,
         val pendingBattleUnitIds: List<String>,
         val isWandering: Boolean,
+        val respawns: List<RespawnDto>,
     ) {
         data class HomeDto(
             val battleUnitId: String,
             val row: Int,
             val column: Int,
+        )
+
+        data class RespawnDto(
+            val battleUnitId: String,
+            val partySteps: Int,
         )
     }
 }

@@ -16,7 +16,7 @@ class WanderingTest {
         // When
         val wandering = Wandering.create()
         // Then
-        wandering.toDto() shouldBe Wandering.Dto(homes = emptyList(), returningBattleUnitIds = emptySet(), pendingBattleUnitIds = emptyList(), isWandering = false)
+        wandering.toDto() shouldBe Wandering.Dto(homes = emptyList(), returningBattleUnitIds = emptySet(), pendingBattleUnitIds = emptyList(), isWandering = false, respawns = emptyList())
     }
 
     @Test
@@ -220,5 +220,70 @@ class WanderingTest {
         val (events, _) = wandering.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
         // Then
         events shouldBe setOf(WanderingEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")))
+    }
+
+    private fun Wandering.walkPartySteps(steps: Int): Wandering = (1..steps).fold(this) { wandering, _ -> wandering.walkPartyStep() }
+
+    @Test
+    fun `Defeat should start counting the party steps of a battle unit with a home`() {
+        // When
+        val wandering = wandering().defeat("rat-1")
+        // Then
+        wandering.toDto().respawns.shouldContainExactly(Wandering.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 0))
+    }
+
+    @Test
+    fun `Defeat should ignore a battle unit without a home`() {
+        // When
+        val wandering = wandering().defeat("knight-1")
+        // Then
+        wandering.toDto().respawns.shouldBeEmpty()
+    }
+
+    @Test
+    fun `WalkPartyStep should count a step for every defeated battle unit`() {
+        // Given
+        val wandering = wandering().defeat("rat-1").walkPartyStep().defeat("rat-2")
+        // When
+        val walkedWandering = wandering.walkPartyStep()
+        // Then
+        walkedWandering.toDto().respawns.shouldContainExactly(
+            Wandering.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 2),
+            Wandering.Dto.RespawnDto(battleUnitId = "rat-2", partySteps = 1),
+        )
+    }
+
+    @Test
+    fun `DueRespawns should be the battle units that counted the respawn steps, with their home, in their deployment order`() {
+        // Given
+        val wandering = wandering().defeat("rat-2").defeat("rat-1")
+        // When
+        val dueRespawns = wandering.walkPartySteps(RESPAWN_STEPS).dueRespawns()
+        // Then
+        dueRespawns.shouldContainExactly(
+            Wandering.Dto.HomeDto(battleUnitId = "rat-1", row = 0, column = 0),
+            Wandering.Dto.HomeDto(battleUnitId = "rat-2", row = 2, column = 2),
+        )
+    }
+
+    @Test
+    fun `DueRespawns should not have the battle units that counted fewer steps`() {
+        // Given
+        val wandering = wandering().defeat("rat-1").walkPartySteps(RESPAWN_STEPS - 1)
+        // When
+        val dueRespawns = wandering.dueRespawns()
+        // Then
+        dueRespawns.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Respawn should stop counting the party steps of the battle unit, which no longer returns`() {
+        // Given
+        val wandering = wandering().leaveTerritory("rat-1").defeat("rat-1").walkPartySteps(RESPAWN_STEPS)
+        // When
+        val respawnedWandering = wandering.respawn("rat-1")
+        // Then
+        respawnedWandering.toDto().respawns.shouldBeEmpty()
+        respawnedWandering.isReturning("rat-1").shouldBeFalse()
     }
 }
