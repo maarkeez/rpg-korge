@@ -22,6 +22,7 @@ import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitCast
 import com.mkz.rpg.cpuBrain.usecases.commands.ResolveCpuBattleUnitMove
 import com.mkz.rpg.cpuBrain.usecases.commands.UpdateEngagement
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.SearchDistancesFromHome
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchTerrainHealthEffect
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
@@ -48,6 +49,7 @@ class CpuBrainApi(
     // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(battlefieldApi.searchBattlefield, terrainApi.searchTerrainById, effectApi.searchEffectById)
+    val searchDistancesFromHome = SearchDistancesFromHome(battlefieldApi.canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
 
     val searchEnemiesWithinReach =
         SearchEnemiesWithinReach(
@@ -89,7 +91,7 @@ class CpuBrainApi(
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
             battlefieldApi.canBattlefieldTileBeOccupied,
-            battlefieldApi.searchWalkingDistance,
+            searchDistancesFromHome,
             healingNeed,
             searchTerrainHealthEffect,
             random,

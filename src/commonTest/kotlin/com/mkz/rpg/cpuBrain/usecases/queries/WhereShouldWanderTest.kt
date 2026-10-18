@@ -226,6 +226,68 @@ class WhereShouldWanderTest {
     }
 
     @Test
+    fun `should walk around harmful terrain on its way home`() {
+        // Given: the lava blocks the straight way home, 4 tiles to the north, so it is 8 tiles away around it, either way.
+        givenBattleUnits("rat-1")
+        givenBattlefield(
+            """
+            sand sand sand sand sand
+            sand sand sand sand sand
+            sand sand sand sand sand
+            sand lava lava lava sand
+            sand sand sand sand sand
+            """,
+            occupants = mapOf("rat-1" to (4 to 2)),
+        )
+        // When
+        val eastStep = whereShouldWander(0.0, homeRow = 0, homeColumn = 2)
+        val westStep = whereShouldWander(0.99, homeRow = 0, homeColumn = 2)
+        // Then: both are 7 tiles away from home.
+        eastStep shouldBe position(4, 3)
+        westStep shouldBe position(4, 1)
+    }
+
+    @Test
+    fun `should head home when it stands on harmful terrain away from home`() {
+        // Given: the rat stands on lava 5 tiles away from home, outside its territory.
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand sand sand sand sand lava sand", occupants = mapOf("rat-1" to (0 to 5)))
+        // When
+        val step = whereShouldWander(0.99, homeRow = 0, homeColumn = 0)
+        // Then
+        step shouldBe position(0, 4)
+    }
+
+    @Test
+    fun `should count its distance from home through the nearest tile next to it when it stands on harmful terrain`() {
+        // Given: the rat stands on lava next to a tile 3 tiles away from home, so it is 4 tiles away, outside its
+        // territory. The tiles to the east and south are further away (7 and 5 tiles), so it only steps to the west.
+        givenBattleUnits("rat-1")
+        givenBattlefield(
+            """
+            sand sand sand sand lava sand
+            sand sand sand sand sand sand
+            """,
+            occupants = mapOf("rat-1" to (0 to 4)),
+        )
+        // When
+        val step = whereShouldWander(0.0, homeRow = 0, homeColumn = 0)
+        // Then
+        step shouldBe position(0, 3)
+    }
+
+    @Test
+    fun `should stay when home can only be walked to across harmful terrain`() {
+        // Given
+        givenBattleUnits("rat-1")
+        givenBattlefield("sand lava sand sand", occupants = mapOf("rat-1" to (0 to 2)))
+        // When
+        val step = whereShouldWander(0.5, 0.0, homeRow = 0, homeColumn = 0)
+        // Then
+        step.shouldBeNull()
+    }
+
+    @Test
     fun `should stay when home can not be walked to`() {
         // Given
         givenBattleUnits("rat-1")

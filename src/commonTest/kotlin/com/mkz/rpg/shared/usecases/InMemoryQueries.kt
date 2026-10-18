@@ -25,6 +25,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
 import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBrain.usecases.queries.SearchDistancesFromHome
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBrain.usecases.queries.SearchTerrainHealthEffect
 import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
@@ -84,7 +85,7 @@ class InMemoryQueries(
     val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
-    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied, canBattlefieldTerrainBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
 
     // Battle unit
     val distanceService = DistanceService()
@@ -109,6 +110,7 @@ class InMemoryQueries(
     // CPU brain
     val healingNeed = HealingNeed(searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchBattlefield, searchTerrainById, searchEffectById)
+    val searchDistancesFromHome = SearchDistancesFromHome(canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
     val searchEnemiesWithinReach = SearchEnemiesWithinReach(searchBattleUnitById, searchEnemyPlayer, searchBattleUnitsByPlayerId, searchPosition, searchWalkingDistance)
     val whatShouldCast =
         WhatShouldCast(
@@ -139,7 +141,7 @@ class InMemoryQueries(
             searchBattleUnitById,
             searchPosition,
             canBattlefieldTileBeOccupied,
-            searchWalkingDistance,
+            searchDistancesFromHome,
             healingNeed,
             searchTerrainHealthEffect,
             random,

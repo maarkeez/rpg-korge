@@ -82,7 +82,7 @@ class BattlefieldApi(
     val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
-    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied, canBattlefieldTerrainBeOccupied)
+    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
     val searchDroppedItems = SearchDroppedItems(battlefieldRepository)
     val previewBattlefield = PreviewBattlefield(battlefieldRepository, terrainApi.searchTerrainById)
     val exportBattlefield = ExportBattlefield(battlefieldEncoder)

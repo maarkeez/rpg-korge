@@ -101,7 +101,7 @@ The unit moves to the best tile, unless it is worth no more than `MINIMUM_UTILIT
 
 ## Wandering
 
-While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on, also during a battle (e.g.: a bat deployed by a goat). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
+While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on, also during a battle (e.g.: a bat deployed by a goat). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer, without stepping on harmful terrain (e.g.: lava), as they never step on it while they wander. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
 
 The [`wandering`](../../src/commonMain/kotlin/com/mkz/rpg/wandering) subdomain remembers the homes, and walks the CPU battle units every second, while the CPU brain decides where each one steps:
 
@@ -117,7 +117,7 @@ Within its territory, a CPU battle unit rests at random (`REST_CHANCE`, 0.5), bu
 - **Home**: how much nearer to home the tile is (normalised the same way), weighted by `distance from home / WANDER_DISTANCE`. Far from home, the battle unit walks back to it.
 - **Terrain**: the health effect of the tile terrain relative to the battle unit max health, weighted by its healing need, as when [moving](#moving). Hurt battle units prefer healing terrain (e.g.: water).
 
-The distance from home is the walking distance through the battle units. Picking at random, rather than the best tile, lets the battle unit reach the edge of its territory now and then, instead of going back and forth between the same two tiles. For example, on open sand:
+The distance from home is the walking distance through the battle units, around void and harmful terrain ([`SearchDistancesFromHome`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/queries/SearchDistancesFromHome.kt)). As it only walks over the tiles a wandering battle unit can step on, every tile away from home has a tile next to it nearer to home, so a battle unit heading home never stops in front of harmful terrain: it walks around it. A battle unit standing on harmful terrain (e.g.: after a chase) counts its distance through the nearest tile next to it. Picking at random, rather than the best tile, lets the battle unit reach the edge of its territory now and then, instead of going back and forth between the same two tiles. For example, on open sand:
 
 | Distance from home | Steps (utility)                                          |
 |--------------------|----------------------------------------------------------|

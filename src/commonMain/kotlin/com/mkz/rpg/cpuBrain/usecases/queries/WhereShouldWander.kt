@@ -4,7 +4,6 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBrain.usecases.services.REST_CHANCE
 import com.mkz.rpg.cpuBrain.usecases.services.WANDER_DISTANCE
 import com.mkz.rpg.cpuBrain.usecases.services.terrainHealthContribution
@@ -12,8 +11,8 @@ import kotlin.random.Random
 
 /**
  * Where a CPU battle unit out of a battle steps to while it wanders around its home (the tile it was deployed on), or
- * `null` when it rests. It wanders within its territory: the tiles walkable from home in [WANDER_DISTANCE] tiles or
- * fewer, through the battle units, as only the terrain bounds it.
+ * `null` when it rests. It wanders within its territory: the tiles it can walk to from home in [WANDER_DISTANCE] tiles
+ * or fewer, without stepping on harmful terrain, through the battle units ([SearchDistancesFromHome]).
  *
  * Within its territory, it rests at random ([REST_CHANCE]), but on harmful terrain (e.g.: lava). Otherwise, it scores
  * the free tiles next to it that are not harmful, within its territory or nearer to home, and steps to one of them at
@@ -23,13 +22,13 @@ import kotlin.random.Random
  * - Terrain: the health effect of the tile terrain, weighted by its healing need, as when moving in a battle.
  *
  * Outside its territory (e.g.: after chasing the party in a battle), it never rests, and only steps nearer to home, so
- * it heads back home. It stays when home can not be walked to.
+ * it heads back home, around the harmful terrain. It stays when home can not be walked to.
  */
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
-    private val searchWalkingDistance: SearchWalkingDistance,
+    private val searchDistancesFromHome: SearchDistancesFromHome,
     private val healingNeed: HealingNeed,
     private val searchTerrainHealthEffect: SearchTerrainHealthEffect,
     private val random: Random = Random.Default,
@@ -41,8 +40,8 @@ class WhereShouldWander(
     ): PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return null
         val position = searchPosition(battleUnitId = battleUnitId) ?: return null
-        val home = PositionDto(row = homeRow, column = homeColumn)
-        val distanceFromHome = distanceFromHome(home, position) ?: return null
+        val distancesFromHome = searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)
+        val distanceFromHome = distanceFromHome(distancesFromHome, position) ?: return null
         val isInTerritory = distanceFromHome <= WANDER_DISTANCE
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0
         if (isInTerritory && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
@@ -51,7 +50,7 @@ class WhereShouldWander(
             adjacentPositions(position)
                 .filter { step -> canBattlefieldTileBeOccupied(row = step.row, column = step.column) }
                 .filter { step -> terrainHealthEffect(step) >= 0 }
-                .mapNotNull { step -> distanceFromHome(home, step)?.let { distance -> step to distance } }
+                .mapNotNull { step -> distancesFromHome[step]?.let { distance -> step to distance } }
                 .filter { (_, distance) -> distance <= WANDER_DISTANCE || distance < distanceFromHome }
         if (steps.isEmpty()) return null
         // The distances are normalised between the steps and the current tile, so staying is the reference.
@@ -76,19 +75,12 @@ class WhereShouldWander(
         return pickWeighted(utilities)
     }
 
+    // On harmful terrain, which it can not wander to (e.g.: after chasing the party onto lava), through the nearest tile
+    // next to it.
     private fun distanceFromHome(
-        home: PositionDto,
+        distancesFromHome: Map<PositionDto, Int>,
         position: PositionDto,
-    ): Int? =
-        searchWalkingDistance(
-            fromRow = home.row,
-            fromColumn = home.column,
-            toRow = position.row,
-            toColumn = position.column,
-            // Anywhere on the battlefield, as a battle unit may be far from home (e.g.: after a battle).
-            maximumDistance = Int.MAX_VALUE,
-            throughBattleUnits = true,
-        )
+    ): Int? = distancesFromHome[position] ?: adjacentPositions(position).mapNotNull { adjacentPosition -> distancesFromHome[adjacentPosition] }.minOrNull()?.plus(1)
 
     private fun terrainHealthEffect(position: PositionDto): Int = searchTerrainHealthEffect(row = position.row, column = position.column)
 

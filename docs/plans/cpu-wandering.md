@@ -228,3 +228,11 @@ Each milestone is committed and pushed on its own, with its tests and documentat
 Until milestone 2, a CPU battle unit outside its territory (e.g.: after a battle) had nowhere to step to, so it stood
 still. From milestone 3, the acceptance tests that play rounds also wire the `WanderingApi`, as the engagement is only
 updated once the CPU battle units out of the battle have wandered, and make them rest.
+
+## Follow-ups
+
+- **Around harmful terrain**: the distance from home first walked over harmful terrain, which a wandering battle unit
+  never steps on. Outside its territory, a battle unit whose only tile nearer to home was harmful stopped in front of
+  it for good (e.g.: below the lava strip of the battlefield). The distance from home now only walks over the tiles a
+  wandering battle unit can step on (`SearchDistancesFromHome`), so it walks around the harmful terrain, and the
+  territory leaves it out. `SearchWalkingDistance` no longer walks through the battle units, as nothing else needed it.

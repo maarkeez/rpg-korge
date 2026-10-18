@@ -119,42 +119,4 @@ class SearchWalkingDistanceTest {
         // Then
         distance shouldBe 0
     }
-
-    @Test
-    fun `should walk over other battle units when walking through battle units`() {
-        // Given
-        queries.battlefieldRepository.create(battlefield("A C . B", occupants))
-        // When
-        val distance = searchWalkingDistance(fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 3, maximumDistance = 10, throughBattleUnits = true)
-        // Then
-        distance shouldBe 3
-    }
-
-    @Test
-    fun `should still walk around the tiles that can not be occupied when walking through battle units`() {
-        // Given
-        queries.battlefieldRepository.create(
-            battlefield(
-                """
-                A # B
-                . C .
-                """,
-                occupants,
-            ),
-        )
-        // When
-        val distance = searchWalkingDistance(fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2, maximumDistance = 10, throughBattleUnits = true)
-        // Then
-        distance shouldBe 4
-    }
-
-    @Test
-    fun `should return null when the destination can only be reached through tiles that can not be occupied, walking through battle units`() {
-        // Given
-        queries.battlefieldRepository.create(battlefield("A # B", occupants))
-        // When
-        val distance = searchWalkingDistance(fromRow = 0, fromColumn = 0, toRow = 0, toColumn = 2, maximumDistance = 10, throughBattleUnits = true)
-        // Then
-        distance.shouldBeNull()
-    }
 }

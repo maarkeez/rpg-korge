@@ -52,13 +52,15 @@ class WanderingAcceptanceTest {
         val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
 
-        // The knights explore from the left side of an 8x8 battlefield, one above the other, and the rat is deployed at the
-        // given tile, as the other rats.
+        // The knights explore from the left side of an 8x8 battlefield of sand, one above the other, unless told otherwise,
+        // and the rat is deployed at the given tile, as the other rats.
         suspend fun start(
             ratRow: Int,
             ratColumn: Int,
             knightRow: Int,
             otherRats: Map<String, Pair<Int, Int>> = emptyMap(),
+            knightColumn: Int = 0,
+            tiles: List<List<String>> = List(8) { List(8) { "sand" } },
         ) {
             terrainApi.init()
             effectApi.init()
@@ -70,9 +72,9 @@ class WanderingAcceptanceTest {
             unitApi.initialiseUnits()
             playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
             playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
-            battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
-            battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = knightRow, deployAtColumn = 0)
-            battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = knightRow + 1, deployAtColumn = 0)
+            battlefieldApi.requestBattlefieldCreation(tiles.size, tiles.first().size, tiles)
+            battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = knightRow, deployAtColumn = knightColumn)
+            battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = knightRow + 1, deployAtColumn = knightColumn)
             battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = ratRow, deployAtColumn = ratColumn)
             otherRats.forEach { (battleUnitId, tile) -> battleUnitApi.deployBattleUnit(battleUnitId, "rat", cpuPlayerId, deployAtRow = tile.first, deployAtColumn = tile.second) }
             explorationApi.startExploration()
@@ -174,6 +176,33 @@ class WanderingAcceptanceTest {
                 PositionDto(4, 7),
                 PositionDto(3, 7),
                 PositionDto(3, 7),
+            )
+        }
+    }
+
+    @Test
+    fun `should walk around the lava on its way back home`() {
+        // Given: the rat is deployed at (0,2), above a strip of lava, and left 5 tiles away from home below it, at (5,2).
+        // The way back home goes around the lava, along the left side of the battlefield.
+        val tiles = List(8) { row -> List(8) { column -> if (row == 3 && column in 1..3) "lava" else "sand" } }
+        val game = Game(0.9)
+        scenarioTest({ game.start(ratRow = 0, ratColumn = 2, knightRow = 6, knightColumn = 7, tiles = tiles) }) {
+            game.battleUnitApi.walkBattleUnit(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 2)
+            game.eventBus.dispatch()
+            // When
+            val positions =
+                List(6) {
+                    game.waitASecond()
+                    game.ratPosition()
+                }
+            // Then: it walks around the lava, rather than stopping in front of it, until it is back in its territory.
+            positions.shouldContainExactly(
+                PositionDto(5, 1),
+                PositionDto(5, 0),
+                PositionDto(4, 0),
+                PositionDto(3, 0),
+                PositionDto(2, 0),
+                PositionDto(2, 1),
             )
         }
     }
