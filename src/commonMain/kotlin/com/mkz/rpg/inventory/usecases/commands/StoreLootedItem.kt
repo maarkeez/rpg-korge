@@ -12,7 +12,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Stores an item lying on a tile in the inventory of a battle unit of the human player, creating the inventory with its first item. CPU battle
- * units have none, so the item stays on its tile.
+ * units and summoned battle units have none, so the item stays on its tile.
  */
 class StoreLootedItem(
     private val inventoryRepository: InventoryRepository,
@@ -29,6 +29,7 @@ class StoreLootedItem(
     ) {
         val battleUnit = searchBattleUnitById(battleUnitId) ?: throw InventoryBattleUnitDoesNotExist()
         if (searchPlayerById(battleUnit.playerId)?.type != HUMAN) return
+        if (battleUnit.remainingTurns != null) return
         searchLootableItemById(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
         val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: Inventory.create(battleUnitId)
         val (events, updatedInventory) = inventory.store(lootableItemId, row, column).pullEvents()

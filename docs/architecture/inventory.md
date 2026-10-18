@@ -4,7 +4,7 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 
 ## Who has an inventory
 
-- Each battle unit of the human player has one. CPU battle units have none for now: storing an item for them does nothing, so the item stays on its tile.
+- Each battle unit of the human player has one, except the summoned ones (e.g.: a bee), which vanish after some turns. CPU battle units and summoned battle units have none: storing an item for them does nothing, so the item stays on its tile, and their bag is not displayed.
 - An inventory is created empty when its battle unit stores its first item, so it has no game data. Until then, `searchInventoryByBattleUnitId` returns `null`, which means the inventory is empty.
 - Each inventory has 12 storage spaces. Each item takes one space, so two health potions take two. An equipped item keeps taking its space.
 
@@ -35,7 +35,7 @@ A dropped item lies on the tile where its battle unit was defeated until an inve
 3. The inventory stores each item found (`storeLootedItem`), and announces `ItemStored` with the tile the item was lying on.
 4. The battlefield picks the stored item up from its tile (`pickUpDroppedItem`, announcing `DroppedItemPickedUp`).
 
-An item that is not stored stays on its tile: when a CPU battle unit steps on it, or when the inventory is full. The battlefield exposes the items lying on each tile with `searchDroppedItems`.
+An item that is not stored stays on its tile: when a CPU battle unit or a summoned battle unit steps on it, or when the inventory is full. The battlefield exposes the items lying on each tile with `searchDroppedItems`.
 
 ## When the inventory is full
 

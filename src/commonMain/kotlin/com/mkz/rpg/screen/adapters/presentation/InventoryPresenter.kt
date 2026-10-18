@@ -49,7 +49,7 @@ class InventoryPresenter(
             // Selecting a battle unit displays its info instead of the inventory.
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 val battleUnitId = event.battleUnitId
-                val hasInventory = isHuman(battleUnitId)
+                val hasInventory = hasInventory(battleUnitId)
                 timeline.play {
                     clearDisplayedInventory()
                     if (hasInventory) {
@@ -206,9 +206,10 @@ class InventoryPresenter(
         }
     }
 
-    private fun isHuman(battleUnitId: String): Boolean {
+    // Only the battle units of the human player have an inventory, the summoned ones excluded.
+    private fun hasInventory(battleUnitId: String): Boolean {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return false
-        return playerApi.searchPlayerById(battleUnit.playerId)?.type == PlayerTypeDto.HUMAN
+        return playerApi.searchPlayerById(battleUnit.playerId)?.type == PlayerTypeDto.HUMAN && battleUnit.remainingTurns == null
     }
 
     // In a battle, the inventory can only be used during the turn of its battle unit player. Out of the battles (e.g.:

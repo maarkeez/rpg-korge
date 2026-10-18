@@ -133,7 +133,7 @@ open class BattleUnitInfoView(
         visible = true
     }
 
-    /** Displays the bag, which opens the inventory of the battle unit. Only the battle units of the human player have one. */
+    /** Displays the bag, which opens the inventory of the battle unit. Only the battle units of the human player have one, the summoned ones excluded. */
     open fun displayBag(onBagSelected: () -> kotlin.Unit) {
         bagButton.display(onBagSelected)
     }

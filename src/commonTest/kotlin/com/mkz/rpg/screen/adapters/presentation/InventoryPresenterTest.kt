@@ -1,7 +1,12 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
@@ -34,6 +39,7 @@ import kotlin.test.Test
 class InventoryPresenterTest {
     // The battle has started with the human player turn. The human knight-1 (100 health points) stands at (1,1), and the
     // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion heals 10 and the hammer raises the maximum health by 20.
+    // The knight can summon a bee next to it.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -41,13 +47,24 @@ class InventoryPresenterTest {
                 listOf(
                     increaseHealthEffect(id = "heal", healing = 10).toDto(),
                     increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto(),
+                    deployBattleUnitEffect(id = "summon-bee", unitId = "bee").toDto(),
+                ),
+            abilities =
+                listOf(
+                    ability(
+                        id = "bee",
+                        cost = 0,
+                        effectSpecs = listOf(effectSpec(effectId = "summon-bee", target = SELECTED_TILE)),
+                        targeting = VACANT_TILE_ADJACENT_TO_SELF,
+                        turnsDuration = 5,
+                    ).toDto(),
                 ),
             lootableItems =
                 listOf(
                     consumableLootableItem(id = "health-potion", name = "Health Potion", consumable = consumable(effectIds = setOf("heal"))).toDto(),
                     equippableLootableItem(id = "hammer", name = "Hammer", equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
                 ),
-            units = listOf(unit(id = "knight", healthPoints = 100).toDto(), unit(id = "rat").toDto()),
+            units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee")).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
@@ -109,6 +126,15 @@ class InventoryPresenterTest {
         eventBus.dispatch()
     }
 
+    // The knight summons a bee next to it, and returns the tile it stands on.
+    private fun summonBee(): TileDto {
+        val castGroup = apis.battleUnitApi.whereCanCast("knight-1", "bee").first()
+        apis.battleUnitApi.castAbility(battleUnitId = "knight-1", abilityId = "bee", castGroup = castGroup)
+        eventBus.dispatch()
+        val tile = castGroup.positions.first()
+        return TileDto(row = tile.row, column = tile.column)
+    }
+
     private fun clickSlot(index: Int) {
         inventoryView.delegate.shouldNotBeNull().slotSelected(index)
         eventBus.dispatch()
@@ -147,6 +173,18 @@ class InventoryPresenterTest {
         select("knight-1", row = 1, column = 1)
         // When
         select("rat-1", row = 1, column = 3)
+        // Then
+        battleUnitInfoView.onBagSelected.shouldBeNull()
+    }
+
+    @Test
+    fun `DisplayBag should not display the bag when a summoned battle unit is selected`() {
+        // Given
+        val beeTile = summonBee()
+        val beeBattleUnitId = apis.battlefieldApi.searchOccupant(row = beeTile.row, column = beeTile.column).shouldNotBeNull()
+        select("knight-1", row = 1, column = 1)
+        // When
+        select(beeBattleUnitId, row = beeTile.row, column = beeTile.column)
         // Then
         battleUnitInfoView.onBagSelected.shouldBeNull()
     }

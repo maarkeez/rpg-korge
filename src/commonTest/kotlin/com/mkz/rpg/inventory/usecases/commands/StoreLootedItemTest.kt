@@ -37,7 +37,7 @@ class StoreLootedItemTest {
     private val storeLootedItem =
         StoreLootedItem(inventoryRepository, SearchBattleUnitById(battleUnitRepository), SearchPlayerById(playerRepository), SearchLootableItemById(lootableItemRepository), eventBus)
 
-    // The knight belongs to the human player, and the rat to the CPU player.
+    // The knight and the summoned bee belong to the human player, and the rat to the CPU player.
     @BeforeTest
     fun setUp() {
         val human = player(id = "human", type = HUMAN)
@@ -46,6 +46,7 @@ class StoreLootedItemTest {
         playerRepository.create(cpu)
         battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
         battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
+        battleUnitRepository.create(battleUnit(id = "bee-1", player = human.toDto(), remainingTurns = 5))
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))
     }
 
@@ -97,6 +98,16 @@ class StoreLootedItemTest {
         storeLootedItem(battleUnitId = "rat-1", lootableItemId = "health-potion", row = 1, column = 2)
         // Then
         inventoryRepository.searchByBattleUnitId("rat-1").shouldBeNull()
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
+    fun `should not store the item when the battle unit is summoned`() {
+        // Given
+        // When
+        storeLootedItem(battleUnitId = "bee-1", lootableItemId = "health-potion", row = 1, column = 2)
+        // Then
+        inventoryRepository.searchByBattleUnitId("bee-1").shouldBeNull()
         eventBus.shouldNotHavePublishedEvents()
     }
 
