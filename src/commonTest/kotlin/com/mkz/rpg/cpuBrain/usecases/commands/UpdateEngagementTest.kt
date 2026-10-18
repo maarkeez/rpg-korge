@@ -73,4 +73,18 @@ class UpdateEngagementTest {
         // Then
         eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
     }
+
+    @Test
+    fun `should never have the cpu summons in the battle leave it, even with no enemy within reach`() {
+        // Given: the bat can not walk to the knight.
+        queries.playerRepository.create(human)
+        queries.playerRepository.create(cpu)
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu.toDto(), remainingTurns = 3))
+        queries.battlefieldRepository.create(battlefield("B . # . K", occupants = mapOf('K' to "knight-1", 'B' to "bat-1")))
+        // When
+        updateEngagement(battleUnitIds = setOf("knight-1", "bat-1"))
+        // Then
+        eventBus.shouldHavePublishedEvents(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
+    }
 }

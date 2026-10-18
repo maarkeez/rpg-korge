@@ -44,6 +44,10 @@ For example, next to a knight, a rat two tiles away moves next to it and attacks
 
 The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts. When a round finishes, the CPU battle units out of the battle wander, then those that got an enemy within reach join the battle, and those without any leave it, until none is left and the party explores again (see [Exploration](exploration.md#engaging)).
 
+### Summons
+
+A summoned battle unit (e.g.: the bat a goat summons) lasts only some turns, and spends them attacking: every enemy it can walk to is within its reach, however far, so it approaches and attacks the nearest one. It never leaves the battle when a round finishes, even with no enemy it can walk to, and claims no home, so it never wanders: it vanishes once its turns are over.
+
 ## Casting
 
 Every ability the unit can cast (enough mana, no cooldown), with every target `WhereCanCast` allows, is a candidate, but only heals when no enemy is within reach. Each ability is classified by its effects:
