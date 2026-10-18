@@ -988,4 +988,38 @@ class BattleUnitTest {
         finishedBattleUnit.toDto().remainingTurns shouldBe 1
         events.shouldBeEmpty()
     }
+
+    @Test
+    fun `Vanish should vanish a summon on its tile, whatever turns it has left`() {
+        // Given
+        val unit = UnitMother.unit().toDto()
+        val player = PlayerMother.player().toDto()
+        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingTurns = 4)
+        // When
+        val (events, vanishedBattleUnit) = summon.vanish(row = 2, column = 3).pullEvents()
+        // Then
+        vanishedBattleUnit.toDto().remainingTurns shouldBe 0
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3))
+    }
+
+    @Test
+    fun `Vanish should not change a battle unit that never vanishes`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit()
+        // When
+        val (events, vanishedBattleUnit) = battleUnit.vanish(row = 2, column = 3).pullEvents()
+        // Then
+        vanishedBattleUnit shouldBe battleUnit
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Vanish should not vanish a defeated summon`() {
+        // Given
+        val summon = BattleUnitMother.battleUnit(remainingHealthPoints = 0, remainingTurns = 4)
+        // When
+        val (events, _) = summon.vanish(row = 2, column = 3).pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
 }

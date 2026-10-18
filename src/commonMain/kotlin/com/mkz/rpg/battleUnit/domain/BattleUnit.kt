@@ -176,18 +176,20 @@ data class BattleUnit private constructor(
     ): BattleUnit {
         if (remainingTurns == null || isDefeated()) return this
         val turnsLeft = remainingTurns.finishTurn()
-        return if (turnsLeft.isOver()) {
-            copy(remainingTurns = turnsLeft).vanishFrom(row = row, column = column)
-        } else {
-            copy(remainingTurns = turnsLeft)
-        }
+        return if (turnsLeft.isOver()) vanish(row = row, column = column) else copy(remainingTurns = turnsLeft)
     }
 
-    private fun vanishFrom(
+    /**
+     * A summon vanishes from its tile, whatever turns it has left (e.g.: when the battle ends). Nothing changes for the
+     * other battle units, nor once defeated.
+     */
+    fun vanish(
         row: Int,
         column: Int,
-    ): BattleUnit =
-        copy(
+    ): BattleUnit {
+        if (remainingTurns == null || isDefeated()) return this
+        return copy(
+            remainingTurns = RemainingTurns(0),
             events =
                 events +
                     BattleUnitVanished(
@@ -198,6 +200,7 @@ data class BattleUnit private constructor(
                         column = column,
                     ),
         )
+    }
 
     fun resetActions(): BattleUnit {
         val remainingTurnActions = remainingTurnActions.reset()

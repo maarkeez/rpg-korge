@@ -58,6 +58,7 @@ While exploring, the battle info displays "Exploring".
 When the engagement is updated and only one player is left with battle units in the battle (e.g.: every CPU battle unit in it was defeated or left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes the battle without a winner (`BattleFinished`) instead of starting the next round:
 
 - The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
+- The summons left (e.g.: the bees a knight summoned) vanish, whatever turns they had left, as they never explore ([`VanishSummonedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/VanishSummonedBattleUnits.kt)). They flash and leave the battlefield, without being defeated: they drop no loot. A player whose last battle units were summons is defeated then, so the human player loses the game when only bees were left.
 - The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, and the virtual pad takes the place of the battle HUD and the player call to action.
 - The next engagement starts a new battle, which replaces the finished one.
 
