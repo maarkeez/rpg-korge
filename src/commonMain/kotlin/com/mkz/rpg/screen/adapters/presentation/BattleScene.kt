@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
+import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
@@ -17,7 +18,6 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
-import com.mkz.rpg.wandering.adapters.presentation.WanderingApi
 import korlibs.korge.scene.Scene
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
@@ -78,7 +78,7 @@ class BattleScene(
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
-        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
+        val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 

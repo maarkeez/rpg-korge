@@ -25,7 +25,7 @@ import kotlin.random.Random
  * heads home: it never rests, and only steps nearer to home, around the harmful terrain. Once home, it wanders again. It
  * stays when home can not be walked to.
  *
- * Is returning: whether it left its territory and has not been back home since, as the wandering remembers.
+ * Is returning: whether it left its territory and has not been back home since, as the CPU wander brain remembers.
  */
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,

@@ -47,7 +47,7 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
-    // Requested for the defeated CPU battle units the wandering brings back home.
+    // Requested for the defeated CPU battle units the CPU wander brain brings back home.
     data class RequestRespawnBattleUnit(
         val battleUnitId: String,
         val row: Int,

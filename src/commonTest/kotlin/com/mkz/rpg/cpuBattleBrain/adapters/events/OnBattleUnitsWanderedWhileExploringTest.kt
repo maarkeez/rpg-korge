@@ -4,12 +4,12 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.wandering.domain.WanderingEvent
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
@@ -30,7 +30,7 @@ class OnBattleUnitsWanderedWhileExploringTest {
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield("K . R", occupants = mapOf('K' to "knight-1", 'R' to "rat-1")))
-        eventBus.publish(WanderingEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        eventBus.publish(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
         // When
         eventBus.dispatch()
         // Then
