@@ -4,6 +4,8 @@ The production code is split into subdomains. Each subdomain lives in its own pa
 
 This structure is enforced by [`PackageStructureArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/PackageStructureArchitectureTest.kt).
 
+The dependencies between the subdomains are shown in the [Subdomain dependencies](dependencies.md) report.
+
 ## Allowed packages
 
 A subdomain MUST only contain the following packages:

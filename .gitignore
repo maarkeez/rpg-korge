@@ -15,3 +15,6 @@ src/main/*
 .DS_Store
 /null.frame
 /null.socket
+/buildSrc/build
+/buildSrc/.gradle
+/buildSrc/.kotlin

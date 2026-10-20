@@ -1,3 +1,4 @@
+import dependencyreport.DependencyReportTask
 import korlibs.korge.gradle.*
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.testing.Test
@@ -81,6 +82,15 @@ tasks.withType<ConfigurableKtLintTask>().configureEach {
             setSource(filtered)
         }
     }
+}
+
+tasks.register<DependencyReportTask>("dependencyReport") {
+    group = "documentation"
+    description = "Generates the interactive report of the dependencies between the subdomains. See docs/architecture/dependencies.md."
+
+    sourceDirectory.set(file("src/commonMain/kotlin"))
+    basePackage.set("com.mkz.rpg")
+    reportFile.set(file("docs/architecture/dependencies.html"))
 }
 
 tasks.register("allTargetTests") {

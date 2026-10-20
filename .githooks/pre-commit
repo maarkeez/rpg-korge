@@ -1,11 +1,12 @@
 #!/bin/sh
 set -e
 
-# (1) auto-fix format in place
-./gradlew formatKotlin --quiet
+# (1) auto-fix format in place, and regenerate the subdomain dependency report (see docs/architecture/dependencies.md)
+./gradlew formatKotlin dependencyReport --quiet
 
-# re-stage anything the formatter changed
+# re-stage anything the formatter changed, and the report, which `git add -u` misses on its first generation
 git add -u
+git add docs/architecture/dependencies.html
 
 # (2) verify: fail the commit if unfixable violations remain
 if ! ./gradlew lintKotlin --quiet; then
