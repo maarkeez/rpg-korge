@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
@@ -35,7 +35,7 @@ class ExploringTerrainEffectAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
-    private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
     private val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
     private val humanPlayerId = "human"

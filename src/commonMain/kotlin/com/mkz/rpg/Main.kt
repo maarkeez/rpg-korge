@@ -15,7 +15,7 @@ suspend fun main() =
         startGame()
     }
 
-// Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU brain.
+// Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU battle brain.
 suspend fun Stage.startGame(random: Random = Random.Default) {
     val sceneContainer = sceneContainer()
 

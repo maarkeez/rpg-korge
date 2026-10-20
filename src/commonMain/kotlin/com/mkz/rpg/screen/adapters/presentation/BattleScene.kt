@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
@@ -27,7 +27,7 @@ import korlibs.korge.view.container
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
-// Random: the rolls of the CPU brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
+// Random: the rolls of the CPU battle brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
 class BattleScene(
     private val random: Random = Random.Default,
 ) : Scene() {
@@ -77,8 +77,8 @@ class BattleScene(
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
-        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
-        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
+        val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
+        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 

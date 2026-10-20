@@ -3,15 +3,15 @@ package com.mkz.rpg.wandering.usecases.services
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.cpuBrain.usecases.queries.IsOutsideTerritory
-import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldWander
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.IsOutsideTerritory
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.wandering.domain.Wandering
 import com.mkz.rpg.wandering.domain.WanderingRepository
 
 /**
- * Wanders the CPU battle units one at a time: the CPU brain decides whether each one rests or where it steps
+ * Wanders the CPU battle units one at a time: the CPU battle brain decides whether each one rests or where it steps
  * ([WhereShouldWander]). The resting ones are done at once, and the first step is requested and awaited, so the next
  * battle unit decides once it has been walked.
  *

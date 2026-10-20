@@ -23,15 +23,15 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
-import com.mkz.rpg.cpuBrain.adapters.storage.InMemoryCpuBrainRepository
-import com.mkz.rpg.cpuBrain.usecases.queries.HealingNeed
-import com.mkz.rpg.cpuBrain.usecases.queries.IsOutsideTerritory
-import com.mkz.rpg.cpuBrain.usecases.queries.SearchDistancesFromHome
-import com.mkz.rpg.cpuBrain.usecases.queries.SearchEnemiesWithinReach
-import com.mkz.rpg.cpuBrain.usecases.queries.SearchTerrainHealthEffect
-import com.mkz.rpg.cpuBrain.usecases.queries.WhatShouldCast
-import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldMove
-import com.mkz.rpg.cpuBrain.usecases.queries.WhereShouldWander
+import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.HealingNeed
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.IsOutsideTerritory
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchDistancesFromHome
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchEnemiesWithinReach
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchTerrainHealthEffect
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhatShouldCast
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldMove
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
@@ -60,7 +60,7 @@ class InMemoryQueries(
     val battleRepository = InMemoryBattleRepository()
     val battlefieldRepository = InMemoryBattlefieldRepository()
     val battleUnitRepository = InMemoryBattleUnitRepository()
-    val cpuBrainRepository = InMemoryCpuBrainRepository()
+    val cpuBattleBrainRepository = InMemoryCpuBattleBrainRepository()
     val effectRepository = InMemoryEffectRepository()
     val npcRepository = InMemoryNpcRepository()
     val playerRepository = InMemoryPlayerRepository()
@@ -116,7 +116,7 @@ class InMemoryQueries(
         )
     val abilityExecution = AbilityExecution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, distanceService)
 
-    // CPU brain
+    // CPU battle brain
     val healingNeed = HealingNeed(searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchBattlefield, searchTerrainById, searchEffectById)
     val searchDistancesFromHome = SearchDistancesFromHome(canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)

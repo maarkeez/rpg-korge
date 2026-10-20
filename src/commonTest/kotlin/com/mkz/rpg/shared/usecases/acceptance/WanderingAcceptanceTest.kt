@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
@@ -49,8 +49,8 @@ class WanderingAcceptanceTest {
         val abilityApi = AbilityApi(effectApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
-        val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(*rolls))
-        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
+        val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(*rolls))
+        val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
         val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
         // The knights explore from the left side of an 8x8 battlefield of sand, one above the other, unless told otherwise,

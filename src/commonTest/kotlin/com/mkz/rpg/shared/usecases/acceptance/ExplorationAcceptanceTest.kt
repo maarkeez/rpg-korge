@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
@@ -38,8 +38,8 @@ class ExplorationAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
 
     // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
-    private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
-    private val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
     private val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
     private val humanPlayerId = "human"

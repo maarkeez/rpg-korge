@@ -5,8 +5,8 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 ## The party
 
 - Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
-- The CPU battle units wander around the tile they were deployed on while the party explores (see [CPU brain](cpu-brain.md#wandering)).
-- A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU brain](cpu-brain.md#respawning)).
+- The CPU battle units wander around the tile they were deployed on while the party explores (see [CPU battle brain](cpu-battle-brain.md#wandering)).
+- A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU battle brain](cpu-battle-brain.md#respawning)).
 - A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
 
 ## The virtual pad
@@ -69,16 +69,16 @@ Every second while exploring, the battle units that stood still during that seco
 - The exploration remembers the battle units that moved during the current second (`BattleUnitMoved`, see [`MarkBattleUnitMoved`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/MarkBattleUnitMoved.kt)), so walking over a tile does not apply its effect. A battle unit that walks onto lava is hurt once it has stood on it for a whole second.
 - The effects are requested to the battlefield (`BattlefieldEvent.RequestEffectApplicationToOccupants`) for the battle units standing still, as they are for the battle units in the battle when a round starts.
 - Nothing is applied while battling: the battle applies the terrain effects when its rounds start instead.
-- Then, the next second starts (`ExplorationSecondStarted`), and the CPU battle units wander (see [CPU brain](cpu-brain.md#wandering)). They wander after the effects, so a battle unit that steps counts as moved during the new second.
+- Then, the next second starts (`ExplorationSecondStarted`), and the CPU battle units wander (see [CPU battle brain](cpu-battle-brain.md#wandering)). They wander after the effects, so a battle unit that steps counts as moved during the new second.
 
 A battle unit defeated by its terrain while exploring leaves the party. A player whose last battle units are defeated while exploring loses the game, as in a battle (`PlayerVictory` for their enemy, see [`DefeatPlayer`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt)). Once the game is over, the virtual pad is hidden and the seconds are no longer counted.
 
 ## Engaging
 
-After the party starts exploring, every time it has walked and every time the CPU battle units have wandered, the CPU brain [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/EngageEnemies.kt) looks for the CPU battle units that have a battle unit of the party within reach, with the same rule as in a battle (see [CPU brain](cpu-brain.md#engaging)). When there is any, the combat is engaged (`CombatEngaged`):
+After the party starts exploring, every time it has walked and every time the CPU battle units have wandered, the CPU battle brain [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/EngageEnemies.kt) looks for the CPU battle units that have a battle unit of the party within reach, with the same rule as in a battle (see [CPU battle brain](cpu-battle-brain.md#engaging)). When there is any, the combat is engaged (`CombatEngaged`):
 
-- The battle starts between the CPU battle units that engaged and the whole party. The CPU plays first, as it engaged. The other CPU battle units stay out of the battle: they do not play, and only wander once per round (see [CPU brain](cpu-brain.md#wandering)).
-- When a battle round finishes and the CPU battle units out of the battle have wandered, the CPU brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBrain/usecases/commands/UpdateEngagement.kt) updates the engagement (`EngagementUpdated`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
+- The battle starts between the CPU battle units that engaged and the whole party. The CPU plays first, as it engaged. The other CPU battle units stay out of the battle: they do not play, and only wander once per round (see [CPU battle brain](cpu-battle-brain.md#wandering)).
+- When a battle round finishes and the CPU battle units out of the battle have wandered, the CPU battle brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt) updates the engagement (`EngagementUpdated`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
 - Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
 - The battle info announces the battle, and the battle HUD and the player call to action take the place of the virtual pad.

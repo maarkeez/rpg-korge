@@ -4,7 +4,7 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.commands.StartNextRound
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -27,7 +27,7 @@ class OnEngagementUpdatedTest {
         listOf("rat-1", "rat-2").forEach { ratId -> queries.battleUnitRepository.create(battleUnit(id = ratId, player = player(id = "cpu").toDto())) }
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
         battleRepository.create(battle(players = listOf("cpu", "human"), battleUnitIds = setOf("rat-1", "knight-1")))
-        eventBus.publish(CpuBrainEvent.EngagementUpdated(joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = listOf("rat-1")))
+        eventBus.publish(CpuBattleBrainEvent.EngagementUpdated(joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = listOf("rat-1")))
         // When
         eventBus.dispatch()
         // Then

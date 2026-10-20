@@ -2,7 +2,7 @@ package com.mkz.rpg.wandering.adapters.presentation
 
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.wandering.adapters.events.OnBattleRoundFinished
@@ -27,14 +27,14 @@ class WanderingApi(
     playerApi: PlayerApi,
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
-    cpuBrainApi: CpuBrainApi,
+    cpuBattleBrainApi: CpuBattleBrainApi,
     eventBus: EventBus,
 ) {
     // Storage
     private val wanderingRepository: WanderingRepository = InMemoryWanderingRepository()
 
     // Services
-    private val wanderingSteps = WanderingSteps(wanderingRepository, cpuBrainApi.whereShouldWander, cpuBrainApi.isOutsideTerritory, battlefieldApi.searchPosition, eventBus)
+    private val wanderingSteps = WanderingSteps(wanderingRepository, cpuBattleBrainApi.whereShouldWander, cpuBattleBrainApi.isOutsideTerritory, battlefieldApi.searchPosition, eventBus)
 
     // Commands
     val claimHome = ClaimHome(wanderingRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById)

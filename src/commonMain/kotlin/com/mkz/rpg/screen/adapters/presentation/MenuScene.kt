@@ -6,7 +6,7 @@ import korlibs.korge.scene.Scene
 import korlibs.korge.view.SContainer
 import kotlin.random.Random
 
-/** The first scene of the game, opening the battle or the map builder. Random: the rolls of the CPU brain in the battle. */
+/** The first scene of the game, opening the battle or the map builder. Random: the rolls of the CPU battle brain in the battle. */
 class MenuScene(
     private val random: Random = Random.Default,
 ) : Scene() {

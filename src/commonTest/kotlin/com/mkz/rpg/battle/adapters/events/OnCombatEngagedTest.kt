@@ -3,7 +3,7 @@ package com.mkz.rpg.battle.adapters.events
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.usecases.commands.StartBattle
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.cpuBrain.domain.CpuBrainEvent
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -22,7 +22,7 @@ class OnCombatEngagedTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
-        eventBus.publish(CpuBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
+        eventBus.publish(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
         // When
         eventBus.dispatch()
         // Then

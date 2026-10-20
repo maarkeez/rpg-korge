@@ -9,7 +9,7 @@ import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.cpuBrain.adapters.presentation.CpuBrainApi
+import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -37,8 +37,8 @@ class SummonVanishingAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
-    private val cpuBrainApi = CpuBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
-    private val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBrainApi, eventBus)
+    private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
+    private val wanderingApi = WanderingApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
 
     private val summonerPlayerId = "summoner"
     private val enemyPlayerId = "enemy"

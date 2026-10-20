@@ -55,7 +55,7 @@ Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equippe
 - In a swap, the new item's effects are applied **before** the old item's are removed, so the remaining health and mana are only lowered to the final maximums: swapping an item for another with the same effects loses nothing.
 - An item can not be equipped twice. A battle unit can store several copies of the same item, but only one of them is equipped.
 - An equipped item can not be discarded: the player unequips it first. When another copy of it is stored, discarding removes that copy instead.
-- Healing, restoring mana and the mana replenished each turn never go above the maximums, equipment included. The battle unit exposes them as `maximumHealthPoints` and `maximumManaPoints`, and the health and mana bars and the CPU brain use them.
+- Healing, restoring mana and the mana replenished each turn never go above the maximums, equipment included. The battle unit exposes them as `maximumHealthPoints` and `maximumManaPoints`, and the health and mana bars and the CPU battle brain use them.
 
 ## On the screen
 
