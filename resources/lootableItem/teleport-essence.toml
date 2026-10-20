@@ -1,0 +1,6 @@
+name = "Teleport Essence"
+price = 100
+type = "CONSUMABLE"
+
+[consumable]
+effectIds = ["learn-teleport"]

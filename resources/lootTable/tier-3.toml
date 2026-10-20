@@ -1,0 +1,4 @@
+[[entries]]
+type = "LOOTABLE_ITEM"
+lootableItemId = "teleport-essence"
+weight = 100

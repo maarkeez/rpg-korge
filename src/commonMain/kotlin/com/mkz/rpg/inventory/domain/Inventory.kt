@@ -74,6 +74,9 @@ data class Inventory private constructor(
             copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))
         }
 
+    /** Whether the item is stored, so it can be consumed. */
+    fun canConsume(lootableItemId: String): Boolean = storedItems.count(LootableItemId(lootableItemId)) > 0
+
     fun consume(lootableItemId: String): Inventory =
         copy(
             storedItems = storedItems.removeOne(LootableItemId(lootableItemId)),

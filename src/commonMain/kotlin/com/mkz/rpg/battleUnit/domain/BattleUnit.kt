@@ -1,6 +1,8 @@
 package com.mkz.rpg.battleUnit.domain
 
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilitiesAboveLimit
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilityAlreadyKnown
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EffectNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectAlreadyApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectsNotFound
@@ -9,6 +11,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceExceedsRema
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotOnTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.RemainingManaPointsBelowZero
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityLearned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDamaged
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
@@ -30,9 +33,11 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HE
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
+import com.mkz.rpg.shared.domain.KnownAbilities
 import com.mkz.rpg.unit.domain.Unit
 import kotlin.jvm.JvmInline
 import kotlin.math.max
@@ -50,6 +55,7 @@ data class BattleUnit private constructor(
     private val equippedEffects: EquippedEffects,
     private val remainingTurnActions: RemainingTurnActions,
     private val abilityCooldowns: AbilityCooldowns,
+    private val learnedAbilities: LearnedAbilities,
     private val ongoingEffects: OngoingEffects,
     private val remainingTurns: RemainingTurns?,
     private val events: Set<BattleUnitEvent>,
@@ -74,6 +80,7 @@ data class BattleUnit private constructor(
                 EquippedEffects(),
                 RemainingTurnActions(unit.movementRange),
                 AbilityCooldowns(unit.abilities),
+                LearnedAbilities(),
                 OngoingEffects(),
                 remainingTurns?.let(::RemainingTurns),
                 events = setOf(BattleUnitDeployed(battleUnitId = id, row = deployAtRow, column = deployAtColumn)),
@@ -205,7 +212,8 @@ data class BattleUnit private constructor(
 
     /**
      * A defeated battle unit comes back on the tile as it was deployed with its unit: full health and mana, no equipped
-     * effects, no cooldowns, no ongoing effects. It keeps its id and its player. Nothing changes when it is not defeated.
+     * effects, no cooldowns, no ongoing effects. It keeps its id, its player and the abilities it learned, after the
+     * abilities of its unit. Nothing changes when it is not defeated.
      */
     fun respawn(
         unit: Unit.Dto,
@@ -221,7 +229,7 @@ data class BattleUnit private constructor(
             baseMaximumManaPoints = BaseMaximumManaPoints(unit.manaPoints),
             equippedEffects = EquippedEffects(),
             remainingTurnActions = RemainingTurnActions(unit.movementRange),
-            abilityCooldowns = AbilityCooldowns(unit.abilities),
+            abilityCooldowns = AbilityCooldowns(unit.abilities + learnedAbilities.value),
             ongoingEffects = OngoingEffects(),
             events = events + BattleUnitRespawned(playerId = playerId.value, battleUnitId = id.value, row = row, column = column),
         )
@@ -291,6 +299,9 @@ data class BattleUnit private constructor(
     fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
 
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
+
+    /** Whether it can learn the ability for good: it does not know it yet, and knows fewer abilities than the most it can. */
+    fun canLearnAbility(abilityId: String): Boolean = !abilityCooldowns.knows(abilityId) && abilityCooldowns.value.size < KnownAbilities.MAXIMUM
 
     fun canCastAbility(ability: Ability.Dto): Boolean =
         remainingTurnActions.canCastAbility() &&
@@ -404,6 +415,7 @@ data class BattleUnit private constructor(
                     events = events + BattleUnitTeleported(battleUnitId = id.value),
                 )
             }
+            LEARN_ABILITY -> copy(ongoingEffects = ongoingEffects).learnAbility(effect.outcome.learnAbility!!.abilityId)
             NEGATE_INCREASE_HEALTH,
             APPLY_EFFECT_ON_NEARBY_ALLIES,
             DEPLOY_BATTLE_UNIT,
@@ -411,6 +423,17 @@ data class BattleUnit private constructor(
             INCREASE_MAXIMUM_MANA,
             -> TODO("Not implemented")
         }
+    }
+
+    /** Learns the ability for good, after the abilities it knows, ready to be cast. */
+    private fun learnAbility(abilityId: String): BattleUnit {
+        if (abilityCooldowns.knows(abilityId)) throw AbilityAlreadyKnown()
+        if (!canLearnAbility(abilityId)) throw AbilitiesAboveLimit()
+        return copy(
+            abilityCooldowns = abilityCooldowns.learn(abilityId),
+            learnedAbilities = learnedAbilities.learn(abilityId),
+            events = events + AbilityLearned(battleUnitId = id.value, abilityId = abilityId),
+        )
     }
 
     fun hasOnTurnStartedEffects(): Boolean = ongoingEffects.hasOnTurnStartedEffects()
@@ -632,6 +655,11 @@ data class BattleUnit private constructor(
 
         fun toDto(): Map<String, Int> = value.entries.associate { it.key.value to it.value.value }
 
+        fun knows(abilityId: String): Boolean = AbilityId(abilityId) in value
+
+        // The ability is added after the known ones, with no cooldown.
+        fun learn(abilityId: String) = AbilityCooldowns(value + (AbilityId(abilityId) to CooldownTurnsLeft(0)))
+
         fun canCastAbility(abilityId: String): Boolean {
             val cooldownTurnsLeft = value[AbilityId(abilityId)] ?: return false
             return cooldownTurnsLeft.value == 0
@@ -663,6 +691,15 @@ data class BattleUnit private constructor(
                 }
             return AbilityCooldowns(abilityCooldowns)
         }
+    }
+
+    /** The abilities learned for good (e.g.: by consuming an item), which are kept when it respawns. */
+    @JvmInline private value class LearnedAbilities(
+        val value: List<String>,
+    ) {
+        constructor() : this(emptyList())
+
+        fun learn(abilityId: String) = LearnedAbilities(value + abilityId)
     }
 
     @JvmInline private value class OngoingEffects(

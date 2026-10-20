@@ -185,7 +185,13 @@ class InventoryPresenter(
                 add(action("Cancel") {})
                 add(action("Discard", isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
                 when (lootableItem.lootType.type) {
-                    CONSUMABLE -> add(action("Consume") { inventoryApi.consumeItem(battleUnitId, slot.lootableItemId) })
+                    // An item teaching an ability its battle unit can not learn (e.g.: already known) can not be consumed.
+                    CONSUMABLE ->
+                        add(
+                            action("Consume", isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
+                                inventoryApi.consumeItem(battleUnitId, slot.lootableItemId)
+                            },
+                        )
                     EQUIPPABLE ->
                         if (slot.isEquipped) {
                             add(action("Unequip") { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })

@@ -7,6 +7,7 @@ import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseManaEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
@@ -30,6 +31,7 @@ class ResourcesEffectLoaderTest {
                     "effect/ether.toml" to "[outcome]\ntype = \"INCREASE_MANA\"\nmana = 15\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                     "effect/sturdy.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_HEALTH\"\nhealthPoints = 20\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
                     "effect/wise.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_MANA\"\nmanaPoints = 5\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
+                    "effect/learn-teleport.toml" to "[outcome]\ntype = \"LEARN_ABILITY\"\nabilityId = \"teleport\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                 )["effect"]
             val loader = ResourcesEffectLoader(effectRoot = effectRoot)
             // When
@@ -39,6 +41,7 @@ class ResourcesEffectLoaderTest {
                 applyEffectOnNearbyAlliesEffect(id = "curse", effectId = "venom").toDto(),
                 increaseManaEffect(id = "ether", mana = 15).toDto(),
                 increaseHealthEffect(id = "heal", healing = 7).toDto(),
+                learnAbilityEffect(id = "learn-teleport", abilityId = "teleport").toDto(),
                 increaseMaximumHealthEffect(id = "sturdy", healthPoints = 20).toDto(),
                 deployBattleUnitEffect(id = "summon", unitId = "bee").toDto(),
                 teleportEffect(id = "teleport").toDto(),

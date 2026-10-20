@@ -13,7 +13,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | Command           | What it does                                                                                                                                       |
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `storeLootedItem` | Stores an item lying on a tile, or announces `InventoryFull` without storing it when there is no space left.                                       |
-| `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. |
+| `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. Fails, keeping it, when its battle unit can not learn the ability it teaches. See [Learning an ability](#learning-an-ability). |
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
 | `equipItem`       | Equips a stored equippable item in its zone, and requests the application of its effects. See [Equipment](#equipment).                              |
 | `unequipItem`     | Unequips an item, which stays stored, and requests the removal of its effects. See [Equipment](#equipment).                                         |
@@ -24,6 +24,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 |---------------------------------|---------------------------------------------------------|
 | `searchInventoryByBattleUnitId` | The stored items and the equipped ones, to display them. |
 | `canStoreItem`                  | Whether there is space left for one more item.          |
+| `canConsumeItem`                | Whether the battle unit can consume the item now.       |
 | `canBuyItem`                    | Whether the battle unit can buy the item now.           |
 | `canSellItem`                   | Whether the battle unit can sell the item now.          |
 
@@ -83,6 +84,14 @@ A battle unit trades as a party member, while the party talks to a merchant ([`T
 - Buying announces `ItemBought`, and selling `ItemSold`, with the price paid. A sold item leaves the game, so it does not join the merchant's stock.
 - Any item can be sold, also the ones the merchant does not sell.
 - `canBuyItem` and `canSellItem` answer `false` instead of failing, so the shop disables Buy and Sell. See [Shopping at a merchant](exploration.md#shopping-at-a-merchant).
+
+## Learning an ability
+
+A consumable can teach its battle unit an ability for good, with a `LEARN_ABILITY` effect (see [Game data](game-data.md)). E.g.: the teleport essence (100 G) teaches teleport, and the goat always drops it.
+
+- The ability is added at the end of the battle unit's abilities, ready to be cast. It belongs to that battle unit only, and it is kept out of the battles and when the battle unit respawns.
+- The item can not be consumed when its battle unit already knows the ability (e.g.: the knights know teleport), or already knows 6 abilities: `consumeItem` fails with `AbilityCanNotBeLearned`, and the item stays stored. `canConsumeItem` answers `false` instead, so the inventory disables Consume ([`ConsumptionRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/ConsumptionRule.kt)).
+- The other effects never prevent consuming an item, e.g.: a health potion can be consumed at full health.
 
 ## Not yet supported
 

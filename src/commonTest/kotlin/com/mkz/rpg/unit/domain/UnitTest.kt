@@ -35,6 +35,26 @@ class UnitTest {
     }
 
     @Test
+    fun `Create should create a unit with up to 6 abilities, one per button of the ability bar`() {
+        // Given
+        val abilities = List(6) { index -> "ability-$index" }
+        // When
+        val unit = UnitMother.unit(abilities = abilities)
+        // Then
+        unit.toDto().abilities shouldBe abilities
+    }
+
+    @Test
+    fun `Create should fail when the unit has more than 6 abilities`() {
+        // Given
+        val abilities = List(7) { index -> "ability-$index" }
+        // When
+        val result = runCatching { UnitMother.unit(abilities = abilities) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<UnitError.AbilitiesAboveLimit>()
+    }
+
+    @Test
     fun `Create should publish the unit created event when the unit is created`() {
         // Given
         val unitDto =

@@ -279,6 +279,36 @@ class BattleUnitTest {
     }
 
     @Test
+    fun `CanLearnAbility should be true when the battle unit does not know the ability and knows fewer than 6`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(5) { index -> "ability-$index" }).toDto())
+        // When
+        val result = battleUnit.canLearnAbility(abilityId = "teleport")
+        // Then
+        result.shouldBeTrue()
+    }
+
+    @Test
+    fun `CanLearnAbility should be false when the battle unit already knows the ability`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("sword", "teleport")).toDto())
+        // When
+        val result = battleUnit.canLearnAbility(abilityId = "teleport")
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `CanLearnAbility should be false when the battle unit already knows 6 abilities`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(6) { index -> "ability-$index" }).toDto())
+        // When
+        val result = battleUnit.canLearnAbility(abilityId = "teleport")
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
     fun `CastAbility should reduce the mana and casts, set the cooldown and publish the event when the ability is cast`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
@@ -521,6 +551,50 @@ class BattleUnitTest {
         // Then
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.BattleUnitTeleported(battleUnitId = updatedBattleUnit.toDto().id))
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should learn the ability after the known ones, ready to be cast, when the effect teaches an ability`() {
+        // Given: sword is cooling down.
+        val battleUnit =
+            BattleUnitMother
+                .battleUnit(unit = UnitMother.unit(abilities = listOf("sword")).toDto())
+                .castAbility(abilityId = "sword", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .pullEvents()
+                .second
+        val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
+        // When
+        val (events, updatedBattleUnit) =
+            battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0).pullEvents()
+        // Then
+        updatedBattleUnit
+            .toDto()
+            .abilityCooldowns
+            .toList()
+            .shouldContainExactly("sword" to 2, "teleport" to 0)
+        events.shouldContainExactly(BattleUnitEvent.AbilityLearned(battleUnitId = updatedBattleUnit.toDto().id, abilityId = "teleport"))
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should fail when the effect teaches an ability the battle unit already knows`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("sword", "teleport")).toDto())
+        val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
+        // When
+        val result = runCatching { battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.AbilityAlreadyKnown>()
+    }
+
+    @Test
+    fun `ApplyImmediateEffect should fail when the effect teaches an ability and the battle unit already knows 6`() {
+        // Given
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(6) { index -> "ability-$index" }).toDto())
+        val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
+        // When
+        val result = runCatching { battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.AbilitiesAboveLimit>()
     }
 
     @Test
@@ -1042,6 +1116,29 @@ class BattleUnitTest {
         // Then
         respawnedBattleUnit.toDto() shouldBe BattleUnitMother.battleUnit(id = "rat-1", unit = unit, player = player).toDto()
         events.shouldContainExactly(BattleUnitEvent.BattleUnitRespawned(playerId = player.id, battleUnitId = "rat-1", row = 2, column = 3))
+    }
+
+    @Test
+    fun `Respawn should keep the learned abilities after the abilities of its unit, with no cooldown`() {
+        // Given: it learned teleport and cast it before being defeated.
+        val unit = UnitMother.unit(healthPoints = 20, abilities = listOf("sword")).toDto()
+        val defeatedBattleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit)
+                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
+                .castAbility(abilityId = "teleport", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 20, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .pullEvents()
+                .second
+        require(defeatedBattleUnit.isDefeated())
+        // When
+        val (_, respawnedBattleUnit) = defeatedBattleUnit.respawn(unit = unit, row = 2, column = 3).pullEvents()
+        // Then
+        respawnedBattleUnit
+            .toDto()
+            .abilityCooldowns
+            .toList()
+            .shouldContainExactly("sword" to 0, "teleport" to 0)
     }
 
     @Test

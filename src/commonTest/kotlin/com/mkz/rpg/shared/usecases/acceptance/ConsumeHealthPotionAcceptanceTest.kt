@@ -35,7 +35,7 @@ class ConsumeHealthPotionAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
-    private val inventoryApi = InventoryApi(lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"

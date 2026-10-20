@@ -8,6 +8,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSour
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
@@ -474,6 +475,49 @@ class EffectTest {
         val result = runCatching { Effect.create(invalidEffectDto) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<EffectError.InvalidEffectApplication>()
+    }
+
+    @Test
+    fun `Create should create effect when the outcome learns an ability immediately`() {
+        // Given
+        val effectDto = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
+        // When
+        val createdEffect = Effect.create(effectDto)
+        // Then
+        createdEffect.toDto() shouldBe effectDto
+    }
+
+    @Test
+    fun `Create should fail when the outcome learns an ability but is not applied immediately`() {
+        // Given
+        val effectDto = EffectMother.learnAbilityEffect().toDto()
+        val invalidEffectDto = effectDto.copy(application = EffectMother.decreaseHealthEffect().toDto().application)
+        // When
+        val result = runCatching { Effect.create(invalidEffectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EffectError.InvalidEffectApplication>()
+    }
+
+    @Test
+    fun `Create should fail when the learn ability outcome is missing its details`() {
+        // Given
+        val effectDto = EffectMother.learnAbilityEffect().toDto()
+        val invalidEffectDto = effectDto.copy(outcome = effectDto.outcome.copy(learnAbility = null))
+        // When
+        val result = runCatching { Effect.create(invalidEffectDto) }
+        // Then
+        result.exceptionOrNull().shouldBeInstanceOf<NullPointerException>()
+    }
+
+    @Test
+    fun `ToDto should expose the learn ability outcome when converted to dto`() {
+        // Given
+        val effect = EffectMother.learnAbilityEffect(abilityId = "teleport")
+        // When
+        val result = effect.toDto()
+        // Then
+        result.outcome.type shouldBe LEARN_ABILITY
+        result.outcome.learnAbility!!.abilityId shouldBe "teleport"
     }
 
     @Test

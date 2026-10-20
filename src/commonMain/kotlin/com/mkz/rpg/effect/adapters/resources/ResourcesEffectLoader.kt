@@ -13,6 +13,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.LearnAbilityDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.usecases.services.EffectLoader
 import com.mkz.rpg.shared.adapters.toml.enumOf
@@ -62,6 +63,7 @@ class ResourcesEffectLoader(
         val mana: Int? = null,
         val healthPoints: Int? = null,
         val manaPoints: Int? = null,
+        val abilityId: String? = null,
     ) {
         fun toDto(): EffectOutcomeDto {
             val outcomeType = enumOf<TypeDto>("outcome.type", type)
@@ -89,6 +91,7 @@ class ResourcesEffectLoader(
                     } else {
                         null
                     },
+                learnAbility = if (outcomeType == TypeDto.LEARN_ABILITY) LearnAbilityDto(required("outcome.abilityId", abilityId)) else null,
             )
         }
     }

@@ -9,6 +9,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
@@ -39,7 +40,7 @@ import kotlin.test.Test
 class InventoryPresenterTest {
     // The battle has started with the human player turn. The human knight-1 (100 health points) stands at (1,1), and the
     // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion (10 G) heals 10 and the hammer (50 G) raises the maximum health by 20.
-    // The knight can summon a bee next to it.
+    // The knight can summon a bee next to it. The teleport essence teaches teleport, and the bee essence teaches bee.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -48,6 +49,8 @@ class InventoryPresenterTest {
                     increaseHealthEffect(id = "heal", healing = 10).toDto(),
                     increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto(),
                     deployBattleUnitEffect(id = "summon-bee", unitId = "bee").toDto(),
+                    learnAbilityEffect(id = "learn-teleport", abilityId = "teleport").toDto(),
+                    learnAbilityEffect(id = "learn-bee", abilityId = "bee").toDto(),
                 ),
             abilities =
                 listOf(
@@ -63,6 +66,8 @@ class InventoryPresenterTest {
                 listOf(
                     consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
                     equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
+                    consumableLootableItem(id = "teleport-essence", consumable = consumable(effectIds = setOf("learn-teleport"))).toDto(),
+                    consumableLootableItem(id = "bee-essence", consumable = consumable(effectIds = setOf("learn-bee"))).toDto(),
                 ),
             units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -248,6 +253,30 @@ class InventoryPresenterTest {
         itemActions.itemName shouldBe "Health Potion"
         itemActions.itemPrice shouldBe 10
         itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
+    }
+
+    @Test
+    fun `SelectItem should enable consume when the battle unit can learn the ability the consumable teaches`() {
+        // Given
+        loot("knight-1", "teleport-essence")
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
+    }
+
+    @Test
+    fun `SelectItem should disable consume when the battle unit already knows the ability the consumable teaches`() {
+        // Given
+        loot("knight-1", "bee-essence")
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
+        itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to false)
     }
 
     @Test

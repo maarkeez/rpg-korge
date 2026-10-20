@@ -203,6 +203,15 @@ class InventoryTest {
     }
 
     @Test
+    fun `CanConsume should tell whether the item is stored`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("teleport-essence"))
+        // Then
+        inventory.canConsume("teleport-essence").shouldBeTrue()
+        inventory.canConsume("health-potion").shouldBeFalse()
+    }
+
+    @Test
     fun `Consume should remove one of the stored items when the item is stored`() {
         // Given
         val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion", "helmet", "health-potion"))

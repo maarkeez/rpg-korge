@@ -35,6 +35,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummonedBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
+import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastOngoingEffects
@@ -96,6 +97,7 @@ class BattleUnitApi(
             battleUnitRepository,
             abilityApi.searchAbilityById,
         )
+    val canLearnAbility = CanLearnAbility(battleUnitRepository)
 
     // Services
     val abilityExecution =

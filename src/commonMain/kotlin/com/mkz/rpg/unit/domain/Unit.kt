@@ -1,6 +1,8 @@
 package com.mkz.rpg.unit.domain
 
 import com.mkz.rpg.shared.domain.Gold
+import com.mkz.rpg.shared.domain.KnownAbilities
+import com.mkz.rpg.unit.domain.UnitError.AbilitiesAboveLimit
 import com.mkz.rpg.unit.domain.UnitError.NegativeStartingGold
 import com.mkz.rpg.unit.domain.UnitError.StartingGoldAboveLimit
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
@@ -62,7 +64,11 @@ data class Unit private constructor(
 
     @JvmInline private value class Abilities(
         val value: List<String>,
-    )
+    ) {
+        init {
+            if (value.size > KnownAbilities.MAXIMUM) throw AbilitiesAboveLimit()
+        }
+    }
 
     @JvmInline private value class MovementRange(
         val value: Int,

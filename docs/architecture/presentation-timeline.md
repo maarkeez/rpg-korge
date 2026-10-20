@@ -116,6 +116,7 @@ The selected battle unit info displays a bag (the chest icon) next to its abilit
 | Item                            | Actions                                    |
 |---------------------------------|--------------------------------------------|
 | Consumable                      | Consume, Discard, Cancel                   |
+| Can not learn its ability       | Consume (disabled), Discard, Cancel        |
 | Equippable, not equipped        | Equip, Discard, Cancel                     |
 | Equippable, equipped            | Unequip, Discard (disabled), Cancel        |
 | Another copy is equipped        | Equip (disabled), Discard, Cancel          |

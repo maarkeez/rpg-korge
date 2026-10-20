@@ -13,6 +13,8 @@ sealed class InventoryError(
 
     class LootableItemNotConsumable : InventoryError("The lootable item is not consumable")
 
+    class AbilityCanNotBeLearned : InventoryError("The battle unit already knows the ability the item teaches, or can not know more abilities")
+
     class LootableItemNotEquippable : InventoryError("The lootable item is not equippable")
 
     class ItemAlreadyEquipped : InventoryError("The item is already equipped")

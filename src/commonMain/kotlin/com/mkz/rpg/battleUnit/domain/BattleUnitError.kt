@@ -36,4 +36,8 @@ sealed class BattleUnitError(
     class EquippedEffectAlreadyApplied : BattleUnitError("Equipped effect already applied")
 
     class EquippedEffectsNotFound : BattleUnitError("Equipped effects not found")
+
+    class AbilityAlreadyKnown : BattleUnitError("The battle unit already knows the ability")
+
+    class AbilitiesAboveLimit : BattleUnitError("The battle unit can not know more abilities")
 }

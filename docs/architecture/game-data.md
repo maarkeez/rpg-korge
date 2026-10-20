@@ -44,7 +44,7 @@ Unless stated otherwise, there is one file per entity and **the file name is the
 
 ```toml
 [outcome]
-type = "DECREASE_HEALTH"   # DECREASE_HEALTH, INCREASE_HEALTH, INCREASE_MANA, INCREASE_MAXIMUM_HEALTH, INCREASE_MAXIMUM_MANA, TELEPORT, APPLY_EFFECT_ON_NEARBY_ALLIES, DEPLOY_BATTLE_UNIT
+type = "DECREASE_HEALTH"   # DECREASE_HEALTH, INCREASE_HEALTH, INCREASE_MANA, INCREASE_MAXIMUM_HEALTH, INCREASE_MAXIMUM_MANA, TELEPORT, APPLY_EFFECT_ON_NEARBY_ALLIES, DEPLOY_BATTLE_UNIT, LEARN_ABILITY
 damage = 3                 # Only for DECREASE_HEALTH
 # healing = 5              # Only for INCREASE_HEALTH
 # mana = 5                 # Only for INCREASE_MANA
@@ -52,6 +52,7 @@ damage = 3                 # Only for DECREASE_HEALTH
 # manaPoints = 20          # Only for INCREASE_MAXIMUM_MANA
 # effectId = "..."         # Only for APPLY_EFFECT_ON_NEARBY_ALLIES
 # unitId = "..."           # Only for DEPLOY_BATTLE_UNIT
+# abilityId = "..."        # Only for LEARN_ABILITY
 
 [application]
 type = "ON_TURN_STARTED"   # IMMEDIATELY, ON_TURN_STARTED, BEFORE_APPLYING_EFFECT, ON_DEFEATED, WHILE_EQUIPPED
@@ -61,6 +62,8 @@ duration = 5               # Only for ON_TURN_STARTED and BEFORE_APPLYING_EFFECT
 The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 0 to 999. Healing and restoring mana never go above the battle unit's maximum, equipment included.
 
 `INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` application, and `WHILE_EQUIPPED` only accepts these two outcomes. A battle unit applies them while their item is equipped, see [Inventory](inventory.md#equipment).
+
+`LEARN_ABILITY` teaches the battle unit its `abilityId` for good, e.g.: the teleport essence teaches teleport. It must use the `IMMEDIATELY` application. The ability is not checked to exist, as the effects are created before the abilities. The battle unit adds it at the end of its abilities, ready to be cast, and keeps it when it respawns. It fails when the battle unit already knows the ability or already knows 6 abilities, so an item teaching it can not be consumed then, see [Inventory](inventory.md#learning-an-ability).
 
 ### `ability/<ability id>.toml`
 
@@ -124,6 +127,8 @@ startingGold = 20
 ```
 
 `startingGold` is optional, 0 by default: the gold each battle unit of the unit carries once deployed, from 0 to 99,999 (`NegativeStartingGold`, `StartingGoldAboveLimit`). Only the battle units of the human player carry gold, see [Inventory](inventory.md#gold).
+
+A unit has 6 `abilities` at most, one per button of the ability bar (`KnownAbilities.MAXIMUM`, `AbilitiesAboveLimit`). Its battle units can learn more abilities, up to the same 6.
 
 ### `lootDrop/<unit id>.toml`
 

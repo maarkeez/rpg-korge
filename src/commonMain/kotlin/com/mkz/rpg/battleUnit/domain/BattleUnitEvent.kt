@@ -118,6 +118,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleUnitEvent
 
+    // The battle unit knows the ability for good, at the end of its abilities.
+    data class AbilityLearned(
+        val battleUnitId: String,
+        val abilityId: String,
+    ) : BattleUnitEvent
+
     // A summon whose turns are over: it is gone, not defeated. It carries its unit and its tile, as it is deleted.
     data class BattleUnitVanished(
         val playerId: String,

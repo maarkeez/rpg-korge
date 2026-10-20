@@ -10,6 +10,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.LearnAbilityDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
@@ -17,6 +18,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HE
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import korlibs.io.util.UUID
 
@@ -213,6 +215,31 @@ object EffectMother {
                         increaseHealth = null,
                         applyEffectOnNearbyAllies = null,
                         deployBattleUnit = DeployBattleUnitDto(unitId = unitId),
+                    ),
+                application =
+                    ApplicationDto(
+                        type = ApplicationTypeDto.IMMEDIATELY,
+                        onTurnStarted = null,
+                        beforeApplyingEffect = null,
+                    ),
+            ),
+        ).pullEvents()
+        .second
+
+    fun learnAbilityEffect(
+        id: String = effectId(),
+        abilityId: String = "ability-${UUID.randomUUID()}",
+    ) = Effect
+        .create(
+            Effect.Dto(
+                id = id,
+                outcome =
+                    Effect.Dto.EffectOutcomeDto(
+                        type = LEARN_ABILITY,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        learnAbility = LearnAbilityDto(abilityId = abilityId),
                     ),
                 application =
                     ApplicationDto(

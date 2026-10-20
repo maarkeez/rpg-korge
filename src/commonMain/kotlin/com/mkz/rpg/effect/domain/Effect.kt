@@ -11,6 +11,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HE
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.EffectError.ApplicationDurationAboveLimit
@@ -30,11 +31,15 @@ data class Effect private constructor(
     private val events: Set<EffectEvent>,
 ) {
     companion object {
-        /** Fails when the outcome only makes sense while an item is equipped but the application is not, or the other way round. */
+        /**
+         * Fails when the outcome only makes sense while an item is equipped but the application is not, or the other way round,
+         * and when learning an ability is not applied immediately.
+         */
         fun create(dto: Dto): Effect {
             val outcome = Outcome(dto.outcome)
             val application = Application(dto.application)
             if (outcome.lastsWhileEquipped() != application.isWhileEquipped()) throw InvalidEffectApplication()
+            if (outcome.learnsAbility() && !application.isImmediately()) throw InvalidEffectApplication()
             return Effect(
                 id = Id(dto.id),
                 outcome = outcome,
@@ -74,11 +79,15 @@ data class Effect private constructor(
                     INCREASE_MANA -> IncreaseMana(dto.increaseMana!!.mana)
                     INCREASE_MAXIMUM_HEALTH -> IncreaseMaximumHealth(dto.increaseMaximumHealth!!.healthPoints)
                     INCREASE_MAXIMUM_MANA -> IncreaseMaximumMana(dto.increaseMaximumMana!!.manaPoints)
+                    LEARN_ABILITY -> LearnAbility(dto.learnAbility!!.abilityId)
                 }
         }
 
         /** Raising a maximum stat only lasts while the item granting it is equipped. */
         fun lastsWhileEquipped() = this is IncreaseMaximumHealth || this is IncreaseMaximumMana
+
+        /** Learning an ability happens once, as soon as it is applied. */
+        fun learnsAbility() = this is LearnAbility
 
         fun toDto() =
             when (this) {
@@ -154,6 +163,14 @@ data class Effect private constructor(
                         applyEffectOnNearbyAllies = null,
                         increaseMaximumMana = this.toIncreaseMaximumManaDto(),
                     )
+                is LearnAbility ->
+                    Dto.EffectOutcomeDto(
+                        type = LEARN_ABILITY,
+                        increaseHealth = null,
+                        decreaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        learnAbility = this.toLearnAbilityDto(),
+                    )
             }
 
         @JvmInline private value class DecreaseHealth(
@@ -223,6 +240,13 @@ data class Effect private constructor(
             fun toDeployBattleUnitDto() = Dto.EffectOutcomeDto.DeployBattleUnitDto(unitId = unitId)
         }
 
+        /** Teaches its battle unit the ability for good. */
+        @JvmInline private value class LearnAbility(
+            val abilityId: String,
+        ) : Outcome {
+            fun toLearnAbilityDto() = Dto.EffectOutcomeDto.LearnAbilityDto(abilityId = abilityId)
+        }
+
         private object NegateIncreaseHealth : Outcome
 
         private object Teleport : Outcome
@@ -241,6 +265,8 @@ data class Effect private constructor(
         }
 
         fun isWhileEquipped() = this is WhileEquipped
+
+        fun isImmediately() = this is Immediately
 
         fun toDto() =
             ApplicationDto(
@@ -363,6 +389,7 @@ data class Effect private constructor(
             val increaseMana: IncreaseManaDto? = null,
             val increaseMaximumHealth: IncreaseMaximumHealthDto? = null,
             val increaseMaximumMana: IncreaseMaximumManaDto? = null,
+            val learnAbility: LearnAbilityDto? = null,
         ) {
             enum class TypeDto {
                 DECREASE_HEALTH,
@@ -374,6 +401,7 @@ data class Effect private constructor(
                 INCREASE_MANA,
                 INCREASE_MAXIMUM_HEALTH,
                 INCREASE_MAXIMUM_MANA,
+                LEARN_ABILITY,
             }
 
             data class DecreaseHealthDto(
@@ -402,6 +430,10 @@ data class Effect private constructor(
 
             data class IncreaseMaximumManaDto(
                 val manaPoints: Int,
+            )
+
+            data class LearnAbilityDto(
+                val abilityId: String,
             )
         }
 
