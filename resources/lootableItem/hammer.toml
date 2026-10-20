@@ -1,4 +1,5 @@
 name = "Hammer"
+price = 50
 type = "EQUIPPABLE"
 
 [equippable]

@@ -16,6 +16,7 @@ import korlibs.math.geom.Size
 /** Asks the player to tap a stored item to discard it for the found one, or to leave the found one on its tile. */
 class InventoryFullView(
     foundItemName: String,
+    foundItemPrice: Int,
     foundItemId: String,
     resourcesLoader: BattleSceneResourcesLoader,
     onLeft: () -> Unit,
@@ -59,6 +60,6 @@ class InventoryFullView(
                 }
         }
         titleView.display("Inventory full")
-        messageView.display("Tap an item to swap it for the $foundItemName")
+        messageView.display("Tap an item to swap it for the $foundItemName (${goldText(foundItemPrice)})")
     }
 }

@@ -3,6 +3,8 @@ package com.mkz.rpg.lootableItem.domain
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.lootableItem.domain.LootableItemError.InvalidLootType
+import com.mkz.rpg.lootableItem.domain.LootableItemError.NegativePrice
+import com.mkz.rpg.lootableItem.domain.LootableItemError.PriceAboveLimit
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent.LootableItemCreated
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippable
@@ -33,6 +35,36 @@ class LootableItemTest {
         val createdLootableItem = LootableItem.create(lootableItemDto)
         // Then
         createdLootableItem.toDto() shouldBe lootableItemDto
+    }
+
+    @Test
+    fun `Create should create lootable item when the price is within the limits`() {
+        // Given
+        val lootableItemDtos = listOf(0, 999).map { price -> LootableItemMother.lootableItem(price = price).toDto() }
+        // When
+        val createdLootableItems = lootableItemDtos.map(LootableItem::create)
+        // Then
+        createdLootableItems.map { createdLootableItem -> createdLootableItem.toDto().price }.shouldContainExactly(0, 999)
+    }
+
+    @Test
+    fun `Create should fail when the price is negative`() {
+        // Given
+        val lootableItemDto = LootableItemMother.lootableItem().toDto().copy(price = -1)
+        // When
+        val result = runCatching { LootableItem.create(lootableItemDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NegativePrice>()
+    }
+
+    @Test
+    fun `Create should fail when the price is above 999`() {
+        // Given
+        val lootableItemDto = LootableItemMother.lootableItem().toDto().copy(price = 1000)
+        // When
+        val result = runCatching { LootableItem.create(lootableItemDto) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<PriceAboveLimit>()
     }
 
     @Test

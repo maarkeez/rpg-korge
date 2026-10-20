@@ -4,15 +4,17 @@ import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
+import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/** The name of the selected inventory item and what the player can do with it, e.g.: Consume, Discard or Cancel. */
+/** The name and price of the selected inventory item and what the player can do with it, e.g.: Consume, Discard or Cancel. */
 class ItemActionsView(
     itemName: String,
+    itemPrice: Int,
     actions: List<Action>,
 ) : Container() {
     companion object {
@@ -28,11 +30,17 @@ class ItemActionsView(
     )
 
     internal val itemNameView = UnitNameView(Size(WIDTH, 16))
+    internal val itemPriceView = UnitNameView(Size(WIDTH, 16))
     internal lateinit var actionButtons: List<UIButton>
 
     init {
         uiVerticalStack(padding = 4.0) {
-            addChild(itemNameView)
+            // The price shares the line of the name, aligned to the right.
+            val nameLine = UIContainer(Size(WIDTH, 16))
+            nameLine.addChild(itemNameView)
+            itemPriceView.alignTextToRight()
+            nameLine.addChild(itemPriceView)
+            addChild(nameLine)
             uiHorizontalStack(padding = SPACING) {
                 val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
                 actionButtons =
@@ -49,5 +57,6 @@ class ItemActionsView(
             }
         }
         itemNameView.display(itemName)
+        itemPriceView.display(goldText(itemPrice))
     }
 }

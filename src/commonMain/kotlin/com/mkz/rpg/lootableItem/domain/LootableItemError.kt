@@ -5,6 +5,10 @@ sealed class LootableItemError(
 ) : Throwable(message = message) {
     class InvalidLootType : LootableItemError("Invalid loot type")
 
+    class NegativePrice : LootableItemError("Lootable item price is negative")
+
+    class PriceAboveLimit : LootableItemError("Lootable item price is higher than 999")
+
     class LootableItemEffectDoesNotExist : LootableItemError("Lootable item effect does not exist")
 
     class ConsumableEffectAppliedWhileEquipped : LootableItemError("A consumable lootable item effect can not be applied while equipped")

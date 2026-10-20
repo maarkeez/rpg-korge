@@ -53,9 +53,10 @@ open class PlayerCallToActionView(
         displayFinishTurn(onTurnFinished = onTurnFinished!!)
     }
 
-    /** Displays the name of the selected inventory item and its actions. The finish turn is displayed again once an action is selected. */
+    /** Displays the name and price of the selected inventory item and its actions. The finish turn is displayed again once an action is selected. */
     open fun displayItemActions(
         itemName: String,
+        itemPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
         val itemActions =
@@ -67,16 +68,17 @@ open class PlayerCallToActionView(
                     },
                 )
             }
-        display(ItemActionsView(itemName = itemName, actions = itemActions))
+        display(ItemActionsView(itemName = itemName, itemPrice = itemPrice, actions = itemActions))
     }
 
     /** Asks the player what to do with an item found while the inventory is full. */
     open fun displayInventoryFull(
         foundItemName: String,
+        foundItemPrice: Int,
         foundItemId: String,
         onLeft: () -> Unit,
     ) {
-        display(InventoryFullView(foundItemName = foundItemName, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
+        display(InventoryFullView(foundItemName = foundItemName, foundItemPrice = foundItemPrice, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
     }
 
     internal val callToAction: View?

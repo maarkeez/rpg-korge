@@ -23,6 +23,9 @@ fun PlayerCallToActionView.isDisplayingItemActions(): Boolean = visible && callT
 /** The name of the selected inventory item, followed by its actions, e.g.: Consume, Discard and Cancel. */
 fun PlayerCallToActionView.itemName(): String = (callToAction as ItemActionsView).itemNameView.nameText()
 
+/** The price of the selected inventory item, on the line of its name, e.g.: 50 G. */
+fun PlayerCallToActionView.itemPrice(): String = (callToAction as ItemActionsView).itemPriceView.nameText()
+
 fun PlayerCallToActionView.itemActionLabels(): List<String> = (callToAction as ItemActionsView).actionButtons.map { button -> button.text }
 
 fun PlayerCallToActionView.enabledItemActionLabels(): List<String> = (callToAction as ItemActionsView).actionButtons.filter { button -> button.enabled }.map { button -> button.text }

@@ -10,16 +10,18 @@ object LootableItemMother {
     fun lootableItem(
         id: String = lootableItemId(),
         name: String = lootableItemName(),
+        price: Int = lootableItemPrice(),
         lootType: LootTypeDto = arrayOf(LootTypeDto.consumable(consumable()), LootTypeDto.equippable(equippable())).random(),
     ): LootableItem =
         LootableItem
-            .create(dto = LootableItem.Dto(id = id, name = name, lootType = lootType))
+            .create(dto = LootableItem.Dto(id = id, name = name, price = price, lootType = lootType))
             .pullEvents()
             .second
 
     fun consumableLootableItem(
         id: String = lootableItemId(),
         name: String = lootableItemName(),
+        price: Int = lootableItemPrice(),
         consumable: ConsumableDto = consumable(),
     ): LootableItem =
         LootableItem
@@ -28,6 +30,7 @@ object LootableItemMother {
                     LootableItem.Dto(
                         id = id,
                         name = name,
+                        price = price,
                         lootType =
                             LootTypeDto(
                                 type = LootTypeDto.TypeDto.CONSUMABLE,
@@ -41,6 +44,7 @@ object LootableItemMother {
     fun equippableLootableItem(
         id: String = lootableItemId(),
         name: String = lootableItemName(),
+        price: Int = lootableItemPrice(),
         equippable: EquippableDto = equippable(),
     ): LootableItem =
         LootableItem
@@ -49,6 +53,7 @@ object LootableItemMother {
                     LootableItem.Dto(
                         id = id,
                         name = name,
+                        price = price,
                         lootType =
                             LootTypeDto(
                                 type = LootTypeDto.TypeDto.EQUIPPABLE,
@@ -69,6 +74,8 @@ object LootableItemMother {
     fun lootableItemId(): String = "lootable-item-" + UUID.randomUUID().toString()
 
     fun lootableItemName(): String = "lootable-item-name-" + UUID.randomUUID().toString()
+
+    fun lootableItemPrice(): Int = (0..999).random()
 
     fun effectId(): String = "lootable-item-efect-id" + UUID.randomUUID().toString()
 }

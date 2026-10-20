@@ -13,11 +13,13 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
 
     data class DisplayedItemActions(
         val itemName: String,
+        val itemPrice: Int,
         val actions: List<ItemActionsView.Action>,
     )
 
     data class DisplayedInventoryFull(
         val foundItemName: String,
+        val foundItemPrice: Int,
         val foundItemId: String,
         val onLeft: () -> Unit,
     )
@@ -49,12 +51,14 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
     // As the real view, the finish turn is displayed again once an action is selected.
     override fun displayItemActions(
         itemName: String,
+        itemPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
         displayedInventoryFull = null
         displayedItemActions =
             DisplayedItemActions(
                 itemName = itemName,
+                itemPrice = itemPrice,
                 actions =
                     actions.map { action ->
                         action.copy(onSelected = {
@@ -67,11 +71,12 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
 
     override fun displayInventoryFull(
         foundItemName: String,
+        foundItemPrice: Int,
         foundItemId: String,
         onLeft: () -> Unit,
     ) {
         displayedItemActions = null
-        displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemId, onLeft)
+        displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemPrice, foundItemId, onLeft)
     }
 
     override fun setFinishTurnEnabled(enabled: Boolean) {

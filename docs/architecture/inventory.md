@@ -61,6 +61,8 @@ Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equippe
 
 The battle scene draws the dropped items on their tiles, and opens the inventory of the selected battle unit behind its bag, where the player consumes, equips, unequips, swaps and discards items, and chooses what to do with an item found while the inventory is full. See [Presentation timeline](presentation-timeline.md#loot) and [Inventory on the screen](presentation-timeline.md#inventory).
 
+The price of an item is displayed in gold: on the line of its name, aligned to the right, when it is selected (e.g.: `Health Potion ........ 10 G`), and at the end of the message asking what to do with it when it is found while the inventory is full (e.g.: `Tap an item to swap it for the Hammer (50 G)`).
+
 ## Not yet supported
 
 - **Looking inside a chest:** a tile with several items is drawn as a chest, and its items are only shown once they are looted.

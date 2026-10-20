@@ -82,8 +82,11 @@ target = "SELECTED_TARGET"     # CASTER, SELECTED_TARGET, SELECTED_TILE, CASTER_
 
 An item a battle unit can loot. Its effects must exist and suit its type: a consumable's effects can not be `WHILE_EQUIPPED`, and an equippable item's effects must all be `WHILE_EQUIPPED`.
 
+Its `price` is what it is worth in gold, from 0 to 999. It is displayed as `10 G` in the inventory.
+
 ```toml
 name = "Health Potion"
+price = 10
 type = "CONSUMABLE"              # CONSUMABLE, EQUIPPABLE
 
 [consumable]                     # Only for CONSUMABLE

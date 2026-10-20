@@ -153,7 +153,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayItemActions should display the item name and its actions when the item actions are displayed`() =
+    fun `DisplayItemActions should display the item name, its price and its actions when the item actions are displayed`() =
         sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
@@ -165,10 +165,11 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                     ItemActionsView.Action(label = "Cancel") {},
                 )
             // When
-            playerCallToActionView.displayItemActions(itemName = "Hammer", actions = actions)
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = actions)
             // Then
             playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
             playerCallToActionView.itemName() shouldBe "Hammer"
+            playerCallToActionView.itemPrice() shouldBe "50 G"
             playerCallToActionView.itemActionLabels().shouldContainExactly("Equip", "Discard", "Cancel")
             playerCallToActionView.enabledItemActionLabels().shouldContainExactly("Equip", "Cancel")
         }
@@ -180,7 +181,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             var consumed = false
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(itemName = "Health Potion", actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
+            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
             addChild(playerCallToActionView)
             // When
             clickItemAction(playerCallToActionView, "Consume")
@@ -190,18 +191,18 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayInventoryFull should display the found item and leave it when leave it is clicked`() =
+    fun `DisplayInventoryFull should display the found item with its price and leave it when leave it is clicked`() =
         sharedViewsTest {
             // Given
             var left = false
             val playerCallToActionView = PlayerCallToActionView(loadedResourcesLoader())
             addChild(playerCallToActionView)
-            playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemId = "health-potion", onLeft = { left = true })
+            playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemPrice = 10, foundItemId = "health-potion", onLeft = { left = true })
             // When
             clickLeaveIt(playerCallToActionView)
             // Then
             playerCallToActionView.isDisplayingInventoryFull().shouldBeTrue()
-            playerCallToActionView.inventoryFullMessage() shouldBe "Tap an item to swap it for the Health Potion"
+            playerCallToActionView.inventoryFullMessage() shouldBe "Tap an item to swap it for the Health Potion (10 G)"
             playerCallToActionView.isFoundItemIconDisplayed().shouldBeTrue()
             left.shouldBeTrue()
         }
@@ -212,7 +213,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(itemName = "Hammer", actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
             playerCallToActionView.redisplayFinishTurn()
             // Then

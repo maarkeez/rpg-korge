@@ -71,8 +71,8 @@ class InventoryPresenter(
             eventBus.subscribe<InventoryEvent.ItemEquipped> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemUnequipped> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryFull> { event ->
-                val foundItemName = lootableItemApi.searchLootableItemById(event.lootableItemId)?.name ?: event.lootableItemId
-                timeline.play { askWhatToDoWith(event, foundItemName) }
+                val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
+                timeline.play { askWhatToDoWith(event, foundItemName = foundItem.name, foundItemPrice = foundItem.price) }
             },
         )
 
@@ -132,6 +132,7 @@ class InventoryPresenter(
     private suspend fun askWhatToDoWith(
         found: InventoryFull,
         foundItemName: String,
+        foundItemPrice: Int,
     ) {
         val pendingChoice = CompletableDeferred<Unit>()
         foundItem = found
@@ -139,6 +140,7 @@ class InventoryPresenter(
         displayInventory(found.battleUnitId, slotsOf(found.battleUnitId))
         playerCallToActionView.displayInventoryFull(
             foundItemName = foundItemName,
+            foundItemPrice = foundItemPrice,
             foundItemId = found.lootableItemId,
             onLeft = { completeChoice() },
         )
@@ -189,7 +191,7 @@ class InventoryPresenter(
         timeline.play {
             selectedSlotIndex = slotIndex
             inventoryView.selectSlot(slotIndex)
-            playerCallToActionView.displayItemActions(itemName = lootableItem.name, actions = actions)
+            playerCallToActionView.displayItemActions(itemName = lootableItem.name, itemPrice = lootableItem.price, actions = actions)
         }
     }
 

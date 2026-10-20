@@ -7,6 +7,8 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.CONSUMABLE
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.EQUIPPABLE
 import com.mkz.rpg.lootableItem.domain.LootableItemError.InvalidLootType
+import com.mkz.rpg.lootableItem.domain.LootableItemError.NegativePrice
+import com.mkz.rpg.lootableItem.domain.LootableItemError.PriceAboveLimit
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent.LootableItemCreated
 import kotlin.jvm.JvmInline
 
@@ -14,6 +16,7 @@ import kotlin.jvm.JvmInline
 data class LootableItem private constructor(
     private val id: Id,
     private val name: Name,
+    private val price: Price,
     private val lootType: LootType,
     private val events: Set<LootableItemEvent>,
 ) {
@@ -22,6 +25,7 @@ data class LootableItem private constructor(
             LootableItem(
                 id = Id(dto.id),
                 name = Name(dto.name),
+                price = Price(dto.price),
                 lootType = LootType(dto.lootType),
                 events = setOf(LootableItemCreated(lootableItemId = dto.id)),
             )
@@ -33,6 +37,7 @@ data class LootableItem private constructor(
         Dto(
             id = id.value,
             name = name.value,
+            price = price.value,
             lootType = lootType.toDto(),
         )
 
@@ -43,6 +48,16 @@ data class LootableItem private constructor(
     @JvmInline private value class Name(
         val value: String,
     )
+
+    // In gold.
+    @JvmInline private value class Price(
+        val value: Int,
+    ) {
+        init {
+            if (value < 0) throw NegativePrice()
+            if (value > 999) throw PriceAboveLimit()
+        }
+    }
 
     sealed interface LootType {
         fun toDto(): LootTypeDto
@@ -140,6 +155,7 @@ data class LootableItem private constructor(
     data class Dto(
         val id: String,
         val name: String,
+        val price: Int,
         val lootType: LootTypeDto,
     ) {
         data class LootTypeDto(

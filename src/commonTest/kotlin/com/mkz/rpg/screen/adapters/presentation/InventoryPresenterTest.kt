@@ -38,7 +38,7 @@ import kotlin.test.Test
 
 class InventoryPresenterTest {
     // The battle has started with the human player turn. The human knight-1 (100 health points) stands at (1,1), and the
-    // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion heals 10 and the hammer raises the maximum health by 20.
+    // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion (10 G) heals 10 and the hammer (50 G) raises the maximum health by 20.
     // The knight can summon a bee next to it.
     private val apis =
         SubdomainApis(
@@ -61,8 +61,8 @@ class InventoryPresenterTest {
                 ),
             lootableItems =
                 listOf(
-                    consumableLootableItem(id = "health-potion", name = "Health Potion", consumable = consumable(effectIds = setOf("heal"))).toDto(),
-                    equippableLootableItem(id = "hammer", name = "Hammer", equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
+                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
+                    equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
                 ),
             units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee")).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -235,7 +235,7 @@ class InventoryPresenterTest {
     }
 
     @Test
-    fun `SelectItem should frame the item and display its actions when a consumable is selected`() {
+    fun `SelectItem should frame the item and display its price and actions when a consumable is selected`() {
         // Given
         loot("knight-1", "health-potion")
         openKnightInventory()
@@ -245,6 +245,7 @@ class InventoryPresenterTest {
         inventoryView.selectedSlot shouldBe 0
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
         itemActions.itemName shouldBe "Health Potion"
+        itemActions.itemPrice shouldBe 10
         itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
     }
 
@@ -359,6 +360,7 @@ class InventoryPresenterTest {
         inventoryView.displayedSlots.last().size shouldBe 12
         val inventoryFull = playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
         inventoryFull.foundItemName shouldBe "Hammer"
+        inventoryFull.foundItemPrice shouldBe 50
         inventoryFull.foundItemId shouldBe "hammer"
         timeline.isPlaying.shouldBeTrue()
     }

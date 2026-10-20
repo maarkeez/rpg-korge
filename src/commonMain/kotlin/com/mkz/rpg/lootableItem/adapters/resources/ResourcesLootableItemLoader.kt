@@ -33,6 +33,7 @@ class ResourcesLootableItemLoader(
     @Serializable
     data class LootableItemDefinition(
         val name: String,
+        val price: Int,
         val type: String,
         val consumable: ConsumableDefinition? = null,
         val equippable: EquippableDefinition? = null,
@@ -41,6 +42,7 @@ class ResourcesLootableItemLoader(
             LootableItem.Dto(
                 id = lootableItemId,
                 name = name,
+                price = price,
                 lootType =
                     when (enumOf<TypeDto>("type", type)) {
                         TypeDto.CONSUMABLE -> LootTypeDto.consumable(required("consumable", consumable).toDto())

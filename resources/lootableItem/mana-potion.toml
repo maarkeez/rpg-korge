@@ -1,4 +1,5 @@
 name = "Mana Potion"
+price = 10
 type = "CONSUMABLE"
 
 [consumable]
