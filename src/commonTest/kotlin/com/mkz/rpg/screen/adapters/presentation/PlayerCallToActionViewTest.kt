@@ -4,6 +4,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
@@ -172,6 +173,21 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             playerCallToActionView.itemPrice() shouldBe "50 G"
             playerCallToActionView.itemActionLabels().shouldContainExactly("Equip", "Discard", "Cancel")
             playerCallToActionView.enabledItemActionLabels().shouldContainExactly("Equip", "Cancel")
+        }
+
+    @Test
+    fun `DisplayItemActions should display only the item name and its price when the item has no actions`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            // When
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = emptyList())
+            // Then
+            playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
+            playerCallToActionView.itemName() shouldBe "Hammer"
+            playerCallToActionView.itemPrice() shouldBe "50 G"
+            playerCallToActionView.itemActionLabels().shouldBeEmpty()
         }
 
     @Test

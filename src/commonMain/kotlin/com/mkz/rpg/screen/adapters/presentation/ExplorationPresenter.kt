@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
+import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -26,18 +27,22 @@ import kotlin.time.Duration.Companion.seconds
  * counted.
  *
  * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
- * meanwhile, as the party neither walks nor starts a second while talking.
+ * meanwhile, as the party neither walks nor starts a second while talking. Tapping the dialog of a merchant opens its
+ * shop in place of the dialog instead, where tapping an item displays its name and price in the call to action, until the
+ * shop is closed.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
     private val npcDialogView: NpcDialogView,
+    private val shopView: ShopView,
     private val battleHudView: BattleHudView,
     private val playerCallToActionView: PlayerCallToActionView,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
+    private val lootableItemApi: LootableItemApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
-) {
+) : ShopView.Delegate {
     companion object {
         // How often the battle units standing still receive the effect of their terrain while exploring.
         val STANDING_TERRAIN_EFFECT_INTERVAL = 1.seconds
@@ -45,6 +50,9 @@ class ExplorationPresenter(
 
     private var elapsedSinceTerrainEffects = Duration.ZERO
     private var isGameOver = false
+
+    // The items sold by the merchant whose shop is displayed.
+    private var shopLootableItemIds = emptyList<String>()
 
     private val subscriptions =
         listOf(
@@ -81,6 +89,7 @@ class ExplorationPresenter(
                 timeline.play {
                     virtualPadView.visible = false
                     npcDialogView.visible = false
+                    shopView.visible = false
                 }
             },
         )
@@ -88,9 +97,11 @@ class ExplorationPresenter(
     init {
         virtualPadView.visible = false
         npcDialogView.visible = false
+        shopView.visible = false
         virtualPadView.setOnDirectionHeld { direction -> walkParty(direction) }
         virtualPadView.setOnAPressed { talkToAdjacentNpc() }
-        npcDialogView.setOnTapped { finishTalk() }
+        npcDialogView.setOnTapped { dialogTapped() }
+        shopView.setDelegate(this)
     }
 
     /** Counts the time elapsed since the previous frame, and applies the standing terrain effects every second. */
@@ -120,16 +131,24 @@ class ExplorationPresenter(
         partyApi.talkToAdjacentNpc()
     }
 
-    private fun finishTalk() {
+    // A merchant opens its shop, any other npc finishes the talk.
+    private fun dialogTapped() {
         if (timeline.isPlaying || !npcDialogView.visible) return
-        partyApi.finishTalk()
+        val npc = partyApi.searchParty()?.talkingNpcId?.let { npcId -> npcApi.searchNpcById(npcId) }
+        if (npc != null && npc.stock.isNotEmpty()) {
+            timeline.play { displayShop(npc) }
+        } else {
+            partyApi.finishTalk()
+        }
     }
 
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
-    // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog.
+    // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog
+    // and the shop.
     private fun displayVirtualPad(isDisplayed: Boolean) {
         npcDialogView.visible = false
+        closeShop()
         virtualPadView.visible = isDisplayed
         battleHudView.visible = !isDisplayed
         playerCallToActionView.visible = !isDisplayed
@@ -140,5 +159,43 @@ class ExplorationPresenter(
         npcDialogView.display(npc)
         virtualPadView.visible = false
         npcDialogView.visible = true
+    }
+
+    // The shop takes the place of the dialog. The call to action is displayed once an item is selected.
+    private fun displayShop(npc: Npc.Dto) {
+        shopLootableItemIds = npc.stock
+        shopView.display(merchantName = npc.name, lootableItemIds = npc.stock)
+        npcDialogView.visible = false
+        shopView.visible = true
+    }
+
+    // The call to action displays the finish turn again, as before the shop was opened.
+    private fun closeShop() {
+        if (!shopView.visible) return
+        shopView.visible = false
+        shopLootableItemIds = emptyList()
+        playerCallToActionView.redisplayFinishTurn()
+    }
+
+    // Delegates
+    override fun shopSlotSelected(index: Int) {
+        if (timeline.isPlaying || !shopView.visible) return
+        val lootableItem = shopLootableItemIds.getOrNull(index)?.let { lootableItemId -> lootableItemApi.searchLootableItemById(lootableItemId) }
+        timeline.play {
+            if (lootableItem == null) {
+                shopView.selectSlot(null)
+                playerCallToActionView.visible = false
+            } else {
+                shopView.selectSlot(index)
+                playerCallToActionView.displayItemActions(itemName = lootableItem.name, itemPrice = lootableItem.price, actions = emptyList())
+                playerCallToActionView.visible = true
+            }
+        }
+    }
+
+    // Finishing the talk displays the pad again, which closes the shop.
+    override fun shopClosed() {
+        if (timeline.isPlaying || !shopView.visible) return
+        partyApi.finishTalk()
     }
 }

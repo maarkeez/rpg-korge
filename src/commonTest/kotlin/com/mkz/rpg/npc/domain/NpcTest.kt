@@ -47,6 +47,50 @@ class NpcTest {
     }
 
     @Test
+    fun `Place should place a merchant with the items it sells, in their order, when its stock is given`() {
+        // Given
+        val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 14, column = 2, stock = listOf("mana-potion", "health-potion", "hammer"))
+        // When
+        val (events, npc) = Npc.place(merchant).pullEvents()
+        // Then
+        npc.toDto() shouldBe merchant
+        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "merchant", row = 14, column = 2))
+    }
+
+    @Test
+    fun `IsMerchant should tell whether the npc has a stock`() {
+        // Then
+        npc(stock = listOf("hammer")).isMerchant().shouldBeTrue()
+        npc(stock = emptyList()).isMerchant().shouldBeFalse()
+    }
+
+    @Test
+    fun `Place should place a merchant selling 12 items`() {
+        // Given
+        val stock = List(12) { index -> "item-$index" }
+        // When
+        val npc = Npc.place(theGuy.copy(stock = stock))
+        // Then
+        npc.toDto().stock shouldBe stock
+    }
+
+    @Test
+    fun `Place should fail when the stock has more than 12 items`() {
+        // When
+        val result = runCatching { Npc.place(theGuy.copy(stock = List(13) { index -> "item-$index" })) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcStockTooLarge>()
+    }
+
+    @Test
+    fun `Place should fail when the stock lists an item twice`() {
+        // When
+        val result = runCatching { Npc.place(theGuy.copy(stock = listOf("hammer", "health-potion", "hammer"))) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcStockItemRepeated>()
+    }
+
+    @Test
     fun `Recruit should publish the npc recruited event, with its tile, when the npc is recruitable`() {
         // When
         val (events, _) = npc(id = "viking", row = 12, column = 2, unitId = "viking").recruit().pullEvents()

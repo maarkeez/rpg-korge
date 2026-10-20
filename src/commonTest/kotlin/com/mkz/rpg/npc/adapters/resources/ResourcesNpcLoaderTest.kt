@@ -40,6 +40,23 @@ class ResourcesNpcLoaderTest {
         }
 
     @Test
+    fun `should load the stock of a merchant, in its order, when it has one`() =
+        runTest {
+            // Given
+            val npcRoot =
+                MemoryVfsMix(
+                    "npc/merchant.toml" to "name = \"Merchant\"\nline = \"How can I help you?\"\nrow = 14\ncolumn = 2\nstock = [\"mana-potion\", \"hammer\"]\n",
+                )["npc"]
+            val loader = ResourcesNpcLoader(npcRoot = npcRoot)
+            // When
+            loader.initResources()
+            // Then
+            loader.loadNpcs().shouldContainExactly(
+                Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 14, column = 2, stock = listOf("mana-potion", "hammer")),
+            )
+        }
+
+    @Test
     fun `should fail with the file when the npc has no line`() =
         runTest {
             // Given

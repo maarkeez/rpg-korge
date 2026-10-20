@@ -10,7 +10,8 @@ object NpcMother {
         row: Int = 0,
         column: Int = 0,
         unitId: String? = null,
-    ): Npc = Npc.place(Npc.Dto(id = id, name = name, line = line, row = row, column = column, unitId = unitId)).pullEvents().second
+        stock: List<String> = emptyList(),
+    ): Npc = Npc.place(Npc.Dto(id = id, name = name, line = line, row = row, column = column, unitId = unitId, stock = stock)).pullEvents().second
 
     fun id() = "npc-${UUID.randomUUID()}"
 }

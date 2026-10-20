@@ -34,6 +34,8 @@ import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldMove
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
+import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
+import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
@@ -62,6 +64,7 @@ class InMemoryQueries(
     val battleUnitRepository = InMemoryBattleUnitRepository()
     val cpuBattleBrainRepository = InMemoryCpuBattleBrainRepository()
     val effectRepository = InMemoryEffectRepository()
+    val lootableItemRepository = InMemoryLootableItemRepository()
     val npcRepository = InMemoryNpcRepository()
     val playerRepository = InMemoryPlayerRepository()
     val terrainRepository = InMemoryTerrainRepository()
@@ -75,6 +78,9 @@ class InMemoryQueries(
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)
     val searchTerrainById = SearchTerrainById(terrainRepository)
     val isTransitionAllowed = IsTransitionAllowed(terrainRepository)
+
+    // Lootable item
+    val searchLootableItemById = SearchLootableItemById(lootableItemRepository)
 
     // Npc
     val searchNpcById = SearchNpcById(npcRepository)

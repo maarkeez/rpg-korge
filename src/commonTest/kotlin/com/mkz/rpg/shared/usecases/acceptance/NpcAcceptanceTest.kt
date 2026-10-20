@@ -6,8 +6,10 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldError
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.npc.domain.NpcError
 import com.mkz.rpg.npc.usecases.services.FakeNpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
@@ -23,12 +25,13 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
-// Uses the units and terrains defined in the resources: two human knights with 100 health points, whose poisoned sword hits
-// an adjacent enemy, a CPU rat, and the lava, which damages 5 health points.
+// Uses the units, terrains and lootable items defined in the resources: two human knights with 100 health points, whose
+// poisoned sword hits an adjacent enemy, a CPU rat, the lava, which damages 5 health points, and the potions and the hammer.
 class NpcAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus)
@@ -38,14 +41,18 @@ class NpcAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootableItemApi = LootableItemApi(effectApi, eventBus)
     private val theGuy = Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 0, column = 0)
 
     // Recruitable, as the viking of the resources: 150 health points.
     private val viking = Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 0, column = 3, unitId = "viking")
 
+    // A merchant, selling the lootable items of the resources. The leader walks east to (0,2) to stand next to it.
+    private val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 1, column = 2, stock = listOf("health-potion", "mana-potion", "hammer"))
+
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
-    private val npcApi by lazy { NpcApi(battlefieldApi, unitApi, eventBus, FakeNpcLoader(npcs)) }
+    private val npcApi by lazy { NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus, FakeNpcLoader(npcs)) }
     private val partyApi by lazy { PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus) }
     private val secondsStarted =
         mutableListOf<PartyEvent.ExplorationSecondStarted>().also { seconds -> eventBus.subscribe<PartyEvent.ExplorationSecondStarted> { seconds += it } }
@@ -57,8 +64,10 @@ class NpcAcceptanceTest {
         effectApi.init()
         abilityApi.init()
         unitApi.init()
+        lootableItemApi.init()
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
+        lootableItemApi.initialiseLootableItems()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
         playerApi.requestPlayerCreation("human", "Human", HUMAN)
@@ -157,6 +166,36 @@ class NpcAcceptanceTest {
             // Then
             battlefieldApi.searchOccupant(row = 0, column = 0) shouldBe "the-guy"
             partyApi.searchParty()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2")
+        }
+
+    @Test
+    fun `should place a merchant with the items it sells, and talk to it as any other npc`() =
+        scenarioTest({
+            npcs = listOf(theGuy, merchant)
+            setUp()
+        }) {
+            // Then
+            npcApi.searchNpcById("merchant")!!.stock shouldBe listOf("health-potion", "mana-potion", "hammer")
+            battlefieldApi.searchOccupant(row = 1, column = 2) shouldBe "merchant"
+            // When
+            walk(DirectionDto.EAST)
+            talk()
+            // Then
+            partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
+            // When
+            finishTalk()
+            // Then
+            partyApi.searchParty()!!.talkingNpcId.shouldBeNull()
+            npcApi.searchNpcById("merchant").shouldNotBeNull()
+        }
+
+    @Test
+    fun `should fail to place a merchant selling an item that does not exist`() =
+        scenarioTest({ npcs = listOf(merchant.copy(stock = listOf("health-potion", "dragon-egg"))) }) {
+            // When
+            val result = runCatching { setUp() }
+            // Then
+            result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcStockItemNotFound>()
         }
 
     @Test

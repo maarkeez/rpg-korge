@@ -14,7 +14,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
 
 - The arrows walk the party (see [Walking](#walking)).
-- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), and recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)).
+- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and shows the items it sells when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
 - B is displayed, but does nothing for now.
 
 ## Walking
@@ -36,7 +36,7 @@ An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Gam
 1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces, and talks to the first one (`NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
 2. While talking, the party is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
 3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
-4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant opens its shop instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
 
 A battle starting while talking (`PauseExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
 
@@ -50,6 +50,16 @@ An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game 
 4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
 
 The events are dispatched in the order they are published, so the tile is vacated before the battle unit is deployed on it, and the battle unit is deployed before it joins the party. Once recruited, it is a party member as any other: it has a bag, and leaves the party once defeated.
+
+## Shopping at a merchant
+
+An npc with a stock in its game data is a merchant (e.g.: the merchant, see [Game data](game-data.md)). Its dialog is displayed as any other, and the party keeps talking to it, so time stays stopped, until its shop is closed. The shop is screen state only: the party has no mode nor event for it.
+
+1. Tapping the merchant's dialog opens its shop in place of the dialog, instead of finishing the talk: [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) displays the merchant's name, a Close button, and 12 slots, as the inventory does. The items it sells fill the first slots, in their order, and the rest are empty.
+2. Tapping an item frames it, and the call to action displays its name and price, as for an item of the inventory (e.g.: `Hammer ........ 50 G`), without actions. Tapping an empty slot unselects it and hides the call to action.
+3. Close finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+
+A battle starting while shopping abandons the shop, as it abandons the dialog. Items can not be bought nor sold yet.
 
 ## Inventory
 

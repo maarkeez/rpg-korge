@@ -3,13 +3,16 @@ package com.mkz.rpg.npc.domain
 import com.mkz.rpg.npc.domain.NpcError.NpcLineRequired
 import com.mkz.rpg.npc.domain.NpcError.NpcNameRequired
 import com.mkz.rpg.npc.domain.NpcError.NpcNotRecruitable
+import com.mkz.rpg.npc.domain.NpcError.NpcStockItemRepeated
+import com.mkz.rpg.npc.domain.NpcError.NpcStockTooLarge
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import kotlin.jvm.JvmInline
 
 /**
  * A character standing on a tile of the battlefield, who says its line when talked to. It is no battle unit: it can not
- * be attacked. An npc with a unit is recruitable: it joins the party as that unit.
+ * be attacked. An npc with a unit is recruitable: it joins the party as that unit. An npc with a stock is a merchant: it
+ * shows the lootable items it sells.
  */
 @ConsistentCopyVisibility
 data class Npc private constructor(
@@ -18,9 +21,12 @@ data class Npc private constructor(
     private val line: Line,
     private val tile: Tile,
     private val unitId: UnitId?,
+    private val stock: Stock,
     private val events: Set<NpcEvent>,
 ) {
     companion object {
+        const val MAX_STOCK_SIZE = 12
+
         fun place(dto: Dto): Npc =
             Npc(
                 id = Id(dto.id),
@@ -28,6 +34,7 @@ data class Npc private constructor(
                 line = Line(dto.line),
                 tile = Tile(row = dto.row, column = dto.column),
                 unitId = dto.unitId?.let(::UnitId),
+                stock = Stock(dto.stock),
                 events = setOf(NpcPlaced(npcId = dto.id, row = dto.row, column = dto.column, unitId = dto.unitId)),
             )
     }
@@ -42,10 +49,14 @@ data class Npc private constructor(
             row = tile.row,
             column = tile.column,
             unitId = unitId?.value,
+            stock = stock.lootableItemIds,
         )
 
     /** Whether it joins the party once talked to: it has a unit. */
     fun isRecruitable(): Boolean = unitId != null
+
+    /** Whether it shows the items it sells once talked to: it has a stock. */
+    fun isMerchant(): Boolean = stock.lootableItemIds.isNotEmpty()
 
     /** Recruits it, so it leaves its tile and joins the party as its unit. Fails when it is not recruitable. */
     fun recruit(): Npc {
@@ -82,12 +93,24 @@ data class Npc private constructor(
         val value: String,
     )
 
+    @JvmInline private value class Stock(
+        val lootableItemIds: List<String>,
+    ) {
+        init {
+            if (lootableItemIds.size > MAX_STOCK_SIZE) throw NpcStockTooLarge()
+            if (lootableItemIds.distinct().size != lootableItemIds.size) throw NpcStockItemRepeated()
+        }
+    }
+
     private data class Tile(
         val row: Int,
         val column: Int,
     )
 
-    /** Unit: the unit it joins the party as, or `null` when it is not recruitable. */
+    /**
+     * Unit: the unit it joins the party as, or `null` when it is not recruitable. Stock: the lootable items it sells, in
+     * the order they are shown, or none when it is no merchant.
+     */
     data class Dto(
         val id: String,
         val name: String,
@@ -95,5 +118,6 @@ data class Npc private constructor(
         val row: Int,
         val column: Int,
         val unitId: String? = null,
+        val stock: List<String> = emptyList(),
     )
 }

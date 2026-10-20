@@ -1,6 +1,7 @@
 package com.mkz.rpg.npc.usecases.commands
 
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.lootableItem.domain.LootableItemMother.lootableItem
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcError
@@ -22,7 +23,8 @@ class InitialiseNpcsTest {
     private val npcRepository = InMemoryNpcRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, eventBus)()
+    private fun initialiseNpcs(vararg npcs: Npc.Dto) =
+        InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, queries.searchLootableItemById, eventBus)()
 
     @Test
     fun `should place every loaded npc on its tile when the npcs are initialised`() {
@@ -63,6 +65,32 @@ class InitialiseNpcsTest {
         // Then
         result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcUnitNotFound>()
         npcRepository.searchById("viking").shouldBeNull()
+    }
+
+    @Test
+    fun `should place a merchant when every item it sells exists`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". ."))
+        queries.lootableItemRepository.create(lootableItem(id = "hammer"))
+        queries.lootableItemRepository.create(lootableItem(id = "health-potion"))
+        val merchant = npc(id = "merchant", row = 0, column = 1, stock = listOf("hammer", "health-potion")).toDto()
+        // When
+        initialiseNpcs(merchant)
+        // Then
+        npcRepository.searchById("merchant")?.toDto() shouldBe merchant
+        eventBus.shouldHavePublishedEvents(NpcPlaced(npcId = "merchant", row = 0, column = 1))
+    }
+
+    @Test
+    fun `should fail when an item sold by a merchant does not exist`() {
+        // Given
+        queries.battlefieldRepository.create(battlefield(". ."))
+        queries.lootableItemRepository.create(lootableItem(id = "hammer"))
+        // When
+        val result = runCatching { initialiseNpcs(npc(id = "merchant", row = 0, column = 1, stock = listOf("hammer", "dragon-egg")).toDto()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcStockItemNotFound>()
+        npcRepository.searchById("merchant").shouldBeNull()
     }
 
     @Test

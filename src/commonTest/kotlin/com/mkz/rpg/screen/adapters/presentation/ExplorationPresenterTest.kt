@@ -4,7 +4,10 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
+import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.inventory.domain.InventoryEvent
+import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
+import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.party.domain.PartyEvent
@@ -30,24 +33,37 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class ExplorationPresenterTest {
-    // The knight explores the sand from (1,1), next to The Guy, who stands west of it at (1,0). There is no battle yet.
+    // The knight explores the sand from (1,1), next to The Guy, who stands west of it at (1,0). The merchant stands at
+    // (2,2), selling a health potion and a mana potion. There is no battle yet.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            effects = listOf(increaseHealthEffect(id = "cure").toDto()),
+            lootableItems =
+                listOf(
+                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
+                    consumableLootableItem(id = "mana-potion", name = "Mana Potion", price = 15, consumable = consumable(effectIds = setOf("cure"))).toDto(),
+                ),
             units = listOf(unit(id = "knight").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(3) { List(3) { "sand" } },
             deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
-            npcs = listOf(npc(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 1, column = 0).toDto()),
+            npcs =
+                listOf(
+                    npc(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 1, column = 0).toDto(),
+                    npc(id = "merchant", name = "Merchant", line = "How can I help you?", row = 2, column = 2, stock = listOf("health-potion", "mana-potion")).toDto(),
+                ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
     private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
+    private val shopView = ShopView(BattleSceneResourcesLoader())
     private val battleHudView = FakeBattleHudView()
     private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
 
-    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, timeline, eventBus)
+    private fun createPresenter() =
+        ExplorationPresenter(virtualPadView, npcDialogView, shopView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, apis.lootableItemApi, timeline, eventBus)
 
     private fun startExploring() {
         apis.partyApi.startExploration()
@@ -350,5 +366,117 @@ class ExplorationPresenterTest {
         // Then
         npcDialogView.visible.shouldBeFalse()
         battleHudView.visible.shouldBeTrue()
+    }
+
+    // The leader walks east to (1,2), next to the merchant, south of it, and talks to it.
+    private fun talkToTheMerchant() {
+        virtualPadView.holdArrow(DirectionDto.EAST)
+        virtualPadView.releaseArrow()
+        eventBus.dispatch()
+        talk()
+    }
+
+    private fun openTheShop() {
+        talkToTheMerchant()
+        npcDialogView.tapDialog()
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `DialogTapped should open the shop of a merchant in place of its dialog, and keep talking`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talkToTheMerchant()
+        // When
+        npcDialogView.tapDialog()
+        eventBus.dispatch()
+        // Then
+        shopView.visible.shouldBeTrue()
+        shopView.titleText() shouldBe "Merchant"
+        npcDialogView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
+    }
+
+    @Test
+    fun `DialogTapped should not open any shop when the npc is no merchant`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talk()
+        // When
+        npcDialogView.tapDialog()
+        eventBus.dispatch()
+        // Then
+        shopView.visible.shouldBeFalse()
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe null
+    }
+
+    @Test
+    fun `ShopSlotSelected should frame the item and display its name and price in the call to action when an item is selected`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openTheShop()
+        // When
+        presenter.shopSlotSelected(1)
+        // Then
+        shopView.selectedSlotIndexes().shouldContainExactly(1)
+        playerCallToActionView.visible.shouldBeTrue()
+        playerCallToActionView.displayedItemActions shouldBe FakePlayerCallToActionView.DisplayedItemActions(itemName = "Mana Potion", itemPrice = 15, actions = emptyList())
+    }
+
+    @Test
+    fun `ShopSlotSelected should unselect the item and hide the call to action when an empty slot is selected`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openTheShop()
+        presenter.shopSlotSelected(0)
+        // When
+        presenter.shopSlotSelected(5)
+        // Then
+        shopView.selectedSlotIndexes().shouldBeEmpty()
+        playerCallToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `ShopClosed should finish the talk and display the pad again when the shop is closed`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openTheShop()
+        presenter.shopSlotSelected(0)
+        // When
+        presenter.shopClosed()
+        eventBus.dispatch()
+        // Then
+        shopView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+        playerCallToActionView.visible.shouldBeFalse()
+        playerCallToActionView.displayedItemActions shouldBe null
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `DisplayExploring should close the shop and display the finish turn again when the exploration pauses while shopping`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openTheShop()
+        presenter.shopSlotSelected(0)
+        // When
+        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.dispatch()
+        // Then
+        shopView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeTrue()
+        playerCallToActionView.visible.shouldBeTrue()
+        playerCallToActionView.displayedItemActions shouldBe null
     }
 }

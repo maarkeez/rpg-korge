@@ -182,6 +182,16 @@ column = 2
 unitId = "viking"
 ```
 
+An npc with a `stock` is a merchant: once the party talks to it, it shows the lootable items it sells, in the order they are listed (e.g.: the merchant). Each item is in unlimited supply, so it is listed once. The game fails to start when an item does not exist (`NpcStockItemNotFound`), when the stock has more than 12 items (`NpcStockTooLarge`), or when it lists an item twice (`NpcStockItemRepeated`).
+
+```toml
+name = "Merchant"
+line = "How can I help you?"
+row = 14
+column = 2
+stock = ["health-potion", "mana-potion", "hammer"]
+```
+
 ## How to add a unit
 
 1. Add `resources/unit/<unit id>.toml`.
@@ -190,7 +200,7 @@ unitId = "viking"
 
 ## How to add an npc
 
-1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied and where no battle unit is deployed.
+1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied and where no battle unit is deployed. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
 2. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
 
 ## How to add a lootable item

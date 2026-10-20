@@ -7,7 +7,7 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
-/** Loads one npc per `npc/<npc id>.toml` resource. Unit: only for a recruitable npc. */
+/** Loads one npc per `npc/<npc id>.toml` resource. Unit: only for a recruitable npc. Stock: only for a merchant. */
 class ResourcesNpcLoader(
     private val npcRoot: VfsFile = resourcesVfs["npc"],
 ) : NpcLoader {
@@ -29,6 +29,7 @@ class ResourcesNpcLoader(
         val row: Int,
         val column: Int,
         val unitId: String? = null,
+        val stock: List<String> = emptyList(),
     ) {
         fun toDto(npcId: String): Npc.Dto =
             Npc.Dto(
@@ -38,6 +39,7 @@ class ResourcesNpcLoader(
                 row = row,
                 column = column,
                 unitId = unitId,
+                stock = stock,
             )
     }
 }

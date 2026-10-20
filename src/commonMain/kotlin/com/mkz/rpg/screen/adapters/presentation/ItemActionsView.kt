@@ -11,7 +11,10 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/** The name and price of the selected inventory item and what the player can do with it, e.g.: Consume, Discard or Cancel. */
+/**
+ * The name and price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel. Without
+ * actions (e.g.: an item a merchant sells), only its name and price are displayed.
+ */
 class ItemActionsView(
     itemName: String,
     itemPrice: Int,
@@ -31,7 +34,7 @@ class ItemActionsView(
 
     internal val itemNameView = UnitNameView(Size(WIDTH, 16))
     internal val itemPriceView = UnitNameView(Size(WIDTH, 16))
-    internal lateinit var actionButtons: List<UIButton>
+    internal var actionButtons: List<UIButton> = emptyList()
 
     init {
         uiVerticalStack(padding = 4.0) {
@@ -41,19 +44,21 @@ class ItemActionsView(
             itemPriceView.alignTextToRight()
             nameLine.addChild(itemPriceView)
             addChild(nameLine)
-            uiHorizontalStack(padding = SPACING) {
-                val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
-                actionButtons =
-                    actions.map { action ->
-                        uiButton(action.label) {
-                            width = buttonWidth
-                            bgColorOut = Colors.DIMGRAY
-                            bgColorOver = RGBA(85, 85, 85)
-                            background.borderColor = Colors.LIGHTGRAY
-                            enabled = action.isEnabled
-                            onClick { action.onSelected() }
+            if (actions.isNotEmpty()) {
+                uiHorizontalStack(padding = SPACING) {
+                    val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
+                    actionButtons =
+                        actions.map { action ->
+                            uiButton(action.label) {
+                                width = buttonWidth
+                                bgColorOut = Colors.DIMGRAY
+                                bgColorOver = RGBA(85, 85, 85)
+                                background.borderColor = Colors.LIGHTGRAY
+                                enabled = action.isEnabled
+                                onClick { action.onSelected() }
+                            }
                         }
-                    }
+                }
             }
         }
         itemNameView.display(itemName)

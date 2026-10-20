@@ -51,6 +51,7 @@ class BattleScene(
     val playerCallToActionView = PlayerCallToActionView(resourcesLoader)
     val virtualPadView = VirtualPadView(Size(390, 300))
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
+    val shopView = ShopView(resourcesLoader)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -73,7 +74,7 @@ class BattleScene(
         val lootableItemApi = LootableItemApi(effectApi, eventBus)
         val lootTableApi = LootTableApi(lootableItemApi, eventBus)
         val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-        val npcApi = NpcApi(battlefieldApi, unitApi, eventBus)
+        val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
@@ -149,11 +150,13 @@ class BattleScene(
 
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
-                // While exploring, the virtual pad takes the place of the battle HUD, and an npc dialog the place of the pad.
+                // While exploring, the virtual pad takes the place of the battle HUD, an npc dialog the place of the pad, and a
+                // merchant's shop the place of its dialog.
                 container {
                     addChild(battleHudView)
                     addChild(virtualPadView)
                     addChild(npcDialogView)
+                    addChild(shopView)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
@@ -161,7 +164,7 @@ class BattleScene(
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
-                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, timeline, eventBus)
+                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, shopView, battleHudView, playerCallToActionView, partyApi, npcApi, lootableItemApi, timeline, eventBus)
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

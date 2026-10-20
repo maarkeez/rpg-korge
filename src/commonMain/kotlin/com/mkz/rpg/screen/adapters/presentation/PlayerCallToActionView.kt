@@ -53,7 +53,10 @@ open class PlayerCallToActionView(
         displayFinishTurn(onTurnFinished = onTurnFinished!!)
     }
 
-    /** Displays the name and price of the selected inventory item and its actions. The finish turn is displayed again once an action is selected. */
+    /**
+     * Displays the name and price of the selected item and its actions, if any (e.g.: none for an item a merchant sells).
+     * The finish turn is displayed again once an action is selected.
+     */
     open fun displayItemActions(
         itemName: String,
         itemPrice: Int,
