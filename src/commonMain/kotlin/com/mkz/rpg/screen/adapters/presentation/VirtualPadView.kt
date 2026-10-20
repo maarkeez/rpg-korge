@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick

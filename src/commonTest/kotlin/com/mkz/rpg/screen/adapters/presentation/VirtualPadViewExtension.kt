@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.isShown
 import korlibs.korge.tests.ViewsForTesting

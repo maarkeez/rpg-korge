@@ -4,7 +4,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.exploration.domain.ExplorationEvent
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
@@ -103,7 +103,7 @@ class BattleInfoPresenterTest {
     fun `DisplayExploring should display that the player explores when the exploration starts`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
-        apis.eventBus.publish(ExplorationEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1")))
+        apis.eventBus.publish(PartyEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1")))
         // When
         apis.eventBus.dispatch()
         // Then
@@ -136,7 +136,7 @@ class BattleInfoPresenterTest {
     fun `DisplayExploring should display that the player explores when the exploration resumes`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
-        apis.eventBus.publish(ExplorationEvent.ExplorationResumed(playerId = "player-1", battleUnitIds = listOf("knight-1")))
+        apis.eventBus.publish(PartyEvent.ExplorationResumed(playerId = "player-1", battleUnitIds = listOf("knight-1")))
         // When
         apis.eventBus.dispatch()
         // Then

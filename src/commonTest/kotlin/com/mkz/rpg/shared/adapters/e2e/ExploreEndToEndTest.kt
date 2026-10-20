@@ -1,7 +1,7 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.screen.adapters.presentation.battleHudView
 import com.mkz.rpg.screen.adapters.presentation.battleInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView

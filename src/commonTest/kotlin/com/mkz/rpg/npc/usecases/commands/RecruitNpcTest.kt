@@ -1,10 +1,10 @@
 package com.mkz.rpg.npc.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestDeployBattleUnit
-import com.mkz.rpg.exploration.domain.ExplorationEvent.RequestJoinParty
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import com.mkz.rpg.npc.domain.NpcMother.npc
+import com.mkz.rpg.party.domain.PartyEvent.RequestJoinParty
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import io.kotest.matchers.collections.shouldContainExactly

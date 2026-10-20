@@ -7,7 +7,7 @@ import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainReposit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderWhileExploring
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
-import com.mkz.rpg.exploration.domain.ExplorationEvent
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -36,7 +36,7 @@ class OnExplorationSecondStartedTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield("R .\n. .", occupants = mapOf('R' to "rat-1")))
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))))
-        eventBus.publish(ExplorationEvent.ExplorationSecondStarted(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationSecondStarted(playerId = "human"))
         // When
         eventBus.dispatch()
         // Then

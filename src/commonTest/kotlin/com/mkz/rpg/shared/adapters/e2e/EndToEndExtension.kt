@@ -1,6 +1,6 @@
 package com.mkz.rpg.shared.adapters.e2e
 
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickArrow

@@ -12,9 +12,9 @@ import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
@@ -39,7 +39,7 @@ class CpuRespawnAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
-    private val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
     private val ratHome = PositionDto(row = 1, column = 4)
 
@@ -64,7 +64,7 @@ class CpuRespawnAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 1, deployAtColumn = 0)
         eventBus.dispatch()
         while (ratHealth() > 0) hitRat()
-        explorationApi.startExploration()
+        partyApi.startExploration()
         eventBus.dispatch()
     }
 
@@ -83,7 +83,7 @@ class CpuRespawnAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        explorationApi.walkParty(direction)
+        partyApi.walkParty(direction)
         eventBus.dispatch()
     }
 

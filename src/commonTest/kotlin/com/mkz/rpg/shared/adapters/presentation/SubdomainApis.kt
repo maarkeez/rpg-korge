@@ -13,7 +13,6 @@ import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.domain.LootDrop
@@ -27,6 +26,7 @@ import com.mkz.rpg.lootableItem.usecases.services.FakeLootableItemLoader
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.usecases.services.FakeNpcLoader
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.services.FakePlayerLoader
@@ -70,7 +70,7 @@ class SubdomainApis(
     val npcApi = NpcApi(battlefieldApi, unitApi, eventBus, FakeNpcLoader(npcs))
     val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
-    val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
+    val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
 
     /** Stores the given data, deploys the battle units, places the npcs and starts the battle, dispatching the events it publishes. */
     fun initialise() {

@@ -1,13 +1,13 @@
 # Exploration
 
-A new game starts exploring the battlefield, out of the battles: there are no turns. The human player walks their party with the virtual pad, and the game switches to a turn-based battle once a CPU battle unit engages it. Exploring lives in the [`exploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration) subdomain, and the screen uses it through `ExplorationApi`.
+A new game starts exploring the battlefield, out of the battles: there are no turns. The human player walks their party with the virtual pad, and the game switches to a turn-based battle once a CPU battle unit engages it. Exploring lives in the [`party`](../../src/commonMain/kotlin/com/mkz/rpg/party) subdomain, and the screen uses it through `PartyApi`.
 
 ## The party
 
-- Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
+- Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
 - The CPU battle units wander around the tile they were deployed on while the party explores (see [CPU battle brain](cpu-battle-brain.md#wandering)).
 - A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU battle brain](cpu-battle-brain.md#respawning)).
-- A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
+- A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
 
 ## The virtual pad
 
@@ -21,9 +21,9 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 The party walks one tile at a time, towards the arrow held on the virtual pad (north, east, south or west). An npc blocks its tile as a battle unit does, so the party walks around it.
 
-1. [`WalkParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/WalkParty.kt) plans a step for each battle unit of the party: the leader walks one tile towards the direction, and each follower walks to the tile the battle unit ahead of it left. Nothing happens when the leader can not occupy that tile (e.g.: void, another battle unit, out of the battlefield), or while the party is still walking or battling.
+1. [`WalkParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/WalkParty.kt) plans a step for each battle unit of the party: the leader walks one tile towards the direction, and each follower walks to the tile the battle unit ahead of it left. Nothing happens when the leader can not occupy that tile (e.g.: void, another battle unit, out of the battlefield), or while the party is still walking or battling.
 2. The steps are walked one after another, with `RequestWalkBattleUnit`. A walk spends no turn action, unlike a move in a battle, and publishes the same `BattleUnitMoved`, so the battlefield occupancy, the loot found on the way and the animation work as in a battle.
-3. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolvePartyStep`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ResolvePartyStep.kt)). Only then is the tile left by the battle unit ahead vacant, so the next battle unit can step on it.
+3. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolvePartyStep`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResolvePartyStep.kt)). Only then is the tile left by the battle unit ahead vacant, so the next battle unit can step on it.
 4. A follower that can not reach its tile (e.g.: the battle unit ahead could not leave it) skips its step, so the party always finishes walking. A follower that is not next to the battle unit ahead (e.g.: before the party is lined up) walks the shortest path to its tile.
 5. Once every step has been walked or skipped, the party has walked (`PartyWalked`).
 
@@ -33,10 +33,10 @@ Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/c
 
 An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands next to the leader.
 
-1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces, and talks to the first one (`NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
-2. While talking, the exploration is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
+1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces, and talks to the first one (`NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
+2. While talking, the party is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
 3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
-4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
 A battle starting while talking (`PauseExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
 
@@ -47,7 +47,7 @@ An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game 
 1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: The Guy.
 2. The npc leaves its tile (`NpcRecruited`): the battlefield vacates it, and the screen removes the npc.
 3. A battle unit of its unit is deployed for the human player on that tile (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
-4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
+4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
 
 The events are dispatched in the order they are published, so the tile is vacated before the battle unit is deployed on it, and the battle unit is deployed before it joins the party. Once recruited, it is a party member as any other: it has a bag, and leaves the party once defeated.
 
@@ -65,8 +65,8 @@ There are no turns while exploring, so the inventory of the party can always be 
 
 Every second while exploring, the battle units that stood still during that second receive the effect of their terrain (e.g.: lava hurts, water heals), the CPU battle units resting included:
 
-- [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) counts the time elapsed on every frame, and calls [`ApplyStandingTerrainEffects`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ApplyStandingTerrainEffects.kt) every second (`STANDING_TERRAIN_EFFECT_INTERVAL`).
-- The exploration remembers the battle units that moved during the current second (`BattleUnitMoved`, see [`MarkBattleUnitMoved`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/MarkBattleUnitMoved.kt)), so walking over a tile does not apply its effect. A battle unit that walks onto lava is hurt once it has stood on it for a whole second.
+- [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) counts the time elapsed on every frame, and calls [`ApplyStandingTerrainEffects`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt) every second (`STANDING_TERRAIN_EFFECT_INTERVAL`).
+- The party remembers the battle units that moved during the current second (`BattleUnitMoved`, see [`MarkBattleUnitMoved`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/MarkBattleUnitMoved.kt)), so walking over a tile does not apply its effect. A battle unit that walks onto lava is hurt once it has stood on it for a whole second.
 - The effects are requested to the battlefield (`BattlefieldEvent.RequestEffectApplicationToOccupants`) for the battle units standing still, as they are for the battle units in the battle when a round starts.
 - Nothing is applied while battling: the battle applies the terrain effects when its rounds start instead.
 - Then, the next second starts (`ExplorationSecondStarted`), and the CPU battle units wander (see [CPU battle brain](cpu-battle-brain.md#wandering)). They wander after the effects, so a battle unit that steps counts as moved during the new second.
@@ -89,7 +89,7 @@ While exploring, the battle info displays "Exploring".
 
 When the engagement is updated and only one player is left with battle units in the battle (e.g.: every CPU battle unit in it was defeated or left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes the battle without a winner (`BattleFinished`) instead of starting the next round:
 
-- The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/exploration/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
+- The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
 - The summons left (e.g.: the bees a knight summoned) vanish, whatever turns they had left, as they never explore ([`VanishSummonedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/VanishSummonedBattleUnits.kt)). They flash and leave the battlefield, without being defeated: they drop no loot. A player whose last battle units were summons is defeated then, so the human player loses the game when only bees were left.
 - The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, and the virtual pad takes the place of the battle HUD and the player call to action.
 - The next engagement starts a new battle, which replaces the finished one.

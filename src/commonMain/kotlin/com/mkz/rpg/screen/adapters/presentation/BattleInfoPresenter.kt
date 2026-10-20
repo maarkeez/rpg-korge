@@ -5,8 +5,8 @@ import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
-import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
-import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.shared.domain.EventBus

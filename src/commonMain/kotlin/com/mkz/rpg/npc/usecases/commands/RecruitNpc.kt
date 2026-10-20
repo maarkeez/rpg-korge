@@ -1,8 +1,8 @@
 package com.mkz.rpg.npc.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestDeployBattleUnit
-import com.mkz.rpg.exploration.domain.ExplorationEvent.RequestJoinParty
 import com.mkz.rpg.npc.domain.NpcRepository
+import com.mkz.rpg.party.domain.PartyEvent.RequestJoinParty
 import com.mkz.rpg.shared.domain.EventBus
 
 /**

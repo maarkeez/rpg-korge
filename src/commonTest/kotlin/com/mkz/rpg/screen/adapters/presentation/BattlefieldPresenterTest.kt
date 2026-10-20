@@ -27,13 +27,13 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
-import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
 import com.mkz.rpg.npc.domain.NpcMother.npc
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -120,7 +120,7 @@ class BattlefieldPresenterTest {
             unitApi = apis.unitApi,
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
-            explorationApi = apis.explorationApi,
+            partyApi = apis.partyApi,
             timeline = timeline,
             eventBus = eventBus,
         )
@@ -285,7 +285,7 @@ class BattlefieldPresenterTest {
         unitApi = apis.unitApi,
         abilityApi = apis.abilityApi,
         battleApi = apis.battleApi,
-        explorationApi = apis.explorationApi,
+        partyApi = apis.partyApi,
         timeline = timeline,
         eventBus = apis.eventBus,
     )
@@ -396,7 +396,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashUnit should flash the battle unit on view when it joins the party`() {
         // Given
-        eventBus.publish(ExplorationEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1"))
+        eventBus.publish(PartyEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1"))
         // When
         eventBus.dispatch()
         // Then
@@ -680,8 +680,8 @@ class BattlefieldPresenterTest {
         // Given
         val exploringApis = exploringApis(npcs = listOf(npc(id = "the-guy", row = 1, column = 0).toDto()))
         val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
-        exploringApis.explorationApi.startExploration()
-        exploringApis.explorationApi.talkToAdjacentNpc()
+        exploringApis.partyApi.startExploration()
+        exploringApis.partyApi.talkToAdjacentNpc()
         exploringApis.eventBus.dispatch()
         val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
         exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }

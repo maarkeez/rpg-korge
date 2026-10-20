@@ -4,10 +4,10 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
-import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.inventory.domain.InventoryEvent
 import com.mkz.rpg.npc.domain.NpcMother.npc
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -47,10 +47,10 @@ class ExplorationPresenterTest {
     private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
 
-    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.explorationApi, apis.npcApi, timeline, eventBus)
+    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, timeline, eventBus)
 
     private fun startExploring() {
-        apis.explorationApi.startExploration()
+        apis.partyApi.startExploration()
         eventBus.dispatch()
     }
 
@@ -80,7 +80,7 @@ class ExplorationPresenterTest {
         createPresenter()
         startExploring()
         // When
-        eventBus.publish(ExplorationEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
@@ -93,10 +93,10 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
-        eventBus.publish(ExplorationEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
         eventBus.dispatch()
         // When
-        eventBus.publish(ExplorationEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.publish(PartyEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeTrue()
@@ -206,7 +206,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
-        apis.explorationApi.pauseExploration()
+        apis.partyApi.pauseExploration()
         eventBus.dispatch()
         // When
         eventBus.publish(BattlefieldHudEvent.Idle)
@@ -275,7 +275,7 @@ class ExplorationPresenterTest {
         // When
         talk()
         // Then
-        apis.explorationApi.searchExploration()!!.talkingNpcId shouldBe null
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe null
     }
 
     @Test
@@ -332,8 +332,8 @@ class ExplorationPresenterTest {
         // Then
         npcDialogView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
-        apis.explorationApi
-            .searchExploration()!!
+        apis.partyApi
+            .searchParty()!!
             .isExploring
             .shouldBeTrue()
     }
@@ -345,7 +345,7 @@ class ExplorationPresenterTest {
         startExploring()
         talk()
         // When
-        eventBus.publish(ExplorationEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
         eventBus.dispatch()
         // Then
         npcDialogView.visible.shouldBeFalse()

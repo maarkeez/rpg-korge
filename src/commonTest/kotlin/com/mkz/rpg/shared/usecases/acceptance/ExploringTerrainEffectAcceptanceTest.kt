@@ -7,9 +7,9 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
@@ -36,7 +36,7 @@ class ExploringTerrainEffectAcceptanceTest {
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
-    private val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
     private val humanPlayerId = "human"
     private val cpuPlayerId = "cpu"
@@ -60,13 +60,13 @@ class ExploringTerrainEffectAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = 6, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = 7, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = 0, deployAtColumn = 6)
-        explorationApi.startExploration()
+        partyApi.startExploration()
         eventBus.dispatch()
     }
 
     // A second passes while exploring.
     private fun waitASecond() {
-        explorationApi.applyStandingTerrainEffects()
+        partyApi.applyStandingTerrainEffects()
         eventBus.dispatch()
     }
 
@@ -89,7 +89,7 @@ class ExploringTerrainEffectAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             // The leader walks off the lava to (5,1), and the knight-2 onto it.
-            explorationApi.walkParty(DirectionDto.NORTH)
+            partyApi.walkParty(DirectionDto.NORTH)
             eventBus.dispatch()
             // When
             waitASecond()

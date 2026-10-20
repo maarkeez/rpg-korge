@@ -4,7 +4,7 @@ import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainReposit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.RespawnDefeatedBattleUnits
-import com.mkz.rpg.exploration.domain.ExplorationEvent
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldContainExactly
@@ -20,7 +20,7 @@ class OnPartyWalkedTest {
     fun `should count the party step for every defeated cpu battle unit when the party walks`() {
         // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).defeat("rat-1"))
-        eventBus.publish(ExplorationEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.publish(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
         // When
         eventBus.dispatch()
         // Then

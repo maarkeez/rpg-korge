@@ -10,9 +10,9 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.npc.domain.NpcEvent
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -43,7 +43,7 @@ class BattlefieldPresenter(
     private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
-    private val explorationApi: ExplorationApi,
+    private val partyApi: PartyApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
@@ -116,7 +116,7 @@ class BattlefieldPresenter(
             eventBus.subscribe<NpcEvent.NpcRecruited> { event ->
                 timeline.play { battlefieldView.removeNpc(event.row, event.column) }
             },
-            eventBus.subscribe<ExplorationEvent.PartyJoined> { event ->
+            eventBus.subscribe<PartyEvent.PartyJoined> { event ->
                 flashUnit(event.battleUnitId)
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
@@ -466,7 +466,7 @@ class BattlefieldPresenter(
     }
 
     // While talking to an npc, time stops: the tiles can not be selected.
-    private fun isTalking(): Boolean = explorationApi.searchExploration()?.talkingNpcId != null
+    private fun isTalking(): Boolean = partyApi.searchParty()?.talkingNpcId != null
 
     // Delegates
     override fun tileSelected(

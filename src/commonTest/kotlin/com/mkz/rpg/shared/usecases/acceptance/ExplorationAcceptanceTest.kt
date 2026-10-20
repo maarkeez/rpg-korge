@@ -8,9 +8,9 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
@@ -40,7 +40,7 @@ class ExplorationAcceptanceTest {
     // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
-    private val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, eventBus), eventBus)
 
     private val humanPlayerId = "human"
     private val cpuPlayerId = "cpu"
@@ -61,12 +61,12 @@ class ExplorationAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-1", "knight", humanPlayerId, deployAtRow = 6, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("knight-2", "knight", humanPlayerId, deployAtRow = 7, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("rat-1", "rat", cpuPlayerId, deployAtRow = 0, deployAtColumn = 1)
-        explorationApi.startExploration()
+        partyApi.startExploration()
         eventBus.dispatch()
     }
 
     private fun walk(direction: DirectionDto) {
-        explorationApi.walkParty(direction)
+        partyApi.walkParty(direction)
         eventBus.dispatch()
     }
 
@@ -74,7 +74,7 @@ class ExplorationAcceptanceTest {
     fun `should explore without a battle while no cpu battle unit has the party within reach`() =
         scenarioTest(::setUp) {
             // Then
-            explorationApi.searchExploration()!!.isExploring.shouldBeTrue()
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
             battleApi.searchBattle().shouldBeNull()
         }
 
@@ -98,7 +98,7 @@ class ExplorationAcceptanceTest {
             // Then
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 6, column = 5)
             battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 6, column = 4)
-            explorationApi.searchExploration()!!.isExploring.shouldBeTrue()
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
         }
 
     @Test
@@ -108,7 +108,7 @@ class ExplorationAcceptanceTest {
             walk(DirectionDto.NORTH)
             // Then
             battleApi.searchBattle().shouldNotBeNull().currentPlayerTurn shouldBe humanPlayerId
-            explorationApi.searchExploration()!!.isExploring.shouldBeFalse()
+            partyApi.searchParty()!!.isExploring.shouldBeFalse()
             walk(DirectionDto.NORTH)
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 5, column = 1)
         }

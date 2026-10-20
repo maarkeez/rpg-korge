@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.collections.shouldBeEmpty

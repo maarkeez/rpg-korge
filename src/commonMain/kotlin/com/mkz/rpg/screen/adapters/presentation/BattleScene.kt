@@ -8,12 +8,12 @@ import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -79,7 +79,7 @@ class BattleScene(
         val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
-        val explorationApi = ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
+        val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Resources: each subdomain loads its data before the battle is set up
@@ -110,7 +110,7 @@ class BattleScene(
                 unitApi,
                 abilityApi,
                 battleApi,
-                explorationApi,
+                partyApi,
                 timeline,
                 eventBus,
             )
@@ -161,7 +161,7 @@ class BattleScene(
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
-                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, explorationApi, npcApi, timeline, eventBus)
+                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, timeline, eventBus)
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

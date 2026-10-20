@@ -4,7 +4,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
-import com.mkz.rpg.exploration.domain.ExplorationEvent
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -30,7 +30,7 @@ class OnPartyWalkedTest {
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield("K R", occupants = mapOf('K' to "knight-1", 'R' to "rat-1")))
-        eventBus.publish(ExplorationEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.publish(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
         // When
         eventBus.dispatch()
         // Then

@@ -1,16 +1,16 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
-import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationPaused
-import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationResumed
-import com.mkz.rpg.exploration.domain.ExplorationEvent.ExplorationStarted
-import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkFinished
-import com.mkz.rpg.exploration.domain.ExplorationEvent.NpcTalkStarted
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
+import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
+import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -26,14 +26,14 @@ import kotlin.time.Duration.Companion.seconds
  * counted.
  *
  * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
- * meanwhile, as the exploration neither walks nor starts a second while talking.
+ * meanwhile, as the party neither walks nor starts a second while talking.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
     private val npcDialogView: NpcDialogView,
     private val battleHudView: BattleHudView,
     private val playerCallToActionView: PlayerCallToActionView,
-    private val explorationApi: ExplorationApi,
+    private val partyApi: PartyApi,
     private val npcApi: NpcApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
@@ -99,7 +99,7 @@ class ExplorationPresenter(
         elapsedSinceTerrainEffects += elapsed
         while (elapsedSinceTerrainEffects >= STANDING_TERRAIN_EFFECT_INTERVAL) {
             elapsedSinceTerrainEffects -= STANDING_TERRAIN_EFFECT_INTERVAL
-            explorationApi.applyStandingTerrainEffects()
+            partyApi.applyStandingTerrainEffects()
         }
     }
 
@@ -111,21 +111,21 @@ class ExplorationPresenter(
     // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed).
     private fun walkParty(direction: DirectionDto) {
         if (timeline.isPlaying || !virtualPadView.visible) return
-        explorationApi.walkParty(direction)
+        partyApi.walkParty(direction)
     }
 
     // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun talkToAdjacentNpc() {
         if (timeline.isPlaying || !virtualPadView.visible) return
-        explorationApi.talkToAdjacentNpc()
+        partyApi.talkToAdjacentNpc()
     }
 
     private fun finishTalk() {
         if (timeline.isPlaying || !npcDialogView.visible) return
-        explorationApi.finishTalk()
+        partyApi.finishTalk()
     }
 
-    private fun isExploring() = !isGameOver && explorationApi.searchExploration()?.isExploring == true
+    private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
     // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog.
     private fun displayVirtualPad(isDisplayed: Boolean) {

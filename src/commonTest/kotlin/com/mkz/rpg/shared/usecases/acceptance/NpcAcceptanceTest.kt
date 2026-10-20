@@ -6,12 +6,12 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldError
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
-import com.mkz.rpg.exploration.adapters.presentation.ExplorationApi
-import com.mkz.rpg.exploration.domain.Exploration.Dto.DirectionDto
-import com.mkz.rpg.exploration.domain.ExplorationEvent
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.usecases.services.FakeNpcLoader
+import com.mkz.rpg.party.adapters.presentation.PartyApi
+import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
@@ -46,9 +46,9 @@ class NpcAcceptanceTest {
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
     private val npcApi by lazy { NpcApi(battlefieldApi, unitApi, eventBus, FakeNpcLoader(npcs)) }
-    private val explorationApi by lazy { ExplorationApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus) }
+    private val partyApi by lazy { PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus) }
     private val secondsStarted =
-        mutableListOf<ExplorationEvent.ExplorationSecondStarted>().also { seconds -> eventBus.subscribe<ExplorationEvent.ExplorationSecondStarted> { seconds += it } }
+        mutableListOf<PartyEvent.ExplorationSecondStarted>().also { seconds -> eventBus.subscribe<PartyEvent.ExplorationSecondStarted> { seconds += it } }
 
     // The Guy stands on the lava at (0,0). The knight-1 leads from (0,1), east of it, and the knight-2 follows it from
     // (1,1). The rat stands at (7,7), far from the party, so it does not engage.
@@ -68,28 +68,28 @@ class NpcAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-2", "knight", "human", deployAtRow = 1, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("rat-1", "rat", "cpu", deployAtRow = 7, deployAtColumn = 7)
         npcApi.initialiseNpcs()
-        explorationApi.startExploration()
+        partyApi.startExploration()
         eventBus.dispatch()
     }
 
     private fun walk(direction: DirectionDto) {
-        explorationApi.walkParty(direction)
+        partyApi.walkParty(direction)
         eventBus.dispatch()
     }
 
     // A second passes while exploring.
     private fun waitASecond() {
-        explorationApi.applyStandingTerrainEffects()
+        partyApi.applyStandingTerrainEffects()
         eventBus.dispatch()
     }
 
     private fun talk() {
-        explorationApi.talkToAdjacentNpc()
+        partyApi.talkToAdjacentNpc()
         eventBus.dispatch()
     }
 
     private fun finishTalk() {
-        explorationApi.finishTalk()
+        partyApi.finishTalk()
         eventBus.dispatch()
     }
 
@@ -113,7 +113,7 @@ class NpcAcceptanceTest {
             vikingBattleUnit.playerId shouldBe "human"
             vikingBattleUnit.remainingHealthPoints shouldBe 150
             battlefieldApi.searchOccupant(row = 0, column = 3) shouldBe "viking"
-            explorationApi.searchExploration()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2", "viking")
+            partyApi.searchParty()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2", "viking")
             npcApi.searchNpcById("viking").shouldBeNull()
         }
 
@@ -144,7 +144,7 @@ class NpcAcceptanceTest {
             // When
             talk()
             // Then
-            explorationApi.searchExploration()!!.talkingNpcId.shouldBeNull()
+            partyApi.searchParty()!!.talkingNpcId.shouldBeNull()
         }
 
     @Test
@@ -156,7 +156,7 @@ class NpcAcceptanceTest {
             finishTalk()
             // Then
             battlefieldApi.searchOccupant(row = 0, column = 0) shouldBe "the-guy"
-            explorationApi.searchExploration()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2")
+            partyApi.searchParty()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2")
         }
 
     @Test
@@ -210,7 +210,7 @@ class NpcAcceptanceTest {
             // When
             talk()
             // Then
-            explorationApi.searchExploration()!!.talkingNpcId shouldBe "the-guy"
+            partyApi.searchParty()!!.talkingNpcId shouldBe "the-guy"
             // When
             walk(DirectionDto.EAST)
             waitASecond()
@@ -222,7 +222,7 @@ class NpcAcceptanceTest {
             walk(DirectionDto.EAST)
             waitASecond()
             // Then
-            explorationApi.searchExploration()!!.talkingNpcId.shouldBeNull()
+            partyApi.searchParty()!!.talkingNpcId.shouldBeNull()
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 2)
             secondsStarted.shouldHaveSize(1)
         }
@@ -235,7 +235,7 @@ class NpcAcceptanceTest {
             // When
             talk()
             // Then
-            explorationApi.searchExploration()!!.talkingNpcId.shouldBeNull()
-            explorationApi.searchExploration()!!.isExploring.shouldBeTrue()
+            partyApi.searchParty()!!.talkingNpcId.shouldBeNull()
+            partyApi.searchParty()!!.isExploring.shouldBeTrue()
         }
 }
