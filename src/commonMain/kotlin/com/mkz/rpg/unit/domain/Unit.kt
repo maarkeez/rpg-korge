@@ -1,5 +1,8 @@
 package com.mkz.rpg.unit.domain
 
+import com.mkz.rpg.shared.domain.Gold
+import com.mkz.rpg.unit.domain.UnitError.NegativeStartingGold
+import com.mkz.rpg.unit.domain.UnitError.StartingGoldAboveLimit
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
 import kotlin.jvm.JvmInline
 
@@ -11,6 +14,7 @@ data class Unit private constructor(
     private val manaPoints: ManaPoints,
     private val abilities: Abilities,
     private val movementRange: MovementRange,
+    private val startingGold: StartingGold,
     private val events: Set<UnitEvent>,
 ) {
     companion object {
@@ -22,6 +26,7 @@ data class Unit private constructor(
                 manaPoints = ManaPoints(unitDto.manaPoints),
                 abilities = Abilities(unitDto.abilities),
                 movementRange = MovementRange(unitDto.movementRange),
+                startingGold = StartingGold(unitDto.startingGold),
                 events = setOf(UnitCreated(unitDto.id)),
             )
     }
@@ -36,6 +41,7 @@ data class Unit private constructor(
             manaPoints = manaPoints.value,
             abilities = abilities.value,
             movementRange = movementRange.value,
+            startingGold = startingGold.value,
         )
 
     @JvmInline private value class Id(
@@ -62,6 +68,16 @@ data class Unit private constructor(
         val value: Int,
     )
 
+    // The gold each battle unit of the unit carries once deployed.
+    @JvmInline private value class StartingGold(
+        val value: Int,
+    ) {
+        init {
+            if (value < 0) throw NegativeStartingGold()
+            if (value > Gold.MAXIMUM) throw StartingGoldAboveLimit()
+        }
+    }
+
     data class Dto(
         val id: String,
         val name: String,
@@ -69,5 +85,6 @@ data class Unit private constructor(
         val manaPoints: Int,
         val abilities: List<String>,
         val movementRange: Int,
+        val startingGold: Int = 0,
     )
 }

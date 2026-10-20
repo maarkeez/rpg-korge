@@ -11,13 +11,13 @@ class CanStoreItemTest {
     private val canStoreItem = CanStoreItem(inventoryRepository)
 
     @Test
-    fun `should allow storing when the battle unit has not looted any item`() {
+    fun `should not allow storing when the battle unit has no inventory`() {
         // Given
         val battleUnitId = InventoryMother.battleUnitId()
         // When
         val canStore = canStoreItem(battleUnitId = battleUnitId)
         // Then
-        canStore.shouldBeTrue()
+        canStore.shouldBeFalse()
     }
 
     @Test

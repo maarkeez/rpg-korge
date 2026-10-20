@@ -3,7 +3,7 @@ package com.mkz.rpg.inventory.usecases.queries
 import com.mkz.rpg.inventory.domain.Inventory
 import com.mkz.rpg.inventory.domain.InventoryRepository
 
-/** Returns `null` until the battle unit loots its first item, which means its inventory is empty. */
+/** Returns `null` for the battle units without inventory: the CPU battle units and the summoned ones. */
 class SearchInventoryByBattleUnitId(
     private val inventoryRepository: InventoryRepository,
 ) {

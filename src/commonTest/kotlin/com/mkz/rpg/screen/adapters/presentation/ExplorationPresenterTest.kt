@@ -58,12 +58,26 @@ class ExplorationPresenterTest {
     private val virtualPadView = VirtualPadView()
     private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
     private val shopView = ShopView(BattleSceneResourcesLoader())
+    private val battlefieldView = FakeBattlefieldView()
     private val battleHudView = FakeBattleHudView()
     private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
+    private val shopPresenter =
+        ShopPresenter(
+            shopView,
+            battlefieldView,
+            playerCallToActionView,
+            apis.partyApi,
+            apis.inventoryApi,
+            apis.lootableItemApi,
+            apis.battleUnitApi,
+            apis.unitApi,
+            apis.battlefieldApi,
+            timeline,
+            eventBus,
+        )
 
-    private fun createPresenter() =
-        ExplorationPresenter(virtualPadView, npcDialogView, shopView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, apis.lootableItemApi, timeline, eventBus)
+    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, timeline, eventBus)
 
     private fun startExploring() {
         apis.partyApi.startExploration()
@@ -392,6 +406,7 @@ class ExplorationPresenterTest {
         npcDialogView.tapDialog()
         eventBus.dispatch()
         // Then
+        shopPresenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
         shopView.titleText() shouldBe "Merchant"
         npcDialogView.visible.shouldBeFalse()
@@ -410,49 +425,22 @@ class ExplorationPresenterTest {
         npcDialogView.tapDialog()
         eventBus.dispatch()
         // Then
-        shopView.visible.shouldBeFalse()
+        shopPresenter.isOpen.shouldBeFalse()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe null
     }
 
     @Test
-    fun `ShopSlotSelected should frame the item and display its name and price in the call to action when an item is selected`() {
+    fun `ShopClosed should close the shop and display the pad again when the talk is finished`() {
         // Given
-        val presenter = createPresenter()
+        createPresenter()
         startExploring()
         openTheShop()
+        shopPresenter.shopSlotSelected(0)
         // When
-        presenter.shopSlotSelected(1)
-        // Then
-        shopView.selectedSlotIndexes().shouldContainExactly(1)
-        playerCallToActionView.visible.shouldBeTrue()
-        playerCallToActionView.displayedItemActions shouldBe FakePlayerCallToActionView.DisplayedItemActions(itemName = "Mana Potion", itemPrice = 15, actions = emptyList())
-    }
-
-    @Test
-    fun `ShopSlotSelected should unselect the item and hide the call to action when an empty slot is selected`() {
-        // Given
-        val presenter = createPresenter()
-        startExploring()
-        openTheShop()
-        presenter.shopSlotSelected(0)
-        // When
-        presenter.shopSlotSelected(5)
-        // Then
-        shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
-    }
-
-    @Test
-    fun `ShopClosed should finish the talk and display the pad again when the shop is closed`() {
-        // Given
-        val presenter = createPresenter()
-        startExploring()
-        openTheShop()
-        presenter.shopSlotSelected(0)
-        // When
-        presenter.shopClosed()
+        shopPresenter.shopClosed()
         eventBus.dispatch()
         // Then
+        shopPresenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
         playerCallToActionView.visible.shouldBeFalse()
@@ -466,15 +454,15 @@ class ExplorationPresenterTest {
     @Test
     fun `DisplayExploring should close the shop and display the finish turn again when the exploration pauses while shopping`() {
         // Given
-        val presenter = createPresenter()
+        createPresenter()
         startExploring()
         openTheShop()
-        presenter.shopSlotSelected(0)
+        shopPresenter.shopSlotSelected(0)
         // When
         eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
         eventBus.dispatch()
         // Then
-        shopView.visible.shouldBeFalse()
+        shopPresenter.isOpen.shouldBeFalse()
         battleHudView.visible.shouldBeTrue()
         playerCallToActionView.visible.shouldBeTrue()
         playerCallToActionView.displayedItemActions shouldBe null

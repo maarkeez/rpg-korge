@@ -17,7 +17,6 @@ import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
@@ -35,9 +34,9 @@ class StoreLootedItemTest {
     private val lootableItemRepository = InMemoryLootableItemRepository()
     private val eventBus = FakeEventBus()
     private val storeLootedItem =
-        StoreLootedItem(inventoryRepository, SearchBattleUnitById(battleUnitRepository), SearchPlayerById(playerRepository), SearchLootableItemById(lootableItemRepository), eventBus)
+        StoreLootedItem(inventoryRepository, SearchBattleUnitById(battleUnitRepository), SearchLootableItemById(lootableItemRepository), eventBus)
 
-    // The knight and the summoned bee belong to the human player, and the rat to the CPU player.
+    // The knight and the summoned bee belong to the human player, and the rat to the CPU player. Only the knight has an inventory.
     @BeforeTest
     fun setUp() {
         val human = player(id = "human", type = HUMAN)
@@ -48,10 +47,11 @@ class StoreLootedItemTest {
         battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         battleUnitRepository.create(battleUnit(id = "bee-1", player = human.toDto(), remainingTurns = 5))
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))
+        inventoryRepository.create(inventory(battleUnitId = "knight-1"))
     }
 
     @Test
-    fun `should create the inventory with the item when the human battle unit loots its first item`() {
+    fun `should store the item in the inventory when the battle unit loots its first item`() {
         // Given
         // When
         storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2)
@@ -92,7 +92,7 @@ class StoreLootedItemTest {
     }
 
     @Test
-    fun `should not store the item when the battle unit belongs to the CPU player`() {
+    fun `should leave the item on its tile when the battle unit has no inventory, as it belongs to the CPU player`() {
         // Given
         // When
         storeLootedItem(battleUnitId = "rat-1", lootableItemId = "health-potion", row = 1, column = 2)
@@ -102,7 +102,7 @@ class StoreLootedItemTest {
     }
 
     @Test
-    fun `should not store the item when the battle unit is summoned`() {
+    fun `should leave the item on its tile when the battle unit has no inventory, as it is summoned`() {
         // Given
         // When
         storeLootedItem(battleUnitId = "bee-1", lootableItemId = "health-potion", row = 1, column = 2)

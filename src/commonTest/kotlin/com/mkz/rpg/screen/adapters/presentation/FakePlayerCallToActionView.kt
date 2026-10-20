@@ -53,6 +53,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
         itemName: String,
         itemPrice: Int,
         actions: List<ItemActionsView.Action>,
+        redisplaysFinishTurn: Boolean,
     ) {
         displayedInventoryFull = null
         displayedItemActions =
@@ -63,7 +64,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
                     actions.map { action ->
                         action.copy(onSelected = {
                             action.onSelected()
-                            redisplayFinishTurn()
+                            if (redisplaysFinishTurn) redisplayFinishTurn()
                         })
                     },
             )

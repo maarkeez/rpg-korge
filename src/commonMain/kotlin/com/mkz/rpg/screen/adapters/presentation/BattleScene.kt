@@ -77,10 +77,10 @@ class BattleScene(
         val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus)
         val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
         val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
-        val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
         val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, eventBus)
         val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
+        val inventoryApi = InventoryApi(lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
 
         // Resources: each subdomain loads its data before the battle is set up
@@ -164,7 +164,21 @@ class BattleScene(
                 // val finishTurnPresenter = FinishTurnPresenter(finishTurnView, battleApi, eventBus)
                 addChild(playerCallToActionView)
                 FinishTurnPresenter(playerCallToActionView, battleApi, playerApi, timeline, eventBus)
-                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, shopView, battleHudView, playerCallToActionView, partyApi, npcApi, lootableItemApi, timeline, eventBus)
+                val shopPresenter =
+                    ShopPresenter(
+                        shopView,
+                        battlefieldView,
+                        playerCallToActionView,
+                        partyApi,
+                        inventoryApi,
+                        lootableItemApi,
+                        battleUnitApi,
+                        unitApi,
+                        battlefieldApi,
+                        timeline,
+                        eventBus,
+                    )
+                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, shopPresenter, timeline, eventBus)
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

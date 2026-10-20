@@ -70,6 +70,8 @@ class InventoryPresenter(
             eventBus.subscribe<InventoryEvent.ItemDiscarded> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemEquipped> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemUnequipped> { event -> refreshInventory(event.battleUnitId) },
+            eventBus.subscribe<InventoryEvent.ItemBought> { event -> refreshInventory(event.battleUnitId) },
+            eventBus.subscribe<InventoryEvent.ItemSold> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryFull> { event ->
                 val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
                 timeline.play { askWhatToDoWith(event, foundItemName = foundItem.name, foundItemPrice = foundItem.price) }
@@ -91,29 +93,34 @@ class InventoryPresenter(
         return inventory.storedItems.map { lootableItemId -> InventoryView.Slot(lootableItemId, isEquipped = equippedItems.remove(lootableItemId)) }
     }
 
+    private fun goldOf(battleUnitId: String): Int = inventoryApi.searchInventoryByBattleUnitId(battleUnitId)?.gold ?: 0
+
     private fun openInventory(battleUnitId: String) {
         val slots = slotsOf(battleUnitId)
-        timeline.play { displayInventory(battleUnitId, slots) }
+        val gold = goldOf(battleUnitId)
+        timeline.play { displayInventory(battleUnitId, slots, gold) }
     }
 
     private fun displayInventory(
         battleUnitId: String,
         slots: List<InventoryView.Slot>,
+        gold: Int,
     ) {
         displayedBattleUnitId = battleUnitId
         displayedSlots = slots
         selectedSlotIndex = null
-        inventoryView.display(slots)
+        inventoryView.display(slots, gold)
         battleHudView.displayInventoryView()
     }
 
     private fun refreshInventory(battleUnitId: String) {
         val slots = slotsOf(battleUnitId)
+        val gold = goldOf(battleUnitId)
         timeline.play {
             if (displayedBattleUnitId != battleUnitId) return@play
             displayedSlots = slots
             selectedSlotIndex = null
-            inventoryView.display(slots)
+            inventoryView.display(slots, gold)
         }
     }
 
@@ -137,7 +144,7 @@ class InventoryPresenter(
         val pendingChoice = CompletableDeferred<Unit>()
         foundItem = found
         choice = pendingChoice
-        displayInventory(found.battleUnitId, slotsOf(found.battleUnitId))
+        displayInventory(found.battleUnitId, slotsOf(found.battleUnitId), goldOf(found.battleUnitId))
         playerCallToActionView.displayInventoryFull(
             foundItemName = foundItemName,
             foundItemPrice = foundItemPrice,

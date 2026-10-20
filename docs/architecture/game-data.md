@@ -120,7 +120,10 @@ healthPoints = 100
 manaPoints = 30
 movementRange = 3
 abilities = ["poisoned-sword", "heal"]
+startingGold = 20
 ```
+
+`startingGold` is optional, 0 by default: the gold each battle unit of the unit carries once deployed, from 0 to 99,999 (`NegativeStartingGold`, `StartingGoldAboveLimit`). Only the battle units of the human player carry gold, see [Inventory](inventory.md#gold).
 
 ### `lootDrop/<unit id>.toml`
 

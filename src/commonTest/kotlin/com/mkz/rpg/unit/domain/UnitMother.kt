@@ -12,6 +12,7 @@ object UnitMother {
         manaPoints: Int = manaPoints(),
         abilities: List<String> = abilities(),
         movementRange: Int = movementRange(),
+        startingGold: Int = 0,
     ) = Unit
         .create(
             unitDto =
@@ -22,6 +23,7 @@ object UnitMother {
                     manaPoints = manaPoints,
                     abilities = abilities,
                     movementRange = movementRange,
+                    startingGold = startingGold,
                 ),
         ).pullEvents()
         .second

@@ -565,6 +565,12 @@ open class BattlefieldView(
         }
     }
 
+    /** Scrolls the battlefield so the tile is visible, e.g.: the buyer of a merchant's shop. */
+    open suspend fun scrollToTile(
+        row: Int,
+        column: Int,
+    ) = followTile(row, column)
+
     // Centers the tile when it is out of the viewport or on its edge.
     private suspend fun followTile(
         row: Int,

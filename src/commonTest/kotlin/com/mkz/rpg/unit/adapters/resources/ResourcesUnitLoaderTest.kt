@@ -3,6 +3,7 @@ package com.mkz.rpg.unit.adapters.resources
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import korlibs.io.file.std.MemoryVfsMix
 import kotlinx.coroutines.test.runTest
@@ -25,6 +26,22 @@ class ResourcesUnitLoaderTest {
             loader.loadUnits().shouldContainExactly(
                 unit(id = "knight", name = "Knight", healthPoints = 100, manaPoints = 30, abilities = listOf("sword", "heal"), movementRange = 3).toDto(),
             )
+        }
+
+    @Test
+    fun `should load the starting gold of a unit, or 0 when it has none`() =
+        runTest {
+            // Given
+            val unitRoot =
+                MemoryVfsMix(
+                    "unit/viking.toml" to "name = \"Viking\"\nhealthPoints = 150\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\"]\nstartingGold = 100\n",
+                    "unit/rat.toml" to "name = \"Rat\"\nhealthPoints = 20\nmanaPoints = 10\nmovementRange = 3\nabilities = [\"sword\"]\n",
+                )["unit"]
+            val loader = ResourcesUnitLoader(unitRoot = unitRoot)
+            // When
+            loader.initResources()
+            // Then
+            loader.loadUnits().associate { unit -> unit.id to unit.startingGold } shouldBe mapOf("viking" to 100, "rat" to 0)
         }
 
     @Test

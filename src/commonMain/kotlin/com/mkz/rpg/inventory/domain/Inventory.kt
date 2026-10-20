@@ -1,21 +1,29 @@
 package com.mkz.rpg.inventory.domain
 
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
+import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
+import com.mkz.rpg.inventory.domain.InventoryError.NegativeGold
+import com.mkz.rpg.inventory.domain.InventoryError.NoStorageSpaceLeft
+import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
+import com.mkz.rpg.shared.domain.Gold.MAXIMUM
 import kotlin.jvm.JvmInline
 
 /**
- * The lootable items a battle unit of the human player has looted. Each item takes one storage space, even while equipped. Each equipment zone holds
- * one equipped item.
+ * The lootable items a battle unit of the human player carries, and its gold. Each item takes one storage space, even while equipped. Each
+ * equipment zone holds one equipped item. Items are looted, bought and sold, and the gold goes from 0 to 99,999.
  */
 @ConsistentCopyVisibility
 data class Inventory private constructor(
@@ -23,18 +31,23 @@ data class Inventory private constructor(
     private val maximumStorageSpace: MaximumStorageSpace,
     private val storedItems: StoredItems,
     private val equippedItems: EquippedItems,
+    private val gold: Gold,
     private val events: Set<InventoryEvent>,
 ) {
     companion object {
         private const val DEFAULT_MAXIMUM_STORAGE_SPACE = 12
 
-        /** Creates the empty inventory of a battle unit, when it loots its first item. */
-        fun create(battleUnitId: String): Inventory =
+        /** Creates the empty inventory of a battle unit, with its starting gold, once it is deployed. */
+        fun create(
+            battleUnitId: String,
+            gold: Int = 0,
+        ): Inventory =
             Inventory(
                 battleUnitId = BattleUnitId(battleUnitId),
                 maximumStorageSpace = MaximumStorageSpace(DEFAULT_MAXIMUM_STORAGE_SPACE),
                 storedItems = StoredItems(emptyList()),
                 equippedItems = EquippedItems(emptyMap()),
+                gold = Gold(gold),
                 events = emptySet(),
             )
     }
@@ -99,6 +112,49 @@ data class Inventory private constructor(
         )
     }
 
+    /** Whether it can pay the price of an item, and has space to store it. */
+    fun canBuy(price: Int): Boolean = canStore() && gold.value >= price
+
+    /** Pays the price of an item and stores it. Fails when it can not pay it, or has no space left. */
+    fun buy(
+        lootableItemId: String,
+        price: Int,
+    ): Inventory {
+        if (!canStore()) throw NoStorageSpaceLeft()
+        if (gold.value < price) throw NotEnoughGold()
+        return copy(
+            storedItems = StoredItems(storedItems.value + LootableItemId(lootableItemId)),
+            gold = Gold(gold.value - price),
+            events = events + ItemBought(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, price = price),
+        )
+    }
+
+    /** Whether it can sell a stored copy that is not equipped for the price, without going above the most gold it can carry. */
+    fun canSell(
+        lootableItemId: String,
+        price: Int,
+    ): Boolean {
+        val item = LootableItemId(lootableItemId)
+        val unequippedCopies = storedItems.count(item) - if (equippedItems.isEquipped(item)) 1 else 0
+        return unequippedCopies > 0 && gold.value + price <= MAXIMUM
+    }
+
+    /** Removes a stored copy that is not equipped, and receives its price. The item leaves the game. */
+    fun sell(
+        lootableItemId: String,
+        price: Int,
+    ): Inventory {
+        val item = LootableItemId(lootableItemId)
+        if (storedItems.count(item) == 0) throw InventoryItemNotFound()
+        if (equippedItems.isEquipped(item) && storedItems.count(item) == 1) throw EquippedItemCanNotBeSold()
+        if (gold.value + price > MAXIMUM) throw GoldAboveLimit()
+        return copy(
+            storedItems = storedItems.removeOne(item),
+            gold = Gold(gold.value + price),
+            events = events + ItemSold(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, price = price),
+        )
+    }
+
     /** Unequips an item, which stays stored. */
     fun unequip(lootableItemId: String): Inventory {
         val item = LootableItemId(lootableItemId)
@@ -115,6 +171,7 @@ data class Inventory private constructor(
             maximumStorageSpace = maximumStorageSpace.value,
             storedItems = storedItems.value.map(LootableItemId::value),
             equippedItems = equippedItems.value.mapValues { (_, lootableItemId) -> lootableItemId.value },
+            gold = gold.value,
         )
 
     @JvmInline private value class BattleUnitId(
@@ -124,6 +181,15 @@ data class Inventory private constructor(
     @JvmInline private value class MaximumStorageSpace(
         val value: Int,
     )
+
+    @JvmInline private value class Gold(
+        val value: Int,
+    ) {
+        init {
+            if (value < 0) throw NegativeGold()
+            if (value > MAXIMUM) throw GoldAboveLimit()
+        }
+    }
 
     @JvmInline private value class LootableItemId(
         val value: String,
@@ -155,5 +221,6 @@ data class Inventory private constructor(
         val storedItems: List<String>,
         // The equipped items are also part of the stored items.
         val equippedItems: Map<EquipmentZoneDto, String>,
+        val gold: Int,
     )
 }

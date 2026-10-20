@@ -1,13 +1,20 @@
 package com.mkz.rpg.inventory.domain
 
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
+import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
+import com.mkz.rpg.inventory.domain.InventoryError.NegativeGold
+import com.mkz.rpg.inventory.domain.InventoryError.NoStorageSpaceLeft
+import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
@@ -24,13 +31,122 @@ import kotlin.test.Test
 
 class InventoryTest {
     @Test
-    fun `Create should create an empty inventory with 12 storage spaces when the battle unit loots its first item`() {
+    fun `Create should create an empty inventory with 12 storage spaces and the starting gold when the battle unit is deployed`() {
         // Given
         val battleUnitId = "knight-1"
         // When
-        val createdInventory = Inventory.create(battleUnitId)
+        val createdInventory = Inventory.create(battleUnitId, gold = 20)
         // Then
-        createdInventory.toDto() shouldBe Inventory.Dto(battleUnitId = "knight-1", maximumStorageSpace = 12, storedItems = emptyList(), equippedItems = emptyMap())
+        createdInventory.toDto() shouldBe Inventory.Dto(battleUnitId = "knight-1", maximumStorageSpace = 12, storedItems = emptyList(), equippedItems = emptyMap(), gold = 20)
+    }
+
+    @Test
+    fun `Create should create an inventory with up to 99,999 gold, and fail below 0 or above it`() {
+        // Then
+        Inventory.create("knight-1", gold = 99_999).toDto().gold shouldBe 99_999
+        runCatching { Inventory.create("knight-1", gold = -1) }.exceptionOrNull().shouldBeTypeOf<NegativeGold>()
+        runCatching { Inventory.create("knight-1", gold = 100_000) }.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+    }
+
+    @Test
+    fun `Buy should pay the price and store the item when it can afford it and has space left`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("health-potion"), gold = 100)
+        // When
+        val (events, updatedInventory) = inventory.buy("hammer", price = 50).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "hammer")
+        updatedInventory.toDto().gold shouldBe 50
+        events.shouldContainExactly(ItemBought(battleUnitId = "viking-1", lootableItemId = "hammer", price = 50))
+    }
+
+    @Test
+    fun `Buy should spend all the gold when the price is exactly the gold`() {
+        // When
+        val updatedInventory = inventory(gold = 10).buy("health-potion", price = 10)
+        // Then
+        updatedInventory.toDto().gold shouldBe 0
+    }
+
+    @Test
+    fun `Buy should fail when it can not afford the price`() {
+        // When
+        val result = runCatching { inventory(gold = 20).buy("hammer", price = 50) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NotEnoughGold>()
+    }
+
+    @Test
+    fun `Buy should fail when there is no space left`() {
+        // When
+        val result = runCatching { fullInventory(gold = 100).buy("hammer", price = 50) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
+    }
+
+    @Test
+    fun `CanBuy should tell whether it can afford the price and has space left`() {
+        // Then
+        inventory(gold = 50).canBuy(price = 50).shouldBeTrue()
+        inventory(gold = 49).canBuy(price = 50).shouldBeFalse()
+        fullInventory(gold = 100).canBuy(price = 50).shouldBeFalse()
+    }
+
+    @Test
+    fun `Sell should remove one of the stored items and receive its price when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("hammer", "hammer"), gold = 50)
+        // When
+        val (events, updatedInventory) = inventory.sell("hammer", price = 25).pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().gold shouldBe 75
+        events.shouldContainExactly(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", price = 25))
+    }
+
+    @Test
+    fun `Sell should sell a copy that is not equipped when another copy is equipped`() {
+        // Given
+        val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val updatedInventory = inventory.sell("hammer", price = 25)
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+    }
+
+    @Test
+    fun `Sell should fail when the only stored copy is equipped`() {
+        // When
+        val result = runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sell("hammer", price = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<EquippedItemCanNotBeSold>()
+    }
+
+    @Test
+    fun `Sell should fail when the item is not stored`() {
+        // When
+        val result = runCatching { inventory().sell("hammer", price = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+    }
+
+    @Test
+    fun `Sell should fail when the price takes the gold above 99,999`() {
+        // When
+        val result = runCatching { inventory(storedItems = listOf("hammer"), gold = 99_990).sell("hammer", price = 25) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+    }
+
+    @Test
+    fun `CanSell should tell whether a copy that is not equipped is stored, and the gold stays within 99,999`() {
+        // Then
+        inventory(storedItems = listOf("hammer"), gold = 99_974).canSell("hammer", price = 25).shouldBeTrue()
+        inventory(storedItems = listOf("hammer"), gold = 99_975).canSell("hammer", price = 25).shouldBeFalse()
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).canSell("hammer", price = 25).shouldBeFalse()
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).canSell("hammer", price = 25).shouldBeTrue()
+        inventory().canSell("hammer", price = 25).shouldBeFalse()
     }
 
     @Test

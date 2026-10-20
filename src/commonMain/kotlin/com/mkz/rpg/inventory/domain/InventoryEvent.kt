@@ -30,6 +30,20 @@ sealed interface InventoryEvent : DomainEvent {
         val lootableItemId: String,
     ) : InventoryEvent
 
+    /** The item was stored, and its price paid to the merchant. */
+    data class ItemBought(
+        val battleUnitId: String,
+        val lootableItemId: String,
+        val price: Int,
+    ) : InventoryEvent
+
+    /** The item left the game, and the merchant paid its sell price. */
+    data class ItemSold(
+        val battleUnitId: String,
+        val lootableItemId: String,
+        val price: Int,
+    ) : InventoryEvent
+
     data class ItemEquipped(
         val battleUnitId: String,
         val lootableItemId: String,

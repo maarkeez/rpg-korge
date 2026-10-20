@@ -12,7 +12,10 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
-/** The items stored by the selected battle unit, one slot per storage space. Displayed in the HUD instead of the battle unit info. */
+/**
+ * The items stored by the selected battle unit, one slot per storage space, and its gold on the title line. Displayed in the HUD instead of the
+ * battle unit info.
+ */
 open class InventoryView(
     resourcesLoader: BattleSceneResourcesLoader,
 ) : Container() {
@@ -23,6 +26,7 @@ open class InventoryView(
         private const val SLOT_SPACING = 6.0
         private const val WIDTH = SLOTS_PER_ROW * SLOT_SIZE + (SLOTS_PER_ROW - 1) * SLOT_SPACING
         private const val CLOSE_WIDTH = 80.0
+        private const val TITLE_SPACING = 10.0
     }
 
     /** A stored item, and whether it is the equipped copy. */
@@ -39,14 +43,22 @@ open class InventoryView(
 
     private var delegate: Delegate? = null
     internal lateinit var titleView: UnitNameView
+    internal lateinit var goldView: UnitNameView
     internal lateinit var closeButton: UIButton
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
 
     init {
         uiVerticalStack(padding = 10.0) {
             uiHorizontalStack {
-                titleView = UnitNameView(size = Size(width = WIDTH - CLOSE_WIDTH, height = 20))
-                addChild(titleView)
+                // The gold shares the line of the title, aligned to the right, before Close.
+                val titleSize = Size(width = WIDTH - CLOSE_WIDTH - TITLE_SPACING, height = 20.0)
+                val titleLine = UIContainer(Size(WIDTH - CLOSE_WIDTH, 20.0))
+                titleView = UnitNameView(size = titleSize)
+                titleLine.addChild(titleView)
+                goldView = UnitNameView(size = titleSize)
+                goldView.alignTextToRight()
+                titleLine.addChild(goldView)
+                addChild(titleLine)
                 closeButton =
                     uiButton("Close") {
                         width = CLOSE_WIDTH
@@ -72,8 +84,12 @@ open class InventoryView(
         this.delegate = delegate
     }
 
-    /** Displays the stored items in their order, followed by the empty storage spaces. Clears the selected slot. */
-    open fun display(slots: List<Slot>) {
+    /** Displays the stored items in their order, followed by the empty storage spaces, and the gold. Clears the selected slot. */
+    open fun display(
+        slots: List<Slot>,
+        gold: Int,
+    ) {
+        goldView.display(goldText(gold))
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)

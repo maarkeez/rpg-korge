@@ -12,6 +12,8 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSour
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -31,7 +33,9 @@ class ConsumeHealthPotionAcceptanceTest {
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
-    private val inventoryApi = InventoryApi(lootableItemApi, battleUnitApi, playerApi, battleApi, eventBus)
+    private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus)
+    private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"

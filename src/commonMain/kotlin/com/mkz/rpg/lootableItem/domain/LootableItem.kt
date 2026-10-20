@@ -158,6 +158,9 @@ data class LootableItem private constructor(
         val price: Int,
         val lootType: LootTypeDto,
     ) {
+        /** What a merchant pays for it: half its price, rounded down. */
+        val sellPrice: Int get() = price / 2
+
         data class LootTypeDto(
             val type: TypeDto,
             val consumable: ConsumableDto?,

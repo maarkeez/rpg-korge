@@ -1,11 +1,11 @@
 # Inventory
 
-The inventory stores the lootable items a battle unit has looted. It lives in the [`inventory`](../../src/commonMain/kotlin/com/mkz/rpg/inventory) subdomain, and the screen uses it through `InventoryApi`.
+The inventory stores the lootable items a battle unit carries, and its gold. It lives in the [`inventory`](../../src/commonMain/kotlin/com/mkz/rpg/inventory) subdomain, and the screen uses it through `InventoryApi`.
 
 ## Who has an inventory
 
 - Each battle unit of the human player has one, except the summoned ones (e.g.: a bee), which vanish after some turns. CPU battle units and summoned battle units have none: storing an item for them does nothing, so the item stays on its tile, and their bag is not displayed.
-- An inventory is created empty when its battle unit stores its first item, so it has no game data. Until then, `searchInventoryByBattleUnitId` returns `null`, which means the inventory is empty.
+- An inventory is created empty, with the starting gold of its unit, when its battle unit is deployed ([`CreateInventory`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/commands/CreateInventory.kt), on `BattleUnitDeployed`), e.g.: when the battle is set up, or an npc is recruited. `searchInventoryByBattleUnitId` returns `null` for the battle units without inventory.
 - Each inventory has 12 storage spaces. Each item takes one space, so two health potions take two. An equipped item keeps taking its space.
 
 ## Using the inventory
@@ -17,11 +17,15 @@ The inventory stores the lootable items a battle unit has looted. It lives in th
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
 | `equipItem`       | Equips a stored equippable item in its zone, and requests the application of its effects. See [Equipment](#equipment).                              |
 | `unequipItem`     | Unequips an item, which stays stored, and requests the removal of its effects. See [Equipment](#equipment).                                         |
+| `buyItem`         | Pays the price of an item the merchant sells, and stores it. See [Buying and selling](#buying-and-selling).                                        |
+| `sellItem`        | Removes an item that is not equipped, and receives half its price. See [Buying and selling](#buying-and-selling).                                  |
 
 | Query                           | What it answers                                         |
 |---------------------------------|---------------------------------------------------------|
 | `searchInventoryByBattleUnitId` | The stored items and the equipped ones, to display them. |
 | `canStoreItem`                  | Whether there is space left for one more item.          |
+| `canBuyItem`                    | Whether the battle unit can buy the item now.           |
+| `canSellItem`                   | Whether the battle unit can sell the item now.          |
 
 - Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
 - Storing is not limited to the player's turn, as it happens while a battle unit moves.
@@ -62,6 +66,23 @@ Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equippe
 The battle scene draws the dropped items on their tiles, and opens the inventory of the selected battle unit behind its bag, where the player consumes, equips, unequips, swaps and discards items, and chooses what to do with an item found while the inventory is full. See [Presentation timeline](presentation-timeline.md#loot) and [Inventory on the screen](presentation-timeline.md#inventory).
 
 The price of an item is displayed in gold: on the line of its name, aligned to the right, when it is selected (e.g.: `Health Potion ........ 10 G`), and at the end of the message asking what to do with it when it is found while the inventory is full (e.g.: `Tap an item to swap it for the Hammer (50 G)`).
+
+## Gold
+
+Each battle unit carries its own gold in its inventory: the party never shares it. It starts with the `startingGold` of its unit (e.g.: the knights 20 G, and the viking 100 G, see [Game data](game-data.md)), and goes from 0 to 99,999 G (`Gold.MAXIMUM`). The bag displays it on its title line, e.g.: `Inventory ........ 20 G`.
+
+## Buying and selling
+
+A battle unit trades as a party member, while the party talks to a merchant ([`TradeRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/TradeRule.kt)): otherwise, buying and selling fail (`NotTradingWithAMerchant`). The merchant has unlimited gold and stock.
+
+| Trade  | Price                             | Fails when                                                                                                                                  |
+|--------|-----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| Buy    | The price of the item, e.g.: 50 G | The merchant does not sell it (`ItemNotSoldByTheMerchant`), the battle unit can not afford it (`NotEnoughGold`), or has no space left (`NoStorageSpaceLeft`). |
+| Sell   | Half of it, rounded down: 25 G    | The item is not stored, its only stored copy is equipped (`EquippedItemCanNotBeSold`), or the gold would go above 99,999 G (`GoldAboveLimit`). |
+
+- Buying announces `ItemBought`, and selling `ItemSold`, with the price paid. A sold item leaves the game, so it does not join the merchant's stock.
+- Any item can be sold, also the ones the merchant does not sell.
+- `canBuyItem` and `canSellItem` answer `false` instead of failing, so the shop disables Buy and Sell. See [Shopping at a merchant](exploration.md#shopping-at-a-merchant).
 
 ## Not yet supported
 

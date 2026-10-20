@@ -55,11 +55,15 @@ The events are dispatched in the order they are published, so the tile is vacate
 
 An npc with a stock in its game data is a merchant (e.g.: the merchant, see [Game data](game-data.md)). Its dialog is displayed as any other, and the party keeps talking to it, so time stays stopped, until its shop is closed. The shop is screen state only: the party has no mode nor event for it.
 
-1. Tapping the merchant's dialog opens its shop in place of the dialog, instead of finishing the talk: [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) displays the merchant's name, a Close button, and 12 slots, as the inventory does. The items it sells fill the first slots, in their order, and the rest are empty.
-2. Tapping an item frames it, and the call to action displays its name and price, as for an item of the inventory (e.g.: `Hammer ........ 50 G`), without actions. Tapping an empty slot unselects it and hides the call to action.
-3. Close finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+1. Tapping the merchant's dialog opens its shop in place of the dialog, instead of finishing the talk ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) displays the merchant's name, the Buy and Sell tabs, Close, 12 slots as the inventory does, and the buyer.
+2. The buyer is one party member at a time, the leader when the shop opens. A line under the slots displays its name, gold and bag (e.g.: `Knight · 20 G · Bag 11/12`, or `Bag full`), and one dot per party member, in party order, the buyer's one filled.
+3. Swiping the shop left or right (at least 40 px) moves the buyer one dot left or right, stopping at the ends. Tapping a dot selects its party member. Every tile is dimmed but the buyer's and the merchant's, and the battlefield scrolls to the buyer.
+4. The shop opens on the Buy tab, with the items the merchant sells. Tapping one frames it, and the call to action displays its name and price with Cancel and Buy (e.g.: `Hammer ........ 50 G`). Buy is disabled when the buyer can not afford it or its bag is full. After buying, the item stays selected, to buy another one.
+5. The Sell tab displays the buyer's items, the equipped ones framed in gold. Tapping one displays its sell price with Cancel and Sell (e.g.: `Hammer ........ 25 G`). Sell is disabled for the only copy of an equipped item, and when the buyer's gold would go above 99,999 G. After selling, the selection is cleared.
+6. Switching the buyer or the tab, Cancel, and tapping an empty slot clear the selection and hide the call to action.
+7. Close finishes the talk (`NpcTalkFinished`): the shop is closed, the tiles are no longer dimmed, the virtual pad is displayed again, and time goes on.
 
-A battle starting while shopping abandons the shop, as it abandons the dialog. Items can not be bought nor sold yet.
+A battle starting while shopping abandons the shop, as it abandons the dialog. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
 
 ## Inventory
 

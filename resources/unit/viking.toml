@@ -3,3 +3,4 @@ healthPoints = 150
 manaPoints = 30
 movementRange = 3
 abilities = ["sword"]
+startingGold = 100

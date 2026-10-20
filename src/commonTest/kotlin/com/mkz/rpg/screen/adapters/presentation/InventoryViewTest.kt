@@ -44,7 +44,7 @@ class InventoryViewTest : ViewsForTesting() {
             val resourcesLoader = loadedResourcesLoader()
             val inventoryView = InventoryView(resourcesLoader)
             // When
-            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             // Then
             inventoryView.slotBitmaps().take(3).shouldContainExactly(
                 resourcesLoader.bitmap("lootableItem/hammer.png"),
@@ -54,12 +54,24 @@ class InventoryViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Display should display the gold on the title line when is displayed`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader())
+            // When
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 120)
+            // Then
+            inventoryView.titleText() shouldBe "Inventory"
+            inventoryView.goldText() shouldBe "120 G"
+        }
+
+    @Test
     fun `Display should frame the equipped items in gold when is displayed`() =
         sharedViewsTest {
             // Given
             val inventoryView = InventoryView(loadedResourcesLoader())
             // When
-            inventoryView.display(listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)))
+            inventoryView.display(listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)), gold = 0)
             // Then
             inventoryView.equippedSlotIndexes().shouldContainExactly(1)
         }
@@ -69,10 +81,10 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val inventoryView = InventoryView(loadedResourcesLoader())
-            inventoryView.display(listOf(Slot("hammer", isEquipped = false)))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
-            inventoryView.display(listOf(Slot("hammer", isEquipped = true)))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = true)), gold = 0)
             // Then
             inventoryView.selectedSlotIndexes().shouldBeEmpty()
         }
@@ -82,7 +94,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val inventoryView = InventoryView(loadedResourcesLoader())
-            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
             inventoryView.selectSlot(1)
@@ -97,7 +109,7 @@ class InventoryViewTest : ViewsForTesting() {
             val delegate = RecordingDelegate()
             val inventoryView = InventoryView(loadedResourcesLoader())
             inventoryView.setDelegate(delegate)
-            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             addChild(inventoryView)
             // When
             clickSlot(inventoryView, 1)

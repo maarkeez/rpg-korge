@@ -54,6 +54,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     var resetTilesCount = 0
         private set
     val tilesNotDimmed = mutableListOf<Set<PositionDto>>()
+    val scrolledToTiles = mutableListOf<PositionDto>()
     val removedBattleUnits = mutableListOf<PositionDto>()
     val removedNpcs = mutableListOf<PositionDto>()
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
@@ -132,6 +133,13 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
 
     override fun dimTilesExcept(tiles: Set<PositionDto>) {
         tilesNotDimmed += tiles
+    }
+
+    override suspend fun scrollToTile(
+        row: Int,
+        column: Int,
+    ) {
+        scrolledToTiles += PositionDto(row, column)
     }
 
     override fun removeNpc(

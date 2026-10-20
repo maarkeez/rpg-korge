@@ -6,6 +6,8 @@ class FakeInventoryView : InventoryView(BattleSceneResourcesLoader()) {
     var delegate: Delegate? = null
         private set
     val displayedSlots = mutableListOf<List<Slot>>()
+    var displayedGold: Int? = null
+        private set
     var selectedSlot: Int? = null
         private set
 
@@ -13,8 +15,12 @@ class FakeInventoryView : InventoryView(BattleSceneResourcesLoader()) {
         this.delegate = delegate
     }
 
-    override fun display(slots: List<Slot>) {
+    override fun display(
+        slots: List<Slot>,
+        gold: Int,
+    ) {
         displayedSlots += slots
+        displayedGold = gold
         selectedSlot = null
     }
 

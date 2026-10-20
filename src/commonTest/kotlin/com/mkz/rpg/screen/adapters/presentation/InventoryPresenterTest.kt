@@ -64,7 +64,7 @@ class InventoryPresenterTest {
                     consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
                     equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
                 ),
-            units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee")).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
+            units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
@@ -210,6 +210,7 @@ class InventoryPresenterTest {
         openKnightInventory()
         // Then
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true))
+        inventoryView.displayedGold shouldBe 20
         battleHudView.displays.last() shouldBe Display.INVENTORY
     }
 

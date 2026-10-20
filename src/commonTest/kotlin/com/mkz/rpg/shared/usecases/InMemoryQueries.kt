@@ -39,6 +39,8 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
+import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
+import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
@@ -66,6 +68,7 @@ class InMemoryQueries(
     val effectRepository = InMemoryEffectRepository()
     val lootableItemRepository = InMemoryLootableItemRepository()
     val npcRepository = InMemoryNpcRepository()
+    val partyRepository = InMemoryPartyRepository()
     val playerRepository = InMemoryPlayerRepository()
     val terrainRepository = InMemoryTerrainRepository()
     val unitRepository = InMemoryUnitRepository()
@@ -85,6 +88,9 @@ class InMemoryQueries(
     // Npc
     val searchNpcById = SearchNpcById(npcRepository)
     val searchNpcAt = SearchNpcAt(npcRepository)
+
+    // Party
+    val searchParty = SearchParty(partyRepository)
 
     // Ability
     val searchAbilityById = SearchAbilityById(abilityRepository)

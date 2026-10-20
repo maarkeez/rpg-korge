@@ -22,7 +22,7 @@ class SearchInventoryByBattleUnitIdTest {
     }
 
     @Test
-    fun `should not find an inventory when the battle unit has not looted any item`() {
+    fun `should not find an inventory when the battle unit has none`() {
         // Given
         val battleUnitId = InventoryMother.battleUnitId()
         // When

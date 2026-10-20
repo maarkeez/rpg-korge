@@ -9,6 +9,9 @@ import korlibs.korge.view.Image
 
 fun InventoryView.titleText(): String = titleView.nameText()
 
+/** The gold of the battle unit, on the title line, e.g.: 120 G. */
+fun InventoryView.goldText(): String = goldView.nameText()
+
 fun InventoryView.slotCount(): Int = slotViews.size
 
 /** The image of the item stored in each slot, or `null` for the empty slots. */

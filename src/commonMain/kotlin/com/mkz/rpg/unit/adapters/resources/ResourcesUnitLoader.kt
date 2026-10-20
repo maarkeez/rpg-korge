@@ -8,7 +8,7 @@ import korlibs.io.file.VfsFile
 import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
-/** Loads one unit per `unit/<unit id>.toml` resource. */
+/** Loads one unit per `unit/<unit id>.toml` resource. Starting gold: 0 when it has none. */
 class ResourcesUnitLoader(
     private val unitRoot: VfsFile = resourcesVfs["unit"],
 ) : UnitLoader {
@@ -30,6 +30,7 @@ class ResourcesUnitLoader(
         val manaPoints: Int,
         val movementRange: Int,
         val abilities: List<String>,
+        val startingGold: Int = 0,
     ) {
         fun toDto(unitId: String): Unit.Dto =
             Unit.Dto(
@@ -39,6 +40,7 @@ class ResourcesUnitLoader(
                 manaPoints = manaPoints,
                 abilities = abilities,
                 movementRange = movementRange,
+                startingGold = startingGold,
             )
     }
 }
