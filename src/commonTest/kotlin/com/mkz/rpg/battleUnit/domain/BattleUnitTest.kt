@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.effect.domain.EffectMother
+import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -449,7 +450,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should publish the defeated event when the battle unit health points reach zero`() {
+    fun `ApplyImmediateEffect should publish the defeated event and request its loot drop when the battle unit health points reach zero`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 3).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
@@ -473,6 +474,7 @@ class BattleUnitTest {
                 defeatedAtRow = defeatedAtPosition.row,
                 defeatedAtColumn = defeatedAtPosition.column,
             ),
+            LootDropEvent.RequestDropLoot(unitId = unit.id, row = defeatedAtPosition.row, column = defeatedAtPosition.column),
             BattlefieldEvent.RequestRemoveOccupant(occupantId = updatedBattleUnit.toDto().id),
         )
     }
@@ -695,6 +697,7 @@ class BattleUnitTest {
             BattleUnitEvent.OnTurnStartedEffectApplied::class,
             BattleUnitEvent.BattleUnitDamaged::class,
             BattleUnitEvent.BattleUnitDefeated::class,
+            LootDropEvent.RequestDropLoot::class,
             BattlefieldEvent.RequestRemoveOccupant::class,
         )
     }

@@ -43,7 +43,7 @@ For example, given a subdomain called `tomatoes`:
 
 ## Dependencies between subdomains
 
-- Two subdomains MUST NOT depend on each other. This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt). It only checks the direct two-way dependencies: longer cycles (e.g.: `battleUnit` → `battlefield` → `lootDrop` → `battleUnit`) are shown in the [dependency report](dependencies.md).
+- Subdomains MUST NOT depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`). This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt), which fails on the same cycles the [dependency report](dependencies.md) highlights.
 - To have the upstream subdomain react to the downstream one without depending on it, the upstream subdomain declares a `Request…` event in its own events (e.g.: `BattleEvent.RequestDefeatPlayer`), and a downstream command use case publishes it (e.g.: `battleUnit`'s `RequestBattleLeave`). The upstream subdomain listens to its own request, and the data it needs travels in the event (e.g.: the player of the battle unit joining the battle), instead of being queried from the downstream subdomain.
 - The bus dispatches the events in the order they are published (FIFO), so a request published by a listener on a fact is handled after every event already waiting. When the upstream subdomain must be up to date before those (e.g.: the battlefield occupancy before the next CPU decision), the downstream aggregate records the request right after the fact instead, so both are published together (e.g.: `BattleUnit` records `BattlefieldEvent.RequestOccupyTile` after `BattleUnitDeployed`). A downstream command use case without an aggregate publishes the fact and the request together instead (e.g.: `EngageEnemies` publishes `CombatEngaged` and `BattleEvent.RequestStartBattle`).
 - An event listener (`adapters/events/On…`) holds no business logic: it only takes command use cases and the `EventBus`, and never publishes an event itself. A command use case decides and publishes. This is enforced by [`EventListenerArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/EventListenerArchitectureTest.kt).
@@ -74,6 +74,12 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 | An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Vacates its tile.  |
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
+
+`lootDrop` does not depend on `battleUnit` either. The `BattleUnit` aggregate records its request right after its own event, before `RequestRemoveOccupant`, carrying the unit the loot drop belongs to:
+
+| When                      | `BattleUnit` records                   | `lootDrop`                                                      |
+|---------------------------|----------------------------------------|-----------------------------------------------------------------|
+| A battle unit is defeated | `RequestDropLoot(unitId, row, column)` | Drops the loot of the unit on the tile (`LootDropped`), if any. |
 
 `battlefield` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
 

@@ -39,6 +39,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropLoot
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.KnownAbilities
@@ -487,6 +488,7 @@ data class BattleUnit private constructor(
                             defeatedAtColumn = currentColumn,
                         ),
                     )
+                    add(RequestDropLoot(unitId = unitId.value, row = currentRow, column = currentColumn))
                     add(RequestRemoveOccupant(occupantId = id.value))
                 }
             }

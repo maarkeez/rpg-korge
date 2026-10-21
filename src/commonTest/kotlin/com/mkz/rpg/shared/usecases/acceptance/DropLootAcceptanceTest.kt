@@ -31,7 +31,7 @@ class DropLootAcceptanceTest {
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
     private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi)
     private val battleSetupApi = BattleSetupApi(eventBus)
 

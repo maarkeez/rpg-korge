@@ -1,7 +1,6 @@
 package com.mkz.rpg.lootDrop.adapters.presentation
 
-import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
-import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitDefeated
+import com.mkz.rpg.lootDrop.adapters.events.OnRequestDropLoot
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestInitialiseLootDrops
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
@@ -17,7 +16,6 @@ import kotlin.random.Random
 class LootDropApi(
     unitApi: UnitApi,
     lootTableApi: LootTableApi,
-    battleUnitApi: BattleUnitApi,
     eventBus: EventBus,
     private val lootDropLoader: LootDropLoader = ResourcesLootDropLoader(),
     random: Random = Random.Default,
@@ -27,11 +25,11 @@ class LootDropApi(
 
     // Commands
     val initialiseLootDrops = InitialiseLootDrops(lootDropLoader, lootDropRepository, unitApi.searchUnitById, lootTableApi.searchLootTableById, eventBus)
-    val dropLoot = DropLoot(battleUnitApi.searchBattleUnitById, lootDropRepository, lootTableApi.searchLootTableById, random, eventBus)
+    val dropLoot = DropLoot(lootDropRepository, lootTableApi.searchLootTableById, random, eventBus)
 
     // Events
     private val onRequestInitialiseLootDrops = OnRequestInitialiseLootDrops(initialiseLootDrops, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(dropLoot, eventBus)
+    private val onRequestDropLoot = OnRequestDropLoot(dropLoot, eventBus)
 
     suspend fun init() {
         lootDropLoader.initResources()

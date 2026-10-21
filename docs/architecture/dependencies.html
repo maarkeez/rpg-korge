@@ -209,14 +209,14 @@ const DATA = {
   "subdomains": [
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 23, "importsOut": 16},
     {"name": "battle", "files": 21, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 31, "importsOut": 23},
-    {"name": "battleUnit", "files": 56, "fanIn": 8, "fanOut": 7, "instability": 0.47, "importsIn": 67, "importsOut": 166},
+    {"name": "battleUnit", "files": 56, "fanIn": 7, "fanOut": 8, "instability": 0.53, "importsIn": 64, "importsOut": 167},
     {"name": "battlefield", "files": 41, "fanIn": 9, "fanOut": 5, "instability": 0.36, "importsIn": 95, "importsOut": 41},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 13, "instability": 0.93, "importsIn": 1, "importsOut": 14},
     {"name": "cpuBattleBrain", "files": 33, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 99},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 47},
     {"name": "effect", "files": 13, "fanIn": 8, "fanOut": 1, "instability": 0.11, "importsIn": 70, "importsOut": 12},
     {"name": "inventory", "files": 24, "fanIn": 1, "fanOut": 10, "instability": 0.91, "importsIn": 8, "importsOut": 60},
-    {"name": "lootDrop", "files": 12, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 3, "importsOut": 19},
+    {"name": "lootDrop", "files": 12, "fanIn": 4, "fanOut": 3, "instability": 0.43, "importsIn": 4, "importsOut": 16},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 11},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 13},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
@@ -380,6 +380,9 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.Tile"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.Unit"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"}
+    ]},
+    {"from": "battleUnit", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestDropLoot"}
     ]},
     {"from": "battleUnit", "to": "player", "weight": 6, "files": 6, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
@@ -821,11 +824,6 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/CreateInventory.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchUnitById"}
     ]},
-    {"from": "lootDrop", "to": "battleUnit", "weight": 3, "files": 3, "imports": [
-      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "battleUnit.domain.BattleUnitEvent"},
-      {"file": "com/mkz/rpg/lootDrop/adapters/presentation/LootDropApi.kt", "layer": "adapters", "name": "battleUnit.adapters.presentation.BattleUnitApi"},
-      {"file": "com/mkz/rpg/lootDrop/usecases/commands/DropLoot.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitById"}
-    ]},
     {"from": "lootDrop", "to": "lootTable", "weight": 4, "files": 4, "imports": [
       {"file": "com/mkz/rpg/lootDrop/adapters/presentation/LootDropApi.kt", "layer": "adapters", "name": "lootTable.adapters.presentation.LootTableApi"},
       {"file": "com/mkz/rpg/lootDrop/domain/LootDrop.kt", "layer": "domain", "name": "lootTable.domain.LootTable"},
@@ -833,8 +831,8 @@ const DATA = {
       {"file": "com/mkz/rpg/lootDrop/usecases/commands/InitialiseLootDrops.kt", "layer": "usecases", "name": "lootTable.usecases.queries.SearchLootTableById"}
     ]},
     {"from": "lootDrop", "to": "shared", "weight": 10, "files": 7, "imports": [
-      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestDropLoot.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestDropLoot.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestInitialiseLootDrops.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestInitialiseLootDrops.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/lootDrop/adapters/presentation/LootDropApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1223,7 +1221,6 @@ const DATA = {
     ]}
   ],
   "cycles": [
-    ["battleUnit", "battlefield", "lootDrop"]
   ],
   "mutualDependencies": [
   ]
