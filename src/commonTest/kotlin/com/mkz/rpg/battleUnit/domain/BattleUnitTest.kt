@@ -50,7 +50,7 @@ class BattleUnitTest {
         val (events, _) = deployedBattleUnit.pullEvents()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = battleUnitId, row = 2, column = 3),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = battleUnitId, row = 2, column = 3),
+            BattlefieldEvent.RequestOccupyTile(occupantId = battleUnitId, row = 2, column = 3),
         )
     }
 
@@ -73,7 +73,7 @@ class BattleUnitTest {
                 toColumn = 2,
                 path = path,
             ),
-            BattlefieldEvent.RequestMoveOccupant(battleUnitId = movedBattleUnit.toDto().id, toRow = 0, toColumn = 2, path = path),
+            BattlefieldEvent.RequestMoveOccupant(occupantId = movedBattleUnit.toDto().id, toRow = 0, toColumn = 2, path = path),
         )
     }
 
@@ -117,7 +117,7 @@ class BattleUnitTest {
                 toColumn = 5,
                 path = path,
             ),
-            BattlefieldEvent.RequestMoveOccupant(battleUnitId = walkedBattleUnit.toDto().id, toRow = 0, toColumn = 5, path = path),
+            BattlefieldEvent.RequestMoveOccupant(occupantId = walkedBattleUnit.toDto().id, toRow = 0, toColumn = 5, path = path),
         )
     }
 
@@ -140,7 +140,7 @@ class BattleUnitTest {
                 path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
             ),
             BattlefieldEvent.RequestMoveOccupant(
-                battleUnitId = teleportedBattleUnit.toDto().id,
+                occupantId = teleportedBattleUnit.toDto().id,
                 toRow = 2,
                 toColumn = 2,
                 path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
@@ -473,7 +473,7 @@ class BattleUnitTest {
                 defeatedAtRow = defeatedAtPosition.row,
                 defeatedAtColumn = defeatedAtPosition.column,
             ),
-            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = updatedBattleUnit.toDto().id),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = updatedBattleUnit.toDto().id),
         )
     }
 
@@ -1054,7 +1054,7 @@ class BattleUnitTest {
         finishedBattleUnit.toDto().remainingTurns shouldBe 0
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3),
-            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "battle-unit-1"),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = "battle-unit-1"),
         )
     }
 
@@ -1092,7 +1092,7 @@ class BattleUnitTest {
         vanishedBattleUnit.toDto().remainingTurns shouldBe 0
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3),
-            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "battle-unit-1"),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = "battle-unit-1"),
         )
     }
 
@@ -1137,7 +1137,7 @@ class BattleUnitTest {
         respawnedBattleUnit.toDto() shouldBe BattleUnitMother.battleUnit(id = "rat-1", unit = unit, player = player).toDto()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitRespawned(playerId = player.id, battleUnitId = "rat-1", row = 2, column = 3),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = "rat-1", row = 2, column = 3),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "rat-1", row = 2, column = 3),
         )
     }
 

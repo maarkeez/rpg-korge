@@ -12,7 +12,7 @@ class OnLootFound(
     val subscription =
         eventBus.subscribe<LootFound> { event ->
             event.lootableItemIds.forEach { lootableItemId ->
-                storeLootedItem(battleUnitId = event.battleUnitId, lootableItemId = lootableItemId, row = event.row, column = event.column)
+                storeLootedItem(battleUnitId = event.occupantId, lootableItemId = lootableItemId, row = event.row, column = event.column)
             }
         }
 }

@@ -15,7 +15,7 @@ class VanishSummonedBattleUnits(
 ) {
     operator fun invoke() {
         battleUnitRepository.searchAll().forEach { battleUnit ->
-            val position = searchPosition(battleUnitId = battleUnit.toDto().id) ?: return@forEach
+            val position = searchPosition(occupantId = battleUnit.toDto().id) ?: return@forEach
             val (events, vanishedBattleUnit) = battleUnit.vanish(row = position.row, column = position.column).pullEvents()
             if (events.isEmpty()) return@forEach
             battleUnitRepository.delete(battleUnitId = vanishedBattleUnit.toDto().id)

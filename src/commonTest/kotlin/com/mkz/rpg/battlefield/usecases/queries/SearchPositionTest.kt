@@ -14,15 +14,15 @@ class SearchPositionTest {
     @Test
     fun `should return position when the battle unit is deployed`() {
         // Given
-        val battleUnitId = "battle-unit-1"
+        val occupantId = "battle-unit-1"
         val battlefield =
             battlefield()
-                .occupy(1, 1, battleUnitId)
+                .occupy(1, 1, occupantId)
                 .pullEvents()
                 .second
         battlefieldRepository.create(battlefield)
         // When
-        val result = searchPosition(battleUnitId)
+        val result = searchPosition(occupantId)
         // Then
         result shouldBe Battlefield.Dto.PositionDto(1, 1)
     }

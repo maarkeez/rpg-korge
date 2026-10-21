@@ -22,13 +22,13 @@ class SearchEnemiesWithinReach(
 ) {
     operator fun invoke(battleUnitId: String): List<BattleUnit.Dto> {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return emptyList()
-        val position = searchPosition(battleUnitId = battleUnitId) ?: return emptyList()
+        val position = searchPosition(occupantId = battleUnitId) ?: return emptyList()
         val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId) ?: return emptyList()
         val maximumDistance = if (battleUnit.remainingTurns != null) Int.MAX_VALUE else ENGAGEMENT_DISTANCE
         return searchBattleUnitsByPlayerId(playerId = enemyPlayer.id)
             .filter { enemy -> enemy.remainingHealthPoints > 0 }
             .filter { enemy ->
-                val enemyPosition = searchPosition(battleUnitId = enemy.id) ?: return@filter false
+                val enemyPosition = searchPosition(occupantId = enemy.id) ?: return@filter false
                 searchWalkingDistance(
                     fromRow = position.row,
                     fromColumn = position.column,

@@ -46,7 +46,7 @@ class RespawnBattleUnitTest {
         healthOf("rat-1") shouldBe 20
         eventBus.shouldHavePublishedEvents(
             BattleUnitRespawned(playerId = "cpu", battleUnitId = "rat-1", row = 0, column = 2),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = "rat-1", row = 0, column = 2),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "rat-1", row = 0, column = 2),
         )
     }
 

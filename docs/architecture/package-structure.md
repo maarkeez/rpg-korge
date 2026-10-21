@@ -60,8 +60,8 @@ Likewise, `battlefield` does not depend on `battleUnit`. The `BattleUnit` aggreg
 
 | When                                    | `BattleUnit` records                                       | `battlefield`                                             |
 |-----------------------------------------|------------------------------------------------------------|-----------------------------------------------------------|
-| A battle unit is deployed, or respawns  | `RequestOccupyTile(battleUnitId, row, column)`             | Occupies the tile.                                        |
-| A battle unit moves, walks or teleports | `RequestMoveOccupant(battleUnitId, toRow, toColumn, path)` | Occupies the destination, and finds the loot on the path. |
-| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(battleUnitId)`                      | Vacates its tile.                                         |
+| A battle unit is deployed, or respawns  | `RequestOccupyTile(occupantId, row, column)`               | Occupies the tile.                                        |
+| A battle unit moves, walks or teleports | `RequestMoveOccupant(occupantId, toRow, toColumn, path)`   | Occupies the destination, and finds the loot on the path. |
+| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                        | Vacates its tile.                                         |
 
 The terrain effects go the other way: `battlefield` announces `TerrainEffectTriggered(application)` for each battle unit standing on a terrain with an effect, and `battleUnit` applies it.

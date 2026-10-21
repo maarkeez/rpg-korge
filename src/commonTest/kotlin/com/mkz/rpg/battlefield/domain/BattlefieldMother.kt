@@ -44,8 +44,8 @@ object BattlefieldMother {
         return mapTiles
             .flatMapIndexed { row, rowTiles -> rowTiles.mapIndexedNotNull { column, tile -> if (tile.isLetter()) Triple(row, column, tile) else null } }
             .fold(emptyBattlefield) { battlefield, (row, column, letter) ->
-                val battleUnitId = requireNotNull(occupants[letter]) { "The battlefield map occupant '$letter' has no battle unit id" }
-                battlefield.occupy(row, column, battleUnitId).pullEvents().second
+                val occupantId = requireNotNull(occupants[letter]) { "The battlefield map occupant '$letter' has no battle unit id" }
+                battlefield.occupy(row, column, occupantId).pullEvents().second
             }.let { occupiedBattlefield -> withDroppedItems(occupiedBattlefield, droppedItems) }
     }
 

@@ -7,9 +7,9 @@ class RemoveOccupant(
     private val battlefieldRepository: BattlefieldRepository,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(battleUnitId: String) {
+    operator fun invoke(occupantId: String) {
         val storedBattlefield = battlefieldRepository.search() ?: return
-        val (events, battlefield) = storedBattlefield.removeOccupant(battleUnitId).pullEvents()
+        val (events, battlefield) = storedBattlefield.removeOccupant(occupantId).pullEvents()
         battlefieldRepository.update(battlefield)
         eventBus.publish(events)
     }

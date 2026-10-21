@@ -25,7 +25,7 @@ class ApplyStandingTerrainEffects(
             searchBattlefield()
                 ?.tiles
                 ?.values
-                ?.mapNotNull { tile -> tile.battleUnitId }
+                ?.mapNotNull { tile -> tile.occupantId }
                 ?.filter { occupantId -> searchBattleUnitById(occupantId) != null }
                 ?.toSet()
                 .orEmpty()
@@ -33,7 +33,7 @@ class ApplyStandingTerrainEffects(
         val (events, nextSecondParty) = party.startNextSecond().pullEvents()
         partyRepository.save(nextSecondParty)
         if (standingBattleUnitIds.isNotEmpty()) {
-            eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = standingBattleUnitIds))
+            eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = standingBattleUnitIds))
         }
         // After the effects, so the battle units moving during the new second (e.g.: wandering) count as moved in it.
         eventBus.publish(events)

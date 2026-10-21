@@ -17,7 +17,7 @@ class IsOutsideTerritory(
         homeRow: Int,
         homeColumn: Int,
     ): Boolean {
-        val position = searchPosition(battleUnitId = battleUnitId) ?: return false
+        val position = searchPosition(occupantId = battleUnitId) ?: return false
         val distanceFromHome = searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)[position] ?: return false
         return distanceFromHome > WANDER_DISTANCE
     }

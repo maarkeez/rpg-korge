@@ -12,6 +12,6 @@ class OnNpcRecruited(
 ) {
     val subscription =
         eventBus.subscribe<NpcRecruited> { event ->
-            removeOccupant(battleUnitId = event.npcId)
+            removeOccupant(occupantId = event.npcId)
         }
 }

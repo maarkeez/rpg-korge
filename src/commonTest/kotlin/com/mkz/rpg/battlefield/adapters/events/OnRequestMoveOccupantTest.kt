@@ -30,7 +30,7 @@ class OnRequestMoveOccupantTest {
         battlefieldRepository.create(battlefield(". . .", droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion"))))
         eventBus.publish(
             BattlefieldEvent.RequestMoveOccupant(
-                battleUnitId = "battle-unit-1",
+                occupantId = "battle-unit-1",
                 toRow = 0,
                 toColumn = 2,
                 path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)),
@@ -40,6 +40,6 @@ class OnRequestMoveOccupantTest {
         eventBus.dispatch()
         // Then
         battlefieldRepository.search()?.occupant(row = 0, column = 2) shouldBe "battle-unit-1"
-        lootFoundEvents.shouldContainExactly(LootFound(battleUnitId = "battle-unit-1", lootableItemIds = listOf("health-potion"), row = 0, column = 1))
+        lootFoundEvents.shouldContainExactly(LootFound(occupantId = "battle-unit-1", lootableItemIds = listOf("health-potion"), row = 0, column = 1))
     }
 }

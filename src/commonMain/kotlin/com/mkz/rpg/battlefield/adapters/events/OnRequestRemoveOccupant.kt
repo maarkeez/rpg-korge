@@ -11,6 +11,6 @@ class OnRequestRemoveOccupant(
 ) {
     val subscription =
         eventBus.subscribe<RequestRemoveOccupant> { event ->
-            removeOccupant(battleUnitId = event.battleUnitId)
+            removeOccupant(occupantId = event.occupantId)
         }
 }

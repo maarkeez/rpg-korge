@@ -38,7 +38,7 @@ class ApplyStandingTerrainEffectsTest {
         applyStandingTerrainEffects()
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1")),
+            BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-1", "knight-2", "rat-1")),
             PartyEvent.ExplorationSecondStarted(playerId = "human"),
         )
     }
@@ -52,7 +52,7 @@ class ApplyStandingTerrainEffectsTest {
         applyStandingTerrainEffects()
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-2", "rat-1")),
+            BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-2", "rat-1")),
             PartyEvent.ExplorationSecondStarted(playerId = "human"),
         )
     }
@@ -66,7 +66,7 @@ class ApplyStandingTerrainEffectsTest {
         // When
         applyStandingTerrainEffects()
         // Then
-        eventBus.publishedEvents.takeLast(2).first() shouldBe BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2", "rat-1"))
+        eventBus.publishedEvents.takeLast(2).first() shouldBe BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-1", "knight-2", "rat-1"))
     }
 
     @Test
@@ -79,7 +79,7 @@ class ApplyStandingTerrainEffectsTest {
         applyStandingTerrainEffects()
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-1", "knight-2")),
+            BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-1", "knight-2")),
             PartyEvent.ExplorationSecondStarted(playerId = "human"),
         )
     }

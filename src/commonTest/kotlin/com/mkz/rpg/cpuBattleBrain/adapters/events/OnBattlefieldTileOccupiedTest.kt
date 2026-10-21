@@ -23,7 +23,7 @@ class OnBattlefieldTileOccupiedTest {
                 .pullEvents()
                 .second,
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 3, battlefieldUnitId = "unit-1"))
+        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 3, occupantId = "unit-1"))
         // When
         eventBus.dispatch()
         // Then

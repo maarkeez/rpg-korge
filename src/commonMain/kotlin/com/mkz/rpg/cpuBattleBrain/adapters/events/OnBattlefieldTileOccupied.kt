@@ -11,6 +11,6 @@ class OnBattlefieldTileOccupied(
 ) {
     val subscription =
         eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> { event ->
-            resolveCpuBattleUnitMove(battleUnitId = event.battlefieldUnitId, row = event.row, column = event.column)
+            resolveCpuBattleUnitMove(battleUnitId = event.occupantId, row = event.row, column = event.column)
         }
 }

@@ -8,44 +8,45 @@ sealed interface BattlefieldEvent : DomainEvent {
 
     object RequestInitialiseBattlefield : BattlefieldEvent
 
-    /** Requests the effect of each terrain for the given battle units standing on it, e.g.: those standing still while exploring. */
+    /** Requests the effect of each terrain for the given occupants standing on it, e.g.: the battle units standing still while exploring. */
     data class RequestEffectApplicationToOccupants(
-        val battleUnitIds: Set<String>,
+        val occupantIds: Set<String>,
     ) : BattlefieldEvent
 
-    // Requested for a battle unit placed on a tile, e.g.: when it is deployed or respawns.
+    // Requested for an occupant placed on a tile, e.g.: a battle unit deployed or respawned.
     data class RequestOccupyTile(
-        val battleUnitId: String,
+        val occupantId: String,
         val row: Int,
         val column: Int,
     ) : BattlefieldEvent
 
-    // Requested for a battle unit that walked or teleported. Path: the tiles walked from the origin (excluded) to the destination (included).
+    // Requested for an occupant that walked or teleported. Path: the tiles walked from the origin (excluded) to the destination (included).
     data class RequestMoveOccupant(
-        val battleUnitId: String,
+        val occupantId: String,
         val toRow: Int,
         val toColumn: Int,
         val path: List<Battlefield.Dto.PositionDto>,
     ) : BattlefieldEvent
 
-    // Requested for a battle unit that is no longer on the battlefield, e.g.: when it is defeated or vanishes.
+    // Requested for an occupant that is no longer on the battlefield, e.g.: a battle unit defeated or vanished.
     data class RequestRemoveOccupant(
-        val battleUnitId: String,
+        val occupantId: String,
     ) : BattlefieldEvent
 
-    /** The terrain under a battle unit has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the battle unit as its target. */
+    /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its target. */
     data class TerrainEffectTriggered(
         val application: EffectApplicationDto,
     ) : BattlefieldEvent
 
+    // Occupant: whoever stands on the tile, e.g.: a battle unit or an npc.
     data class BattlefieldTileOccupied(
         val row: Int,
         val column: Int,
-        val battlefieldUnitId: String,
+        val occupantId: String,
     ) : BattlefieldEvent
 
     data class OccupantRemoved(
-        val battleUnitId: String,
+        val occupantId: String,
         val row: Int,
         val column: Int,
     ) : BattlefieldEvent
@@ -56,9 +57,9 @@ sealed interface BattlefieldEvent : DomainEvent {
         val column: Int,
     ) : BattlefieldEvent
 
-    /** A battle unit stepped on a tile with dropped items, listed in the order they were dropped. They stay on the tile until an inventory stores them. */
+    /** An occupant stepped on a tile with dropped items, listed in the order they were dropped. They stay on the tile until an inventory stores them. */
     data class LootFound(
-        val battleUnitId: String,
+        val occupantId: String,
         val lootableItemIds: List<String>,
         val row: Int,
         val column: Int,

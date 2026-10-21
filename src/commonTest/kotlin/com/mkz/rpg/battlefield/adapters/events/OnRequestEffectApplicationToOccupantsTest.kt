@@ -31,7 +31,7 @@ class OnRequestEffectApplicationToOccupantsTest {
         // Given
         battlefieldRepository.create(battlefield("K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2")))
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
-        eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(battleUnitIds = setOf("knight-2")))
+        eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-2")))
         // When
         eventBus.dispatch()
         // Then

@@ -33,7 +33,7 @@ class OnBattlefieldTileOccupiedTest {
                 .startWhileExploring(exploringPlayerId = "human", battleUnitIds = listOf("rat-1"))
                 .requestStep(battleUnitId = "rat-1", row = 1, column = 0),
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 0, battlefieldUnitId = "rat-1"))
+        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 0, occupantId = "rat-1"))
         // When
         eventBus.dispatch()
         // Then

@@ -16,9 +16,9 @@ class OnRequestMoveOccupant(
             updateBattlefieldOccupancy(
                 row = event.toRow,
                 column = event.toColumn,
-                battleUnitId = event.battleUnitId,
+                occupantId = event.occupantId,
             )
             // A teleport's path is only its destination.
-            findLoot(battleUnitId = event.battleUnitId, path = event.path)
+            findLoot(occupantId = event.occupantId, path = event.path)
         }
 }

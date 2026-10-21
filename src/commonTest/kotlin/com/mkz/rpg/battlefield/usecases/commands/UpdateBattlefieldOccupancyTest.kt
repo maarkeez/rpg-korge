@@ -27,14 +27,14 @@ class UpdateBattlefieldOccupancyTest {
     fun `should occupy tile when the tile is vacant`() {
         // Given
         battlefieldRepository.create(battlefield())
-        val battleUnitId = "battle-unit-1"
+        val occupantId = "battle-unit-1"
         // When
-        updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = battleUnitId)
+        updateBattlefieldOccupancy(row = 1, column = 1, occupantId = occupantId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
-        storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.battleUnitId shouldBe battleUnitId
+        storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.occupantId shouldBe occupantId
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.BattlefieldTileOccupied(1, 1, battleUnitId),
+            BattlefieldEvent.BattlefieldTileOccupied(1, 1, occupantId),
         )
     }
 
@@ -50,7 +50,7 @@ class UpdateBattlefieldOccupancyTest {
         // When
         val error =
             shouldThrowAny {
-                updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
+                updateBattlefieldOccupancy(row = 1, column = 1, occupantId = "battle-unit-1")
             }
         // Then
         error.shouldBeInstanceOf<BattlefieldError.TileIsNotVacant>()
@@ -60,7 +60,7 @@ class UpdateBattlefieldOccupancyTest {
     fun `should not occupy tile when no battlefield exists`() {
         // Given
         // When
-        updateBattlefieldOccupancy(row = 1, column = 1, battleUnitId = "battle-unit-1")
+        updateBattlefieldOccupancy(row = 1, column = 1, occupantId = "battle-unit-1")
         // Then
         battlefieldRepository.search().shouldBeNull()
         eventBus.publishedEvents.shouldBeEmpty()

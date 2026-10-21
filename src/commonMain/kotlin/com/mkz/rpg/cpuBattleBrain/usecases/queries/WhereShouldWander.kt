@@ -43,7 +43,7 @@ class WhereShouldWander(
         isReturning: Boolean = false,
     ): PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return null
-        val position = searchPosition(battleUnitId = battleUnitId) ?: return null
+        val position = searchPosition(occupantId = battleUnitId) ?: return null
         val distancesFromHome = searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)
         val distanceFromHome = distancesFromHome[position] ?: return null
         val isHeadingHome = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)

@@ -6,8 +6,8 @@ import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 class SearchPosition(
     private val battlefieldRepository: BattlefieldRepository,
 ) {
-    operator fun invoke(battleUnitId: String): PositionDto? {
+    operator fun invoke(occupantId: String): PositionDto? {
         val battlefield = battlefieldRepository.search() ?: return null
-        return battlefield.position(battleUnitId)
+        return battlefield.position(occupantId)
     }
 }

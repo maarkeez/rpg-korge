@@ -32,7 +32,7 @@ class TriggerTerrainEffectsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattlefieldEvent.TerrainEffectTriggered(
@@ -58,7 +58,7 @@ class TriggerTerrainEffectsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattlefieldEvent.TerrainEffectTriggered(
@@ -92,7 +92,7 @@ class TriggerTerrainEffectsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattlefieldEvent.TerrainEffectTriggered(
@@ -112,7 +112,7 @@ class TriggerTerrainEffectsTest {
         battlefieldRepository.create(battlefield())
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -124,7 +124,7 @@ class TriggerTerrainEffectsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -132,7 +132,7 @@ class TriggerTerrainEffectsTest {
     @Test
     fun `should not trigger terrain effects when the battlefield does not exist`() {
         // When
-        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

@@ -10,10 +10,10 @@ class UpdateBattlefieldOccupancy(
     operator fun invoke(
         row: Int,
         column: Int,
-        battleUnitId: String,
+        occupantId: String,
     ) {
         val storedBattlefield = battlefieldRepository.search() ?: return
-        val (events, battlefield) = storedBattlefield.occupy(row, column, battleUnitId).pullEvents()
+        val (events, battlefield) = storedBattlefield.occupy(row, column, occupantId).pullEvents()
         battlefieldRepository.update(battlefield)
         eventBus.publish(events)
     }

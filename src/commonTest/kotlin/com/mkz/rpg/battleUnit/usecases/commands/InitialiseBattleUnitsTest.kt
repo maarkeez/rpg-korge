@@ -63,9 +63,9 @@ class InitialiseBattleUnitsTest {
             ?.playerId shouldBe "player-one"
         eventBus.shouldHavePublishedEvents(
             BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-1", row = 0, column = 0),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = "player-1-unit-1", row = 0, column = 0),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "player-1-unit-1", row = 0, column = 0),
             BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-2", row = 1, column = 1),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = "player-1-unit-2", row = 1, column = 1),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "player-1-unit-2", row = 1, column = 1),
         )
     }
 

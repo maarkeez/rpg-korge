@@ -161,7 +161,7 @@ class ExplorationPresenterTest {
 
     private fun requestedTerrainEffects() =
         mutableListOf<Set<String>>().also { requests ->
-            eventBus.subscribe<BattlefieldEvent.RequestEffectApplicationToOccupants> { requests += it.battleUnitIds }
+            eventBus.subscribe<BattlefieldEvent.RequestEffectApplicationToOccupants> { requests += it.occupantIds }
         }
 
     @Test

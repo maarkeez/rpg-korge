@@ -36,7 +36,7 @@ class WhereCanCast(
             Ability.Dto.TargetingDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF ->
-                searchTilesThatCanBeOccupied(battleUnitId = battleUnit.toDto().id, distance = 1)
+                searchTilesThatCanBeOccupied(occupantId = battleUnit.toDto().id, distance = 1)
                     .filterNot { tilePosition ->
                         distanceService.manhattanDistance(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = tilePosition.row, toColumn = tilePosition.column) >
                             1

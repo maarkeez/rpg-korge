@@ -44,7 +44,7 @@ class OnLootFoundTest {
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))
         lootableItemRepository.create(consumableLootableItem(id = "antidote"))
         inventoryRepository.create(inventory(battleUnitId = "knight-1"))
-        eventBus.publish(LootFound(battleUnitId = "knight-1", lootableItemIds = listOf("health-potion", "antidote"), row = 0, column = 1))
+        eventBus.publish(LootFound(occupantId = "knight-1", lootableItemIds = listOf("health-potion", "antidote"), row = 0, column = 1))
         // When
         eventBus.dispatch()
         // Then

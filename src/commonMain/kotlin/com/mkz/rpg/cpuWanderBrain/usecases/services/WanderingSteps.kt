@@ -34,7 +34,7 @@ class WanderingSteps(
             currentCpuWanderBrain =
                 when {
                     isOutsideTerritory(battleUnitId = battleUnitId, homeRow = home.row, homeColumn = home.column) -> currentCpuWanderBrain.leaveTerritory(battleUnitId)
-                    searchPosition(battleUnitId = battleUnitId) == PositionDto(row = home.row, column = home.column) -> currentCpuWanderBrain.arriveHome(battleUnitId)
+                    searchPosition(occupantId = battleUnitId) == PositionDto(row = home.row, column = home.column) -> currentCpuWanderBrain.arriveHome(battleUnitId)
                     else -> currentCpuWanderBrain
                 }
             val step = whereShouldWander(battleUnitId = battleUnitId, homeRow = home.row, homeColumn = home.column, isReturning = currentCpuWanderBrain.isReturning(battleUnitId))

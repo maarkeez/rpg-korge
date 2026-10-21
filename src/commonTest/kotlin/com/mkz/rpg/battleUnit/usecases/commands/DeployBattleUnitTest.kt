@@ -49,7 +49,7 @@ class DeployBattleUnitTest {
         storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = "battle-unit-1", row = 0, column = 0),
-            BattlefieldEvent.RequestOccupyTile(battleUnitId = "battle-unit-1", row = 0, column = 0),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "battle-unit-1", row = 0, column = 0),
         )
     }
 

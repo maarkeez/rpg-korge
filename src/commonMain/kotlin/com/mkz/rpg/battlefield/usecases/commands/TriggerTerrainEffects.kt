@@ -8,13 +8,13 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-/** Triggers the effect of each terrain for the battle units standing on it, among the given ones (e.g.: those in the battle). */
+/** Triggers the effect of each terrain for the occupants standing on it, among the given ones (e.g.: the battle units in the battle). */
 class TriggerTerrainEffects(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(battleUnitIds: Set<String>) {
+    operator fun invoke(occupantIds: Set<String>) {
         val battlefield = battlefieldRepository.search() ?: return
         val terrainEffectIds =
             battlefield
@@ -29,14 +29,14 @@ class TriggerTerrainEffects(
         val applications =
             battlefield
                 .effectApplicationsToOccupants(terrainEffectIds)
-                .filter { application -> application.occupantBattleUnitId in battleUnitIds }
+                .filter { application -> application.occupantId in occupantIds }
         applications.forEach { application ->
             eventBus.publish(
                 BattlefieldEvent.TerrainEffectTriggered(
                     application =
                         EffectApplicationDto(
                             source = ApplicationSourceDto.terrain(application.terrainId),
-                            target = EffectTargetDto.Unit(id = application.occupantBattleUnitId),
+                            target = EffectTargetDto.Unit(id = application.occupantId),
                             effectId = application.effectId,
                         ),
                 ),

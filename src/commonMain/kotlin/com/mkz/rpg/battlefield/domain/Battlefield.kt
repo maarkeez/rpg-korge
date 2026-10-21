@@ -52,26 +52,26 @@ data class Battlefield private constructor(
     fun occupy(
         row: Int,
         column: Int,
-        battleUnitId: String,
+        occupantId: String,
     ): Battlefield {
         if (!tiles.isVacant(row, column)) throw TileIsNotVacant()
-        val updatedTiles = tiles.occupy(row, column, battleUnitId)
+        val updatedTiles = tiles.occupy(row, column, occupantId)
         val battlefieldTileOccupiedEvent =
             BattlefieldTileOccupied(
                 row = row,
                 column = column,
-                battlefieldUnitId = battleUnitId,
+                occupantId = occupantId,
             )
         return copy(tiles = updatedTiles, events = events + battlefieldTileOccupiedEvent)
     }
 
-    fun removeOccupant(battleUnitId: String): Battlefield {
-        if (!tiles.isDeployed(battleUnitId)) return this
-        val occupantPosition = tiles.position(battleUnitId)!!
-        val updatedTiles = tiles.removeOccupant(battleUnitId)
+    fun removeOccupant(occupantId: String): Battlefield {
+        if (!tiles.isDeployed(occupantId)) return this
+        val occupantPosition = tiles.position(occupantId)!!
+        val updatedTiles = tiles.removeOccupant(occupantId)
         val occupantRemovedEvent =
             OccupantRemoved(
-                battleUnitId = battleUnitId,
+                occupantId = occupantId,
                 row = occupantPosition.row,
                 column = occupantPosition.column,
             )
@@ -90,18 +90,18 @@ data class Battlefield private constructor(
     }
 
     /**
-     * Announces the items lying on each tile of the [path] walked by the battle unit, in walking order. The items stay on their tiles until an
+     * Announces the items lying on each tile of the [path] walked by the occupant, in walking order. The items stay on their tiles until an
      * inventory stores them.
      */
     fun findLoot(
-        battleUnitId: String,
+        occupantId: String,
         path: List<PositionDto>,
     ): Battlefield {
         val lootFoundEvents =
             path.mapNotNull { position ->
                 val droppedItems = tiles.droppedItems(position.row, position.column)
                 if (droppedItems.isEmpty()) return@mapNotNull null
-                LootFound(battleUnitId = battleUnitId, lootableItemIds = droppedItems, row = position.row, column = position.column)
+                LootFound(occupantId = occupantId, lootableItemIds = droppedItems, row = position.row, column = position.column)
             }
         return copy(events = events + lootFoundEvents)
     }
@@ -127,7 +127,7 @@ data class Battlefield private constructor(
         column: Int,
     ): Boolean = tiles.isVacant(row, column) && tiles.isTerrainOccupiable(row, column)
 
-    /** Whether the terrain of the tile can be occupied (e.g.: not void), whether a battle unit stands on it or not. */
+    /** Whether the terrain of the tile can be occupied (e.g.: not void), whether an occupant stands on it or not. */
     fun canTerrainBeOccupied(
         row: Int,
         column: Int,
@@ -140,7 +140,7 @@ data class Battlefield private constructor(
 
     fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> = tiles.effectApplicationsToOccupants(terrainEffectIds)
 
-    fun position(battleUnitId: String): PositionDto? = tiles.position(battleUnitId)
+    fun position(occupantId: String): PositionDto? = tiles.position(occupantId)
 
     fun isInBoundaries(
         row: Int,
@@ -178,16 +178,16 @@ data class Battlefield private constructor(
             return tile.isTerrainOccupiable()
         }
 
-        fun isDeployed(battlefieldUnitId: String) = tiles.values.any { tile -> tile.isOccupiedBy(battlefieldUnitId) }
+        fun isDeployed(occupantId: String) = tiles.values.any { tile -> tile.isOccupiedBy(occupantId) }
 
         fun occupy(
             row: Int,
             column: Int,
-            battleUnitId: String,
+            occupantId: String,
         ): Tiles {
             val tileToBeOccupied = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
-            val occupiedTile = tileToBeOccupied.occupy(battleUnitId)
-            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(battleUnitId) }
+            val occupiedTile = tileToBeOccupied.occupy(occupantId)
+            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(occupantId) }
             val vacantTile = previousOccupiedTile?.removeOccupant()
             val updatedTiles =
                 buildMap {
@@ -200,8 +200,8 @@ data class Battlefield private constructor(
             return Tiles(updatedTiles)
         }
 
-        fun removeOccupant(battleUnitId: String): Tiles {
-            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(battleUnitId) }
+        fun removeOccupant(occupantId: String): Tiles {
+            val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(occupantId) }
             val vacantTile = previousOccupiedTile?.removeOccupant()
             val updatedTiles =
                 buildMap {
@@ -256,17 +256,17 @@ data class Battlefield private constructor(
         fun occupant(
             row: Int,
             column: Int,
-        ): String? = tiles[Position(row = row, column = column)]?.toDto()?.battleUnitId
+        ): String? = tiles[Position(row = row, column = column)]?.toDto()?.occupantId
 
         fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> =
             tiles.values
                 .sortedWith(compareBy({ it.row() }, { it.column() }))
                 .mapNotNull { tile ->
                     val terrainId = tile.terrainIdValue()
-                    val occupantBattleUnitId = tile.occupantBattleUnitId()
-                    if (occupantBattleUnitId != null && terrainId in terrainEffectIds) {
+                    val occupantId = tile.occupantId()
+                    if (occupantId != null && terrainId in terrainEffectIds) {
                         Dto.EffectApplicationToOccupantDto(
-                            occupantBattleUnitId = occupantBattleUnitId,
+                            occupantId = occupantId,
                             terrainId = terrainId,
                             effectId = terrainEffectIds.getValue(terrainId),
                         )
@@ -275,9 +275,9 @@ data class Battlefield private constructor(
                     }
                 }
 
-        fun position(battleUnitId: String): PositionDto? =
+        fun position(occupantId: String): PositionDto? =
             tiles.entries
-                .firstOrNull { (_, tile) -> tile.isOccupiedBy(battleUnitId) }
+                .firstOrNull { (_, tile) -> tile.isOccupiedBy(occupantId) }
                 ?.key
                 ?.toDto()
 
@@ -438,7 +438,7 @@ data class Battlefield private constructor(
         @ConsistentCopyVisibility
         private data class Tile private constructor(
             private val position: Position,
-            private val occupyingBattleUnitId: OccupyingBattleUnitId?,
+            private val occupant: OccupantId?,
             private val terrainId: TerrainId,
             private val terrainCanBeOccupied: TerrainCanBeOccupied,
             private val terrainTransition: TerrainTransition?,
@@ -452,7 +452,7 @@ data class Battlefield private constructor(
                     terrainTransition: TerrainTransition?,
                 ) = Tile(
                     position = position,
-                    occupyingBattleUnitId = null,
+                    occupant = null,
                     terrainId = TerrainId(terrainId),
                     terrainCanBeOccupied = TerrainCanBeOccupied(terrainCanBeOccupied),
                     terrainTransition = terrainTransition,
@@ -460,17 +460,17 @@ data class Battlefield private constructor(
                 )
             }
 
-            fun isVacant() = occupyingBattleUnitId == null
+            fun isVacant() = occupant == null
 
-            fun isOccupied() = occupyingBattleUnitId != null
+            fun isOccupied() = occupant != null
 
             fun isTerrainOccupiable() = terrainCanBeOccupied.value
 
-            fun occupy(battleUnitId: String) = copy(occupyingBattleUnitId = OccupyingBattleUnitId(battleUnitId))
+            fun occupy(occupantId: String) = copy(occupant = OccupantId(occupantId))
 
-            fun removeOccupant() = copy(occupyingBattleUnitId = null)
+            fun removeOccupant() = copy(occupant = null)
 
-            fun isOccupiedBy(battleUnitId: String) = occupyingBattleUnitId?.value == battleUnitId
+            fun isOccupiedBy(occupantId: String) = occupant?.value == occupantId
 
             fun placeDroppedItem(lootableItemId: String) = copy(droppedItems = DroppedItems(droppedItems.value + DroppedItemId(lootableItemId)))
 
@@ -480,7 +480,7 @@ data class Battlefield private constructor(
 
             fun terrainIdValue() = terrainId.value
 
-            fun occupantBattleUnitId(): String? = occupyingBattleUnitId?.value
+            fun occupantId(): String? = occupant?.value
 
             fun row() = position.row
 
@@ -488,7 +488,7 @@ data class Battlefield private constructor(
 
             fun toDto() =
                 TileDto(
-                    battleUnitId = occupyingBattleUnitId?.value,
+                    occupantId = occupant?.value,
                     terrainId = terrainId.value,
                     terrainTransition = terrainTransition?.toDto(),
                 )
@@ -514,7 +514,7 @@ data class Battlefield private constructor(
             fun toDto() = PositionDto(row = row, column = column)
         }
 
-        @JvmInline private value class OccupyingBattleUnitId(
+        @JvmInline private value class OccupantId(
             val value: String,
         )
 
@@ -548,7 +548,7 @@ data class Battlefield private constructor(
         val tiles: Map<PositionDto, TileDto>,
     ) {
         data class TileDto(
-            val battleUnitId: String?,
+            val occupantId: String?,
             val terrainId: String,
             val terrainTransition: TerrainTransitionDto? = null,
         )
@@ -570,7 +570,7 @@ data class Battlefield private constructor(
         )
 
         data class EffectApplicationToOccupantDto(
-            val occupantBattleUnitId: String,
+            val occupantId: String,
             val terrainId: String,
             val effectId: String,
         )

@@ -8,12 +8,12 @@ class SearchTilesThatCanBeOccupied(
     private val battlefieldRepository: BattlefieldRepository,
 ) {
     operator fun invoke(
-        battleUnitId: String,
+        occupantId: String,
         distance: Int,
     ): List<PositionDto> {
         if (distance <= 0) return emptyList()
         val battlefield = battlefieldRepository.search() ?: return emptyList()
-        val position = battlefield.position(battleUnitId) ?: return emptyList()
+        val position = battlefield.position(occupantId) ?: return emptyList()
         val tilesThatCanBeOccupied =
             buildList {
                 for (row in position.row - distance..position.row + distance) {

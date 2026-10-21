@@ -21,7 +21,7 @@ class OnRequestRemoveOccupantTest {
     fun `should remove the occupant when it is requested`() {
         // Given
         battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "battle-unit-1")))
-        eventBus.publish(BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "battle-unit-1"))
+        eventBus.publish(BattlefieldEvent.RequestRemoveOccupant(occupantId = "battle-unit-1"))
         // When
         eventBus.dispatch()
         // Then

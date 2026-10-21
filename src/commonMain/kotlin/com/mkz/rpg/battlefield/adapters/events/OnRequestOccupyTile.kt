@@ -14,7 +14,7 @@ class OnRequestOccupyTile(
             updateBattlefieldOccupancy(
                 row = event.row,
                 column = event.column,
-                battleUnitId = event.battleUnitId,
+                occupantId = event.occupantId,
             )
         }
 }

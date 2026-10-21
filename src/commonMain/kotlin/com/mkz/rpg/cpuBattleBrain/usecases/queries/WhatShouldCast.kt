@@ -156,7 +156,7 @@ class WhatShouldCast(
         val nearestEnemy =
             enemiesWithinReach
                 .mapNotNull { enemy ->
-                    searchPosition(battleUnitId = enemy.id)?.let { position -> enemy to abs(position.row - tile.row) + abs(position.column - tile.column) }
+                    searchPosition(occupantId = enemy.id)?.let { position -> enemy to abs(position.row - tile.row) + abs(position.column - tile.column) }
                 }.minByOrNull { (_, distance) -> distance }
         if (damage <= 0 || nearestEnemy == null) return 0.0
         val (enemy, distance) = nearestEnemy

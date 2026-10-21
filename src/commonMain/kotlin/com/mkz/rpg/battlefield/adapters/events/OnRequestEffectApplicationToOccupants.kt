@@ -11,6 +11,6 @@ class OnRequestEffectApplicationToOccupants(
 ) {
     val subscription =
         eventBus.subscribe<BattlefieldEvent.RequestEffectApplicationToOccupants> { event ->
-            triggerTerrainEffects(event.battleUnitIds)
+            triggerTerrainEffects(event.occupantIds)
         }
 }

@@ -21,17 +21,17 @@ class FindLootTest {
         val droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion"))
         battlefieldRepository.create(battlefield(". . .", droppedItems = droppedItems))
         // When
-        findLoot(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)))
+        findLoot(occupantId = "knight-1", path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)))
         // Then
         battlefieldRepository.search()?.droppedItems() shouldBe droppedItems
-        eventBus.shouldHavePublishedEvents(LootFound(battleUnitId = "knight-1", lootableItemIds = listOf("health-potion"), row = 0, column = 1))
+        eventBus.shouldHavePublishedEvents(LootFound(occupantId = "knight-1", lootableItemIds = listOf("health-potion"), row = 0, column = 1))
     }
 
     @Test
     fun `should not announce loot when no battlefield exists`() {
         // Given
         // When
-        findLoot(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 1)))
+        findLoot(occupantId = "knight-1", path = listOf(PositionDto(row = 0, column = 1)))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

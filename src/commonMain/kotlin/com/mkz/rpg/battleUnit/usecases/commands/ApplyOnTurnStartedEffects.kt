@@ -28,7 +28,7 @@ class ApplyOnTurnStartedEffects(
                 val onTurnStartedEffects = battleUnit.toDto().ongoingEffects.onTurnStarted
                 onTurnStartedEffects.forEach { onTurnStartedEffectId ->
                     val effect = searchEffectById(onTurnStartedEffectId)!!
-                    val position = searchPosition(battleUnitId = battleUnit.toDto().id)!!
+                    val position = searchPosition(occupantId = battleUnit.toDto().id)!!
                     val (events, updatedBattleUnit) =
                         battleUnit
                             .applyOnTurnStartedEffect(

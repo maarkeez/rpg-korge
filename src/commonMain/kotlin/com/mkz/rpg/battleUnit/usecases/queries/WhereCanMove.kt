@@ -12,7 +12,7 @@ class WhereCanMove(
     operator fun invoke(battleUnitId: String): List<Battlefield.Dto.PositionDto> {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return emptyList()
         return searchTilesThatCanBeOccupied(
-            battleUnitId = battleUnit.toDto().id,
+            occupantId = battleUnit.toDto().id,
             distance = battleUnit.toDto().remainingTurnActions.remainingSteps,
         ).filter { position ->
             canMoveTo(

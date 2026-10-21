@@ -322,7 +322,7 @@ class BattlefieldPresenterTest {
         timeline.playLongStep()
         val path = listOf(position(3, 2))
         exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
-        exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(battleUnitId = "rat-1", toRow = 3, toColumn = 2, path = path))
+        exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(occupantId = "rat-1", toRow = 3, toColumn = 2, path = path))
         val resetTilesCount = exploringBattlefieldView.resetTilesCount
         // When
         exploringApis.eventBus.dispatch()
@@ -645,7 +645,7 @@ class BattlefieldPresenterTest {
         // Given
         selectKnight()
         battlefieldView.tilesNotDimmed.last() shouldContain position(1, 2)
-        apis.battlefieldApi.updateBattlefieldOccupancy(row = 1, column = 2, battleUnitId = "bee-1")
+        apis.battlefieldApi.updateBattlefieldOccupancy(row = 1, column = 2, occupantId = "bee-1")
         // When
         eventBus.dispatch()
         // Then

@@ -20,7 +20,7 @@ class WhereShouldMove(
 ) {
     operator fun invoke(battleUnitId: String): Battlefield.Dto.PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId)!!
-        val currentPosition = searchPosition(battleUnitId = battleUnitId)!!
+        val currentPosition = searchPosition(occupantId = battleUnitId)!!
         val candidatePositions =
             buildList {
                 addAll(whereCanMove(battleUnitId = battleUnit.id))
@@ -33,12 +33,12 @@ class WhereShouldMove(
         val enemyBattleUnits = searchEnemiesWithinReach(battleUnitId = battleUnit.id)
         val enemyBattleUnitsPositions =
             enemyBattleUnits.associate { battleUnit ->
-                battleUnit.id to searchPosition(battleUnitId = battleUnit.id)
+                battleUnit.id to searchPosition(occupantId = battleUnit.id)
             }
         val allyBattleUnits = searchBattleUnitsByPlayerId(playerId = battleUnit.playerId).filter { ally -> ally.id != battleUnit.id }
         val allyBattleUnitsPositions =
             allyBattleUnits.associate { battleUnit ->
-                battleUnit.id to searchPosition(battleUnitId = battleUnit.id)
+                battleUnit.id to searchPosition(occupantId = battleUnit.id)
             }
         // Initialize
         val utilityData = mutableMapOf<Battlefield.Dto.PositionDto, UtilityEvaluationData>()

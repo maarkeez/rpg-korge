@@ -54,7 +54,7 @@ class RequestBattlefieldCreationTest {
         storedBattlefield!!.rows shouldBe rows
         storedBattlefield.columns shouldBe columns
         storedBattlefield.tiles.shouldHaveSize(rows * columns)
-        storedBattlefield.tiles.values.forAll { tile -> tile.battleUnitId.shouldBeNull() }
+        storedBattlefield.tiles.values.forAll { tile -> tile.occupantId.shouldBeNull() }
         eventBus.shouldHavePublishedEvents(BattlefieldEvent.BattlefieldCreated)
     }
 

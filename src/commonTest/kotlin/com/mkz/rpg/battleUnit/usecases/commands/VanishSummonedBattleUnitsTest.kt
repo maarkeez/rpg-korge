@@ -45,9 +45,9 @@ class VanishSummonedBattleUnitsTest {
         battleUnitRepository.searchById("bee-2").shouldBeNull()
         eventBus.shouldHavePublishedEvents(
             BattleUnitVanished(playerId = "human", battleUnitId = "bee-1", unitId = "bee", row = 0, column = 1),
-            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "bee-1"),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = "bee-1"),
             BattleUnitVanished(playerId = "human", battleUnitId = "bee-2", unitId = "bee", row = 0, column = 2),
-            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "bee-2"),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = "bee-2"),
         )
     }
 

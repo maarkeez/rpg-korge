@@ -21,7 +21,7 @@ class OnRequestOccupyTileTest {
     fun `should occupy the tile when it is requested`() {
         // Given
         battlefieldRepository.create(battlefield(". . ."))
-        eventBus.publish(BattlefieldEvent.RequestOccupyTile(battleUnitId = "battle-unit-1", row = 0, column = 2))
+        eventBus.publish(BattlefieldEvent.RequestOccupyTile(occupantId = "battle-unit-1", row = 0, column = 2))
         // When
         eventBus.dispatch()
         // Then

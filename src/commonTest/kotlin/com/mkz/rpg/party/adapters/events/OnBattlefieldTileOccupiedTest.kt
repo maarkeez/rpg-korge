@@ -31,7 +31,7 @@ class OnBattlefieldTileOccupiedTest {
                 .walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0)))
                 .awaitNextStep(),
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = "knight-1"))
+        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = "knight-1"))
         // When
         eventBus.dispatch()
         // Then

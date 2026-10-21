@@ -14,7 +14,7 @@ class MovementService(
         val battleUnit = searchBattleUnitById(battleUnitId)!!
         val tilesWhereCanBeMoved =
             searchTilesThatCanBeOccupied(
-                battleUnitId = battleUnit.id,
+                occupantId = battleUnit.id,
                 distance = battleUnit.remainingTurnActions.remainingSteps,
             ).filter { tilePosition ->
                 canMoveTo(

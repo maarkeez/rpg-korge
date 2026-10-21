@@ -22,24 +22,24 @@ class RemoveOccupantTest {
     @Test
     fun `should remove occupant when the battle unit is deployed`() {
         // Given
-        val battleUnitId = "battle-unit-1"
+        val occupantId = "battle-unit-1"
         val battlefield =
             battlefield()
-                .occupy(1, 1, battleUnitId)
+                .occupy(1, 1, occupantId)
                 .pullEvents()
                 .second
         battlefieldRepository.create(battlefield)
         // When
-        removeOccupant(battleUnitId)
+        removeOccupant(occupantId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
         storedBattlefield
             ?.tiles
             ?.get(Battlefield.Dto.PositionDto(1, 1))
-            ?.battleUnitId
+            ?.occupantId
             .shouldBeNull()
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.OccupantRemoved(battleUnitId, 1, 1),
+            BattlefieldEvent.OccupantRemoved(occupantId, 1, 1),
         )
     }
 

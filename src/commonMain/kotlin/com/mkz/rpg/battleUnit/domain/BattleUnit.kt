@@ -92,7 +92,7 @@ data class BattleUnit private constructor(
                 events =
                     setOf(
                         BattleUnitDeployed(playerId = player.id, battleUnitId = id, row = deployAtRow, column = deployAtColumn),
-                        RequestOccupyTile(battleUnitId = id, row = deployAtRow, column = deployAtColumn),
+                        RequestOccupyTile(occupantId = id, row = deployAtRow, column = deployAtColumn),
                     ),
             )
     }
@@ -184,7 +184,7 @@ data class BattleUnit private constructor(
         )
     }
 
-    private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(battleUnitId = battleUnitId, toRow = toRow, toColumn = toColumn, path = path)
+    private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(occupantId = battleUnitId, toRow = toRow, toColumn = toColumn, path = path)
 
     /**
      * A summon counts the turns of its player: once the turn it is on finishes, it has one turn fewer, and it vanishes
@@ -219,7 +219,7 @@ data class BattleUnit private constructor(
                         row = row,
                         column = column,
                     ) +
-                    RequestRemoveOccupant(battleUnitId = id.value),
+                    RequestRemoveOccupant(occupantId = id.value),
         )
     }
 
@@ -247,7 +247,7 @@ data class BattleUnit private constructor(
             events =
                 events +
                     BattleUnitRespawned(playerId = playerId.value, battleUnitId = id.value, row = row, column = column) +
-                    RequestOccupyTile(battleUnitId = id.value, row = row, column = column),
+                    RequestOccupyTile(occupantId = id.value, row = row, column = column),
         )
     }
 
@@ -487,7 +487,7 @@ data class BattleUnit private constructor(
                             defeatedAtColumn = currentColumn,
                         ),
                     )
-                    add(RequestRemoveOccupant(battleUnitId = id.value))
+                    add(RequestRemoveOccupant(occupantId = id.value))
                 }
             }
         return copy(

@@ -214,33 +214,33 @@ class BattlefieldTest {
     fun `Occupy should occupy the tile and publish the event when the tile is vacant`() {
         // Given
         val battlefield = BattlefieldMother.battlefield()
-        val battleUnitId = "battle-unit-1"
+        val occupantId = "battle-unit-1"
         // When
-        val occupiedBattlefield = battlefield.occupy(row = 0, column = 0, battleUnitId = battleUnitId)
+        val occupiedBattlefield = battlefield.occupy(row = 0, column = 0, occupantId = occupantId)
         // Then
-        occupiedBattlefield.occupant(row = 0, column = 0) shouldBe battleUnitId
+        occupiedBattlefield.occupant(row = 0, column = 0) shouldBe occupantId
         val (events, _) = occupiedBattlefield.pullEvents()
-        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = battleUnitId))
+        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = occupantId))
     }
 
     @Test
     fun `Occupy should free the previous tile when the battle unit occupies a new tile`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = battleUnitId)
+        val occupantId = "battle-unit-1"
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = occupantId)
         // When
-        val occupiedBattlefield = battlefield.occupy(row = 0, column = 1, battleUnitId = battleUnitId)
+        val occupiedBattlefield = battlefield.occupy(row = 0, column = 1, occupantId = occupantId)
         // Then
         occupiedBattlefield.occupant(row = 0, column = 0).shouldBeNull()
-        occupiedBattlefield.occupant(row = 0, column = 1) shouldBe battleUnitId
+        occupiedBattlefield.occupant(row = 0, column = 1) shouldBe occupantId
     }
 
     @Test
     fun `Occupy should fail when the tile is not vacant`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
-        val result = runCatching { battlefield.occupy(row = 0, column = 0, battleUnitId = "battle-unit-2") }
+        val result = runCatching { battlefield.occupy(row = 0, column = 0, occupantId = "battle-unit-2") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
     }
@@ -250,7 +250,7 @@ class BattlefieldTest {
         // Given
         val battlefield = BattlefieldMother.battlefield()
         // When
-        val result = runCatching { battlefield.occupy(row = 5, column = 5, battleUnitId = "battle-unit-1") }
+        val result = runCatching { battlefield.occupy(row = 5, column = 5, occupantId = "battle-unit-1") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileNotFound>()
     }
@@ -258,19 +258,19 @@ class BattlefieldTest {
     @Test
     fun `RemoveOccupant should remove the occupant and publish the event when the battle unit is deployed`() {
         // Given
-        val battleUnitId = "battle-unit-1"
+        val occupantId = "battle-unit-1"
         val battlefield =
             BattlefieldMother
                 .battlefield()
-                .occupy(row = 1, column = 1, battleUnitId = battleUnitId)
+                .occupy(row = 1, column = 1, occupantId = occupantId)
                 .pullEvents()
                 .second
         // When
-        val updatedBattlefield = battlefield.removeOccupant(battleUnitId = battleUnitId)
+        val updatedBattlefield = battlefield.removeOccupant(occupantId = occupantId)
         // Then
         updatedBattlefield.occupant(row = 1, column = 1).shouldBeNull()
         val (events, _) = updatedBattlefield.pullEvents()
-        events.shouldContainExactly(BattlefieldEvent.OccupantRemoved(battleUnitId = battleUnitId, row = 1, column = 1))
+        events.shouldContainExactly(BattlefieldEvent.OccupantRemoved(occupantId = occupantId, row = 1, column = 1))
     }
 
     @Test
@@ -278,7 +278,7 @@ class BattlefieldTest {
         // Given
         val battlefield = BattlefieldMother.battlefield()
         // When
-        val updatedBattlefield = battlefield.removeOccupant(battleUnitId = "battle-unit-1")
+        val updatedBattlefield = battlefield.removeOccupant(occupantId = "battle-unit-1")
         // Then
         updatedBattlefield shouldBe battlefield
     }
@@ -296,7 +296,7 @@ class BattlefieldTest {
     @Test
     fun `CanBeOccupied should be false when the tile is occupied`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
         val result = battlefield.canBeOccupied(row = 0, column = 0)
         // Then
@@ -355,12 +355,12 @@ class BattlefieldTest {
     @Test
     fun `Occupant should return the battle unit id when the tile is occupied`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = battleUnitId)
+        val occupantId = "battle-unit-1"
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = occupantId)
         // When
         val result = battlefield.occupant(row = 0, column = 0)
         // Then
-        result shouldBe battleUnitId
+        result shouldBe occupantId
     }
 
     @Test
@@ -376,10 +376,10 @@ class BattlefieldTest {
     @Test
     fun `Position should return the position when the battle unit is deployed`() {
         // Given
-        val battleUnitId = "battle-unit-1"
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 1, column = 2, battleUnitId = battleUnitId)
+        val occupantId = "battle-unit-1"
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 1, column = 2, occupantId = occupantId)
         // When
-        val result = battlefield.position(battleUnitId = battleUnitId)
+        val result = battlefield.position(occupantId = occupantId)
         // Then
         result shouldBe Battlefield.Dto.PositionDto(row = 1, column = 2)
     }
@@ -389,7 +389,7 @@ class BattlefieldTest {
         // Given
         val battlefield = BattlefieldMother.battlefield()
         // When
-        val result = battlefield.position(battleUnitId = "battle-unit-1")
+        val result = battlefield.position(occupantId = "battle-unit-1")
         // Then
         result.shouldBeNull()
     }
@@ -400,14 +400,14 @@ class BattlefieldTest {
         val battlefield =
             BattlefieldMother
                 .battlefield()
-                .occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
-                .occupy(row = 2, column = 1, battleUnitId = "battle-unit-2")
+                .occupy(row = 0, column = 0, occupantId = "battle-unit-1")
+                .occupy(row = 2, column = 1, occupantId = "battle-unit-2")
         // When
         val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
         // Then
         result.shouldContainExactly(
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
         )
     }
 
@@ -424,7 +424,7 @@ class BattlefieldTest {
     @Test
     fun `EffectApplicationsToOccupants should not return an application when the tile terrain has no effect assigned`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
         val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = emptyMap())
         // Then
@@ -438,13 +438,13 @@ class BattlefieldTest {
         val battlefield =
             BattlefieldMother
                 .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
-                .occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
-                .occupy(row = 0, column = 1, battleUnitId = "battle-unit-2")
+                .occupy(row = 0, column = 0, occupantId = "battle-unit-1")
+                .occupy(row = 0, column = 1, occupantId = "battle-unit-2")
         // When
         val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
         // Then
         result.shouldContainExactly(
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantBattleUnitId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
         )
     }
 
@@ -524,12 +524,12 @@ class BattlefieldTest {
             )
         val path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2), PositionDto(row = 0, column = 3))
         // When
-        val updatedBattlefield = battlefield.findLoot(battleUnitId = "knight-1", path = path)
+        val updatedBattlefield = battlefield.findLoot(occupantId = "knight-1", path = path)
         // Then
         val (events, _) = updatedBattlefield.pullEvents()
         events.shouldContainExactly(
-            BattlefieldEvent.LootFound(battleUnitId = "knight-1", lootableItemIds = listOf("health-potion", "helmet"), row = 0, column = 1),
-            BattlefieldEvent.LootFound(battleUnitId = "knight-1", lootableItemIds = listOf("helmet"), row = 0, column = 3),
+            BattlefieldEvent.LootFound(occupantId = "knight-1", lootableItemIds = listOf("health-potion", "helmet"), row = 0, column = 1),
+            BattlefieldEvent.LootFound(occupantId = "knight-1", lootableItemIds = listOf("helmet"), row = 0, column = 3),
         )
     }
 
@@ -539,7 +539,7 @@ class BattlefieldTest {
         val droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion"))
         val battlefield = BattlefieldMother.battlefield(". .", droppedItems = droppedItems)
         // When
-        val updatedBattlefield = battlefield.findLoot(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 1)))
+        val updatedBattlefield = battlefield.findLoot(occupantId = "knight-1", path = listOf(PositionDto(row = 0, column = 1)))
         // Then
         updatedBattlefield.droppedItems() shouldBe droppedItems
     }
@@ -549,7 +549,7 @@ class BattlefieldTest {
         // Given
         val battlefield = BattlefieldMother.battlefield(". . .", droppedItems = mapOf(PositionDto(row = 0, column = 0) to listOf("health-potion")))
         // When
-        val updatedBattlefield = battlefield.findLoot(battleUnitId = "knight-1", path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)))
+        val updatedBattlefield = battlefield.findLoot(occupantId = "knight-1", path = listOf(PositionDto(row = 0, column = 1), PositionDto(row = 0, column = 2)))
         // Then
         updatedBattlefield.pullEvents().first.shouldBeEmpty()
     }
@@ -599,11 +599,11 @@ class BattlefieldTest {
     @Test
     fun `PullEvents should pull the pending events and clear them when the battlefield has events`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+        val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
         val (events, clearedBattlefield) = battlefield.pullEvents()
         // Then
-        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, battlefieldUnitId = "battle-unit-1"))
+        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = "battle-unit-1"))
         clearedBattlefield.pullEvents().first.shouldBeEmpty()
     }
 

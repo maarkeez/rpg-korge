@@ -15,7 +15,7 @@ class OnNpcPlaced(
             updateBattlefieldOccupancy(
                 row = event.row,
                 column = event.column,
-                battleUnitId = event.npcId,
+                occupantId = event.npcId,
             )
         }
 }

@@ -2,7 +2,7 @@ package com.mkz.rpg.battlefield.usecases.queries
 
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 
-/** Whether the terrain of the tile can be occupied (e.g.: not void), whether a battle unit stands on it or not. */
+/** Whether the terrain of the tile can be occupied (e.g.: not void), whether an occupant stands on it or not. */
 class CanBattlefieldTerrainBeOccupied(
     private val battlefieldRepository: BattlefieldRepository,
 ) {

@@ -21,7 +21,7 @@ class FinishSummonedBattleUnitsTurn(
             .searchByPlayerId(playerId)
             .filter { battleUnit -> battleUnit.toDto().id in battleUnitIds }
             .forEach { battleUnit ->
-                val position = searchPosition(battleUnitId = battleUnit.toDto().id) ?: return@forEach
+                val position = searchPosition(occupantId = battleUnit.toDto().id) ?: return@forEach
                 val (events, updatedBattleUnit) = battleUnit.finishTurn(row = position.row, column = position.column).pullEvents()
                 if (events.isEmpty()) {
                     battleUnitRepository.update(updatedBattleUnit)

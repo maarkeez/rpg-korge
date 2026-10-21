@@ -24,7 +24,7 @@ class InMemoryBattlefieldRepositoryTest {
         // Given
         val storedBattlefield = battlefield()
         battlefieldRepository.create(storedBattlefield)
-        val updatedBattlefield = storedBattlefield.occupy(row = 0, column = 0, battleUnitId = "battle-unit-1")
+        val updatedBattlefield = storedBattlefield.occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
         battlefieldRepository.update(updatedBattlefield)
         // Then
