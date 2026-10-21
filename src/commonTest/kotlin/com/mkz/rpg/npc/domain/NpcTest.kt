@@ -1,5 +1,6 @@
 package com.mkz.rpg.npc.domain
 
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.npc.domain.NpcMother.npc
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -21,11 +22,14 @@ class NpcTest {
     }
 
     @Test
-    fun `Place should publish the npc placed event when the npc is placed`() {
+    fun `Place should publish the npc placed event, then request the battlefield to occupy its tile, when the npc is placed`() {
         // When
         val (events, _) = Npc.place(theGuy).pullEvents()
         // Then
-        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "the-guy", row = 10, column = 2))
+        events.shouldContainExactly(
+            NpcEvent.NpcPlaced(npcId = "the-guy", row = 10, column = 2),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "the-guy", row = 10, column = 2),
+        )
     }
 
     @Test
@@ -36,7 +40,10 @@ class NpcTest {
         val (events, npc) = Npc.place(viking).pullEvents()
         // Then
         npc.toDto() shouldBe viking
-        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "viking", row = 12, column = 2, unitId = "viking"))
+        events.shouldContainExactly(
+            NpcEvent.NpcPlaced(npcId = "viking", row = 12, column = 2, unitId = "viking"),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "viking", row = 12, column = 2),
+        )
     }
 
     @Test
@@ -54,7 +61,10 @@ class NpcTest {
         val (events, npc) = Npc.place(merchant).pullEvents()
         // Then
         npc.toDto() shouldBe merchant
-        events.shouldContainExactly(NpcEvent.NpcPlaced(npcId = "merchant", row = 14, column = 2))
+        events.shouldContainExactly(
+            NpcEvent.NpcPlaced(npcId = "merchant", row = 14, column = 2),
+            BattlefieldEvent.RequestOccupyTile(occupantId = "merchant", row = 14, column = 2),
+        )
     }
 
     @Test
@@ -91,11 +101,14 @@ class NpcTest {
     }
 
     @Test
-    fun `Recruit should publish the npc recruited event, with its tile, when the npc is recruitable`() {
+    fun `Recruit should publish the npc recruited event, with its tile, then request the battlefield to vacate it, when the npc is recruitable`() {
         // When
         val (events, _) = npc(id = "viking", row = 12, column = 2, unitId = "viking").recruit().pullEvents()
         // Then
-        events.shouldContainExactly(NpcEvent.NpcRecruited(npcId = "viking", row = 12, column = 2))
+        events.shouldContainExactly(
+            NpcEvent.NpcRecruited(npcId = "viking", row = 12, column = 2),
+            BattlefieldEvent.RequestRemoveOccupant(occupantId = "viking"),
+        )
     }
 
     @Test

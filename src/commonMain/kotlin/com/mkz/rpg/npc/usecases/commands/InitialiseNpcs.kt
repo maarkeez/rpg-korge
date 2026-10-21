@@ -6,16 +6,16 @@ import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcError.NpcStockItemNotFound
 import com.mkz.rpg.npc.domain.NpcError.NpcTileCanNotBeOccupied
 import com.mkz.rpg.npc.domain.NpcError.NpcUnitNotFound
-import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.npc.usecases.services.NpcLoader
+import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
 /**
  * Places every loaded npc on its tile, unless it is already placed, failing when its tile can not be occupied (e.g.:
  * void, out of the battlefield), when the unit of a recruitable npc does not exist, or when an item sold by a merchant
- * does not exist. The battlefield occupies the tile once `NpcPlaced` is handled.
+ * does not exist. Each npc requests the battlefield to occupy its tile, right after `NpcPlaced`.
  */
 class InitialiseNpcs(
     private val npcLoader: NpcLoader,
@@ -26,7 +26,7 @@ class InitialiseNpcs(
     private val eventBus: EventBus,
 ) {
     operator fun invoke() {
-        val events = mutableSetOf<NpcEvent>()
+        val events = mutableSetOf<DomainEvent>()
         npcLoader.loadNpcs().forEach { npcDto ->
             if (npcRepository.searchById(npcDto.id) != null) return@forEach
             if (!canBattlefieldTileBeOccupied(npcDto.row, npcDto.column)) throw NpcTileCanNotBeOccupied()

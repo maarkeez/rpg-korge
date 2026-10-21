@@ -16,7 +16,6 @@ class SubdomainDependencyArchitectureTest {
         setOf(
             setOf("battle", "cpuBattleBrain"),
             setOf("battlefield", "inventory"),
-            setOf("battlefield", "npc"),
             setOf("cpuBattleBrain", "cpuWanderBrain"),
             setOf("npc", "party"),
         )

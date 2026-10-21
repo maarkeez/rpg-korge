@@ -1,5 +1,7 @@
 package com.mkz.rpg.npc.domain
 
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestOccupyTile
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestRemoveOccupant
 import com.mkz.rpg.npc.domain.NpcError.NpcLineRequired
 import com.mkz.rpg.npc.domain.NpcError.NpcNameRequired
 import com.mkz.rpg.npc.domain.NpcError.NpcNotRecruitable
@@ -7,6 +9,7 @@ import com.mkz.rpg.npc.domain.NpcError.NpcStockItemRepeated
 import com.mkz.rpg.npc.domain.NpcError.NpcStockTooLarge
 import com.mkz.rpg.npc.domain.NpcEvent.NpcPlaced
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
+import com.mkz.rpg.shared.domain.DomainEvent
 import kotlin.jvm.JvmInline
 
 /**
@@ -22,7 +25,9 @@ data class Npc private constructor(
     private val tile: Tile,
     private val unitId: UnitId?,
     private val stock: Stock,
-    private val events: Set<NpcEvent>,
+    // Its own events, each followed by the battlefield request it needs (e.g.: occupying the tile it was placed on),
+    // published together so the battlefield is up to date before anything reacting to the next events.
+    private val events: Set<DomainEvent>,
 ) {
     companion object {
         const val MAX_STOCK_SIZE = 12
@@ -35,7 +40,11 @@ data class Npc private constructor(
                 tile = Tile(row = dto.row, column = dto.column),
                 unitId = dto.unitId?.let(::UnitId),
                 stock = Stock(dto.stock),
-                events = setOf(NpcPlaced(npcId = dto.id, row = dto.row, column = dto.column, unitId = dto.unitId)),
+                events =
+                    setOf(
+                        NpcPlaced(npcId = dto.id, row = dto.row, column = dto.column, unitId = dto.unitId),
+                        RequestOccupyTile(occupantId = dto.id, row = dto.row, column = dto.column),
+                    ),
             )
     }
 
@@ -61,7 +70,12 @@ data class Npc private constructor(
     /** Recruits it, so it leaves its tile and joins the party as its unit. Fails when it is not recruitable. */
     fun recruit(): Npc {
         if (!isRecruitable()) throw NpcNotRecruitable()
-        return copy(events = events + NpcRecruited(npcId = id.value, row = tile.row, column = tile.column))
+        return copy(
+            events =
+                events +
+                    NpcRecruited(npcId = id.value, row = tile.row, column = tile.column) +
+                    RequestRemoveOccupant(occupantId = id.value),
+        )
     }
 
     fun isAt(

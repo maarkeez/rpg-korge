@@ -3,8 +3,6 @@ package com.mkz.rpg.battlefield.adapters.presentation
 import com.mkz.rpg.battlefield.adapters.events.OnBattleRoundStarted
 import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
-import com.mkz.rpg.battlefield.adapters.events.OnNpcPlaced
-import com.mkz.rpg.battlefield.adapters.events.OnNpcRecruited
 import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.events.OnRequestMoveOccupant
@@ -92,8 +90,6 @@ class BattlefieldApi(
 
     // Event Listeners
     private val onRequestOccupyTile = OnRequestOccupyTile(updateBattlefieldOccupancy, eventBus)
-    private val onNpcPlaced = OnNpcPlaced(updateBattlefieldOccupancy, eventBus)
-    private val onNpcRecruited = OnNpcRecruited(removeOccupant, eventBus)
     private val onRequestMoveOccupant = OnRequestMoveOccupant(updateBattlefieldOccupancy, findLoot, eventBus)
     private val onRequestRemoveOccupant = OnRequestRemoveOccupant(removeOccupant, eventBus)
     private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)

@@ -10,8 +10,8 @@ import com.mkz.rpg.shared.domain.EventBus
  * party. The battle unit takes the id of the npc, which is deleted, so it is only recruited once. Nothing happens when
  * the npc does not exist or is not recruitable.
  *
- * The events are dispatched in order: the tile is vacated (`NpcRecruited`) before the battle unit is deployed on it, and
- * the battle unit is deployed before it joins the party.
+ * The events are dispatched in order: the tile is vacated (`RequestRemoveOccupant`, right after `NpcRecruited`) before
+ * the battle unit is deployed on it, and the battle unit is deployed before it joins the party.
  */
 class RecruitNpc(
     private val npcRepository: NpcRepository,

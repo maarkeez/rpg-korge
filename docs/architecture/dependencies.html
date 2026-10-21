@@ -210,7 +210,7 @@ const DATA = {
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 23, "importsOut": 16},
     {"name": "battle", "files": 21, "fanIn": 7, "fanOut": 3, "instability": 0.3, "importsIn": 29, "importsOut": 25},
     {"name": "battleUnit", "files": 56, "fanIn": 8, "fanOut": 7, "instability": 0.47, "importsIn": 67, "importsOut": 166},
-    {"name": "battlefield", "files": 43, "fanIn": 9, "fanOut": 7, "instability": 0.44, "importsIn": 92, "importsOut": 48},
+    {"name": "battlefield", "files": 41, "fanIn": 9, "fanOut": 6, "instability": 0.4, "importsIn": 94, "importsOut": 42},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 13, "instability": 0.93, "importsIn": 1, "importsOut": 14},
     {"name": "cpuBattleBrain", "files": 33, "fanIn": 3, "fanOut": 11, "instability": 0.79, "importsIn": 6, "importsOut": 99},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 2, "fanOut": 7, "instability": 0.78, "importsIn": 3, "importsOut": 44},
@@ -220,11 +220,11 @@ const DATA = {
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 11},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 13},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
-    {"name": "npc", "files": 14, "fanIn": 5, "fanOut": 6, "instability": 0.55, "importsIn": 13, "importsOut": 18},
+    {"name": "npc", "files": 14, "fanIn": 4, "fanOut": 6, "instability": 0.6, "importsIn": 11, "importsOut": 22},
     {"name": "party", "files": 26, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 23, "importsOut": 45},
     {"name": "player", "files": 15, "fanIn": 8, "fanOut": 1, "instability": 0.11, "importsIn": 35, "importsOut": 11},
     {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 152},
-    {"name": "shared", "files": 12, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 338, "importsOut": 0},
+    {"name": "shared", "files": 12, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 336, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 6},
     {"name": "unit", "files": 13, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 23, "importsOut": 14}
   ],
@@ -475,21 +475,13 @@ const DATA = {
     {"from": "battlefield", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent.LootDropped"}
     ]},
-    {"from": "battlefield", "to": "npc", "weight": 2, "files": 2, "imports": [
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcPlaced.kt", "layer": "adapters", "name": "npc.domain.NpcEvent.NpcPlaced"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcRecruited.kt", "layer": "adapters", "name": "npc.domain.NpcEvent.NpcRecruited"}
-    ]},
-    {"from": "battlefield", "to": "shared", "weight": 33, "files": 22, "imports": [
+    {"from": "battlefield", "to": "shared", "weight": 29, "files": 20, "imports": [
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnBattleRoundStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnBattleRoundStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnItemStored.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnItemStored.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcPlaced.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcPlaced.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcRecruited.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnNpcRecruited.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestInitialiseBattlefield.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -916,8 +908,10 @@ const DATA = {
     {"from": "npc", "to": "battleUnit", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent.RequestDeployBattleUnit"}
     ]},
-    {"from": "npc", "to": "battlefield", "weight": 2, "files": 2, "imports": [
+    {"from": "npc", "to": "battlefield", "weight": 4, "files": 3, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
+      {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTile"},
+      {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestRemoveOccupant"},
       {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
     ]},
     {"from": "npc", "to": "lootableItem", "weight": 2, "files": 2, "imports": [
@@ -928,14 +922,16 @@ const DATA = {
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "party.domain.PartyEvent.NpcTalkFinished"},
       {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "party.domain.PartyEvent.RequestJoinParty"}
     ]},
-    {"from": "npc", "to": "shared", "weight": 9, "files": 7, "imports": [
+    {"from": "npc", "to": "shared", "weight": 11, "files": 8, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnRequestInitialiseNpcs.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnRequestInitialiseNpcs.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/resources/ResourcesNpcLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
+      {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/npc/domain/NpcEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
@@ -1234,7 +1230,6 @@ const DATA = {
   "mutualDependencies": [
     ["battle", "cpuBattleBrain"],
     ["battlefield", "inventory"],
-    ["battlefield", "npc"],
     ["cpuBattleBrain", "cpuWanderBrain"],
     ["npc", "party"]
   ]

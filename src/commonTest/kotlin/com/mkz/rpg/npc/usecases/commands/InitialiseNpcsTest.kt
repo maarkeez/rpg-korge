@@ -1,5 +1,6 @@
 package com.mkz.rpg.npc.usecases.commands
 
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestOccupyTile
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.lootableItem
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
@@ -27,7 +28,7 @@ class InitialiseNpcsTest {
         InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, queries.searchLootableItemById, eventBus)()
 
     @Test
-    fun `should place every loaded npc on its tile when the npcs are initialised`() {
+    fun `should place every loaded npc on its tile, requesting the battlefield to occupy it, when the npcs are initialised`() {
         // Given
         queries.battlefieldRepository.create(battlefield(". . .\n. . ."))
         val theGuy = npc(id = "the-guy", row = 1, column = 2).toDto()
@@ -39,7 +40,9 @@ class InitialiseNpcsTest {
         npcRepository.searchById("the-girl")?.toDto() shouldBe theGirl
         eventBus.shouldHavePublishedEvents(
             NpcPlaced(npcId = "the-guy", row = 1, column = 2),
+            RequestOccupyTile(occupantId = "the-guy", row = 1, column = 2),
             NpcPlaced(npcId = "the-girl", row = 0, column = 0),
+            RequestOccupyTile(occupantId = "the-girl", row = 0, column = 0),
         )
     }
 
@@ -53,7 +56,10 @@ class InitialiseNpcsTest {
         initialiseNpcs(viking)
         // Then
         npcRepository.searchById("viking")?.toDto() shouldBe viking
-        eventBus.shouldHavePublishedEvents(NpcPlaced(npcId = "viking", row = 0, column = 1, unitId = "viking"))
+        eventBus.shouldHavePublishedEvents(
+            NpcPlaced(npcId = "viking", row = 0, column = 1, unitId = "viking"),
+            RequestOccupyTile(occupantId = "viking", row = 0, column = 1),
+        )
     }
 
     @Test
@@ -78,7 +84,10 @@ class InitialiseNpcsTest {
         initialiseNpcs(merchant)
         // Then
         npcRepository.searchById("merchant")?.toDto() shouldBe merchant
-        eventBus.shouldHavePublishedEvents(NpcPlaced(npcId = "merchant", row = 0, column = 1))
+        eventBus.shouldHavePublishedEvents(
+            NpcPlaced(npcId = "merchant", row = 0, column = 1),
+            RequestOccupyTile(occupantId = "merchant", row = 0, column = 1),
+        )
     }
 
     @Test

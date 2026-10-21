@@ -1,6 +1,7 @@
 package com.mkz.rpg.npc.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestDeployBattleUnit
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestRemoveOccupant
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import com.mkz.rpg.npc.domain.NpcMother.npc
@@ -27,6 +28,7 @@ class RecruitNpcTest {
         npcRepository.searchById("viking").shouldBeNull()
         eventBus.publishedEvents.shouldContainExactly(
             NpcRecruited(npcId = "viking", row = 12, column = 2),
+            RequestRemoveOccupant(occupantId = "viking"),
             RequestDeployBattleUnit(battleUnitId = "viking", unitId = "viking", playerId = "human", row = 12, column = 2),
             RequestJoinParty(battleUnitId = "viking"),
         )
