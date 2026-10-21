@@ -7,17 +7,17 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto
 import com.mkz.rpg.lootableItem.usecases.services.LootableItemLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.enumOf
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one lootable item per `lootableItem/<lootable item id>.toml` resource. */
 class ResourcesLootableItemLoader(
-    private val lootableItemRoot: VfsFile = resourcesVfs["lootableItem"],
+    private val lootableItemRoot: VfsFile = ResourcesBundle.root["lootableItem"],
 ) : LootableItemLoader {
     private var lootableItems = emptyList<LootableItem.Dto>()
 

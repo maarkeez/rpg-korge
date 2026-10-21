@@ -1,16 +1,16 @@
 package com.mkz.rpg.unit.adapters.resources
 
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.usecases.services.UnitLoader
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one unit per `unit/<unit id>.toml` resource. Starting gold: 0 when it has none. */
 class ResourcesUnitLoader(
-    private val unitRoot: VfsFile = resourcesVfs["unit"],
+    private val unitRoot: VfsFile = ResourcesBundle.root["unit"],
 ) : UnitLoader {
     private var units = emptyList<Unit.Dto>()
 

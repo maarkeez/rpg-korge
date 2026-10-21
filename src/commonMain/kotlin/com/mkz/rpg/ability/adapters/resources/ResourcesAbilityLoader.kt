@@ -5,16 +5,16 @@ import com.mkz.rpg.ability.domain.Ability.Dto.EffectSpecDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.usecases.services.AbilityLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.enumOf
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one ability per `ability/<ability id>.toml` resource. */
 class ResourcesAbilityLoader(
-    private val abilityRoot: VfsFile = resourcesVfs["ability"],
+    private val abilityRoot: VfsFile = ResourcesBundle.root["ability"],
 ) : AbilityLoader {
     private var abilities = emptyList<Ability.Dto>()
 

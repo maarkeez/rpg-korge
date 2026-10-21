@@ -2,8 +2,11 @@ import dependencyreport.DependencyReportTask
 import korlibs.korge.gradle.*
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.testing.Test
+import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.kotlin.dsl.register
 import org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import resourcesbundle.ResourcesBundleTask
 
 // The korge plugin bundles kotlin-gradle-plugin 2.0.20 on its classpath; declaring the
 // newer version here forces Gradle to resolve the conflict to 2.2.21 (highest version wins),
@@ -81,6 +84,32 @@ tasks.withType<ConfigurableKtLintTask>().configureEach {
         if (filtered.size != all.size) {
             setSource(filtered)
         }
+    }
+}
+
+// The game reads its resources from a single bundle, so it loads them with one request instead of one per file.
+// Contributors keep editing the files under `resources`, and only the bundle is packaged. See docs/architecture/assets.md.
+val resourcesBundle =
+    tasks.register<ResourcesBundleTask>("resourcesBundle") {
+        group = "build"
+        description = "Bundles the files under resources into the single file the game reads them from."
+
+        sourceDirectory.set(file("resources"))
+        bundleFileName.set("resources.zip")
+        outputDirectory.set(layout.buildDirectory.dir("generated/resourcesBundle"))
+    }
+
+// The tests read the bundle too, as the JS tests are only served the resources of the test compilation.
+extensions.getByType<KotlinMultiplatformExtension>().sourceSets.matching { it.name in setOf("commonMain", "commonTest") }.configureEach {
+    resources.setSrcDirs(listOf(resourcesBundle.flatMap { it.outputDirectory }))
+}
+
+// KorGE always packages the files under `resources`, with a `$catalog.json` listing each folder: both are left out.
+tasks.withType<ProcessResources>().configureEach {
+    val looseResourcesDirectory = file("resources")
+    includeEmptyDirs = false
+    eachFile {
+        if (file.startsWith(looseResourcesDirectory) || name == "\$catalog.json") exclude()
     }
 }
 

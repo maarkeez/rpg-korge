@@ -10,6 +10,7 @@ import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
@@ -20,7 +21,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
-import korlibs.io.file.std.resourcesVfs
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
 import kotlin.test.Test
@@ -173,7 +173,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
             // When
             val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
             // Then
@@ -187,7 +187,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
             // When
             val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
             // Then
@@ -199,7 +199,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
             // When
             val tileBitmap =
                 battlefieldView
@@ -218,7 +218,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = resourcesVfs["terrain/transitions/sand_to_void.png"].readBitmap()
+            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
             // When
             val tileBitmap =
                 battlefieldView

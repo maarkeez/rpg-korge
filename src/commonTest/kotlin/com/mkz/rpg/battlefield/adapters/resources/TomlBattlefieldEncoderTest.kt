@@ -1,8 +1,8 @@
 package com.mkz.rpg.battlefield.adapters.resources
 
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.matchers.shouldBe
 import korlibs.io.file.std.MemoryVfsMix
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -48,7 +48,7 @@ class TomlBattlefieldEncoderTest {
     fun `should write the game battlefield exactly as its resource when its tiles are encoded`() =
         runTest {
             // Given
-            val resource = resourcesVfs["battlefield/battlefield.toml"].readString()
+            val resource = ResourcesBundle.root["battlefield/battlefield.toml"].readString()
             // When
             val toml = encoder.encode(load(resource))
             // Then

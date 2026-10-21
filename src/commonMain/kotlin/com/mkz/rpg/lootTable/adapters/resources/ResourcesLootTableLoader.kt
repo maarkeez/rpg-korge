@@ -4,17 +4,17 @@ import com.mkz.rpg.lootTable.domain.LootTable
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto.TypeDto
 import com.mkz.rpg.lootTable.usecases.services.LootTableLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.enumOf
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one loot table per `lootTable/<loot table id>.toml` resource. */
 class ResourcesLootTableLoader(
-    private val lootTableRoot: VfsFile = resourcesVfs["lootTable"],
+    private val lootTableRoot: VfsFile = ResourcesBundle.root["lootTable"],
 ) : LootTableLoader {
     private var lootTables = emptyList<LootTable.Dto>()
 

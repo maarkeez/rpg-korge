@@ -1,9 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.format.readBitmap
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 
 /**
  * Loads every image under [root] just once, so views can share them.
@@ -11,7 +11,7 @@ import korlibs.io.file.std.resourcesVfs
  * New images are discovered automatically: there is no need to change this loader when adding them.
  */
 class BattleSceneResourcesLoader(
-    private val root: VfsFile = resourcesVfs,
+    private val root: VfsFile = ResourcesBundle.root,
 ) {
     companion object {
         private val IMAGE_EXTENSIONS = setOf("png", "jpg", "jpeg")

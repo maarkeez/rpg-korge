@@ -16,17 +16,17 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumMana
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.LearnAbilityDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.usecases.services.EffectLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.enumOf
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import com.mkz.rpg.shared.adapters.toml.required
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one effect per `effect/<effect id>.toml` resource. */
 class ResourcesEffectLoader(
-    private val effectRoot: VfsFile = resourcesVfs["effect"],
+    private val effectRoot: VfsFile = ResourcesBundle.root["effect"],
 ) : EffectLoader {
     private var effects = emptyList<Effect.Dto>()
 

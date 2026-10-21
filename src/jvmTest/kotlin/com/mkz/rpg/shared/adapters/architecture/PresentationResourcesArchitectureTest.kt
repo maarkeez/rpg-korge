@@ -11,6 +11,7 @@ class PresentationResourcesArchitectureTest {
     private val resourceReadingImports =
         setOf(
             "korlibs.io.file.std.resourcesVfs",
+            "com.mkz.rpg.shared.adapters.resources.ResourcesBundle",
             "korlibs.image.format.readBitmap",
         )
 

@@ -1,6 +1,7 @@
 package com.mkz.rpg
 
 import com.mkz.rpg.screen.adapters.presentation.MenuScene
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer
@@ -17,6 +18,8 @@ suspend fun main() =
 
 // Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU battle brain.
 suspend fun Stage.startGame(random: Random = Random.Default) {
+    // The resources are downloaded while the menu is displayed, so a new game does not wait as long for them.
+    ResourcesBundle.prefetch(views)
     val sceneContainer = sceneContainer()
 
     sceneContainer.changeTo { MenuScene(random) }

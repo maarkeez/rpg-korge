@@ -2,16 +2,16 @@ package com.mkz.rpg.player.adapters.resources
 
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.services.PlayerLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.enumOf
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one player per `player/<player id>.toml` resource. */
 class ResourcesPlayerLoader(
-    private val playerRoot: VfsFile = resourcesVfs["player"],
+    private val playerRoot: VfsFile = ResourcesBundle.root["player"],
 ) : PlayerLoader {
     private var players = emptyList<Player.Dto>()
 

@@ -4,7 +4,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 
 ## How the battle is set up
 
-1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files. Reading resources is asynchronous, so it happens before the battle is set up.
+1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the battle is set up.
 2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring:
 
 | #  | Event                            | Creates                        | Requires                       |

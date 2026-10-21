@@ -1,15 +1,15 @@
 package com.mkz.rpg.terrain.adapters.resources
 
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainError.TerrainNotFound
 import com.mkz.rpg.terrain.usecases.services.TerrainLoader
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 class ResourcesTerrainLoader(
-    private val terrainRoot: VfsFile = resourcesVfs["terrain"],
+    private val terrainRoot: VfsFile = ResourcesBundle.root["terrain"],
 ) : TerrainLoader {
     private var terrainDefinitions = emptyMap<String, TerrainDefinition>()
     private var transitions = emptyMap<String, Set<String>>()

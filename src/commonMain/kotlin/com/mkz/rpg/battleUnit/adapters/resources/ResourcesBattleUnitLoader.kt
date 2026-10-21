@@ -2,14 +2,14 @@ package com.mkz.rpg.battleUnit.adapters.resources
 
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one battle unit deployment per `battleUnit/<battle unit id>.toml` resource. */
 class ResourcesBattleUnitLoader(
-    private val battleUnitRoot: VfsFile = resourcesVfs["battleUnit"],
+    private val battleUnitRoot: VfsFile = ResourcesBundle.root["battleUnit"],
 ) : BattleUnitLoader {
     private var deployments = emptyList<Deployment>()
 

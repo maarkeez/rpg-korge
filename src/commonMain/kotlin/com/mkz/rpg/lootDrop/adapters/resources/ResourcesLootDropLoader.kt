@@ -2,15 +2,15 @@ package com.mkz.rpg.lootDrop.adapters.resources
 
 import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.usecases.services.LootDropLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one loot drop per `lootDrop/<unit id>.toml` resource. */
 class ResourcesLootDropLoader(
-    private val lootDropRoot: VfsFile = resourcesVfs["lootDrop"],
+    private val lootDropRoot: VfsFile = ResourcesBundle.root["lootDrop"],
 ) : LootDropLoader {
     private var lootDrops = emptyList<LootDrop.Dto>()
 

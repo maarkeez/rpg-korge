@@ -1,9 +1,9 @@
 package com.mkz.rpg.battlefield.adapters.resources
 
 import com.mkz.rpg.battlefield.domain.BattlefieldError.InvalidBattlefieldFormat
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -24,7 +24,7 @@ class TomlBattlefieldDecoderTest {
     fun `should read the game battlefield as the loader does when its resource is decoded`() =
         runTest {
             // Given
-            val resource = resourcesVfs["battlefield/battlefield.toml"]
+            val resource = ResourcesBundle.root["battlefield/battlefield.toml"]
             val loader = ResourcesBattlefieldLoader(battlefieldFile = resource).also { loader -> loader.initResources() }
             // When
             val decodedTiles = decoder.decode(resource.readString())

@@ -2,14 +2,14 @@ package com.mkz.rpg.npc.adapters.resources
 
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.usecases.services.NpcLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.readTomlFiles
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads one npc per `npc/<npc id>.toml` resource. Unit: only for a recruitable npc. Stock: only for a merchant. */
 class ResourcesNpcLoader(
-    private val npcRoot: VfsFile = resourcesVfs["npc"],
+    private val npcRoot: VfsFile = ResourcesBundle.root["npc"],
 ) : NpcLoader {
     private var npcs = emptyList<Npc.Dto>()
 

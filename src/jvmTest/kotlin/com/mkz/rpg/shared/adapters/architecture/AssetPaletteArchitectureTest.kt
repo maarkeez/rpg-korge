@@ -1,5 +1,6 @@
 package com.mkz.rpg.shared.adapters.architecture
 
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
@@ -9,7 +10,6 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.image.format.readBitmap
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.coroutines.runBlocking
 import kotlin.math.pow
 import kotlin.test.Test
@@ -20,7 +20,7 @@ class AssetPaletteArchitectureTest {
 
     private val palette: Set<Int> =
         runBlocking {
-            resourcesVfs[paletteFileName]
+            ResourcesBundle.root[paletteFileName]
                 .readBitmap()
                 .pixels()
                 .map { it.rgb() }
@@ -28,7 +28,7 @@ class AssetPaletteArchitectureTest {
         }
     private val assets: Map<String, Bitmap> =
         runBlocking {
-            resourcesVfs
+            ResourcesBundle.root
                 .listRecursiveSimple()
                 .filter { file -> file.isImage() && file.fileName() != paletteFileName }
                 .associate { file -> file.path.removePrefix("/") to file.readBitmap() }

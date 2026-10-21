@@ -2,10 +2,19 @@
 
 The battle scene images live in the [`resources`](../../resources) folder. They are loaded by [`BattleSceneResourcesLoader`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattleSceneResourcesLoader.kt).
 
+## How resources are bundled
+
+Contributors add, edit and remove the individual files under `resources`. The game never reads them one by one: the build bundles them into a single file, so a new game loads every resource with one request instead of one per file (each request is a round trip in the browser).
+
+- The `resourcesBundle` Gradle task ([`ResourcesBundleTask`](../../buildSrc/src/main/kotlin/resourcesbundle/ResourcesBundleTask.kt)) zips every file under `resources`, except hidden ones, into `build/generated/resourcesBundle/resources.zip`. The entries are stored uncompressed. The bundle is never committed.
+- Only the bundle is packaged, on every target (e.g.: the JVM game and the web game on GitHub Pages). The individual files and the `$catalog.json` files KorGE lists them with are left out, so a file read one by one fails instead of being slow.
+- [`ResourcesBundle`](../../src/commonMain/kotlin/com/mkz/rpg/shared/adapters/resources/ResourcesBundle.kt) reads the bundle once per run. `ResourcesBundle.root` reads its files as `resourcesVfs` would, e.g.: `ResourcesBundle.root["unit/knight.toml"]`. The game starts downloading it as soon as it starts, while the menu is displayed.
+- Only `ResourcesBundle` may use `resourcesVfs`. This is enforced by [`ResourcesBundleArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ResourcesBundleArchitectureTest.kt).
+
 ## How assets are loaded
 
 - `BattleScene` creates a single `BattleSceneResourcesLoader` and calls `load()` once, when the scene is initialised.
-- `load()` walks every folder under `resources` and decodes every `.png`, `.jpg` and `.jpeg` file just once. Hidden files and non-image files (e.g.: terrain `.toml` definitions) are ignored.
+- `load()` walks every folder of the resources bundle and decodes every `.png`, `.jpg` and `.jpeg` file just once. Hidden files and non-image files (e.g.: terrain `.toml` definitions) are ignored.
 - Views receive the loader through their constructor and request the images they need when displaying something:
   - `bitmap(path)` returns an image or fails when it does not exist.
   - `bitmapOrNull(path)` returns an image or `null` when it does not exist.
@@ -15,7 +24,7 @@ The battle scene images live in the [`resources`](../../resources) folder. They 
 
 ## Adding an asset
 
-Drop the image in `resources` following the naming conventions below. Neither the loader nor the views need to change. A new unit, ability or effect also needs its data file, see [Game data](game-data.md).
+Drop the image in `resources` following the naming conventions below. Neither the bundle, the loader nor the views need to change. A new unit, ability or effect also needs its data file, see [Game data](game-data.md).
 
 | Asset                            | Path                                  | Example                          |
 |----------------------------------|---------------------------------------|----------------------------------|

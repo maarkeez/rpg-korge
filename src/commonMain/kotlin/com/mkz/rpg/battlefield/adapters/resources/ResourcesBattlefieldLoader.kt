@@ -1,15 +1,15 @@
 package com.mkz.rpg.battlefield.adapters.resources
 
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.shared.adapters.toml.fromResource
 import com.mkz.rpg.shared.adapters.toml.readTomlFile
 import korlibs.io.file.VfsFile
-import korlibs.io.file.std.resourcesVfs
 import kotlinx.serialization.Serializable
 
 /** Loads the battlefield from the `battlefield/battlefield.toml` resource. */
 class ResourcesBattlefieldLoader(
-    private val battlefieldFile: VfsFile = resourcesVfs["battlefield/battlefield.toml"],
+    private val battlefieldFile: VfsFile = ResourcesBundle.root["battlefield/battlefield.toml"],
 ) : BattlefieldLoader {
     private var tiles = emptyList<List<String>>()
 
