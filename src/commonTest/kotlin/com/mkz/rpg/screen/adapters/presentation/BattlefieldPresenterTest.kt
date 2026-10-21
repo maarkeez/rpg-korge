@@ -20,6 +20,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
@@ -321,6 +322,7 @@ class BattlefieldPresenterTest {
         timeline.playLongStep()
         val path = listOf(position(3, 2))
         exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
+        exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(battleUnitId = "rat-1", toRow = 3, toColumn = 2, path = path))
         val resetTilesCount = exploringBattlefieldView.resetTilesCount
         // When
         exploringApis.eventBus.dispatch()

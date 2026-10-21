@@ -17,6 +17,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
@@ -229,6 +230,7 @@ class BattleUnitApi(
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
     private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)
+    private val onTerrainEffectTriggered = OnTerrainEffectTriggered(applyEffect, eventBus)
 
     suspend fun init() {
         battleUnitLoader.initResources()

@@ -1,6 +1,6 @@
 package com.mkz.rpg.battlefield.usecases.commands
 
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
@@ -8,8 +8,8 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
-/** Requests the effect of each terrain for the battle units standing on it, among the given ones (e.g.: those in the battle). */
-class RequestEffectApplicationToOccupants(
+/** Triggers the effect of each terrain for the battle units standing on it, among the given ones (e.g.: those in the battle). */
+class TriggerTerrainEffects(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
     private val eventBus: EventBus,
@@ -32,7 +32,7 @@ class RequestEffectApplicationToOccupants(
                 .filter { application -> application.occupantBattleUnitId in battleUnitIds }
         applications.forEach { application ->
             eventBus.publish(
-                BattleUnitEvent.RequestApplyEffect(
+                BattlefieldEvent.TerrainEffectTriggered(
                     application =
                         EffectApplicationDto(
                             source = ApplicationSourceDto.terrain(application.terrainId),

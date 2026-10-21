@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -58,7 +59,10 @@ class FinishSummonedBattleUnitsTurnTest {
         // Then
         battleUnitRepository.searchById("bee-1")!!.toDto().remainingTurns shouldBe 2
         battleUnitRepository.searchById("bee-2").shouldBeNull()
-        eventBus.shouldHavePublishedEvents(BattleUnitVanished(playerId = "human", battleUnitId = "bee-2", unitId = "bee", row = 0, column = 2))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitVanished(playerId = "human", battleUnitId = "bee-2", unitId = "bee", row = 0, column = 2),
+            BattlefieldEvent.RequestRemoveOccupant(battleUnitId = "bee-2"),
+        )
     }
 
     @Test

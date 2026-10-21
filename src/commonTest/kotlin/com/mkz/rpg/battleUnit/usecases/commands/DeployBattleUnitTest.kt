@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -48,6 +49,7 @@ class DeployBattleUnitTest {
         storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = "battle-unit-1", row = 0, column = 0),
+            BattlefieldEvent.RequestOccupyTile(battleUnitId = "battle-unit-1", row = 0, column = 0),
         )
     }
 

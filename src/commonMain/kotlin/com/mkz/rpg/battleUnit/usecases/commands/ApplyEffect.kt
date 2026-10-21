@@ -3,7 +3,6 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
@@ -17,6 +16,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.random.Random
@@ -105,7 +105,7 @@ class ApplyEffect(
                     battleUnit.applyEquippedEffect(lootableItemId = lootableItemId, effect = effect).pullEvents()
                 }
             }
-        var pendingEvents: Set<BattleUnitEvent> = events
+        var pendingEvents: Set<DomainEvent> = events
         var updatedBattleUnit: BattleUnit = appliedBattleUnit
         if (effect.outcome.type == TELEPORT && application.destination is EffectTargetDto.Tile) {
             val currentPosition = searchPosition(target.id) ?: throw FailedToReceiveAbilityEffects()

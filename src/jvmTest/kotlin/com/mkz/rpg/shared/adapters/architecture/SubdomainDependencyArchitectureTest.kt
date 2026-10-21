@@ -15,7 +15,6 @@ class SubdomainDependencyArchitectureTest {
     private val knownTwoWayDependencies =
         setOf(
             setOf("battle", "cpuBattleBrain"),
-            setOf("battleUnit", "battlefield"),
             setOf("battlefield", "inventory"),
             setOf("battlefield", "npc"),
             setOf("cpuBattleBrain", "cpuWanderBrain"),

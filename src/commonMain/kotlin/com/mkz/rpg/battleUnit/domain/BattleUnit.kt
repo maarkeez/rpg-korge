@@ -25,6 +25,9 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EquippedEffectsRemoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
 import com.mkz.rpg.battlefield.domain.Battlefield
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestMoveOccupant
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestOccupyTile
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestRemoveOccupant
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
@@ -37,6 +40,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILI
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
+import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.KnownAbilities
 import com.mkz.rpg.unit.domain.Unit
 import kotlin.jvm.JvmInline
@@ -58,7 +62,9 @@ data class BattleUnit private constructor(
     private val learnedAbilities: LearnedAbilities,
     private val ongoingEffects: OngoingEffects,
     private val remainingTurns: RemainingTurns?,
-    private val events: Set<BattleUnitEvent>,
+    // Its own events, each followed by the battlefield request it needs (e.g.: occupying the tile it was deployed on),
+    // published together so the battlefield is up to date before anything reacting to the next events.
+    private val events: Set<DomainEvent>,
 ) {
     companion object {
         fun deploy(
@@ -83,7 +89,11 @@ data class BattleUnit private constructor(
                 LearnedAbilities(),
                 OngoingEffects(),
                 remainingTurns?.let(::RemainingTurns),
-                events = setOf(BattleUnitDeployed(playerId = player.id, battleUnitId = id, row = deployAtRow, column = deployAtColumn)),
+                events =
+                    setOf(
+                        BattleUnitDeployed(playerId = player.id, battleUnitId = id, row = deployAtRow, column = deployAtColumn),
+                        RequestOccupyTile(battleUnitId = id, row = deployAtRow, column = deployAtColumn),
+                    ),
             )
     }
 
@@ -126,7 +136,7 @@ data class BattleUnit private constructor(
             )
         return copy(
             remainingTurnActions = remainingTurnActions,
-            events = events + movedEvent,
+            events = events + movedEvent + movedEvent.occupantMoveRequest(),
         )
     }
 
@@ -149,7 +159,7 @@ data class BattleUnit private constructor(
                 toColumn = destination.column,
                 path = path,
             )
-        return copy(events = events + movedEvent)
+        return copy(events = events + movedEvent + movedEvent.occupantMoveRequest())
     }
 
     fun teleport(
@@ -170,9 +180,11 @@ data class BattleUnit private constructor(
             )
         return copy(
             remainingTurnActions = remainingTurnActions,
-            events = events + movedEvent,
+            events = events + movedEvent + movedEvent.occupantMoveRequest(),
         )
     }
+
+    private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(battleUnitId = battleUnitId, toRow = toRow, toColumn = toColumn, path = path)
 
     /**
      * A summon counts the turns of its player: once the turn it is on finishes, it has one turn fewer, and it vanishes
@@ -206,7 +218,8 @@ data class BattleUnit private constructor(
                         unitId = unitId.value,
                         row = row,
                         column = column,
-                    ),
+                    ) +
+                    RequestRemoveOccupant(battleUnitId = id.value),
         )
     }
 
@@ -231,7 +244,10 @@ data class BattleUnit private constructor(
             remainingTurnActions = RemainingTurnActions(unit.movementRange),
             abilityCooldowns = AbilityCooldowns(unit.abilities + learnedAbilities.value),
             ongoingEffects = OngoingEffects(),
-            events = events + BattleUnitRespawned(playerId = playerId.value, battleUnitId = id.value, row = row, column = column),
+            events =
+                events +
+                    BattleUnitRespawned(playerId = playerId.value, battleUnitId = id.value, row = row, column = column) +
+                    RequestOccupyTile(battleUnitId = id.value, row = row, column = column),
         )
     }
 
@@ -471,6 +487,7 @@ data class BattleUnit private constructor(
                             defeatedAtColumn = currentColumn,
                         ),
                     )
+                    add(RequestRemoveOccupant(battleUnitId = id.value))
                 }
             }
         return copy(

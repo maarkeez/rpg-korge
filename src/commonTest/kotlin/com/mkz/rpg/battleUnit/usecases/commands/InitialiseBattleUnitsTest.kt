@@ -4,6 +4,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.UnitNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -62,7 +63,9 @@ class InitialiseBattleUnitsTest {
             ?.playerId shouldBe "player-one"
         eventBus.shouldHavePublishedEvents(
             BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-1", row = 0, column = 0),
+            BattlefieldEvent.RequestOccupyTile(battleUnitId = "player-1-unit-1", row = 0, column = 0),
             BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-2", row = 1, column = 1),
+            BattlefieldEvent.RequestOccupyTile(battleUnitId = "player-1-unit-2", row = 1, column = 1),
         )
     }
 

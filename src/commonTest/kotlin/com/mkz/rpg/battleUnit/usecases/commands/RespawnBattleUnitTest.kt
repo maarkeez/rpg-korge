@@ -4,6 +4,7 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -43,7 +44,10 @@ class RespawnBattleUnitTest {
         respawnBattleUnit(battleUnitId = "rat-1", row = 0, column = 2)
         // Then
         healthOf("rat-1") shouldBe 20
-        eventBus.shouldHavePublishedEvents(BattleUnitRespawned(playerId = "cpu", battleUnitId = "rat-1", row = 0, column = 2))
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitRespawned(playerId = "cpu", battleUnitId = "rat-1", row = 0, column = 2),
+            BattlefieldEvent.RequestOccupyTile(battleUnitId = "rat-1", row = 0, column = 2),
+        )
     }
 
     @Test

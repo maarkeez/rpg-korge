@@ -1,17 +1,15 @@
 package com.mkz.rpg.battlefield.adapters.presentation
 
 import com.mkz.rpg.battlefield.adapters.events.OnBattleRoundStarted
-import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDefeated
-import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitDeployed
-import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitMoved
-import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitRespawned
-import com.mkz.rpg.battlefield.adapters.events.OnBattleUnitVanished
 import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
 import com.mkz.rpg.battlefield.adapters.events.OnNpcPlaced
 import com.mkz.rpg.battlefield.adapters.events.OnNpcRecruited
 import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
+import com.mkz.rpg.battlefield.adapters.events.OnRequestMoveOccupant
+import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTile
+import com.mkz.rpg.battlefield.adapters.events.OnRequestRemoveOccupant
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
@@ -22,7 +20,7 @@ import com.mkz.rpg.battlefield.usecases.commands.PickUpDroppedItem
 import com.mkz.rpg.battlefield.usecases.commands.PlaceDroppedItem
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
-import com.mkz.rpg.battlefield.usecases.commands.RequestEffectApplicationToOccupants
+import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
@@ -68,8 +66,8 @@ class BattlefieldApi(
         )
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
     val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus)
-    val requestEffectApplicationToOccupants =
-        RequestEffectApplicationToOccupants(
+    val triggerTerrainEffects =
+        TriggerTerrainEffects(
             battlefieldRepository = battlefieldRepository,
             searchTerrainById = terrainApi.searchTerrainById,
             eventBus = eventBus,
@@ -93,16 +91,14 @@ class BattlefieldApi(
     val parseBattlefield = ParseBattlefield(battlefieldDecoder)
 
     // Event Listeners
-    private val onBattleUnitDeployed = OnBattleUnitDeployed(updateBattlefieldOccupancy, eventBus)
-    private val onBattleUnitRespawned = OnBattleUnitRespawned(updateBattlefieldOccupancy, eventBus)
+    private val onRequestOccupyTile = OnRequestOccupyTile(updateBattlefieldOccupancy, eventBus)
     private val onNpcPlaced = OnNpcPlaced(updateBattlefieldOccupancy, eventBus)
     private val onNpcRecruited = OnNpcRecruited(removeOccupant, eventBus)
-    private val onBattleUnitMoved = OnBattleUnitMoved(updateBattlefieldOccupancy, findLoot, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(removeOccupant, eventBus)
-    private val onBattleUnitVanished = OnBattleUnitVanished(removeOccupant, eventBus)
+    private val onRequestMoveOccupant = OnRequestMoveOccupant(updateBattlefieldOccupancy, findLoot, eventBus)
+    private val onRequestRemoveOccupant = OnRequestRemoveOccupant(removeOccupant, eventBus)
     private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)
-    private val onBattleRoundStarted = OnBattleRoundStarted(requestEffectApplicationToOccupants, eventBus)
-    private val onRequestEffectApplicationToOccupants = OnRequestEffectApplicationToOccupants(requestEffectApplicationToOccupants, eventBus)
+    private val onBattleRoundStarted = OnBattleRoundStarted(triggerTerrainEffects, eventBus)
+    private val onRequestEffectApplicationToOccupants = OnRequestEffectApplicationToOccupants(triggerTerrainEffects, eventBus)
     private val onLootDropped = OnLootDropped(placeDroppedItem, eventBus)
     private val onItemStored = OnItemStored(pickUpDroppedItem, eventBus)
 

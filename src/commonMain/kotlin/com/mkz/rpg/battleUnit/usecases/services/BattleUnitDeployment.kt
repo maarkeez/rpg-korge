@@ -4,10 +4,10 @@ import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattlefieldTileCanNotBeOccupied
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.PlayerNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.UnitNotFound
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
 /**
@@ -27,7 +27,7 @@ class BattleUnitDeployment(
         deployAtRow: Int,
         deployAtColumn: Int,
         remainingTurns: Int? = null,
-    ): Set<BattleUnitEvent> {
+    ): Set<DomainEvent> {
         val unit = searchUnitById(unitId) ?: throw UnitNotFound()
         val player = searchPlayerById(playerId) ?: throw PlayerNotFound()
         if (!canBattlefieldTileBeOccupied(deployAtRow, deployAtColumn)) throw BattlefieldTileCanNotBeOccupied()

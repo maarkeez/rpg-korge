@@ -1,7 +1,7 @@
 package com.mkz.rpg.battlefield.usecases.commands
 
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
@@ -14,28 +14,28 @@ import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import kotlin.test.Test
 
-class RequestEffectApplicationToOccupantsTest {
+class TriggerTerrainEffectsTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val terrainRepository = InMemoryTerrainRepository()
     private val eventBus = FakeEventBus()
-    private val requestEffectApplicationToOccupants =
-        RequestEffectApplicationToOccupants(
+    private val triggerTerrainEffects =
+        TriggerTerrainEffects(
             battlefieldRepository = battlefieldRepository,
             searchTerrainById = SearchTerrainById(terrainRepository),
             eventBus = eventBus,
         )
 
     @Test
-    fun `should request the effect application to the occupant when the tile terrain has an effect assigned`() {
+    fun `should trigger the terrain effect to the occupant when the tile terrain has an effect assigned`() {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.RequestApplyEffect(
+            BattlefieldEvent.TerrainEffectTriggered(
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
@@ -47,7 +47,7 @@ class RequestEffectApplicationToOccupantsTest {
     }
 
     @Test
-    fun `should request one effect application per occupied tile when multiple tiles are occupied on the terrain with an effect`() {
+    fun `should trigger one terrain effect per occupied tile when multiple tiles are occupied on the terrain with an effect`() {
         // Given
         val occupiedBattlefield =
             battlefield()
@@ -58,10 +58,10 @@ class RequestEffectApplicationToOccupantsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.RequestApplyEffect(
+            BattlefieldEvent.TerrainEffectTriggered(
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
@@ -69,7 +69,7 @@ class RequestEffectApplicationToOccupantsTest {
                         effectId = "effect-1",
                     ),
             ),
-            BattleUnitEvent.RequestApplyEffect(
+            BattlefieldEvent.TerrainEffectTriggered(
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
@@ -81,7 +81,7 @@ class RequestEffectApplicationToOccupantsTest {
     }
 
     @Test
-    fun `should only request the effect application to the given battle units when other battle units occupy the terrain with an effect`() {
+    fun `should only trigger the terrain effect to the given battle units when other battle units occupy the terrain with an effect`() {
         // Given
         val occupiedBattlefield =
             battlefield()
@@ -92,10 +92,10 @@ class RequestEffectApplicationToOccupantsTest {
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.RequestApplyEffect(
+            BattlefieldEvent.TerrainEffectTriggered(
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
@@ -107,32 +107,32 @@ class RequestEffectApplicationToOccupantsTest {
     }
 
     @Test
-    fun `should not request effect applications when the battlefield has no occupant`() {
+    fun `should not trigger terrain effects when the battlefield has no occupant`() {
         // Given
         battlefieldRepository.create(battlefield())
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should not request effect applications when the terrain has no effect assigned`() {
+    fun `should not trigger terrain effects when the terrain has no effect assigned`() {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
         terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should not request effect applications when the battlefield does not exist`() {
+    fun `should not trigger terrain effects when the battlefield does not exist`() {
         // When
-        requestEffectApplicationToOccupants(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
+        triggerTerrainEffects(battleUnitIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

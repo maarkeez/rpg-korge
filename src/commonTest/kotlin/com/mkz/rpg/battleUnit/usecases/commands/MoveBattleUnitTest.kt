@@ -3,6 +3,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -44,6 +45,7 @@ class MoveBattleUnitTest {
         storedBattleUnit!!.remainingTurnActions.remainingSteps shouldBe 2
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitMoved("knight-1", 0, 0, 2, 1, listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))),
+            BattlefieldEvent.RequestMoveOccupant("knight-1", 2, 1, listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))),
         )
     }
 
