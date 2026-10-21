@@ -3,10 +3,10 @@ package com.mkz.rpg.inventory.adapters.events
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.LootFound
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
 import com.mkz.rpg.inventory.usecases.commands.StoreLootedItem
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootFound
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
@@ -44,7 +44,7 @@ class OnLootFoundTest {
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))
         lootableItemRepository.create(consumableLootableItem(id = "antidote"))
         inventoryRepository.create(inventory(battleUnitId = "knight-1"))
-        eventBus.publish(LootFound(occupantId = "knight-1", lootableItemIds = listOf("health-potion", "antidote"), row = 0, column = 1))
+        eventBus.publish(LootFound(battleUnitId = "knight-1", lootableItemIds = listOf("health-potion", "antidote"), row = 0, column = 1))
         // When
         eventBus.dispatch()
         // Then

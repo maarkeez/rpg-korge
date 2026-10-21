@@ -10,5 +10,11 @@ class InMemoryLootDropRepository : LootDropRepository {
         lootDrops[lootDrop.toDto().unitId] = lootDrop
     }
 
+    override fun update(lootDrop: LootDrop) {
+        lootDrops[lootDrop.toDto().unitId] = lootDrop
+    }
+
     override fun searchByUnitId(unitId: String) = lootDrops[unitId]
+
+    override fun searchAll() = lootDrops.values.toList()
 }

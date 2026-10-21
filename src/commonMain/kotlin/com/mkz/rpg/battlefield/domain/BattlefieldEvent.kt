@@ -20,24 +20,16 @@ sealed interface BattlefieldEvent : DomainEvent {
         val column: Int,
     ) : BattlefieldEvent
 
-    // Requested for an occupant that walked or teleported. Path: the tiles walked from the origin (excluded) to the destination (included).
+    // Requested for an occupant that walked or teleported.
     data class RequestMoveOccupant(
         val occupantId: String,
         val toRow: Int,
         val toColumn: Int,
-        val path: List<Battlefield.Dto.PositionDto>,
     ) : BattlefieldEvent
 
     // Requested for an occupant that is no longer on the battlefield, e.g.: a battle unit defeated or vanished.
     data class RequestRemoveOccupant(
         val occupantId: String,
-    ) : BattlefieldEvent
-
-    // Requested for an item stored by an inventory, which leaves the tile at row and column it was lying on.
-    data class RequestPickUpDroppedItem(
-        val lootableItemId: String,
-        val row: Int,
-        val column: Int,
     ) : BattlefieldEvent
 
     /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its target. */
@@ -54,26 +46,6 @@ sealed interface BattlefieldEvent : DomainEvent {
 
     data class OccupantRemoved(
         val occupantId: String,
-        val row: Int,
-        val column: Int,
-    ) : BattlefieldEvent
-
-    data class DroppedItemPlaced(
-        val lootableItemId: String,
-        val row: Int,
-        val column: Int,
-    ) : BattlefieldEvent
-
-    /** An occupant stepped on a tile with dropped items, listed in the order they were dropped. They stay on the tile until an inventory stores them. */
-    data class LootFound(
-        val occupantId: String,
-        val lootableItemIds: List<String>,
-        val row: Int,
-        val column: Int,
-    ) : BattlefieldEvent
-
-    data class DroppedItemPickedUp(
-        val lootableItemId: String,
         val row: Int,
         val column: Int,
     ) : BattlefieldEvent

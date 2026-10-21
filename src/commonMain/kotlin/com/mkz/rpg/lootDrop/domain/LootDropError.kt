@@ -10,4 +10,6 @@ sealed class LootDropError(
     class LootDropUnitDoesNotExist : LootDropError("Loot drop unit does not exist")
 
     class LootDropLootTableDoesNotExist : LootDropError("Loot drop loot table does not exist")
+
+    class DroppedItemNotFound : LootDropError("Dropped item not found on the position")
 }

@@ -103,7 +103,7 @@ The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.disp
 
 | Event                 | Step played                                                                                      |
 |-----------------------|--------------------------------------------------------------------------------------------------|
-| `DroppedItemPlaced`   | The item appears, once the defeated battle unit has been removed from its tile                   |
+| `LootDropped`         | The item appears, once the defeated battle unit has been removed from its tile                   |
 | `DroppedItemPickedUp` | The item disappears, or the chest becomes the item left, once the battle unit has walked its path |
 
 ## Inventory

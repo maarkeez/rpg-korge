@@ -3,7 +3,6 @@ package com.mkz.rpg.inventory.usecases.commands
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryBattleUnitDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
@@ -11,6 +10,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById

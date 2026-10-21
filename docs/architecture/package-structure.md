@@ -58,11 +58,11 @@ For example, `battle` does not depend on `battleUnit`, while `battleUnit` depend
 
 Likewise, `battlefield` does not depend on `battleUnit`. The `BattleUnit` aggregate records its requests right after its own events:
 
-| When                                    | `BattleUnit` records                                       | `battlefield`                                             |
-|-----------------------------------------|------------------------------------------------------------|-----------------------------------------------------------|
-| A battle unit is deployed, or respawns  | `RequestOccupyTile(occupantId, row, column)`               | Occupies the tile.                                        |
-| A battle unit moves, walks or teleports | `RequestMoveOccupant(occupantId, toRow, toColumn, path)`   | Occupies the destination, and finds the loot on the path. |
-| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                        | Vacates its tile.                                         |
+| When                                    | `BattleUnit` records                               | `battlefield`             |
+|-----------------------------------------|----------------------------------------------------|---------------------------|
+| A battle unit is deployed, or respawns  | `RequestOccupyTile(occupantId, row, column)`       | Occupies the tile.        |
+| A battle unit moves, walks or teleports | `RequestMoveOccupant(occupantId, toRow, toColumn)` | Occupies the destination. |
+| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                | Vacates its tile.         |
 
 The terrain effects go the other way: `battlefield` announces `TerrainEffectTriggered(application)` for each battle unit standing on a terrain with an effect, and `battleUnit` applies it.
 
@@ -75,15 +75,16 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
 
-`lootDrop` does not depend on `battleUnit` either. The `BattleUnit` aggregate records its request right after its own event, before `RequestRemoveOccupant`, carrying the unit the loot drop belongs to:
+`lootDrop` does not depend on `battleUnit` either, and `battlefield` knows nothing about loot: each `LootDrop` keeps the items its unit dropped on each tile, with its own position type. The `BattleUnit` aggregate records its requests right after its own events, the loot drop before `RequestRemoveOccupant`, carrying the unit the loot drop belongs to, and the loot search after `RequestMoveOccupant`, so the loot is found once the occupancy is up to date:
 
-| When                      | `BattleUnit` records                   | `lootDrop`                                                      |
-|---------------------------|----------------------------------------|-----------------------------------------------------------------|
-| A battle unit is defeated | `RequestDropLoot(unitId, row, column)` | Drops the loot of the unit on the tile (`LootDropped`), if any. |
+| When                                    | `BattleUnit` records                   | `lootDrop`                                                                    |
+|-----------------------------------------|----------------------------------------|-------------------------------------------------------------------------------|
+| A battle unit is defeated               | `RequestDropLoot(unitId, row, column)` | Drops the loot of the unit on the tile (`LootDropped`), if any.               |
+| A battle unit moves, walks or teleports | `RequestFindLoot(battleUnitId, path)`  | Announces the items on each tile of the path (`LootFound`), in walking order. |
 
-`battlefield` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
+`lootDrop` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
 
-| When              | `Inventory` records                                     | `battlefield`              |
+| When              | `Inventory` records                                     | `lootDrop`                 |
 |-------------------|---------------------------------------------------------|----------------------------|
 | An item is stored | `RequestPickUpDroppedItem(lootableItemId, row, column)` | Picks it up from its tile. |
 

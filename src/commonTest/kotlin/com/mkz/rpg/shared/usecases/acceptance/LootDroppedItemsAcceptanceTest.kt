@@ -9,6 +9,9 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.rpg.lootDrop.domain.LootDrop
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -29,7 +32,9 @@ class LootDroppedItemsAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
@@ -44,8 +49,10 @@ class LootDroppedItemsAcceptanceTest {
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
+        lootTableApi.init()
         abilityApi.init()
         unitApi.init()
+        lootDropApi.init()
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
@@ -62,13 +69,13 @@ class LootDroppedItemsAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
             require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 6, column = 6))
-            battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 7)
+            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
             // When
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("health-potion")
-            battlefieldApi.searchDroppedItems().shouldBeEmpty()
+            lootDropApi.searchDroppedItems().shouldBeEmpty()
         }
 
     @Test
@@ -76,13 +83,13 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
-            battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 8)
+            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 8)
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
             // When
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("health-potion")
-            battlefieldApi.searchDroppedItems().shouldBeEmpty()
+            lootDropApi.searchDroppedItems().shouldBeEmpty()
         }
 
     @Test
@@ -90,12 +97,12 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
-            repeat(13) { battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 6, column = 7) }
+            repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7) }
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 7)
             // When
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe List(12) { "health-potion" }
-            battlefieldApi.searchDroppedItems() shouldBe mapOf(PositionDto(row = 6, column = 7) to listOf("health-potion"))
+            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 6, column = 7) to listOf("health-potion"))
         }
 }

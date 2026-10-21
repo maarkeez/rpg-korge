@@ -39,7 +39,9 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
+import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropLoot
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestFindLoot
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.KnownAbilities
@@ -137,7 +139,7 @@ data class BattleUnit private constructor(
             )
         return copy(
             remainingTurnActions = remainingTurnActions,
-            events = events + movedEvent + movedEvent.occupantMoveRequest(),
+            events = events + movedEvent + movedEvent.occupantMoveRequest() + movedEvent.findLootRequest(),
         )
     }
 
@@ -160,7 +162,7 @@ data class BattleUnit private constructor(
                 toColumn = destination.column,
                 path = path,
             )
-        return copy(events = events + movedEvent + movedEvent.occupantMoveRequest())
+        return copy(events = events + movedEvent + movedEvent.occupantMoveRequest() + movedEvent.findLootRequest())
     }
 
     fun teleport(
@@ -181,11 +183,14 @@ data class BattleUnit private constructor(
             )
         return copy(
             remainingTurnActions = remainingTurnActions,
-            events = events + movedEvent + movedEvent.occupantMoveRequest(),
+            events = events + movedEvent + movedEvent.occupantMoveRequest() + movedEvent.findLootRequest(),
         )
     }
 
-    private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(occupantId = battleUnitId, toRow = toRow, toColumn = toColumn, path = path)
+    private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(occupantId = battleUnitId, toRow = toRow, toColumn = toColumn)
+
+    // Recorded after the occupant move request, so the loot is found once the battlefield occupancy is up to date.
+    private fun BattleUnitMoved.findLootRequest() = RequestFindLoot(battleUnitId = battleUnitId, path = path.map { position -> LootDrop.Dto.PositionDto(row = position.row, column = position.column) })
 
     /**
      * A summon counts the turns of its player: once the turn it is on finishes, it has one turn fewer, and it vanishes

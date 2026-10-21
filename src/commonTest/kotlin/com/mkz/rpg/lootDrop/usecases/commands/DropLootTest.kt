@@ -1,6 +1,7 @@
 package com.mkz.rpg.lootDrop.usecases.commands
 
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
+import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.adapters.storage.InMemoryLootTableRepository
@@ -12,6 +13,8 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.FixedRandom
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class DropLootTest {
@@ -35,6 +38,7 @@ class DropLootTest {
         // When
         dropLoot(unitId = "bat", row = 2, column = 3)
         // Then
+        lootDropRepository.searchByUnitId("bat")!!.toDto().droppedItems shouldBe mapOf(PositionDto(row = 2, column = 3) to listOf("health-potion"))
         eventBus.shouldHavePublishedEvents(LootDropped(lootableItemId = "health-potion", row = 2, column = 3))
     }
 
@@ -46,6 +50,11 @@ class DropLootTest {
         // When
         dropLoot(unitId = "bat", row = 2, column = 3)
         // Then
+        lootDropRepository
+            .searchByUnitId("bat")!!
+            .toDto()
+            .droppedItems
+            .shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()
     }
 

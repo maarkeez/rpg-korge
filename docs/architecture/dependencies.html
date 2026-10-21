@@ -209,21 +209,21 @@ const DATA = {
   "subdomains": [
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 23, "importsOut": 16},
     {"name": "battle", "files": 21, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 31, "importsOut": 23},
-    {"name": "battleUnit", "files": 56, "fanIn": 7, "fanOut": 8, "instability": 0.53, "importsIn": 64, "importsOut": 167},
-    {"name": "battlefield", "files": 41, "fanIn": 9, "fanOut": 5, "instability": 0.36, "importsIn": 95, "importsOut": 41},
+    {"name": "battleUnit", "files": 56, "fanIn": 7, "fanOut": 8, "instability": 0.53, "importsIn": 64, "importsOut": 169},
+    {"name": "battlefield", "files": 35, "fanIn": 8, "fanOut": 4, "instability": 0.33, "importsIn": 93, "importsOut": 33},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 13, "instability": 0.93, "importsIn": 1, "importsOut": 14},
     {"name": "cpuBattleBrain", "files": 33, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 99},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 47},
     {"name": "effect", "files": 13, "fanIn": 8, "fanOut": 1, "instability": 0.11, "importsIn": 70, "importsOut": 12},
     {"name": "inventory", "files": 24, "fanIn": 1, "fanOut": 10, "instability": 0.91, "importsIn": 8, "importsOut": 60},
-    {"name": "lootDrop", "files": 12, "fanIn": 4, "fanOut": 3, "instability": 0.43, "importsIn": 4, "importsOut": 16},
+    {"name": "lootDrop", "files": 18, "fanIn": 4, "fanOut": 3, "instability": 0.43, "importsIn": 8, "importsOut": 23},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 11},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 13},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 6, "instability": 0.67, "importsIn": 9, "importsOut": 27},
     {"name": "party", "files": 27, "fanIn": 6, "fanOut": 5, "instability": 0.45, "importsIn": 26, "importsOut": 44},
     {"name": "player", "files": 15, "fanIn": 8, "fanOut": 1, "instability": 0.11, "importsIn": 35, "importsOut": 11},
-    {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 152},
+    {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 153},
     {"name": "shared", "files": 12, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 341, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 6},
     {"name": "unit", "files": 13, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 23, "importsOut": 14}
@@ -381,8 +381,10 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.Unit"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"}
     ]},
-    {"from": "battleUnit", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestDropLoot"}
+    {"from": "battleUnit", "to": "lootDrop", "weight": 3, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "lootDrop.domain.LootDrop"},
+      {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestDropLoot"},
+      {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestFindLoot"}
     ]},
     {"from": "battleUnit", "to": "player", "weight": 6, "files": 6, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
@@ -468,14 +470,9 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"}
     ]},
-    {"from": "battlefield", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent.LootDropped"}
-    ]},
-    {"from": "battlefield", "to": "shared", "weight": 29, "files": 20, "imports": [
+    {"from": "battlefield", "to": "shared", "weight": 22, "files": 15, "imports": [
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnBattleRoundStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnBattleRoundStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnLootDropped.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestInitialiseBattlefield.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -484,8 +481,6 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestMoveOccupant.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestOccupyTile.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestOccupyTile.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestPickUpDroppedItem.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestPickUpDroppedItem.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestRemoveOccupant.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestRemoveOccupant.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/presentation/BattlefieldApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -493,10 +488,7 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/adapters/resources/ResourcesBattlefieldLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFile"},
       {"file": "com/mkz/rpg/battlefield/adapters/resources/TomlBattlefieldDecoder.kt", "layer": "adapters", "name": "shared.adapters.toml.TomlService"},
       {"file": "com/mkz/rpg/battlefield/domain/BattlefieldEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/battlefield/usecases/commands/FindLoot.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/InitialiseBattlefield.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/usecases/commands/PickUpDroppedItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/usecases/commands/PlaceDroppedItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/RemoveOccupant.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/RequestBattlefieldCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
@@ -760,10 +752,6 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/services/ConsumptionRule.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.CanLearnAbility"},
       {"file": "com/mkz/rpg/inventory/usecases/services/PlayerTurnRule.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitById"}
     ]},
-    {"from": "inventory", "to": "battlefield", "weight": 2, "files": 2, "imports": [
-      {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent.LootFound"},
-      {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem"}
-    ]},
     {"from": "inventory", "to": "effect", "weight": 8, "files": 4, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/ConsumeItem.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto"},
@@ -773,6 +761,10 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/commands/EquipItem.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/EquipItem.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
       {"file": "com/mkz/rpg/inventory/usecases/services/ConsumptionRule.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"}
+    ]},
+    {"from": "inventory", "to": "lootDrop", "weight": 2, "files": 2, "imports": [
+      {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent.LootFound"},
+      {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem"}
     ]},
     {"from": "inventory", "to": "lootableItem", "weight": 13, "files": 13, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "lootableItem.adapters.presentation.LootableItemApi"},
@@ -830,17 +822,24 @@ const DATA = {
       {"file": "com/mkz/rpg/lootDrop/usecases/commands/DropLoot.kt", "layer": "usecases", "name": "lootTable.usecases.queries.SearchLootTableById"},
       {"file": "com/mkz/rpg/lootDrop/usecases/commands/InitialiseLootDrops.kt", "layer": "usecases", "name": "lootTable.usecases.queries.SearchLootTableById"}
     ]},
-    {"from": "lootDrop", "to": "shared", "weight": 10, "files": 7, "imports": [
+    {"from": "lootDrop", "to": "shared", "weight": 17, "files": 12, "imports": [
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestDropLoot.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestDropLoot.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestFindLoot.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestFindLoot.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestInitialiseLootDrops.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestInitialiseLootDrops.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestPickUpDroppedItem.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/adapters/events/OnRequestPickUpDroppedItem.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/lootDrop/adapters/presentation/LootDropApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/lootDrop/adapters/resources/ResourcesLootDropLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.fromResource"},
       {"file": "com/mkz/rpg/lootDrop/adapters/resources/ResourcesLootDropLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
       {"file": "com/mkz/rpg/lootDrop/domain/LootDropEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/lootDrop/usecases/commands/DropLoot.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/lootDrop/usecases/commands/InitialiseLootDrops.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+      {"file": "com/mkz/rpg/lootDrop/usecases/commands/FindLoot.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/usecases/commands/InitialiseLootDrops.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/usecases/commands/PickUpDroppedItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/lootDrop/usecases/commands/PlaceDroppedItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "lootDrop", "to": "unit", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/lootDrop/adapters/presentation/LootDropApi.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
@@ -1085,8 +1084,9 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemBought"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemSold"}
     ]},
-    {"from": "screen", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "lootDrop.adapters.presentation.LootDropApi"}
+    {"from": "screen", "to": "lootDrop", "weight": 2, "files": 2, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "lootDrop.adapters.presentation.LootDropApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent"}
     ]},
     {"from": "screen", "to": "lootTable", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "lootTable.adapters.presentation.LootTableApi"}

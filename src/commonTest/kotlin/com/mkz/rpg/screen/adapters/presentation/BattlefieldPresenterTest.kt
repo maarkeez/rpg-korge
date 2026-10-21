@@ -28,6 +28,9 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
+import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
+import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.domain.Npc
@@ -73,6 +76,9 @@ class BattlefieldPresenterTest {
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             units = listOf(unit(id = "knight", movementRange = 3, healthPoints = 30).toDto(), unit(id = "rat", healthPoints = 21).toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
+            lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),
+            lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
             effects =
                 listOf(
                     decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto(),
@@ -322,7 +328,7 @@ class BattlefieldPresenterTest {
         timeline.playLongStep()
         val path = listOf(position(3, 2))
         exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
-        exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(occupantId = "rat-1", toRow = 3, toColumn = 2, path = path))
+        exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(occupantId = "rat-1", toRow = 3, toColumn = 2))
         val resetTilesCount = exploringBattlefieldView.resetTilesCount
         // When
         exploringApis.eventBus.dispatch()
@@ -464,7 +470,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `DisplayLoot should display the dropped item on its tile when an item is dropped on the battlefield`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
@@ -474,8 +480,8 @@ class BattlefieldPresenterTest {
     @Test
     fun `DisplayLoot should display every item lying on the tile when several items are dropped on it`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "hammer", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
@@ -485,10 +491,10 @@ class BattlefieldPresenterTest {
     @Test
     fun `DisplayLoot should display the items left on the tile when a dropped item is picked up`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "hammer", row = 2, column = 2)
         eventBus.dispatch()
-        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
@@ -499,7 +505,7 @@ class BattlefieldPresenterTest {
     fun `DisplayLoot should display the dropped item once the previous steps have been played`() {
         // Given
         val previousStep = timeline.playLongStep()
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
         require(battlefieldView.displayedLoot.isEmpty())
         // When
@@ -511,9 +517,9 @@ class BattlefieldPresenterTest {
     @Test
     fun `PickUpLoot should lift the item off its tile when a dropped item is picked up`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
-        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
         // When
         eventBus.dispatch()
         // Then
@@ -524,10 +530,10 @@ class BattlefieldPresenterTest {
     @Test
     fun `PickUpLoot should lift the item off its tile once the previous steps have been played`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
         val previousStep = timeline.playLongStep()
-        apis.battlefieldApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
+        apis.lootDropApi.pickUpDroppedItem(lootableItemId = "health-potion", row = 2, column = 2)
         eventBus.dispatch()
         require(battlefieldView.pickedUpLoot.isEmpty())
         // When
@@ -539,7 +545,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `PickUpLoot should lift the item off its tile once the battle unit has walked over it when a human battle unit walks over loot`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 1)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 1)
         eventBus.dispatch()
         // When
         publish(RequestMoveBattleUnit(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 1))
@@ -551,7 +557,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `PickUpLoot should not lift anything when a cpu battle unit walks over loot`() {
         // Given
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = 2, column = 3)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
         eventBus.dispatch()
         publish(PlayerTurnStarted(playerId = "cpu", battleUnitIds = emptySet()))
         // When

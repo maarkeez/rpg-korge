@@ -11,6 +11,8 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
@@ -32,7 +34,9 @@ class EquipHammerAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
@@ -47,8 +51,10 @@ class EquipHammerAcceptanceTest {
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
+        lootTableApi.init()
         abilityApi.init()
         unitApi.init()
+        lootDropApi.init()
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
@@ -57,7 +63,7 @@ class EquipHammerAcceptanceTest {
         // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
-        battlefieldApi.placeDroppedItem(lootableItemId = "hammer", row = 6, column = 7)
+        lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "hammer", row = 6, column = 7)
         inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "hammer", row = 6, column = 7)
         eventBus.dispatch()
     }

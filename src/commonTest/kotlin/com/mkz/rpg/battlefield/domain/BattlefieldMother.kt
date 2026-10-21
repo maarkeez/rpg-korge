@@ -28,14 +28,11 @@ object BattlefieldMother {
      *
      * As in the game, sand in a corner between two void tiles (e.g.: void to the north and to the east) can not be occupied.
      *
-     * The [droppedItems] lie on their tiles in the given order.
-     *
      * For example: `battlefield("K . #\n. . #", occupants = mapOf('K' to "knight-1"))`.
      */
     fun battlefield(
         map: String,
         occupants: Map<Char, String> = emptyMap(),
-        droppedItems: Map<Battlefield.Dto.PositionDto, List<String>> = emptyMap(),
     ): Battlefield {
         val mapTiles = map.trimIndent().lines().map { line -> line.split(" ").filter(String::isNotBlank).map(String::single) }
         require(mapTiles.all { it.size == mapTiles.first().size }) { "Every row of the battlefield map must have the same number of tiles" }
@@ -46,18 +43,8 @@ object BattlefieldMother {
             .fold(emptyBattlefield) { battlefield, (row, column, letter) ->
                 val occupantId = requireNotNull(occupants[letter]) { "The battlefield map occupant '$letter' has no battle unit id" }
                 battlefield.occupy(row, column, occupantId).pullEvents().second
-            }.let { occupiedBattlefield -> withDroppedItems(occupiedBattlefield, droppedItems) }
-    }
-
-    private fun withDroppedItems(
-        battlefield: Battlefield,
-        droppedItems: Map<Battlefield.Dto.PositionDto, List<String>>,
-    ): Battlefield =
-        droppedItems.entries
-            .flatMap { (position, lootableItemIds) -> lootableItemIds.map { lootableItemId -> position to lootableItemId } }
-            .fold(battlefield) { updatedBattlefield, (position, lootableItemId) ->
-                updatedBattlefield.placeDroppedItem(lootableItemId, position.row, position.column).pullEvents().second
             }
+    }
 
     fun terrainId() = listOf("sand", "void").random()
 

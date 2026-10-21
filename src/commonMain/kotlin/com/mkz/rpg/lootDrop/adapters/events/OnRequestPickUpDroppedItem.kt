@@ -1,7 +1,7 @@
-package com.mkz.rpg.battlefield.adapters.events
+package com.mkz.rpg.lootDrop.adapters.events
 
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
-import com.mkz.rpg.battlefield.usecases.commands.PickUpDroppedItem
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
+import com.mkz.rpg.lootDrop.usecases.commands.PickUpDroppedItem
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 

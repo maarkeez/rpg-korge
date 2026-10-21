@@ -10,6 +10,10 @@ import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
+import com.mkz.rpg.lootDrop.domain.LootDrop
+import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
+import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
+import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
@@ -71,6 +75,9 @@ class InventoryPresenterTest {
                 ),
             units = listOf(unit(id = "knight", healthPoints = 100, abilities = listOf("bee"), startingGold = 20).toDto(), unit(id = "rat").toDto(), unit(id = "bee").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
+            lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),
+            lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
             tiles = List(4) { List(4) { "sand" } },
             deployments =
                 listOf(
@@ -113,7 +120,7 @@ class InventoryPresenterTest {
         battleUnitId: String,
         lootableItemId: String,
     ) {
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = lootableItemId, row = 1, column = 1)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 1)
         apis.inventoryApi.storeLootedItem(battleUnitId = battleUnitId, lootableItemId = lootableItemId, row = 1, column = 1)
         eventBus.dispatch()
     }
@@ -158,7 +165,7 @@ class InventoryPresenterTest {
 
     // The knight finds an item lying on (1,2) while its inventory is full.
     private fun findWhileFull(lootableItemId: String) {
-        apis.battlefieldApi.placeDroppedItem(lootableItemId = lootableItemId, row = 1, column = 2)
+        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 2)
         apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = lootableItemId, row = 1, column = 2)
         eventBus.dispatch()
     }
@@ -404,7 +411,7 @@ class InventoryPresenterTest {
         clickSlot(0)
         // Then
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(11) { "health-potion" } + "hammer"
-        apis.battlefieldApi.searchDroppedItems()[PositionDto(1, 2)].shouldBeNull()
+        apis.lootDropApi.searchDroppedItems()[LootDrop.Dto.PositionDto(1, 2)].shouldBeNull()
         playerCallToActionView.displayedInventoryFull.shouldBeNull()
         timeline.isPlaying.shouldBeFalse()
     }
@@ -420,7 +427,7 @@ class InventoryPresenterTest {
             .onLeft()
         eventBus.dispatch()
         // Then
-        apis.battlefieldApi.searchDroppedItems()[PositionDto(1, 2)] shouldBe listOf("hammer")
+        apis.lootDropApi.searchDroppedItems()[LootDrop.Dto.PositionDto(1, 2)] shouldBe listOf("hammer")
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(12) { "health-potion" }
         timeline.isPlaying.shouldBeFalse()
     }

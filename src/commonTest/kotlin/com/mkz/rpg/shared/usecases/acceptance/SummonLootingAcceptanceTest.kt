@@ -12,6 +12,14 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.rpg.lootDrop.domain.LootDrop
+import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
+import com.mkz.rpg.lootDrop.usecases.services.FakeLootDropLoader
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
+import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
+import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
+import com.mkz.rpg.lootTable.usecases.services.FakeLootTableLoader
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -38,7 +46,9 @@ class SummonLootingAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(listOf(lootTable(id = "enemy-loot", entries = listOf(nothingEntry())).toDto())))
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(listOf(lootDrop(unitId = "enemy", lootTableIds = listOf("enemy-loot")).toDto())))
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
@@ -47,7 +57,7 @@ class SummonLootingAcceptanceTest {
     private val humanPlayerId = "human"
     private val enemyPlayerId = "enemy"
     private val knightId = "knight-1"
-    private val potionTile = PositionDto(row = 1, column = 4)
+    private val potionTile = LootDrop.Dto.PositionDto(row = 1, column = 4)
 
     // The knight, at (2,2), summons a bee at (1,2), and a health potion lies at (1,4). The enemy stands far away, at (7,7).
     private suspend fun setUp() {
@@ -76,12 +86,14 @@ class SummonLootingAcceptanceTest {
         unitApi.requestUnitCreation(UnitMother.unit(id = "knight", healthPoints = 20, manaPoints = 10, abilities = listOf("summon"), movementRange = 3).toDto())
         unitApi.requestUnitCreation(UnitMother.unit(id = "summon", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto())
         unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", healthPoints = 20, manaPoints = 10, abilities = emptyList(), movementRange = 3).toDto())
+        lootTableApi.initialiseLootTables()
+        lootDropApi.initialiseLootDrops()
 
         battleUnitApi.deployBattleUnit(battleUnitId = knightId, unitId = "knight", playerId = humanPlayerId, deployAtRow = 2, deployAtColumn = 2)
         battleUnitApi.deployBattleUnit(battleUnitId = "enemy-1", unitId = "enemy", playerId = enemyPlayerId, deployAtRow = 7, deployAtColumn = 7)
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, enemyPlayerId)
         eventBus.dispatch()
-        battlefieldApi.placeDroppedItem(lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)
+        lootDropApi.placeDroppedItem(unitId = "enemy", lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)
         eventBus.dispatch()
     }
 
@@ -108,7 +120,7 @@ class SummonLootingAcceptanceTest {
             // When
             walkBeeOverThePotion(beeId)
             // Then
-            battlefieldApi.searchDroppedItems()[potionTile].shouldNotBeNull().shouldContainExactly("health-potion")
+            lootDropApi.searchDroppedItems()[potionTile].shouldNotBeNull().shouldContainExactly("health-potion")
             inventoryApi.searchInventoryByBattleUnitId(beeId).shouldBeNull()
         }
 
@@ -122,6 +134,6 @@ class SummonLootingAcceptanceTest {
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(knightId)!!.storedItems shouldBe listOf("health-potion")
-            battlefieldApi.searchDroppedItems() shouldNotContainKey potionTile
+            lootDropApi.searchDroppedItems() shouldNotContainKey potionTile
         }
 }

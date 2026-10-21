@@ -33,14 +33,14 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 
 ## Looting from the battlefield
 
-A dropped item lies on the tile where its battle unit was defeated until an inventory stores it. A tile can hold several items, kept in the order they were dropped.
+A dropped item lies on the tile where its battle unit was defeated until an inventory stores it. A tile can hold several items, listed by the unit that dropped them, each in the order it dropped them.
 
-1. A defeated battle unit drops an item (`LootDropped`), and the battlefield places it on its tile (`placeDroppedItem`, announcing `DroppedItemPlaced`).
-2. A battle unit moves or teleports. The battlefield finds the items on every tile of its path, destination included (`findLoot`), and announces one `LootFound` per tile with items, in walking order. A teleport's path is only its destination. Deploying a battle unit does not look for loot.
+1. A defeated battle unit drops an item: the loot drop of its unit keeps it on its tile, and announces `LootDropped`.
+2. A battle unit moves or teleports, and requests to find the loot on its path (`RequestFindLoot`). `lootDrop` finds the items on every tile of the path, destination included (`findLoot`), and announces one `LootFound` per tile with items, in walking order. A teleport's path is only its destination. Deploying a battle unit does not look for loot.
 3. The inventory stores each item found (`storeLootedItem`), and announces `ItemStored` with the tile the item was lying on.
-4. The inventory requests the pick-up right after (`RequestPickUpDroppedItem`), and the battlefield picks the stored item up from its tile (`pickUpDroppedItem`, announcing `DroppedItemPickedUp`).
+4. The inventory requests the pick-up right after (`RequestPickUpDroppedItem`), and `lootDrop` picks the stored item up from its tile (`pickUpDroppedItem`, announcing `DroppedItemPickedUp`).
 
-An item that is not stored stays on its tile: when a CPU battle unit or a summoned battle unit steps on it, or when the inventory is full. The battlefield exposes the items lying on each tile with `searchDroppedItems`.
+An item that is not stored stays on its tile: when a CPU battle unit or a summoned battle unit steps on it, or when the inventory is full. `lootDrop` exposes the items lying on each tile with `searchDroppedItems`. The battlefield knows nothing about loot: its tiles only hold their terrain and their occupant.
 
 ## When the inventory is full
 

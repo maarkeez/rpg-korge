@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.position
 import com.mkz.rpg.effect.domain.EffectMother
+import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.unit.domain.UnitMother
@@ -74,7 +75,8 @@ class BattleUnitTest {
                 toColumn = 2,
                 path = path,
             ),
-            BattlefieldEvent.RequestMoveOccupant(occupantId = movedBattleUnit.toDto().id, toRow = 0, toColumn = 2, path = path),
+            BattlefieldEvent.RequestMoveOccupant(occupantId = movedBattleUnit.toDto().id, toRow = 0, toColumn = 2),
+            LootDropEvent.RequestFindLoot(battleUnitId = movedBattleUnit.toDto().id, path = path.map { LootDrop.Dto.PositionDto(it.row, it.column) }),
         )
     }
 
@@ -118,7 +120,8 @@ class BattleUnitTest {
                 toColumn = 5,
                 path = path,
             ),
-            BattlefieldEvent.RequestMoveOccupant(occupantId = walkedBattleUnit.toDto().id, toRow = 0, toColumn = 5, path = path),
+            BattlefieldEvent.RequestMoveOccupant(occupantId = walkedBattleUnit.toDto().id, toRow = 0, toColumn = 5),
+            LootDropEvent.RequestFindLoot(battleUnitId = walkedBattleUnit.toDto().id, path = path.map { LootDrop.Dto.PositionDto(it.row, it.column) }),
         )
     }
 
@@ -140,12 +143,8 @@ class BattleUnitTest {
                 toColumn = 2,
                 path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
             ),
-            BattlefieldEvent.RequestMoveOccupant(
-                occupantId = teleportedBattleUnit.toDto().id,
-                toRow = 2,
-                toColumn = 2,
-                path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 2)),
-            ),
+            BattlefieldEvent.RequestMoveOccupant(occupantId = teleportedBattleUnit.toDto().id, toRow = 2, toColumn = 2),
+            LootDropEvent.RequestFindLoot(battleUnitId = teleportedBattleUnit.toDto().id, path = listOf(LootDrop.Dto.PositionDto(row = 2, column = 2))),
         )
     }
 

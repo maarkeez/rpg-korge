@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent
@@ -145,10 +146,10 @@ class BattlefieldPresenter(
                 removeUnit(event.row, event.column)
                 refreshMovementRange()
             },
-            eventBus.subscribe<BattlefieldEvent.DroppedItemPlaced> { event ->
+            eventBus.subscribe<LootDropEvent.LootDropped> { event ->
                 timeline.play { dropLoot(event.row, event.column, event.lootableItemId) }
             },
-            eventBus.subscribe<BattlefieldEvent.DroppedItemPickedUp> { event ->
+            eventBus.subscribe<LootDropEvent.DroppedItemPickedUp> { event ->
                 timeline.play { pickUpLoot(event.row, event.column, event.lootableItemId) }
             },
             // The selection is cleared before the turn is announced, and can not be acted on during the new turn.

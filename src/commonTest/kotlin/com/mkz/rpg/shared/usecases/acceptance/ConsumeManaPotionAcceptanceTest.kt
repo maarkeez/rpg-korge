@@ -8,6 +8,8 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -28,7 +30,9 @@ class ConsumeManaPotionAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
+    private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus)
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
@@ -43,8 +47,10 @@ class ConsumeManaPotionAcceptanceTest {
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
+        lootTableApi.init()
         abilityApi.init()
         unitApi.init()
+        lootDropApi.init()
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
@@ -64,7 +70,7 @@ class ConsumeManaPotionAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingManaPoints == 20)
-            battlefieldApi.placeDroppedItem(lootableItemId = "mana-potion", row = 6, column = 7)
+            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "mana-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion")

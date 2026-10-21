@@ -1,6 +1,5 @@
 package com.mkz.rpg.inventory.domain
 
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
@@ -18,6 +17,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.Gold.MAXIMUM
