@@ -32,7 +32,7 @@ class DropLootAcceptanceTest {
     private val lootTableApi = LootTableApi(lootableItemApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus)
-    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerTwoRatBattleUnitId = "player-2-unit-1"

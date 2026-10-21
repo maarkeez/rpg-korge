@@ -457,7 +457,7 @@ class InventoryPresenterTest {
         // The battle finishes during the cpu turn, as the rat leaves it.
         apis.battleApi.finishPlayerTurn()
         eventBus.dispatch()
-        apis.battleApi.startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))
+        apis.battleApi.startNextRound(joiningPlayerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))
         eventBus.dispatch()
         apis.battleApi
             .searchBattle()!!

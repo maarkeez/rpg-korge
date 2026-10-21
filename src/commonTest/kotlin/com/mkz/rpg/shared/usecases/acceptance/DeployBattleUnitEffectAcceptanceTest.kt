@@ -35,7 +35,7 @@ class DeployBattleUnitEffectAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi)
 
     // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))

@@ -33,7 +33,7 @@ class UpdateEngagement(
                 .filter { battleUnit -> battleUnit.remainingTurns == null }
                 .map { battleUnit -> battleUnit.id }
                 .filterNot { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
-        eventBus.publish(CpuBattleBrainEvent.EngagementUpdated(joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds))
+        eventBus.publish(CpuBattleBrainEvent.EngagementUpdated(playerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds))
     }
 
     private fun hasEnemyWithinReach(battleUnitId: String) = searchEnemiesWithinReach(battleUnitId = battleUnitId).isNotEmpty()

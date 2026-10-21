@@ -12,13 +12,14 @@ import kotlin.test.Test
 
 class BattleTest {
     private val battleUnitIds = setOf("battle-unit-1", "battle-unit-2")
+    private val battleUnits = mapOf("battle-unit-1" to "player-1", "battle-unit-2" to "player-2")
 
     @Test
     fun `StartFirstRound should start the first round with the first player when two players join`() {
         // Given
         val players = listOf("player-1", "player-2")
         // When
-        val battle = Battle.startFirstRound(players, battleUnitIds)
+        val battle = Battle.startFirstRound(players, battleUnits)
         // Then
         battle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
     }
@@ -28,7 +29,7 @@ class BattleTest {
         // Given
         val players = listOf("player-1", "player-2")
         // When
-        val battle = Battle.startFirstRound(players, battleUnitIds)
+        val battle = Battle.startFirstRound(players, battleUnits)
         // Then
         val (events, _) = battle.pullEvents()
         events.shouldContainExactly(BattleEvent.BattleStarted, BattleEvent.PlayerTurnStarted(players.first(), battleUnitIds))
@@ -39,7 +40,7 @@ class BattleTest {
         // Given
         val players = listOf("player-1")
         // When
-        val result = runCatching { Battle.startFirstRound(players, battleUnitIds) }
+        val result = runCatching { Battle.startFirstRound(players, battleUnits) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattleError.MinimumTwoPlayersRequired>()
     }
@@ -145,9 +146,9 @@ class BattleTest {
     fun `IsDisengaged should be disengaged when only one player has battle units in the battle`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = battle(players, battleUnitIds)
+        val battle = battle(players, battleUnits = battleUnits).leave("battle-unit-1")
         // When
-        val result = battle.isDisengaged(playersInBattle = setOf("player-2"))
+        val result = battle.isDisengaged()
         // Then
         result.shouldBeTrue()
     }
@@ -156,9 +157,9 @@ class BattleTest {
     fun `IsDisengaged should not be disengaged when every player has battle units in the battle`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = battle(players, battleUnitIds)
+        val battle = battle(players, battleUnits = battleUnits)
         // When
-        val result = battle.isDisengaged(playersInBattle = setOf("player-1", "player-2"))
+        val result = battle.isDisengaged()
         // Then
         result.shouldBeFalse()
     }
@@ -221,7 +222,7 @@ class BattleTest {
     fun `PullEvents should pull the pending events and clear them when the battle has events`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = Battle.startFirstRound(players, battleUnitIds)
+        val battle = Battle.startFirstRound(players, battleUnits)
         // When
         val (events, clearedBattle) = battle.pullEvents()
         // Then
@@ -244,9 +245,19 @@ class BattleTest {
         // Given
         val battle = battle(listOf("player-1", "player-2"), battleUnitIds)
         // When
-        val joinedBattle = battle.join("battle-unit-3")
+        val joinedBattle = battle.join("battle-unit-3", "player-1")
         // Then
         joinedBattle.toDto().battleUnitIds shouldBe setOf("battle-unit-1", "battle-unit-2", "battle-unit-3")
+    }
+
+    @Test
+    fun `Join should keep the battle engaged when the battle unit of a player whose last battle unit left joins`() {
+        // Given
+        val battle = battle(listOf("player-1", "player-2"), battleUnits = battleUnits).leave("battle-unit-1")
+        // When
+        val joinedBattle = battle.join("battle-unit-3", "player-1")
+        // Then
+        joinedBattle.isDisengaged().shouldBeFalse()
     }
 
     @Test
@@ -254,7 +265,7 @@ class BattleTest {
         // Given
         val battle = battle(listOf("player-1", "player-2"), battleUnitIds)
         // When
-        val joinedBattle = battle.join("battle-unit-1")
+        val joinedBattle = battle.join("battle-unit-1", "player-1")
         // Then
         joinedBattle.toDto().battleUnitIds shouldBe battleUnitIds
     }
@@ -285,7 +296,7 @@ class BattleTest {
     fun `StartNextRound should start the round with the battle units in the battle when one has joined`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = battle(players, battleUnitIds).join("battle-unit-3")
+        val battle = battle(players, battleUnitIds).join("battle-unit-3", "player-1")
         // When
         val nextBattle = battle.startNextRound()
         // Then

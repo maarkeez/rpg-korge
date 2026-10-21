@@ -21,7 +21,7 @@ class OnBattleUnitDeployedTest {
     fun `should update battlefield occupancy when a battle unit is deployed`() {
         // Given
         battlefieldRepository.create(battlefield(". . ."))
-        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(battleUnitId = "battle-unit-1", row = 0, column = 2))
+        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(playerId = "player-1", battleUnitId = "battle-unit-1", row = 0, column = 2))
         // When
         eventBus.dispatch()
         // Then

@@ -45,7 +45,7 @@ class BattleInfoPresenterTest {
                     ),
                 playerOrder = listOf("player-1", "player-2"),
             ).also(SubdomainApis::initialise)
-        repeat(round - 1) { apis.battleApi.startNextRound(emptyList(), emptyList()) }
+        repeat(round - 1) { apis.battleApi.startNextRound(null, emptyList(), emptyList()) }
         apis.eventBus.dispatch()
         battleInfoPresenter = BattleInfoPresenter(battleInfoView, battlefieldView, apis.battleApi, apis.playerApi, timeline, apis.eventBus)
     }

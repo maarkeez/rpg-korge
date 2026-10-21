@@ -83,7 +83,7 @@ data class BattleUnit private constructor(
                 LearnedAbilities(),
                 OngoingEffects(),
                 remainingTurns?.let(::RemainingTurns),
-                events = setOf(BattleUnitDeployed(battleUnitId = id, row = deployAtRow, column = deployAtColumn)),
+                events = setOf(BattleUnitDeployed(playerId = player.id, battleUnitId = id, row = deployAtRow, column = deployAtColumn)),
             )
     }
 

@@ -34,6 +34,6 @@ class OnExplorationStartedTest {
         // When
         eventBus.dispatch()
         // Then
-        engagements.shouldContainExactly(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
+        engagements.shouldContainExactly(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
     }
 }

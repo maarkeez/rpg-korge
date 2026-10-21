@@ -9,6 +9,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import kotlin.test.Test
 
 class EngageEnemiesTest {
@@ -36,7 +37,18 @@ class EngageEnemiesTest {
         // When
         engageEnemies(exploringPlayerId = "human")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1")))
+        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
+    }
+
+    @Test
+    fun `should engage every living battle unit of the exploring player`() {
+        // Given
+        givenRatsAt(". . . . . R K . . . . . S")
+        queries.battleUnitRepository.create(battleUnit(id = "knight-2", player = human.toDto(), unit = unit(healthPoints = 0).toDto()))
+        // When
+        engageEnemies(exploringPlayerId = "human")
+        // Then
+        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
     }
 
     @Test

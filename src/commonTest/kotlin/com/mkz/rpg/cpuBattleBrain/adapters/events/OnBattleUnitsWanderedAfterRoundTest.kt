@@ -26,6 +26,6 @@ class OnBattleUnitsWanderedAfterRoundTest {
         // When
         eventBus.dispatch()
         // Then
-        updates.shouldContainExactly(CpuBattleBrainEvent.EngagementUpdated(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
+        updates.shouldContainExactly(CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
     }
 }

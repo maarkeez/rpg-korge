@@ -7,6 +7,22 @@ sealed interface BattleEvent : DomainEvent {
 
     object RequestFinishPlayerTurn : BattleEvent
 
+    /** Adds the battle unit, of the player, to the battle when there is one, e.g.: when it is deployed during the battle. */
+    data class RequestJoinBattle(
+        val battleUnitId: String,
+        val playerId: String,
+    ) : BattleEvent
+
+    /** Removes the battle unit from the battle when there is one, e.g.: when it is defeated. */
+    data class RequestLeaveBattle(
+        val battleUnitId: String,
+    ) : BattleEvent
+
+    /** Defeats the player, e.g.: once all their battle units are defeated, in a battle or while exploring. */
+    data class RequestDefeatPlayer(
+        val playerId: String,
+    ) : BattleEvent
+
     /** The battle finished without a winner, as only one player is left with battle units in it (e.g.: the CPU battle units were defeated or left behind). */
     object BattleFinished : BattleEvent
 

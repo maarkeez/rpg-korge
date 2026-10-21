@@ -13,6 +13,6 @@ class OnEngagementUpdated(
 ) {
     private val subscription =
         eventBus.subscribe<CpuBattleBrainEvent.EngagementUpdated> { event ->
-            startNextRound(joiningBattleUnitIds = event.joiningBattleUnitIds, leavingBattleUnitIds = event.leavingBattleUnitIds)
+            startNextRound(joiningPlayerId = event.playerId, joiningBattleUnitIds = event.joiningBattleUnitIds, leavingBattleUnitIds = event.leavingBattleUnitIds)
         }
 }

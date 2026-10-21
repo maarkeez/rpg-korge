@@ -35,7 +35,7 @@ class ExploringTerrainEffectAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi)
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, NpcApi(battlefieldApi, unitApi, LootableItemApi(effectApi, eventBus), eventBus), eventBus)
 

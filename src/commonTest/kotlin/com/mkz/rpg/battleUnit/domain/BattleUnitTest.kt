@@ -47,7 +47,7 @@ class BattleUnitTest {
         val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, deployAtRow = 2, deployAtColumn = 3)
         // Then
         val (events, _) = deployedBattleUnit.pullEvents()
-        events.shouldContainExactly(BattleUnitEvent.BattleUnitDeployed(battleUnitId = battleUnitId, row = 2, column = 3))
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = battleUnitId, row = 2, column = 3))
     }
 
     @Test

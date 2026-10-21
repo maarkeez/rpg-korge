@@ -47,7 +47,7 @@ class DeployBattleUnitTest {
         storedBattleUnit.unitId shouldBe unit.id
         storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.BattleUnitDeployed("battle-unit-1", 0, 0),
+            BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = "battle-unit-1", row = 0, column = 0),
         )
     }
 

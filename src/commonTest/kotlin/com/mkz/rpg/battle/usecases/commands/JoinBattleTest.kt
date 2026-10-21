@@ -15,7 +15,7 @@ class JoinBattleTest {
         // Given
         battleRepository.create(battle(battleUnitIds = setOf("battle-unit-1")))
         // When
-        joinBattle(battleUnitId = "battle-unit-2")
+        joinBattle(battleUnitId = "battle-unit-2", playerId = "player-2")
         // Then
         battleRepository.search()?.toDto()?.battleUnitIds shouldBe setOf("battle-unit-1", "battle-unit-2")
     }
@@ -23,7 +23,7 @@ class JoinBattleTest {
     @Test
     fun `should not start a battle when no battle exists`() {
         // When
-        joinBattle(battleUnitId = "battle-unit-2")
+        joinBattle(battleUnitId = "battle-unit-2", playerId = "player-2")
         // Then
         battleRepository.search().shouldBeNull()
     }

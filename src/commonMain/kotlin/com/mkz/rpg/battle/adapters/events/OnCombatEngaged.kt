@@ -15,6 +15,7 @@ class OnCombatEngaged(
                 engagingPlayerId = event.playerId,
                 engagedPlayerId = event.engagedPlayerId,
                 engagingBattleUnitIds = event.battleUnitIds,
+                engagedBattleUnitIds = event.engagedBattleUnitIds,
             )
         }
 }

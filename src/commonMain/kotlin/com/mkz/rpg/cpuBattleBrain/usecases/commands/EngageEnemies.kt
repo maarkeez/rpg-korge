@@ -8,7 +8,8 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Engages the exploring player when any CPU battle unit has one of their battle units within reach, with the same rule
- * the CPU battle units engage enemies in a battle: after the party walks, and after the CPU battle units wander.
+ * the CPU battle units engage enemies in a battle: after the party walks, and after the CPU battle units wander. Every
+ * living battle unit of the exploring player is engaged.
  */
 class EngageEnemies(
     private val searchEnemyPlayer: SearchEnemyPlayer,
@@ -23,6 +24,14 @@ class EngageEnemies(
                 .map { battleUnit -> battleUnit.id }
                 .filter { battleUnitId -> searchEnemiesWithinReach(battleUnitId = battleUnitId).isNotEmpty() }
         if (engagingBattleUnitIds.isEmpty()) return
-        eventBus.publish(CpuBattleBrainEvent.CombatEngaged(playerId = cpuPlayer.id, engagedPlayerId = exploringPlayerId, battleUnitIds = engagingBattleUnitIds))
+        val engagedBattleUnitIds = searchBattleUnitsByPlayerId(playerId = exploringPlayerId).map { battleUnit -> battleUnit.id }
+        eventBus.publish(
+            CpuBattleBrainEvent.CombatEngaged(
+                playerId = cpuPlayer.id,
+                engagedPlayerId = exploringPlayerId,
+                battleUnitIds = engagingBattleUnitIds,
+                engagedBattleUnitIds = engagedBattleUnitIds,
+            ),
+        )
     }
 }

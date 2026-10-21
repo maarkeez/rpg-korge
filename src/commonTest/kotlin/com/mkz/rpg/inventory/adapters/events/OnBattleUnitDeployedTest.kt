@@ -27,7 +27,7 @@ class OnBattleUnitDeployedTest {
         queries.playerRepository.create(human)
         queries.unitRepository.create(knight)
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = knight.toDto(), player = human.toDto()))
-        eventBus.publish(BattleUnitDeployed(battleUnitId = "knight-1", row = 0, column = 0))
+        eventBus.publish(BattleUnitDeployed(playerId = "human", battleUnitId = "knight-1", row = 0, column = 0))
         // When
         eventBus.dispatch()
         // Then

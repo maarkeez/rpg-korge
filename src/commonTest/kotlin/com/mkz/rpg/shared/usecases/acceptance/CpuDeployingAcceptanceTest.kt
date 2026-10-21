@@ -35,7 +35,7 @@ class CpuDeployingAcceptanceTest {
     private val effectApi = EffectApi(eventBus)
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi)
 
     // The CPU battle units out of the battle rest when a round finishes, rather than wandering.
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
@@ -82,7 +82,7 @@ class CpuDeployingAcceptanceTest {
             deployedBattleUnitIds.size shouldBe 1
             val deployedBattleUnitId = deployedBattleUnitIds.single()
             battleUnitApi.searchBattleUnitById(deployedBattleUnitId)!!.unitId shouldBe "bat"
-            deployments.last() shouldBe BattleUnitEvent.BattleUnitDeployed(battleUnitId = deployedBattleUnitId, row = 0, column = 1)
+            deployments.last() shouldBe BattleUnitEvent.BattleUnitDeployed(playerId = cpuPlayerId, battleUnitId = deployedBattleUnitId, row = 0, column = 1)
             // The bat joins the battle, so it plays the next CPU turns.
             battleApi.searchBattle()!!.battleUnitIds shouldContain deployedBattleUnitId
             battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId

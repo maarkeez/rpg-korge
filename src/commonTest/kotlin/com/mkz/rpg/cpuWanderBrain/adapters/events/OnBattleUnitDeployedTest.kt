@@ -24,7 +24,7 @@ class OnBattleUnitDeployedTest {
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
-        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(battleUnitId = "rat-1", row = 1, column = 2))
+        eventBus.publish(BattleUnitEvent.BattleUnitDeployed(playerId = "cpu", battleUnitId = "rat-1", row = 1, column = 2))
         // When
         eventBus.dispatch()
         // Then

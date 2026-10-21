@@ -136,23 +136,17 @@ package com.mkz.rpg.battle.adapters.events
 
 // Imports goes here
 
-class OnBattleUnitDefeatedTest {
+class OnRequestDefeatPlayerTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val onBattleUnitDefeated =
-        OnBattleUnitDefeated(
-            eventBus = eventBus,
-            defeatPlayer = DefeatPlayer(HasAllBattleUnitsDefeated(battleUnitRepository), battleRepository, eventBus),
-        )
+    private val onRequestDefeatPlayer = OnRequestDefeatPlayer(DefeatPlayer(SearchEnemyPlayer(InMemoryPlayerRepository()), battleRepository, eventBus), eventBus)
     private val defeatedPlayers = mutableListOf<PlayerDefeated>().also { defeated -> eventBus.subscribe<PlayerDefeated> { defeated += it } }
 
     @Test
-    fun `should defeat player when a battle unit is defeated`() {
+    fun `should defeat the player when it is requested to be defeated`() {
         // Given
         battleRepository.create(battle(players = listOf("player-1", "player-2")))
-        battleUnitRepository.create(battleUnit(id = "battle-unit-1", player = player(id = "player-2").toDto(), unit = unit(healthPoints = 0).toDto()))
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "player-2", battleUnitId = "battle-unit-1", defeatedAtRow = 1, defeatedAtColumn = 2))
+        eventBus.publish(BattleEvent.RequestDefeatPlayer(playerId = "player-2"))
         // When
         eventBus.dispatch()
         // Then

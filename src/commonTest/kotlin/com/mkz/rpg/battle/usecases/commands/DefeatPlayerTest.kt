@@ -4,16 +4,11 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
-import com.mkz.rpg.unit.domain.UnitMother.unit
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -21,18 +16,16 @@ class DefeatPlayerTest {
     private val battleUnitIds = setOf("battle-unit-1", "battle-unit-2")
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val playerRepository = InMemoryPlayerRepository()
     private val defeatPlayer =
         DefeatPlayer(
-            hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository),
             searchEnemyPlayer = SearchEnemyPlayer(playerRepository),
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
 
     @Test
-    fun `should defeat player when all its battle units are defeated`() {
+    fun `should defeat the player when a battle is in progress`() {
         // Given
         val players = listOf("player-1", "player-2")
         battleRepository.create(
@@ -40,7 +33,6 @@ class DefeatPlayerTest {
                 .battle(players, battleUnitIds),
         )
         val defeatedPlayer = players[1]
-        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
         // When
         defeatPlayer(playerId = defeatedPlayer)
         // Then
@@ -50,30 +42,10 @@ class DefeatPlayerTest {
     }
 
     @Test
-    fun `should not defeat player when its battle units are not all defeated`() {
-        // Given
-        val players = listOf("player-1", "player-2")
-        battleRepository.create(
-            BattleMother
-                .battle(players, battleUnitIds),
-        )
-        val defeatedPlayer = players[1]
-        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 0).toDto()))
-        battleUnitRepository.create(battleUnit(player = player(id = defeatedPlayer).toDto(), unit = unit(healthPoints = 10).toDto()))
-        // When
-        defeatPlayer(playerId = defeatedPlayer)
-        // Then
-        val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
-        eventBus.publishedEvents.shouldBeEmpty()
-    }
-
-    @Test
-    fun `should defeat the player and leave their enemy as the only player when all their battle units are defeated while exploring`() {
+    fun `should defeat the player and leave their enemy as the only player while exploring`() {
         // Given
         playerRepository.create(player(id = "human"))
         playerRepository.create(player(id = "cpu"))
-        battleUnitRepository.create(battleUnit(player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
         // When
         defeatPlayer(playerId = "cpu")
         // Then
@@ -84,7 +56,7 @@ class DefeatPlayerTest {
     }
 
     @Test
-    fun `should defeat the player in place of the finished battle when all their battle units are defeated while exploring again`() {
+    fun `should defeat the player in place of the finished battle while exploring again`() {
         // Given
         playerRepository.create(player(id = "human"))
         playerRepository.create(player(id = "cpu"))
@@ -97,7 +69,6 @@ class DefeatPlayerTest {
                 .pullEvents()
                 .second,
         )
-        battleUnitRepository.create(battleUnit(player = player(id = "human").toDto(), unit = unit(healthPoints = 0).toDto()))
         // When
         defeatPlayer(playerId = "human")
         // Then

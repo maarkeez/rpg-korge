@@ -36,7 +36,7 @@ class TradeAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-    private val battleApi = BattleApi(eventBus, playerApi, battleUnitApi)
+    private val battleApi = BattleApi(eventBus, playerApi)
 
     // West of the knight, selling the potions and the hammer.
     private val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 0, column = 0, stock = listOf("health-potion", "mana-potion", "hammer"))

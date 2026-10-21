@@ -194,7 +194,7 @@ class BattlefieldPresenterTest {
     fun `DisplayUnitInOrder should display the deployed battle unit once the previous steps have been played`() {
         // Given
         val previousStep = timeline.playLongStep()
-        publish(BattleUnitDeployed(battleUnitId = "knight-1", row = 2, column = 2))
+        publish(BattleUnitDeployed(playerId = "human", battleUnitId = "knight-1", row = 2, column = 2))
         battlefieldView.displayedBattleUnits.shouldBeEmpty()
         // When
         previousStep.complete(Unit)
@@ -342,7 +342,7 @@ class BattlefieldPresenterTest {
                         Deployment(battleUnitId = "rat-2", unitId = "rat", playerId = "cpu", row = 3, column = 3),
                     ),
             )
-        battlingApis.battleApi.startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"))
+        battlingApis.battleApi.startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1"))
         battlingApis.eventBus.dispatch()
         val battlingBattlefieldView = FakeBattlefieldView()
         val timeline = battleSceneTimeline()

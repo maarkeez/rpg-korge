@@ -14,4 +14,5 @@ fun BattleApi.startBattleWithEveryBattleUnit(
     engagingPlayerId = firstPlayerId,
     engagedPlayerId = secondPlayerId,
     engagingBattleUnitIds = battleUnitApi.searchBattleUnitsByPlayerId(firstPlayerId).map { battleUnit -> battleUnit.id },
+    engagedBattleUnitIds = battleUnitApi.searchBattleUnitsByPlayerId(secondPlayerId).map { battleUnit -> battleUnit.id },
 )

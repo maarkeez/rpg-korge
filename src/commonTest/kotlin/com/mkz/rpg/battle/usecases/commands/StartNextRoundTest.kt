@@ -4,12 +4,9 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother.battle
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
-import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -19,21 +16,16 @@ import kotlin.test.Test
 class StartNextRoundTest {
     private val players = listOf("cpu", "human")
     private val battleUnitIds = setOf("rat-1", "knight-1")
-    private val queries = InMemoryQueries()
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
     private val startNextRound =
         StartNextRound(
-            searchBattleUnitById = queries.searchBattleUnitById,
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
 
-    // The rat-1 battles the knight-1. The rat-2 is out of the battle.
+    // The rat-1, of the cpu, battles the knight-1, of the human. The rat-2, of the cpu, is out of the battle.
     private fun givenBattle() {
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
         battleRepository.create(battle(players, battleUnitIds))
     }
 
@@ -42,7 +34,7 @@ class StartNextRoundTest {
         // Given
         givenBattle()
         // When
-        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
         // Then
         val storedBattle = battleRepository.search()?.toDto()
         storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
@@ -57,7 +49,7 @@ class StartNextRoundTest {
         // Given
         givenBattle()
         // When
-        startNextRound(joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList())
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList())
         // Then
         val joinedBattleUnitIds = battleUnitIds + "rat-2"
         battleRepository.search()?.toDto()?.battleUnitIds shouldBe joinedBattleUnitIds
@@ -72,7 +64,7 @@ class StartNextRoundTest {
         // Given
         givenBattle()
         // When
-        startNextRound(joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = listOf("rat-1"))
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = listOf("rat-1"))
         // Then
         val updatedBattleUnitIds = setOf("rat-2", "knight-1")
         battleRepository.search()?.toDto()?.battleUnitIds shouldBe updatedBattleUnitIds
@@ -87,7 +79,7 @@ class StartNextRoundTest {
         // Given
         givenBattle()
         // When
-        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-1"))
         // Then
         val storedBattle = battleRepository.search()!!.toDto()
         storedBattle.isFinished.shouldBeTrue()
@@ -100,9 +92,9 @@ class StartNextRoundTest {
     fun `should finish the battle without a winner when only one player has battle units left in it`() {
         // Given
         givenBattle()
-        battleRepository.create(battle(players, battleUnitIds = setOf("knight-1")))
+        battleRepository.create(battle(players, battleUnits = mapOf("knight-1" to "human")))
         // When
-        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
         // Then
         battleRepository
             .search()!!
@@ -116,7 +108,7 @@ class StartNextRoundTest {
     fun `should not start next round when no battle exists`() {
         // Given
         // When
-        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
         // Then
         battleRepository.search().shouldBeNull()
         eventBus.publishedEvents.shouldBeEmpty()
@@ -125,11 +117,10 @@ class StartNextRoundTest {
     @Test
     fun `should not start the next round when the battle is finished`() {
         // Given: the last battle unit of the cpu vanished as the round finished, which defeated it.
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
         val finishedBattle = battle(players, battleUnitIds).defeatPlayer("cpu").pullEvents().second
         battleRepository.create(finishedBattle)
         // When
-        startNextRound(joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
+        startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
         // Then
         battleRepository.search() shouldBe finishedBattle
         eventBus.shouldNotHavePublishedEvents()

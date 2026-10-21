@@ -61,8 +61,8 @@ class InitialiseBattleUnitsTest {
             ?.toDto()
             ?.playerId shouldBe "player-one"
         eventBus.shouldHavePublishedEvents(
-            BattleUnitDeployed(battleUnitId = "player-1-unit-1", row = 0, column = 0),
-            BattleUnitDeployed(battleUnitId = "player-1-unit-2", row = 1, column = 1),
+            BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-1", row = 0, column = 0),
+            BattleUnitDeployed(playerId = "player-one", battleUnitId = "player-1-unit-2", row = 1, column = 1),
         )
     }
 

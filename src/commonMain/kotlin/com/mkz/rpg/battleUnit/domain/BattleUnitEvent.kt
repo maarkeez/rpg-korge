@@ -6,6 +6,7 @@ import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface BattleUnitEvent : DomainEvent {
     data class BattleUnitDeployed(
+        val playerId: String,
         val battleUnitId: String,
         val row: Int,
         val column: Int,
