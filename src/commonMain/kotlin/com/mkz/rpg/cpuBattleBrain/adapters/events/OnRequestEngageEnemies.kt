@@ -1,16 +1,16 @@
 package com.mkz.rpg.cpuBattleBrain.adapters.events
 
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestEngageEnemies
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
-import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattleUnitsWanderedWhileExploring(
+class OnRequestEngageEnemies(
     engageEnemies: EngageEnemies,
     eventBus: EventBus,
 ) {
     private val subscription =
-        eventBus.subscribe<CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring> { event ->
+        eventBus.subscribe<RequestEngageEnemies> { event ->
             engageEnemies(exploringPlayerId = event.exploringPlayerId)
         }
 }

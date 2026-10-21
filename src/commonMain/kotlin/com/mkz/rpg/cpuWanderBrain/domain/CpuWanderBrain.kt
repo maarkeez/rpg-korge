@@ -1,9 +1,12 @@
 package com.mkz.rpg.cpuWanderBrain.domain
 
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestEngageEnemies
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestUpdateEngagement
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.AlreadyAwaitingAStep
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.NotTheNextBattleUnit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.BattleUnitsWanderedAfterRound
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring
+import com.mkz.rpg.shared.domain.DomainEvent
 import kotlin.jvm.JvmInline
 
 /** The party steps a defeated battle unit waits before it respawns on its home. */
@@ -31,7 +34,7 @@ data class CpuWanderBrain private constructor(
     private val pendingBattleUnits: PendingBattleUnits,
     private val awaitedStep: Step?,
     private val purpose: Purpose?,
-    private val events: Set<CpuWanderBrainEvent>,
+    private val events: Set<DomainEvent>,
 ) {
     companion object {
         fun create(): CpuWanderBrain =
@@ -163,17 +166,25 @@ data class CpuWanderBrain private constructor(
         if (pendingBattleUnits.value.firstOrNull() != battleUnitId) throw NotTheNextBattleUnit()
     }
 
-    // Once every battle unit has wandered, it announces it, for what follows (e.g.: engaging the exploring player, or
-    // updating the engagement of the battle).
+    // Once every battle unit has wandered, it announces it, and requests what follows from the CPU battle brain right
+    // after: engaging the exploring player, or updating the engagement of the battle.
     private fun finishWhenDone(): CpuWanderBrain {
         if (isWandering()) return this
-        val finishedEvent =
+        val finishedEvents =
             when (purpose) {
-                is Purpose.Exploring -> BattleUnitsWanderedWhileExploring(exploringPlayerId = purpose.exploringPlayerId)
-                is Purpose.AfterRound -> BattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle)
+                is Purpose.Exploring ->
+                    listOf(
+                        BattleUnitsWanderedWhileExploring(exploringPlayerId = purpose.exploringPlayerId),
+                        RequestEngageEnemies(exploringPlayerId = purpose.exploringPlayerId),
+                    )
+                is Purpose.AfterRound ->
+                    listOf(
+                        BattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle),
+                        RequestUpdateEngagement(battleUnitIds = purpose.battleUnitIdsInBattle),
+                    )
                 null -> return this
             }
-        return copy(events = events + finishedEvent)
+        return copy(events = events + finishedEvents)
     }
 
     private data class Home(

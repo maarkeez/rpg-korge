@@ -87,3 +87,10 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 |----------------------------------------------|----------------------------------|--------------------------------------------|
 | A is pressed, with an npc next to the leader | `RequestStartTalk(npcId)`        | Talks to it, only when the party can walk. |
 | A recruited npc is deployed as a battle unit | `RequestJoinParty(battleUnitId)` | Adds it to the party, last.                |
+
+`cpuBattleBrain` does not depend on `cpuWanderBrain` either. `cpuWanderBrain` asks it where each battle unit wanders (`WhereShouldWander`, `IsOutsideTerritory`), and the `CpuWanderBrain` aggregate records its requests right after its own events:
+
+| When                                                                | `CpuWanderBrain` records                  | `cpuBattleBrain`                                      |
+|---------------------------------------------------------------------|-------------------------------------------|-------------------------------------------------------|
+| Every CPU battle unit has wandered, while exploring                 | `RequestEngageEnemies(exploringPlayerId)` | Engages the party when a battle unit is within reach. |
+| Every CPU battle unit out of the battle has wandered, after a round | `RequestUpdateEngagement(battleUnitIds)`  | Updates the engagement of the battle.                 |

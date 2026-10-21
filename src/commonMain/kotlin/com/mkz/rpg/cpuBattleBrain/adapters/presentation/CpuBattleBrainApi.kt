@@ -5,8 +5,6 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnAbilityCastResolved
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleUnitDeployed
-import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleUnitsWanderedAfterRound
-import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleUnitsWanderedWhileExploring
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleBrainInitialized
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitActionResolved
@@ -14,6 +12,8 @@ import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitManaged
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnExplorationStarted
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPartyWalked
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPlayerTurnStarted
+import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestEngageEnemies
+import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestUpdateEngagement
 import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
@@ -149,6 +149,6 @@ class CpuBattleBrainApi(
     private val onBattleUnitDeployed = OnBattleUnitDeployed(joinCpuTurn, eventBus)
     private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)
     private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
-    private val onBattleUnitsWanderedWhileExploring = OnBattleUnitsWanderedWhileExploring(engageEnemies, eventBus)
-    private val onBattleUnitsWanderedAfterRound = OnBattleUnitsWanderedAfterRound(updateEngagement, eventBus)
+    private val onRequestEngageEnemies = OnRequestEngageEnemies(engageEnemies, eventBus)
+    private val onRequestUpdateEngagement = OnRequestUpdateEngagement(updateEngagement, eventBus)
 }

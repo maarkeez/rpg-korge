@@ -15,7 +15,6 @@ class SubdomainDependencyArchitectureTest {
     private val knownTwoWayDependencies =
         setOf(
             setOf("battle", "cpuBattleBrain"),
-            setOf("cpuBattleBrain", "cpuWanderBrain"),
         )
 
     private val rootPackage = "com.mkz.rpg"

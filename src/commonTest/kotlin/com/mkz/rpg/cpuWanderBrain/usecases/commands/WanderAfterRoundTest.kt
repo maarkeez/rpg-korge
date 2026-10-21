@@ -3,6 +3,7 @@ package com.mkz.rpg.cpuWanderBrain.usecases.commands
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
@@ -56,6 +57,7 @@ class WanderAfterRoundTest {
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
             CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
 
@@ -66,7 +68,10 @@ class WanderAfterRoundTest {
         // When
         wanderAfterRound(0.0)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
+        eventBus.shouldHavePublishedEvents(
+            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+        )
     }
 
     @Test
@@ -74,6 +79,9 @@ class WanderAfterRoundTest {
         // When
         wanderAfterRound(0.9)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
+        eventBus.shouldHavePublishedEvents(
+            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+        )
     }
 }

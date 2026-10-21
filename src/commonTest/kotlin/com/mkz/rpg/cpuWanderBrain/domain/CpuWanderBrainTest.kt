@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuWanderBrain.domain
 
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -86,7 +87,7 @@ class CpuWanderBrainTest {
         // When
         val (events, cpuWanderBrain) = cpuWanderBrain().startWhileExploring(exploringPlayerId = "human", battleUnitIds = listOf("knight-1")).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         cpuWanderBrain.toDto().isWandering.shouldBeFalse()
     }
 
@@ -118,7 +119,7 @@ class CpuWanderBrainTest {
         // When
         val (events, restedCpuWanderBrain) = cpuWanderBrain.rest("rat-1").pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         restedCpuWanderBrain.toDto().isWandering.shouldBeFalse()
     }
 
@@ -182,7 +183,7 @@ class CpuWanderBrainTest {
         // When
         val (events, resolvedCpuWanderBrain) = cpuWanderBrain.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         resolvedCpuWanderBrain.toDto().isWandering.shouldBeFalse()
         resolvedCpuWanderBrain
             .resolveStep(battleUnitId = "rat-1", row = 0, column = 1)
@@ -206,7 +207,11 @@ class CpuWanderBrainTest {
         // When
         val (events, _) = cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-1")).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
+        events shouldBe
+            setOf(
+                CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+                CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+            )
     }
 
     @Test
@@ -219,7 +224,11 @@ class CpuWanderBrainTest {
         // When
         val (events, _) = cpuWanderBrain.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")))
+        events shouldBe
+            setOf(
+                CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")),
+                CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-2")),
+            )
     }
 
     private fun CpuWanderBrain.walkPartySteps(steps: Int): CpuWanderBrain = (1..steps).fold(this) { cpuWanderBrain, _ -> cpuWanderBrain.walkPartyStep() }

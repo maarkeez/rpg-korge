@@ -39,6 +39,16 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
         val leavingBattleUnitIds: List<String>,
     ) : CpuBattleBrainEvent
 
+    // Requested once every CPU battle unit has wandered, while the player explores.
+    data class RequestEngageEnemies(
+        val exploringPlayerId: String,
+    ) : CpuBattleBrainEvent
+
+    // Requested once every CPU battle unit out of the battle has wandered, after a round finished. Battle units: those in the battle.
+    data class RequestUpdateEngagement(
+        val battleUnitIds: Set<String>,
+    ) : CpuBattleBrainEvent
+
     data class CpuTurnFinished(
         val playerId: String,
     ) : CpuBattleBrainEvent

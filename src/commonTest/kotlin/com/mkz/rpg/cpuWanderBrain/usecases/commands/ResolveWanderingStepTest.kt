@@ -3,6 +3,7 @@ package com.mkz.rpg.cpuWanderBrain.usecases.commands
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
@@ -54,7 +55,7 @@ class ResolveWanderingStepTest {
         // When
         resolveWanderingStep(battleUnitId = "rat-1", row = 1, column = 0)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
     }
 
     @Test
