@@ -44,6 +44,20 @@ For example, given a subdomain called `tomatoes`:
 ## Dependencies between subdomains
 
 - Subdomains MUST NOT depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`). This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt), which fails on the same cycles the [dependency report](dependencies.md) highlights.
+- The restricted subdomains MUST only depend on the subdomains allowed for them, so their dependencies do not grow. Each one is allowed exactly the subdomains it depends on, so the list can only shrink: an allowed subdomain that is no longer depended on must be removed from it. This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt). The other subdomains are only checked for cycles.
+
+  | Restricted subdomain                  | May only depend on                                                       |
+  |---------------------------------------|--------------------------------------------------------------------------|
+  | `shared`                              | nothing                                                                  |
+  | `effect`, `player`, `terrain`, `unit` | `shared`                                                                 |
+  | `ability`, `lootableItem`             | `shared`, `effect`                                                       |
+  | `battle`                              | `shared`, `player`                                                       |
+  | `lootTable`                           | `shared`, `lootableItem`                                                 |
+  | `battlefield`                         | `shared`, `effect`, `terrain`, `battle` (to remove next, see below)      |
+  | `party`                               | `shared`, `effect`, `player`, `battle`, `battlefield`, `battleUnit`      |
+  | `battleUnit`                          | `shared`, `effect`, `player`, `unit`, `ability`, `battle`, `battlefield` |
+
+  `battlefield` still depends on `battle`: only `OnBattleRoundStarted` listens to `BattleEvent`. It is the next dependency to remove, by a `Request…` event of `battlefield` that `battle` publishes.
 - To have the upstream subdomain react to the downstream one without depending on it, the upstream subdomain declares a `Request…` event in its own events (e.g.: `BattleEvent.RequestDefeatPlayer`), and a downstream command use case publishes it (e.g.: `battleUnit`'s `RequestBattleLeave`). The upstream subdomain listens to its own request, and the data it needs travels in the event (e.g.: the player of the battle unit joining the battle), instead of being queried from the downstream subdomain.
 - The bus dispatches the events in the order they are published (FIFO), so a request published by a listener on a fact is handled after every event already waiting. When the upstream subdomain must be up to date before those (e.g.: the battlefield occupancy before the next CPU decision), the downstream aggregate records the request right after the fact instead, so both are published together (e.g.: `BattleUnit` records `BattlefieldEvent.RequestOccupyTile` after `BattleUnitDeployed`). A downstream command use case without an aggregate publishes the fact and the request together instead (e.g.: `EngageEnemies` publishes `CombatEngaged` and `BattleEvent.RequestStartBattle`).
 - An event listener (`adapters/events/On…`) holds no business logic: it only takes command use cases and the `EventBus`, and never publishes an event itself. A command use case decides and publishes. This is enforced by [`EventListenerArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/EventListenerArchitectureTest.kt).
