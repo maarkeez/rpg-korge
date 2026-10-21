@@ -1,6 +1,5 @@
 package com.mkz.rpg.lootDrop.domain
 
-import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface LootDropEvent : DomainEvent {
@@ -9,19 +8,6 @@ sealed interface LootDropEvent : DomainEvent {
     ) : LootDropEvent
 
     object RequestInitialiseLootDrops : LootDropEvent
-
-    // Requested for a defeated battle unit, which drops the loot of its unit on the tile where it was defeated.
-    data class RequestDropLoot(
-        val unitId: String,
-        val row: Int,
-        val column: Int,
-    ) : LootDropEvent
-
-    // Requested for a battle unit that walked or teleported. Path: the tiles walked from the origin (excluded) to the destination (included).
-    data class RequestFindLoot(
-        val battleUnitId: String,
-        val path: List<PositionDto>,
-    ) : LootDropEvent
 
     // Requested for an item stored by an inventory, which leaves the tile at row and column it was lying on.
     data class RequestPickUpDroppedItem(

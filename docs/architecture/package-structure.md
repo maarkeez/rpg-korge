@@ -75,12 +75,12 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
 
-`lootDrop` does not depend on `battleUnit` either, and `battlefield` knows nothing about loot: each `LootDrop` keeps the items its unit dropped on each tile, with its own position type. The `BattleUnit` aggregate records its requests right after its own events, the loot drop before `RequestRemoveOccupant`, carrying the unit the loot drop belongs to, and the loot search after `RequestMoveOccupant`, so the loot is found once the occupancy is up to date:
+`battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about loot. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `LootDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the tile is vacated. `LootFound` is published while handling `BattleUnitMoved`, so it is dispatched before the events of the occupancy update (e.g.: `BattlefieldTileOccupied`):
 
-| When                                    | `BattleUnit` records                   | `lootDrop`                                                                    |
-|-----------------------------------------|----------------------------------------|-------------------------------------------------------------------------------|
-| A battle unit is defeated               | `RequestDropLoot(unitId, row, column)` | Drops the loot of the unit on the tile (`LootDropped`), if any.               |
-| A battle unit moves, walks or teleports | `RequestFindLoot(battleUnitId, path)`  | Announces the items on each tile of the path (`LootFound`), in walking order. |
+| When `battleUnit` publishes                                 | `lootDrop`                                                                            |
+|-------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| `BattleUnitDefeated` (a battle unit is defeated)            | Drops the loot of its unit on the tile where it was defeated (`LootDropped`), if any. |
+| `BattleUnitMoved` (a battle unit moves, walks or teleports) | Announces the items on each tile of its path (`LootFound`), in walking order.         |
 
 `lootDrop` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
 

@@ -142,9 +142,11 @@ sealed interface BattleUnitEvent : DomainEvent {
         val column: Int,
     ) : BattleUnitEvent
 
+    // It carries its unit, so its loot can be dropped.
     data class BattleUnitDefeated(
         val playerId: String,
         val battleUnitId: String,
+        val unitId: String,
         val defeatedAtRow: Int,
         val defeatedAtColumn: Int,
     ) : BattleUnitEvent

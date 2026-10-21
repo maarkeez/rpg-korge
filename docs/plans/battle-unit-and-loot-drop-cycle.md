@@ -1,6 +1,7 @@
 # Plan: Battle unit and loot drop dependency cycle
 
-> **Status:** done.
+> **Status:** done, superseded by [Battle unit and loot drop dependency](battle-unit-and-loot-drop-dependency.md):
+> `lootDrop` now listens to `battleUnit` instead.
 >
 > **Summary:** `battleUnit` → `battlefield` → `lootDrop` → `battleUnit` was the last cycle between subdomains. `lootDrop`
 > no longer depends on `battleUnit`: it declares `RequestDropLoot`, which the `BattleUnit` aggregate records right after

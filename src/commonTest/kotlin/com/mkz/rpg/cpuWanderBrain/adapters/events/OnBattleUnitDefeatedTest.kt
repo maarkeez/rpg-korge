@@ -18,7 +18,7 @@ class OnBattleUnitDefeatedTest {
     fun `should start counting the party steps when a cpu battle unit is defeated`() {
         // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))))
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "cpu", battleUnitId = "rat-1", defeatedAtRow = 1, defeatedAtColumn = 1))
+        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "cpu", battleUnitId = "rat-1", unitId = "rat", defeatedAtRow = 1, defeatedAtColumn = 1))
         // When
         eventBus.dispatch()
         // Then

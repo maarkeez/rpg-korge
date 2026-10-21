@@ -17,7 +17,7 @@ class OnBattleUnitDefeatedTest {
     fun `should remove the battle unit from the party when it is defeated`() {
         // Given
         partyRepository.save(party(battleUnitIds = listOf("knight-1", "knight-2")))
-        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "human", battleUnitId = "knight-1", defeatedAtRow = 0, defeatedAtColumn = 0))
+        eventBus.publish(BattleUnitEvent.BattleUnitDefeated(playerId = "human", battleUnitId = "knight-1", unitId = "knight", defeatedAtRow = 0, defeatedAtColumn = 0))
         // When
         eventBus.dispatch()
         // Then

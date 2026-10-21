@@ -1,7 +1,7 @@
 package com.mkz.rpg.lootDrop.adapters.presentation
 
-import com.mkz.rpg.lootDrop.adapters.events.OnRequestDropLoot
-import com.mkz.rpg.lootDrop.adapters.events.OnRequestFindLoot
+import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitDefeated
+import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestInitialiseLootDrops
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestPickUpDroppedItem
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
@@ -41,8 +41,8 @@ class LootDropApi(
 
     // Events
     private val onRequestInitialiseLootDrops = OnRequestInitialiseLootDrops(initialiseLootDrops, eventBus)
-    private val onRequestDropLoot = OnRequestDropLoot(dropLoot, eventBus)
-    private val onRequestFindLoot = OnRequestFindLoot(findLoot, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(dropLoot, eventBus)
+    private val onBattleUnitMoved = OnBattleUnitMoved(findLoot, eventBus)
     private val onRequestPickUpDroppedItem = OnRequestPickUpDroppedItem(pickUpDroppedItem, eventBus)
 
     suspend fun init() {

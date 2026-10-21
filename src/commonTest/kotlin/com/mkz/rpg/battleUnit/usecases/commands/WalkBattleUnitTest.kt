@@ -5,8 +5,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.lootDrop.domain.LootDrop
-import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
@@ -50,7 +48,6 @@ class WalkBattleUnitTest {
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitMoved("knight-1", 0, 0, 2, 1, listOf(PositionDto(1, 0), PositionDto(2, 0), PositionDto(2, 1))),
             BattlefieldEvent.RequestMoveOccupant("knight-1", 2, 1),
-            LootDropEvent.RequestFindLoot("knight-1", listOf(LootDrop.Dto.PositionDto(1, 0), LootDrop.Dto.PositionDto(2, 0), LootDrop.Dto.PositionDto(2, 1))),
         )
     }
 
