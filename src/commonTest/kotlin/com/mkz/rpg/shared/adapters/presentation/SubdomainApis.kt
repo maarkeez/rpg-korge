@@ -56,6 +56,8 @@ class SubdomainApis(
     deployments: List<Deployment> = emptyList(),
     npcs: List<Npc.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
+    // Whether the human player explores with their battle units before the battle starts, as when the battle is set up, so they get their inventories.
+    private val explore: Boolean = false,
 ) {
     val terrainApi = TerrainApi(eventBus, FakeTerrainLoader(terrains))
     val unitApi = UnitApi(eventBus, FakeUnitLoader(units))
@@ -70,9 +72,9 @@ class SubdomainApis(
     val battleApi = BattleApi(eventBus, playerApi)
     val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
-    val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
-    /** Stores the given data, deploys the battle units, places the npcs and starts the battle, dispatching the events it publishes. */
+    /** Stores the given data, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
     fun initialise() {
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
@@ -87,6 +89,8 @@ class SubdomainApis(
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()
         npcApi.initialiseNpcs()
+        eventBus.dispatch()
+        if (explore) partyApi.startExploration()
         eventBus.dispatch()
         if (playerOrder.isNotEmpty()) battleApi.startBattleWithEveryBattleUnit(battleUnitApi, playerOrder[0], playerOrder[1])
         eventBus.dispatch()

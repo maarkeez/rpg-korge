@@ -35,7 +35,7 @@ class LearnTeleportAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
-    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val vikingBattleUnitId = "viking-1"
@@ -63,6 +63,8 @@ class LearnTeleportAcceptanceTest {
             deployAtRow = vikingRow,
             deployAtColumn = vikingColumn,
         )
+        eventBus.dispatch()
+        partyApi.joinParty(vikingBattleUnitId)
         eventBus.dispatch()
     }
 

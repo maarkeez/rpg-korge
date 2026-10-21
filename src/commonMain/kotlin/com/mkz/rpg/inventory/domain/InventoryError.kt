@@ -5,8 +5,6 @@ import com.mkz.rpg.shared.domain.Gold
 sealed class InventoryError(
     message: String,
 ) : Throwable(message = message) {
-    class InventoryBattleUnitDoesNotExist : InventoryError("Inventory battle unit does not exist")
-
     class InventoryLootableItemDoesNotExist : InventoryError("Inventory lootable item does not exist")
 
     class InventoryItemNotFound : InventoryError("The item is not stored in the inventory")
@@ -36,6 +34,8 @@ sealed class InventoryError(
     class NotTradingWithAMerchant : InventoryError("The battle unit can only trade as a party member, while the party talks to a merchant")
 
     class ItemNotSoldByTheMerchant : InventoryError("The merchant does not sell the item")
+
+    class NotAPartyMember : InventoryError("The inventory can only be used by a party member")
 
     class NotTheBattleUnitPlayerTurn : InventoryError("The inventory can only be used during the turn of its battle unit player")
 }

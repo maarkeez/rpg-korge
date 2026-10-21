@@ -41,6 +41,7 @@ import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
+import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
@@ -118,6 +119,7 @@ class InMemoryQueries(
     val whereCanMove = WhereCanMove(battleUnitRepository, searchTilesThatCanBeOccupied, canMoveTo)
     val canCastAbility = CanCastAbility(battleUnitRepository, searchAbilityById)
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
+    val canMemberLearnAbility = CanMemberLearnAbility(partyRepository, canLearnAbility)
     val whereCanCast =
         WhereCanCast(
             battleUnitRepository,

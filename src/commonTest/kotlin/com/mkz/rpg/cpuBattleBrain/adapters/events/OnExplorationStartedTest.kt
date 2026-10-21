@@ -30,7 +30,7 @@ class OnExplorationStartedTest {
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battlefieldRepository.create(battlefield("K R", occupants = mapOf('K' to "knight-1", 'R' to "rat-1")))
-        eventBus.publish(PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.publish(PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1"), unitIds = listOf("knight")))
         // When
         eventBus.dispatch()
         // Then

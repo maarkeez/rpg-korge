@@ -38,10 +38,11 @@ data class Party private constructor(
     private val events: Set<PartyEvent>,
 ) {
     companion object {
-        /** Battle units: the party, the leader first. */
+        /** Battle units: the party, the leader first. Units: the unit of each battle unit, in the same order. */
         fun start(
             playerId: String,
             battleUnitIds: List<String>,
+            unitIds: List<String>,
         ): Party {
             if (battleUnitIds.isEmpty()) throw PartyRequired()
             return Party(
@@ -52,7 +53,7 @@ data class Party private constructor(
                 awaitedStep = null,
                 movedBattleUnits = MovedBattleUnits(emptySet()),
                 talkingNpcId = null,
-                events = setOf(ExplorationStarted(playerId = playerId, battleUnitIds = battleUnitIds)),
+                events = setOf(ExplorationStarted(playerId = playerId, battleUnitIds = battleUnitIds, unitIds = unitIds)),
             )
         }
     }
@@ -138,12 +139,15 @@ data class Party private constructor(
             events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = members.value),
         )
 
-    /** Adds the battle unit to the party, last, e.g.: a recruited npc. Nothing changes when it is already in it. */
-    fun join(battleUnitId: String): Party {
+    /** Adds the battle unit of the unit to the party, last, e.g.: a recruited npc. Nothing changes when it is already in it. */
+    fun join(
+        battleUnitId: String,
+        unitId: String,
+    ): Party {
         if (battleUnitId in members.value) return this
         return copy(
             members = Members(members.value + battleUnitId),
-            events = events + PartyJoined(playerId = playerId.value, battleUnitId = battleUnitId),
+            events = events + PartyJoined(playerId = playerId.value, battleUnitId = battleUnitId, unitId = unitId),
         )
     }
 

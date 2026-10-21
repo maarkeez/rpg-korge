@@ -40,7 +40,7 @@ class EquipHammerAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
-    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"

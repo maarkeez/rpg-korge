@@ -70,7 +70,7 @@ class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1, with 30 health points, stands at (1,1) and can walk 3 tiles,
     // and the cpu rat-1 and rat-2, with 21 health points, stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight
     // can cast the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat.
-    // A health potion, healing 5, can be looted.
+    // A health potion, healing 5, can be looted. The knight explored before the battle, so it has an inventory.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -106,6 +106,7 @@ class BattlefieldPresenterTest {
                     Deployment(battleUnitId = "rat-2", unitId = "rat", playerId = "cpu", row = 0, column = 3),
                 ),
             playerOrder = listOf("human", "cpu"),
+            explore = true,
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val battlefieldView = FakeBattlefieldView()
@@ -404,7 +405,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashUnit should flash the battle unit on view when it joins the party`() {
         // Given
-        eventBus.publish(PartyEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1"))
+        eventBus.publish(PartyEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1", unitId = "knight"))
         // When
         eventBus.dispatch()
         // Then

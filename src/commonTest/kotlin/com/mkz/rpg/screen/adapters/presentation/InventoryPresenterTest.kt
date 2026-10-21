@@ -44,7 +44,8 @@ import kotlin.test.Test
 class InventoryPresenterTest {
     // The battle has started with the human player turn. The human knight-1 (100 health points) stands at (1,1), and the
     // cpu rat-1 at (1,3), on a 4x4 sand battlefield. The health potion (10 G) heals 10 and the hammer (50 G) raises the maximum health by 20.
-    // The knight can summon a bee next to it. The teleport essence teaches teleport, and the bee essence teaches bee.
+    // The knight can summon a bee next to it. The teleport essence teaches teleport, and the bee essence teaches bee. The knight explored before the
+    // battle, so it has an inventory.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
@@ -85,6 +86,7 @@ class InventoryPresenterTest {
                     Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 3),
                 ),
             playerOrder = listOf("human", "cpu"),
+            explore = true,
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val inventoryView = FakeInventoryView()

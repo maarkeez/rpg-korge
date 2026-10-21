@@ -42,7 +42,7 @@ class TradeAcceptanceTest {
     private val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 0, column = 0, stock = listOf("health-potion", "mana-potion", "hammer"))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(listOf(merchant)))
-    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
     // The knight leads from (0,1), next to the merchant, and the viking follows it from (1,1).
     private suspend fun setUp() {

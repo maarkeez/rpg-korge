@@ -3,13 +3,10 @@ package com.mkz.rpg.inventory.usecases.commands
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestRemoveEquippedEffects
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
+import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
@@ -19,7 +16,10 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippableLootableItem
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
-import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
+import com.mkz.rpg.party.domain.PartyEvent.RequestRemoveMemberEquippedEffects
+import com.mkz.rpg.party.domain.PartyMother.party
+import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.assertions.throwables.shouldThrow
@@ -30,7 +30,7 @@ import kotlin.test.Test
 
 class UnequipItemTest {
     private val inventoryRepository = InMemoryInventoryRepository()
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
+    private val partyRepository = InMemoryPartyRepository()
     private val battleRepository = InMemoryBattleRepository()
     private val lootableItemRepository = InMemoryLootableItemRepository()
     private val eventBus = FakeEventBus()
@@ -38,16 +38,15 @@ class UnequipItemTest {
         UnequipItem(
             inventoryRepository,
             SearchLootableItemById(lootableItemRepository),
-            PlayerTurnRule(SearchBattleUnitById(battleUnitRepository), SearchBattle(battleRepository)),
+            PlayerTurnRule(SearchParty(partyRepository), SearchBattle(battleRepository)),
             eventBus,
         )
 
-    // It is the turn of the human player, who owns the knight. The CPU player owns the rat.
+    // It is the turn of the human player, who explores with the knight. The rat is no party member.
     @BeforeTest
     fun setUp() {
         battleRepository.create(battle(players = listOf("human", "cpu")))
-        battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
-        battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
+        partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")))
         lootableItemRepository.create(equippableLootableItem(id = "hammer", equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)))
     }
 
@@ -63,7 +62,7 @@ class UnequipItemTest {
         inventory?.storedItems?.shouldContainExactly("hammer")
         eventBus.shouldHavePublishedEvents(
             ItemUnequipped(battleUnitId = "knight-1", lootableItemId = "hammer", equipmentZone = WEAPON),
-            RequestRemoveEquippedEffects(battleUnitId = "knight-1", lootableItemId = "hammer"),
+            RequestRemoveMemberEquippedEffects(battleUnitId = "knight-1", lootableItemId = "hammer"),
         )
     }
 
@@ -87,12 +86,23 @@ class UnequipItemTest {
     }
 
     @Test
-    fun `should fail when it is not the turn of the battle unit player`() {
+    fun `should fail when it is not the turn of the party player`() {
+        // Given
+        battleRepository.create(battle(players = listOf("cpu", "human")))
+        inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")))
+        // When
+        val unequipping = { unequipItem(battleUnitId = "knight-1", lootableItemId = "hammer") }
+        // Then
+        shouldThrow<NotTheBattleUnitPlayerTurn> { unequipping() }
+    }
+
+    @Test
+    fun `should fail when the battle unit is no party member`() {
         // Given
         inventoryRepository.create(inventory(battleUnitId = "rat-1", storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")))
         // When
         val unequipping = { unequipItem(battleUnitId = "rat-1", lootableItemId = "hammer") }
         // Then
-        shouldThrow<NotTheBattleUnitPlayerTurn> { unequipping() }
+        shouldThrow<NotAPartyMember> { unequipping() }
     }
 }

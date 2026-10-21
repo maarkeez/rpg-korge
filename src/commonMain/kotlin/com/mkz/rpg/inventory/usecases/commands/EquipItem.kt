@@ -1,16 +1,13 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestApplyEffect
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestRemoveEquippedEffects
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryError.LootableItemNotEquippable
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
+import com.mkz.rpg.party.domain.PartyEvent.RequestApplyMemberEffect
+import com.mkz.rpg.party.domain.PartyEvent.RequestRemoveMemberEquippedEffects
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
@@ -36,19 +33,10 @@ class EquipItem(
         inventoryRepository.create(updatedInventory)
         eventBus.publish(events)
         equippable.effectIds.forEach { effectId ->
-            eventBus.publish(
-                RequestApplyEffect(
-                    application =
-                        EffectApplicationDto(
-                            source = ApplicationSourceDto.item(lootableItemId),
-                            target = EffectTargetDto.Unit(battleUnitId),
-                            effectId = effectId,
-                        ),
-                ),
-            )
+            eventBus.publish(RequestApplyMemberEffect(battleUnitId = battleUnitId, lootableItemId = lootableItemId, effectId = effectId))
         }
         if (unequippedItemId != null && hasEffects(unequippedItemId)) {
-            eventBus.publish(RequestRemoveEquippedEffects(battleUnitId = battleUnitId, lootableItemId = unequippedItemId))
+            eventBus.publish(RequestRemoveMemberEquippedEffects(battleUnitId = battleUnitId, lootableItemId = unequippedItemId))
         }
     }
 

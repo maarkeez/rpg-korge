@@ -18,7 +18,7 @@ class PartyTest {
     @Test
     fun `Start should explore with the first battle unit leading when the party starts exploring`() {
         // When
-        val party = Party.start(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"))
+        val party = Party.start(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight"))
         // Then
         party.toDto() shouldBe
             Party.Dto(
@@ -30,14 +30,14 @@ class PartyTest {
                 talkingNpcId = null,
             )
         party.pullEvents().first.shouldContainExactly(
-            PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
+            PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight")),
         )
     }
 
     @Test
     fun `Start should fail when the party has no battle units`() {
         // When
-        val result = runCatching { Party.start(playerId = "human", battleUnitIds = emptyList()) }
+        val result = runCatching { Party.start(playerId = "human", battleUnitIds = emptyList(), unitIds = emptyList()) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PartyError.PartyRequired>()
     }
@@ -176,11 +176,11 @@ class PartyTest {
     @Test
     fun `Join should add the battle unit to the party, last, when it is not in it`() {
         // When
-        val party = party(battleUnitIds = listOf("knight-1", "knight-2")).join("viking")
+        val party = party(battleUnitIds = listOf("knight-1", "knight-2")).join("viking-1", "viking")
         // Then
         party.toDto().leaderBattleUnitId shouldBe "knight-1"
-        party.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-2", "viking")
-        party.pullEvents().first.shouldContainExactly(PartyEvent.PartyJoined(playerId = "human", battleUnitId = "viking"))
+        party.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-2", "viking-1")
+        party.pullEvents().first.shouldContainExactly(PartyEvent.PartyJoined(playerId = "human", battleUnitId = "viking-1", unitId = "viking"))
     }
 
     @Test
@@ -188,7 +188,7 @@ class PartyTest {
         // Given
         val party = party(battleUnitIds = listOf("knight-1", "knight-2"))
         // When
-        val joinedParty = party.join("knight-2")
+        val joinedParty = party.join("knight-2", "knight")
         // Then
         joinedParty shouldBe party
     }

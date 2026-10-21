@@ -88,6 +88,13 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 |-------------------|---------------------------------------------------------|----------------------------|
 | An item is stored | `RequestPickUpDroppedItem(lootableItemId, row, column)` | Picks it up from its tile. |
 
+`inventory` does not depend on `battleUnit` nor `player` either: only the party members have an inventory, so it relies on `party` for them. It creates the inventory of each party member when the exploration starts (`ExplorationStarted`) or a battle unit joins the party (`PartyJoined`), which carry the unit of each battle unit for its starting gold. It checks the turn of the party player, and asks `party` whether a member can learn the ability a consumable teaches (`CanMemberLearnAbility`). The effects of the items reach `battleUnit` through the requests of `party`, which relays them to its members:
+
+| When                              | `inventory` publishes                                              | `party`                                                                 |
+|-----------------------------------|--------------------------------------------------------------------|-------------------------------------------------------------------------|
+| An item is consumed, or equipped  | `RequestApplyMemberEffect(battleUnitId, lootableItemId, effectId)` | Requests `RequestApplyEffect` from `battleUnit` for a member.           |
+| An item is unequipped, or swapped | `RequestRemoveMemberEquippedEffects(battleUnitId, lootableItemId)` | Requests `RequestRemoveEquippedEffects` from `battleUnit` for a member. |
+
 `party` does not depend on `npc` either. `npc` listens to `NpcTalkFinished` to recruit the npc, and publishes the requests of `party`:
 
 | When                                         | `npc` publishes                  | `party`                                    |

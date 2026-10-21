@@ -9,6 +9,7 @@ import com.mkz.rpg.inventory.usecases.services.ConsumptionRule
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippableLootableItem
+import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -23,10 +24,10 @@ class CanConsumeItemTest {
         CanConsumeItem(
             inventoryRepository,
             queries.searchLootableItemById,
-            ConsumptionRule(queries.searchEffectById, queries.canLearnAbility),
+            ConsumptionRule(queries.searchEffectById, queries.canMemberLearnAbility),
         )
 
-    // The teleport essence teaches teleport, and the health potion heals. The viking only knows sword.
+    // The teleport essence teaches teleport, and the health potion heals. The viking and the knight explore, and the viking only knows sword.
     @BeforeTest
     fun setUp() {
         queries.effectRepository.create(learnAbilityEffect(id = "learn-teleport", abilityId = "teleport"))
@@ -35,6 +36,7 @@ class CanConsumeItemTest {
         queries.lootableItemRepository.create(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))))
         queries.lootableItemRepository.create(equippableLootableItem(id = "hammer"))
         queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(abilities = listOf("sword")).toDto()))
+        queries.partyRepository.save(party(battleUnitIds = listOf("viking-1", "knight-1")))
     }
 
     @Test
@@ -75,6 +77,17 @@ class CanConsumeItemTest {
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("teleport-essence")))
         // When
         val result = canConsumeItem(battleUnitId = "knight-1", lootableItemId = "teleport-essence")
+        // Then
+        result.shouldBeFalse()
+    }
+
+    @Test
+    fun `should not allow consuming a consumable that teaches an ability when the battle unit is no party member`() {
+        // Given
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = emptyList()).toDto()))
+        inventoryRepository.create(inventory(battleUnitId = "rat-1", storedItems = listOf("teleport-essence")))
+        // When
+        val result = canConsumeItem(battleUnitId = "rat-1", lootableItemId = "teleport-essence")
         // Then
         result.shouldBeFalse()
     }

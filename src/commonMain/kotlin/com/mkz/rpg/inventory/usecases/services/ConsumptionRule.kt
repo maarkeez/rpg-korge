@@ -1,9 +1,9 @@
 package com.mkz.rpg.inventory.usecases.services
 
-import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.inventory.domain.InventoryError.AbilityCanNotBeLearned
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.ConsumableDto
+import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 
 /**
  * A consumable can only be consumed when its battle unit can learn the ability each of its effects teaches, e.g.: the
@@ -12,7 +12,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.ConsumableDt
  */
 class ConsumptionRule(
     private val searchEffectById: SearchEffectById,
-    private val canLearnAbility: CanLearnAbility,
+    private val canMemberLearnAbility: CanMemberLearnAbility,
 ) {
     fun canConsume(
         battleUnitId: String,
@@ -20,7 +20,7 @@ class ConsumptionRule(
     ): Boolean =
         consumable.effectIds.all { effectId ->
             val abilityId = searchEffectById(effectId)?.outcome?.learnAbility?.abilityId ?: return@all true
-            canLearnAbility(battleUnitId, abilityId)
+            canMemberLearnAbility(battleUnitId, abilityId)
         }
 
     fun requireConsumable(

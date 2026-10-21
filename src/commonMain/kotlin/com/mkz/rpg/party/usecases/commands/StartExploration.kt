@@ -16,9 +16,15 @@ class StartExploration(
     operator fun invoke() {
         if (partyRepository.search() != null) return
         val humanPlayer = searchHumanPlayer() ?: return
-        val battleUnitIds = searchBattleUnitsByPlayerId(humanPlayer.id).map { battleUnit -> battleUnit.id }
-        if (battleUnitIds.isEmpty()) return
-        val (events, party) = Party.start(playerId = humanPlayer.id, battleUnitIds = battleUnitIds).pullEvents()
+        val battleUnits = searchBattleUnitsByPlayerId(humanPlayer.id)
+        if (battleUnits.isEmpty()) return
+        val (events, party) =
+            Party
+                .start(
+                    playerId = humanPlayer.id,
+                    battleUnitIds = battleUnits.map { battleUnit -> battleUnit.id },
+                    unitIds = battleUnits.map { battleUnit -> battleUnit.unitId },
+                ).pullEvents()
         partyRepository.save(party)
         eventBus.publish(events)
     }

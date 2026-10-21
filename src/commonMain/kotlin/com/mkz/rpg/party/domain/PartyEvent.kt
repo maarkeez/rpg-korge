@@ -5,10 +5,11 @@ import com.mkz.rpg.shared.domain.DomainEvent
 sealed interface PartyEvent : DomainEvent {
     object RequestStartExploration : PartyEvent
 
-    /** Battle units: the party, the leader first. */
+    /** Battle units: the party, the leader first. Units: the unit of each battle unit, in the same order. */
     data class ExplorationStarted(
         val playerId: String,
         val battleUnitIds: List<String>,
+        val unitIds: List<String>,
     ) : PartyEvent
 
     /** Battle units: the party, the leader first. */
@@ -54,9 +55,23 @@ sealed interface PartyEvent : DomainEvent {
         val battleUnitId: String,
     ) : PartyEvent
 
-    /** The battle unit joins the party, last. */
+    /** The battle unit of the unit joins the party, last. */
     data class PartyJoined(
         val playerId: String,
         val battleUnitId: String,
+        val unitId: String,
+    ) : PartyEvent
+
+    // Requested for a party member when an item applies an effect to it, e.g.: a consumed potion or an equipped hammer.
+    data class RequestApplyMemberEffect(
+        val battleUnitId: String,
+        val lootableItemId: String,
+        val effectId: String,
+    ) : PartyEvent
+
+    // Requested for a party member when an item is unequipped, so it loses the effects the item applied while equipped.
+    data class RequestRemoveMemberEquippedEffects(
+        val battleUnitId: String,
+        val lootableItemId: String,
     ) : PartyEvent
 }

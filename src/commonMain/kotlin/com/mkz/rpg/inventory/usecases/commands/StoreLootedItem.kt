@@ -1,7 +1,5 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryBattleUnitDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
@@ -13,7 +11,6 @@ import com.mkz.rpg.shared.domain.EventBus
  */
 class StoreLootedItem(
     private val inventoryRepository: InventoryRepository,
-    private val searchBattleUnitById: SearchBattleUnitById,
     private val searchLootableItemById: SearchLootableItemById,
     private val eventBus: EventBus,
 ) {
@@ -23,7 +20,6 @@ class StoreLootedItem(
         row: Int,
         column: Int,
     ) {
-        searchBattleUnitById(battleUnitId) ?: throw InventoryBattleUnitDoesNotExist()
         val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: return
         searchLootableItemById(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
         val (events, updatedInventory) = inventory.store(lootableItemId, row, column).pullEvents()

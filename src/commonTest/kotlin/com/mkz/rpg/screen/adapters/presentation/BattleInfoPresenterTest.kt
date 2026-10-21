@@ -103,7 +103,7 @@ class BattleInfoPresenterTest {
     fun `DisplayExploring should display that the player explores when the exploration starts`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN, playerName = "Human")
-        apis.eventBus.publish(PartyEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1")))
+        apis.eventBus.publish(PartyEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1"), unitIds = listOf("knight")))
         // When
         apis.eventBus.dispatch()
         // Then

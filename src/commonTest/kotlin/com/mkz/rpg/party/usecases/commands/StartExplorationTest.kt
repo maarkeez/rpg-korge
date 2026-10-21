@@ -9,6 +9,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -28,15 +29,17 @@ class StartExplorationTest {
         queries.playerRepository.create(cpu)
         queries.playerRepository.create(human)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-1", player = human.toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "knight-2", player = human.toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(id = "knight").toDto(), player = human.toDto()))
+        queries.battleUnitRepository.create(battleUnit(id = "viking-1", unit = unit(id = "viking").toDto(), player = human.toDto()))
         // When
         startExploration()
         // Then
         val party = partyRepository.search()!!.toDto()
         party.leaderBattleUnitId shouldBe "knight-1"
-        party.battleUnitIds shouldBe listOf("knight-1", "knight-2")
-        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
+        party.battleUnitIds shouldBe listOf("knight-1", "viking-1")
+        eventBus.shouldHavePublishedEvents(
+            PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "viking-1"), unitIds = listOf("knight", "viking")),
+        )
     }
 
     @Test

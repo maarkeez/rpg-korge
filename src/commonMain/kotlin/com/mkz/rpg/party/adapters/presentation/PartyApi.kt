@@ -7,22 +7,27 @@ import com.mkz.rpg.party.adapters.events.OnBattleStarted
 import com.mkz.rpg.party.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.party.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.party.adapters.events.OnBattlefieldTileOccupied
+import com.mkz.rpg.party.adapters.events.OnRequestApplyMemberEffect
 import com.mkz.rpg.party.adapters.events.OnRequestJoinParty
+import com.mkz.rpg.party.adapters.events.OnRequestRemoveMemberEquippedEffects
 import com.mkz.rpg.party.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.party.adapters.events.OnRequestStartTalk
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.PartyRepository
+import com.mkz.rpg.party.usecases.commands.ApplyMemberEffect
 import com.mkz.rpg.party.usecases.commands.ApplyStandingTerrainEffects
 import com.mkz.rpg.party.usecases.commands.FinishTalk
 import com.mkz.rpg.party.usecases.commands.JoinParty
 import com.mkz.rpg.party.usecases.commands.LeaveParty
 import com.mkz.rpg.party.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.party.usecases.commands.PauseExploration
+import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.party.usecases.commands.StartExploration
 import com.mkz.rpg.party.usecases.commands.StartTalk
 import com.mkz.rpg.party.usecases.commands.WalkParty
+import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.party.usecases.services.PartyWalking
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -47,14 +52,17 @@ class PartyApi(
     val pauseExploration = PauseExploration(partyRepository, eventBus)
     val resumeExploration = ResumeExploration(partyRepository, eventBus)
     val leaveParty = LeaveParty(partyRepository)
-    val joinParty = JoinParty(partyRepository, eventBus)
+    val joinParty = JoinParty(partyRepository, battleUnitApi.searchBattleUnitById, eventBus)
     val markBattleUnitMoved = MarkBattleUnitMoved(partyRepository)
     val startTalk = StartTalk(partyRepository, eventBus)
     val finishTalk = FinishTalk(partyRepository, eventBus)
     val applyStandingTerrainEffects = ApplyStandingTerrainEffects(partyRepository, battlefieldApi.searchBattlefield, battleUnitApi.searchBattleUnitById, eventBus)
+    val applyMemberEffect = ApplyMemberEffect(partyRepository, eventBus)
+    val removeMemberEquippedEffects = RemoveMemberEquippedEffects(partyRepository, eventBus)
 
     // Queries
     val searchParty = SearchParty(partyRepository)
+    val canMemberLearnAbility = CanMemberLearnAbility(partyRepository, battleUnitApi.canLearnAbility)
 
     // Events
     private val onRequestStartExploration = OnRequestStartExploration(startExploration, eventBus)
@@ -65,4 +73,6 @@ class PartyApi(
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
     private val onRequestJoinParty = OnRequestJoinParty(joinParty, eventBus)
     private val onRequestStartTalk = OnRequestStartTalk(startTalk, eventBus)
+    private val onRequestApplyMemberEffect = OnRequestApplyMemberEffect(applyMemberEffect, eventBus)
+    private val onRequestRemoveMemberEquippedEffects = OnRequestRemoveMemberEquippedEffects(removeMemberEquippedEffects, eventBus)
 }

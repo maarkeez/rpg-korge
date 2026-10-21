@@ -52,14 +52,14 @@ class SummonLootingAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
-    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
+    private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
     private val humanPlayerId = "human"
     private val enemyPlayerId = "enemy"
     private val knightId = "knight-1"
     private val potionTile = LootDrop.Dto.PositionDto(row = 1, column = 4)
 
-    // The knight, at (2,2), summons a bee at (1,2), and a health potion lies at (1,4). The enemy stands far away, at (7,7).
+    // The knight, at (2,2), explores and summons a bee at (1,2), and a health potion lies at (1,4). The enemy stands far away, at (7,7).
     private suspend fun setUp() {
         playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
         playerApi.requestPlayerCreation(enemyPlayerId, "Enemy", HUMAN)
@@ -91,6 +91,9 @@ class SummonLootingAcceptanceTest {
 
         battleUnitApi.deployBattleUnit(battleUnitId = knightId, unitId = "knight", playerId = humanPlayerId, deployAtRow = 2, deployAtColumn = 2)
         battleUnitApi.deployBattleUnit(battleUnitId = "enemy-1", unitId = "enemy", playerId = enemyPlayerId, deployAtRow = 7, deployAtColumn = 7)
+        eventBus.dispatch()
+        partyApi.startExploration()
+        eventBus.dispatch()
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, enemyPlayerId)
         eventBus.dispatch()
         lootDropApi.placeDroppedItem(unitId = "enemy", lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)

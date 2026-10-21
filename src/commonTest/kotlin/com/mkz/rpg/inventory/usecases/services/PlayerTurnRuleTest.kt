@@ -1,35 +1,29 @@
 package com.mkz.rpg.inventory.usecases.services
 
-import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleMother.battle
-import com.mkz.rpg.battle.usecases.queries.SearchBattle
-import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryBattleUnitDoesNotExist
+import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
-import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.party.domain.PartyMother.party
+import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class PlayerTurnRuleTest {
-    private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val battleRepository = InMemoryBattleRepository()
-    private val playerTurnRule = PlayerTurnRule(SearchBattleUnitById(battleUnitRepository), SearchBattle(battleRepository))
+    private val queries = InMemoryQueries()
+    private val playerTurnRule = PlayerTurnRule(queries.searchParty, queries.searchBattle)
 
-    // The human player owns the knight, and the CPU player the rat.
+    // The human player explores with the knight. The rat is no party member.
     @BeforeTest
     fun setUp() {
-        battleUnitRepository.create(battleUnit(id = "knight-1", player = player(id = "human").toDto()))
-        battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
+        queries.partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")))
     }
 
     @Test
-    fun `should allow the inventory during the turn of its battle unit player in a battle`() {
+    fun `should allow the inventory during the turn of the party player in a battle`() {
         // Given
-        battleRepository.create(battle(players = listOf("human", "cpu")))
+        queries.battleRepository.create(battle(players = listOf("human", "cpu")))
         // Then
         shouldNotThrowAny { playerTurnRule.requirePlayerTurn("knight-1") }
     }
@@ -37,29 +31,36 @@ class PlayerTurnRuleTest {
     @Test
     fun `should fail during the turn of another player in a battle`() {
         // Given
-        battleRepository.create(battle(players = listOf("human", "cpu")))
+        queries.battleRepository.create(battle(players = listOf("cpu", "human")))
         // Then
-        shouldThrow<NotTheBattleUnitPlayerTurn> { playerTurnRule.requirePlayerTurn("rat-1") }
+        shouldThrow<NotTheBattleUnitPlayerTurn> { playerTurnRule.requirePlayerTurn("knight-1") }
     }
 
     @Test
-    fun `should allow the inventory of any battle unit while exploring before any battle`() {
+    fun `should allow the inventory while exploring before any battle`() {
         // Then
         shouldNotThrowAny { playerTurnRule.requirePlayerTurn("knight-1") }
-        shouldNotThrowAny { playerTurnRule.requirePlayerTurn("rat-1") }
     }
 
     @Test
-    fun `should allow the inventory of any battle unit while exploring once the battle has finished`() {
+    fun `should allow the inventory while exploring once the battle has finished`() {
         // Given
-        battleRepository.create(battle(players = listOf("human", "cpu")).finishWithoutWinner())
+        queries.battleRepository.create(battle(players = listOf("cpu", "human")).finishWithoutWinner())
         // Then
-        shouldNotThrowAny { playerTurnRule.requirePlayerTurn("rat-1") }
+        shouldNotThrowAny { playerTurnRule.requirePlayerTurn("knight-1") }
     }
 
     @Test
-    fun `should fail when the battle unit does not exist`() {
+    fun `should fail when the battle unit is no party member`() {
         // Then
-        shouldThrow<InventoryBattleUnitDoesNotExist> { playerTurnRule.requirePlayerTurn("bat-1") }
+        shouldThrow<NotAPartyMember> { playerTurnRule.requirePlayerTurn("rat-1") }
+    }
+
+    @Test
+    fun `should fail when there is no party`() {
+        // Given
+        val queries = InMemoryQueries()
+        // Then
+        shouldThrow<NotAPartyMember> { PlayerTurnRule(queries.searchParty, queries.searchBattle).requirePlayerTurn("knight-1") }
     }
 }
