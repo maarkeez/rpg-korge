@@ -1,5 +1,6 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
@@ -150,14 +151,17 @@ class InventoryTest {
     }
 
     @Test
-    fun `Store should store the item when there is space left`() {
+    fun `Store should store the item and request its pick-up when there is space left`() {
         // Given
         val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion"))
         // When
         val (events, updatedInventory) = inventory.store("health-potion", row = 1, column = 2).pullEvents()
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "health-potion")
-        events.shouldContainExactly(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
+        events.shouldContainExactly(
+            ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
+            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+        )
     }
 
     @Test

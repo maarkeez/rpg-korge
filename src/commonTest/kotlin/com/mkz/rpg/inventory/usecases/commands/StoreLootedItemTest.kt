@@ -3,6 +3,7 @@ package com.mkz.rpg.inventory.usecases.commands
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryBattleUnitDoesNotExist
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
@@ -61,7 +62,10 @@ class StoreLootedItemTest {
             ?.toDto()
             ?.storedItems
             .shouldBe(listOf("health-potion"))
-        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
+        eventBus.shouldHavePublishedEvents(
+            ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
+            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+        )
     }
 
     @Test
@@ -76,7 +80,10 @@ class StoreLootedItemTest {
             ?.toDto()
             ?.storedItems
             ?.shouldContainExactly("health-potion", "health-potion")
-        eventBus.shouldHavePublishedEvents(ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2))
+        eventBus.shouldHavePublishedEvents(
+            ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
+            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+        )
     }
 
     @Test

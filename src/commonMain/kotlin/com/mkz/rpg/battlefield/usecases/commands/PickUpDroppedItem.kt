@@ -3,7 +3,7 @@ package com.mkz.rpg.battlefield.usecases.commands
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Removes a dropped item from its tile once an inventory has stored it. */
+/** Removes a dropped item from its tile once an inventory has stored it, and requested its pick-up. */
 class PickUpDroppedItem(
     private val battlefieldRepository: BattlefieldRepository,
     private val eventBus: EventBus,

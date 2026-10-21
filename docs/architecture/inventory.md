@@ -38,7 +38,7 @@ A dropped item lies on the tile where its battle unit was defeated until an inve
 1. A defeated battle unit drops an item (`LootDropped`), and the battlefield places it on its tile (`placeDroppedItem`, announcing `DroppedItemPlaced`).
 2. A battle unit moves or teleports. The battlefield finds the items on every tile of its path, destination included (`findLoot`), and announces one `LootFound` per tile with items, in walking order. A teleport's path is only its destination. Deploying a battle unit does not look for loot.
 3. The inventory stores each item found (`storeLootedItem`), and announces `ItemStored` with the tile the item was lying on.
-4. The battlefield picks the stored item up from its tile (`pickUpDroppedItem`, announcing `DroppedItemPickedUp`).
+4. The inventory requests the pick-up right after (`RequestPickUpDroppedItem`), and the battlefield picks the stored item up from its tile (`pickUpDroppedItem`, announcing `DroppedItemPickedUp`).
 
 An item that is not stored stays on its tile: when a CPU battle unit or a summoned battle unit steps on it, or when the inventory is full. The battlefield exposes the items lying on each tile with `searchDroppedItems`.
 

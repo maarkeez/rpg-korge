@@ -4,7 +4,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface InventoryEvent : DomainEvent {
-    /** The item was stored, so it leaves the tile at [row] and [column] it was lying on. */
+    /** The item was stored, from the tile at [row] and [column] it was lying on. */
     data class ItemStored(
         val battleUnitId: String,
         val lootableItemId: String,

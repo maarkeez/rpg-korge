@@ -1,5 +1,6 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
@@ -18,6 +19,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
+import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.Gold.MAXIMUM
 import kotlin.jvm.JvmInline
 
@@ -32,7 +34,9 @@ data class Inventory private constructor(
     private val storedItems: StoredItems,
     private val equippedItems: EquippedItems,
     private val gold: Gold,
-    private val events: Set<InventoryEvent>,
+    // Its own events, each followed by the battlefield request it needs (e.g.: picking up the item it stored),
+    // published together so the battlefield is up to date before anything reacting to the next events.
+    private val events: Set<DomainEvent>,
 ) {
     companion object {
         private const val DEFAULT_MAXIMUM_STORAGE_SPACE = 12
@@ -57,8 +61,8 @@ data class Inventory private constructor(
     fun canStore(): Boolean = storedItems.value.size < maximumStorageSpace.value
 
     /**
-     * Stores the item lying on the tile at [row] and [column], or announces the inventory is full, so the player chooses whether to discard an item
-     * to make room.
+     * Stores the item lying on the tile at [row] and [column], and requests its pick-up from the tile. Or announces the inventory is full, so the
+     * player chooses whether to discard an item to make room.
      */
     fun store(
         lootableItemId: String,
@@ -68,7 +72,10 @@ data class Inventory private constructor(
         if (canStore()) {
             copy(
                 storedItems = StoredItems(storedItems.value + LootableItemId(lootableItemId)),
-                events = events + ItemStored(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column),
+                events =
+                    events +
+                        ItemStored(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column) +
+                        RequestPickUpDroppedItem(lootableItemId = lootableItemId, row = row, column = column),
             )
         } else {
             copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))

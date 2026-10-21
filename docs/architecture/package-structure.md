@@ -74,3 +74,9 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 | An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Vacates its tile.  |
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
+
+`battlefield` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
+
+| When              | `Inventory` records                                     | `battlefield`              |
+|-------------------|---------------------------------------------------------|----------------------------|
+| An item is stored | `RequestPickUpDroppedItem(lootableItemId, row, column)` | Picks it up from its tile. |

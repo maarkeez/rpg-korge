@@ -1,12 +1,12 @@
 package com.mkz.rpg.battlefield.adapters.presentation
 
 import com.mkz.rpg.battlefield.adapters.events.OnBattleRoundStarted
-import com.mkz.rpg.battlefield.adapters.events.OnItemStored
 import com.mkz.rpg.battlefield.adapters.events.OnLootDropped
 import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.events.OnRequestMoveOccupant
 import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTile
+import com.mkz.rpg.battlefield.adapters.events.OnRequestPickUpDroppedItem
 import com.mkz.rpg.battlefield.adapters.events.OnRequestRemoveOccupant
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
@@ -96,7 +96,7 @@ class BattlefieldApi(
     private val onBattleRoundStarted = OnBattleRoundStarted(triggerTerrainEffects, eventBus)
     private val onRequestEffectApplicationToOccupants = OnRequestEffectApplicationToOccupants(triggerTerrainEffects, eventBus)
     private val onLootDropped = OnLootDropped(placeDroppedItem, eventBus)
-    private val onItemStored = OnItemStored(pickUpDroppedItem, eventBus)
+    private val onRequestPickUpDroppedItem = OnRequestPickUpDroppedItem(pickUpDroppedItem, eventBus)
 
     suspend fun init() {
         battlefieldLoader.initResources()

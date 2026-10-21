@@ -33,6 +33,13 @@ sealed interface BattlefieldEvent : DomainEvent {
         val occupantId: String,
     ) : BattlefieldEvent
 
+    // Requested for an item stored by an inventory, which leaves the tile at row and column it was lying on.
+    data class RequestPickUpDroppedItem(
+        val lootableItemId: String,
+        val row: Int,
+        val column: Int,
+    ) : BattlefieldEvent
+
     /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its target. */
     data class TerrainEffectTriggered(
         val application: EffectApplicationDto,
