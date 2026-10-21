@@ -97,10 +97,19 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 
 `party` does not depend on `npc` either. `npc` listens to `NpcTalkFinished` to recruit the npc, and publishes the requests of `party`:
 
-| When                                         | `npc` publishes                  | `party`                                    |
-|----------------------------------------------|----------------------------------|--------------------------------------------|
-| A is pressed, with an npc next to the leader | `RequestStartTalk(npcId)`        | Talks to it, only when the party can walk. |
-| A recruited npc is deployed as a battle unit | `RequestJoinParty(battleUnitId)` | Adds it to the party, last.                |
+| When                                         | `npc` publishes                                           | `party`                                                    |
+|----------------------------------------------|-----------------------------------------------------------|------------------------------------------------------------|
+| A is pressed, with an npc next to the leader | `RequestStartTalk(npcId)`                                 | Talks to it, only when the party can walk.                 |
+| A recruitable npc is recruited               | `RequestRecruitMember(battleUnitId, unitId, row, column)` | Recruits a battle unit of the unit on the tile, see below. |
+
+`npc` does not depend on `battleUnit` nor `unit` either. `party` deploys the recruited battle unit for its player, publishing both requests together, so it is deployed before it joins:
+
+| When `npc` requests    | `party` publishes                                                      | Then                                 |
+|------------------------|------------------------------------------------------------------------|--------------------------------------|
+| `RequestRecruitMember` | `RequestDeployBattleUnit(battleUnitId, unitId, playerId, row, column)` | `battleUnit` deploys it on the tile. |
+|                        | `RequestJoinParty(battleUnitId)`                                       | `party` adds it to the party, last.  |
+
+The unit of a recruitable npc is not checked when the game starts: [`NpcUnitResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/npc/adapters/resources/NpcUnitResourcesTest.kt) checks that every one in the resources exists.
 
 `cpuBattleBrain` does not depend on `cpuWanderBrain` either. `cpuWanderBrain` asks it where each battle unit wanders (`WhereShouldWander`, `IsOutsideTerritory`), and the `CpuWanderBrain` aggregate records its requests right after its own events:
 

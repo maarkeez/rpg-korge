@@ -46,10 +46,10 @@ An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game 
 
 1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: The Guy.
 2. The npc leaves its tile (`NpcRecruited`): the battlefield vacates it, and the screen removes the npc.
-3. A battle unit of its unit is deployed for the human player on that tile (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
+3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the party player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
 4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
 
-The events are dispatched in the order they are published, so the tile is vacated before the battle unit is deployed on it, and the battle unit is deployed before it joins the party. Once recruited, it is a party member as any other: it has a bag, and leaves the party once defeated.
+The events are dispatched in the order they are published, so the tile is vacated before the battle unit is deployed on it, and the battle unit is deployed before it joins the party, as the party publishes both requests together. Once recruited, it is a party member as any other: it has a bag, and leaves the party once defeated.
 
 ## Shopping at a merchant
 

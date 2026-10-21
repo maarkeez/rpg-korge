@@ -18,7 +18,7 @@ class OnRequestInitialiseNpcsTest {
     private val theGuy = npc(id = "the-guy").toDto()
     private val onRequestInitialiseNpcs =
         OnRequestInitialiseNpcs(
-            InitialiseNpcs(FakeNpcLoader(listOf(theGuy)), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, queries.searchLootableItemById, eventBus),
+            InitialiseNpcs(FakeNpcLoader(listOf(theGuy)), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchLootableItemById, eventBus),
             eventBus,
         )
 

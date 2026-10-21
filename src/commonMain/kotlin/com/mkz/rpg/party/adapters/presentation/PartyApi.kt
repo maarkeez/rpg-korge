@@ -9,6 +9,7 @@ import com.mkz.rpg.party.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.party.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.party.adapters.events.OnRequestApplyMemberEffect
 import com.mkz.rpg.party.adapters.events.OnRequestJoinParty
+import com.mkz.rpg.party.adapters.events.OnRequestRecruitMember
 import com.mkz.rpg.party.adapters.events.OnRequestRemoveMemberEquippedEffects
 import com.mkz.rpg.party.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.party.adapters.events.OnRequestStartTalk
@@ -21,6 +22,7 @@ import com.mkz.rpg.party.usecases.commands.JoinParty
 import com.mkz.rpg.party.usecases.commands.LeaveParty
 import com.mkz.rpg.party.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.party.usecases.commands.PauseExploration
+import com.mkz.rpg.party.usecases.commands.RecruitMember
 import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
@@ -53,6 +55,7 @@ class PartyApi(
     val resumeExploration = ResumeExploration(partyRepository, eventBus)
     val leaveParty = LeaveParty(partyRepository)
     val joinParty = JoinParty(partyRepository, battleUnitApi.searchBattleUnitById, eventBus)
+    val recruitMember = RecruitMember(partyRepository, eventBus)
     val markBattleUnitMoved = MarkBattleUnitMoved(partyRepository)
     val startTalk = StartTalk(partyRepository, eventBus)
     val finishTalk = FinishTalk(partyRepository, eventBus)
@@ -71,6 +74,7 @@ class PartyApi(
     private val onBattleFinished = OnBattleFinished(resumeExploration, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
+    private val onRequestRecruitMember = OnRequestRecruitMember(recruitMember, eventBus)
     private val onRequestJoinParty = OnRequestJoinParty(joinParty, eventBus)
     private val onRequestStartTalk = OnRequestStartTalk(startTalk, eventBus)
     private val onRequestApplyMemberEffect = OnRequestApplyMemberEffect(applyMemberEffect, eventBus)

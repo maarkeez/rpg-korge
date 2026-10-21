@@ -50,7 +50,15 @@ sealed interface PartyEvent : DomainEvent {
         val npcId: String,
     ) : PartyEvent
 
-    // Requested for a recruited npc, once deployed as a battle unit.
+    // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
+    data class RequestRecruitMember(
+        val battleUnitId: String,
+        val unitId: String,
+        val row: Int,
+        val column: Int,
+    ) : PartyEvent
+
+    // Requested for a recruited member, once deployed as a battle unit.
     data class RequestJoinParty(
         val battleUnitId: String,
     ) : PartyEvent

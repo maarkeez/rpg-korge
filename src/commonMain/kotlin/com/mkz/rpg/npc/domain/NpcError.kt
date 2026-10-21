@@ -9,8 +9,6 @@ sealed class NpcError(
 
     class NpcTileCanNotBeOccupied : NpcError("The npc tile can not be occupied")
 
-    class NpcUnitNotFound : NpcError("The npc unit was not found")
-
     class NpcStockTooLarge : NpcError("The npc stock has more than ${Npc.MAX_STOCK_SIZE} items")
 
     class NpcStockItemRepeated : NpcError("The npc stock lists an item more than once")

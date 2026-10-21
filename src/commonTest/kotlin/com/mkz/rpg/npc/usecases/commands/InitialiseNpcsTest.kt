@@ -13,7 +13,6 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -24,8 +23,7 @@ class InitialiseNpcsTest {
     private val npcRepository = InMemoryNpcRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseNpcs(vararg npcs: Npc.Dto) =
-        InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchUnitById, queries.searchLootableItemById, eventBus)()
+    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchLootableItemById, eventBus)()
 
     @Test
     fun `should place every loaded npc on its tile, requesting the battlefield to occupy it, when the npcs are initialised`() {
@@ -47,10 +45,9 @@ class InitialiseNpcsTest {
     }
 
     @Test
-    fun `should place a recruitable npc when its unit exists`() {
+    fun `should place a recruitable npc, with its unit`() {
         // Given
         queries.battlefieldRepository.create(battlefield(". ."))
-        queries.unitRepository.create(unit(id = "viking"))
         val viking = npc(id = "viking", row = 0, column = 1, unitId = "viking").toDto()
         // When
         initialiseNpcs(viking)
@@ -60,17 +57,6 @@ class InitialiseNpcsTest {
             NpcPlaced(npcId = "viking", row = 0, column = 1, unitId = "viking"),
             RequestOccupyTile(occupantId = "viking", row = 0, column = 1),
         )
-    }
-
-    @Test
-    fun `should fail when the unit of a recruitable npc does not exist`() {
-        // Given
-        queries.battlefieldRepository.create(battlefield(". ."))
-        // When
-        val result = runCatching { initialiseNpcs(npc(id = "viking", row = 0, column = 1, unitId = "dragon").toDto()) }
-        // Then
-        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcUnitNotFound>()
-        npcRepository.searchById("viking").shouldBeNull()
     }
 
     @Test

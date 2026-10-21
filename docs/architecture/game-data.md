@@ -180,7 +180,7 @@ row = 10
 column = 2
 ```
 
-An npc with a `unitId` is recruitable: it joins the party as a battle unit of that unit (e.g.: the viking). The game fails to start when the unit does not exist (`NpcUnitNotFound`).
+An npc with a `unitId` is recruitable: it joins the party as a battle unit of that unit (e.g.: the viking). The game does not check the unit when it starts: [`NpcUnitResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/npc/adapters/resources/NpcUnitResourcesTest.kt) fails when it does not exist.
 
 ```toml
 name = "Viking"

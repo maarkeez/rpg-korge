@@ -12,6 +12,6 @@ class OnNpcTalkFinished(
 ) {
     val subscription =
         eventBus.subscribe<NpcTalkFinished> { event ->
-            recruitNpc(npcId = event.npcId, playerId = event.playerId)
+            recruitNpc(npcId = event.npcId)
         }
 }

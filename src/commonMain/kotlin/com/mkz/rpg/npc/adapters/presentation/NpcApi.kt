@@ -15,11 +15,9 @@ import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.npc.usecases.services.NpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class NpcApi(
     battlefieldApi: BattlefieldApi,
-    unitApi: UnitApi,
     lootableItemApi: LootableItemApi,
     partyApi: PartyApi,
     eventBus: EventBus,
@@ -33,7 +31,7 @@ class NpcApi(
     val searchNpcNextTo = SearchNpcNextTo(npcRepository)
 
     // Commands
-    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, unitApi.searchUnitById, lootableItemApi.searchLootableItemById, eventBus)
+    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, lootableItemApi.searchLootableItemById, eventBus)
     val recruitNpc = RecruitNpc(npcRepository, eventBus)
     val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchNpcNextTo, eventBus)
 

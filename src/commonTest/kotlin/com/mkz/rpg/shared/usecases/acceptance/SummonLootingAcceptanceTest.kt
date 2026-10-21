@@ -51,7 +51,7 @@ class SummonLootingAcceptanceTest {
     private val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(listOf(lootDrop(unitId = "enemy", lootTableIds = listOf("enemy-loot")).toDto())))
     private val battleApi = BattleApi(eventBus, playerApi)
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
-    private val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus)
+    private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus)
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
     private val humanPlayerId = "human"
