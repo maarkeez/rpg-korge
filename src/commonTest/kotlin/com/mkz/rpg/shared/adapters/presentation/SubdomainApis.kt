@@ -67,9 +67,9 @@ class SubdomainApis(
     val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
     val lootDropApi = LootDropApi(unitApi, lootTableApi, battleUnitApi, eventBus, FakeLootDropLoader(lootDrops))
-    val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, eventBus, FakeNpcLoader(npcs))
     val battleApi = BattleApi(eventBus, playerApi)
-    val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, npcApi, eventBus)
+    val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
+    val npcApi = NpcApi(battlefieldApi, unitApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleUnitApi, playerApi, battleApi, partyApi, npcApi, eventBus)
 
     /** Stores the given data, deploys the battle units, places the npcs and starts the battle, dispatching the events it publishes. */

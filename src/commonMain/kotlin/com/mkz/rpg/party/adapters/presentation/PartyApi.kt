@@ -2,7 +2,6 @@ package com.mkz.rpg.party.adapters.presentation
 
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.events.OnBattleFinished
 import com.mkz.rpg.party.adapters.events.OnBattleStarted
 import com.mkz.rpg.party.adapters.events.OnBattleUnitDefeated
@@ -10,6 +9,7 @@ import com.mkz.rpg.party.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.party.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.party.adapters.events.OnRequestJoinParty
 import com.mkz.rpg.party.adapters.events.OnRequestStartExploration
+import com.mkz.rpg.party.adapters.events.OnRequestStartTalk
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.party.usecases.commands.ApplyStandingTerrainEffects
@@ -21,7 +21,7 @@ import com.mkz.rpg.party.usecases.commands.PauseExploration
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.party.usecases.commands.StartExploration
-import com.mkz.rpg.party.usecases.commands.TalkToAdjacentNpc
+import com.mkz.rpg.party.usecases.commands.StartTalk
 import com.mkz.rpg.party.usecases.commands.WalkParty
 import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.party.usecases.services.PartyWalking
@@ -32,7 +32,6 @@ class PartyApi(
     playerApi: PlayerApi,
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
-    npcApi: NpcApi,
     eventBus: EventBus,
 ) {
     // Storage
@@ -50,7 +49,7 @@ class PartyApi(
     val leaveParty = LeaveParty(partyRepository)
     val joinParty = JoinParty(partyRepository, eventBus)
     val markBattleUnitMoved = MarkBattleUnitMoved(partyRepository)
-    val talkToAdjacentNpc = TalkToAdjacentNpc(partyRepository, battlefieldApi.searchPosition, npcApi.searchNpcAt, eventBus)
+    val startTalk = StartTalk(partyRepository, eventBus)
     val finishTalk = FinishTalk(partyRepository, eventBus)
     val applyStandingTerrainEffects = ApplyStandingTerrainEffects(partyRepository, battlefieldApi.searchBattlefield, battleUnitApi.searchBattleUnitById, eventBus)
 
@@ -65,4 +64,5 @@ class PartyApi(
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)
     private val onRequestJoinParty = OnRequestJoinParty(joinParty, eventBus)
+    private val onRequestStartTalk = OnRequestStartTalk(startTalk, eventBus)
 }

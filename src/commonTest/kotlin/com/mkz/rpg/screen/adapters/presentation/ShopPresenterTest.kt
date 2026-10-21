@@ -79,7 +79,7 @@ class ShopPresenterTest {
     private fun openTheShop() {
         apis.partyApi.startExploration()
         eventBus.dispatch()
-        apis.partyApi.talkToAdjacentNpc()
+        apis.npcApi.talkToAdjacentNpc()
         eventBus.dispatch()
         timeline.play { presenter.open(merchant) }
     }

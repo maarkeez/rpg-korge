@@ -9,9 +9,11 @@ import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.npc.usecases.commands.InitialiseNpcs
 import com.mkz.rpg.npc.usecases.commands.RecruitNpc
-import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
+import com.mkz.rpg.npc.usecases.commands.TalkToAdjacentNpc
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
+import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.npc.usecases.services.NpcLoader
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
@@ -19,19 +21,21 @@ class NpcApi(
     battlefieldApi: BattlefieldApi,
     unitApi: UnitApi,
     lootableItemApi: LootableItemApi,
+    partyApi: PartyApi,
     eventBus: EventBus,
     private val npcLoader: NpcLoader = ResourcesNpcLoader(),
 ) {
     // Storage
     private val npcRepository: NpcRepository = InMemoryNpcRepository()
 
+    // Queries
+    val searchNpcById = SearchNpcById(npcRepository)
+    val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+
     // Commands
     val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, unitApi.searchUnitById, lootableItemApi.searchLootableItemById, eventBus)
     val recruitNpc = RecruitNpc(npcRepository, eventBus)
-
-    // Queries
-    val searchNpcById = SearchNpcById(npcRepository)
-    val searchNpcAt = SearchNpcAt(npcRepository)
+    val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchNpcNextTo, eventBus)
 
     // Events
     private val onRequestInitialiseNpcs = OnRequestInitialiseNpcs(initialiseNpcs, eventBus)

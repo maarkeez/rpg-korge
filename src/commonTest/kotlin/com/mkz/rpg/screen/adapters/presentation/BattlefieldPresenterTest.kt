@@ -683,7 +683,7 @@ class BattlefieldPresenterTest {
         val exploringApis = exploringApis(npcs = listOf(npc(id = "the-guy", row = 1, column = 0).toDto()))
         val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
         exploringApis.partyApi.startExploration()
-        exploringApis.partyApi.talkToAdjacentNpc()
+        exploringApis.npcApi.talkToAdjacentNpc()
         exploringApis.eventBus.dispatch()
         val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
         exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }

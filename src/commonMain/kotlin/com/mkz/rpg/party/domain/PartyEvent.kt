@@ -32,6 +32,11 @@ sealed interface PartyEvent : DomainEvent {
         val playerId: String,
     ) : PartyEvent
 
+    // Requested for the npc standing next to the leader, when A is pressed.
+    data class RequestStartTalk(
+        val npcId: String,
+    ) : PartyEvent
+
     /** The party talks to the npc: time stops until the talk is finished. */
     data class NpcTalkStarted(
         val playerId: String,

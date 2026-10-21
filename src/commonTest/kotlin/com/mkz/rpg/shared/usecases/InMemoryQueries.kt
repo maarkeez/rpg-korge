@@ -38,8 +38,8 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
-import com.mkz.rpg.npc.usecases.queries.SearchNpcAt
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
+import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
@@ -88,7 +88,7 @@ class InMemoryQueries(
 
     // Npc
     val searchNpcById = SearchNpcById(npcRepository)
-    val searchNpcAt = SearchNpcAt(npcRepository)
+    val searchNpcNextTo = SearchNpcNextTo(npcRepository)
 
     // Party
     val searchParty = SearchParty(partyRepository)

@@ -220,11 +220,11 @@ const DATA = {
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 11},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 13},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
-    {"name": "npc", "files": 14, "fanIn": 4, "fanOut": 6, "instability": 0.6, "importsIn": 11, "importsOut": 22},
-    {"name": "party", "files": 26, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 23, "importsOut": 45},
+    {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 6, "instability": 0.67, "importsIn": 9, "importsOut": 27},
+    {"name": "party", "files": 27, "fanIn": 6, "fanOut": 5, "instability": 0.45, "importsIn": 26, "importsOut": 44},
     {"name": "player", "files": 15, "fanIn": 8, "fanOut": 1, "instability": 0.11, "importsIn": 35, "importsOut": 11},
     {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 152},
-    {"name": "shared", "files": 12, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 337, "importsOut": 0},
+    {"name": "shared", "files": 12, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 340, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 6},
     {"name": "unit", "files": 13, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 23, "importsOut": 14}
   ],
@@ -907,21 +907,25 @@ const DATA = {
     {"from": "npc", "to": "battleUnit", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent.RequestDeployBattleUnit"}
     ]},
-    {"from": "npc", "to": "battlefield", "weight": 4, "files": 3, "imports": [
+    {"from": "npc", "to": "battlefield", "weight": 5, "files": 4, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTile"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestRemoveOccupant"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
+      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "npc", "to": "lootableItem", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "lootableItem.adapters.presentation.LootableItemApi"},
       {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"}
     ]},
-    {"from": "npc", "to": "party", "weight": 2, "files": 2, "imports": [
+    {"from": "npc", "to": "party", "weight": 5, "files": 4, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "party.domain.PartyEvent.NpcTalkFinished"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "party.domain.PartyEvent.RequestJoinParty"}
+      {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "party.domain.PartyEvent.RequestJoinParty"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "party.domain.PartyEvent.RequestStartTalk"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
-    {"from": "npc", "to": "shared", "weight": 11, "files": 8, "imports": [
+    {"from": "npc", "to": "shared", "weight": 12, "files": 9, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnRequestInitialiseNpcs.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -932,7 +936,8 @@ const DATA = {
       {"file": "com/mkz/rpg/npc/domain/NpcEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+      {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "npc", "to": "unit", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
@@ -950,25 +955,20 @@ const DATA = {
       {"file": "com/mkz/rpg/party/usecases/commands/StartExploration.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitsByPlayerId"},
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"}
     ]},
-    {"from": "party", "to": "battlefield", "weight": 8, "files": 6, "imports": [
+    {"from": "party", "to": "battlefield", "weight": 7, "files": 5, "imports": [
       {"file": "com/mkz/rpg/party/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt", "layer": "usecases", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchBattlefield"},
-      {"file": "com/mkz/rpg/party/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/party/usecases/commands/WalkParty.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchShortestPath"}
-    ]},
-    {"from": "party", "to": "npc", "weight": 2, "files": 2, "imports": [
-      {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
-      {"file": "com/mkz/rpg/party/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "npc.usecases.queries.SearchNpcAt"}
     ]},
     {"from": "party", "to": "player", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
       {"file": "com/mkz/rpg/party/usecases/commands/StartExploration.kt", "layer": "usecases", "name": "player.usecases.queries.SearchHumanPlayer"}
     ]},
-    {"from": "party", "to": "shared", "weight": 25, "files": 17, "imports": [
+    {"from": "party", "to": "shared", "weight": 27, "files": 18, "imports": [
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -983,6 +983,8 @@ const DATA = {
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestJoinParty.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartExploration.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartExploration.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartTalk.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartTalk.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/domain/PartyEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
@@ -991,7 +993,7 @@ const DATA = {
       {"file": "com/mkz/rpg/party/usecases/commands/PauseExploration.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/usecases/commands/ResumeExploration.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/usecases/commands/StartExploration.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/party/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/party/usecases/commands/StartTalk.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
@@ -1224,12 +1226,11 @@ const DATA = {
     ]}
   ],
   "cycles": [
-    ["battle", "battleUnit", "battlefield", "cpuBattleBrain", "cpuWanderBrain", "lootDrop", "npc", "party"]
+    ["battle", "battleUnit", "battlefield", "cpuBattleBrain", "cpuWanderBrain", "lootDrop", "party"]
   ],
   "mutualDependencies": [
     ["battle", "cpuBattleBrain"],
-    ["cpuBattleBrain", "cpuWanderBrain"],
-    ["npc", "party"]
+    ["cpuBattleBrain", "cpuWanderBrain"]
   ]
 };
 </script>

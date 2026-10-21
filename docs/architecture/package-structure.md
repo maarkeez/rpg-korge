@@ -80,3 +80,10 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 | When              | `Inventory` records                                     | `battlefield`              |
 |-------------------|---------------------------------------------------------|----------------------------|
 | An item is stored | `RequestPickUpDroppedItem(lootableItemId, row, column)` | Picks it up from its tile. |
+
+`party` does not depend on `npc` either. `npc` listens to `NpcTalkFinished` to recruit the npc, and publishes the requests of `party`:
+
+| When                                         | `npc` publishes                  | `party`                                    |
+|----------------------------------------------|----------------------------------|--------------------------------------------|
+| A is pressed, with an npc next to the leader | `RequestStartTalk(npcId)`        | Talks to it, only when the party can walk. |
+| A recruited npc is deployed as a battle unit | `RequestJoinParty(battleUnitId)` | Adds it to the party, last.                |

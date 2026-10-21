@@ -120,7 +120,7 @@ class ExplorationPresenter(
     // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun talkToAdjacentNpc() {
         if (timeline.isPlaying || !virtualPadView.visible) return
-        partyApi.talkToAdjacentNpc()
+        npcApi.talkToAdjacentNpc()
     }
 
     // A merchant opens its shop, any other npc finishes the talk.
