@@ -1,6 +1,6 @@
 # Subdomain dependencies
 
-[`dependencies.html`](dependencies.html) is an interactive report of the dependencies between the subdomains (see [Package structure](package-structure.md)). Open it in a browser: it loads its graph library from a CDN, so it needs an internet connection.
+[`dependencies.html`](dependencies.html) is an interactive report of the dependencies between the subdomains (see [Package structure](package-structure.md)). Open it in a browser: it loads its graph library from a CDN, so it needs an internet connection. The version on `main` is also published alongside the game, at https://maarkeez.github.io/rpg-korge/dependencies/, by the [`Deploy JS`](../../.github/workflows/deploy-js.yml) workflow.
 
 ## What it shows
 

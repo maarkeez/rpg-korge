@@ -32,5 +32,12 @@ jobs:
       - { name: Prepare Gradle, uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 } # v3.1.0
       #- { name: Buid JS bundle, run: ./gradlew browserReleaseEsbuild }
       - { name: Buid JS bundle, run: ./gradlew browserReleaseWebpack } # available after 6.0.0-beta3
+      # Served at /dependencies/. Its links to the source files are relative to the repository, so they point to GitHub instead
+      - name: Add dependency report
+        run: |
+          mkdir -p build/www/dependencies
+          sed 's#"sourceRoot": "../../#"sourceRoot": "${{ github.server_url }}/${{ github.repository }}/blob/${{ github.sha }}/#' \
+            docs/architecture/dependencies.html > build/www/dependencies/index.html
+          grep -q '"sourceRoot": "https://' build/www/dependencies/index.html
       - { name: Upload artifact, uses: actions/upload-pages-artifact@v3, with: { path: 'build/www' } }
       - { name: Deploy 🚀 to GitHub Pages, id: deployment, uses: actions/deploy-pages@v4}
