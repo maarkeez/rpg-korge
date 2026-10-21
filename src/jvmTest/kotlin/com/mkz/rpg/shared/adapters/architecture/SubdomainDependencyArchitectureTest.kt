@@ -59,5 +59,10 @@ class SubdomainDependencyArchitectureTest {
 
     // The first package segment after the root package, e.g.: `screen` for `com.mkz.rpg.screen.adapters.presentation`.
     // Null out of the root package (e.g.: `korlibs`), and for the root package itself (e.g.: `Main.kt`).
-    private fun subdomainOf(name: String): String? = name.removePrefix("$rootPackage.").takeIf { it != name }?.substringBefore(".")?.takeIf { it.isNotEmpty() }
+    private fun subdomainOf(name: String): String? =
+        name
+            .removePrefix("$rootPackage.")
+            .takeIf { it != name }
+            ?.substringBefore(".")
+            ?.takeIf { it.isNotEmpty() }
 }
