@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchEnemiesWithinReach
@@ -9,7 +10,7 @@ import com.mkz.rpg.shared.domain.EventBus
 /**
  * Engages the exploring player when any CPU battle unit has one of their battle units within reach, with the same rule
  * the CPU battle units engage enemies in a battle: after the party walks, and after the CPU battle units wander. Every
- * living battle unit of the exploring player is engaged.
+ * living battle unit of the exploring player is engaged. The battle is requested to start right after.
  */
 class EngageEnemies(
     private val searchEnemyPlayer: SearchEnemyPlayer,
@@ -26,11 +27,19 @@ class EngageEnemies(
         if (engagingBattleUnitIds.isEmpty()) return
         val engagedBattleUnitIds = searchBattleUnitsByPlayerId(playerId = exploringPlayerId).map { battleUnit -> battleUnit.id }
         eventBus.publish(
-            CpuBattleBrainEvent.CombatEngaged(
-                playerId = cpuPlayer.id,
-                engagedPlayerId = exploringPlayerId,
-                battleUnitIds = engagingBattleUnitIds,
-                engagedBattleUnitIds = engagedBattleUnitIds,
+            setOf(
+                CpuBattleBrainEvent.CombatEngaged(
+                    playerId = cpuPlayer.id,
+                    engagedPlayerId = exploringPlayerId,
+                    battleUnitIds = engagingBattleUnitIds,
+                    engagedBattleUnitIds = engagedBattleUnitIds,
+                ),
+                BattleEvent.RequestStartBattle(
+                    engagingPlayerId = cpuPlayer.id,
+                    engagedPlayerId = exploringPlayerId,
+                    engagingBattleUnitIds = engagingBattleUnitIds,
+                    engagedBattleUnitIds = engagedBattleUnitIds,
+                ),
             ),
         )
     }

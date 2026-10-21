@@ -1,22 +1,22 @@
 package com.mkz.rpg.battle.adapters.events
 
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.usecases.commands.StartBattle
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class OnCombatEngagedTest {
+class OnRequestStartBattleTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
-    private val onCombatEngaged = OnCombatEngaged(StartBattle(battleRepository, eventBus), eventBus)
+    private val onRequestStartBattle = OnRequestStartBattle(StartBattle(battleRepository, eventBus), eventBus)
 
     @Test
-    fun `should start the battle with the engaging cpu battle units and the party when the cpu engages`() {
+    fun `should start the battle with the engaging battle units and the engaged ones when it is requested`() {
         // Given
         eventBus.publish(
-            CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+            BattleEvent.RequestStartBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
         )
         // When
         eventBus.dispatch()

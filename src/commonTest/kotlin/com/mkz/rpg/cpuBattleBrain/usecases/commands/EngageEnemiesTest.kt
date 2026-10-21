@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
@@ -37,7 +38,10 @@ class EngageEnemiesTest {
         // When
         engageEnemies(exploringPlayerId = "human")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+            BattleEvent.RequestStartBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+        )
     }
 
     @Test
@@ -48,7 +52,10 @@ class EngageEnemiesTest {
         // When
         engageEnemies(exploringPlayerId = "human")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+            BattleEvent.RequestStartBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+        )
     }
 
     @Test

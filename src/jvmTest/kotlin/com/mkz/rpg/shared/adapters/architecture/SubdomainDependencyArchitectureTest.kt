@@ -11,12 +11,6 @@ import kotlin.test.Test
  * are read as in the dependency report (docs/architecture/dependencies.md).
  */
 class SubdomainDependencyArchitectureTest {
-    // The two-way dependencies still to be removed. Only ever remove a pair from this list.
-    private val knownTwoWayDependencies =
-        setOf(
-            setOf("battle", "cpuBattleBrain"),
-        )
-
     private val rootPackage = "com.mkz.rpg"
 
     private val dependencies: Set<Pair<String, String>> =
@@ -37,19 +31,8 @@ class SubdomainDependencyArchitectureTest {
 
     @Test
     fun `should not depend on each other when they are two subdomains`() {
-        val newTwoWayDependencies = twoWayDependencies - knownTwoWayDependencies
-
-        withClue("Subdomains that depend on each other: ${newTwoWayDependencies.map { it.joinToString(" ⇄ ") }}. Publish a request event of the upstream subdomain instead.") {
-            newTwoWayDependencies.shouldBeEmpty()
-        }
-    }
-
-    @Test
-    fun `should only list the two-way dependencies that still exist when they are known`() {
-        val removedTwoWayDependencies = knownTwoWayDependencies - twoWayDependencies
-
-        withClue("These subdomains no longer depend on each other, remove them from the known two-way dependencies: ${removedTwoWayDependencies.map { it.joinToString(" ⇄ ") }}") {
-            removedTwoWayDependencies.shouldBeEmpty()
+        withClue("Subdomains that depend on each other: ${twoWayDependencies.map { it.joinToString(" ⇄ ") }}. Publish a request event of the upstream subdomain instead.") {
+            twoWayDependencies.shouldBeEmpty()
         }
     }
 

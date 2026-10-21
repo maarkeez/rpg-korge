@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
+import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
@@ -43,7 +44,10 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "rat-1"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
+            BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
+        )
     }
 
     @Test
@@ -53,7 +57,10 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+        )
     }
 
     @Test
@@ -63,7 +70,10 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2", "rat-3"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")),
+            BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")),
+        )
     }
 
     @Test
@@ -71,7 +81,10 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = emptySet())
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            BattleEvent.RequestStartNextRound(joiningPlayerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+        )
     }
 
     @Test
@@ -85,6 +98,9 @@ class UpdateEngagementTest {
         // When
         updateEngagement(battleUnitIds = setOf("knight-1", "bat-1"))
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()))
+        eventBus.shouldHavePublishedEvents(
+            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+        )
     }
 }
