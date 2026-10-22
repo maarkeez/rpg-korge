@@ -284,6 +284,42 @@ class BattlefieldTest {
     }
 
     @Test
+    fun `SwapOccupants should swap the tiles of both occupants at once and announce both tiles when both are deployed`() {
+        // Given
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(row = 1, column = 1, occupantId = "knight-1")
+                .occupy(row = 2, column = 1, occupantId = "knight-2")
+                .pullEvents()
+                .second
+        // When
+        val updatedBattlefield = battlefield.swapOccupants(occupantId = "knight-1", otherOccupantId = "knight-2")
+        // Then
+        updatedBattlefield.occupant(row = 1, column = 1) shouldBe "knight-2"
+        updatedBattlefield.occupant(row = 2, column = 1) shouldBe "knight-1"
+        updatedBattlefield.pullEvents().first.shouldContainExactly(
+            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 1, occupantId = "knight-1"),
+            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 1, occupantId = "knight-2"),
+        )
+    }
+
+    @Test
+    fun `SwapOccupants should not update the battlefield when an occupant is not deployed`() {
+        // Given
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(row = 1, column = 1, occupantId = "knight-1")
+                .pullEvents()
+                .second
+        // When
+        val updatedBattlefield = battlefield.swapOccupants(occupantId = "knight-1", otherOccupantId = "knight-2")
+        // Then
+        updatedBattlefield shouldBe battlefield
+    }
+
+    @Test
     fun `CanBeOccupied should be true when the tile is vacant`() {
         // Given
         val battlefield = BattlefieldMother.battlefield()

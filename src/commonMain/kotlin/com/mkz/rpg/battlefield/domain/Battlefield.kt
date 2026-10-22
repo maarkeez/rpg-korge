@@ -74,6 +74,24 @@ data class Battlefield private constructor(
         return copy(tiles = updatedTiles, events = events + occupantRemovedEvent)
     }
 
+    /**
+     * Swaps the tiles of both occupants at once, so a tile never holds two of them, e.g.: the leader of the party and
+     * the party member on its next tile. Nothing changes when any of them is not on the battlefield.
+     */
+    fun swapOccupants(
+        occupantId: String,
+        otherOccupantId: String,
+    ): Battlefield {
+        val position = tiles.position(occupantId) ?: return this
+        val otherPosition = tiles.position(otherOccupantId) ?: return this
+        val swappedEvents =
+            setOf(
+                BattlefieldTileOccupied(row = otherPosition.row, column = otherPosition.column, occupantId = occupantId),
+                BattlefieldTileOccupied(row = position.row, column = position.column, occupantId = otherOccupantId),
+            )
+        return copy(tiles = tiles.swapOccupants(position, otherPosition), events = events + swappedEvents)
+    }
+
     fun pullEvents() = events to copy(events = emptySet())
 
     fun canBeOccupied(
@@ -150,6 +168,21 @@ data class Battlefield private constructor(
                     vacantTile?.let {
                         put(Position(row = vacantTile.row(), column = vacantTile.column()), vacantTile)
                     }
+                }
+            return Tiles(updatedTiles)
+        }
+
+        fun swapOccupants(
+            position: PositionDto,
+            otherPosition: PositionDto,
+        ): Tiles {
+            val tile = tiles.getValue(Position(row = position.row, column = position.column))
+            val otherTile = tiles.getValue(Position(row = otherPosition.row, column = otherPosition.column))
+            val updatedTiles =
+                buildMap {
+                    putAll(tiles)
+                    put(Position(row = position.row, column = position.column), tile.occupy(otherTile.occupantId()!!))
+                    put(Position(row = otherPosition.row, column = otherPosition.column), otherTile.occupy(tile.occupantId()!!))
                 }
             return Tiles(updatedTiles)
         }

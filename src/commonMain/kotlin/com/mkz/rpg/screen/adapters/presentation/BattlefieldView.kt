@@ -530,6 +530,27 @@ open class BattlefieldView(
         }
     }
 
+    /**
+     * Swaps the tiles of both battle units at once, in a single step, and scrolls the battlefield so the first one stays
+     * visible, e.g.: the leader of the party and the party member on its next tile.
+     */
+    open suspend fun swapBattleUnits(
+        row: Int,
+        column: Int,
+        unitId: String,
+        otherRow: Int,
+        otherColumn: Int,
+        otherUnitId: String,
+        stepDuration: Duration = EXPLORING_STEP_DURATION,
+    ) {
+        followTile(otherRow, otherColumn)
+        removeBattleUnit(row, column)
+        removeBattleUnit(otherRow, otherColumn)
+        displayBattleUnit(otherRow, otherColumn, unitId)
+        displayBattleUnit(row, column, otherUnitId)
+        delay(stepDuration)
+    }
+
     /** Tints the visible battlefield with the colour, fading it in and out, e.g.: when a turn starts. */
     open suspend fun tint(color: RGBA) {
         val overlay = viewport.solidRect(Size(VIEWPORT_WIDTH, VIEWPORT_HEIGHT), color) { alpha = 0.0 }

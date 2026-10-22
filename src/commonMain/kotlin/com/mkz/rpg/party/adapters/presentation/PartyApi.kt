@@ -49,7 +49,7 @@ class PartyApi(
 
     // Commands
     val startExploration = StartExploration(playerApi.searchHumanPlayer, battleUnitApi.searchBattleUnitsByPlayerId, partyRepository, eventBus)
-    val walkParty = WalkParty(partyRepository, battlefieldApi.searchPosition, partyWalking)
+    val walkParty = WalkParty(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchOccupant, partyWalking, eventBus)
     val resolvePartyStep = ResolvePartyStep(partyRepository, partyWalking)
     val pauseExploration = PauseExploration(partyRepository, eventBus)
     val resumeExploration = ResumeExploration(partyRepository, eventBus)
