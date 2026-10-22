@@ -5,6 +5,8 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.math.geom.Size
@@ -88,5 +90,44 @@ class NpcDialogViewTest : ViewsForTesting() {
             clickDialog(dialog)
             // Then
             taps shouldBe 1
+        }
+
+    @Test
+    fun `Display should display the choices under the line, in their order`() =
+        sharedViewsTest {
+            // Given
+            val dialog = newNpcDialogView()
+            // When
+            dialog.display(theGuy, choices = listOf(NpcDialogView.Choice("Buy") {}, NpcDialogView.Choice("Sell") {}, NpcDialogView.Choice("Leave") {}))
+            // Then
+            dialog.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
+            dialog.areChoicesUnderText().shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should replace the choices displayed before`() =
+        sharedViewsTest {
+            // Given
+            val dialog = newNpcDialogView()
+            dialog.display(theGuy, choices = listOf(NpcDialogView.Choice("Buy") {}))
+            // When
+            dialog.display(theGuy)
+            // Then
+            dialog.choiceLabels().shouldBeEmpty()
+        }
+
+    @Test
+    fun `ClickChoice should call the selected choice`() =
+        sharedViewsTest {
+            // Given
+            val selectedChoices = mutableListOf<String>()
+            val dialog = newNpcDialogView()
+            dialog.display(theGuy, choices = listOf("Buy", "Sell").map { label -> NpcDialogView.Choice(label) { selectedChoices += label } })
+            dialog.visible = true
+            addChild(dialog)
+            // When
+            clickChoice(dialog, "Sell")
+            // Then
+            selectedChoices.shouldContainExactly("Sell")
         }
 }

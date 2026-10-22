@@ -390,14 +390,37 @@ class ExplorationPresenterTest {
         talk()
     }
 
+    // ... and chooses to buy.
     private fun openTheShop() {
         talkToTheMerchant()
-        npcDialogView.tapDialog()
+        npcDialogView.selectChoice("Buy")
         eventBus.dispatch()
     }
 
     @Test
-    fun `DialogTapped should open the shop of a merchant in place of its dialog, and keep talking`() {
+    fun `TalkToAdjacentNpc should display Buy, Sell and Leave on the dialog of a merchant`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        talkToTheMerchant()
+        // Then
+        npcDialogView.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
+    }
+
+    @Test
+    fun `TalkToAdjacentNpc should display no choices on the dialog of an npc that is no merchant`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        talk()
+        // Then
+        npcDialogView.choiceLabels().shouldBeEmpty()
+    }
+
+    @Test
+    fun `DialogTapped should keep talking to a merchant`() {
         // Given
         createPresenter()
         startExploring()
@@ -406,9 +429,24 @@ class ExplorationPresenterTest {
         npcDialogView.tapDialog()
         eventBus.dispatch()
         // Then
+        npcDialogView.visible.shouldBeTrue()
+        shopPresenter.isOpen.shouldBeFalse()
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
+    }
+
+    @Test
+    fun `Buy should open the shop of the merchant to buy in place of its dialog, and keep talking`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talkToTheMerchant()
+        // When
+        npcDialogView.selectChoice("Buy")
+        eventBus.dispatch()
+        // Then
         shopPresenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
-        shopView.titleText() shouldBe "Merchant"
+        shopView.mode() shouldBe ShopView.Mode.BUY
         npcDialogView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeFalse()
         playerCallToActionView.visible.shouldBeFalse()
@@ -416,39 +454,85 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DialogTapped should not open any shop when the npc is no merchant`() {
+    fun `Sell should open the shop of the merchant to sell`() {
         // Given
         createPresenter()
         startExploring()
-        talk()
+        talkToTheMerchant()
         // When
-        npcDialogView.tapDialog()
+        npcDialogView.selectChoice("Sell")
         eventBus.dispatch()
         // Then
-        shopPresenter.isOpen.shouldBeFalse()
-        apis.partyApi.searchParty()!!.talkingNpcId shouldBe null
+        shopView.visible.shouldBeTrue()
+        shopView.mode() shouldBe ShopView.Mode.SELL
     }
 
     @Test
-    fun `ShopClosed should close the shop and display the pad again when the talk is finished`() {
+    fun `Buy should not open the shop while the scene plays the previous steps`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talkToTheMerchant()
+        timeline.playLongStep()
+        // When
+        npcDialogView.selectChoice("Buy")
+        // Then
+        shopPresenter.isOpen.shouldBeFalse()
+    }
+
+    @Test
+    fun `Leave should finish the talk with the merchant and display the pad again`() {
+        // Given
+        createPresenter()
+        startExploring()
+        talkToTheMerchant()
+        // When
+        npcDialogView.selectChoice("Leave")
+        eventBus.dispatch()
+        // Then
+        npcDialogView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `ShopBackSelected should close the shop and display the merchant's dialog again, still talking`() {
         // Given
         createPresenter()
         startExploring()
         openTheShop()
         shopPresenter.shopSlotSelected(0)
         // When
-        shopPresenter.shopClosed()
+        shopPresenter.shopBackSelected()
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
-        virtualPadView.visible.shouldBeTrue()
+        npcDialogView.visible.shouldBeTrue()
+        npcDialogView.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
+        virtualPadView.visible.shouldBeFalse()
         playerCallToActionView.visible.shouldBeFalse()
-        playerCallToActionView.displayedItemActions shouldBe null
-        apis.partyApi
-            .searchParty()!!
-            .isExploring
-            .shouldBeTrue()
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
+    }
+
+    @Test
+    fun `Sell should open the shop to sell after Back from buying`() {
+        // Given
+        createPresenter()
+        startExploring()
+        openTheShop()
+        shopPresenter.shopBackSelected()
+        eventBus.dispatch()
+        // When
+        npcDialogView.selectChoice("Sell")
+        eventBus.dispatch()
+        // Then
+        shopPresenter.isOpen.shouldBeTrue()
+        shopView.mode() shouldBe ShopView.Mode.SELL
+        npcDialogView.visible.shouldBeFalse()
     }
 
     @Test

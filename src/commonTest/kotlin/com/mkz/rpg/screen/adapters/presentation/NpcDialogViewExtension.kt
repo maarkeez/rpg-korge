@@ -23,8 +23,29 @@ fun NpcDialogView.isPortraitLeftOfText(): Boolean = portrait?.let { it.x + it.sc
 /** Whether the name is on top of the line. */
 fun NpcDialogView.isNameAboveLine(): Boolean = nameText.y + nameText.height <= lineText.y
 
+/** The labels of the choices, in their order. */
+fun NpcDialogView.choiceLabels(): List<String> = choiceButtons.map { button -> button.text }
+
+/** Whether every choice is under the line and the portrait, in a row, inside the dialog. */
+fun NpcDialogView.areChoicesUnderText(): Boolean =
+    choiceButtons.all { button ->
+        button.y >= lineText.y + lineText.height &&
+            button.y >= (portrait?.let { it.y + it.scaledHeight } ?: 0.0) &&
+            button.y + button.height <= height &&
+            button.y == choiceButtons.first().y
+    }
+
+/** Selects the choice with the [label], as the player tapping it. */
+fun NpcDialogView.selectChoice(label: String) = choices.single { choice -> choice.label == label }.onSelected()
+
 /** Taps the dialog, as the player. */
 fun NpcDialogView.tapDialog() = tap()
 
 /** Taps the dialog where its line is written, as the player. */
 suspend fun ViewsForTesting.clickDialog(npcDialogView: NpcDialogView) = clickOn(npcDialogView.lineText)
+
+/** Taps the choice with the [label], as the player. */
+suspend fun ViewsForTesting.clickChoice(
+    npcDialogView: NpcDialogView,
+    label: String,
+) = clickOn(npcDialogView.choiceButtons.single { button -> button.text == label })

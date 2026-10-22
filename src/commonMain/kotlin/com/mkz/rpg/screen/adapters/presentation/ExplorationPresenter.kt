@@ -11,6 +11,7 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
+import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -26,8 +27,9 @@ import kotlin.time.Duration.Companion.seconds
  * counted.
  *
  * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
- * meanwhile, as the party neither walks nor starts a second while talking. Tapping the dialog of a merchant opens its
- * shop in place of the dialog instead (see [ShopPresenter]), until the shop is closed.
+ * meanwhile, as the party neither walks nor starts a second while talking. The dialog of a merchant is not closed by
+ * tapping it, but by its Leave choice. Its Buy and Sell choices open its shop in place of the dialog (see
+ * [ShopPresenter]), until Back displays the dialog again.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
@@ -94,6 +96,7 @@ class ExplorationPresenter(
         virtualPadView.setOnDirectionHeld { direction -> walkParty(direction) }
         virtualPadView.setOnAPressed { talkToAdjacentNpc() }
         npcDialogView.setOnTapped { dialogTapped() }
+        shopPresenter.setOnBack { shopBackSelected() }
     }
 
     /** Counts the time elapsed since the previous frame, and applies the standing terrain effects every second. */
@@ -123,19 +126,40 @@ class ExplorationPresenter(
         npcApi.talkToAdjacentNpc()
     }
 
-    // A merchant opens its shop, any other npc finishes the talk.
+    // Finishes the talk, but with a merchant, which is left with its Leave choice.
     private fun dialogTapped() {
+        if (timeline.isPlaying || !npcDialogView.visible || talkingNpc()?.isMerchant() == true) return
+        partyApi.finishTalk()
+    }
+
+    // The merchant's Buy or Sell choice.
+    private fun openShop(mode: Mode) {
         if (timeline.isPlaying || !npcDialogView.visible) return
-        val npc = partyApi.searchParty()?.talkingNpcId?.let { npcId -> npcApi.searchNpcById(npcId) }
-        if (npc != null && npc.stock.isNotEmpty()) {
-            timeline.play {
-                npcDialogView.visible = false
-                shopPresenter.open(npc)
-            }
-        } else {
-            partyApi.finishTalk()
+        val merchant = talkingNpc() ?: return
+        timeline.play {
+            npcDialogView.visible = false
+            shopPresenter.open(merchant, mode)
         }
     }
+
+    // The merchant's Leave choice.
+    private fun leaveMerchant() {
+        if (timeline.isPlaying || !npcDialogView.visible) return
+        partyApi.finishTalk()
+    }
+
+    // The party keeps talking to the merchant.
+    private fun shopBackSelected() {
+        val merchant = talkingNpc() ?: return
+        timeline.play {
+            shopPresenter.close()
+            displayNpcDialog(merchant)
+        }
+    }
+
+    private fun talkingNpc(): Npc.Dto? = partyApi.searchParty()?.talkingNpcId?.let { npcId -> npcApi.searchNpcById(npcId) }
+
+    private fun Npc.Dto.isMerchant() = stock.isNotEmpty()
 
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
@@ -149,9 +173,19 @@ class ExplorationPresenter(
         playerCallToActionView.visible = !isDisplayed
     }
 
-    // The dialog takes the place of the pad.
+    // The dialog takes the place of the pad, with Buy, Sell and Leave for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
-        npcDialogView.display(npc)
+        val choices =
+            if (npc.isMerchant()) {
+                listOf(
+                    NpcDialogView.Choice("Buy") { openShop(Mode.BUY) },
+                    NpcDialogView.Choice("Sell") { openShop(Mode.SELL) },
+                    NpcDialogView.Choice("Leave") { leaveMerchant() },
+                )
+            } else {
+                emptyList()
+            }
+        npcDialogView.display(npc, choices)
         virtualPadView.visible = false
         npcDialogView.visible = true
     }

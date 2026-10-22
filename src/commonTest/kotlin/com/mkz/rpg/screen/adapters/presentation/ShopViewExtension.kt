@@ -22,11 +22,8 @@ fun ShopView.equippedSlotIndexes(): List<Int> = slotViews.indices.filter { index
 /** The slots framed in white, as their item is selected. */
 fun ShopView.selectedSlotIndexes(): List<Int> = slotViews.indices.filter { index -> slotViews[index].findViewByName(InventorySlotView.SELECTION_FRAME) != null }
 
-/** The highlighted tab. */
-fun ShopView.activeTab(): ShopView.Tab = activeTab
-
-/** The colour of the Buy and Sell tabs. */
-fun ShopView.tabColors(): Pair<RGBA, RGBA> = buyTabButton.bgColorOut to sellTabButton.bgColorOut
+/** Whether the buyer buys or sells. */
+fun ShopView.mode(): ShopView.Mode = mode
 
 /** The buyer's name, gold and bag, e.g.: Knight · 20 G · Bag 11/12. */
 fun ShopView.buyerText(): String = buyerView.nameText()
@@ -39,16 +36,12 @@ suspend fun ViewsForTesting.clickSlot(
     index: Int,
 ) = clickOn(shopView.slotViews[index])
 
-suspend fun ViewsForTesting.clickBuyTab(shopView: ShopView) = clickOn(shopView.buyTabButton)
-
-suspend fun ViewsForTesting.clickSellTab(shopView: ShopView) = clickOn(shopView.sellTabButton)
-
 suspend fun ViewsForTesting.clickDot(
     shopView: ShopView,
     partyIndex: Int,
 ) = clickOn(shopView.dots[partyIndex])
 
-suspend fun ViewsForTesting.clickClose(shopView: ShopView) = clickOn(shopView.closeButton)
+suspend fun ViewsForTesting.clickBack(shopView: ShopView) = clickOn(shopView.backButton)
 
 /** Drags the mouse across the shop, starting on its first slot, [dx] pixels to the right (negative to the left). */
 suspend fun ViewsForTesting.swipeShop(

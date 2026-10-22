@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
-import com.mkz.rpg.screen.adapters.presentation.ShopView.Tab
+import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -15,17 +15,12 @@ class ShopViewTest : ViewsForTesting() {
     // Records what the player does on the shop.
     private class RecordingDelegate : ShopView.Delegate {
         val selectedSlots = mutableListOf<Int>()
-        val selectedTabs = mutableListOf<Tab>()
         val swipes = mutableListOf<Int>()
         val selectedBuyers = mutableListOf<Int>()
-        var isClosed = false
+        var isBackSelected = false
 
         override fun shopSlotSelected(index: Int) {
             selectedSlots += index
-        }
-
-        override fun shopTabSelected(tab: Tab) {
-            selectedTabs += tab
         }
 
         override fun shopBuyerSwiped(step: Int) {
@@ -36,8 +31,8 @@ class ShopViewTest : ViewsForTesting() {
             selectedBuyers += partyIndex
         }
 
-        override fun shopClosed() {
-            isClosed = true
+        override fun shopBackSelected() {
+            isBackSelected = true
         }
     }
 
@@ -45,10 +40,10 @@ class ShopViewTest : ViewsForTesting() {
     private val knight = ShopView.Buyer(name = "Knight", gold = 20, usedStorageSpace = 11, maximumStorageSpace = 12, partyIndex = 1, partySize = 3)
 
     private fun ShopView.displayMerchant(
-        tab: Tab = Tab.BUY,
+        mode: Mode = Mode.BUY,
         slots: List<Slot> = listOf(Slot("mana-potion", isEquipped = false), Slot("hammer", isEquipped = false)),
         buyer: ShopView.Buyer = knight,
-    ) = display(merchantName = "Merchant", tab = tab, slots = slots, buyer = buyer)
+    ) = display(merchantName = "Merchant", mode = mode, slots = slots, buyer = buyer)
 
     @Test
     fun `Init should display 12 empty slots when is initialized`() =
@@ -61,7 +56,7 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display the merchant name and the items in order followed by the empty slots`() =
+    fun `Display should display buying from the merchant and the items in order followed by the empty slots`() =
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
@@ -69,7 +64,8 @@ class ShopViewTest : ViewsForTesting() {
             // When
             shopView.displayMerchant()
             // Then
-            shopView.titleText() shouldBe "Merchant"
+            shopView.titleText() shouldBe "Buy from Merchant"
+            shopView.mode() shouldBe Mode.BUY
             shopView.slotBitmaps().take(3).shouldContainExactly(
                 resourcesLoader.bitmap("lootableItem/mana-potion.png"),
                 resourcesLoader.bitmap("lootableItem/hammer.png"),
@@ -78,16 +74,15 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should highlight the active tab`() =
+    fun `Display should display selling to the merchant`() =
         sharedViewsTest {
             // Given
             val shopView = ShopView(loadedResourcesLoader())
             // When
-            shopView.displayMerchant(tab = Tab.SELL)
+            shopView.displayMerchant(mode = Mode.SELL)
             // Then
-            shopView.activeTab() shouldBe Tab.SELL
-            shopView.tabColors().second shouldBe ShopView.ACTIVE_TAB_COLOR
-            (shopView.tabColors().first == ShopView.ACTIVE_TAB_COLOR) shouldBe false
+            shopView.titleText() shouldBe "Sell to Merchant"
+            shopView.mode() shouldBe Mode.SELL
         }
 
     @Test
@@ -96,7 +91,7 @@ class ShopViewTest : ViewsForTesting() {
             // Given
             val shopView = ShopView(loadedResourcesLoader())
             // When
-            shopView.displayMerchant(tab = Tab.SELL, slots = listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)))
+            shopView.displayMerchant(mode = Mode.SELL, slots = listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)))
             // Then
             shopView.equippedSlotIndexes().shouldContainExactly(1)
         }
@@ -151,22 +146,19 @@ class ShopViewTest : ViewsForTesting() {
     }
 
     @Test
-    fun `Click should notify the delegate of the selected slot, tab and party member, and when the shop is closed`() =
+    fun `Click should notify the delegate of the selected slot and party member, and of Back`() =
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
             val shopView = newShopView(delegate)
             // When
             clickSlot(shopView, 1)
-            clickSellTab(shopView)
-            clickBuyTab(shopView)
             clickDot(shopView, 2)
-            clickClose(shopView)
+            clickBack(shopView)
             // Then
             delegate.selectedSlots.shouldContainExactly(1)
-            delegate.selectedTabs.shouldContainExactly(Tab.SELL, Tab.BUY)
             delegate.selectedBuyers.shouldContainExactly(2)
-            delegate.isClosed.shouldBeTrue()
+            delegate.isBackSelected.shouldBeTrue()
         }
 
     @Test

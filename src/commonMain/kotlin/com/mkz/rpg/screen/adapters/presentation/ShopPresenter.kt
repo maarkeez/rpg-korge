@@ -9,16 +9,17 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.party.adapters.presentation.PartyApi
-import com.mkz.rpg.screen.adapters.presentation.ShopView.Tab
+import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 /**
- * The shop of the merchant the party talks to, where one party member at a time buys and sells. It opens on the Buy tab,
- * with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its name
- * and price in the call to action, with Cancel and Buy, or Sell. Switching the buyer or the tab clears the selection.
+ * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
+ * sell, with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its
+ * name and price in the call to action, with Cancel and Buy, or Sell. Switching the buyer clears the selection. Back is
+ * handed to the listener set with [setOnBack], which returns to the merchant's dialog.
  */
 class ShopPresenter(
     private val shopView: ShopView,
@@ -37,9 +38,10 @@ class ShopPresenter(
     private var merchant: Npc.Dto? = null
     private var partyMemberIds: List<String> = emptyList()
     private var buyerIndex = 0
-    private var tab = Tab.BUY
+    private var mode = Mode.BUY
     private var displayedSlots: List<InventoryView.Slot> = emptyList()
     private var selectedSlotIndex: Int? = null
+    private var onBack: (() -> Unit)? = null
 
     /** Whether the scene displays the shop. */
     val isOpen: Boolean get() = merchant != null
@@ -60,18 +62,28 @@ class ShopPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
-    /** Displays the shop of the merchant, with the leader as buyer. To be played in the timeline. */
-    suspend fun open(merchant: Npc.Dto) {
+    fun setOnBack(listener: () -> Unit) {
+        onBack = listener
+    }
+
+    /** Displays the shop of the merchant, to buy or to sell, with the leader as buyer. To be played in the timeline. */
+    suspend fun open(
+        merchant: Npc.Dto,
+        mode: Mode,
+    ) {
         this.merchant = merchant
         partyMemberIds = partyApi.searchParty()?.battleUnitIds.orEmpty()
         buyerIndex = 0
-        tab = Tab.BUY
+        this.mode = mode
         displayShop()
         shopView.visible = true
         highlightBuyer()
     }
 
-    /** Hides the shop, restores the tiles, and displays the finish turn again in the call to action. Nothing happens when it is not open. */
+    /**
+     * Hides the shop and the call to action, restores the tiles, and displays the finish turn again in the call to action.
+     * Nothing happens when it is not open.
+     */
     fun close() {
         if (merchant == null) return
         merchant = null
@@ -79,21 +91,22 @@ class ShopPresenter(
         displayedSlots = emptyList()
         selectedSlotIndex = null
         shopView.visible = false
+        playerCallToActionView.visible = false
         battlefieldView.resetTiles()
         playerCallToActionView.redisplayFinishTurn()
     }
 
     private fun buyerId(): String? = partyMemberIds.getOrNull(buyerIndex)
 
-    // Displays the items of the active tab and the buyer, clearing the selection.
+    // Displays the items to buy or to sell and the buyer, clearing the selection.
     private fun displayShop() {
         val merchant = merchant ?: return
         val buyerId = buyerId() ?: return
         val inventory = inventoryApi.searchInventoryByBattleUnitId(buyerId)
         displayedSlots =
-            when (tab) {
-                Tab.BUY -> merchant.stock.map { lootableItemId -> InventoryView.Slot(lootableItemId, isEquipped = false) }
-                Tab.SELL -> {
+            when (mode) {
+                Mode.BUY -> merchant.stock.map { lootableItemId -> InventoryView.Slot(lootableItemId, isEquipped = false) }
+                Mode.SELL -> {
                     val equippedItems =
                         inventory
                             ?.equippedItems
@@ -112,7 +125,7 @@ class ShopPresenter(
                 partyIndex = buyerIndex,
                 partySize = partyMemberIds.size,
             )
-        shopView.display(merchantName = merchant.name, tab = tab, slots = displayedSlots, buyer = buyer)
+        shopView.display(merchantName = merchant.name, mode = mode, slots = displayedSlots, buyer = buyer)
         clearSelection()
     }
 
@@ -137,13 +150,13 @@ class ShopPresenter(
         val lootableItemId = displayedSlots.getOrNull(slotIndex)?.lootableItemId ?: return clearSelection()
         val lootableItem = lootableItemApi.searchLootableItemById(lootableItemId) ?: return
         val (price, tradeAction) =
-            when (tab) {
-                Tab.BUY ->
+            when (mode) {
+                Mode.BUY ->
                     lootableItem.price to
                         ItemActionsView.Action(label = "Buy", isEnabled = inventoryApi.canBuyItem(buyerId, lootableItemId)) {
                             whenIdle { inventoryApi.buyItem(buyerId, lootableItemId) }
                         }
-                Tab.SELL ->
+                Mode.SELL ->
                     lootableItem.sellPrice to
                         ItemActionsView.Action(label = "Sell", isEnabled = inventoryApi.canSellItem(buyerId, lootableItemId)) {
                             whenIdle { inventoryApi.sellItem(buyerId, lootableItemId) }
@@ -185,19 +198,9 @@ class ShopPresenter(
     // Delegates
     override fun shopSlotSelected(index: Int) = whenIdle { timeline.play { selectItem(index) } }
 
-    override fun shopTabSelected(tab: Tab) =
-        whenIdle {
-            if (tab == this.tab) return@whenIdle
-            timeline.play {
-                this.tab = tab
-                displayShop()
-            }
-        }
-
     override fun shopBuyerSwiped(step: Int) = switchBuyer(buyerIndex + step)
 
     override fun shopBuyerSelected(partyIndex: Int) = switchBuyer(partyIndex)
 
-    // Finishing the talk displays the pad again, which closes the shop.
-    override fun shopClosed() = whenIdle { partyApi.finishTalk() }
+    override fun shopBackSelected() = whenIdle { onBack?.invoke() }
 }

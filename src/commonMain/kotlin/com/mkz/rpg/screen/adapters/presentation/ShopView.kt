@@ -19,10 +19,10 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
 /**
- * A merchant's shop, displayed in place of its dialog once it is tapped, until it is closed. The Buy tab displays the
- * items the merchant sells, and the Sell tab the items of the buyer, one slot per item, as the inventory does. Under
- * them, the buyer's name, gold and bag, and one dot per party member, the buyer's one filled. Swiping the shop left or
- * right, or tapping a dot, switches the buyer.
+ * A merchant's shop, displayed in place of its dialog once the player chooses to buy or sell, until Back. Buying
+ * displays the items the merchant sells, and selling the items of the buyer, one slot per item, as the inventory does.
+ * Under them, the buyer's name, gold and bag, and one dot per party member, the buyer's one filled. Swiping the shop
+ * left or right, or tapping a dot, switches the buyer.
  */
 open class ShopView(
     resourcesLoader: BattleSceneResourcesLoader,
@@ -35,22 +35,21 @@ open class ShopView(
         private const val WIDTH = SLOTS_PER_ROW * SLOT_SIZE + (SLOTS_PER_ROW - 1) * SLOT_SPACING
         private const val HEIGHT = 300.0
         private const val TITLE_SPACING = 5.0
-        private const val TAB_WIDTH = 60.0
-        private const val CLOSE_WIDTH = 70.0
-        private const val TITLE_WIDTH = WIDTH - CLOSE_WIDTH - 2 * TAB_WIDTH - 3 * TITLE_SPACING
+        private const val BACK_WIDTH = 70.0
+        private const val TITLE_WIDTH = WIDTH - BACK_WIDTH - TITLE_SPACING
         private const val DOT_RADIUS = 5.0
         private const val DOT_SIZE = 24.0
 
         // How far the shop is dragged left or right to switch the buyer.
         const val SWIPE_THRESHOLD = 40.0
 
-        // FamiCube palette colours: blue like the human turn, white like the selection, and grey.
-        val ACTIVE_TAB_COLOR = RGBA(0x00, 0x84, 0xFF)
+        // FamiCube palette colours: white like the selection, and grey.
         val BUYER_DOT_COLOR = Colors.WHITE
         val PARTY_MEMBER_DOT_COLOR = RGBA(0x7B, 0x7B, 0x7B)
     }
 
-    enum class Tab { BUY, SELL }
+    /** Whether the buyer buys the merchant's items, or sells its own. */
+    enum class Mode { BUY, SELL }
 
     /** The party member trading: its position in the party, from the leader, and its gold and bag. */
     data class Buyer(
@@ -65,21 +64,17 @@ open class ShopView(
     interface Delegate {
         fun shopSlotSelected(index: Int)
 
-        fun shopTabSelected(tab: Tab)
-
         /** The shop was swiped left ([step] -1) or right ([step] 1). */
         fun shopBuyerSwiped(step: Int)
 
         fun shopBuyerSelected(partyIndex: Int)
 
-        fun shopClosed()
+        fun shopBackSelected()
     }
 
     private var delegate: Delegate? = null
     internal lateinit var titleView: UnitNameView
-    internal lateinit var buyTabButton: UIButton
-    internal lateinit var sellTabButton: UIButton
-    internal lateinit var closeButton: UIButton
+    internal lateinit var backButton: UIButton
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
     internal val buyerView = UnitNameView(Size(WIDTH, 20.0))
     internal val dotsRow = UIContainer(Size(WIDTH, DOT_SIZE))
@@ -87,7 +82,7 @@ open class ShopView(
     // The dot of each party member, in party order.
     internal var dots: List<Container> = emptyList()
         private set
-    internal var activeTab: Tab = Tab.BUY
+    internal var mode: Mode = Mode.BUY
         private set
 
     init {
@@ -97,15 +92,13 @@ open class ShopView(
             uiHorizontalStack(padding = TITLE_SPACING) {
                 titleView = UnitNameView(size = Size(width = TITLE_WIDTH, height = 20.0))
                 addChild(titleView)
-                buyTabButton = tabButton("Buy", Tab.BUY)
-                sellTabButton = tabButton("Sell", Tab.SELL)
-                closeButton =
-                    uiButton("Close") {
-                        width = CLOSE_WIDTH
+                backButton =
+                    uiButton("Back") {
+                        width = BACK_WIDTH
                         bgColorOut = Colors.DIMGRAY
                         bgColorOver = RGBA(85, 85, 85)
                         background.borderColor = Colors.LIGHTGRAY
-                        onClick { delegate?.shopClosed() }
+                        onClick { delegate?.shopBackSelected() }
                     }
             }
             slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
@@ -137,19 +130,22 @@ open class ShopView(
     }
 
     /**
-     * Displays the merchant's name, the active tab, its items in their order followed by the empty slots, and the buyer.
-     * Clears the selected slot.
+     * Displays whether the buyer buys from the merchant or sells to it, e.g.: Buy from Merchant, the items in their order
+     * followed by the empty slots, and the buyer. Clears the selected slot.
      */
     open fun display(
         merchantName: String,
-        tab: Tab,
+        mode: Mode,
         slots: List<InventoryView.Slot>,
         buyer: Buyer,
     ) {
-        titleView.display(merchantName)
-        activeTab = tab
-        highlight(buyTabButton, tab == Tab.BUY)
-        highlight(sellTabButton, tab == Tab.SELL)
+        titleView.display(
+            when (mode) {
+                Mode.BUY -> "Buy from $merchantName"
+                Mode.SELL -> "Sell to $merchantName"
+            },
+        )
+        this.mode = mode
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)
@@ -180,23 +176,5 @@ open class ShopView(
                     onClick { delegate?.shopBuyerSelected(partyIndex) }
                 }
             }
-    }
-
-    private fun Container.tabButton(
-        label: String,
-        tab: Tab,
-    ): UIButton =
-        uiButton(label) {
-            width = TAB_WIDTH
-            background.borderColor = Colors.LIGHTGRAY
-            onClick { delegate?.shopTabSelected(tab) }
-        }
-
-    private fun highlight(
-        tabButton: UIButton,
-        isActive: Boolean,
-    ) {
-        tabButton.bgColorOut = if (isActive) ACTIVE_TAB_COLOR else Colors.DIMGRAY
-        tabButton.bgColorOver = if (isActive) ACTIVE_TAB_COLOR else RGBA(85, 85, 85)
     }
 }

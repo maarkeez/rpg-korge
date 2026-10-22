@@ -15,7 +15,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
-import com.mkz.rpg.screen.adapters.presentation.ShopView.Tab
+import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -75,13 +75,25 @@ class ShopPresenterTest {
     private val vikingTile = PositionDto(row = 2, column = 1)
     private val merchantTile = PositionDto(row = 0, column = 1)
 
-    // The party talks to the merchant, and its shop opens.
-    private fun openTheShop() {
+    // The party talks to the merchant, and its shop opens to buy, or to sell.
+    private fun openTheShop(mode: Mode = Mode.BUY) {
         apis.partyApi.startExploration()
         eventBus.dispatch()
         apis.npcApi.talkToAdjacentNpc()
         eventBus.dispatch()
-        timeline.play { presenter.open(merchant) }
+        timeline.play { presenter.open(merchant, mode) }
+    }
+
+    // The viking buys a hammer, and the shop opens again to sell, with the viking as buyer.
+    private fun reopenToSellTheVikingsHammer(beforeReopening: () -> Unit = {}) {
+        openTheShop()
+        presenter.shopBuyerSwiped(1)
+        presenter.shopSlotSelected(1)
+        trade("Buy")
+        presenter.close()
+        beforeReopening()
+        timeline.play { presenter.open(merchant, Mode.SELL) }
+        presenter.shopBuyerSwiped(1)
     }
 
     private fun displayedItem() = playerCallToActionView.displayedItemActions.shouldNotBeNull()
@@ -101,14 +113,14 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `Open should display the merchant's items on the Buy tab, with the leader as buyer, and dim every tile but theirs`() {
+    fun `Open should display the merchant's items to buy, with the leader as buyer, and dim every tile but theirs`() {
         // When
         openTheShop()
         // Then
         presenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
-        shopView.titleText() shouldBe "Merchant"
-        shopView.activeTab() shouldBe Tab.BUY
+        shopView.titleText() shouldBe "Buy from Merchant"
+        shopView.mode() shouldBe Mode.BUY
         shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
         shopView.dotColors().shouldContainExactly(ShopView.BUYER_DOT_COLOR, ShopView.PARTY_MEMBER_DOT_COLOR)
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, merchantTile)
@@ -215,18 +227,13 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `ShopTabSelected should display the buyer's items on the Sell tab, clearing the selection`() {
-        // Given
-        openTheShop()
-        presenter.shopBuyerSwiped(1)
-        presenter.shopSlotSelected(1)
-        trade("Buy")
+    fun `Open should display the buyer's items to sell`() {
         // When
-        presenter.shopTabSelected(Tab.SELL)
+        reopenToSellTheVikingsHammer()
         // Then
-        shopView.activeTab() shouldBe Tab.SELL
+        shopView.titleText() shouldBe "Sell to Merchant"
+        shopView.mode() shouldBe Mode.SELL
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
         // When
         presenter.shopSlotSelected(0)
         // Then
@@ -236,11 +243,7 @@ class ShopPresenterTest {
     @Test
     fun `Sell should receive half the price and clear the selection`() {
         // Given
-        openTheShop()
-        presenter.shopBuyerSwiped(1)
-        presenter.shopSlotSelected(1)
-        trade("Buy")
-        presenter.shopTabSelected(Tab.SELL)
+        reopenToSellTheVikingsHammer()
         presenter.shopSlotSelected(0)
         // Then
         displayedItem().itemPrice shouldBe 25
@@ -256,14 +259,11 @@ class ShopPresenterTest {
     @Test
     fun `Sell should be disabled for the only copy of an equipped item, framed in gold`() {
         // Given
-        openTheShop()
-        presenter.shopBuyerSwiped(1)
-        presenter.shopSlotSelected(1)
-        trade("Buy")
-        apis.inventoryApi.equipItem("viking-1", "hammer")
-        eventBus.dispatch()
+        reopenToSellTheVikingsHammer {
+            apis.inventoryApi.equipItem("viking-1", "hammer")
+            eventBus.dispatch()
+        }
         // When
-        presenter.shopTabSelected(Tab.SELL)
         presenter.shopSlotSelected(0)
         // Then
         shopView.equippedSlotIndexes().shouldContainExactly(0)
@@ -282,21 +282,21 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `ShopClosed should finish the talk`() {
+    fun `ShopBackSelected should call the back listener, still talking to the merchant`() {
         // Given
+        var backs = 0
+        presenter.setOnBack { backs++ }
         openTheShop()
         // When
-        presenter.shopClosed()
+        presenter.shopBackSelected()
         eventBus.dispatch()
         // Then
-        apis.partyApi
-            .searchParty()!!
-            .isExploring
-            .shouldBeTrue()
+        backs shouldBe 1
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
     @Test
-    fun `Close should hide the shop, restore the tiles, and display the finish turn again`() {
+    fun `Close should hide the shop and the call to action, restore the tiles, and display the finish turn again`() {
         // Given
         openTheShop()
         presenter.shopSlotSelected(0)
@@ -306,6 +306,7 @@ class ShopPresenterTest {
         // Then
         presenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
         battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
         playerCallToActionView.displayedItemActions.shouldBeNull()
     }

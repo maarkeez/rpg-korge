@@ -14,7 +14,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
 
 - The arrows walk the party (see [Walking](#walking)).
-- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and shows the items it sells when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
+- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
 - B is displayed, but does nothing for now.
 
 ## Walking
@@ -51,7 +51,7 @@ An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Gam
 1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces ([`SearchNpcNextTo`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/queries/SearchNpcNextTo.kt)), and requests the party to talk to the first one (`RequestStartTalk`). The party talks to it ([`StartTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartTalk.kt), `NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
 2. While talking, the party is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
 3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
-4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant opens its shop instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
+4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant's dialog is only left with its Leave choice instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
 
 A battle starting while talking (`PauseExploration`) abandons the talk, and the battle HUD takes the place of the dialog.
 
@@ -68,15 +68,15 @@ The events are dispatched in the order they are published, so the tile is vacate
 
 ## Shopping at a merchant
 
-An npc with a stock in its game data is a merchant (e.g.: the merchant, see [Game data](game-data.md)). Its dialog is displayed as any other, and the party keeps talking to it, so time stays stopped, until its shop is closed. The shop is screen state only: the party has no mode nor event for it.
+An npc with a stock in its game data is a merchant (e.g.: the merchant, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave under its line, and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
 
-1. Tapping the merchant's dialog opens its shop in place of the dialog, instead of finishing the talk ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) displays the merchant's name, the Buy and Sell tabs, Close, 12 slots as the inventory does, and the buyer.
+1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) displays `Buy from Merchant` (or `Sell to Merchant`), Back, 12 slots as the inventory does, and the buyer.
 2. The buyer is one party member at a time, the leader when the shop opens. A line under the slots displays its name, gold and bag (e.g.: `Knight · 20 G · Bag 11/12`, or `Bag full`), and one dot per party member, in party order, the buyer's one filled.
 3. Swiping the shop left or right (at least 40 px) moves the buyer one dot left or right, stopping at the ends. Tapping a dot selects its party member. Every tile is dimmed but the buyer's and the merchant's, and the battlefield scrolls to the buyer.
-4. The shop opens on the Buy tab, with the items the merchant sells. Tapping one frames it, and the call to action displays its name and price with Cancel and Buy (e.g.: `Hammer ........ 50 G`). Buy is disabled when the buyer can not afford it or its bag is full. After buying, the item stays selected, to buy another one.
-5. The Sell tab displays the buyer's items, the equipped ones framed in gold. Tapping one displays its sell price with Cancel and Sell (e.g.: `Hammer ........ 25 G`). Sell is disabled for the only copy of an equipped item, and when the buyer's gold would go above 99,999 G. After selling, the selection is cleared.
-6. Switching the buyer or the tab, Cancel, and tapping an empty slot clear the selection and hide the call to action.
-7. Close finishes the talk (`NpcTalkFinished`): the shop is closed, the tiles are no longer dimmed, the virtual pad is displayed again, and time goes on.
+4. Buying displays the items the merchant sells. Tapping one frames it, and the call to action displays its name and price with Cancel and Buy (e.g.: `Hammer ........ 50 G`). Buy is disabled when the buyer can not afford it or its bag is full. After buying, the item stays selected, to buy another one.
+5. Selling displays the buyer's items, the equipped ones framed in gold. Tapping one displays its sell price with Cancel and Sell (e.g.: `Hammer ........ 25 G`). Sell is disabled for the only copy of an equipped item, and when the buyer's gold would go above 99,999 G. After selling, the selection is cleared.
+6. Switching the buyer, Cancel, and tapping an empty slot clear the selection and hide the call to action.
+7. Back closes the shop, the tiles are no longer dimmed, and the merchant's dialog is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
 A battle starting while shopping abandons the shop, as it abandons the dialog. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
 
