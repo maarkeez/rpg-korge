@@ -592,18 +592,28 @@ open class BattlefieldView(
         column: Int,
     ) = followTile(row, column)
 
-    // Centers the tile when it is out of the viewport or on its edge.
+    // Centers the tile on each axis where it is out of the viewport or on its edge, keeping the scroll of the other axis.
+    // On a border of the battlefield, the centered scroll is clamped back to the current one, so that axis does not scroll.
     private suspend fun followTile(
         row: Int,
         column: Int,
     ) {
         val tileX = column * TILE_SIZE.toDouble()
         val tileY = row * TILE_SIZE.toDouble()
-        if (isAwayFromViewportEdges(tileX, battlefieldGrid.x, VIEWPORT_WIDTH) && isAwayFromViewportEdges(tileY, battlefieldGrid.y, VIEWPORT_HEIGHT)) return
-        val centeredX = ((VIEWPORT_WIDTH - TILE_SIZE) / 2.0 - tileX).clamp(minScrollX, 0.0)
-        val centeredY = ((VIEWPORT_HEIGHT - TILE_SIZE) / 2.0 - tileY).clamp(minScrollY, 0.0)
-        if (centeredX == battlefieldGrid.x && centeredY == battlefieldGrid.y) return
-        scrollTo(x = centeredX, y = centeredY)
+        val followedX =
+            if (isAwayFromViewportEdges(tileX, battlefieldGrid.x, VIEWPORT_WIDTH)) {
+                battlefieldGrid.x
+            } else {
+                ((VIEWPORT_WIDTH - TILE_SIZE) / 2.0 - tileX).clamp(minScrollX, 0.0)
+            }
+        val followedY =
+            if (isAwayFromViewportEdges(tileY, battlefieldGrid.y, VIEWPORT_HEIGHT)) {
+                battlefieldGrid.y
+            } else {
+                ((VIEWPORT_HEIGHT - TILE_SIZE) / 2.0 - tileY).clamp(minScrollY, 0.0)
+            }
+        if (followedX == battlefieldGrid.x && followedY == battlefieldGrid.y) return
+        scrollTo(x = followedX, y = followedY)
         battlefieldAnimator.awaitComplete()
     }
 

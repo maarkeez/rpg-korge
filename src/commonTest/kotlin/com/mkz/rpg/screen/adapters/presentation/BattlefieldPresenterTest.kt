@@ -313,6 +313,46 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `MoveUnit should follow the leader of the party when it walks while exploring`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        val path = listOf(position(0, 1))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = path))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 1, fromColumn = 1, path = path, unitId = "knight"))
+        exploringBattlefieldView.unfollowedMoves.shouldBeEmpty()
+    }
+
+    @Test
+    fun `MoveUnit should not follow a follower of the party when it walks while exploring`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        val path = listOf(position(2, 0))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
+    }
+
+    // knight-1 leads the party, and knight-2 follows it.
+    private val partyOfTwoKnights =
+        listOf(
+            Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1),
+            Deployment(battleUnitId = "knight-2", unitId = "knight", playerId = "human", row = 2, column = 1),
+        )
+
+    @Test
     fun `MoveUnit should move a cpu battle unit wandering while exploring alongside the timeline, without following it`() {
         // Given
         val exploringApis =

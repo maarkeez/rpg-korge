@@ -824,6 +824,34 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
         }
 
+    @Test
+    fun `MoveBattleUnit should not scroll the battlefield when the battle unit moves along a border of the battlefield`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 4, column = 0))))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should only scroll the axis whose viewport edge the battle unit reaches when it moves`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7))))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-168.0 to 0.0)
+        }
+
     private suspend fun startMoving(
         battlefieldView: BattlefieldView,
         path: List<Battlefield.Dto.PositionDto>,

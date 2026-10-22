@@ -42,6 +42,8 @@ In a battle, an ally still blocks its tile: only the exploring party swaps.
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
 
+The battlefield only scrolls to follow the leader, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)). It scrolls when the leader reaches an edge of the viewport, centering it on that axis only, so walking along a border of the battlefield does not scroll it.
+
 ## Talking to an npc
 
 An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands next to the leader.

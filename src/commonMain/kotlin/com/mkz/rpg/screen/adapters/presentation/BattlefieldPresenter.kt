@@ -228,7 +228,10 @@ class BattlefieldPresenter(
             wanderUnit(event, battleUnit.unitId)
             return
         }
-        val stepDuration = if (isBattling()) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
+        val isBattling = isBattling()
+        val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
+        // While exploring, the battlefield only follows the leader, so it does not scroll from one party member to another.
+        val followsTiles = isBattling || !isPartyFollower(battleUnit)
         timeline.play {
             battlefieldView.resetTiles()
             battlefieldView.moveBattleUnit(
@@ -237,6 +240,7 @@ class BattlefieldPresenter(
                 path = event.path,
                 unitId = battleUnit.unitId,
                 stepDuration = stepDuration,
+                followsTiles = followsTiles,
             )
         }
     }
@@ -263,6 +267,11 @@ class BattlefieldPresenter(
                 otherUnitId = unitId,
             )
         }
+    }
+
+    private fun isPartyFollower(battleUnit: BattleUnit.Dto): Boolean {
+        val party = partyApi.searchParty() ?: return false
+        return battleUnit.id in party.battleUnitIds && battleUnit.id != party.leaderBattleUnitId
     }
 
     // The CPU battle units out of the battles wander without scrolling the battlefield away from the party, nor clearing
