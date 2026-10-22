@@ -66,7 +66,6 @@ class ExplorationPresenterTest {
         ShopPresenter(
             shopView,
             battlefieldView,
-            playerCallToActionView,
             apis.partyApi,
             apis.inventoryApi,
             apis.lootableItemApi,
@@ -446,7 +445,7 @@ class ExplorationPresenterTest {
         // Then
         shopPresenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
-        shopView.mode() shouldBe ShopView.Mode.BUY
+        shopView.footerText() shouldBe "Tap an item to buy"
         npcDialogView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeFalse()
         playerCallToActionView.visible.shouldBeFalse()
@@ -464,7 +463,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         shopView.visible.shouldBeTrue()
-        shopView.mode() shouldBe ShopView.Mode.SELL
+        shopView.footerText() shouldBe "Nothing to sell"
     }
 
     @Test
@@ -531,7 +530,7 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeTrue()
-        shopView.mode() shouldBe ShopView.Mode.SELL
+        shopView.footerText() shouldBe "Nothing to sell"
         npcDialogView.visible.shouldBeFalse()
     }
 

@@ -168,7 +168,6 @@ class BattleScene(
                     ShopPresenter(
                         shopView,
                         battlefieldView,
-                        playerCallToActionView,
                         partyApi,
                         inventoryApi,
                         lootableItemApi,

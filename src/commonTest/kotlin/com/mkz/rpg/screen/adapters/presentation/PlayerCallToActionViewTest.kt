@@ -191,27 +191,6 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayItemActions should run the action and keep the item actions when they do not redisplay the finish turn`() =
-        sharedViewsTest {
-            // Given
-            var bought = false
-            val playerCallToActionView = PlayerCallToActionView()
-            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(
-                itemName = "Hammer",
-                itemPrice = 50,
-                actions = listOf(ItemActionsView.Action(label = "Buy") { bought = true }),
-                redisplaysFinishTurn = false,
-            )
-            addChild(playerCallToActionView)
-            // When
-            clickItemAction(playerCallToActionView, "Buy")
-            // Then
-            bought.shouldBeTrue()
-            playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
-        }
-
-    @Test
     fun `DisplayItemActions should run the action and display the finish turn again when an item action is clicked`() =
         sharedViewsTest {
             // Given

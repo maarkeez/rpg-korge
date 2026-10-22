@@ -24,7 +24,6 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -54,13 +53,11 @@ class ShopPresenterTest {
     private val eventBus = apis.eventBus
     private val shopView = ShopView(BattleSceneResourcesLoader())
     private val battlefieldView = FakeBattlefieldView()
-    private val playerCallToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
     private val presenter =
         ShopPresenter(
             shopView,
             battlefieldView,
-            playerCallToActionView,
             apis.partyApi,
             apis.inventoryApi,
             apis.lootableItemApi,
@@ -87,21 +84,17 @@ class ShopPresenterTest {
     // The viking buys a hammer, and the shop opens again to sell, with the viking as buyer.
     private fun reopenToSellTheVikingsHammer(beforeReopening: () -> Unit = {}) {
         openTheShop()
-        presenter.shopBuyerSwiped(1)
+        presenter.shopBuyerStepped(1)
         presenter.shopSlotSelected(1)
-        trade("Buy")
+        trade()
         presenter.close()
         beforeReopening()
         timeline.play { presenter.open(merchant, Mode.SELL) }
-        presenter.shopBuyerSwiped(1)
+        presenter.shopBuyerStepped(1)
     }
 
-    private fun displayedItem() = playerCallToActionView.displayedItemActions.shouldNotBeNull()
-
-    private fun displayedAction(label: String) = displayedItem().actions.single { action -> action.label == label }
-
-    private fun trade(label: String) {
-        displayedAction(label).onSelected()
+    private fun trade() {
+        presenter.shopActionSelected()
         eventBus.dispatch()
     }
 
@@ -119,31 +112,29 @@ class ShopPresenterTest {
         // Then
         presenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
-        shopView.titleText() shouldBe "Buy from Merchant"
-        shopView.mode() shouldBe Mode.BUY
         shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
-        shopView.dotColors().shouldContainExactly(ShopView.BUYER_DOT_COLOR, ShopView.PARTY_MEMBER_DOT_COLOR)
+        shopView.arrowsEnabled() shouldBe (false to true)
+        shopView.footerText() shouldBe "Tap an item to buy"
+        shopView.action().shouldBeNull()
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, merchantTile)
         battlefieldView.scrolledToTiles.last() shouldBe knightTile
-        playerCallToActionView.visible.shouldBeFalse()
     }
 
     @Test
-    fun `ShopSlotSelected should display the item price with Cancel, and Buy disabled when the buyer can not afford it`() {
+    fun `ShopSlotSelected should display the item price, and Buy disabled when the buyer can not afford it`() {
         // Given
         openTheShop()
         // When
         presenter.shopSlotSelected(1)
         // Then
         shopView.selectedSlotIndexes().shouldContainExactly(1)
-        playerCallToActionView.visible.shouldBeTrue()
-        displayedItem().itemName shouldBe "Hammer"
-        displayedItem().itemPrice shouldBe 50
-        displayedItem().actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Buy" to false)
+        shopView.footerText() shouldBe "Hammer"
+        shopView.footerPrice() shouldBe "50 G"
+        shopView.action() shouldBe ("Buy" to false)
     }
 
     @Test
-    fun `ShopSlotSelected should clear the selection and hide the call to action when an empty slot is selected`() {
+    fun `ShopSlotSelected should clear the selection and display the hint again when an empty slot is selected`() {
         // Given
         openTheShop()
         presenter.shopSlotSelected(0)
@@ -151,79 +142,85 @@ class ShopPresenterTest {
         presenter.shopSlotSelected(5)
         // Then
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
+        shopView.footerText() shouldBe "Tap an item to buy"
+        shopView.action().shouldBeNull()
     }
 
     @Test
-    fun `Cancel should clear the selection and hide the call to action`() {
+    fun `ShopSlotSelected should clear the selection when the selected item is selected again`() {
         // Given
         openTheShop()
         presenter.shopSlotSelected(0)
         // When
-        trade("Cancel")
+        presenter.shopSlotSelected(0)
         // Then
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
+        shopView.footerText() shouldBe "Tap an item to buy"
+        // When
+        presenter.shopSlotSelected(0)
+        // Then
+        shopView.selectedSlotIndexes().shouldContainExactly(0)
     }
 
     @Test
-    fun `ShopBuyerSwiped should switch the buyer, clear the selection, dim every tile but the new buyer's and the merchant's, and scroll to it`() {
+    fun `ShopBuyerStepped should switch the buyer, clear the selection, dim every tile but the new buyer's and the merchant's, and scroll to it`() {
         // Given
         openTheShop()
         presenter.shopSlotSelected(0)
         // When
-        presenter.shopBuyerSwiped(1)
+        presenter.shopBuyerStepped(1)
         // Then
         shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
-        shopView.dotColors().shouldContainExactly(ShopView.PARTY_MEMBER_DOT_COLOR, ShopView.BUYER_DOT_COLOR)
+        shopView.arrowsEnabled() shouldBe (true to false)
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
+        shopView.action().shouldBeNull()
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(vikingTile, merchantTile)
         battlefieldView.scrolledToTiles.last() shouldBe vikingTile
     }
 
     @Test
-    fun `ShopBuyerSwiped should stop at the ends of the party`() {
+    fun `ShopBuyerStepped should stop at the ends of the party`() {
         // Given
         openTheShop()
         // When
-        presenter.shopBuyerSwiped(-1)
+        presenter.shopBuyerStepped(-1)
         // Then
         shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
         // When
-        presenter.shopBuyerSwiped(1)
-        presenter.shopBuyerSwiped(1)
+        presenter.shopBuyerStepped(1)
+        presenter.shopBuyerStepped(1)
         // Then
         shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
     }
 
     @Test
-    fun `ShopBuyerSelected should switch to the party member of the tapped dot`() {
+    fun `ShopActionSelected should buy the item, keeping it selected with Buy checked again`() {
         // Given
         openTheShop()
-        // When
-        presenter.shopBuyerSelected(1)
-        // Then
-        shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
-    }
-
-    @Test
-    fun `Buy should pay and store the item, keeping it selected with Buy checked again`() {
-        // Given
-        openTheShop()
-        presenter.shopBuyerSwiped(1)
+        presenter.shopBuyerStepped(1)
         presenter.shopSlotSelected(1)
         // When
-        trade("Buy")
+        trade()
         // Then
         shopView.buyerText() shouldBe "Viking · 50 G · Bag 1/12"
         shopView.selectedSlotIndexes().shouldContainExactly(1)
-        displayedAction("Buy").isEnabled.shouldBeTrue()
+        shopView.action() shouldBe ("Buy" to true)
         // When
-        trade("Buy")
+        trade()
         // Then
         shopView.buyerText() shouldBe "Viking · 0 G · Bag 2/12"
-        displayedAction("Buy").isEnabled.shouldBeFalse()
+        shopView.action() shouldBe ("Buy" to false)
+    }
+
+    @Test
+    fun `ShopActionSelected should do nothing when the buyer can not afford the item`() {
+        // Given
+        openTheShop()
+        presenter.shopSlotSelected(1)
+        // When
+        trade()
+        // Then
+        shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
     }
 
     @Test
@@ -231,29 +228,36 @@ class ShopPresenterTest {
         // When
         reopenToSellTheVikingsHammer()
         // Then
-        shopView.titleText() shouldBe "Sell to Merchant"
-        shopView.mode() shouldBe Mode.SELL
         shopView.selectedSlotIndexes().shouldBeEmpty()
+        shopView.footerText() shouldBe "Tap an item to sell"
         // When
         presenter.shopSlotSelected(0)
         // Then
-        displayedItem().itemName shouldBe "Hammer"
+        shopView.footerText() shouldBe "Hammer"
     }
 
     @Test
-    fun `Sell should receive half the price and clear the selection`() {
+    fun `Open should display there is nothing to sell when the buyer stores no item`() {
+        // When
+        openTheShop(Mode.SELL)
+        // Then
+        shopView.footerText() shouldBe "Nothing to sell"
+    }
+
+    @Test
+    fun `ShopActionSelected should sell the item for half the price and clear the selection`() {
         // Given
         reopenToSellTheVikingsHammer()
         presenter.shopSlotSelected(0)
         // Then
-        displayedItem().itemPrice shouldBe 25
-        displayedItem().actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Sell" to true)
+        shopView.footerPrice() shouldBe "25 G"
+        shopView.action() shouldBe ("Sell" to true)
         // When
-        trade("Sell")
+        trade()
         // Then
         shopView.buyerText() shouldBe "Viking · 75 G · Bag 0/12"
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        playerCallToActionView.visible.shouldBeFalse()
+        shopView.footerText() shouldBe "Nothing to sell"
     }
 
     @Test
@@ -267,7 +271,7 @@ class ShopPresenterTest {
         presenter.shopSlotSelected(0)
         // Then
         shopView.equippedSlotIndexes().shouldContainExactly(0)
-        displayedAction("Sell").isEnabled.shouldBeFalse()
+        shopView.action() shouldBe ("Sell" to false)
     }
 
     @Test
@@ -278,7 +282,7 @@ class ShopPresenterTest {
         // When
         presenter.shopSlotSelected(0)
         // Then
-        playerCallToActionView.displayedItemActions.shouldBeNull()
+        shopView.selectedSlotIndexes().shouldBeEmpty()
     }
 
     @Test
@@ -296,7 +300,7 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `Close should hide the shop and the call to action, restore the tiles, and display the finish turn again`() {
+    fun `Close should hide the shop and restore the tiles`() {
         // Given
         openTheShop()
         presenter.shopSlotSelected(0)
@@ -306,8 +310,6 @@ class ShopPresenterTest {
         // Then
         presenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
         battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
-        playerCallToActionView.displayedItemActions.shouldBeNull()
     }
 }

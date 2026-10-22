@@ -2,27 +2,29 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
+import korlibs.image.text.TextAlignment
 import korlibs.korge.input.SwipeDirection
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onSwipe
+import korlibs.korge.style.styles
+import korlibs.korge.style.textAlignment
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
+import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiButton
-import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
+import korlibs.korge.ui.uiText
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
-import korlibs.korge.view.align.centerOn
-import korlibs.korge.view.circle
-import korlibs.korge.view.container
+import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
 /**
- * A merchant's shop, displayed in place of its dialog once the player chooses to buy or sell, until Back. Buying
- * displays the items the merchant sells, and selling the items of the buyer, one slot per item, as the inventory does.
- * Under them, the buyer's name, gold and bag, and one dot per party member, the buyer's one filled. Swiping the shop
- * left or right, or tapping a dot, switches the buyer.
+ * A merchant's shop, displayed in place of its dialog once the player chooses to buy or sell, until Back. On top, the
+ * buyer's name, gold and bag, between the arrows that switch the buyer, as swiping the shop left or right does. Under
+ * it, the items to buy or to sell, one slot per item, as the inventory does. At the bottom, every button the player
+ * taps: Back, and a hint until an item is selected, then its name and price with Buy or Sell.
  */
 open class ShopView(
     resourcesLoader: BattleSceneResourcesLoader,
@@ -33,19 +35,17 @@ open class ShopView(
         private const val SLOT_SIZE = 60.0
         private const val SLOT_SPACING = 6.0
         private const val WIDTH = SLOTS_PER_ROW * SLOT_SIZE + (SLOTS_PER_ROW - 1) * SLOT_SPACING
-        private const val HEIGHT = 300.0
-        private const val TITLE_SPACING = 5.0
-        private const val BACK_WIDTH = 70.0
-        private const val TITLE_WIDTH = WIDTH - BACK_WIDTH - TITLE_SPACING
-        private const val DOT_RADIUS = 5.0
-        private const val DOT_SIZE = 24.0
+        private const val PADDING = 10.0
+        private const val SPACING = 8.0
+        private const val BAR_HEIGHT = 32.0
+        private const val ARROW_WIDTH = 40.0
+        private const val BACK_WIDTH = 64.0
+        private const val ACTION_WIDTH = 120.0
+        private const val ITEM_WIDTH = WIDTH - BACK_WIDTH - ACTION_WIDTH - 2 * SPACING
+        private const val HEIGHT = 2 * BAR_HEIGHT + 2 * SLOT_SIZE + SLOT_SPACING + 3 * PADDING
 
         // How far the shop is dragged left or right to switch the buyer.
         const val SWIPE_THRESHOLD = 40.0
-
-        // FamiCube palette colours: white like the selection, and grey.
-        val BUYER_DOT_COLOR = Colors.WHITE
-        val PARTY_MEMBER_DOT_COLOR = RGBA(0x7B, 0x7B, 0x7B)
     }
 
     /** Whether the buyer buys the merchant's items, or sells its own. */
@@ -64,52 +64,38 @@ open class ShopView(
     interface Delegate {
         fun shopSlotSelected(index: Int)
 
-        /** The shop was swiped left ([step] -1) or right ([step] 1). */
-        fun shopBuyerSwiped(step: Int)
+        /** The buyer was switched to the party member on its left ([step] -1) or right ([step] 1), with an arrow or a swipe. */
+        fun shopBuyerStepped(step: Int)
 
-        fun shopBuyerSelected(partyIndex: Int)
+        /** Buy or Sell was tapped. */
+        fun shopActionSelected()
 
         fun shopBackSelected()
     }
 
     private var delegate: Delegate? = null
-    internal lateinit var titleView: UnitNameView
-    internal lateinit var backButton: UIButton
+    internal lateinit var previousBuyerButton: UIButton
+    internal lateinit var nextBuyerButton: UIButton
+    internal lateinit var buyerText: UIText
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
-    internal val buyerView = UnitNameView(Size(WIDTH, 20.0))
-    internal val dotsRow = UIContainer(Size(WIDTH, DOT_SIZE))
-
-    // The dot of each party member, in party order.
-    internal var dots: List<Container> = emptyList()
-        private set
-    internal var mode: Mode = Mode.BUY
-        private set
+    internal lateinit var backButton: UIButton
+    internal lateinit var itemNameText: UIText
+    internal lateinit var itemPriceText: UIText
+    internal lateinit var actionButton: UIButton
 
     init {
         // The whole shop can be swiped, also between its slots and buttons.
         solidRect(Size(WIDTH, HEIGHT), Colors.TRANSPARENT)
-        uiVerticalStack(padding = 10.0) {
-            uiHorizontalStack(padding = TITLE_SPACING) {
-                titleView = UnitNameView(size = Size(width = TITLE_WIDTH, height = 20.0))
-                addChild(titleView)
-                backButton =
-                    uiButton("Back") {
-                        width = BACK_WIDTH
-                        bgColorOut = Colors.DIMGRAY
-                        bgColorOver = RGBA(85, 85, 85)
-                        background.borderColor = Colors.LIGHTGRAY
-                        onClick { delegate?.shopBackSelected() }
-                    }
-            }
+        uiVerticalStack(padding = PADDING) {
+            addChild(header())
             slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
-                if (rowIndex > 0) uiSpacing(Size(0.0, SLOT_SPACING - 10.0))
+                if (rowIndex > 0) uiSpacing(Size(0.0, SLOT_SPACING - PADDING))
                 val row = UIContainer(Size(WIDTH, SLOT_SIZE))
                 rowSlots.forEachIndexed { columnIndex, slotView -> slotView.x = columnIndex * (SLOT_SIZE + SLOT_SPACING) }
                 rowSlots.forEach(row::addChild)
                 addChild(row)
             }
-            addChild(buyerView)
-            addChild(dotsRow)
+            addChild(footer())
         }
         slotViews.forEachIndexed { index, slotView -> slotView.setOnSelected { delegate?.shopSlotSelected(index) } }
         onSwipe(threshold = SWIPE_THRESHOLD) { swipe ->
@@ -126,31 +112,26 @@ open class ShopView(
     }
 
     internal fun swiped(step: Int) {
-        delegate?.shopBuyerSwiped(step)
+        delegate?.shopBuyerStepped(step)
     }
 
     /**
-     * Displays whether the buyer buys from the merchant or sells to it, e.g.: Buy from Merchant, the items in their order
-     * followed by the empty slots, and the buyer. Clears the selected slot.
+     * Displays the items in their order followed by the empty slots, and the buyer, e.g.: Knight · 20 G · Bag 11/12, or
+     * Bag full. The arrows are disabled at the ends of the party. Clears the selected slot.
      */
     open fun display(
-        merchantName: String,
-        mode: Mode,
         slots: List<InventoryView.Slot>,
         buyer: Buyer,
     ) {
-        titleView.display(
-            when (mode) {
-                Mode.BUY -> "Buy from $merchantName"
-                Mode.SELL -> "Sell to $merchantName"
-            },
-        )
-        this.mode = mode
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)
         }
-        displayBuyer(buyer)
+        val bag = if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) "Bag full" else "Bag ${buyer.usedStorageSpace}/${buyer.maximumStorageSpace}"
+        buyerText.text = "${buyer.name} · ${goldText(buyer.gold)} · $bag"
+        previousBuyerButton.enabled = buyer.partyIndex > 0
+        nextBuyerButton.enabled = buyer.partyIndex < buyer.partySize - 1
+        selectSlot(null)
     }
 
     /** Frames the selected slot, or none when [index] is `null`. */
@@ -158,23 +139,67 @@ open class ShopView(
         slotViews.forEachIndexed { slotIndex, slotView -> if (slotIndex == index) slotView.select() else slotView.unselect() }
     }
 
-    // E.g.: Knight · 20 G · Bag 11/12, or Bag full, and one dot per party member.
-    private fun displayBuyer(buyer: Buyer) {
-        val bag = if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) "Bag full" else "Bag ${buyer.usedStorageSpace}/${buyer.maximumStorageSpace}"
-        buyerView.display("${buyer.name} · ${goldText(buyer.gold)} · $bag")
-        dots.forEach { dot -> dot.removeFromParent() }
-        val dotsX = (WIDTH - buyer.partySize * DOT_SIZE) / 2
-        dots =
-            List(buyer.partySize) { partyIndex ->
-                dotsRow.container {
-                    x = dotsX + partyIndex * DOT_SIZE
-                    // The whole dot area can be tapped, not only the dot.
-                    val area = solidRect(Size(DOT_SIZE, DOT_SIZE), Colors.TRANSPARENT)
-                    circle(radius = DOT_RADIUS, fill = if (partyIndex == buyer.partyIndex) BUYER_DOT_COLOR else PARTY_MEMBER_DOT_COLOR) {
-                        centerOn(area)
-                    }
-                    onClick { delegate?.shopBuyerSelected(partyIndex) }
-                }
-            }
+    /** Displays the [hint] next to Back, e.g.: Tap an item to buy, without Buy nor Sell. */
+    open fun displayHint(hint: String) {
+        itemNameText.text = hint
+        itemPriceText.text = ""
+        actionButton.visible = false
     }
+
+    /** Displays the selected item's name and price next to Back, and its action, e.g.: Buy, disabled when it can not be done. */
+    open fun displayItem(
+        itemName: String,
+        itemPrice: Int,
+        actionLabel: String,
+        isActionEnabled: Boolean,
+    ) {
+        itemNameText.text = itemName
+        itemPriceText.text = goldText(itemPrice)
+        actionButton.text = actionLabel
+        actionButton.enabled = isActionEnabled
+        actionButton.visible = true
+    }
+
+    // < Knight · 20 G · Bag 11/12 >
+    private fun header(): UIContainer =
+        UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
+            previousBuyerButton = button("<", ARROW_WIDTH) { delegate?.shopBuyerStepped(-1) }
+            buyerText =
+                uiText("", size = Size(WIDTH - 2 * ARROW_WIDTH, BAR_HEIGHT)) {
+                    styles.textAlignment = TextAlignment.MIDDLE_CENTER
+                    position(ARROW_WIDTH, 0.0)
+                }
+            nextBuyerButton = button(">", ARROW_WIDTH) { delegate?.shopBuyerStepped(1) }.position(WIDTH - ARROW_WIDTH, 0.0)
+        }
+
+    // Back  Hammer ....... 50 G  Buy
+    private fun footer(): UIContainer =
+        UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
+            backButton = button("Back", BACK_WIDTH) { delegate?.shopBackSelected() }
+            val itemX = BACK_WIDTH + SPACING
+            itemNameText =
+                uiText("", size = Size(ITEM_WIDTH, BAR_HEIGHT)) {
+                    styles.textAlignment = TextAlignment.MIDDLE_LEFT
+                    position(itemX, 0.0)
+                }
+            itemPriceText =
+                uiText("", size = Size(ITEM_WIDTH, BAR_HEIGHT)) {
+                    styles.textAlignment = TextAlignment.MIDDLE_RIGHT
+                    position(itemX, 0.0)
+                }
+            actionButton = button("", ACTION_WIDTH) { delegate?.shopActionSelected() }.position(WIDTH - ACTION_WIDTH, 0.0)
+            actionButton.visible = false
+        }
+
+    private fun Container.button(
+        label: String,
+        width: Double,
+        onSelected: () -> Unit,
+    ): UIButton =
+        uiButton(label, size = Size(width, BAR_HEIGHT)) {
+            bgColorOut = Colors.DIMGRAY
+            bgColorOver = RGBA(85, 85, 85)
+            background.borderColor = Colors.LIGHTGRAY
+            onClick { onSelected() }
+        }
 }

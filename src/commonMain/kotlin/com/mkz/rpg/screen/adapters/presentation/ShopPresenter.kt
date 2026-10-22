@@ -18,13 +18,12 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 /**
  * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
  * sell, with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its
- * name and price in the call to action, with Cancel and Buy, or Sell. Switching the buyer clears the selection. Back is
+ * name and price with Buy, or Sell, and tapping it again clears the selection, as switching the buyer does. Back is
  * handed to the listener set with [setOnBack], which returns to the merchant's dialog.
  */
 class ShopPresenter(
     private val shopView: ShopView,
     private val battlefieldView: BattlefieldView,
-    private val playerCallToActionView: PlayerCallToActionView,
     private val partyApi: PartyApi,
     private val inventoryApi: InventoryApi,
     private val lootableItemApi: LootableItemApi,
@@ -80,10 +79,7 @@ class ShopPresenter(
         highlightBuyer()
     }
 
-    /**
-     * Hides the shop and the call to action, restores the tiles, and displays the finish turn again in the call to action.
-     * Nothing happens when it is not open.
-     */
+    /** Hides the shop and restores the tiles. Nothing happens when it is not open. */
     fun close() {
         if (merchant == null) return
         merchant = null
@@ -91,9 +87,7 @@ class ShopPresenter(
         displayedSlots = emptyList()
         selectedSlotIndex = null
         shopView.visible = false
-        playerCallToActionView.visible = false
         battlefieldView.resetTiles()
-        playerCallToActionView.redisplayFinishTurn()
     }
 
     private fun buyerId(): String? = partyMemberIds.getOrNull(buyerIndex)
@@ -125,7 +119,7 @@ class ShopPresenter(
                 partyIndex = buyerIndex,
                 partySize = partyMemberIds.size,
             )
-        shopView.display(merchantName = merchant.name, mode = mode, slots = displayedSlots, buyer = buyer)
+        shopView.display(slots = displayedSlots, buyer = buyer)
         clearSelection()
     }
 
@@ -138,35 +132,42 @@ class ShopPresenter(
         battlefieldView.scrollToTile(buyerPosition.row, buyerPosition.column)
     }
 
+    // The hint tells what tapping an item does, or that the buyer has nothing to sell.
     private fun clearSelection() {
         selectedSlotIndex = null
         shopView.selectSlot(null)
-        playerCallToActionView.visible = false
+        shopView.displayHint(
+            when {
+                mode == Mode.BUY -> "Tap an item to buy"
+                displayedSlots.isEmpty() -> "Nothing to sell"
+                else -> "Tap an item to sell"
+            },
+        )
     }
 
-    // Displays the name and price of the item with Cancel and Buy, or Sell, enabled when the buyer can trade it.
+    // Displays the name and price of the item with Buy, or Sell, enabled when the buyer can trade it. Tapping the selected
+    // item, or an empty slot, clears the selection.
     private fun selectItem(slotIndex: Int) {
         val buyerId = buyerId() ?: return
+        if (slotIndex == selectedSlotIndex) return clearSelection()
         val lootableItemId = displayedSlots.getOrNull(slotIndex)?.lootableItemId ?: return clearSelection()
         val lootableItem = lootableItemApi.searchLootableItemById(lootableItemId) ?: return
-        val (price, tradeAction) =
-            when (mode) {
-                Mode.BUY ->
-                    lootableItem.price to
-                        ItemActionsView.Action(label = "Buy", isEnabled = inventoryApi.canBuyItem(buyerId, lootableItemId)) {
-                            whenIdle { inventoryApi.buyItem(buyerId, lootableItemId) }
-                        }
-                Mode.SELL ->
-                    lootableItem.sellPrice to
-                        ItemActionsView.Action(label = "Sell", isEnabled = inventoryApi.canSellItem(buyerId, lootableItemId)) {
-                            whenIdle { inventoryApi.sellItem(buyerId, lootableItemId) }
-                        }
-            }
-        val cancelAction = ItemActionsView.Action(label = "Cancel") { whenIdle { timeline.play { clearSelection() } } }
         selectedSlotIndex = slotIndex
         shopView.selectSlot(slotIndex)
-        playerCallToActionView.displayItemActions(itemName = lootableItem.name, itemPrice = price, actions = listOf(cancelAction, tradeAction), redisplaysFinishTurn = false)
-        playerCallToActionView.visible = true
+        when (mode) {
+            Mode.BUY -> shopView.displayItem(lootableItem.name, lootableItem.price, actionLabel = "Buy", isActionEnabled = inventoryApi.canBuyItem(buyerId, lootableItemId))
+            Mode.SELL -> shopView.displayItem(lootableItem.name, lootableItem.sellPrice, actionLabel = "Sell", isActionEnabled = inventoryApi.canSellItem(buyerId, lootableItemId))
+        }
+    }
+
+    // Buys or sells the selected item, when the buyer can.
+    private fun trade() {
+        val buyerId = buyerId() ?: return
+        val lootableItemId = selectedSlotIndex?.let { slotIndex -> displayedSlots.getOrNull(slotIndex) }?.lootableItemId ?: return
+        when (mode) {
+            Mode.BUY -> if (inventoryApi.canBuyItem(buyerId, lootableItemId)) inventoryApi.buyItem(buyerId, lootableItemId)
+            Mode.SELL -> if (inventoryApi.canSellItem(buyerId, lootableItemId)) inventoryApi.sellItem(buyerId, lootableItemId)
+        }
     }
 
     // Displays the buyer's new gold and bag once it traded.
@@ -198,9 +199,9 @@ class ShopPresenter(
     // Delegates
     override fun shopSlotSelected(index: Int) = whenIdle { timeline.play { selectItem(index) } }
 
-    override fun shopBuyerSwiped(step: Int) = switchBuyer(buyerIndex + step)
+    override fun shopBuyerStepped(step: Int) = switchBuyer(buyerIndex + step)
 
-    override fun shopBuyerSelected(partyIndex: Int) = switchBuyer(partyIndex)
+    override fun shopActionSelected() = whenIdle { trade() }
 
     override fun shopBackSelected() = whenIdle { onBack?.invoke() }
 }

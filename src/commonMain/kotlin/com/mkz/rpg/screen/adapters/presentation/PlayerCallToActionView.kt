@@ -54,21 +54,20 @@ open class PlayerCallToActionView(
     }
 
     /**
-     * Displays the name and price of the selected item and its actions, e.g.: Consume or Buy. The finish turn is displayed
-     * again once an action is selected, unless [redisplaysFinishTurn] is `false` (e.g.: the shop, which keeps its actions).
+     * Displays the name and price of the selected item and its actions, e.g.: Consume. The finish turn is displayed again
+     * once an action is selected.
      */
     open fun displayItemActions(
         itemName: String,
         itemPrice: Int,
         actions: List<ItemActionsView.Action>,
-        redisplaysFinishTurn: Boolean = true,
     ) {
         val itemActions =
             actions.map { action ->
                 action.copy(
                     onSelected = {
                         action.onSelected()
-                        if (redisplaysFinishTurn) redisplayFinishTurn()
+                        redisplayFinishTurn()
                     },
                 )
             }
