@@ -1,0 +1,12 @@
+name = "Mending"
+cost = 10
+cooldown = 2
+targeting = "SELF"
+
+[[effects]]
+effectId = "mending-heal"
+target = "CASTER"
+
+[[effects]]
+effectId = "mending-heal"
+target = "NEARBY_ALLIES"

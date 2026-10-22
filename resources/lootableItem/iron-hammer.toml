@@ -1,0 +1,7 @@
+name = "Iron Hammer"
+price = 90
+type = "EQUIPPABLE"
+
+[equippable]
+effectIds = ["maximum-health-40"]
+equipmentZone = "WEAPON"

@@ -1,0 +1,6 @@
+name = "Bee Essence"
+price = 120
+type = "CONSUMABLE"
+
+[consumable]
+effectIds = ["learn-bee"]

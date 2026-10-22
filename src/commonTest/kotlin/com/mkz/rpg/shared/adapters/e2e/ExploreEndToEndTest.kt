@@ -30,7 +30,11 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.seconds
 
 class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup deploys the knights at (6,6), which leads, and (7,6), far from the CPU battle units.
+    // The battle setup deploys the knight at (2,1), alone in the party, out of reach of the CPU battle units, even while
+    // they wander. (2,2) is the next sand tile east, along the start corridor.
+    private val knightRow = KNIGHT_START_ROW
+    private val knightColumn = KNIGHT_START_COLUMN
+    private val nextTileColumn = KNIGHT_START_COLUMN + 1
 
     @Test
     fun `should explore with the virtual pad in place of the battle HUD when the human player plays a new game`() =
@@ -45,19 +49,18 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should walk the leading knight and have the other knight follow it when the human player taps an arrow`() =
+    fun `should walk the knight one tile when the human player taps an arrow`() =
         sharedViewsTest {
             // Given
             startNewGame()
-            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(7, 6) == true }
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
-            clickArrow(requireNotNull(virtualPadView()), DirectionDto.NORTH)
+            clickArrow(requireNotNull(virtualPadView()), DirectionDto.EAST)
             // Then
-            waitUntil { battlefieldView.hasBattleUnitAt(5, 6) && !battlefieldView.hasBattleUnitAt(7, 6) }
-            withClue("Expected the leading knight to walk to (5,6)") { battlefieldView.hasBattleUnitAt(5, 6).shouldBeTrue() }
-            withClue("Expected the other knight to follow it to (6,6)") { battlefieldView.hasBattleUnitAt(6, 6).shouldBeTrue() }
-            withClue("Expected the other knight to have left (7,6)") { battlefieldView.hasBattleUnitAt(7, 6).shouldBeFalse() }
+            waitUntil { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn) && !battlefieldView.hasBattleUnitAt(knightRow, knightColumn) }
+            withClue("Expected the knight to walk to ($knightRow,$nextTileColumn)") { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn).shouldBeTrue() }
+            withClue("Expected the knight to have left ($knightRow,$knightColumn)") { battlefieldView.hasBattleUnitAt(knightRow, knightColumn).shouldBeFalse() }
         }
 
     @Test
@@ -65,10 +68,10 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         sharedViewsTest {
             // Given
             startNewGame()
-            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
-            clickTile(battlefieldView, 6, 6)
+            clickTile(battlefieldView, knightRow, knightColumn)
             // Then
             waitUntil { isBattleHudShown() && battleUnitInfoView()?.isBagDisplayed() == true }
             withClue("Expected the battle HUD to display the knight info") { battleHudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
@@ -82,9 +85,9 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             // The CPU battle units always step instead of resting, so a tile is occupied every second.
             startNewGame(random = FixedDoublesRandom(0.99))
-            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, 6, 6)
+            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battleUnitInfoView()?.isBagDisplayed() == true }
             // When
             clickBag(requireNotNull(battleUnitInfoView()))
@@ -100,18 +103,18 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         sharedViewsTest {
             // Given
             startNewGame()
-            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+            waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, 6, 6)
+            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { isBattleHudShown() }
             // When
-            clickTile(battlefieldView, 5, 6)
+            clickTile(battlefieldView, knightRow, nextTileColumn)
             // Then
             waitUntil { virtualPadView()?.isPadShown() == true }
             withClue("Expected the virtual pad to be displayed again") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
             withClue("Expected the battle HUD to be hidden again") { isBattleHudShown().shouldBeFalse() }
-            withClue("Expected the knight to stay at (6,6)") { battlefieldView.hasBattleUnitAt(6, 6).shouldBeTrue() }
-            withClue("Expected the knight not to walk to the tapped tile") { battlefieldView.hasBattleUnitAt(5, 6).shouldBeFalse() }
+            withClue("Expected the knight to stay at ($knightRow,$knightColumn)") { battlefieldView.hasBattleUnitAt(knightRow, knightColumn).shouldBeTrue() }
+            withClue("Expected the knight not to walk to the tapped tile") { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn).shouldBeFalse() }
         }
 
     @Test

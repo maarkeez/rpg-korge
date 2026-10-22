@@ -48,7 +48,7 @@ class SetupBattleAcceptanceTest {
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"
-    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+    private val playerOneKnightBattleUnitId = "hero"
 
     private suspend fun setUp() {
         terrainApi.init()
@@ -73,19 +73,19 @@ class SetupBattleAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             val currentPosition = battlefieldApi.searchPosition(playerOneKnightBattleUnitId)!!
-            require(currentPosition.row == 6 && currentPosition.column == 6)
+            require(currentPosition.row == 2 && currentPosition.column == 1)
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
             battleUnitApi.moveBattleUnit(
                 battleUnitId = playerOneKnightBattleUnitId,
-                moveToRow = 5,
-                moveToColumn = 6,
+                moveToRow = 2,
+                moveToColumn = 2,
             )
             // When
             eventBus.dispatch()
             // Then
-            val previousTileOccupantId = battlefieldApi.searchOccupant(row = 6, column = 6)
+            val previousTileOccupantId = battlefieldApi.searchOccupant(row = 2, column = 1)
             previousTileOccupantId.shouldBeNull()
-            val newTileOccupantId = battlefieldApi.searchOccupant(row = 5, column = 6)
+            val newTileOccupantId = battlefieldApi.searchOccupant(row = 2, column = 2)
             newTileOccupantId shouldBe playerOneKnightBattleUnitId
         }
 
@@ -156,6 +156,11 @@ class SetupBattleAcceptanceTest {
             val tierTwoLootTable = lootTableApi.searchLootTableById(tierTwoLootTableId)
             // Then
             tierTwoLootTable.shouldNotBeNull()
-            tierTwoLootTable.entries.shouldContainExactly(EntryDto.lootableItem(lootableItemId = "hammer", weight = 50))
+            tierTwoLootTable.entries.shouldContainExactly(
+                EntryDto.lootableItem(lootableItemId = "health-potion", weight = 10),
+                EntryDto.lootableItem(lootableItemId = "mana-potion", weight = 10),
+                EntryDto.lootableItem(lootableItemId = "hammer", weight = 3),
+                EntryDto.nothing(weight = 5),
+            )
         }
 }

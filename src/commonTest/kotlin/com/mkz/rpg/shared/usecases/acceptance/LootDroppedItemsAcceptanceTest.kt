@@ -42,9 +42,9 @@ class LootDroppedItemsAcceptanceTest {
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"
-    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+    private val playerOneKnightBattleUnitId = "hero"
 
-    // The knight of the human player starts the battle at row 6 and column 6, with the sand tiles at its east free.
+    // The knight of the human player starts the battle at row 2 and column 1, with the sand tiles at its east free.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -68,9 +68,9 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
-            require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 6, column = 6))
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
+            require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 2, column = 1))
+            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
             // When
             eventBus.dispatch()
             // Then
@@ -83,8 +83,8 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 8)
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 8)
+            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
             // When
             eventBus.dispatch()
             // Then
@@ -97,12 +97,12 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
-            repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7) }
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 6, moveToColumn = 7)
+            repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2) }
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 2)
             // When
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe List(12) { "health-potion" }
-            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 6, column = 7) to listOf("health-potion"))
+            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 2, column = 2) to listOf("health-potion"))
         }
 }

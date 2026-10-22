@@ -22,19 +22,24 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the leading knight at (4,3), which can walk 3 tiles. (4,2) is an adjacent sand tile.
+    // The party walks to the battle with the knight at (2,5), which can walk 3 tiles. (2,4) is an adjacent sand tile.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
-    private val tileInMovementRangeRow = 4
-    private val tileInMovementRangeColumn = 2
+    private val tileInMovementRangeRow = LEADER_ROW_IN_BATTLE
+    private val tileInMovementRangeColumn = 4
 
-    // (4,1) is only reachable within 3 steps through (4,2): the paths around it take 4 steps.
-    private val tileBehindAdjacentTileColumn = 1
+    // (2,1) is 4 tiles away along the corridor, out of the knight movement range.
+    private val tileOutOfRangeColumn = 1
 
-    // The knight abilities are poisoned-sword, mushroom, skull, teleport, bee and heal, which is cast on the knight.
-    // Bee deploys a bee on a vacant tile adjacent to the knight.
-    private val beeAbilityIndex = 4
-    private val healAbilityIndex = 5
+    // The bat engaging the knight stands next to it, blocking the corridor: (2,7), behind it, is only reachable once
+    // the bat is gone. The bat has 10 health points, and the knight sword deals 10.
+    private val batRow = BAT_ROW_IN_BATTLE
+    private val batColumn = BAT_COLUMN_IN_BATTLE
+    private val tileBehindBatColumn = BAT_COLUMN_IN_BATTLE + 1
+
+    // The knight abilities are sword, which is cast on an adjacent enemy, and heal, which is cast on the knight.
+    private val swordAbilityIndex = 0
+    private val healAbilityIndex = 1
 
     @Test
     fun `should keep the knight selected when the human player casts heal on the knight`() =
@@ -58,35 +63,35 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             battleHudView.isDisplayingAttackPreview().shouldBeFalse()
             withClue("Expected the knight tile to be selected after casting heal") { battlefieldView.hasSelectionAt(knightRow, knightColumn).shouldBeTrue() }
             withClue("Expected the knight movement range to be displayed after casting heal") { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeFalse() }
-            battlefieldView.isDimmedAt(0, 0).shouldBeTrue()
+            battlefieldView.isDimmedAt(tileInMovementRangeRow, tileOutOfRangeColumn).shouldBeTrue()
         }
 
     @Test
-    fun `should update the knight movement range when the human player deploys a bee on an adjacent tile`() =
+    fun `should update the knight movement range when the human player defeats the bat blocking the corridor with the sword`() =
         sharedViewsTest {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
-            require(!battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn)) { "(4,1) should be reachable before the bee is deployed" }
-            clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, beeAbilityIndex)
-            waitUntil { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn) }
-            clickTile(battlefieldView, tileInMovementRangeRow, tileInMovementRangeColumn)
+            require(battlefieldView.isDimmedAt(batRow, tileBehindBatColumn)) { "($batRow,$tileBehindBatColumn) should be out of reach while the bat blocks the way" }
+            clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, swordAbilityIndex)
+            waitUntil { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
+            clickTile(battlefieldView, batRow, batColumn)
             val playerCallToActionView = requireNotNull(playerCallToActionView()) { "The call to action is not displayed" }
             waitUntil { playerCallToActionView.isDisplayingCancelAndConfirm() }
             // When
             clickConfirm(playerCallToActionView)
             // Then
             val battleHudView = requireNotNull(battleHudView()) { "The battle HUD is not displayed" }
-            waitUntil { battleHudView.isDisplayingBattleUnitInfo() && battlefieldView.hasBattleUnitAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
-            waitUntil { !battlefieldView.isDimmedAt(knightRow - 1, knightColumn) }
-            withClue("Expected the bee to be deployed at ($tileInMovementRangeRow,$tileInMovementRangeColumn)") {
-                battlefieldView.hasBattleUnitAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeTrue()
+            waitUntil { battleHudView.isDisplayingBattleUnitInfo() && !battlefieldView.hasBattleUnitAt(batRow, batColumn) }
+            waitUntil { !battlefieldView.isDimmedAt(batRow, tileBehindBatColumn) }
+            withClue("Expected the bat to be defeated and gone from ($batRow,$batColumn)") { battlefieldView.hasBattleUnitAt(batRow, batColumn).shouldBeFalse() }
+            withClue("Expected the knight movement range to be displayed after defeating the bat") {
+                battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeFalse()
             }
-            withClue("Expected the knight movement range to be displayed after deploying the bee") { battlefieldView.isDimmedAt(knightRow - 1, knightColumn).shouldBeFalse() }
             withClue(
-                "Expected (4,1) to be out of the knight movement range once the bee blocks the way",
-            ) { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileBehindAdjacentTileColumn).shouldBeTrue() }
+                "Expected ($batRow,$tileBehindBatColumn) to be in the knight movement range once the bat no longer blocks the way",
+            ) { battlefieldView.isDimmedAt(batRow, tileBehindBatColumn).shouldBeFalse() }
         }
 }

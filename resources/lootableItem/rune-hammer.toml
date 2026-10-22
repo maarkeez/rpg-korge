@@ -1,0 +1,7 @@
+name = "Rune Hammer"
+price = 150
+type = "EQUIPPABLE"
+
+[equippable]
+effectIds = ["maximum-health-30", "maximum-mana-40"]
+equipmentZone = "WEAPON"

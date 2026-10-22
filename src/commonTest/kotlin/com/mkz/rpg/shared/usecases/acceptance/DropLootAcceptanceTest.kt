@@ -43,10 +43,11 @@ class DropLootAcceptanceTest {
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
     private val battleSetupApi = BattleSetupApi(eventBus)
 
-    private val playerOneKnightBattleUnitId = "player-1-unit-1"
-    private val playerTwoRatBattleUnitId = "player-2-unit-1"
+    private val playerOneKnightBattleUnitId = "hero"
+    private val playerTwoGoatWizardBattleUnitId = "goat-wizard-1"
 
-    // The rat of the CPU player starts the battle at row 0 and column 0, with 20 health points.
+    // A goat wizard of the CPU player is deployed next to the knight, at row 2 and column 2, with 150 health points. It
+    // always drops a bee essence.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()
@@ -60,45 +61,53 @@ class DropLootAcceptanceTest {
         battleUnitApi.init()
         battleSetupApi.setupBattle()
         eventBus.dispatch()
+        battleUnitApi.deployBattleUnit(
+            battleUnitId = playerTwoGoatWizardBattleUnitId,
+            unitId = "goat-wizard",
+            playerId = "player-two",
+            deployAtRow = 2,
+            deployAtColumn = 2,
+        )
+        eventBus.dispatch()
     }
 
-    // The rat is hit twice for 10 damage, which defeats it.
-    private fun defeatTheRat() =
-        repeat(2) {
+    // The goat wizard is hit 15 times for 10 damage, which defeats it.
+    private fun defeatTheGoatWizard() =
+        repeat(15) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit(playerTwoRatBattleUnitId),
+                    target = EffectTargetDto.Unit(playerTwoGoatWizardBattleUnitId),
                     effectId = "low-physical-damage",
                 ),
             )
         }
 
     @Test
-    fun `should leave a hammer on its tile when a rat is defeated`() =
+    fun `should leave a bee essence on its tile when the goat wizard is defeated`() =
         scenarioTest(::setUp) {
             // Given
-            require(battlefieldApi.searchPosition(playerTwoRatBattleUnitId) == PositionDto(row = 0, column = 0))
-            require(battleUnitApi.searchBattleUnitById(playerTwoRatBattleUnitId)!!.remainingHealthPoints == 20)
-            defeatTheRat()
+            require(battlefieldApi.searchPosition(playerTwoGoatWizardBattleUnitId) == PositionDto(row = 2, column = 2))
+            require(battleUnitApi.searchBattleUnitById(playerTwoGoatWizardBattleUnitId)!!.remainingHealthPoints == 150)
+            defeatTheGoatWizard()
             // When
             eventBus.dispatch()
             // Then
-            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 0, column = 0) to listOf("hammer"))
+            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 2, column = 2) to listOf("bee-essence"))
         }
 
     @Test
-    fun `should store the hammer of a defeated rat in the inventory and clear its tile when the knight walks onto it`() =
+    fun `should store the bee essence of the defeated goat wizard in the inventory and clear its tile when the knight walks onto it`() =
         scenarioTest(::setUp) {
             // Given
-            defeatTheRat()
+            defeatTheGoatWizard()
             eventBus.dispatch()
-            require(lootDropApi.searchDroppedItems() == mapOf(LootDrop.Dto.PositionDto(row = 0, column = 0) to listOf("hammer")))
-            battleUnitApi.walkBattleUnit(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 0, walkToColumn = 0)
+            require(lootDropApi.searchDroppedItems() == mapOf(LootDrop.Dto.PositionDto(row = 2, column = 2) to listOf("bee-essence")))
+            battleUnitApi.walkBattleUnit(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
             // When
             eventBus.dispatch()
             // Then
-            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("hammer")
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("bee-essence")
             lootDropApi.searchDroppedItems().shouldBeEmpty()
         }
 }

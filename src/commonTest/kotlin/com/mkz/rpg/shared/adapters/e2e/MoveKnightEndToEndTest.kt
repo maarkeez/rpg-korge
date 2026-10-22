@@ -21,11 +21,13 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the leading knight at (4,3), which can walk 3 tiles. (4,2) and (4,1) are sand tiles.
+    // The party walks to the battle with the knight at (2,5), which can walk 3 tiles back west along the corridor: (2,4)
+    // and (2,3) are sand tiles. (2,1) is 4 tiles away, out of its movement range.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
-    private val targetRow = 4
-    private val targetColumn = 2
+    private val targetRow = LEADER_ROW_IN_BATTLE
+    private val targetColumn = 4
+    private val outOfRangeColumn = 1
 
     @Test
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
@@ -53,7 +55,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickTile(battlefieldView, knightRow, knightColumn)
             // Then
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
-            withClue("Expected (0,0), out of the knight movement range, to be dimmed") { battlefieldView.isDimmedAt(0, 0).shouldBeTrue() }
+            withClue("Expected ($targetRow,$outOfRangeColumn), out of the knight movement range, to be dimmed") { battlefieldView.isDimmedAt(targetRow, outOfRangeColumn).shouldBeTrue() }
             withClue("Expected the selected knight not to be dimmed") { battlefieldView.isDimmedAt(knightRow, knightColumn).shouldBeFalse() }
             withClue("Expected ($targetRow,$targetColumn), in the knight movement range, not to be dimmed") { battlefieldView.isDimmedAt(targetRow, targetColumn).shouldBeFalse() }
         }
@@ -62,7 +64,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should walk the knight tile by tile when the human player moves it two tiles away`() =
         sharedViewsTest {
             // Given
-            val farTargetColumn = 1
+            val farTargetColumn = 3
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             clickTile(battlefieldView, knightRow, knightColumn)

@@ -56,24 +56,30 @@ private data class RouteStep(
     val column: Int,
 )
 
+/** The battle setup deploys the knight, alone in the party, at the west end of the start corridor (row 2, 1 tile wide). */
+const val KNIGHT_START_ROW = 2
+const val KNIGHT_START_COLUMN = 1
+
 /**
- * The battle setup deploys the knights at (6,6), which leads, and (7,6). Walking north twice and west three times
- * leaves the leader at (4,3) and the other knight at (4,4), where the CPU rat at (1,1) has the leader within reach: 5
- * tiles. No tile walked before is within reach of a CPU battle unit. The rat engages and plays first, alone: it walks to
- * (2,3), and the other CPU battle units stay out of the battle.
+ * Walking east four times leaves the knight at (2,5), where the CPU bat at (2,10), further along the corridor, has it
+ * within reach: 5 tiles. No tile walked before is within reach of a CPU battle unit. The bat engages and plays first,
+ * alone: it walks to (2,6), next to the knight, and the other CPU battle units stay out of the battle.
  */
 private val ROUTE_TO_BATTLE =
     listOf(
-        RouteStep(DirectionDto.NORTH, row = 5, column = 6),
-        RouteStep(DirectionDto.NORTH, row = 4, column = 6),
-        RouteStep(DirectionDto.WEST, row = 4, column = 5),
-        RouteStep(DirectionDto.WEST, row = 4, column = 4),
-        RouteStep(DirectionDto.WEST, row = 4, column = 3),
+        RouteStep(DirectionDto.EAST, row = 2, column = 2),
+        RouteStep(DirectionDto.EAST, row = 2, column = 3),
+        RouteStep(DirectionDto.EAST, row = 2, column = 4),
+        RouteStep(DirectionDto.EAST, row = 2, column = 5),
     )
 
-/** Where the leading knight is once [startNewBattle] has walked it to the battle. */
-const val LEADER_ROW_IN_BATTLE = 4
-const val LEADER_COLUMN_IN_BATTLE = 3
+/** Where the knight is once [startNewBattle] has walked it to the battle. */
+const val LEADER_ROW_IN_BATTLE = 2
+const val LEADER_COLUMN_IN_BATTLE = 5
+
+/** Where the CPU bat stands once it has engaged the knight, next to it in the corridor. */
+const val BAT_ROW_IN_BATTLE = 2
+const val BAT_COLUMN_IN_BATTLE = 6
 
 /**
  * Plays a new game and walks the party with the virtual pad until the CPU engages, as the player does. Returns once
@@ -81,7 +87,7 @@ const val LEADER_COLUMN_IN_BATTLE = 3
  */
 suspend fun ViewsForTesting.startNewBattle() {
     startNewGame()
-    waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(6, 6) == true }
+    waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
     ROUTE_TO_BATTLE.forEach { step -> walkLeader(step) }
     waitUntil { stage.canHumanPlayerAct() }
 }

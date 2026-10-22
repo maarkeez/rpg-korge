@@ -1,0 +1,6 @@
+name = "Health Elixir"
+price = 25
+type = "CONSUMABLE"
+
+[consumable]
+effectIds = ["health-elixir-heal"]

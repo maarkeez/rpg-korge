@@ -1,5 +1,0 @@
-name = "Merchant"
-line = "How can I help you?"
-row = 14
-column = 2
-stock = ["health-potion", "mana-potion", "hammer"]

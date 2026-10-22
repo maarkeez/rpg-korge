@@ -1,0 +1,6 @@
+[outcome]
+type = "LEARN_ABILITY"
+abilityId = "bee"
+
+[application]
+type = "IMMEDIATELY"

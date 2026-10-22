@@ -59,7 +59,7 @@ A battle starting while talking (`PauseExploration`) abandons the talk, and the 
 
 An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game data](game-data.md)): it joins the party once the talk with it is finished. Until then, it is an npc as any other, displayed with the images of its unit.
 
-1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: The Guy.
+1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: the elder.
 2. The npc leaves its tile (`NpcRecruited`): the battlefield vacates it, and the screen removes the npc.
 3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the party player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
 4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
@@ -68,7 +68,7 @@ The events are dispatched in the order they are published, so the tile is vacate
 
 ## Shopping at a merchant
 
-An npc with a stock in its game data is a merchant (e.g.: the merchant, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave under its line, and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
+An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave under its line, and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
 
 1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel: the buyer on top, 12 slots as the inventory does, and a footer with every button the player taps.
 2. The buyer is one party member at a time, the leader when the shop opens. The header displays its name, gold and bag (e.g.: `< Knight · 20 G · Bag 11/12 >`, or `Bag full`).

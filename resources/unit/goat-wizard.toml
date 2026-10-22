@@ -1,0 +1,5 @@
+name = "Goat Wizard"
+healthPoints = 150
+manaPoints = 60
+movementRange = 2
+abilities = ["sword", "bat", "teleport", "heal"]

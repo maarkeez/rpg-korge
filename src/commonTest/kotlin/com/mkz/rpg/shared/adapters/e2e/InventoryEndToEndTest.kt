@@ -21,7 +21,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the leading knight at (4,3). The battle setup deploys a cpu rat at (0,0).
+    // The party walks to the battle with the knight at (2,5), and the cpu bat engaging it walks to (2,6), next to it.
     // Nothing has been looted yet.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
@@ -46,15 +46,15 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should not display the bag when the human player selects a cpu rat`() =
+    fun `should not display the bag when the human player selects a cpu bat`() =
         sharedViewsTest {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
-            clickTile(battlefieldView, 0, 0)
+            clickTile(battlefieldView, BAT_ROW_IN_BATTLE, BAT_COLUMN_IN_BATTLE)
             // Then
             waitUntil { battleHudView()?.isDisplayingBattleUnitInfo() == true }
-            withClue("Expected the rat, which has no inventory, to have no bag") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeFalse() }
+            withClue("Expected the bat, which has no inventory, to have no bag") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeFalse() }
         }
 }

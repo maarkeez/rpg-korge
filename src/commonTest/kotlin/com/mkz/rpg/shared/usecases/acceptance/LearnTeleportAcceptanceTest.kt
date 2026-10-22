@@ -39,10 +39,10 @@ class LearnTeleportAcceptanceTest {
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val vikingBattleUnitId = "viking-1"
-    private val vikingRow = 6
-    private val vikingColumn = 7
+    private val vikingRow = 2
+    private val vikingColumn = 2
 
-    // The party explores with a viking of the human player, as if recruited, which only knows sword.
+    // The party explores with a viking of the human player, as if recruited next to the knight, which only knows sword.
     private suspend fun setUp() {
         terrainApi.init()
         effectApi.init()

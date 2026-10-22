@@ -40,7 +40,7 @@ class ConsumeManaPotionAcceptanceTest {
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"
-    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+    private val playerOneKnightBattleUnitId = "hero"
 
     // The knight of the human player starts the battle with 30 mana points, and spends 10 casting heal on itself.
     private suspend fun setUp() {

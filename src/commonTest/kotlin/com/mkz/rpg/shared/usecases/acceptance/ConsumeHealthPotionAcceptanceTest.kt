@@ -43,7 +43,7 @@ class ConsumeHealthPotionAcceptanceTest {
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private val playerOneId = "player-one"
-    private val playerOneKnightBattleUnitId = "player-1-unit-1"
+    private val playerOneKnightBattleUnitId = "hero"
 
     // The knight of the human player starts the battle with 100 health points, and is hit twice for 10 damage.
     private suspend fun setUp() {

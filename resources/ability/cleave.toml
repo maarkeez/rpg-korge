@@ -1,0 +1,8 @@
+name = "Cleave"
+cost = 5
+cooldown = 1
+targeting = "ALL_ADJACENT_ENEMIES"
+
+[[effects]]
+effectId = "heavy-physical-damage"
+target = "SELECTED_TARGET"

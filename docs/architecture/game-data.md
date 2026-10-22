@@ -158,6 +158,10 @@ tiles = [
 ]
 ```
 
+Only sand can be next to another terrain, north, east, south or west, as the terrain transitions are only drawn from sand (`terrain/transitions/sand_to_<terrain>.png`): the game fails to start otherwise (`TileTerrainTransitionNotAllowed`).
+
+A tile next to void on two sides that meet (a corner) or on three sides (a dead end) can not be occupied, whatever its terrain: it is drawn as the edge of the void. Void on one side, or on two opposite sides (a corridor 1 tile wide), leaves it walkable. So a corridor 1 tile wide can not turn nor end: it turns in a room at least 3 tiles wide, and ends at the edge of the battlefield or in a room. The battlefield opens on its top-left corner, until the party leader walks, so the party starts within its first 8 rows and columns.
+
 ### `battleUnit/<battle unit id>.toml`
 
 A battle unit deployed when the game starts. The battle units of the human player explore as a party, the first one leading (see [Exploration](exploration.md)). The battles start when the CPU engages, so there is no file for them.
@@ -190,7 +194,7 @@ column = 2
 unitId = "viking"
 ```
 
-An npc with a `stock` is a merchant: once the party talks to it, it shows the lootable items it sells, in the order they are listed (e.g.: the merchant). Each item is in unlimited supply, so it is listed once. The game fails to start when an item does not exist (`NpcStockItemNotFound`), when the stock has more than 12 items (`NpcStockTooLarge`), or when it lists an item twice (`NpcStockItemRepeated`).
+An npc with a `stock` is a merchant: once the party talks to it, it shows the lootable items it sells, in the order they are listed (e.g.: the blacksmith). Each item is in unlimited supply, so it is listed once. The game fails to start when an item does not exist (`NpcStockItemNotFound`), when the stock has more than 12 items (`NpcStockTooLarge`), or when it lists an item twice (`NpcStockItemRepeated`).
 
 ```toml
 name = "Merchant"
