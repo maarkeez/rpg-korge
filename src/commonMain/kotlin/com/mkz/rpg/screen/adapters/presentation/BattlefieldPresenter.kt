@@ -245,26 +245,32 @@ class BattlefieldPresenter(
         }
     }
 
-    // Both battle units of a swap are displayed on their new tiles in a single step, once both have moved.
+    // Both battle units of a swap are animated in a single step, once both have moved: the party leader hops over the
+    // member, whichever of them moved first.
     private fun swapUnit(
         event: BattleUnitEvent.BattleUnitMoved,
         unitId: String,
     ) {
-        val (firstEvent, firstUnitId) =
+        val firstSwapped =
             pendingSwap?.takeIf { (firstEvent, _) -> firstEvent.battleUnitId == event.swappedWithBattleUnitId } ?: run {
                 pendingSwap = event to unitId
                 return
             }
         pendingSwap = null
+        val secondSwapped = event to unitId
+        val leaderId = partyApi.searchParty()?.leaderBattleUnitId
+        val (leader, member) = if (event.battleUnitId == leaderId) secondSwapped to firstSwapped else firstSwapped to secondSwapped
+        val (leaderEvent, leaderUnitId) = leader
+        val (memberEvent, memberUnitId) = member
         timeline.play {
             battlefieldView.resetTiles()
             battlefieldView.swapBattleUnits(
-                row = firstEvent.fromRow,
-                column = firstEvent.fromColumn,
-                unitId = firstUnitId,
-                otherRow = event.fromRow,
-                otherColumn = event.fromColumn,
-                otherUnitId = unitId,
+                leaderRow = leaderEvent.fromRow,
+                leaderColumn = leaderEvent.fromColumn,
+                leaderUnitId = leaderUnitId,
+                memberRow = memberEvent.fromRow,
+                memberColumn = memberEvent.fromColumn,
+                memberUnitId = memberUnitId,
             )
         }
     }

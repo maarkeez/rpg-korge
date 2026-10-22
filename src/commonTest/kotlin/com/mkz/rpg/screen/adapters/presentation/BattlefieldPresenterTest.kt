@@ -48,6 +48,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.NpcAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.PickedUpLoot
+import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.SwappedBattleUnits
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -343,6 +344,28 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
+    }
+
+    @Test
+    fun `MoveUnit should swap the leader over the member whichever battle unit moved first`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        exploringApis.eventBus.publish(
+            BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 1, toColumn = 1, path = listOf(position(1, 1)), swappedWithBattleUnitId = "knight-1"),
+        )
+        exploringApis.eventBus.publish(
+            BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 2, toColumn = 1, path = listOf(position(2, 1)), swappedWithBattleUnitId = "knight-2"),
+        )
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.swappedBattleUnits.shouldContainExactly(
+            SwappedBattleUnits(leader = BattleUnitAt(row = 1, column = 1, unitId = "knight"), member = BattleUnitAt(row = 2, column = 1, unitId = "knight")),
+        )
     }
 
     // knight-1 leads the party, and knight-2 follows it.

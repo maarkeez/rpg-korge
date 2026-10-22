@@ -40,6 +40,11 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         val unitId: String,
     )
 
+    data class SwappedBattleUnits(
+        val leader: BattleUnitAt,
+        val member: BattleUnitAt,
+    )
+
     var delegate: Delegate? = null
         private set
     val displayedBattlefields = mutableListOf<Battlefield.Dto>()
@@ -62,6 +67,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
 
     // The moves that do not scroll the battlefield to follow the battle unit (e.g.: a CPU battle unit wandering).
     val unfollowedMoves = mutableListOf<MovedBattleUnit>()
+    val swappedBattleUnits = mutableListOf<SwappedBattleUnits>()
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
@@ -167,6 +173,17 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         movedBattleUnits += MovedBattleUnit(fromRow, fromColumn, path, unitId)
         moveStepDurations += stepDuration
         if (!followsTiles) unfollowedMoves += MovedBattleUnit(fromRow, fromColumn, path, unitId)
+    }
+
+    override suspend fun swapBattleUnits(
+        leaderRow: Int,
+        leaderColumn: Int,
+        leaderUnitId: String,
+        memberRow: Int,
+        memberColumn: Int,
+        memberUnitId: String,
+    ) {
+        swappedBattleUnits += SwappedBattleUnits(BattleUnitAt(leaderRow, leaderColumn, leaderUnitId), BattleUnitAt(memberRow, memberColumn, memberUnitId))
     }
 
     override fun displayLoot(

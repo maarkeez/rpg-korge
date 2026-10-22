@@ -13,9 +13,11 @@ import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.doubles.plusOrMinus
+import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -32,6 +34,9 @@ class BattlefieldViewTest : ViewsForTesting() {
 
         // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
+
+        // A swap lasts 150ms and each test frame 10ms.
+        const val SWAP_FRAMES = 15
 
         // The tiles on the screen in each direction when the battlefield is not scrolled: the 8 in the viewport and 1 more.
         const val WINDOW_TILES = BattlefieldView.VISIBLE_TILES + BattlefieldView.TILE_WINDOW_MARGIN
@@ -850,6 +855,99 @@ class BattlefieldViewTest : ViewsForTesting() {
             awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7))))
             // Then
             battlefieldView.scrollOffset() shouldBe (-168.0 to 0.0)
+        }
+
+    @Test
+    fun `SwapBattleUnits should display each battle unit on the other's tile when the swap finishes`() =
+        sharedViewsTest {
+            // Given
+            val resourcesLoader = loadedResourcesLoader()
+            val battlefieldView = swappingBattlefieldView(resourcesLoader)
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startSwapping(battlefieldView))
+            // Then
+            battlefieldView.battleUnitBitmapAt(row = 0, column = 0) shouldBe resourcesLoader.bitmap("unit/rat.png")
+            battlefieldView.battleUnitBitmapAt(row = 0, column = 1) shouldBe resourcesLoader.bitmap("unit/knight.png")
+            battlefieldView.glidingBattleUnits().shouldBeEmpty()
+        }
+
+    @Test
+    fun `SwapBattleUnits should not display the battle units on their tiles while they swap`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = swappingBattlefieldView(loadedResourcesLoader())
+            addChild(battlefieldView)
+            // When
+            val positions = sampleUntilCompletion(startSwapping(battlefieldView)) { battlefieldView.battleUnitPositions() }
+            // Then
+            positions.shouldNotBeEmpty()
+            positions.forEach { swappingPositions -> swappingPositions.shouldBeEmpty() }
+        }
+
+    @Test
+    fun `SwapBattleUnits should hop the leader over the member while they swap`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = swappingBattlefieldView(loadedResourcesLoader())
+            addChild(battlefieldView)
+            // When
+            val frames = sampleUntilCompletion(startSwapping(battlefieldView)) { battlefieldView.glidingBattleUnits() }
+            // Then
+            frames.shouldNotBeEmpty()
+            frames.forEach { glidingUnits ->
+                glidingUnits.map { glidingUnit -> glidingUnit.name }.shouldContainExactly(BattlefieldView.SWAPPING_MEMBER, BattlefieldView.SWAPPING_LEADER)
+                glidingUnits.first().y shouldBe 0.0
+            }
+            val highestLeaderY = frames.minOf { glidingUnits -> glidingUnits.last().y }
+            highestLeaderY shouldBe (-BattlefieldView.SWAP_HOP_HEIGHT plusOrMinus 1.0)
+        }
+
+    @Test
+    fun `SwapBattleUnits should last the swap duration`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = swappingBattlefieldView(loadedResourcesLoader())
+            addChild(battlefieldView)
+            // When
+            val frames = sampleUntilCompletion(startSwapping(battlefieldView)) { }
+            // Then
+            frames.size shouldBeInRange (SWAP_FRAMES - 1)..(SWAP_FRAMES + 1)
+        }
+
+    @Test
+    fun `SwapBattleUnits should scroll to the member's tile before the battle units move when it is at the viewport edge`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            battlefieldView.displayBattleUnit(row = 5, column = 7, unitId = "rat")
+            addChild(battlefieldView)
+            // When
+            val swapping =
+                startAnimation {
+                    battlefieldView.swapBattleUnits(leaderRow = 5, leaderColumn = 6, leaderUnitId = "knight", memberRow = 5, memberColumn = 7, memberUnitId = "rat")
+                }
+            val frames = sampleUntilCompletion(swapping) { battlefieldView.scrollOffset() to battlefieldView.glidingBattleUnits().isNotEmpty() }
+            // Then
+            val glidingScrolls = frames.filter { (_, isGliding) -> isGliding }.map { (scroll, _) -> scroll }
+            glidingScrolls.shouldNotBeEmpty()
+            glidingScrolls.forEach { scroll -> scroll shouldBe (-168.0 to 0.0) }
+        }
+
+    // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
+    private fun swappingBattlefieldView(resourcesLoader: BattleSceneResourcesLoader): BattlefieldView {
+        val battlefieldView = BattlefieldView(resourcesLoader)
+        battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+        battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+        battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
+        return battlefieldView
+    }
+
+    private suspend fun startSwapping(battlefieldView: BattlefieldView): Job =
+        startAnimation {
+            battlefieldView.swapBattleUnits(leaderRow = 0, leaderColumn = 0, leaderUnitId = "knight", memberRow = 0, memberColumn = 1, memberUnitId = "rat")
         }
 
     private suspend fun startMoving(

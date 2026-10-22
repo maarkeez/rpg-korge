@@ -53,6 +53,9 @@ open class BattlefieldView(
         const val DIM = "DIM"
         const val HEALTH_PREVIEW = "HEALTH_PREVIEW"
         const val BATTLEFIELD = "BATTLEFIELD"
+        const val MOVING_BATTLE_UNITS = "MOVING_BATTLE_UNITS"
+        const val SWAPPING_LEADER = "SWAPPING_LEADER"
+        const val SWAPPING_MEMBER = "SWAPPING_MEMBER"
 
         // The tiles are only created in the viewport and this many tiles around it, so a battlefield of any size
         // displays as fast as a small one.
@@ -86,6 +89,10 @@ open class BattlefieldView(
         // Exploring, a step is quicker, as the party walks one tile at a time, the battle units one after another.
         val EXPLORING_STEP_DURATION = 75.milliseconds
         val SCROLL_DURATION = 300.milliseconds
+
+        // Swapping, the leader hops over the party member this high, half-way, while the member slides underneath.
+        val SWAP_DURATION = 150.milliseconds
+        const val SWAP_HOP_HEIGHT = TILE_SIZE / 3.0
 
         // Opacity of the black mask over the tiles that can not be selected.
         const val DIM_ALPHA = 0.4
@@ -140,6 +147,10 @@ open class BattlefieldView(
 
     // Holds the tiles at their position in the battlefield, and scrolls them inside the viewport.
     internal lateinit var battlefieldGrid: Container
+
+    // Holds the battle units while they glide between tiles (e.g.: swapping), over the tiles and at their scroll, so they
+    // are neither sorted with the tiles nor drawn under the tiles below them.
+    internal lateinit var movingBattleUnits: Container
     internal var tintOverlay: SolidRect? = null
 
     // The displayed battlefield, which the tiles are created from.
@@ -187,6 +198,7 @@ open class BattlefieldView(
             battlefieldAnimator.cancel()
             createdTiles.values.forEach(::removeHealthPreview)
             battlefieldGrid.removeFromParent()
+            movingBattleUnits.removeFromParent()
         }
         createdTiles.clear()
         undimmedTiles = null
@@ -201,6 +213,8 @@ open class BattlefieldView(
                 y = previousScroll.second.clamp(minScrollY, 0.0)
             }
         battlefieldAnimator = battlefieldGrid.animator(parallel = true)
+        movingBattleUnits = viewport.container { name = MOVING_BATTLE_UNITS }
+        movingBattleUnits.addUpdater { pos = battlefieldGrid.pos }
         // The tiles on the screen follow the scroll, e.g.: while it is dragged or animated.
         battlefieldGrid.addUpdater { refreshTileWindow() }
         refreshTileWindow()
@@ -531,25 +545,77 @@ open class BattlefieldView(
     }
 
     /**
-     * Swaps the tiles of both battle units at once, in a single step, and scrolls the battlefield so the first one stays
-     * visible, e.g.: the leader of the party and the party member on its next tile.
+     * Swaps the tiles of the leader of the party and the party member on its next tile, after scrolling the battlefield
+     * so the leader's new tile is visible: both glide to each other's tile at once, the leader hopping over the member,
+     * which slides straight underneath.
      */
     open suspend fun swapBattleUnits(
-        row: Int,
-        column: Int,
-        unitId: String,
-        otherRow: Int,
-        otherColumn: Int,
-        otherUnitId: String,
-        stepDuration: Duration = EXPLORING_STEP_DURATION,
+        leaderRow: Int,
+        leaderColumn: Int,
+        leaderUnitId: String,
+        memberRow: Int,
+        memberColumn: Int,
+        memberUnitId: String,
     ) {
-        followTile(otherRow, otherColumn)
-        removeBattleUnit(row, column)
-        removeBattleUnit(otherRow, otherColumn)
-        displayBattleUnit(otherRow, otherColumn, unitId)
-        displayBattleUnit(row, column, otherUnitId)
-        delay(stepDuration)
+        followTile(memberRow, memberColumn)
+        removeBattleUnit(leaderRow, leaderColumn)
+        removeBattleUnit(memberRow, memberColumn)
+        glideSwap(leaderRow, leaderColumn, leaderUnitId, memberRow, memberColumn, memberUnitId)
+        displayBattleUnit(memberRow, memberColumn, leaderUnitId)
+        displayBattleUnit(leaderRow, leaderColumn, memberUnitId)
     }
+
+    private suspend fun glideSwap(
+        leaderRow: Int,
+        leaderColumn: Int,
+        leaderUnitId: String,
+        memberRow: Int,
+        memberColumn: Int,
+        memberUnitId: String,
+    ) {
+        val leaderBitmap = resourcesLoader.bitmapOrNull("unit/$leaderUnitId.png")
+        val memberBitmap = resourcesLoader.bitmapOrNull("unit/$memberUnitId.png")
+        if (leaderBitmap == null || memberBitmap == null) return delay(SWAP_DURATION)
+        val leaderX = leaderColumn * TILE_SIZE.toDouble()
+        val leaderY = leaderRow * TILE_SIZE.toDouble()
+        val memberX = memberColumn * TILE_SIZE.toDouble()
+        val memberY = memberRow * TILE_SIZE.toDouble()
+        val member = movingBattleUnits.movingBattleUnit(memberBitmap, SWAPPING_MEMBER, memberX, memberY)
+        // Added last, so it is drawn over the member. Its image hops inside it, while it glides.
+        val leader = movingBattleUnits.movingBattleUnit(leaderBitmap, SWAPPING_LEADER, leaderX, leaderY)
+        val leaderImage = leader.firstChild!!
+        movingBattleUnits
+            .animator(parallel = true) {
+                moveTo(member, x = leaderX, y = leaderY, time = SWAP_DURATION, easing = Easing.LINEAR)
+                moveTo(leader, x = memberX, y = memberY, time = SWAP_DURATION, easing = Easing.LINEAR)
+                sequence {
+                    moveBy(leaderImage, y = -SWAP_HOP_HEIGHT, time = SWAP_DURATION / 2, easing = Easing.EASE_OUT_QUAD)
+                    moveBy(leaderImage, y = SWAP_HOP_HEIGHT, time = SWAP_DURATION / 2, easing = Easing.EASE_IN_QUAD)
+                }
+            }.awaitComplete()
+        member.removeFromParent()
+        leader.removeFromParent()
+    }
+
+    // A battle unit gliding from the tile at the position, drawn as on its tile: its image is centered on the tile.
+    private fun Container.movingBattleUnit(
+        bitmap: Bitmap,
+        viewName: String,
+        x: Double,
+        y: Double,
+    ): Container =
+        container {
+            name = viewName
+            this.x = x
+            this.y = y
+            image(bitmap) {
+                scale = 3.0
+                smoothing = false
+                anchor(Anchor.CENTER)
+                this.x = TILE_SIZE / 2.0
+                this.y = TILE_SIZE / 2.0
+            }
+        }
 
     /** Tints the visible battlefield with the colour, fading it in and out, e.g.: when a turn starts. */
     open suspend fun tint(color: RGBA) {

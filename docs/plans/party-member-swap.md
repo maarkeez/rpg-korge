@@ -21,7 +21,7 @@
 | Line resets          | Back to the party order when the exploration starts or resumes. A recruited member joins the end of the line, a defeated one leaves it.                            |
 | Unreachable steps    | Unchanged: a follower that can not reach its tile skips its step, and walks the shortest path to it on a later walk.                                                |
 | Battles              | Only while exploring: in a battle, an ally still blocks its tile.                                                                                                   |
-| Animation            | Both battle units are displayed on their new tiles at once, in a single exploring step (`EXPLORING_STEP_DURATION`, 75ms).                                          |
+| Animation            | Both battle units are displayed on their new tiles at once, in a single exploring step (`EXPLORING_STEP_DURATION`, 75ms). Replaced by a hop, see [Party swap animation](party-swap-animation.md). |
 
 For example, the party walks into a dead-end corridor, the leader `K` first, then `L` and `M`, `#` being void:
 

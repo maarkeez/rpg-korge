@@ -5,6 +5,7 @@ import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
+import korlibs.korge.view.Container
 import korlibs.korge.view.Image
 import korlibs.math.geom.Point
 
@@ -37,12 +38,40 @@ fun BattlefieldView.hasBattleUnitAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.BATTLE_UNIT) == true
 
-/** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
+/** The image of the battle unit standing on the tile, or `null` when there is none. */
+fun BattlefieldView.battleUnitBitmapAt(
+    row: Int,
+    column: Int,
+): Bitmap? = (tileOrNull(row, column)?.findViewByName(BattlefieldView.BATTLE_UNIT) as? Image)?.bitmap?.base
+
+/** A battle unit gliding between tiles: its name (e.g.: the swapping leader), and where its image is drawn, as a tile. */
+data class GlidingBattleUnit(
+    val name: String,
+    val x: Double,
+    val y: Double,
+)
+
+/** The battle units gliding between tiles (e.g.: swapping), in drawing order: the last one is drawn over the others. */
+fun BattlefieldView.glidingBattleUnits(): List<GlidingBattleUnit> =
+    if (!isDisplayed) {
+        emptyList()
+    } else {
+        movingBattleUnits.children.map { glidingUnit ->
+            val image = (glidingUnit as Container).firstChild!!
+            GlidingBattleUnit(
+                name = glidingUnit.name!!,
+                x = glidingUnit.x + image.x - BattlefieldView.TILE_SIZE / 2.0,
+                y = glidingUnit.y + image.y - BattlefieldView.TILE_SIZE / 2.0,
+            )
+        }
+    }
+
 fun BattlefieldView.hasNpcAt(
     row: Int,
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.NPC) == true
 
+/** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
 fun BattlefieldView.isFlashingAt(
     row: Int,
     column: Int,
