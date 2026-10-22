@@ -27,6 +27,12 @@ sealed interface BattlefieldEvent : DomainEvent {
         val toColumn: Int,
     ) : BattlefieldEvent
 
+    // Requested for two occupants that swap their tiles, e.g.: the leader of the party and the party member on its next tile.
+    data class RequestSwapOccupants(
+        val occupantId: String,
+        val otherOccupantId: String,
+    ) : BattlefieldEvent
+
     // Requested for an occupant that is no longer on the battlefield, e.g.: a battle unit defeated or vanished.
     data class RequestRemoveOccupant(
         val occupantId: String,

@@ -1,5 +1,6 @@
 package com.mkz.rpg.party.domain
 
+import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.Party.Dto.StepDto
 import com.mkz.rpg.party.domain.PartyMother.party
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -25,6 +26,7 @@ class PartyTest {
                 playerId = "human",
                 leaderBattleUnitId = "knight-1",
                 battleUnitIds = listOf("knight-1", "knight-2"),
+                lineBattleUnitIds = listOf("knight-1", "knight-2"),
                 isExploring = true,
                 isWalking = false,
                 talkingNpcId = null,
@@ -77,6 +79,98 @@ class PartyTest {
         val result = runCatching { party().walkParty(emptyList()) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PartyError.StepsRequired>()
+    }
+
+    @Test
+    fun `SwapLeader should await the leader's step onto the follower's tile when the party is exploring`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(1, 0), "knight-2" to PositionDto(2, 0))
+        // When
+        val swappingParty = party().swapLeader(followerId = "knight-2", positions = positions)
+        // Then
+        swappingParty.toDto().isWalking.shouldBeTrue()
+        swappingParty.nextStep().shouldBeNull()
+        val walkedParty = swappingParty.resolveStep(battleUnitId = "knight-1", row = 2, column = 0)
+        walkedParty.toDto().isWalking.shouldBeFalse()
+        walkedParty.pullEvents().first.shouldContainExactly(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
+    }
+
+    @Test
+    fun `SwapLeader should rebuild the line with the closest member following next when the leader swaps in a corridor`() {
+        // Given the corridor "M K L", K leading, then L and M
+        val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
+        // When K swaps with M: "K M L"
+        val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
+        // Then
+        swappingParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
+        swappingParty.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
+    }
+
+    @Test
+    fun `SwapLeader should break ties by party order when two members are as close`() {
+        // Given L and M both next to the tile the leader swaps onto
+        val positions = mapOf("knight-1" to PositionDto(1, 1), "knight-2" to PositionDto(1, 2), "knight-3" to PositionDto(1, 0), "knight-4" to PositionDto(0, 1))
+        // When
+        val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3", "knight-4")).swapLeader(followerId = "knight-4", positions = positions)
+        // Then K stands on (0, 1), and the swapped member on (1, 1)
+        swappingParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-4", "knight-2", "knight-3")
+    }
+
+    @Test
+    fun `SwapLeader should fail when the battle unit is not a follower`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(1, 0), "knight-2" to PositionDto(2, 0), "rat-1" to PositionDto(0, 0))
+        // When
+        val result = runCatching { party().swapLeader(followerId = "rat-1", positions = positions) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<PartyError.NotAFollower>()
+    }
+
+    @Test
+    fun `SwapLeader should fail when the party is still walking`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(1, 0), "knight-2" to PositionDto(2, 0))
+        val walkingParty = party().walkParty(listOf(leaderStep))
+        // When
+        val result = runCatching { walkingParty.swapLeader(followerId = "knight-2", positions = positions) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<PartyError.AlreadyWalking>()
+    }
+
+    @Test
+    fun `Resume should line the party up in party order again when a battle finishes`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
+        val swappedParty =
+            party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
+                .swapLeader(followerId = "knight-3", positions = positions)
+                .resolveStep(battleUnitId = "knight-1", row = 0, column = 2)
+        // When
+        val resumedParty = swappedParty.pause().resume()
+        // Then
+        resumedParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
+    }
+
+    @Test
+    fun `Join should add the battle unit to the end of the line`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
+        val swappedParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
+        // When
+        val joinedParty = swappedParty.join("viking-1", "viking")
+        // Then
+        joinedParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2", "viking-1")
+    }
+
+    @Test
+    fun `Leave should have the next battle unit in party order lead the line when the leader leaves the party`() {
+        // Given
+        val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
+        val swappedParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
+        // When
+        val party = swappedParty.leave("knight-1")
+        // Then
+        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-2", "knight-3")
     }
 
     @Test

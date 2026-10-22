@@ -9,5 +9,7 @@ sealed class PartyError(
 
     class AlreadyWalking : PartyError("The party can not walk again until it has finished walking")
 
+    class NotAFollower : PartyError("The leader can only swap tiles with a follower of the party")
+
     class StepsRequired : PartyError("At least one step is required to walk")
 }

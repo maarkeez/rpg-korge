@@ -21,11 +21,24 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 The party walks one tile at a time, towards the arrow held on the virtual pad (north, east, south or west). An npc blocks its tile as a battle unit does, so the party walks around it.
 
-1. [`WalkParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/WalkParty.kt) plans a step for each battle unit of the party: the leader walks one tile towards the direction, and each follower walks to the tile the battle unit ahead of it left. Nothing happens when the leader can not occupy that tile (e.g.: void, another battle unit, out of the battlefield), or while the party is still walking or battling.
+1. [`WalkParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/WalkParty.kt) plans a step for each battle unit of the party, in line order (see [Swapping with a party member](#swapping-with-a-party-member)): the leader walks one tile towards the direction, and each follower walks to the tile the battle unit ahead of it left. Nothing happens when the leader can not occupy that tile (e.g.: void, an npc, a CPU battle unit, out of the battlefield), or while the party is still walking or battling. A party member on that tile swaps with the leader instead.
 2. The steps are walked one after another, with `RequestWalkBattleUnit`. A walk spends no turn action, unlike a move in a battle, and publishes the same `BattleUnitMoved`, so the battlefield occupancy, the loot found on the way and the animation work as in a battle.
 3. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolvePartyStep`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResolvePartyStep.kt)). Only then is the tile left by the battle unit ahead vacant, so the next battle unit can step on it.
 4. A follower that can not reach its tile (e.g.: the battle unit ahead could not leave it) skips its step, so the party always finishes walking. A follower that is not next to the battle unit ahead (e.g.: before the party is lined up) walks the shortest path to its tile.
 5. Once every step has been walked or skipped, the party has walked (`PartyWalked`).
+
+### Swapping with a party member
+
+A party member never blocks the leader, so the party can always turn around, e.g.: at the end of a dead-end corridor (see [the plan](../plans/party-member-swap.md)).
+
+1. When any party member stands on the leader's next tile, the leader swaps tiles with it, as its single step: the other followers stay where they are. [`Party.swapLeader`](../../src/commonMain/kotlin/com/mkz/rpg/party/domain/Party.kt) awaits the leader's step onto the member's tile, and `WalkParty` requests the swap (`RequestSwapBattleUnits`).
+2. [`SwapBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/SwapBattleUnits.kt) walks both battle units onto each other's tile: each publishes its `BattleUnitMoved`, naming the battle unit it swapped with (`swappedWithBattleUnitId`), so both count as moved and find the loot on their tiles, as after any step. It requests the battlefield to swap both occupants at once (`RequestSwapOccupants`, see [`SwapOccupants`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/commands/SwapOccupants.kt)), so a tile never holds two of them, and the battlefield announces both occupied tiles.
+3. The leader's occupied tile resolves its step, so the party has walked (`PartyWalked`), and the CPU battle units may engage it.
+4. The screen displays both battle units on their new tiles at once, in a single exploring step (`BattlefieldView.swapBattleUnits`).
+
+The followers walk in **line order**, which is kept apart from the party order (the next leader, the shop dots). It starts in party order, and is rebuilt after each swap: from the leader, the closest remaining member, in rows plus columns, follows next, ties broken by party order. So each follower follows the member closest to it, and none is trapped behind another one in a corridor. The line goes back to the party order when the exploration starts or resumes, a recruited member joins the end of the line, and a defeated one leaves it.
+
+In a battle, an ally still blocks its tile: only the exploring party swaps.
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
 

@@ -162,6 +162,31 @@ data class BattleUnit private constructor(
         return copy(events = events + movedEvent + movedEvent.occupantMoveRequest())
     }
 
+    /**
+     * Walks outside a battle onto the tile of the battle unit it swaps with, which walks onto its tile at the same time
+     * (e.g.: the leader of the party and the party member on its next tile). The battlefield swaps both occupants at
+     * once, so it is not requested to move this one.
+     */
+    fun swap(
+        fromRow: Int,
+        fromColumn: Int,
+        toRow: Int,
+        toColumn: Int,
+        swappedWithBattleUnitId: String,
+    ): BattleUnit {
+        val movedEvent =
+            BattleUnitMoved(
+                battleUnitId = id.value,
+                fromRow = fromRow,
+                fromColumn = fromColumn,
+                toRow = toRow,
+                toColumn = toColumn,
+                path = listOf(Battlefield.Dto.PositionDto(row = toRow, column = toColumn)),
+                swappedWithBattleUnitId = swappedWithBattleUnitId,
+            )
+        return copy(events = events + movedEvent)
+    }
+
     fun teleport(
         fromRow: Int,
         fromColumn: Int,

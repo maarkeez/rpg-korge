@@ -16,6 +16,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestSwapBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
@@ -38,6 +39,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTa
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummonedBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.SwapBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
@@ -160,6 +162,7 @@ class BattleUnitApi(
             battlefieldApi.searchPosition,
             battlefieldApi.searchShortestPath,
         )
+    val swapBattleUnits = SwapBattleUnits(battleUnitRepository, eventBus, battlefieldApi.searchPosition)
     val resetBattleUnitActionsAndReduceCooldowns = ResetBattleUnitActionsAndReduceCooldowns(battleUnitRepository)
     val castAbility =
         CastAbility(
@@ -224,6 +227,7 @@ class BattleUnitApi(
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
     private val onRequestWalkBattleUnit = OnRequestWalkBattleUnit(walkBattleUnit, eventBus)
+    private val onRequestSwapBattleUnits = OnRequestSwapBattleUnits(swapBattleUnits, eventBus)
     private val onRequestRecoverBattleUnits = OnRequestRecoverBattleUnits(recoverBattleUnits, eventBus)
     private val onRequestRespawnBattleUnit = OnRequestRespawnBattleUnit(respawnBattleUnit, eventBus)
     private val onRequestDeployBattleUnit = OnRequestDeployBattleUnit(deployBattleUnit, eventBus)

@@ -1,6 +1,7 @@
 package com.mkz.rpg.party.domain
 
 import com.mkz.rpg.party.domain.PartyError.AlreadyWalking
+import com.mkz.rpg.party.domain.PartyError.NotAFollower
 import com.mkz.rpg.party.domain.PartyError.NotExploring
 import com.mkz.rpg.party.domain.PartyError.PartyRequired
 import com.mkz.rpg.party.domain.PartyError.StepsRequired
@@ -13,6 +14,7 @@ import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PartyJoined
 import com.mkz.rpg.party.domain.PartyEvent.PartyWalked
 import kotlin.jvm.JvmInline
+import kotlin.math.abs
 
 /**
  * The human player exploring the battlefield with their party, out of the battles: the leader walks where the player
@@ -20,6 +22,9 @@ import kotlin.jvm.JvmInline
  *
  * The party walks one step at a time: each step is awaited until its battle unit occupies its tile, so the next battle
  * unit can step on the tile it left.
+ *
+ * The followers walk in line order, which is kept apart from the party order: the leader swaps tiles with a party member
+ * on its next tile, and the line is rebuilt then, so each follower follows the closest member ahead of it.
  *
  * Every second while exploring, the battle units that stood still during it receive the effect of their terrain, so it
  * remembers the battle units that moved during the current second.
@@ -30,6 +35,7 @@ import kotlin.jvm.JvmInline
 data class Party private constructor(
     private val playerId: PlayerId,
     private val members: Members,
+    private val line: Line,
     private val mode: Mode,
     private val pendingSteps: PendingSteps,
     private val awaitedStep: Step?,
@@ -48,6 +54,7 @@ data class Party private constructor(
             return Party(
                 playerId = PlayerId(playerId),
                 members = Members(battleUnitIds),
+                line = Line(battleUnitIds),
                 mode = Mode.EXPLORING,
                 pendingSteps = PendingSteps(emptyList()),
                 awaitedStep = null,
@@ -63,6 +70,7 @@ data class Party private constructor(
             playerId = playerId.value,
             leaderBattleUnitId = members.value.firstOrNull(),
             battleUnitIds = members.value,
+            lineBattleUnitIds = walkingLine(),
             isExploring = mode == Mode.EXPLORING,
             isWalking = isWalking(),
             talkingNpcId = talkingNpcId?.value,
@@ -77,6 +85,28 @@ data class Party private constructor(
         if (isWalking()) throw AlreadyWalking()
         if (steps.isEmpty()) throw StepsRequired()
         return copy(pendingSteps = PendingSteps(steps.map(::Step)))
+    }
+
+    /**
+     * Swaps the tiles of the leader and the follower on its next tile, as its single step, and rebuilds the line from the
+     * positions after the swap: from the leader, the closest remaining member by tile distance follows next, ties broken
+     * by party order. Positions: where each battle unit of the party stands before the swap.
+     */
+    fun swapLeader(
+        followerId: String,
+        positions: Map<String, Dto.PositionDto>,
+    ): Party {
+        if (mode != Mode.EXPLORING) throw NotExploring()
+        if (isWalking()) throw AlreadyWalking()
+        val leaderId = members.value.first()
+        val leaderPosition = positions[leaderId]
+        val followerPosition = positions[followerId]
+        if (followerId == leaderId || followerId !in members.value || leaderPosition == null || followerPosition == null) throw NotAFollower()
+        val swappedPositions = positions + (leaderId to followerPosition) + (followerId to leaderPosition)
+        return copy(
+            line = Line.closestFirst(leaderId = leaderId, memberIds = members.value, positions = swappedPositions),
+            awaitedStep = Step(Dto.StepDto(battleUnitId = leaderId, row = followerPosition.row, column = followerPosition.column)),
+        )
     }
 
     /** The next step to walk, or `null` while awaiting the previous one or when the party has finished walking. */
@@ -136,6 +166,7 @@ data class Party private constructor(
     fun resume(): Party =
         copy(
             mode = Mode.EXPLORING,
+            line = Line(members.value),
             events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = members.value),
         )
 
@@ -147,12 +178,13 @@ data class Party private constructor(
         if (battleUnitId in members.value) return this
         return copy(
             members = Members(members.value + battleUnitId),
+            line = Line(line.value + battleUnitId),
             events = events + PartyJoined(playerId = playerId.value, battleUnitId = battleUnitId, unitId = unitId),
         )
     }
 
     /** Removes the battle unit from the party, e.g.: when it is defeated. The next one leads when it was leading. */
-    fun leave(battleUnitId: String): Party = copy(members = Members(members.value - battleUnitId))
+    fun leave(battleUnitId: String): Party = copy(members = Members(members.value - battleUnitId), line = Line(line.value - battleUnitId))
 
     /** Remembers that the battle unit moved during the current second, any battle unit (e.g.: a CPU one). Only while exploring. */
     fun markMoved(battleUnitId: String): Party {
@@ -171,6 +203,12 @@ data class Party private constructor(
         )
 
     fun pullEvents() = events to copy(events = emptySet())
+
+    // The leader first, as the line may have it elsewhere once another member leads (e.g.: the leader was defeated).
+    private fun walkingLine(): List<String> {
+        val leaderId = members.value.firstOrNull() ?: return emptyList()
+        return listOf(leaderId) + (line.value - leaderId)
+    }
 
     private fun isWalking(): Boolean = awaitedStep != null || pendingSteps.value.isNotEmpty()
 
@@ -197,6 +235,28 @@ data class Party private constructor(
         val value: List<String>,
     )
 
+    @JvmInline private value class Line(
+        val value: List<String>,
+    ) {
+        companion object {
+            fun closestFirst(
+                leaderId: String,
+                memberIds: List<String>,
+                positions: Map<String, Dto.PositionDto>,
+            ): Line {
+                val lined = mutableListOf(leaderId)
+                val remaining = (memberIds - leaderId).filter { memberId -> memberId in positions }.toMutableList()
+                while (remaining.isNotEmpty()) {
+                    val ahead = positions.getValue(lined.last())
+                    val closest = remaining.minBy { memberId -> positions.getValue(memberId).distanceTo(ahead) }
+                    lined += closest
+                    remaining -= closest
+                }
+                return Line(lined + (memberIds - lined.toSet()))
+            }
+        }
+    }
+
     @JvmInline private value class PendingSteps(
         val value: List<Step>,
     )
@@ -212,13 +272,15 @@ data class Party private constructor(
     }
 
     /**
-     * Leader: `null` once every battle unit of the party has been defeated. Exploring: `false` while battling and while
+     * Leader: `null` once every battle unit of the party has been defeated. Line: the battle units in walking order, the
+     * leader first. Exploring: `false` while battling and while
      * talking. Talking npc: the npc the party talks to, or `null` when it talks to none.
      */
     data class Dto(
         val playerId: String,
         val leaderBattleUnitId: String?,
         val battleUnitIds: List<String>,
+        val lineBattleUnitIds: List<String>,
         val isExploring: Boolean,
         val isWalking: Boolean,
         val talkingNpcId: String?,
@@ -232,6 +294,15 @@ data class Party private constructor(
             EAST(rowOffset = 0, columnOffset = 1),
             SOUTH(rowOffset = 1, columnOffset = 0),
             WEST(rowOffset = 0, columnOffset = -1),
+        }
+
+        /** A tile of the battlefield. */
+        data class PositionDto(
+            val row: Int,
+            val column: Int,
+        ) {
+            /** The tiles between both, in rows plus columns. */
+            fun distanceTo(other: PositionDto): Int = abs(row - other.row) + abs(column - other.column)
         }
 
         /** A battle unit walking to a tile. */

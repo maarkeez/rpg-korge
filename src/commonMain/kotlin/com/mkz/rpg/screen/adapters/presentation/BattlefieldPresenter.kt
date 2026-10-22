@@ -101,6 +101,9 @@ class BattlefieldPresenter(
     // The items displayed on each tile. Changed in timeline order, so each step draws the loot the battle had then.
     private val displayedLoot = mutableMapOf<PositionDto, List<String>>()
 
+    // The first battle unit of a swap and its unit, until the battle unit it swaps with has moved as well.
+    private var pendingSwap: Pair<BattleUnitEvent.BattleUnitMoved, String>? = null
+
     private val subscriptions =
         listOf(
             eventBus.subscribe<BattlefieldCreated> { displayBattlefield() },
@@ -217,6 +220,10 @@ class BattlefieldPresenter(
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return
+        if (event.swappedWithBattleUnitId != null) {
+            swapUnit(event, battleUnit.unitId)
+            return
+        }
         if (isWandering(battleUnit)) {
             wanderUnit(event, battleUnit.unitId)
             return
@@ -230,6 +237,29 @@ class BattlefieldPresenter(
                 path = event.path,
                 unitId = battleUnit.unitId,
                 stepDuration = stepDuration,
+            )
+        }
+    }
+
+    // Both battle units of a swap are displayed on their new tiles in a single step, once both have moved.
+    private fun swapUnit(
+        event: BattleUnitEvent.BattleUnitMoved,
+        unitId: String,
+    ) {
+        val (firstEvent, firstUnitId) = pendingSwap?.takeIf { (firstEvent, _) -> firstEvent.battleUnitId == event.swappedWithBattleUnitId } ?: run {
+            pendingSwap = event to unitId
+            return
+        }
+        pendingSwap = null
+        timeline.play {
+            battlefieldView.resetTiles()
+            battlefieldView.swapBattleUnits(
+                row = firstEvent.fromRow,
+                column = firstEvent.fromColumn,
+                unitId = firstUnitId,
+                otherRow = event.fromRow,
+                otherColumn = event.fromColumn,
+                otherUnitId = unitId,
             )
         }
     }

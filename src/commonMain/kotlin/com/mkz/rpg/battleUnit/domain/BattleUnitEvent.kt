@@ -33,6 +33,12 @@ sealed interface BattleUnitEvent : DomainEvent {
         val walkToColumn: Int,
     ) : BattleUnitEvent
 
+    // Requested outside a battle (e.g.: while exploring), for two battle units that swap their tiles at once.
+    data class RequestSwapBattleUnits(
+        val battleUnitId: String,
+        val otherBattleUnitId: String,
+    ) : BattleUnitEvent
+
     // Requested for the CPU battle units wandering out of the battles, which recover a percentage of their maximum health and mana.
     data class RequestRecoverBattleUnits(
         val battleUnitIds: List<String>,
@@ -65,7 +71,8 @@ sealed interface BattleUnitEvent : DomainEvent {
         val lootableItemId: String,
     ) : BattleUnitEvent
 
-    // Path: the tiles walked from the origin (excluded) to the destination (included).
+    // Path: the tiles walked from the origin (excluded) to the destination (included). Swapped with: the battle unit that
+    // walked onto its tile at the same time, or null when it walked alone.
     data class BattleUnitMoved(
         val battleUnitId: String,
         val fromRow: Int,
@@ -73,6 +80,7 @@ sealed interface BattleUnitEvent : DomainEvent {
         val toRow: Int,
         val toColumn: Int,
         val path: List<Battlefield.Dto.PositionDto>,
+        val swappedWithBattleUnitId: String? = null,
     ) : BattleUnitEvent
 
     data class AbilityCasted(
