@@ -246,10 +246,11 @@ class BattlefieldPresenter(
         event: BattleUnitEvent.BattleUnitMoved,
         unitId: String,
     ) {
-        val (firstEvent, firstUnitId) = pendingSwap?.takeIf { (firstEvent, _) -> firstEvent.battleUnitId == event.swappedWithBattleUnitId } ?: run {
-            pendingSwap = event to unitId
-            return
-        }
+        val (firstEvent, firstUnitId) =
+            pendingSwap?.takeIf { (firstEvent, _) -> firstEvent.battleUnitId == event.swappedWithBattleUnitId } ?: run {
+                pendingSwap = event to unitId
+                return
+            }
         pendingSwap = null
         timeline.play {
             battlefieldView.resetTiles()

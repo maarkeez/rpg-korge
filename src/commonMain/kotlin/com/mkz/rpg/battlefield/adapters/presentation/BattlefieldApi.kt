@@ -13,8 +13,8 @@ import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
-import com.mkz.rpg.battlefield.usecases.commands.SwapOccupants
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
+import com.mkz.rpg.battlefield.usecases.commands.SwapOccupants
 import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
 import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied

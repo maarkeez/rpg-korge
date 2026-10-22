@@ -307,7 +307,12 @@ class BattlefieldTest {
     @Test
     fun `SwapOccupants should not update the battlefield when an occupant is not deployed`() {
         // Given
-        val battlefield = BattlefieldMother.battlefield().occupy(row = 1, column = 1, occupantId = "knight-1").pullEvents().second
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(row = 1, column = 1, occupantId = "knight-1")
+                .pullEvents()
+                .second
         // When
         val updatedBattlefield = battlefield.swapOccupants(occupantId = "knight-1", otherOccupantId = "knight-2")
         // Then
