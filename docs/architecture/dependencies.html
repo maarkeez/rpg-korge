@@ -215,7 +215,7 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 33, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 99},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 47},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 67, "importsOut": 13},
-    {"name": "inventory", "files": 25, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 8, "importsOut": 51},
+    {"name": "inventory", "files": 25, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 9, "importsOut": 51},
     {"name": "lootDrop", "files": 18, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 26},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 14},
@@ -223,7 +223,7 @@ const DATA = {
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 34, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 34, "importsOut": 64},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 154},
+    {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 155},
     {"name": "shared", "files": 13, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 371, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 21, "importsOut": 15}
@@ -765,9 +765,9 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/commands/SellItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/StoreLootedItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/UnequipItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
-      {"file": "com/mkz/rpg/inventory/usecases/queries/CanBuyItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/queries/CanConsumeItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
-      {"file": "com/mkz/rpg/inventory/usecases/queries/CanSellItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
+      {"file": "com/mkz/rpg/inventory/usecases/queries/SearchBuyRefusal.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
+      {"file": "com/mkz/rpg/inventory/usecases/queries/SearchSellRefusal.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/services/ConsumptionRule.kt", "layer": "usecases", "name": "lootableItem.domain.LootableItem.Dto.LootTypeDto.ConsumableDto"}
     ]},
     {"from": "inventory", "to": "npc", "weight": 2, "files": 2, "imports": [
@@ -1092,13 +1092,14 @@ const DATA = {
     {"from": "screen", "to": "effect", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"}
     ]},
-    {"from": "screen", "to": "inventory", "weight": 8, "files": 4, "imports": [
+    {"from": "screen", "to": "inventory", "weight": 9, "files": 4, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "inventory.adapters.presentation.InventoryApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.InventoryFull"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "inventory.adapters.presentation.InventoryApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.InventoryFull"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.adapters.presentation.InventoryApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.Inventory.Dto.TradeRefusalDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemBought"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemSold"}
     ]},

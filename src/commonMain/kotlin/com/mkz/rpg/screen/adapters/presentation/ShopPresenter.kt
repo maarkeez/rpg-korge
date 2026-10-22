@@ -4,6 +4,7 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
@@ -18,7 +19,8 @@ import com.mkz.rpg.unit.adapters.presentation.UnitApi
 /**
  * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
  * sell, with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its
- * name and price with Buy, or Sell, and tapping it again clears the selection, as switching the buyer does. Back is
+ * name and price with Buy, or Sell, or why the buyer can not trade it, and tapping it again clears the selection, as
+ * switching the buyer does. The items the buyer can not trade are dimmed. Back is
  * handed to the listener set with [setOnBack], which returns to the merchant's dialog.
  */
 class ShopPresenter(
@@ -38,7 +40,7 @@ class ShopPresenter(
     private var partyMemberIds: List<String> = emptyList()
     private var buyerIndex = 0
     private var mode = Mode.BUY
-    private var displayedSlots: List<InventoryView.Slot> = emptyList()
+    private var displayedSlots: List<ShopView.Slot> = emptyList()
     private var selectedSlotIndex: Int? = null
     private var onBack: (() -> Unit)? = null
 
@@ -92,14 +94,14 @@ class ShopPresenter(
 
     private fun buyerId(): String? = partyMemberIds.getOrNull(buyerIndex)
 
-    // Displays the items to buy or to sell and the buyer, clearing the selection.
+    // Displays the items to buy or to sell, dimming the ones the buyer can not trade, and the buyer, clearing the selection.
     private fun displayShop() {
         val merchant = merchant ?: return
         val buyerId = buyerId() ?: return
         val inventory = inventoryApi.searchInventoryByBattleUnitId(buyerId)
         displayedSlots =
             when (mode) {
-                Mode.BUY -> merchant.stock.map { lootableItemId -> InventoryView.Slot(lootableItemId, isEquipped = false) }
+                Mode.BUY -> merchant.stock.map { lootableItemId -> ShopView.Slot(lootableItemId, isEquipped = false, isTradeable = refusal(buyerId, lootableItemId) == null) }
                 Mode.SELL -> {
                     val equippedItems =
                         inventory
@@ -107,7 +109,9 @@ class ShopPresenter(
                             ?.values
                             .orEmpty()
                             .toMutableList()
-                    inventory?.storedItems.orEmpty().map { lootableItemId -> InventoryView.Slot(lootableItemId, isEquipped = equippedItems.remove(lootableItemId)) }
+                    inventory?.storedItems.orEmpty().map { lootableItemId ->
+                        ShopView.Slot(lootableItemId, isEquipped = equippedItems.remove(lootableItemId), isTradeable = refusal(buyerId, lootableItemId) == null)
+                    }
                 }
             }
         val buyer =
@@ -145,8 +149,8 @@ class ShopPresenter(
         )
     }
 
-    // Displays the name and price of the item with Buy, or Sell, enabled when the buyer can trade it. Tapping the selected
-    // item, or an empty slot, clears the selection.
+    // Displays the name and price of the item with Buy, or Sell, or why the buyer can not trade it, disabled. Tapping the
+    // selected item, or an empty slot, clears the selection.
     private fun selectItem(slotIndex: Int) {
         val buyerId = buyerId() ?: return
         if (slotIndex == selectedSlotIndex) return clearSelection()
@@ -154,19 +158,42 @@ class ShopPresenter(
         val lootableItem = lootableItemApi.searchLootableItemById(lootableItemId) ?: return
         selectedSlotIndex = slotIndex
         shopView.selectSlot(slotIndex)
-        when (mode) {
-            Mode.BUY -> shopView.displayItem(lootableItem.name, lootableItem.price, actionLabel = "Buy", isActionEnabled = inventoryApi.canBuyItem(buyerId, lootableItemId))
-            Mode.SELL -> shopView.displayItem(lootableItem.name, lootableItem.sellPrice, actionLabel = "Sell", isActionEnabled = inventoryApi.canSellItem(buyerId, lootableItemId))
-        }
+        val (price, actionLabel) =
+            when (mode) {
+                Mode.BUY -> lootableItem.price to "Buy"
+                Mode.SELL -> lootableItem.sellPrice to "Sell"
+            }
+        val refusal = refusal(buyerId, lootableItemId)
+        shopView.displayItem(lootableItem.name, price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
     }
+
+    private fun refusal(
+        buyerId: String,
+        lootableItemId: String,
+    ): TradeRefusalDto? =
+        when (mode) {
+            Mode.BUY -> inventoryApi.searchBuyRefusal(buyerId, lootableItemId)
+            Mode.SELL -> inventoryApi.searchSellRefusal(buyerId, lootableItemId)
+        }
+
+    // The refusals the shop can meet. The others (e.g.: no longer trading) leave Buy or Sell disabled.
+    private fun refusalText(refusal: TradeRefusalDto): String? =
+        when (refusal) {
+            TradeRefusalDto.NOT_ENOUGH_GOLD -> "Not enough gold"
+            TradeRefusalDto.BAG_FULL -> "Bag full"
+            TradeRefusalDto.EQUIPPED -> "Equipped"
+            TradeRefusalDto.GOLD_FULL -> "Gold full"
+            TradeRefusalDto.NOT_TRADING, TradeRefusalDto.NOT_SOLD_BY_THE_MERCHANT, TradeRefusalDto.NOT_STORED -> null
+        }
 
     // Buys or sells the selected item, when the buyer can.
     private fun trade() {
         val buyerId = buyerId() ?: return
         val lootableItemId = selectedSlotIndex?.let { slotIndex -> displayedSlots.getOrNull(slotIndex) }?.lootableItemId ?: return
+        if (refusal(buyerId, lootableItemId) != null) return
         when (mode) {
-            Mode.BUY -> if (inventoryApi.canBuyItem(buyerId, lootableItemId)) inventoryApi.buyItem(buyerId, lootableItemId)
-            Mode.SELL -> if (inventoryApi.canSellItem(buyerId, lootableItemId)) inventoryApi.sellItem(buyerId, lootableItemId)
+            Mode.BUY -> inventoryApi.buyItem(buyerId, lootableItemId)
+            Mode.SELL -> inventoryApi.sellItem(buyerId, lootableItemId)
         }
     }
 

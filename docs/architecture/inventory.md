@@ -25,8 +25,8 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `searchInventoryByBattleUnitId` | The stored items and the equipped ones, to display them. |
 | `canStoreItem`                  | Whether there is space left for one more item.          |
 | `canConsumeItem`                | Whether the battle unit can consume the item now.       |
-| `canBuyItem`                    | Whether the battle unit can buy the item now.           |
-| `canSellItem`                   | Whether the battle unit can sell the item now.          |
+| `searchBuyRefusal`              | Why the battle unit can not buy the item now, if so.    |
+| `searchSellRefusal`             | Why the battle unit can not sell the item now, if so.   |
 
 - Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
 - Storing is not limited to the player's turn, as it happens while a battle unit moves.
@@ -83,7 +83,7 @@ A battle unit trades as a party member, while the party talks to a merchant ([`T
 
 - Buying announces `ItemBought`, and selling `ItemSold`, with the price paid. A sold item leaves the game, so it does not join the merchant's stock.
 - Any item can be sold, also the ones the merchant does not sell.
-- `canBuyItem` and `canSellItem` answer `false` instead of failing, so the shop disables Buy and Sell. See [Shopping at a merchant](exploration.md#shopping-at-a-merchant).
+- `searchBuyRefusal` and `searchSellRefusal` answer why instead of failing (a `TradeRefusalDto`, e.g.: `NOT_ENOUGH_GOLD`, `BAG_FULL`, `EQUIPPED` or `GOLD_FULL`), or `null` when the trade is allowed, so the shop dims the items and disables Buy and Sell with the reason. The same rules make `buyItem` and `sellItem` fail. See [Shopping at a merchant](exploration.md#shopping-at-a-merchant).
 
 ## Learning an ability
 

@@ -1,5 +1,6 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
@@ -26,6 +27,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
@@ -86,11 +88,12 @@ class InventoryTest {
     }
 
     @Test
-    fun `CanBuy should tell whether it can afford the price and has space left`() {
+    fun `BuyRefusal should tell whether it can not afford the price, or has no space left`() {
         // Then
-        inventory(gold = 50).canBuy(price = 50).shouldBeTrue()
-        inventory(gold = 49).canBuy(price = 50).shouldBeFalse()
-        fullInventory(gold = 100).canBuy(price = 50).shouldBeFalse()
+        inventory(gold = 50).buyRefusal(price = 50).shouldBeNull()
+        inventory(gold = 49).buyRefusal(price = 50) shouldBe TradeRefusalDto.NOT_ENOUGH_GOLD
+        fullInventory(gold = 100).buyRefusal(price = 50) shouldBe TradeRefusalDto.BAG_FULL
+        fullInventory(gold = 0).buyRefusal(price = 50) shouldBe TradeRefusalDto.BAG_FULL
     }
 
     @Test
@@ -141,13 +144,13 @@ class InventoryTest {
     }
 
     @Test
-    fun `CanSell should tell whether a copy that is not equipped is stored, and the gold stays within 99,999`() {
+    fun `SellRefusal should tell whether no copy that is not equipped is stored, or the gold goes above 99,999`() {
         // Then
-        inventory(storedItems = listOf("hammer"), gold = 99_974).canSell("hammer", price = 25).shouldBeTrue()
-        inventory(storedItems = listOf("hammer"), gold = 99_975).canSell("hammer", price = 25).shouldBeFalse()
-        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).canSell("hammer", price = 25).shouldBeFalse()
-        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).canSell("hammer", price = 25).shouldBeTrue()
-        inventory().canSell("hammer", price = 25).shouldBeFalse()
+        inventory(storedItems = listOf("hammer"), gold = 99_974).sellRefusal("hammer", price = 25).shouldBeNull()
+        inventory(storedItems = listOf("hammer"), gold = 99_975).sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.GOLD_FULL
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25).shouldBeNull()
+        inventory().sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.NOT_STORED
     }
 
     @Test

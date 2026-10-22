@@ -27,9 +27,14 @@ class InventorySlotView(
         val EMPTY_COLOR = RGBA(0x34, 0x34, 0x34)
 
         private const val FRAME_THICKNESS = 3.0
+
+        // How visible a dimmed item is, e.g.: an item the buyer can not trade at a merchant.
+        const val DIMMED_ALPHA = 0.35
     }
 
     private var onSelected: (() -> Unit)? = null
+    internal var isDimmed = false
+        private set
 
     init {
         bgColorOut = EMPTY_COLOR
@@ -42,20 +47,23 @@ class InventorySlotView(
         this.onSelected = onSelected
     }
 
-    /** Displays the stored item, or an empty space when [lootableItemId] is `null`. */
+    /** Displays the stored item, dimmed or not, or an empty space when [lootableItemId] is `null`. */
     fun display(
         lootableItemId: String?,
         isEquipped: Boolean,
+        isDimmed: Boolean = false,
     ) {
         findViewByName(ITEM)?.removeFromParent()
         findViewByName(EQUIPPED_FRAME)?.removeFromParent()
         unselect()
+        this.isDimmed = lootableItemId != null && isDimmed
         val slot = this
         lootableItemId?.let { resourcesLoader.bitmapOrNull("lootableItem/$it.png") }?.let { itemBitmap ->
             slot.image(itemBitmap) {
                 name = ITEM
                 smoothing = false
                 scale = 3.0
+                alpha = if (isDimmed) DIMMED_ALPHA else 1.0
                 centerOn(slot)
             }
         }

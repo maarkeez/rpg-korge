@@ -1,6 +1,6 @@
 # Plan: Shop redesign
 
-> **Status:** in progress (slices 1 and 2 done).
+> **Status:** done.
 >
 > **Summary:** The shop asked too much at once: two tabs and Close on top, the slots and buyer dots in the middle, and
 > Cancel and Buy in the call to action under it. The merchant's dialog now offers Buy, Sell and Leave, so the shop opens
@@ -31,5 +31,6 @@
    replaces the call to action: Back, the hint, or the item with Buy or Sell. No Cancel, and tapping the selected item
    again clears the selection. `ShopPresenter` no longer uses the call to action, which no longer needs to keep its item
    actions once one is selected.
-3. **Trade reasons.** `canBuyItem` and `canSellItem` answer why an item can not be traded, instead of `false`. The button
-   reads the reason, and the grid dims the items the buyer can not trade.
+3. **Trade reasons** (done). `searchBuyRefusal` and `searchSellRefusal` replace `canBuyItem` and `canSellItem`: they
+   answer why an item can not be traded (`Inventory.Dto.TradeRefusalDto`), or `null`, and `buyItem` and `sellItem` fail
+   by the same rules. The button reads the reason, and the grid dims the items the buyer can not trade.

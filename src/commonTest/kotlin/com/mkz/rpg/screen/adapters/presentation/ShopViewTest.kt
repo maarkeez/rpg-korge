@@ -1,11 +1,12 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
-import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
+import com.mkz.rpg.screen.adapters.presentation.ShopView.Slot
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
@@ -40,7 +41,7 @@ class ShopViewTest : ViewsForTesting() {
     private val knight = ShopView.Buyer(name = "Knight", gold = 20, usedStorageSpace = 11, maximumStorageSpace = 12, partyIndex = 1, partySize = 3)
 
     private fun ShopView.displayMerchant(
-        slots: List<Slot> = listOf(Slot("mana-potion", isEquipped = false), Slot("hammer", isEquipped = false)),
+        slots: List<Slot> = listOf(Slot("mana-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = false, isTradeable = true)),
         buyer: ShopView.Buyer = knight,
     ) = display(slots = slots, buyer = buyer)
 
@@ -78,9 +79,26 @@ class ShopViewTest : ViewsForTesting() {
             // Given
             val shopView = ShopView(loadedResourcesLoader())
             // When
-            shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)))
+            shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = true, isTradeable = false)))
             // Then
             shopView.equippedSlotIndexes().shouldContainExactly(1)
+        }
+
+    @Test
+    fun `Display should dim the items the buyer can not trade`() =
+        sharedViewsTest {
+            // Given
+            val shopView = ShopView(loadedResourcesLoader())
+            // When
+            shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = false, isTradeable = false)))
+            // Then
+            shopView.dimmedSlotIndexes().shouldContainExactly(1)
+            shopView.itemAlphas()[0] shouldBe 1.0
+            shopView.itemAlphas()[1]!! shouldBe (InventorySlotView.DIMMED_ALPHA plusOrMinus 0.001)
+            // When
+            shopView.displayMerchant(slots = listOf(Slot("hammer", isEquipped = false, isTradeable = true)))
+            // Then
+            shopView.dimmedSlotIndexes().shouldBeEmpty()
         }
 
     @Test
@@ -134,11 +152,11 @@ class ShopViewTest : ViewsForTesting() {
             // Given
             val shopView = ShopView(loadedResourcesLoader())
             // When
-            shopView.displayItem(itemName = "Hammer", itemPrice = 50, actionLabel = "Buy", isActionEnabled = false)
+            shopView.displayItem(itemName = "Hammer", itemPrice = 50, actionLabel = "Not enough gold", isActionEnabled = false)
             // Then
             shopView.footerText() shouldBe "Hammer"
             shopView.footerPrice() shouldBe "50 G"
-            shopView.action() shouldBe ("Buy" to false)
+            shopView.action() shouldBe ("Not enough gold" to false)
             // When
             shopView.displayHint("Tap an item to buy")
             // Then

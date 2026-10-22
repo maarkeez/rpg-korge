@@ -121,7 +121,7 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `ShopSlotSelected should display the item price, and Buy disabled when the buyer can not afford it`() {
+    fun `ShopSlotSelected should display the item price, and Buy disabled reading why when the buyer can not afford it`() {
         // Given
         openTheShop()
         // When
@@ -130,7 +130,19 @@ class ShopPresenterTest {
         shopView.selectedSlotIndexes().shouldContainExactly(1)
         shopView.footerText() shouldBe "Hammer"
         shopView.footerPrice() shouldBe "50 G"
-        shopView.action() shouldBe ("Buy" to false)
+        shopView.action() shouldBe ("Not enough gold" to false)
+    }
+
+    @Test
+    fun `Open should dim the items the buyer can not afford`() {
+        // When
+        openTheShop()
+        // Then
+        shopView.dimmedSlotIndexes().shouldContainExactly(1)
+        // When
+        presenter.shopBuyerStepped(1)
+        // Then
+        shopView.dimmedSlotIndexes().shouldBeEmpty()
     }
 
     @Test
@@ -209,7 +221,8 @@ class ShopPresenterTest {
         trade()
         // Then
         shopView.buyerText() shouldBe "Viking · 0 G · Bag 2/12"
-        shopView.action() shouldBe ("Buy" to false)
+        shopView.action() shouldBe ("Not enough gold" to false)
+        shopView.dimmedSlotIndexes().shouldContainExactly(0, 1)
     }
 
     @Test
@@ -261,7 +274,7 @@ class ShopPresenterTest {
     }
 
     @Test
-    fun `Sell should be disabled for the only copy of an equipped item, framed in gold`() {
+    fun `Sell should be disabled reading Equipped for the only copy of an equipped item, framed in gold and dimmed`() {
         // Given
         reopenToSellTheVikingsHammer {
             apis.inventoryApi.equipItem("viking-1", "hammer")
@@ -271,7 +284,8 @@ class ShopPresenterTest {
         presenter.shopSlotSelected(0)
         // Then
         shopView.equippedSlotIndexes().shouldContainExactly(0)
-        shopView.action() shouldBe ("Sell" to false)
+        shopView.dimmedSlotIndexes().shouldContainExactly(0)
+        shopView.action() shouldBe ("Equipped" to false)
     }
 
     @Test

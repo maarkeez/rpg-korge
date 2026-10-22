@@ -1,5 +1,6 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
@@ -122,16 +123,24 @@ data class Inventory private constructor(
         )
     }
 
-    /** Whether it can pay the price of an item, and has space to store it. */
-    fun canBuy(price: Int): Boolean = canStore() && gold.value >= price
+    /** Why it can not buy an item: it has no space to store it, or can not pay its price. `null` when it can buy it. */
+    fun buyRefusal(price: Int): TradeRefusalDto? =
+        when {
+            !canStore() -> TradeRefusalDto.BAG_FULL
+            gold.value < price -> TradeRefusalDto.NOT_ENOUGH_GOLD
+            else -> null
+        }
 
     /** Pays the price of an item and stores it. Fails when it can not pay it, or has no space left. */
     fun buy(
         lootableItemId: String,
         price: Int,
     ): Inventory {
-        if (!canStore()) throw NoStorageSpaceLeft()
-        if (gold.value < price) throw NotEnoughGold()
+        when (buyRefusal(price)) {
+            TradeRefusalDto.BAG_FULL -> throw NoStorageSpaceLeft()
+            TradeRefusalDto.NOT_ENOUGH_GOLD -> throw NotEnoughGold()
+            else -> Unit
+        }
         return copy(
             storedItems = StoredItems(storedItems.value + LootableItemId(lootableItemId)),
             gold = Gold(gold.value - price),
@@ -139,14 +148,22 @@ data class Inventory private constructor(
         )
     }
 
-    /** Whether it can sell a stored copy that is not equipped for the price, without going above the most gold it can carry. */
-    fun canSell(
+    /**
+     * Why it can not sell an item for the price: it stores no copy, its only copy is equipped, or the price takes its gold
+     * above the most it can carry. `null` when it can sell it.
+     */
+    fun sellRefusal(
         lootableItemId: String,
         price: Int,
-    ): Boolean {
+    ): TradeRefusalDto? {
         val item = LootableItemId(lootableItemId)
-        val unequippedCopies = storedItems.count(item) - if (equippedItems.isEquipped(item)) 1 else 0
-        return unequippedCopies > 0 && gold.value + price <= MAXIMUM
+        val storedCopies = storedItems.count(item)
+        return when {
+            storedCopies == 0 -> TradeRefusalDto.NOT_STORED
+            equippedItems.isEquipped(item) && storedCopies == 1 -> TradeRefusalDto.EQUIPPED
+            gold.value + price > MAXIMUM -> TradeRefusalDto.GOLD_FULL
+            else -> null
+        }
     }
 
     /** Removes a stored copy that is not equipped, and receives its price. The item leaves the game. */
@@ -154,12 +171,14 @@ data class Inventory private constructor(
         lootableItemId: String,
         price: Int,
     ): Inventory {
-        val item = LootableItemId(lootableItemId)
-        if (storedItems.count(item) == 0) throw InventoryItemNotFound()
-        if (equippedItems.isEquipped(item) && storedItems.count(item) == 1) throw EquippedItemCanNotBeSold()
-        if (gold.value + price > MAXIMUM) throw GoldAboveLimit()
+        when (sellRefusal(lootableItemId, price)) {
+            TradeRefusalDto.NOT_STORED -> throw InventoryItemNotFound()
+            TradeRefusalDto.EQUIPPED -> throw EquippedItemCanNotBeSold()
+            TradeRefusalDto.GOLD_FULL -> throw GoldAboveLimit()
+            else -> Unit
+        }
         return copy(
-            storedItems = storedItems.removeOne(item),
+            storedItems = storedItems.removeOne(LootableItemId(lootableItemId)),
             gold = Gold(gold.value + price),
             events = events + ItemSold(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, price = price),
         )
@@ -232,5 +251,21 @@ data class Inventory private constructor(
         // The equipped items are also part of the stored items.
         val equippedItems: Map<EquipmentZoneDto, String>,
         val gold: Int,
-    )
+    ) {
+        /** Why a battle unit can not buy or sell an item. */
+        enum class TradeRefusalDto {
+            // The battle unit is not a party member talking to a merchant, e.g.: the party talks to no merchant.
+            NOT_TRADING,
+
+            // Only buying.
+            NOT_SOLD_BY_THE_MERCHANT,
+            NOT_ENOUGH_GOLD,
+            BAG_FULL,
+
+            // Only selling.
+            NOT_STORED,
+            EQUIPPED,
+            GOLD_FULL,
+        }
+    }
 }

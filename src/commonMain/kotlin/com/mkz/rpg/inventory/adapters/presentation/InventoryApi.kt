@@ -15,11 +15,11 @@ import com.mkz.rpg.inventory.usecases.commands.EquipItem
 import com.mkz.rpg.inventory.usecases.commands.SellItem
 import com.mkz.rpg.inventory.usecases.commands.StoreLootedItem
 import com.mkz.rpg.inventory.usecases.commands.UnequipItem
-import com.mkz.rpg.inventory.usecases.queries.CanBuyItem
 import com.mkz.rpg.inventory.usecases.queries.CanConsumeItem
-import com.mkz.rpg.inventory.usecases.queries.CanSellItem
 import com.mkz.rpg.inventory.usecases.queries.CanStoreItem
+import com.mkz.rpg.inventory.usecases.queries.SearchBuyRefusal
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoryByBattleUnitId
+import com.mkz.rpg.inventory.usecases.queries.SearchSellRefusal
 import com.mkz.rpg.inventory.usecases.services.ConsumptionRule
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
 import com.mkz.rpg.inventory.usecases.services.TradeRule
@@ -60,8 +60,8 @@ class InventoryApi(
     val searchInventoryByBattleUnitId = SearchInventoryByBattleUnitId(inventoryRepository)
     val canStoreItem = CanStoreItem(inventoryRepository)
     val canConsumeItem = CanConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, consumptionRule)
-    val canBuyItem = CanBuyItem(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
-    val canSellItem = CanSellItem(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
+    val searchBuyRefusal = SearchBuyRefusal(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
+    val searchSellRefusal = SearchSellRefusal(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
 
     // Event Listeners
     private val onLootFound = OnLootFound(storeLootedItem, eventBus)

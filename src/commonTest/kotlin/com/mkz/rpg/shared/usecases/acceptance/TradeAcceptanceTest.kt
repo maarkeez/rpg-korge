@@ -6,6 +6,7 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
@@ -18,9 +19,8 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.booleans.shouldBeFalse
-import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -100,7 +100,7 @@ class TradeAcceptanceTest {
     fun `should let each party member buy with its own gold`() =
         scenarioTest(::setUp) {
             // Then
-            inventoryApi.canBuyItem("knight-1", "hammer").shouldBeFalse()
+            inventoryApi.searchBuyRefusal("knight-1", "hammer") shouldBe TradeRefusalDto.NOT_ENOUGH_GOLD
             shouldThrow<InventoryError.NotEnoughGold> { inventoryApi.buyItem("knight-1", "hammer") }
             // When
             buy("knight-1", "health-potion")
@@ -134,12 +134,12 @@ class TradeAcceptanceTest {
             inventoryApi.equipItem("viking-1", "hammer")
             eventBus.dispatch()
             // Then
-            inventoryApi.canSellItem("viking-1", "hammer").shouldBeFalse()
+            inventoryApi.searchSellRefusal("viking-1", "hammer") shouldBe TradeRefusalDto.EQUIPPED
             // When
             inventoryApi.unequipItem("viking-1", "hammer")
             eventBus.dispatch()
             // Then
-            inventoryApi.canSellItem("viking-1", "hammer").shouldBeTrue()
+            inventoryApi.searchSellRefusal("viking-1", "hammer").shouldBeNull()
         }
 
     @Test
@@ -149,7 +149,7 @@ class TradeAcceptanceTest {
             partyApi.finishTalk()
             eventBus.dispatch()
             // Then
-            inventoryApi.canBuyItem("viking-1", "health-potion").shouldBeFalse()
+            inventoryApi.searchBuyRefusal("viking-1", "health-potion") shouldBe TradeRefusalDto.NOT_TRADING
             shouldThrow<InventoryError.NotTradingWithAMerchant> { inventoryApi.buyItem("viking-1", "health-potion") }
         }
 }

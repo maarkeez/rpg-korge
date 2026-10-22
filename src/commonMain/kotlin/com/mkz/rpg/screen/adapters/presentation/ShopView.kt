@@ -40,7 +40,7 @@ open class ShopView(
         private const val BAR_HEIGHT = 32.0
         private const val ARROW_WIDTH = 40.0
         private const val BACK_WIDTH = 64.0
-        private const val ACTION_WIDTH = 120.0
+        private const val ACTION_WIDTH = 130.0
         private const val ITEM_WIDTH = WIDTH - BACK_WIDTH - ACTION_WIDTH - 2 * SPACING
         private const val HEIGHT = 2 * BAR_HEIGHT + 2 * SLOT_SIZE + SLOT_SPACING + 3 * PADDING
 
@@ -50,6 +50,13 @@ open class ShopView(
 
     /** Whether the buyer buys the merchant's items, or sells its own. */
     enum class Mode { BUY, SELL }
+
+    /** An item to buy or to sell, dimmed when the buyer can not trade it, and whether it is the buyer's equipped copy. */
+    data class Slot(
+        val lootableItemId: String,
+        val isEquipped: Boolean,
+        val isTradeable: Boolean,
+    )
 
     /** The party member trading: its position in the party, from the leader, and its gold and bag. */
     data class Buyer(
@@ -116,16 +123,16 @@ open class ShopView(
     }
 
     /**
-     * Displays the items in their order followed by the empty slots, and the buyer, e.g.: Knight · 20 G · Bag 11/12, or
+     * Displays the items in their order followed by the empty slots, the ones the buyer can not trade dimmed, and the buyer, e.g.: Knight · 20 G · Bag 11/12, or
      * Bag full. The arrows are disabled at the ends of the party. Clears the selected slot.
      */
     open fun display(
-        slots: List<InventoryView.Slot>,
+        slots: List<Slot>,
         buyer: Buyer,
     ) {
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
-            slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)
+            slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false, isDimmed = slot?.isTradeable == false)
         }
         val bag = if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) "Bag full" else "Bag ${buyer.usedStorageSpace}/${buyer.maximumStorageSpace}"
         buyerText.text = "${buyer.name} · ${goldText(buyer.gold)} · $bag"
@@ -146,7 +153,10 @@ open class ShopView(
         actionButton.visible = false
     }
 
-    /** Displays the selected item's name and price next to Back, and its action, e.g.: Buy, disabled when it can not be done. */
+    /**
+     * Displays the selected item's name and price next to Back, and its action, e.g.: Buy, or why it can not be done
+     * instead, disabled, e.g.: Not enough gold.
+     */
     open fun displayItem(
         itemName: String,
         itemPrice: Int,
