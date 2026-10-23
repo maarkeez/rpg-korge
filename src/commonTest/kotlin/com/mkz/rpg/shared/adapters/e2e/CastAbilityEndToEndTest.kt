@@ -47,7 +47,6 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
             clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, healAbilityIndex)
             waitUntil { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
@@ -72,7 +71,6 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
             require(battlefieldView.isDimmedAt(batRow, tileBehindBatColumn)) { "($batRow,$tileBehindBatColumn) should be out of reach while the bat blocks the way" }
             clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, swordAbilityIndex)

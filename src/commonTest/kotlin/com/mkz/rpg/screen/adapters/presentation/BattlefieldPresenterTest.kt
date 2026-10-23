@@ -747,6 +747,72 @@ class BattlefieldPresenterTest {
         requestedMoves.shouldBeEmpty()
     }
 
+    private val battleUnitIdsInBattle = setOf("knight-1", "rat-1", "rat-2")
+
+    @Test
+    fun `SelectPartyLeader should select the party leader with its movement range when a human turn starts`() {
+        // Given
+        // When
+        publish(PlayerTurnStarted(playerId = "human", battleUnitIds = battleUnitIdsInBattle))
+        // Then
+        battleUnitInfoView.displayedBattleUnits.map { displayed -> displayed.battleUnit.id }.shouldContainExactly("knight-1")
+        battlefieldView.tileSelections.shouldContainExactly(position(1, 1))
+        battlefieldView.potentialMovements shouldContain position(1, 2)
+    }
+
+    @Test
+    fun `SelectPartyLeader should scroll to the party leader when a human turn starts`() {
+        // Given
+        // When
+        publish(PlayerTurnStarted(playerId = "human", battleUnitIds = battleUnitIdsInBattle))
+        // Then
+        battlefieldView.scrolledToTiles.shouldContainExactly(position(1, 1))
+    }
+
+    @Test
+    fun `SelectPartyLeader should not select any battle unit when a cpu turn starts`() {
+        // Given
+        // When
+        publish(PlayerTurnStarted(playerId = "cpu", battleUnitIds = battleUnitIdsInBattle))
+        // Then
+        battleUnitInfoView.displayedBattleUnits.shouldBeEmpty()
+        battlefieldView.tileSelections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `SelectPartyLeader should not select the party leader when it is not in the battle`() {
+        // Given
+        // When
+        publish(PlayerTurnStarted(playerId = "human", battleUnitIds = setOf("rat-1", "rat-2")))
+        // Then
+        battleUnitInfoView.displayedBattleUnits.shouldBeEmpty()
+        battlefieldView.tileSelections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `SelectPartyLeader should select the new party leader when a human turn starts after the leader left the party`() {
+        // Given
+        // E.g.: the knight-1 has been defeated, so the knight-2 leads the party.
+        val battlingApis =
+            SubdomainApis(
+                terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+                units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
+                players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+                tiles = List(4) { List(4) { "sand" } },
+                deployments = partyOfTwoKnights + Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 3),
+                playerOrder = listOf("cpu", "human"),
+                explore = true,
+            ).also(SubdomainApis::initialise)
+        val battlingBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(battlingApis, battlingBattlefieldView)
+        battlingApis.partyApi.leaveParty("knight-1")
+        // When
+        battlingApis.eventBus.publish(PlayerTurnStarted(playerId = "human", battleUnitIds = setOf("knight-1", "knight-2", "rat-1")))
+        battlingApis.eventBus.dispatch()
+        // Then
+        battlingBattlefieldView.tileSelections.shouldContainExactly(position(2, 1))
+    }
+
     @Test
     fun `TileSelected should ignore the selected tile while talking to an npc`() {
         // Given

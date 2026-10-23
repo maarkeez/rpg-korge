@@ -7,6 +7,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickBag
 import com.mkz.rpg.screen.adapters.presentation.clickClose
 import com.mkz.rpg.screen.adapters.presentation.clickTile
+import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.inventoryView
 import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
@@ -22,17 +23,13 @@ import kotlin.test.Test
 
 class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     // The party walks to the battle with the knight at (2,5), and the cpu bat engaging it walks to (2,6), next to it.
-    // Nothing has been looted yet.
-    private val knightRow = LEADER_ROW_IN_BATTLE
-    private val knightColumn = LEADER_COLUMN_IN_BATTLE
+    // Nothing has been looted yet. The knight is selected once the human player turn starts.
 
     @Test
     fun `should open the empty inventory of the knight and go back to its info when the human player opens and closes its bag`() =
         sharedViewsTest {
             // Given
             startNewBattle()
-            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battleUnitInfoView()?.isBagDisplayed() == true }
             // When
             clickBag(requireNotNull(battleUnitInfoView()))
@@ -54,7 +51,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // When
             clickTile(battlefieldView, BAT_ROW_IN_BATTLE, BAT_COLUMN_IN_BATTLE)
             // Then
-            waitUntil { battleHudView()?.isDisplayingBattleUnitInfo() == true }
+            waitUntil { battlefieldView.hasSelectionAt(BAT_ROW_IN_BATTLE, BAT_COLUMN_IN_BATTLE) && battleHudView()?.isDisplayingBattleUnitInfo() == true }
             withClue("Expected the bat, which has no inventory, to have no bag") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeFalse() }
         }
 }

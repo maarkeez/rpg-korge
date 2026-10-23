@@ -210,7 +210,7 @@ const DATA = {
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 23, "importsOut": 17},
     {"name": "battle", "files": 21, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 31, "importsOut": 23},
     {"name": "battleUnit", "files": 58, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 61, "importsOut": 172},
-    {"name": "battlefield", "files": 37, "fanIn": 8, "fanOut": 4, "instability": 0.33, "importsIn": 96, "importsOut": 37},
+    {"name": "battlefield", "files": 37, "fanIn": 8, "fanOut": 4, "instability": 0.33, "importsIn": 97, "importsOut": 37},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 13, "instability": 0.93, "importsIn": 1, "importsOut": 14},
     {"name": "cpuBattleBrain", "files": 33, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 99},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 47},
@@ -223,8 +223,8 @@ const DATA = {
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 34, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 34, "importsOut": 64},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 64, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 155},
-    {"name": "shared", "files": 13, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 371, "importsOut": 0},
+    {"name": "screen", "files": 65, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 157},
+    {"name": "shared", "files": 13, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 372, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 21, "importsOut": 15}
   ],
@@ -1061,7 +1061,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battleUnit.usecases.queries.CanMoveTo"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battleUnit.usecases.queries.SearchBattleUnitById"}
     ]},
-    {"from": "screen", "to": "battlefield", "weight": 17, "files": 10, "imports": [
+    {"from": "screen", "to": "battlefield", "weight": 18, "files": 11, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
@@ -1078,6 +1078,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ConfirmCast.kt", "layer": "adapters", "name": "battlefield.domain.Battlefield"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchOccupant"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchPosition"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchTilesThatCanBeOccupied"}
     ]},
     {"from": "screen", "to": "battlesetup", "weight": 1, "files": 1, "imports": [
@@ -1162,7 +1163,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
-    {"from": "screen", "to": "shared", "weight": 37, "files": 23, "imports": [
+    {"from": "screen", "to": "shared", "weight": 38, "files": 24, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1199,7 +1200,8 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/DeselectBattleUnit.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessAbilitySelected.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt", "layer": "adapters", "name": "shared.domain.EventBus"}
+      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "shared.domain.EventBus"}
     ]},
     {"from": "screen", "to": "terrain", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "terrain.adapters.presentation.TerrainApi"},

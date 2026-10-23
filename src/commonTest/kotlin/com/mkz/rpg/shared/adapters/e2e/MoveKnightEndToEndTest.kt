@@ -35,7 +35,6 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
             // When
             clickTile(battlefieldView, targetRow, targetColumn)
@@ -46,14 +45,13 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should dim the tiles out of the knight movement range when the human player selects the knight`() =
+    fun `should select the knight and dim the tiles out of its movement range when the human player turn starts`() =
         sharedViewsTest {
             // Given
-            startNewBattle()
-            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
-            clickTile(battlefieldView, knightRow, knightColumn)
+            startNewBattle()
             // Then
+            val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             waitUntil { battlefieldView.hasSelectionAt(targetRow, targetColumn) }
             withClue("Expected ($targetRow,$outOfRangeColumn), out of the knight movement range, to be dimmed") { battlefieldView.isDimmedAt(targetRow, outOfRangeColumn).shouldBeTrue() }
             withClue("Expected the selected knight not to be dimmed") { battlefieldView.isDimmedAt(knightRow, knightColumn).shouldBeFalse() }
@@ -67,7 +65,6 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             val farTargetColumn = 3
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
-            clickTile(battlefieldView, knightRow, knightColumn)
             waitUntil { battlefieldView.hasSelectionAt(targetRow, farTargetColumn) }
             // When
             clickTile(battlefieldView, targetRow, farTargetColumn)

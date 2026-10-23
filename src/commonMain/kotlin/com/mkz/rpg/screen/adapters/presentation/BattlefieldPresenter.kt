@@ -26,6 +26,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessAbilitySelected
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessTileSelected
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.RefreshMovementRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.SelectBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -88,6 +89,13 @@ class BattlefieldPresenter(
         DeselectBattleUnit(
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
+        )
+    private val selectBattleUnit =
+        SelectBattleUnit(
+            searchPosition = battlefieldApi.searchPosition,
+            battlefieldHudRepository = battlefieldHudRepository,
+            eventBus = eventBus,
+            movementService = movementService,
         )
     private val refreshMovementRange =
         RefreshMovementRange(
@@ -155,10 +163,13 @@ class BattlefieldPresenter(
             eventBus.subscribe<LootDropEvent.DroppedItemPickedUp> { event ->
                 timeline.play { pickUpLoot(event.row, event.column, event.lootableItemId) }
             },
-            // The selection is cleared before the turn is announced, and can not be acted on during the new turn.
-            eventBus.subscribe<BattleEvent.PlayerTurnStarted> {
+            // The selection is cleared before the turn is announced, and can not be acted on during the new turn. A human
+            // turn then selects the party leader, so the player sees what it can do. Its selection is published while the
+            // turn starts, so it is drawn once the turn has been announced.
+            eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
                 timeline.play { clearSelection() }
                 deselectBattleUnit()
+                selectPartyLeader(event)
             },
             // The selection is cleared when the battle finishes, as the party explores again.
             eventBus.subscribe<BattleEvent.BattleFinished> {
@@ -333,7 +344,11 @@ class BattlefieldPresenter(
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+        val isBattling = isBattling()
         return {
+            // In a battle, the battlefield scrolls to the selected battle unit (e.g.: the party leader when its turn
+            // starts), when it is out of the viewport or on its edge.
+            if (isBattling) battlefieldView.scrollToTile(row = selectedBattleUnitEvent.tile.row, column = selectedBattleUnitEvent.tile.column)
             battlefieldView.resetTiles()
             battleUnitInfoView.display(battleUnit, unit)
             battleHudView.displayBattleUnitInfoView()
@@ -347,6 +362,13 @@ class BattlefieldPresenter(
             val selectableTiles = selectedBattleUnitEvent.tilesWhereCanBeMoved + selectedBattleUnitEvent.tile
             battlefieldView.dimTilesExcept(selectableTiles.map { tile -> PositionDto(tile.row, tile.column) }.toSet())
         }
+    }
+
+    // The party leader, when it is in the battle and the turn is the human player's.
+    private fun selectPartyLeader(event: BattleEvent.PlayerTurnStarted) {
+        if (playerApi.searchPlayerById(event.playerId)?.type != Player.Dto.PlayerTypeDto.HUMAN) return
+        val leaderId = partyApi.searchParty()?.leaderBattleUnitId ?: return
+        if (leaderId in event.battleUnitIds) selectBattleUnit(leaderId)
     }
 
     private fun clearSelection() {
