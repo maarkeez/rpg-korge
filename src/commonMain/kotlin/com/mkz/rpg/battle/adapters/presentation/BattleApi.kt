@@ -2,6 +2,7 @@ package com.mkz.rpg.battle.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.events.OnPlayerDefeated
 import com.mkz.rpg.battle.adapters.events.OnRequestDefeatPlayer
+import com.mkz.rpg.battle.adapters.events.OnRequestFinishDisengagedBattle
 import com.mkz.rpg.battle.adapters.events.OnRequestFinishPlayerTurn
 import com.mkz.rpg.battle.adapters.events.OnRequestJoinBattle
 import com.mkz.rpg.battle.adapters.events.OnRequestLeaveBattle
@@ -11,6 +12,7 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleRepository
 import com.mkz.rpg.battle.usecases.commands.DefeatPlayer
 import com.mkz.rpg.battle.usecases.commands.FinishBattle
+import com.mkz.rpg.battle.usecases.commands.FinishDisengagedBattle
 import com.mkz.rpg.battle.usecases.commands.FinishPlayerTurn
 import com.mkz.rpg.battle.usecases.commands.JoinBattle
 import com.mkz.rpg.battle.usecases.commands.LeaveBattle
@@ -33,8 +35,9 @@ class BattleApi(
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
     val startBattle = StartBattle(battleRepository, eventBus)
     val joinBattle = JoinBattle(battleRepository)
-    val leaveBattle = LeaveBattle(battleRepository)
+    val leaveBattle = LeaveBattle(battleRepository, eventBus)
     val startNextRound = StartNextRound(battleRepository, eventBus)
+    val finishDisengagedBattle = FinishDisengagedBattle(battleRepository, eventBus)
 
     // Queries
     val searchBattle = SearchBattle(battleRepository)
@@ -47,4 +50,5 @@ class BattleApi(
     private val onRequestJoinBattle = OnRequestJoinBattle(joinBattle, eventBus)
     private val onRequestLeaveBattle = OnRequestLeaveBattle(leaveBattle, eventBus)
     private val onRequestDefeatPlayer = OnRequestDefeatPlayer(defeatPlayer, eventBus)
+    private val onRequestFinishDisengagedBattle = OnRequestFinishDisengagedBattle(finishDisengagedBattle, eventBus)
 }

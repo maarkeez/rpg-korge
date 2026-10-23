@@ -11,7 +11,7 @@ import kotlin.test.Test
 class OnRequestLeaveBattleTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
-    private val onRequestLeaveBattle = OnRequestLeaveBattle(LeaveBattle(battleRepository), eventBus)
+    private val onRequestLeaveBattle = OnRequestLeaveBattle(LeaveBattle(battleRepository, eventBus), eventBus)
 
     @Test
     fun `should remove the battle unit from the battle when it is requested to leave it`() {

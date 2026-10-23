@@ -4,6 +4,7 @@ import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnAbilityCastResolved
+import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleDisengaged
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleBrainInitialized
@@ -20,6 +21,7 @@ import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.JoinCpuTurn
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.ManageCpuBattleUnit
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.PlayTurn
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.ReengageEnemies
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.ResolveCpuBattleUnitCast
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.ResolveCpuBattleUnitMove
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.UpdateEngagement
@@ -135,6 +137,14 @@ class CpuBattleBrainApi(
             searchEnemiesWithinReach,
             eventBus,
         )
+    val reengageEnemies =
+        ReengageEnemies(
+            playerApi.searchHumanPlayer,
+            playerApi.searchEnemyPlayer,
+            battleUnitApi.searchBattleUnitsByPlayerId,
+            searchEnemiesWithinReach,
+            eventBus,
+        )
     val resolveCpuBattleUnitMove = ResolveCpuBattleUnitMove(cpuBattleBrainRepository, eventBus)
     val resolveCpuBattleUnitCast = ResolveCpuBattleUnitCast(cpuBattleBrainRepository, eventBus)
     val joinCpuTurn = JoinCpuTurn(cpuBattleBrainRepository, battleUnitApi.searchBattleUnitById)
@@ -151,4 +161,5 @@ class CpuBattleBrainApi(
     private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
     private val onRequestEngageEnemies = OnRequestEngageEnemies(engageEnemies, eventBus)
     private val onRequestUpdateEngagement = OnRequestUpdateEngagement(updateEngagement, eventBus)
+    private val onBattleDisengaged = OnBattleDisengaged(reengageEnemies, eventBus)
 }

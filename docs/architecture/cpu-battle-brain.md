@@ -42,7 +42,7 @@ A battle unit only engages the enemies **within reach**: the ones it can walk to
 
 For example, next to a knight, a rat two tiles away moves next to it and attacks it, while a rat six tiles away waits. A rat whose way is blocked by an ally may also wait, until the way is free or another way is short enough.
 
-The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts. When a round finishes, the CPU battle units out of the battle wander, then those that got an enemy within reach join the battle, and those without any leave it, until none is left and the party explores again (see [Exploration](exploration.md#engaging)).
+The same rule starts the battles: while the human player explores, a CPU battle unit with a battle unit of the party within reach engages it, and the battle starts. When a round finishes, the CPU battle units out of the battle wander, then those that got an enemy within reach join the battle, and those without any leave it, until none is left and the party explores again (see [Exploration](exploration.md#engaging)). When the last CPU battle unit in the battle is defeated during a round, the CPU battle units out of it with the party within reach join it straight away, and the party explores again when none has (see [Back to exploring](exploration.md#back-to-exploring)).
 
 ### Summons
 

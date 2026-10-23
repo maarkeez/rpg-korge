@@ -44,6 +44,23 @@ sealed interface BattleEvent : DomainEvent {
         val playerId: String,
     ) : BattleEvent
 
+    /**
+     * Joins the battle units, of the joining player, to the disengaged battle, which finishes without a winner when it is
+     * still disengaged. Joining player: the player of the joining battle units, null when there is none.
+     */
+    data class RequestFinishDisengagedBattle(
+        val joiningPlayerId: String?,
+        val joiningBattleUnitIds: List<String>,
+    ) : BattleEvent
+
+    /**
+     * Only one player is left with battle units in the battle during a round, e.g.: the last CPU battle unit engaged was
+     * defeated. Battle units: those left in the battle.
+     */
+    data class BattleDisengaged(
+        val battleUnitIds: Set<String>,
+    ) : BattleEvent
+
     /** The battle finished without a winner, as only one player is left with battle units in it (e.g.: the CPU battle units were defeated or left behind). */
     object BattleFinished : BattleEvent
 

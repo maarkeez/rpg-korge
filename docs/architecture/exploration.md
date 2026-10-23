@@ -117,11 +117,16 @@ While exploring, the battle info displays "Exploring".
 
 ## Back to exploring
 
-When the engagement is updated and only one player is left with battle units in the battle (e.g.: every CPU battle unit in it was defeated or left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes the battle without a winner (`BattleFinished`) instead of starting the next round:
+The battle finishes without a winner (`BattleFinished`) once only one player is left with battle units in it, e.g.: every CPU battle unit in it was defeated or left behind. It is checked as soon as it happens, without waiting for the round to finish (see [the plan](../plans/finish-battle-on-last-enemy-defeated.md)):
+
+- When a battle unit leaves the battle during a round (e.g.: the last CPU battle unit engaged is defeated, during any turn), [`LeaveBattle`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/LeaveBattle.kt) disengages the battle (`BattleDisengaged`). The CPU battle brain [`ReengageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt) has the CPU battle units out of the battle with an enemy within reach join it, without wandering first, so the battle goes on, and they play from the next round. [`FinishDisengagedBattle`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/FinishDisengagedBattle.kt) finishes it when none joins. A CPU summon left in the battle keeps it going, until it is defeated or vanishes.
+- When the engagement is updated after a round, and the CPU battle units in it left it (e.g.: left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes it instead of starting the next round.
+
+Once the battle is finished, a turn finish requested afterwards (e.g.: by the rest of the CPU turn) does nothing. Then:
 
 - The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
 - The summons left (e.g.: the bees a knight summoned) vanish, whatever turns they had left, as they never explore ([`VanishSummonedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/VanishSummonedBattleUnits.kt)). They flash and leave the battlefield, without being defeated: they drop no loot. A player whose last battle units were summons is defeated then, so the human player loses the game when only bees were left.
 - The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, and the virtual pad takes the place of the battle HUD and the player call to action.
 - The next engagement starts a new battle, which replaces the finished one.
 
-So the battle only finishes when a round does: defeating the last CPU battle unit in it during the human turn still needs the turn to be finished. A player with no battle units left on the battlefield still loses the game (`PlayerVictory`), and the game does not go back to exploring then.
+So defeating the last CPU battle unit engaged during the human turn explores again straight away, without finishing the turn. A player with no battle units left on the battlefield still loses the game (`PlayerVictory`), and the game does not go back to exploring then: the player is defeated before the disengaged battle is checked, so only the victory is displayed.

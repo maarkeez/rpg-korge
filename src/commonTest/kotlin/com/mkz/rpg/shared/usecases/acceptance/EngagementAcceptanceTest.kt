@@ -24,6 +24,7 @@ import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -115,13 +116,13 @@ class EngagementAcceptanceTest {
             battlefieldApi.searchPosition("rat-2") shouldNotBe PositionDto(row = 2, column = 6)
         }
 
-    // The rat-1 receives a low physical damage twice, losing its 20 health points, during the human turn.
-    private fun defeatRat() {
+    // The rat receives a low physical damage twice, losing its 20 health points, during the human turn.
+    private fun defeatRat(ratId: String = "rat-1") {
         repeat(2) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit("rat-1"),
+                    target = EffectTargetDto.Unit(ratId),
                     effectId = "low-physical-damage",
                 ),
             )
@@ -130,14 +131,12 @@ class EngagementAcceptanceTest {
     }
 
     @Test
-    fun `should explore again once the round finishes when no cpu battle unit is left in the battle`() =
+    fun `should explore again straight away, without finishing the turn, when the last cpu battle unit engaged is defeated`() =
         scenarioTest(::setUp) {
             // Given
             engageRat()
-            defeatRat()
             // When
-            battleApi.finishPlayerTurn()
-            eventBus.dispatch()
+            defeatRat()
             // Then
             battleApi.searchBattle()!!.isFinished.shouldBeTrue()
             partyApi.searchParty()!!.isExploring.shouldBeTrue()
@@ -146,13 +145,50 @@ class EngagementAcceptanceTest {
         }
 
     @Test
+    fun `should have a cpu battle unit within reach join the battle, which goes on, when the last cpu battle unit engaged is defeated`() =
+        scenarioTest(::setUp) {
+            // Given
+            engageRat()
+            // The leader walks to (5,4), 5 tiles away from the rat-2.
+            battleUnitApi.moveBattleUnit(battleUnitId = "knight-1", moveToRow = 5, moveToColumn = 4)
+            eventBus.dispatch()
+            // When
+            defeatRat()
+            // Then
+            val battle = battleApi.searchBattle()!!
+            battle.isFinished.shouldBeFalse()
+            battle.battleUnitIds shouldBe setOf("rat-2", "knight-1", "knight-2")
+            battle.currentRound shouldBe 1
+            partyApi.searchParty()!!.isExploring.shouldBeFalse()
+            // The rat-2 plays from the next round.
+            battlefieldApi.searchPosition("rat-2") shouldBe PositionDto(row = 2, column = 6)
+            playerTurns shouldBe listOf(cpuPlayerId, humanPlayerId)
+        }
+
+    @Test
+    fun `should only have the human player win, without exploring again, when the last cpu battle unit is defeated`() =
+        scenarioTest(::setUp) {
+            // Given
+            val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
+            val finishedBattles = mutableListOf<BattleEvent.BattleFinished>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinished> { finished += it } }
+            engageRat()
+            // The rat-2, out of the battle, is defeated first, which leaves the battle engaged.
+            defeatRat("rat-2")
+            battleApi.searchBattle()!!.isFinished.shouldBeFalse()
+            // When
+            defeatRat()
+            // Then
+            winners shouldBe listOf(humanPlayerId)
+            finishedBattles.shouldBeEmpty()
+            partyApi.searchParty()!!.isExploring.shouldBeFalse()
+        }
+
+    @Test
     fun `should start a new battle when another cpu battle unit engages the party exploring again`() =
         scenarioTest(::setUp) {
             // Given
             engageRat()
             defeatRat()
-            battleApi.finishPlayerTurn()
-            eventBus.dispatch()
             // When
             // The leader walks from (5,1) to (5,4), 5 tiles away from the rat-2.
             repeat(3) {

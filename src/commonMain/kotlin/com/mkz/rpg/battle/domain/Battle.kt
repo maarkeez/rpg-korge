@@ -1,6 +1,7 @@
 package com.mkz.rpg.battle.domain
 
 import com.mkz.rpg.battle.domain.BattleError.MinimumTwoPlayersRequired
+import com.mkz.rpg.battle.domain.BattleEvent.BattleDisengaged
 import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundFinished
 import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundStarted
@@ -108,6 +109,18 @@ data class Battle private constructor(
 
     /** Removes the battle unit from the battle, e.g.: when it is defeated. */
     fun leave(battleUnitId: String): Battle = copy(battleUnits = BattleUnits(battleUnits.value - battleUnitId))
+
+    /**
+     * Removes the battle unit from the battle during a round, e.g.: when it is defeated. The battle is disengaged when it
+     * leaves the last battle units of a player, e.g.: the last CPU battle unit engaged is defeated. Nothing is recorded once
+     * the battle is finished, nor for a battle unit out of it.
+     */
+    fun leaveDuringRound(battleUnitId: String): Battle {
+        val leftBattle = leave(battleUnitId)
+        val isEngaged = !isFinished.value && !isDisengaged()
+        val disengages = isEngaged && battleUnitId in battleUnits.value && leftBattle.isDisengaged()
+        return if (disengages) leftBattle.copy(events = events + BattleDisengaged(leftBattle.battleUnits.value.keys)) else leftBattle
+    }
 
     fun isBattleFinished(): Boolean = turnQueue.value.size == 1
 

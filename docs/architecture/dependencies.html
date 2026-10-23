@@ -208,11 +208,11 @@ const DATA = {
   "sourceRoot": "../../src/commonMain/kotlin",
   "subdomains": [
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 23, "importsOut": 17},
-    {"name": "battle", "files": 21, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 31, "importsOut": 23},
-    {"name": "battleUnit", "files": 58, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 61, "importsOut": 172},
+    {"name": "battle", "files": 23, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 33, "importsOut": 27},
+    {"name": "battleUnit", "files": 58, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 62, "importsOut": 172},
     {"name": "battlefield", "files": 37, "fanIn": 8, "fanOut": 4, "instability": 0.33, "importsIn": 97, "importsOut": 37},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 13, "instability": 0.93, "importsIn": 1, "importsOut": 14},
-    {"name": "cpuBattleBrain", "files": 33, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 99},
+    {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 6, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 22, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 47},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 67, "importsOut": 13},
     {"name": "inventory", "files": 25, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 9, "importsOut": 51},
@@ -222,9 +222,9 @@ const DATA = {
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 34, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 34, "importsOut": 64},
-    {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
+    {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 34, "importsOut": 12},
     {"name": "screen", "files": 65, "fanIn": 0, "fanOut": 19, "instability": 1.0, "importsIn": 0, "importsOut": 157},
-    {"name": "shared", "files": 13, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 372, "importsOut": 0},
+    {"name": "shared", "files": 13, "fanIn": 19, "fanOut": 0, "instability": 0.0, "importsIn": 379, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 21, "importsOut": 15}
   ],
@@ -254,11 +254,13 @@ const DATA = {
       {"file": "com/mkz/rpg/battle/adapters/presentation/BattleApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
       {"file": "com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt", "layer": "usecases", "name": "player.usecases.queries.SearchEnemyPlayer"}
     ]},
-    {"from": "battle", "to": "shared", "weight": 21, "files": 14, "imports": [
+    {"from": "battle", "to": "shared", "weight": 25, "files": 17, "imports": [
       {"file": "com/mkz/rpg/battle/adapters/events/OnPlayerDefeated.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnPlayerDefeated.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnRequestDefeatPlayer.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnRequestDefeatPlayer.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/battle/adapters/events/OnRequestFinishDisengagedBattle.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/battle/adapters/events/OnRequestFinishDisengagedBattle.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnRequestFinishPlayerTurn.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnRequestFinishPlayerTurn.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battle/adapters/events/OnRequestJoinBattle.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -273,7 +275,9 @@ const DATA = {
       {"file": "com/mkz/rpg/battle/domain/BattleEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/usecases/commands/FinishBattle.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/battle/usecases/commands/FinishDisengagedBattle.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/usecases/commands/FinishPlayerTurn.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/battle/usecases/commands/LeaveBattle.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/usecases/commands/StartBattle.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battle/usecases/commands/StartNextRound.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
@@ -554,14 +558,16 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhatShouldCast.kt", "layer": "usecases", "name": "ability.domain.Ability.Dto.TargetExpressionDto"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhatShouldCast.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"}
     ]},
-    {"from": "cpuBattleBrain", "to": "battle", "weight": 5, "files": 5, "imports": [
+    {"from": "cpuBattleBrain", "to": "battle", "weight": 7, "files": 7, "imports": [
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleDisengaged.kt", "layer": "adapters", "name": "battle.domain.BattleEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnPlayerTurnStarted.kt", "layer": "adapters", "name": "battle.domain.BattleEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/EngageEnemies.kt", "layer": "usecases", "name": "battle.domain.BattleEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "battle.domain.BattleEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/PlayTurn.kt", "layer": "usecases", "name": "battle.domain.BattleEvent"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt", "layer": "usecases", "name": "battle.domain.BattleEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt", "layer": "usecases", "name": "battle.domain.BattleEvent"}
     ]},
-    {"from": "cpuBattleBrain", "to": "battleUnit", "weight": 21, "files": 13, "imports": [
+    {"from": "cpuBattleBrain", "to": "battleUnit", "weight": 22, "files": 14, "imports": [
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnAbilityCastResolved.kt", "layer": "adapters", "name": "battleUnit.domain.BattleUnitEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "battleUnit.domain.BattleUnitEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/presentation/CpuBattleBrainApi.kt", "layer": "adapters", "name": "battleUnit.adapters.presentation.BattleUnitApi"},
@@ -570,6 +576,7 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitsByPlayerId"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/PlayTurn.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitsByPlayerId"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitsByPlayerId"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitsByPlayerId"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/HealingNeed.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitById"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchEnemiesWithinReach.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnit"},
@@ -617,18 +624,22 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnExplorationStarted.kt", "layer": "adapters", "name": "party.domain.PartyEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnPartyWalked.kt", "layer": "adapters", "name": "party.domain.PartyEvent"}
     ]},
-    {"from": "cpuBattleBrain", "to": "player", "weight": 7, "files": 5, "imports": [
+    {"from": "cpuBattleBrain", "to": "player", "weight": 9, "files": 6, "imports": [
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/presentation/CpuBattleBrainApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/EngageEnemies.kt", "layer": "usecases", "name": "player.usecases.queries.SearchEnemyPlayer"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/PlayTurn.kt", "layer": "usecases", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/PlayTurn.kt", "layer": "usecases", "name": "player.usecases.queries.SearchPlayerById"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt", "layer": "usecases", "name": "player.usecases.queries.SearchEnemyPlayer"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt", "layer": "usecases", "name": "player.usecases.queries.SearchHumanPlayer"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt", "layer": "usecases", "name": "player.usecases.queries.SearchEnemyPlayer"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt", "layer": "usecases", "name": "player.usecases.queries.SearchHumanPlayer"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchEnemiesWithinReach.kt", "layer": "usecases", "name": "player.usecases.queries.SearchEnemyPlayer"}
     ]},
-    {"from": "cpuBattleBrain", "to": "shared", "weight": 31, "files": 19, "imports": [
+    {"from": "cpuBattleBrain", "to": "shared", "weight": 34, "files": 21, "imports": [
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnAbilityCastResolved.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnAbilityCastResolved.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleDisengaged.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleDisengaged.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -655,6 +666,7 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/PlayTurn.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ResolveCpuBattleUnitCast.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ResolveCpuBattleUnitMove.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt", "layer": "usecases", "name": "shared.domain.EventBus"}

@@ -2,6 +2,7 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.battleHudView
+import com.mkz.rpg.screen.adapters.presentation.battleInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickAbility
@@ -9,15 +10,20 @@ import com.mkz.rpg.screen.adapters.presentation.clickConfirm
 import com.mkz.rpg.screen.adapters.presentation.clickTile
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
+import com.mkz.rpg.screen.adapters.presentation.isBattleHudShown
 import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingAttackPreview
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingCancelAndConfirm
+import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
+import com.mkz.rpg.screen.adapters.presentation.roundText
+import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
@@ -31,11 +37,9 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     // (2,1) is 4 tiles away along the corridor, out of the knight movement range.
     private val tileOutOfRangeColumn = 1
 
-    // The bat engaging the knight stands next to it, blocking the corridor: (2,7), behind it, is only reachable once
-    // the bat is gone. The bat has 10 health points, and the knight sword deals 10.
+    // The bat engaging the knight, alone, stands next to it. The bat has 10 health points, and the knight sword deals 10.
     private val batRow = BAT_ROW_IN_BATTLE
     private val batColumn = BAT_COLUMN_IN_BATTLE
-    private val tileBehindBatColumn = BAT_COLUMN_IN_BATTLE + 1
 
     // The knight abilities are sword, which is cast on an adjacent enemy, and heal, which is cast on the knight.
     private val swordAbilityIndex = 0
@@ -66,13 +70,12 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should update the knight movement range when the human player defeats the bat blocking the corridor with the sword`() =
+    fun `should explore again when the human player defeats the bat, the only cpu battle unit engaged, with the sword`() =
         sharedViewsTest {
             // Given
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             waitUntil { battlefieldView.hasSelectionAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
-            require(battlefieldView.isDimmedAt(batRow, tileBehindBatColumn)) { "($batRow,$tileBehindBatColumn) should be out of reach while the bat blocks the way" }
             clickAbility(requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }, swordAbilityIndex)
             waitUntil { battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn) }
             clickTile(battlefieldView, batRow, batColumn)
@@ -80,16 +83,11 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { playerCallToActionView.isDisplayingCancelAndConfirm() }
             // When
             clickConfirm(playerCallToActionView)
-            // Then
-            val battleHudView = requireNotNull(battleHudView()) { "The battle HUD is not displayed" }
-            waitUntil { battleHudView.isDisplayingBattleUnitInfo() && !battlefieldView.hasBattleUnitAt(batRow, batColumn) }
-            waitUntil { !battlefieldView.isDimmedAt(batRow, tileBehindBatColumn) }
+            // Then: the battle finishes straight away, without finishing the turn.
+            waitUntil { virtualPadView()?.isPadShown() == true && battleInfoView()?.roundText() == "Exploring" }
             withClue("Expected the bat to be defeated and gone from ($batRow,$batColumn)") { battlefieldView.hasBattleUnitAt(batRow, batColumn).shouldBeFalse() }
-            withClue("Expected the knight movement range to be displayed after defeating the bat") {
-                battlefieldView.isDimmedAt(tileInMovementRangeRow, tileInMovementRangeColumn).shouldBeFalse()
-            }
-            withClue(
-                "Expected ($batRow,$tileBehindBatColumn) to be in the knight movement range once the bat no longer blocks the way",
-            ) { battlefieldView.isDimmedAt(batRow, tileBehindBatColumn).shouldBeFalse() }
+            withClue("Expected the virtual pad to be displayed once the battle is over") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
+            withClue("Expected the battle HUD to be hidden once the battle is over") { isBattleHudShown().shouldBeFalse() }
+            battleInfoView()?.roundText() shouldBe "Exploring"
         }
 }

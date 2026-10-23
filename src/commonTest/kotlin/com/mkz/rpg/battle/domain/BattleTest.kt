@@ -281,6 +281,56 @@ class BattleTest {
     }
 
     @Test
+    fun `LeaveDuringRound should disengage the battle with the battle units left when the last battle unit of a player leaves`() {
+        // Given
+        val battle = battle(listOf("player-1", "player-2"), battleUnitIds)
+        // When
+        val (events, leftBattle) = battle.leaveDuringRound("battle-unit-1").pullEvents()
+        // Then
+        leftBattle.toDto().battleUnitIds shouldBe setOf("battle-unit-2")
+        events.shouldContainExactly(BattleEvent.BattleDisengaged(setOf("battle-unit-2")))
+    }
+
+    @Test
+    fun `LeaveDuringRound should not disengage the battle when other battle units of the player are left in it`() {
+        // Given
+        val battle = battle(listOf("player-1", "player-2"), battleUnits = battleUnits + ("battle-unit-3" to "player-1"))
+        // When
+        val (events, leftBattle) = battle.leaveDuringRound("battle-unit-1").pullEvents()
+        // Then
+        leftBattle.toDto().battleUnitIds shouldBe setOf("battle-unit-2", "battle-unit-3")
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `LeaveDuringRound should not disengage the battle again when a battle unit out of it leaves`() {
+        // Given: the battle was already disengaged, as the battle-unit-1 left it.
+        val battle = battle(listOf("player-1", "player-2"), battleUnitIds).leave("battle-unit-1")
+        // When
+        val (events, _) = battle.leaveDuringRound("battle-unit-3").pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `LeaveDuringRound should not disengage the battle when it is finished`() {
+        // Given: a battle unit joined the battle after it finished, e.g.: deployed while exploring.
+        val battle =
+            battle(listOf("player-1", "player-2"), battleUnits = mapOf("battle-unit-2" to "player-2"))
+                .finishWithoutWinner()
+                .join("battle-unit-1", "player-1")
+        // When
+        val (events, _) =
+            battle
+                .pullEvents()
+                .second
+                .leaveDuringRound("battle-unit-1")
+                .pullEvents()
+        // Then
+        events.shouldBeEmpty()
+    }
+
+    @Test
     fun `FinishPlayerTurn should start the next player turn with the battle units in the battle when one has left`() {
         // Given
         val players = listOf("player-1", "player-2")
