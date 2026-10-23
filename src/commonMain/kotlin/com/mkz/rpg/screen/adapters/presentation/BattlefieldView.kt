@@ -87,7 +87,10 @@ open class BattlefieldView(
         val MOVE_STEP_DURATION = 150.milliseconds
 
         // Exploring, a step is quicker, as the party walks one tile at a time, the battle units one after another.
-        val EXPLORING_STEP_DURATION = 75.milliseconds
+        val EXPLORING_STEP_DURATION = 100.milliseconds
+
+        // Exploring, the CPU battle units wander quicker than the party walks.
+        val WANDERING_STEP_DURATION = 75.milliseconds
         val SCROLL_DURATION = 300.milliseconds
 
         // Swapping, the leader hops over the party member this high, half-way, while the member slides underneath.

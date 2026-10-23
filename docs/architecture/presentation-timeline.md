@@ -23,7 +23,7 @@ The timeline plays its steps on the scene coroutines, which `BattleScene` runs o
 
 - Presenters MUST read what a step needs when its event arrives, and only draw it inside the step. By the time the step is played, the battle may have moved on, e.g.: a battle unit that walks is defeated later in the same CPU turn, so it can no longer be found.
 - Every visual change caused by a battle event MUST go through the timeline, so the scene never displays a later state before an earlier one.
-- The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast, finishing the turn and walking the party while exploring are ignored. The scene still displays a past state of the battle meanwhile.
+- The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast, finishing the turn and walking the party while exploring are ignored. The scene still displays a past state of the battle meanwhile. The virtual pad is the exception: its last press is kept, and acted on once the timeline is idle (see [Exploration](exploration.md#walking)).
 - The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) keeps it displayed but disabled (greyed out) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
 
 ## Starting a turn
@@ -41,7 +41,7 @@ When a player turn starts, two animations play together, in the colour of the pl
 
 `BattlefieldView.moveBattleUnit` displays the battle unit on each tile of the path, stopping `MOVE_STEP_DURATION` (150ms) on each one. Before each step, it scrolls the battlefield to center the tile when the tile is out of the viewport or on its edge. A battlefield smaller than the viewport is never scrolled.
 
-While exploring, the CPU battle units [wander](cpu-battle-brain.md#wandering) every second. Their steps are played alongside the timeline (`playAlongside`), rather than in it, so the party keeps walking smoothly: the step starts straight away, in parallel with the playing steps, and does not make the timeline playing. They do not scroll the battlefield, so the party stays in view, nor reset the tiles, so the selection is kept (e.g.: to use the inventory). When a battle round finishes, the CPU battle units out of the battle wander once, and their steps are played in the timeline at the battle pace, so they are seen before the next round starts, also without scrolling the battlefield.
+While exploring, the CPU battle units [wander](cpu-battle-brain.md#wandering) every second. Their steps are played alongside the timeline (`playAlongside`), rather than in it, at a quicker pace than the party walks (`WANDERING_STEP_DURATION`, 75ms per tile), so the party keeps walking smoothly: the step starts straight away, in parallel with the playing steps, and does not make the timeline playing. They do not scroll the battlefield, so the party stays in view, nor reset the tiles, so the selection is kept (e.g.: to use the inventory). When a battle round finishes, the CPU battle units out of the battle wander once, and their steps are played in the timeline at the battle pace, so they are seen before the next round starts, also without scrolling the battlefield.
 
 ## Applying effects
 

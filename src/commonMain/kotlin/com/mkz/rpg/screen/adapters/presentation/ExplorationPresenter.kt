@@ -26,6 +26,9 @@ import kotlin.time.Duration.Companion.seconds
  * effects of the battle units standing still. Once the game is over, the pad is hidden and the seconds are no longer
  * counted.
  *
+ * A press while the scene is still playing (e.g.: a battle unit flashing with its terrain effect) is not lost: the last
+ * arrow or A pressed is acted on once the scene is idle, unless the pad is hidden meanwhile.
+ *
  * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
  * meanwhile, as the party neither walks nor starts a second while talking. The dialog of a merchant is not closed by
  * tapping it, but by its Leave choice. Its Buy and Sell choices open its shop in place of the dialog (see
@@ -47,8 +50,18 @@ class ExplorationPresenter(
         val STANDING_TERRAIN_EFFECT_INTERVAL = 1.seconds
     }
 
+    // The last arrow or A pressed, until it is acted on.
+    private sealed interface Press {
+        data class Arrow(
+            val direction: DirectionDto,
+        ) : Press
+
+        data object A : Press
+    }
+
     private var elapsedSinceTerrainEffects = Duration.ZERO
     private var isGameOver = false
+    private var pendingPress: Press? = null
 
     private val subscriptions =
         listOf(
@@ -93,15 +106,23 @@ class ExplorationPresenter(
     init {
         virtualPadView.visible = false
         npcDialogView.visible = false
+        virtualPadView.setOnDirectionPressed { direction -> pendingPress = Press.Arrow(direction) }
         virtualPadView.setOnDirectionHeld { direction -> walkParty(direction) }
-        virtualPadView.setOnAPressed { talkToAdjacentNpc() }
+        virtualPadView.setOnAPressed {
+            pendingPress = Press.A
+            talkToAdjacentNpc()
+        }
         npcDialogView.setOnTapped { dialogTapped() }
         shopPresenter.setOnBack { shopBackSelected() }
     }
 
-    /** Counts the time elapsed since the previous frame, and applies the standing terrain effects every second. */
+    /**
+     * Acts on the press pending since the scene was playing, counts the time elapsed since the previous frame, and applies
+     * the standing terrain effects every second.
+     */
     fun tick(elapsed: Duration) {
         if (isGameOver) return
+        actOnPendingPress()
         elapsedSinceTerrainEffects += elapsed
         while (elapsedSinceTerrainEffects >= STANDING_TERRAIN_EFFECT_INTERVAL) {
             elapsedSinceTerrainEffects -= STANDING_TERRAIN_EFFECT_INTERVAL
@@ -113,16 +134,29 @@ class ExplorationPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
+    // A press is kept while the scene plays, and forgotten once the pad is hidden (e.g.: a battle starts).
+    private fun actOnPendingPress() {
+        if (!virtualPadView.visible) pendingPress = null
+        when (val press = pendingPress) {
+            is Press.Arrow -> walkParty(press.direction)
+            Press.A -> talkToAdjacentNpc()
+            null -> Unit
+        }
+    }
+
     // The party only walks once the scene shows where it is, so a held arrow can not walk ahead of the animation, nor
-    // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed).
+    // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed). Walking towards the pressed
+    // arrow acts on its press, so it is not walked again.
     private fun walkParty(direction: DirectionDto) {
         if (timeline.isPlaying || !virtualPadView.visible) return
+        if (pendingPress == Press.Arrow(direction)) pendingPress = null
         partyApi.walkParty(direction)
     }
 
     // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun talkToAdjacentNpc() {
         if (timeline.isPlaying || !virtualPadView.visible) return
+        if (pendingPress == Press.A) pendingPress = null
         npcApi.talkToAdjacentNpc()
     }
 

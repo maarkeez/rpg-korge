@@ -398,7 +398,7 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
-        exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.EXPLORING_STEP_DURATION)
+        exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.WANDERING_STEP_DURATION)
         exploringBattlefieldView.resetTilesCount shouldBe resetTilesCount
     }
 

@@ -299,7 +299,7 @@ class BattlefieldPresenter(
         unitId: String,
     ) {
         val isBattling = isBattling()
-        val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
+        val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.WANDERING_STEP_DURATION
         val step: suspend () -> Unit = {
             battlefieldView.moveBattleUnit(
                 fromRow = event.fromRow,

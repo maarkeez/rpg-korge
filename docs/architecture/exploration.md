@@ -40,7 +40,13 @@ The followers walk in **line order**, which is kept apart from the party order (
 
 In a battle, an ally still blocks its tile: only the exploring party swaps.
 
-Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 75ms per tile).
+Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The party steps are played quicker than a battle move (`EXPLORING_STEP_DURATION`, 100ms per tile and party member, one member after another).
+
+A tap is never lost while the timeline plays (e.g.: a battle unit flashing with its terrain effect, see [Terrain effects](#terrain-effects)), see [the plan](../plans/responsive-virtual-pad.md):
+
+- The pad reports each press once, before holding it. The presenter keeps the last arrow or A pressed, a newer press replacing it, so tapping several times while the timeline plays walks one step, towards the last arrow.
+- On the first frame the timeline is idle, the presenter acts on it: it walks the party, or talks to the npc next to the leader. It is acted on once, even when nothing happens (e.g.: a blocked tile), and a held arrow walking towards it acts on it.
+- It is forgotten when the pad is hidden meanwhile (e.g.: a battle starts, or a battle unit of the party is selected).
 
 The battlefield only scrolls to follow the leader, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)). It scrolls when the leader reaches an edge of the viewport, centering it on that axis only, so walking along a border of the battlefield does not scroll it.
 

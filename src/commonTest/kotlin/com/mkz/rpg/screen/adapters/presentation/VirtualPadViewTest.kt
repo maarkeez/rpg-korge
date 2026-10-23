@@ -15,11 +15,13 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class VirtualPadViewTest : ViewsForTesting() {
+    private val pressedDirections = mutableListOf<DirectionDto>()
     private val heldDirections = mutableListOf<DirectionDto>()
     private var aPresses = 0
 
     private fun newVirtualPadView() =
         VirtualPadView().also { pad ->
+            pad.setOnDirectionPressed { direction -> pressedDirections += direction }
             pad.setOnDirectionHeld { direction -> heldDirections += direction }
             pad.setOnAPressed { aPresses++ }
         }
@@ -104,6 +106,20 @@ class VirtualPadViewTest : ViewsForTesting() {
             // Then
             heldDirections.shouldHaveSize(4)
             heldDirections.toSet().shouldContainExactly(DirectionDto.NORTH)
+        }
+
+    @Test
+    fun `HoldArrow should report the press of the arrow once, then hold it on every frame`() =
+        sharedViewsTest {
+            // Given
+            val pad = newVirtualPadView()
+            addChild(pad)
+            // When
+            pad.holdArrow(DirectionDto.EAST)
+            repeat(3) { nextFrame() }
+            // Then
+            pressedDirections.shouldContainExactly(DirectionDto.EAST)
+            heldDirections.shouldHaveSize(4)
         }
 
     @Test

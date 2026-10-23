@@ -146,16 +146,67 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should not walk the party while the scene plays the previous steps`() {
+    fun `WalkParty should walk the party once the scene is idle when an arrow was tapped while it played`() {
         // Given
-        createPresenter()
+        val presenter = createPresenter()
         startExploring()
-        timeline.playLongStep()
+        val longStep = timeline.playLongStep()
         // When
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        tapArrow(DirectionDto.NORTH)
+        presenter.tick(1.milliseconds)
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+        // When
+        longStep.complete(Unit)
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 1)
+    }
+
+    @Test
+    fun `WalkParty should walk only towards the last arrow tapped while the scene played`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        val longStep = timeline.playLongStep()
+        tapArrow(DirectionDto.NORTH)
+        tapArrow(DirectionDto.EAST)
+        // When
+        longStep.complete(Unit)
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 2)
+    }
+
+    @Test
+    fun `WalkParty should forget the arrow tapped while the scene played when the pad is hidden`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        val longStep = timeline.playLongStep()
+        tapArrow(DirectionDto.NORTH)
+        eventBus.publish(knightSelected)
+        eventBus.dispatch()
+        longStep.complete(Unit)
+        presenter.tick(1.milliseconds)
+        // When
+        eventBus.publish(BattlefieldHudEvent.Idle)
+        eventBus.dispatch()
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeTrue()
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    private fun tapArrow(direction: DirectionDto) {
+        virtualPadView.holdArrow(direction)
+        virtualPadView.releaseArrow()
     }
 
     private fun requestedTerrainEffects() =
@@ -296,15 +347,22 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `TalkToAdjacentNpc should not talk while the scene plays the previous steps`() {
+    fun `TalkToAdjacentNpc should talk once the scene is idle when A was pressed while it played`() {
         // Given
-        createPresenter()
+        val presenter = createPresenter()
         startExploring()
-        timeline.playLongStep()
+        val longStep = timeline.playLongStep()
         // When
         talk()
         // Then
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe null
+        // When
+        longStep.complete(Unit)
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        // Then
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "the-guy"
+        npcDialogView.visible.shouldBeTrue()
     }
 
     @Test

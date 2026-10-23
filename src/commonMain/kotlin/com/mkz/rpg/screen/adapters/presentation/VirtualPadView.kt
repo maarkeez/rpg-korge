@@ -21,8 +21,9 @@ import korlibs.math.interpolation.Ratio
  * The pad the player explores with, laid out as a Game Boy Color: the north, east, south and west arrows on the left,
  * and the round B and A buttons on the right, A higher and further right than B.
  *
- * Holding an arrow keeps walking the party towards it: the listener is called when the arrow is pressed, and on every
- * frame while it is held. Tapping A calls its listener once (e.g.: to talk). B has no listener yet.
+ * Holding an arrow keeps walking the party towards it: the held listener is called when the arrow is pressed, and on
+ * every frame while it is held. The pressed listener is called once before, so a tap is known even when it is released
+ * before it can be walked. Tapping A calls its listener once (e.g.: to talk). B has no listener yet.
  */
 open class VirtualPadView(
     size: Size = Size(390, 300),
@@ -53,6 +54,7 @@ open class VirtualPadView(
         private const val BUTTON_OFFSET_Y = 24.0
     }
 
+    private var onDirectionPressed: ((DirectionDto) -> Unit)? = null
     private var onDirectionHeld: ((DirectionDto) -> Unit)? = null
     private var onAPressed: (() -> Unit)? = null
     internal var heldDirection: DirectionDto? = null
@@ -75,6 +77,10 @@ open class VirtualPadView(
         addUpdater { heldDirection?.let { direction -> onDirectionHeld?.invoke(direction) } }
     }
 
+    open fun setOnDirectionPressed(listener: (DirectionDto) -> Unit) {
+        onDirectionPressed = listener
+    }
+
     open fun setOnDirectionHeld(listener: (DirectionDto) -> Unit) {
         onDirectionHeld = listener
     }
@@ -89,6 +95,7 @@ open class VirtualPadView(
 
     internal fun hold(direction: DirectionDto) {
         heldDirection = direction
+        onDirectionPressed?.invoke(direction)
         onDirectionHeld?.invoke(direction)
     }
 
