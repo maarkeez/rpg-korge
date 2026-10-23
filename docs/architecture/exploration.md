@@ -48,7 +48,7 @@ A tap is never lost while the timeline plays (e.g.: a battle unit flashing with 
 - On the first frame the timeline is idle, the presenter acts on it: it walks the party, or talks to the npc next to the leader. It is acted on once, even when nothing happens (e.g.: a blocked tile), and a held arrow walking towards it acts on it.
 - It is forgotten when the pad is hidden meanwhile (e.g.: a battle starts, or a battle unit of the party is selected).
 
-The battlefield only scrolls to follow the leader, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)). It scrolls when the leader reaches an edge of the viewport, centering it on that axis only, so walking along a border of the battlefield does not scroll it.
+The battlefield only scrolls to follow the leader, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)). It scrolls when the leader reaches an edge of the viewport, on that axis only, so walking along a border of the battlefield does not scroll it. It looks ahead of the leader: on the axis it walks along, the leader lands one tile past the edge behind it, so it sees 6 tiles ahead, and walking straight scrolls every 6 steps (see [the plan](../plans/look-ahead-camera.md)). In a battle, the battlefield centers the battle unit instead.
 
 ## Talking to an npc
 

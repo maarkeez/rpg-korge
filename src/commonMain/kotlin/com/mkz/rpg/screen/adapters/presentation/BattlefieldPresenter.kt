@@ -241,8 +241,14 @@ class BattlefieldPresenter(
         }
         val isBattling = isBattling()
         val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
-        // While exploring, the battlefield only follows the leader, so it does not scroll from one party member to another.
-        val followsTiles = isBattling || !isPartyFollower(battleUnit)
+        // While exploring, the battlefield only follows the leader, so it does not scroll from one party member to another,
+        // and looks ahead of it, so it scrolls less often.
+        val following =
+            when {
+                isBattling -> BattlefieldView.Following.CENTER
+                isPartyFollower(battleUnit) -> BattlefieldView.Following.NONE
+                else -> BattlefieldView.Following.LOOK_AHEAD
+            }
         timeline.play {
             battlefieldView.resetTiles()
             battlefieldView.moveBattleUnit(
@@ -251,7 +257,7 @@ class BattlefieldPresenter(
                 path = event.path,
                 unitId = battleUnit.unitId,
                 stepDuration = stepDuration,
-                followsTiles = followsTiles,
+                following = following,
             )
         }
     }
@@ -307,7 +313,7 @@ class BattlefieldPresenter(
                 path = event.path,
                 unitId = unitId,
                 stepDuration = stepDuration,
-                followsTiles = false,
+                following = BattlefieldView.Following.NONE,
             )
         }
         if (isBattling) timeline.play(step) else timeline.playAlongside(step)

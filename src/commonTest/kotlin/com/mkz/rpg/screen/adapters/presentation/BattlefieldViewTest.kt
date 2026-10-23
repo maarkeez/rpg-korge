@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
+import com.mkz.rpg.screen.adapters.presentation.BattlefieldView.Following.LOOK_AHEAD
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
@@ -858,6 +859,78 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `MoveBattleUnit should land the battle unit one tile past the edge behind it when it walks east to the viewport edge looking ahead`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-288.0 to 0.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should land the battle unit one tile past the edge behind it when it walks south to the viewport edge looking ahead`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 6, column = 5, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 7, column = 5)), LOOK_AHEAD))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to -288.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should scroll back when the battle unit turns around right after a scroll looking ahead`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            addChild(battlefieldView)
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
+            require(battlefieldView.scrollOffset() == (-288.0 to 0.0))
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 6)), LOOK_AHEAD))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should center the other axis when the battle unit is on its viewport edge looking ahead`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 7, column = 6, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 7, column = 7)), LOOK_AHEAD))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-288.0 to -168.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should clamp the scroll to the battlefield when the battle unit walks near its border looking ahead`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 10).toDto())
+            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-96.0 to 0.0)
+        }
+
+    @Test
     fun `SwapBattleUnits should display each battle unit on the other's tile when the swap finishes`() =
         sharedViewsTest {
             // Given
@@ -916,7 +989,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `SwapBattleUnits should scroll to the member's tile before the battle units move when it is at the viewport edge`() =
+    fun `SwapBattleUnits should scroll to the member's tile, looking ahead, before the battle units move when it is at the viewport edge`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
@@ -933,7 +1006,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Then
             val glidingScrolls = frames.filter { (_, isGliding) -> isGliding }.map { (scroll, _) -> scroll }
             glidingScrolls.shouldNotBeEmpty()
-            glidingScrolls.forEach { scroll -> scroll shouldBe (-168.0 to 0.0) }
+            glidingScrolls.forEach { scroll -> scroll shouldBe (-288.0 to 0.0) }
         }
 
     // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
@@ -953,10 +1026,11 @@ class BattlefieldViewTest : ViewsForTesting() {
     private suspend fun startMoving(
         battlefieldView: BattlefieldView,
         path: List<Battlefield.Dto.PositionDto>,
+        following: BattlefieldView.Following = BattlefieldView.Following.CENTER,
     ): Job {
         val origin = battlefieldView.battleUnitPositions().single()
         return startAnimation {
-            battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight")
+            battlefieldView.moveBattleUnit(fromRow = origin.first, fromColumn = origin.second, path = path, unitId = "knight", following = following)
         }
     }
 

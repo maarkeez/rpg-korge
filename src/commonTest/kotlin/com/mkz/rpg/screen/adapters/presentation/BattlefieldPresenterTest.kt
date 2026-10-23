@@ -262,7 +262,16 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.MOVE_STEP_DURATION)
-        battlefieldView.unfollowedMoves.shouldBeEmpty()
+    }
+
+    @Test
+    fun `MoveUnit should center the battle unit when it moves in a battle`() {
+        // Given
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.CENTER)
     }
 
     // The same battlefield, before any battle has started: the human player explores it.
@@ -310,11 +319,10 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.EXPLORING_STEP_DURATION)
-        exploringBattlefieldView.unfollowedMoves.shouldBeEmpty()
     }
 
     @Test
-    fun `MoveUnit should follow the leader of the party when it walks while exploring`() {
+    fun `MoveUnit should follow the leader of the party looking ahead when it walks while exploring`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -327,7 +335,7 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 1, fromColumn = 1, path = path, unitId = "knight"))
-        exploringBattlefieldView.unfollowedMoves.shouldBeEmpty()
+        exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.LOOK_AHEAD)
     }
 
     @Test
@@ -343,7 +351,8 @@ class BattlefieldPresenterTest {
         // When
         exploringApis.eventBus.dispatch()
         // Then
-        exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
+        exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
+        exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.NONE)
     }
 
     @Test
@@ -397,7 +406,8 @@ class BattlefieldPresenterTest {
         // When
         exploringApis.eventBus.dispatch()
         // Then
-        exploringBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.NONE)
         exploringBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.WANDERING_STEP_DURATION)
         exploringBattlefieldView.resetTilesCount shouldBe resetTilesCount
     }
@@ -427,7 +437,8 @@ class BattlefieldPresenterTest {
         // When
         previousStep.complete(Unit)
         // Then
-        battlingBattlefieldView.unfollowedMoves.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        battlingBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 3, fromColumn = 3, path = path, unitId = "rat"))
+        battlingBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.NONE)
         battlingBattlefieldView.moveStepDurations.shouldContainExactly(BattlefieldView.MOVE_STEP_DURATION)
     }
 
