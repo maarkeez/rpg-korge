@@ -68,6 +68,11 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     // How each move scrolls the battlefield to follow the battle unit.
     val moveFollowings = mutableListOf<BattlefieldView.Following>()
     val swappedBattleUnits = mutableListOf<SwappedBattleUnits>()
+
+    // The tiles the battlefield started trailing the battle unit on, and how many times it stopped trailing.
+    val trailedTiles = mutableListOf<PositionDto>()
+    var stopTrailingCount = 0
+        private set
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
@@ -146,6 +151,17 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         column: Int,
     ) {
         scrolledToTiles += PositionDto(row, column)
+    }
+
+    override fun trail(
+        row: Int,
+        column: Int,
+    ) {
+        trailedTiles += PositionDto(row, column)
+    }
+
+    override fun stopTrailing() {
+        stopTrailingCount++
     }
 
     override fun removeNpc(

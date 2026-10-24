@@ -1,10 +1,12 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
+import com.mkz.rpg.screen.adapters.presentation.BattlefieldView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitPositions
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickTile
+import com.mkz.rpg.screen.adapters.presentation.glidingBattleUnits
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.hasSelectionAt
 import com.mkz.rpg.screen.adapters.presentation.isDimmedAt
@@ -14,7 +16,7 @@ import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotContainAnyOf
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
@@ -59,7 +61,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should walk the knight tile by tile when the human player moves it two tiles away`() =
+    fun `should glide the knight tile by tile when the human player moves it two tiles away`() =
         sharedViewsTest {
             // Given
             val farTargetColumn = 3
@@ -69,14 +71,16 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // When
             clickTile(battlefieldView, targetRow, farTargetColumn)
             // Then
-            waitUntil { battlefieldView.hasBattleUnitAt(targetRow, targetColumn) }
-            withClue("Expected the knight to be displayed only on the tile it walks through ($targetRow,$targetColumn)") {
-                battlefieldView.battleUnitPositions().shouldContain(targetRow to targetColumn)
-                battlefieldView.battleUnitPositions().shouldNotContainAnyOf(knightRow to knightColumn, targetRow to farTargetColumn)
+            val throughTileX = targetColumn * BattlefieldView.TILE_SIZE.toDouble()
+            waitUntil { battlefieldView.glidingBattleUnits().any { glidingUnit -> glidingUnit.x < throughTileX } }
+            withClue("Expected the knight to glide past the tile it walks through ($targetRow,$targetColumn), off the tiles") {
+                battlefieldView.glidingBattleUnits().any { glidingUnit -> glidingUnit.x < throughTileX }.shouldBeTrue()
+                battlefieldView.battleUnitPositions().shouldNotContainAnyOf(knightRow to knightColumn, targetRow to targetColumn, targetRow to farTargetColumn)
             }
             waitUntil { battlefieldView.hasBattleUnitAt(targetRow, farTargetColumn) }
             withClue("Expected the knight to be displayed at ($targetRow,$farTargetColumn)") { battlefieldView.hasBattleUnitAt(targetRow, farTargetColumn).shouldBeTrue() }
             withClue("Expected the knight to be gone from ($targetRow,$targetColumn)") { battlefieldView.hasBattleUnitAt(targetRow, targetColumn).shouldBeFalse() }
+            withClue("Expected the knight to have stopped gliding") { battlefieldView.glidingBattleUnits().shouldBeEmpty() }
             val battleUnitInfoView = requireNotNull(battleUnitInfoView()) { "The battle unit info is not displayed" }
             waitUntil { battleUnitInfoView.remainingSteps() == 1 }
             withClue("Expected 1 of the 3 knight steps to remain after walking 2 tiles") { battleUnitInfoView.remainingSteps() shouldBe 1 }

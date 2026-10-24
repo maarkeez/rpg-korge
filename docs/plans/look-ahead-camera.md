@@ -1,6 +1,6 @@
 # Plan: A camera looking ahead of the leader
 
-> **Status:** done.
+> **Status:** done, superseded by [a camera trailing the leader](trailing-camera.md).
 >
 > **Summary:** While exploring, the camera moves too often. When the leader reaches an edge of the viewport, the
 > battlefield centers it on that axis, so walking straight scrolls every 3 steps, by 3 tiles, and the party waits for

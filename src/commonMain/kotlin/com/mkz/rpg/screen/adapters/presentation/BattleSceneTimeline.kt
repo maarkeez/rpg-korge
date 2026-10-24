@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.io.async.launchImmediately
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
 /**
  * Plays the visual steps of the battle scene one after another, in the order they are added.
@@ -15,6 +16,9 @@ class BattleSceneTimeline(
 ) {
     private val steps = ArrayDeque<suspend () -> Unit>()
     private var isPlayingSteps = false
+
+    // The steps played together with the step being played, which the next steps wait for.
+    private val togetherSteps = ArrayDeque<Job>()
     private val playingListeners = mutableListOf<(isPlaying: Boolean) -> Unit>()
 
     /** Whether a step is being played or waiting to be played. The player should not act on the scene meanwhile. */
@@ -36,12 +40,22 @@ class BattleSceneTimeline(
             try {
                 while (steps.isNotEmpty()) {
                     steps.removeFirst().invoke()
+                    while (togetherSteps.isNotEmpty()) togetherSteps.removeFirst().join()
                 }
             } finally {
                 isPlayingSteps = false
                 playingListeners.forEach { listener -> listener(false) }
             }
         }
+    }
+
+    /**
+     * Plays the step straight away, together with the step being played, and the next steps wait for both, e.g.: the
+     * followers of the party gliding with its leader. When the timeline is idle, it plays as [play].
+     */
+    fun playTogether(step: suspend () -> Unit) {
+        if (!isPlayingSteps) return play(step)
+        togetherSteps.addLast(coroutineScope.launchImmediately { step() })
     }
 
     /**

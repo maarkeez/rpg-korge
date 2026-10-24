@@ -37,7 +37,12 @@ import korlibs.math.interpolation.EASE_IN_QUAD
 import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
+import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.max
+import kotlin.math.sign
 import kotlin.time.Duration
+import kotlin.time.DurationUnit
 
 open class BattlefieldView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -54,6 +59,7 @@ open class BattlefieldView(
         const val HEALTH_PREVIEW = "HEALTH_PREVIEW"
         const val BATTLEFIELD = "BATTLEFIELD"
         const val MOVING_BATTLE_UNITS = "MOVING_BATTLE_UNITS"
+        const val GLIDING_BATTLE_UNIT = "GLIDING_BATTLE_UNIT"
         const val SWAPPING_LEADER = "SWAPPING_LEADER"
         const val SWAPPING_MEMBER = "SWAPPING_MEMBER"
 
@@ -83,15 +89,25 @@ open class BattlefieldView(
         const val PICK_UP_SCALE = 3.0
         val PICK_UP_DURATION = 400.milliseconds
 
-        // How long a moving battle unit stops on each tile of its path.
+        // How long a moving battle unit glides from one tile of its path to the next.
         val MOVE_STEP_DURATION = 150.milliseconds
 
-        // Exploring, a step is quicker, as the party walks one tile at a time, the battle units one after another.
-        val EXPLORING_STEP_DURATION = 100.milliseconds
+        // Exploring, the party glides one tile at a time, all its battle units at once.
+        val EXPLORING_STEP_DURATION = 250.milliseconds
 
         // Exploring, the CPU battle units wander quicker than the party walks.
         val WANDERING_STEP_DURATION = 75.milliseconds
         val SCROLL_DURATION = 300.milliseconds
+
+        // Trailing, the leader moves freely between these offsets of the viewport (its 2x2 tiles at the center), and pushes
+        // the camera along once it walks past them.
+        const val DEADZONE_START = TILE_SIZE * (VISIBLE_TILES / 2 - 1)
+        const val DEADZONE_END = TILE_SIZE * (VISIBLE_TILES / 2)
+
+        // Trailing, a camera far from the leader catches up, closing 1 - e^(-dt / CATCH_UP_TIME) of the distance each frame,
+        // and at least as fast as this, in pixels per second (twice the party walking), so it reaches a walking leader.
+        val CATCH_UP_TIME = 80.milliseconds
+        const val CATCH_UP_MIN_SPEED = TILE_SIZE * 8.0
 
         // Swapping, the leader hops over the party member this high, half-way, while the member slides underneath.
         val SWAP_DURATION = 150.milliseconds
@@ -154,7 +170,24 @@ open class BattlefieldView(
     // Holds the battle units while they glide between tiles (e.g.: swapping), over the tiles and at their scroll, so they
     // are neither sorted with the tiles nor drawn under the tiles below them.
     internal lateinit var movingBattleUnits: Container
+
+    // Updated on every frame after the tiles and the gliding battle units, so the scroll follows where they are drawn.
+    private lateinit var camera: View
     internal var tintOverlay: SolidRect? = null
+
+    // While exploring, the camera trails the leader: its tile, or the image it glides with meanwhile. `null` when the
+    // camera does not trail.
+    private var trailedTile: PositionDto? = null
+    private var trailedView: View? = null
+
+    // The trailing is paused by a drag, until the leader moves again.
+    private var isTrailingPaused = false
+
+    // The camera eases towards the leader when it is far from it, e.g.: when the exploration resumes.
+    private var isCatchingUp = false
+
+    private val isTrailing: Boolean
+        get() = trailedTile != null
 
     // The displayed battlefield, which the tiles are created from.
     private lateinit var battlefield: Battlefield.Dto
@@ -178,6 +211,7 @@ open class BattlefieldView(
         viewport.onMouseDrag { event ->
             if (!isDisplayed) return@onMouseDrag
             if (event.start) {
+                isTrailingPaused = isTrailing
                 dragStartX = battlefieldGrid.x
                 dragStartY = battlefieldGrid.y
             }
@@ -202,10 +236,12 @@ open class BattlefieldView(
             createdTiles.values.forEach(::removeHealthPreview)
             battlefieldGrid.removeFromParent()
             movingBattleUnits.removeFromParent()
+            camera.removeFromParent()
         }
         createdTiles.clear()
         undimmedTiles = null
         windowScroll = null
+        trailedView = null
         this.battlefield = battlefield
         minScrollX = minOf(0, VIEWPORT_WIDTH - mapWidth).toDouble()
         minScrollY = minOf(0, VIEWPORT_HEIGHT - mapHeight).toDouble()
@@ -217,10 +253,15 @@ open class BattlefieldView(
             }
         battlefieldAnimator = battlefieldGrid.animator(parallel = true)
         movingBattleUnits = viewport.container { name = MOVING_BATTLE_UNITS }
-        movingBattleUnits.addUpdater { pos = battlefieldGrid.pos }
-        // The tiles on the screen follow the scroll, e.g.: while it is dragged or animated.
-        battlefieldGrid.addUpdater { refreshTileWindow() }
-        refreshTileWindow()
+        // The gliding battle units and the tiles on the screen follow the scroll, e.g.: while it is trailed, dragged or animated.
+        camera =
+            viewport.container {
+                addUpdater { dt ->
+                    trailLeader(dt)
+                    movingBattleUnits.pos = battlefieldGrid.pos
+                    refreshTileWindow()
+                }
+            }
     }
 
     // The rows and the columns of the tiles in the viewport and around it.
@@ -532,18 +573,17 @@ open class BattlefieldView(
         // Does not scroll, e.g.: a CPU battle unit wandering.
         NONE,
 
-        // Centers the battle unit on each axis whose viewport edge it reaches, e.g.: in a battle.
+        // Before each step, centers the battle unit on each axis whose viewport edge it reaches, e.g.: in a battle.
         CENTER,
 
-        // On the axis it walks along, lands the battle unit one tile past the viewport edge behind it, so the viewport
-        // looks ahead of it, e.g.: the leader of the party exploring.
-        LOOK_AHEAD,
+        // Trails the battle unit on every frame, without waiting for the scroll, e.g.: the leader of the party exploring.
+        TRAIL,
     }
 
     /**
-     * Moves the battle unit tile by tile along the path, stopping on each tile, and scrolls the battlefield so the
-     * battle unit stays visible, as following says. Path: the tiles walked from the origin (excluded) to the
-     * destination (included).
+     * Glides the battle unit tile by tile along the path, then displays it on its destination tile, and scrolls the
+     * battlefield so the battle unit stays visible, as following says. A step to a tile that is not next to the previous
+     * one (e.g.: a teleport) jumps to it. Path: the tiles walked from the origin (excluded) to the destination (included).
      */
     open suspend fun moveBattleUnit(
         fromRow: Int,
@@ -553,24 +593,47 @@ open class BattlefieldView(
         stepDuration: Duration = MOVE_STEP_DURATION,
         following: Following = Following.CENTER,
     ) {
-        var previousPosition = PositionDto(fromRow, fromColumn)
-        path.forEach { position ->
-            when (following) {
-                Following.NONE -> Unit
-                Following.CENTER -> followTile(position.row, position.column)
-                Following.LOOK_AHEAD -> followTile(position.row, position.column, walkedFrom = previousPosition)
+        val destination = path.lastOrNull() ?: return
+        val origin = PositionDto(fromRow, fromColumn)
+        removeBattleUnit(fromRow, fromColumn)
+        val glidingUnit =
+            resourcesLoader.bitmapOrNull("unit/$unitId.png")?.let { unitBitmap ->
+                movingBattleUnits.movingBattleUnit(unitBitmap, GLIDING_BATTLE_UNIT, origin.column * TILE_SIZE.toDouble(), origin.row * TILE_SIZE.toDouble())
             }
-            removeBattleUnit(previousPosition.row, previousPosition.column)
-            displayBattleUnit(position.row, position.column, unitId)
-            delay(stepDuration)
+        if (following == Following.TRAIL) trailFrom(origin, glidingUnit)
+        var previousPosition = origin
+        path.forEach { position ->
+            if (following == Following.CENTER) followTile(position.row, position.column)
+            glide(glidingUnit, previousPosition, position, stepDuration)
             previousPosition = position
         }
+        if (following == Following.TRAIL) trailOn(destination, glidingUnit)
+        glidingUnit?.removeFromParent()
+        displayBattleUnit(destination.row, destination.column, unitId)
+    }
+
+    // Glides the image of the battle unit to the next tile of its path, or jumps to it when it is not next to the previous one.
+    private suspend fun glide(
+        glidingUnit: View?,
+        from: PositionDto,
+        to: PositionDto,
+        stepDuration: Duration,
+    ) {
+        if (glidingUnit == null) return delay(stepDuration)
+        val toX = to.column * TILE_SIZE.toDouble()
+        val toY = to.row * TILE_SIZE.toDouble()
+        if (abs(to.row - from.row) + abs(to.column - from.column) != 1) {
+            glidingUnit.x = toX
+            glidingUnit.y = toY
+            return delay(stepDuration)
+        }
+        glidingUnit.animator { moveTo(glidingUnit, x = toX, y = toY, time = stepDuration, easing = Easing.LINEAR) }.awaitComplete()
     }
 
     /**
-     * Swaps the tiles of the leader of the party and the party member on its next tile, after scrolling the battlefield
-     * so the leader's new tile is visible, looking ahead of it as it explores: both glide to each other's tile at once, the leader hopping over the member,
-     * which slides straight underneath.
+     * Swaps the tiles of the leader of the party and the party member on its next tile, trailing the leader as it
+     * explores: both glide to each other's tile at once, the leader hops over the member, which slides straight
+     * underneath.
      */
     open suspend fun swapBattleUnits(
         leaderRow: Int,
@@ -580,10 +643,12 @@ open class BattlefieldView(
         memberColumn: Int,
         memberUnitId: String,
     ) {
-        followTile(memberRow, memberColumn, walkedFrom = PositionDto(leaderRow, leaderColumn))
+        trailFrom(PositionDto(leaderRow, leaderColumn), glidingUnit = null)
         removeBattleUnit(leaderRow, leaderColumn)
         removeBattleUnit(memberRow, memberColumn)
         glideSwap(leaderRow, leaderColumn, leaderUnitId, memberRow, memberColumn, memberUnitId)
+        // The leader glided with the image `glideSwap` trails, which is only known there.
+        trailOn(PositionDto(memberRow, memberColumn), glidingUnit = trailedView)
         displayBattleUnit(memberRow, memberColumn, leaderUnitId)
         displayBattleUnit(leaderRow, leaderColumn, memberUnitId)
     }
@@ -606,6 +671,7 @@ open class BattlefieldView(
         val member = movingBattleUnits.movingBattleUnit(memberBitmap, SWAPPING_MEMBER, memberX, memberY)
         // Added last, so it is drawn over the member. Its image hops inside it, while it glides.
         val leader = movingBattleUnits.movingBattleUnit(leaderBitmap, SWAPPING_LEADER, leaderX, leaderY)
+        if (isTrailing) trailedView = leader
         val leaderImage = leader.firstChild!!
         movingBattleUnits
             .animator(parallel = true) {
@@ -681,39 +747,117 @@ open class BattlefieldView(
         column: Int,
     ) = followTile(row, column)
 
-    // Scrolls each axis where the tile is out of the viewport or on its edge, keeping the scroll of the other axis. On a
-    // border of the battlefield, the scroll is clamped back to the current one, so that axis does not scroll.
-    // Walked from: the tile the battle unit steps from, to look ahead of it on the axis it walks along.
+    /**
+     * Trails the battle unit standing on the tile on every frame, e.g.: the leader of the party when the exploration
+     * starts or resumes. The camera eases towards it when it is far from the deadzone, and is not waited for.
+     */
+    open fun trail(
+        row: Int,
+        column: Int,
+    ) {
+        trailedTile = PositionDto(row, column)
+        trailedView = null
+        isTrailingPaused = false
+        isCatchingUp = true
+        if (isDisplayed) battlefieldAnimator.cancel()
+    }
+
+    /** Stops trailing the leader, leaving the scroll where it is, e.g.: when a battle starts. */
+    open fun stopTrailing() {
+        trailedTile = null
+        trailedView = null
+    }
+
+    // The leader steps from the tile, gliding with the image: the trailing starts, or resumes after a drag.
+    private fun trailFrom(
+        position: PositionDto,
+        glidingUnit: View?,
+    ) {
+        if (!isTrailing || isTrailingPaused) trail(position.row, position.column) else trailedTile = position
+        trailedView = glidingUnit
+    }
+
+    // The leader stands on the tile once it has glided there, unless the trailing stopped meanwhile.
+    private fun trailOn(
+        position: PositionDto,
+        glidingUnit: View?,
+    ) {
+        if (!isTrailing || trailedView !== glidingUnit) return
+        trailedTile = position
+        trailedView = null
+    }
+
+    // Keeps the leader inside the deadzone: straight away while it walks, easing towards it when it is far.
+    private fun trailLeader(dt: Duration) {
+        val tile = trailedTile ?: return
+        if (isTrailingPaused) return
+        val trailedX = trailedView?.x ?: (tile.column * TILE_SIZE.toDouble())
+        val trailedY = trailedView?.y ?: (tile.row * TILE_SIZE.toDouble())
+        val targetX = trailedScroll(trailedX, battlefieldGrid.x, minScrollX)
+        val targetY = trailedScroll(trailedY, battlefieldGrid.y, minScrollY)
+        if (abs(targetX - battlefieldGrid.x) > TILE_SIZE || abs(targetY - battlefieldGrid.y) > TILE_SIZE) isCatchingUp = true
+        if (isCatchingUp) {
+            battlefieldGrid.x = catchUp(battlefieldGrid.x, targetX, dt)
+            battlefieldGrid.y = catchUp(battlefieldGrid.y, targetY, dt)
+            isCatchingUp = battlefieldGrid.x != targetX || battlefieldGrid.y != targetY
+        } else {
+            battlefieldGrid.x = targetX
+            battlefieldGrid.y = targetY
+        }
+    }
+
+    // The scroll of one axis keeping the trailed offset inside the deadzone, clamped to the battlefield.
+    private fun trailedScroll(
+        trailedOffset: Double,
+        scrollOffset: Double,
+        minScroll: Double,
+    ): Double {
+        val trailedOffsetInViewport = trailedOffset + scrollOffset
+        val trailedScroll =
+            when {
+                trailedOffsetInViewport < DEADZONE_START -> DEADZONE_START - trailedOffset
+                trailedOffsetInViewport > DEADZONE_END -> DEADZONE_END - trailedOffset
+                else -> scrollOffset
+            }
+        return trailedScroll.clamp(minScroll, 0.0)
+    }
+
+    private fun catchUp(
+        scrollOffset: Double,
+        targetOffset: Double,
+        dt: Duration,
+    ): Double {
+        val distance = targetOffset - scrollOffset
+        val eased = abs(distance) * (1 - exp(-(dt / CATCH_UP_TIME)))
+        val step = max(eased, CATCH_UP_MIN_SPEED * dt.toDouble(DurationUnit.SECONDS))
+        return if (step >= abs(distance)) targetOffset else scrollOffset + sign(distance) * step
+    }
+
+    // Scrolls each axis where the tile is out of the viewport or on its edge, centering it, and keeps the scroll of the
+    // other axis. On a border of the battlefield, the scroll is clamped back to the current one, so that axis does not
+    // scroll. While trailing, the camera belongs to the leader, so it does not scroll.
     private suspend fun followTile(
         row: Int,
         column: Int,
-        walkedFrom: PositionDto? = null,
     ) {
-        val followedX = followedScroll(column, walkedFrom?.column, battlefieldGrid.x, VIEWPORT_WIDTH, minScrollX)
-        val followedY = followedScroll(row, walkedFrom?.row, battlefieldGrid.y, VIEWPORT_HEIGHT, minScrollY)
+        if (isTrailing) return
+        val followedX = followedScroll(column, battlefieldGrid.x, VIEWPORT_WIDTH, minScrollX)
+        val followedY = followedScroll(row, battlefieldGrid.y, VIEWPORT_HEIGHT, minScrollY)
         if (followedX == battlefieldGrid.x && followedY == battlefieldGrid.y) return
         scrollTo(x = followedX, y = followedY)
         battlefieldAnimator.awaitComplete()
     }
 
-    // The scroll of one axis: kept while the tile is away from the viewport edges. Otherwise, walking along that axis,
-    // the tile lands one tile past the edge behind it, else it is centered.
+    // The scroll of one axis: kept while the tile is away from the viewport edges, else centering it.
     private fun followedScroll(
         tileIndex: Int,
-        walkedFromIndex: Int?,
         scrollOffset: Double,
         viewportSize: Int,
         minScroll: Double,
     ): Double {
         val tileOffset = tileIndex * TILE_SIZE.toDouble()
         if (isAwayFromViewportEdges(tileOffset, scrollOffset, viewportSize)) return scrollOffset
-        val tileOffsetInViewport =
-            when {
-                walkedFromIndex == null || walkedFromIndex == tileIndex -> (viewportSize - TILE_SIZE) / 2.0
-                walkedFromIndex < tileIndex -> TILE_SIZE.toDouble()
-                else -> viewportSize - 2.0 * TILE_SIZE
-            }
-        return (tileOffsetInViewport - tileOffset).clamp(minScroll, 0.0)
+        return ((viewportSize - TILE_SIZE) / 2.0 - tileOffset).clamp(minScroll, 0.0)
     }
 
     private fun isAwayFromViewportEdges(

@@ -322,7 +322,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `MoveUnit should follow the leader of the party looking ahead when it walks while exploring`() {
+    fun `MoveUnit should trail the leader of the party when it walks while exploring`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -335,7 +335,7 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 1, fromColumn = 1, path = path, unitId = "knight"))
-        exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.LOOK_AHEAD)
+        exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.TRAIL)
     }
 
     @Test
@@ -353,6 +353,79 @@ class BattlefieldPresenterTest {
         // Then
         exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
         exploringBattlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.NONE)
+    }
+
+    @Test
+    fun `MoveUnit should glide a follower of the party together with the step being played when it walks while exploring`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        val timeline = battleSceneTimeline()
+        exploringPresenter(exploringApis, exploringBattlefieldView, timeline)
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        val leaderStep = timeline.playLongStep()
+        val path = listOf(position(2, 0))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.movedBattleUnits.shouldContainExactly(MovedBattleUnit(fromRow = 2, fromColumn = 1, path = path, unitId = "knight"))
+        leaderStep.complete(Unit)
+    }
+
+    @Test
+    fun `MoveUnit should wait for the step being played to move a battle unit in a battle`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.movedBattleUnits.shouldBeEmpty()
+        previousStep.complete(Unit)
+        battlefieldView.movedBattleUnits.shouldHaveSize(1)
+    }
+
+    @Test
+    fun `ExplorationStarted should trail the leader of the party`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.partyApi.startExploration()
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.trailedTiles.shouldContainExactly(position(1, 1))
+    }
+
+    @Test
+    fun `ExplorationResumed should trail the leader of the party`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.eventBus.publish(PartyEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.trailedTiles.shouldContainExactly(position(1, 1))
+    }
+
+    @Test
+    fun `ExplorationPaused should stop trailing the leader of the party`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.stopTrailingCount shouldBe 1
     }
 
     @Test

@@ -134,6 +134,12 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
             },
+            // While exploring, the camera trails the leader, e.g.: once a battle finishes, and stops when a battle starts.
+            eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
+            eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
+            eventBus.subscribe<PartyEvent.ExplorationPaused> {
+                timeline.play { battlefieldView.stopTrailing() }
+            },
             // The selected caster is displayed again once its cast has been resolved.
             eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> {
                 refreshMovementRange()
@@ -241,15 +247,16 @@ class BattlefieldPresenter(
         }
         val isBattling = isBattling()
         val stepDuration = if (isBattling) BattlefieldView.MOVE_STEP_DURATION else BattlefieldView.EXPLORING_STEP_DURATION
-        // While exploring, the battlefield only follows the leader, so it does not scroll from one party member to another,
-        // and looks ahead of it, so it scrolls less often.
+        // While exploring, the battlefield only trails the leader, so it does not scroll from one party member to another,
+        // and the followers glide together with the leader, so the party walks a tile in a single step.
+        val isFollowing = !isBattling && isPartyFollower(battleUnit)
         val following =
             when {
                 isBattling -> BattlefieldView.Following.CENTER
-                isPartyFollower(battleUnit) -> BattlefieldView.Following.NONE
-                else -> BattlefieldView.Following.LOOK_AHEAD
+                isFollowing -> BattlefieldView.Following.NONE
+                else -> BattlefieldView.Following.TRAIL
             }
-        timeline.play {
+        val step: suspend () -> Unit = {
             battlefieldView.resetTiles()
             battlefieldView.moveBattleUnit(
                 fromRow = event.fromRow,
@@ -260,6 +267,14 @@ class BattlefieldPresenter(
                 following = following,
             )
         }
+        if (isFollowing) timeline.playTogether(step) else timeline.play(step)
+    }
+
+    // Reads where the leader stands when the exploration starts or resumes, unless a battle has already started.
+    private fun trailPartyLeader() {
+        val party = partyApi.searchParty()?.takeIf { party -> party.isExploring } ?: return
+        val leaderPosition = party.leaderBattleUnitId?.let(battlefieldApi.searchPosition::invoke) ?: return
+        timeline.play { battlefieldView.trail(leaderPosition.row, leaderPosition.column) }
     }
 
     // Both battle units of a swap are animated in a single step, once both have moved: the party leader hops over the

@@ -134,4 +134,43 @@ class BattleSceneTimelineTest {
         // Then
         timeline.isPlaying.shouldBeFalse()
     }
+
+    @Test
+    fun `PlayTogether should play the step straight away when another step is still playing`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        timeline.playLongStep()
+        // When
+        timeline.playTogether { playedSteps += "together" }
+        // Then
+        playedSteps.shouldContainExactly("together")
+    }
+
+    @Test
+    fun `PlayTogether should play the next steps once both steps are done`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        val longStep = timeline.playLongStep()
+        val togetherStep = CompletableDeferred<Unit>()
+        timeline.playTogether { togetherStep.await() }
+        timeline.play { playedSteps += "next" }
+        // When
+        longStep.complete(Unit)
+        // Then
+        playedSteps.shouldBeEmpty()
+        timeline.isPlaying.shouldBeTrue()
+        togetherStep.complete(Unit)
+        playedSteps.shouldContainExactly("next")
+        timeline.isPlaying.shouldBeFalse()
+    }
+
+    @Test
+    fun `PlayTogether should play the step as a step of the timeline when the timeline is idle`() {
+        // Given
+        val togetherStep = CompletableDeferred<Unit>()
+        // When
+        timeline.playTogether { togetherStep.await() }
+        // Then
+        timeline.isPlaying.shouldBeTrue()
+    }
 }

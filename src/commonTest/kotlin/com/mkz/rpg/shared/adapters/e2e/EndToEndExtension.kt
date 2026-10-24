@@ -93,17 +93,15 @@ suspend fun ViewsForTesting.startNewBattle() {
 }
 
 /**
- * Clicks the arrow until the leader is displayed on the tile, as a click is ignored while the scene plays the previous
- * steps. Once the leader is displayed there, no further click is made, so it walks a single tile.
+ * Clicks the arrow once, and waits until the leader is displayed on the tile. A click made while the scene plays the
+ * previous steps is kept until it is idle, and the leader glides off the tiles meanwhile, so clicking again would walk
+ * it further.
  */
 private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
     val virtualPadView = requireNotNull(stage.virtualPadView()) { "The virtual pad is not displayed" }
     val battlefieldView = requireNotNull(stage.battlefieldView()) { "The battlefield is not displayed" }
-    val start = TimeSource.Monotonic.markNow()
-    while (!battlefieldView.hasBattleUnitAt(step.row, step.column) && start.elapsedNow() < WAIT_TIMEOUT) {
-        clickArrow(virtualPadView, step.direction)
-        delay(frameTime)
-    }
+    clickArrow(virtualPadView, step.direction)
+    waitUntil { battlefieldView.hasBattleUnitAt(step.row, step.column) }
     require(battlefieldView.hasBattleUnitAt(step.row, step.column)) { "The leader did not walk to (${step.row},${step.column})" }
 }
 

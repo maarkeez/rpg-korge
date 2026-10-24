@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
-import com.mkz.rpg.screen.adapters.presentation.BattlefieldView.Following.LOOK_AHEAD
+import com.mkz.rpg.screen.adapters.presentation.BattlefieldView.Following.TRAIL
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
@@ -18,6 +18,9 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.doubles.plusOrMinus
+import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
+import io.kotest.matchers.doubles.shouldBeLessThan
+import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -33,8 +36,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         // The battlefield scroll animation lasts 300ms and each test frame 10ms.
         const val SCROLL_ANIMATION_FRAMES = 40
 
-        // A moving battle unit stops 150ms on each tile and each test frame lasts 10ms.
+        // A moving battle unit glides 150ms to each tile and each test frame lasts 10ms.
         const val MOVE_STEP_FRAMES = 15
+
+        // Trailing, the camera catches up with a battle unit 6 tiles away within this many frames of 10ms.
+        const val CATCH_UP_FRAMES = 40
 
         // A swap lasts 150ms and each test frame 10ms.
         const val SWAP_FRAMES = 15
@@ -781,24 +787,26 @@ class BattlefieldViewTest : ViewsForTesting() {
     private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
 
     @Test
-    fun `MoveBattleUnit should display the battle unit on each tile of the path in order when it moves`() =
+    fun `MoveBattleUnit should glide the battle unit image along its path, off the tiles, when it moves`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
-            val positionsBeforeMoving = battlefieldView.battleUnitPositions()
             // When
             val moving = startMoving(battlefieldView, path)
-            val displayedPositions = listOf(positionsBeforeMoving) + sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() }
+            val frames = sampleUntilCompletion(moving) { battlefieldView.battleUnitPositions() to battlefieldView.glidingBattleUnits().map { glidingUnit -> glidingUnit.x } }
             // Then
-            displayedPositions.distinct().shouldContainExactly(listOf(0 to 0), listOf(0 to 1), listOf(0 to 2))
-            displayedPositions.zipWithNext().count { (previous, next) -> previous != next } shouldBe 2
+            frames.shouldNotBeEmpty()
+            frames.forEach { (positions, _) -> positions.shouldBeEmpty() }
+            val glidingXs = frames.map { (_, glidingXs) -> glidingXs.single() }
+            glidingXs.zipWithNext().forEach { (previous, next) -> next shouldBeGreaterThanOrEqual previous }
+            glidingXs.any { glidingX -> glidingX > 0.0 && glidingX < BattlefieldView.TILE_SIZE }.shouldBeTrue()
         }
 
     @Test
-    fun `MoveBattleUnit should stop on each tile of the path when the battle unit moves`() =
+    fun `MoveBattleUnit should display the battle unit on its destination tile once it has glided along its path`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
@@ -806,10 +814,41 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
-            startMoving(battlefieldView, path)
-            repeat(MOVE_STEP_FRAMES - 2) { nextFrame() }
+            awaitCompletion(startMoving(battlefieldView, path))
             // Then
-            battlefieldView.battleUnitPositions().shouldContainExactly(0 to 1)
+            battlefieldView.battleUnitPositions().shouldContainExactly(0 to 2)
+            battlefieldView.glidingBattleUnits().shouldBeEmpty()
+        }
+
+    @Test
+    fun `MoveBattleUnit should glide each tile of the path for a step when the battle unit moves`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val frames = sampleUntilCompletion(startMoving(battlefieldView, path)) { }
+            // Then
+            frames.size shouldBeInRange (2 * MOVE_STEP_FRAMES - 2)..(2 * MOVE_STEP_FRAMES + 2)
+        }
+
+    @Test
+    fun `MoveBattleUnit should jump to the destination when the battle unit teleports`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val moving = startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 0, column = 2)))
+            val glidingXs = sampleUntilCompletion(moving) { battlefieldView.glidingBattleUnits().map { glidingUnit -> glidingUnit.x } }
+            // Then
+            glidingXs.shouldNotBeEmpty()
+            glidingXs.forEach { xs -> xs.shouldContainExactly(2.0 * BattlefieldView.TILE_SIZE) }
+            battlefieldView.battleUnitPositions().shouldContainExactly(0 to 2)
         }
 
     @Test
@@ -872,75 +911,154 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `MoveBattleUnit should land the battle unit one tile past the edge behind it when it walks east to the viewport edge looking ahead`() =
+    fun `MoveBattleUnit should not scroll the battlefield when the battle unit moves inside the deadzone trailing`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
-            // Then
-            battlefieldView.scrollOffset() shouldBe (-288.0 to 0.0)
-        }
-
-    @Test
-    fun `MoveBattleUnit should land the battle unit one tile past the edge behind it when it walks south to the viewport edge looking ahead`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattleUnit(row = 6, column = 5, unitId = "knight")
-            addChild(battlefieldView)
-            // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 7, column = 5)), LOOK_AHEAD))
-            // Then
-            battlefieldView.scrollOffset() shouldBe (0.0 to -288.0)
-        }
-
-    @Test
-    fun `MoveBattleUnit should scroll back when the battle unit turns around right after a scroll looking ahead`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
-            addChild(battlefieldView)
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
-            require(battlefieldView.scrollOffset() == (-288.0 to 0.0))
-            // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 6)), LOOK_AHEAD))
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 4)), TRAIL))
+            nextFrame()
             // Then
             battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
         }
 
     @Test
-    fun `MoveBattleUnit should center the other axis when the battle unit is on its viewport edge looking ahead`() =
+    fun `MoveBattleUnit should scroll the battlefield with the battle unit when it walks past the deadzone trailing`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattleUnit(row = 7, column = 6, unitId = "knight")
+            battlefieldView.displayBattleUnit(row = 3, column = 4, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 7, column = 7)), LOOK_AHEAD))
+            val moving = startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 5)), TRAIL)
+            val frames = sampleUntilCompletion(moving) { battlefieldView.glidingBattleUnits().single().x to battlefieldView.scrollOffset().first }
+            nextFrame()
             // Then
-            battlefieldView.scrollOffset() shouldBe (-288.0 to -168.0)
+            frames.forEach { (glidingX, scrollX) -> glidingX + scrollX shouldBe (BattlefieldView.DEADZONE_END.toDouble() plusOrMinus 0.001) }
+            frames.any { (_, scrollX) -> scrollX > -BattlefieldView.TILE_SIZE && scrollX < 0.0 }.shouldBeTrue()
+            battlefieldView.scrollOffset() shouldBe (-48.0 to 0.0)
         }
 
     @Test
-    fun `MoveBattleUnit should clamp the scroll to the battlefield when the battle unit walks near its border looking ahead`() =
+    fun `MoveBattleUnit should not wait for the battlefield to scroll trailing`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 10).toDto())
-            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 7, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 5, column = 7)), LOOK_AHEAD))
+            val frames = sampleUntilCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 8)), TRAIL)) { }
             // Then
-            battlefieldView.scrollOffset() shouldBe (-96.0 to 0.0)
+            frames.size shouldBeInRange (MOVE_STEP_FRAMES - 1)..(MOVE_STEP_FRAMES + 1)
+        }
+
+    @Test
+    fun `MoveBattleUnit should not scroll back until the battle unit crosses the deadzone when it turns around trailing`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 4, unitId = "knight")
+            addChild(battlefieldView)
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 5)), TRAIL))
+            nextFrame()
+            require(battlefieldView.scrollOffset() == (-48.0 to 0.0))
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 4)), TRAIL))
+            nextFrame()
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-48.0 to 0.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should clamp the trailing scroll to the battlefield when the battle unit walks near its border`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 9).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 4, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val path = listOf(Battlefield.Dto.PositionDto(row = 3, column = 5), Battlefield.Dto.PositionDto(row = 3, column = 6))
+            awaitCompletion(startMoving(battlefieldView, path, TRAIL))
+            nextFrame()
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-48.0 to 0.0)
+        }
+
+    @Test
+    fun `Trail should ease the battlefield to the battle unit when it is far from the deadzone`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 10, column = 10, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            battlefieldView.trail(row = 10, column = 10)
+            val scrolls = List(CATCH_UP_FRAMES) { battlefieldView.scrollOffset().also { nextFrame() } } + listOf(battlefieldView.scrollOffset())
+            // Then
+            scrolls.last() shouldBe (-288.0 to -288.0)
+            val easingScrolls = scrolls.takeWhile { scroll -> scroll != scrolls.last() }
+            easingScrolls.size shouldBeGreaterThan 2
+            easingScrolls.zipWithNext().forEach { (previous, next) -> next.first shouldBeLessThan previous.first }
+        }
+
+    @Test
+    fun `StopTrailing should leave the scroll where it is`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 10, column = 10, unitId = "knight")
+            addChild(battlefieldView)
+            battlefieldView.trail(row = 10, column = 10)
+            // When
+            battlefieldView.stopTrailing()
+            repeat(CATCH_UP_FRAMES) { nextFrame() }
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
+        }
+
+    @Test
+    fun `DisplayBattlefield should pause trailing when the battlefield is dragged`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
+            addChild(battlefieldView)
+            battlefieldView.trail(row = 3, column = 3)
+            // When
+            dragBattlefield(battlefieldView, -48.0 to -48.0, -96.0 to -96.0)
+            repeat(CATCH_UP_FRAMES) { nextFrame() }
+            // Then
+            battlefieldView.scrollOffset() shouldBe (-96.0 to -96.0)
+        }
+
+    @Test
+    fun `MoveBattleUnit should resume trailing when the battle unit moves after a drag trailing`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
+            addChild(battlefieldView)
+            battlefieldView.trail(row = 3, column = 3)
+            dragBattlefield(battlefieldView, -96.0 to -96.0)
+            // When
+            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 4)), TRAIL))
+            repeat(CATCH_UP_FRAMES) { nextFrame() }
+            // Then: the camera caught up while the battle unit glided, until the battle unit was inside the deadzone.
+            val (scrollX, scrollY) = battlefieldView.scrollOffset()
+            val deadzone = BattlefieldView.DEADZONE_START.toDouble()..BattlefieldView.DEADZONE_END.toDouble()
+            (4 * BattlefieldView.TILE_SIZE + scrollX in deadzone).shouldBeTrue()
+            (3 * BattlefieldView.TILE_SIZE + scrollY in deadzone).shouldBeTrue()
         }
 
     @Test
@@ -1002,24 +1120,24 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `SwapBattleUnits should scroll to the member's tile, looking ahead, before the battle units move when it is at the viewport edge`() =
+    fun `SwapBattleUnits should trail the leader while it hops over the member`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattleUnit(row = 5, column = 6, unitId = "knight")
-            battlefieldView.displayBattleUnit(row = 5, column = 7, unitId = "rat")
+            battlefieldView.displayBattleUnit(row = 3, column = 4, unitId = "knight")
+            battlefieldView.displayBattleUnit(row = 3, column = 5, unitId = "rat")
             addChild(battlefieldView)
             // When
             val swapping =
                 startAnimation {
-                    battlefieldView.swapBattleUnits(leaderRow = 5, leaderColumn = 6, leaderUnitId = "knight", memberRow = 5, memberColumn = 7, memberUnitId = "rat")
+                    battlefieldView.swapBattleUnits(leaderRow = 3, leaderColumn = 4, leaderUnitId = "knight", memberRow = 3, memberColumn = 5, memberUnitId = "rat")
                 }
-            val frames = sampleUntilCompletion(swapping) { battlefieldView.scrollOffset() to battlefieldView.glidingBattleUnits().isNotEmpty() }
+            val frames = sampleUntilCompletion(swapping) { battlefieldView.glidingBattleUnits().last().x to battlefieldView.scrollOffset().first }
+            nextFrame()
             // Then
-            val glidingScrolls = frames.filter { (_, isGliding) -> isGliding }.map { (scroll, _) -> scroll }
-            glidingScrolls.shouldNotBeEmpty()
-            glidingScrolls.forEach { scroll -> scroll shouldBe (-288.0 to 0.0) }
+            frames.forEach { (leaderX, scrollX) -> leaderX + scrollX shouldBe (BattlefieldView.DEADZONE_END.toDouble() plusOrMinus 0.001) }
+            battlefieldView.scrollOffset() shouldBe (-48.0 to 0.0)
         }
 
     // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
@@ -1078,6 +1196,22 @@ class BattlefieldViewTest : ViewsForTesting() {
             awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
             // Then
             battlefieldView.isTileVisible(row = 12, column = 13).shouldBeTrue()
+        }
+
+    @Test
+    fun `FlashBattleUnit should not scroll the battlefield trailing`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
+            battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
+            addChild(battlefieldView)
+            battlefieldView.trail(row = 3, column = 3)
+            // When
+            awaitCompletion(startFlashing(battlefieldView, row = 12, column = 13, unitId = "rat"))
+            // Then
+            battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
         }
 
     @Test
