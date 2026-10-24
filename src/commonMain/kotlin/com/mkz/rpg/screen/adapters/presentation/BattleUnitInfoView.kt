@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.AbilityAvailability
 import com.mkz.rpg.unit.domain.Unit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
@@ -95,6 +96,7 @@ open class BattleUnitInfoView(
     open fun display(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
+        abilityAvailabilities: List<AbilityAvailability>,
     ) {
         abilityButtons.forEach(AbilityButtonView::hide)
         // Avatar
@@ -120,13 +122,14 @@ open class BattleUnitInfoView(
             remaining = battleUnit.remainingManaPoints,
             maximum = battleUnit.maximumManaPoints,
         )
-        // Abilities
-        val canCast = battleUnit.remainingTurnActions.remainingCasts > 0
-        battleUnit.abilityCooldowns.keys.forEachIndexed { index, abilityId ->
-            val abilityButton = abilityButtons[index]
-            val isInCooldown = battleUnit.abilityCooldowns[abilityId]!! > 0
-            val canUseAbility = canCast && !isInCooldown
-            abilityButton.display(abilityId = abilityId, canCast = canUseAbility)
+        // Abilities, telling apart the cooldowns from the lack of mana. No casts left darkens none, as the cast points
+        // already tell it.
+        abilityAvailabilities.forEachIndexed { index, abilityAvailability ->
+            abilityButtons[index].display(
+                abilityId = abilityAvailability.abilityId,
+                cooldownTurnsLeft = abilityAvailability.cooldownTurnsLeft,
+                hasEnoughMana = abilityAvailability.hasEnoughMana,
+            )
         }
         // Effects
         effectsView.display(effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects)

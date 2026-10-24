@@ -374,13 +374,14 @@ class BattlefieldPresenter(
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
         val unit = unitApi.searchUnitById(battleUnit.unitId)!!
+        val abilityAvailabilities = battleUnitApi.searchAbilityAvailabilities(battleUnit.id)
         val isBattling = isBattling()
         return {
             // In a battle, the battlefield scrolls to the selected battle unit (e.g.: the party leader when its turn
             // starts), when it is out of the viewport or on its edge.
             if (isBattling) battlefieldView.scrollToTile(row = selectedBattleUnitEvent.tile.row, column = selectedBattleUnitEvent.tile.column)
             battlefieldView.resetTiles()
-            battleUnitInfoView.display(battleUnit, unit)
+            battleUnitInfoView.display(battleUnit, unit, abilityAvailabilities)
             battleHudView.displayBattleUnitInfoView()
             selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
                 battlefieldView.displayPotentialMovement(row = tile.row, column = tile.column)

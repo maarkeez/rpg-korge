@@ -42,6 +42,8 @@ class ProcessAbilitySelected(
                     battlefieldHudRepository.update(updatedBattlefieldHud)
                     eventBus.publish(events)
                 } else {
+                    val canCast = canCastAbility(battlefieldHud.battleUnitId, abilityId)
+                    if (!canCast) return
                     val castGroupsWhereCanCast = castGroupsWhereCanCast(battlefieldHud.battleUnitId, abilityId)
                     val (events, updatedBattlefieldHud) =
                         battlefieldHud

@@ -255,10 +255,11 @@ class InventoryPresenter(
             val battleUnitId = displayedBattleUnitId ?: return@whenIdle
             val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return@whenIdle
             val unit = unitApi.searchUnitById(battleUnit.unitId) ?: return@whenIdle
+            val abilityAvailabilities = battleUnitApi.searchAbilityAvailabilities(battleUnitId)
             timeline.play {
                 clearDisplayedInventory()
                 // The info is read again, as the items may have changed the battle unit, e.g.: healed it.
-                battleUnitInfoView.display(battleUnit, unit)
+                battleUnitInfoView.display(battleUnit, unit, abilityAvailabilities)
                 battleHudView.displayBattleUnitInfoView()
             }
         }

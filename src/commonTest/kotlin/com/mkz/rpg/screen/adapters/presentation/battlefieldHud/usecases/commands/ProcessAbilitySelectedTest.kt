@@ -170,6 +170,26 @@ class ProcessAbilitySelectedTest {
     }
 
     @Test
+    fun `should keep the selected ability when a different ability in cooldown is selected while displaying the ability cast range`() {
+        // Given
+        val hud =
+            displayAbilityCastRange(
+                casterTile = tile(0, 0),
+                battleUnitId = "battle-unit-1",
+                abilityId = "ability-1",
+            )
+        battlefieldHudRepository.create(hud)
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1", "ability-2"))
+        val knight = queries.battleUnitRepository.searchById("battle-unit-1")!!
+        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-2", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList()))
+        // When
+        processAbilitySelected("ability-2")
+        // Then
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
     fun `should throw an invalid hud state error when the hud is idle`() {
         // Given
         battlefieldHudRepository.create(

@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnit
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.AbilityAvailability
 import com.mkz.rpg.unit.domain.Unit
 
 // Records what the presenters ask the battle unit info view to display, instead of drawing it.
@@ -8,6 +9,7 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader()) 
     data class DisplayedBattleUnit(
         val battleUnit: BattleUnit.Dto,
         val unit: Unit.Dto,
+        val abilityAvailabilities: List<AbilityAvailability>,
     )
 
     var delegate: AbilityButtonView.Delegate? = null
@@ -28,8 +30,9 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader()) 
     override fun display(
         battleUnit: BattleUnit.Dto,
         unit: Unit.Dto,
+        abilityAvailabilities: List<AbilityAvailability>,
     ) {
-        displayedBattleUnits += DisplayedBattleUnit(battleUnit, unit)
+        displayedBattleUnits += DisplayedBattleUnit(battleUnit, unit, abilityAvailabilities)
     }
 
     override fun displayAbilitySelected(index: Int) {

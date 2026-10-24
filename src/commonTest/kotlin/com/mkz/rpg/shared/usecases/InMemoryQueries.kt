@@ -9,6 +9,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
@@ -123,6 +124,7 @@ class InMemoryQueries(
     val canMoveTo = CanMoveTo(battleUnitRepository, searchPosition, searchShortestPath)
     val whereCanMove = WhereCanMove(battleUnitRepository, searchTilesThatCanBeOccupied, canMoveTo)
     val canCastAbility = CanCastAbility(battleUnitRepository, searchAbilityById)
+    val searchAbilityAvailabilities = SearchAbilityAvailabilities(battleUnitRepository, searchAbilityById)
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
     val canMemberLearnAbility = CanMemberLearnAbility(partyRepository, canLearnAbility)
     val whereCanCast =

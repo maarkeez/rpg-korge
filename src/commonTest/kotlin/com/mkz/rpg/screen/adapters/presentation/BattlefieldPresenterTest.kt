@@ -863,6 +863,19 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `SelectBattleUnit should display the ability availabilities of the selected battle unit when it is selected`() {
+        // Given
+        // When
+        selectKnight()
+        // Then
+        val displayed = battleUnitInfoView.displayedBattleUnits.last()
+        displayed.abilityAvailabilities shouldBe apis.battleUnitApi.searchAbilityAvailabilities("knight-1")
+        displayed.abilityAvailabilities.map { availability -> availability.abilityId } shouldBe
+            displayed.battleUnit.abilityCooldowns.keys
+                .toList()
+    }
+
+    @Test
     fun `RefreshSelectedBattleUnit should not move the previously selected battle unit when a turn starts and an empty tile is selected`() {
         // Given
         selectKnight()

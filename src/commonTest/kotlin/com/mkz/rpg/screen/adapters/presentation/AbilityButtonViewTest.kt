@@ -17,7 +17,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", canCast = true)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
             // Then
             abilityButtonView.isVisibleToUser().shouldBeTrue()
         }
@@ -28,31 +28,71 @@ class AbilityButtonViewTest : ViewsForTesting() {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", canCast = true)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
             // Then
             abilityButtonView.isAbilityIconDisplayed().shouldBeTrue()
         }
 
     @Test
-    fun `Display should not darken ability icon when ability can be cast`() =
+    fun `Display should neither shade the ability icon nor display a cooldown badge when the ability can be cast`() =
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", canCast = true)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
             // Then
             abilityButtonView.isAbilityIconDarkened().shouldBeFalse()
+            abilityButtonView.isAbilityIconTintedBlue().shouldBeFalse()
+            abilityButtonView.cooldownBadgeText() shouldBe null
         }
 
     @Test
-    fun `Display should darken ability icon when ability can not be cast`() =
+    fun `Display should darken the ability icon and display the cooldown turns left when the ability is in cooldown`() =
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
             // When
-            abilityButtonView.display(abilityId = "mushroom", canCast = false)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true)
             // Then
             abilityButtonView.isAbilityIconDarkened().shouldBeTrue()
+            abilityButtonView.cooldownBadgeText() shouldBe "2"
+        }
+
+    @Test
+    fun `Display should tint the ability icon blue without a cooldown badge when there is not enough mana`() =
+        sharedViewsTest {
+            // Given
+            val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
+            // When
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = false)
+            // Then
+            abilityButtonView.isAbilityIconTintedBlue().shouldBeTrue()
+            abilityButtonView.cooldownBadgeText() shouldBe null
+        }
+
+    @Test
+    fun `Display should darken the ability icon and display the cooldown turns left when in cooldown and without enough mana`() =
+        sharedViewsTest {
+            // Given
+            val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
+            // When
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 1, hasEnoughMana = false)
+            // Then
+            abilityButtonView.isAbilityIconDarkened().shouldBeTrue()
+            abilityButtonView.cooldownBadgeText() shouldBe "1"
+        }
+
+    @Test
+    fun `Display should remove the cooldown badge when displayed again once the cooldown is over`() =
+        sharedViewsTest {
+            // Given
+            val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 1, hasEnoughMana = true)
+            // When
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
+            // Then
+            abilityButtonView.cooldownBadgeCount() shouldBe 0
+            abilityButtonView.isAbilityIconDarkened().shouldBeFalse()
         }
 
     @Test
@@ -95,7 +135,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 48.75, height = 48.75), loadedResourcesLoader())
-            abilityButtonView.display(abilityId = "mushroom", canCast = true)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
             // When
             abilityButtonView.hide()
             // Then
@@ -115,7 +155,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
                     }
                 },
             )
-            abilityButtonView.display(abilityId = "mushroom", canCast = true)
+            abilityButtonView.display(abilityId = "mushroom", cooldownTurnsLeft = 0, hasEnoughMana = true)
             addChild(abilityButtonView)
             // When
             clickAbilityButton(abilityButtonView)
