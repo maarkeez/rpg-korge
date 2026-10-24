@@ -2,8 +2,8 @@
 
 > **Status:** done.
 >
-> **Summary:** The first region of the game, built only from the resources: a lone knight walks out of a corridor, beats
-> its first bat, and is told about a village nearby. The village is the hub: a blacksmith, an alchemist, an elder telling
+> **Summary:** The first region of the game, built only from the resources: a lone knight walks out of a room, beats
+> its first bat on its gate, and is told about a village nearby. The village is the hub: a blacksmith, an alchemist, an elder telling
 > the story of the Goat Wizard, and a herbalist to recruit. Past the village, a viking waits behind rats and bats, and
 > the Goat Wizard waits in its lair, with its rats and bats. Defeating it drops a Bee Essence, which teaches the bee
 > summon, and a mystic behind it tells the party to keep exploring. The game does not end: the player can explore again.
@@ -17,7 +17,7 @@
 | Sandbox content  | Replaced: the battle units, the npcs and the battlefield. The units, abilities, effects and items nobody uses any more stay, as the tests still use some of them (e.g.: the knight with 6 abilities).        |
 | Demo units       | New units with their own id, so the sandbox ones the tests use are unchanged: `hero` (named Knight), `viking-warrior` (named Viking) and `goat-wizard` (named Goat Wizard), with copies of the knight, viking and goat images. |
 | Map              | One battlefield, 24 columns and 40 rows. The start is in the top-left corner, as the battlefield opens there (see [Map rules](#map-rules)): start, village and lair from north to south.                     |
-| Gating           | Only the start corridor forces a fight: the corridor bat blocks it. The recruits are gated by their placement only: the viking stands past the field enemies, the mystic behind the Goat Wizard.              |
+| Gating           | Only the start room forces a fight: the gate bat guards its only way out. The recruits are gated by their placement only: the viking stands past the field enemies, the mystic behind the Goat Wizard.          |
 | Ending           | None. The mystic congratulates the party, and the enemies respawn, so the player can explore again.                                                                                                           |
 | Recovery         | The party never recovers on its own: a fountain in the village and a pond in the meadow (water heals 5 every second standing still), and potions. Mana only comes from potions and elixirs.                 |
 | Economy          | Gold only comes from the starting gold and selling loot, for half its price. Fighting the optional enemies buys about one hammer and a few potions before the lair.                                          |
@@ -32,10 +32,10 @@
      0         1         2
      012345678901234567890123
   0  ########################
-  1  #############...########
-  2  .K........b.....########   Start corridor: the corridor bat blocks it
-  3  #############...########
-  4  ##############.#########
+  1  #...........#...########
+  2  #K..........b...########   Start room: the gate bat guards its only way out
+  3  #..g....g...#...########
+  4  #...........##.#########
   5  ##############.#########
   6  ########.............###   Meadow: the farmer, a pond, and 3 optional bats in the pockets
   7  ########.......g.....###
@@ -73,8 +73,9 @@
  39  ########################
 ```
 
-- The corridor bat (home `(2,10)`) engages the knight at `(2,5)`: 5 tiles. It wanders up to 3 tiles from home, so it never
-  reaches the start, `(2,1)`.
+- The gate bat (home `(2,12)`, the gate) engages the knight at `(2,7)`: 5 tiles. It wanders up to 3 tiles from home, so
+  it never reaches the start, `(2,1)`. The start was a corridor 1 tile high at first, see
+  [Open start room](open-start-room.md).
 - The village is out of reach of every enemy, wandering included, and a way from the meadow to the village keeps out of
   reach of the optional bats.
 
@@ -84,9 +85,10 @@ Learnt while building the map, and added to [Game data](../architecture/game-dat
 
 - Only sand can be next to another terrain, as the transitions are only drawn from sand.
 - A tile with void on two sides that meet (a corner) or three sides (a dead end) can not be occupied. A corridor 1 tile
-  wide can not turn nor end: it turns in a 3x3 room, and the start corridor ends at the west edge of the battlefield.
-- The battlefield opens on its top-left corner and only scrolls once the leader walks, so the party starts within its
-  first 8 rows and columns. This is why the start is in the north-west, and the lair in the south.
+  wide can not turn nor end: it turns in a 3x3 room, and the gate of the start room is 1 tile long, between two rooms.
+- The battlefield opened on its top-left corner and only scrolled once the leader walked, so the party started within
+  its first 8 rows and columns. This is why the start is in the north-west, and the lair in the south. The camera now
+  trails the leader from the start (see [Trailing camera](trailing-camera.md)).
 
 ## The party
 
@@ -110,7 +112,7 @@ Learnt while building the map, and added to [Game data](../architecture/game-dat
 | Rat         | `rat`         | 20     | 10   | 3     | Sword, Heal                   | `tier-2`: health or mana potion, a hammer (3 in 28), or nothing |
 | Goat Wizard | `goat-wizard` | 150    | 60   | 2     | Sword, Bat, Teleport, Heal    | `goat-wizard`: a Bee Essence, always           |
 
-There are 9 bats (the corridor one, 3 optional in the meadow, 2 in the field and 2 in the lair), 4 rats (2 in the field,
+There are 9 bats (the gate one, 3 optional in the meadow, 2 in the field and 2 in the lair), 4 rats (2 in the field,
 2 in the lair) and the Goat Wizard.
 
 ## The npcs
@@ -161,17 +163,17 @@ The dialog fits about 200 characters, so every line stays under 170.
 The end-to-end and some acceptance tests play the real resources, so they follow the demo. They test the same
 journeys:
 
-- End-to-end: the knight starts at `(2,1)` and walks east 4 tiles to `(2,5)`, where the corridor bat engages it and
-  walks to `(2,6)`. The party has a single knight, so walking checks that the knight walks, not that a follower
+- End-to-end: the knight starts at `(2,1)` and walks east 6 tiles to `(2,7)`, where the gate bat engages it and
+  walks to `(2,8)`. The party has a single knight, so walking checks that the knight walks, not that a follower
   follows (covered by the party tests). The knight knows Sword and Heal: deploying a bee to block its way is replaced
-  by defeating the bat that blocks the corridor, which opens the tiles behind it.
+  by defeating the bat that guards the gate, which opens the tiles behind it.
 - Acceptance: the knight battle unit is `hero`, at `(2,1)`. Dropping loot uses a Goat Wizard deployed next to the
   knight, as its Bee Essence is always dropped, while the rat loot is random now. The `tier-2` loot table has its new
   entries.
 
 ## Known limitations
 
-- Enemies respawn once the party has walked 50 steps, so the corridor bat blocks the corridor again on the way back.
+- Enemies respawn once the party has walked 50 steps, so the gate bat guards the gate again on the way back.
 - Losing the knight before recruiting anyone ends the game, as a defeated party member never comes back.
 - The potions and the elixirs look alike, and so do the three hammers, until they get their own art.
 - The game never ends with a victory: it is only won when every CPU battle unit is defeated at once.

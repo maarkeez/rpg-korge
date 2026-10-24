@@ -56,14 +56,14 @@ private data class RouteStep(
     val column: Int,
 )
 
-/** The battle setup deploys the knight, alone in the party, at the west end of the start corridor (row 2, 1 tile wide). */
+/** The battle setup deploys the knight, alone in the party, on the west side of the start room (rows 1 to 4). */
 const val KNIGHT_START_ROW = 2
 const val KNIGHT_START_COLUMN = 1
 
 /**
- * Walking east four times leaves the knight at (2,5), where the CPU bat at (2,10), further along the corridor, has it
- * within reach: 5 tiles. No tile walked before is within reach of a CPU battle unit. The bat engages and plays first,
- * alone: it walks to (2,6), next to the knight, and the other CPU battle units stay out of the battle.
+ * Walking east six times leaves the knight at (2,7), where the CPU bat on the gate at (2,12), the only way out of the
+ * start room, has it within reach: 5 tiles. No tile walked before is within reach of a CPU battle unit. The bat engages
+ * and plays first, alone: it walks to (2,8), next to the knight, and the other CPU battle units stay out of the battle.
  */
 private val ROUTE_TO_BATTLE =
     listOf(
@@ -71,15 +71,17 @@ private val ROUTE_TO_BATTLE =
         RouteStep(DirectionDto.EAST, row = 2, column = 3),
         RouteStep(DirectionDto.EAST, row = 2, column = 4),
         RouteStep(DirectionDto.EAST, row = 2, column = 5),
+        RouteStep(DirectionDto.EAST, row = 2, column = 6),
+        RouteStep(DirectionDto.EAST, row = 2, column = 7),
     )
 
 /** Where the knight is once [startNewBattle] has walked it to the battle. */
 const val LEADER_ROW_IN_BATTLE = 2
-const val LEADER_COLUMN_IN_BATTLE = 5
+const val LEADER_COLUMN_IN_BATTLE = 7
 
-/** Where the CPU bat stands once it has engaged the knight, next to it in the corridor. */
+/** Where the CPU bat stands once it has engaged the knight, next to it, on the side of the gate. */
 const val BAT_ROW_IN_BATTLE = 2
-const val BAT_COLUMN_IN_BATTLE = 6
+const val BAT_COLUMN_IN_BATTLE = 8
 
 /**
  * Plays a new game and walks the party with the virtual pad until the CPU engages, as the player does. Returns once

@@ -28,14 +28,14 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,5), which can walk 3 tiles. (2,4) is an adjacent sand tile.
+    // The party walks to the battle with the knight at (2,7), which can walk 3 tiles. (2,6) is an adjacent sand tile.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
     private val tileInMovementRangeRow = LEADER_ROW_IN_BATTLE
-    private val tileInMovementRangeColumn = 4
+    private val tileInMovementRangeColumn = LEADER_COLUMN_IN_BATTLE - 1
 
-    // (2,1) is 4 tiles away along the corridor, out of the knight movement range.
-    private val tileOutOfRangeColumn = 1
+    // (2,3) is 4 tiles away across the start room, out of the knight movement range.
+    private val tileOutOfRangeColumn = LEADER_COLUMN_IN_BATTLE - 4
 
     // The bat engaging the knight, alone, stands next to it. The bat has 10 health points, and the knight sword deals 10.
     private val batRow = BAT_ROW_IN_BATTLE

@@ -160,7 +160,7 @@ tiles = [
 
 Only sand can be next to another terrain, north, east, south or west, as the terrain transitions are only drawn from sand (`terrain/transitions/sand_to_<terrain>.png`): the game fails to start otherwise (`TileTerrainTransitionNotAllowed`).
 
-A tile next to void on two sides that meet (a corner) or on three sides (a dead end) can not be occupied, whatever its terrain: it is drawn as the edge of the void. Void on one side, or on two opposite sides (a corridor 1 tile wide), leaves it walkable. So a corridor 1 tile wide can not turn nor end: it turns in a room at least 3 tiles wide, and ends at the edge of the battlefield or in a room. The battlefield opens on its top-left corner, until the party leader walks, so the party starts within its first 8 rows and columns.
+A tile next to void on two sides that meet (a corner) or on three sides (a dead end) can not be occupied, whatever its terrain: it is drawn as the edge of the void. Void on one side, or on two opposite sides (a corridor 1 tile wide), leaves it walkable. So a corridor 1 tile wide can not turn nor end: it turns in a room at least 3 tiles wide, and ends at the edge of the battlefield or in a room.
 
 ### `battleUnit/<battle unit id>.toml`
 

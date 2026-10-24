@@ -22,7 +22,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,5), and the cpu bat engaging it walks to (2,6), next to it.
+    // The party walks to the battle with the knight at (2,7), and the cpu bat engaging it walks to (2,8), next to it.
     // Nothing has been looted yet. The knight is selected once the human player turn starts.
 
     @Test

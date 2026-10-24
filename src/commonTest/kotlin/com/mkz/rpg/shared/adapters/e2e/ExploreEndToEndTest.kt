@@ -31,7 +31,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     // The battle setup deploys the knight at (2,1), alone in the party, out of reach of the CPU battle units, even while
-    // they wander. (2,2) is the next sand tile east, along the start corridor.
+    // they wander. (2,2) is the next sand tile east, across the start room.
     private val knightRow = KNIGHT_START_ROW
     private val knightColumn = KNIGHT_START_COLUMN
     private val nextTileColumn = KNIGHT_START_COLUMN + 1

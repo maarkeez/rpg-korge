@@ -23,13 +23,13 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The party walks to the battle with the knight at (2,5), which can walk 3 tiles back west along the corridor: (2,4)
-    // and (2,3) are sand tiles. (2,1) is 4 tiles away, out of its movement range.
+    // The party walks to the battle with the knight at (2,7), which can walk 3 tiles across the start room: (2,6) and
+    // (2,5), back west, are sand tiles. (2,3) is 4 tiles away, out of its movement range.
     private val knightRow = LEADER_ROW_IN_BATTLE
     private val knightColumn = LEADER_COLUMN_IN_BATTLE
     private val targetRow = LEADER_ROW_IN_BATTLE
-    private val targetColumn = 4
-    private val outOfRangeColumn = 1
+    private val targetColumn = LEADER_COLUMN_IN_BATTLE - 1
+    private val outOfRangeColumn = LEADER_COLUMN_IN_BATTLE - 4
 
     @Test
     fun `should move the knight one tile when the human player selects the knight and an adjacent tile`() =
@@ -64,7 +64,7 @@ class MoveKnightEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should glide the knight tile by tile when the human player moves it two tiles away`() =
         sharedViewsTest {
             // Given
-            val farTargetColumn = 3
+            val farTargetColumn = LEADER_COLUMN_IN_BATTLE - 2
             startNewBattle()
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             waitUntil { battlefieldView.hasSelectionAt(targetRow, farTargetColumn) }
