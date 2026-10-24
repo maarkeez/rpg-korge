@@ -224,15 +224,67 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `RedisplayFinishTurn should display the finish turn again when the item actions were displayed`() =
+    fun `Dismiss should display the finish turn again when the item actions were displayed`() =
         sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView()
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
-            playerCallToActionView.redisplayFinishTurn()
+            playerCallToActionView.dismiss()
             // Then
             playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+        }
+
+    @Test
+    fun `Dismiss should display nothing when the item actions were displayed and the finish turn was never displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            // When
+            playerCallToActionView.dismiss()
+            // Then
+            playerCallToActionView.isDisplayingNothing().shouldBeTrue()
+        }
+
+    @Test
+    fun `HideFinishTurn should display nothing when the finish turn is displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            // When
+            playerCallToActionView.hideFinishTurn()
+            // Then
+            playerCallToActionView.isDisplayingNothing().shouldBeTrue()
+        }
+
+    @Test
+    fun `HideFinishTurn should keep the item actions displayed when the item actions are displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            // When
+            playerCallToActionView.hideFinishTurn()
+            // Then
+            playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
+        }
+
+    @Test
+    fun `HideFinishTurn should display nothing once an item action is clicked when the finish turn is hidden`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            playerCallToActionView.hideFinishTurn()
+            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") {}))
+            addChild(playerCallToActionView)
+            // When
+            clickItemAction(playerCallToActionView, "Consume")
+            // Then
+            playerCallToActionView.isDisplayingNothing().shouldBeTrue()
         }
 }

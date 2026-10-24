@@ -10,6 +10,8 @@ open class PlayerCallToActionView(
         const val CALL_TO_ACTION = "CALL_TO_ACTION"
     }
 
+    // The finish turn, displayed when the player has nothing else to choose. `null` out of the battles (e.g.: while
+    // exploring), when nothing is displayed then.
     private var onTurnFinished: (() -> Unit)? = null
     private var isFinishTurnEnabled = true
 
@@ -17,11 +19,18 @@ open class PlayerCallToActionView(
         visible = false
     }
 
+    /** Displays the finish turn, which is displayed again once the player has chosen, e.g.: cancelled a cast. */
     open fun displayFinishTurn(onTurnFinished: () -> Unit) {
         this.onTurnFinished = onTurnFinished
         val finishTurnView = FinishTurnView(onTurnFinished = onTurnFinished)
         finishTurnView.isEnabled = isFinishTurnEnabled
         display(finishTurnView)
+    }
+
+    /** Forgets the finish turn, e.g.: once the battle finishes, so nothing is displayed once the player has chosen. */
+    open fun hideFinishTurn() {
+        onTurnFinished = null
+        (callToAction as? FinishTurnView)?.removeFromParent()
     }
 
     /** Enables or disables the finish turn, also when it is displayed again later (e.g.: after cancelling a cast). */
@@ -38,24 +47,32 @@ open class PlayerCallToActionView(
             CancelAndConfirmView(
                 onCancelled = {
                     onCancelled()
-                    displayFinishTurn(onTurnFinished = onTurnFinished!!)
+                    dismiss()
                 },
                 onConfirmed = {
                     onConfirmed()
-                    displayFinishTurn(onTurnFinished = onTurnFinished!!)
+                    dismiss()
                 },
             )
         display(cancelAndConfirmView)
     }
 
-    /** Displays the finish turn again, e.g.: once the player is done with an inventory item. */
-    open fun redisplayFinishTurn() {
-        displayFinishTurn(onTurnFinished = onTurnFinished!!)
+    /**
+     * Displays the finish turn again once the player is done choosing, e.g.: with an inventory item. Nothing is displayed
+     * out of the battles.
+     */
+    open fun dismiss() {
+        val onTurnFinished = onTurnFinished
+        if (onTurnFinished == null) {
+            callToAction?.removeFromParent()
+        } else {
+            displayFinishTurn(onTurnFinished = onTurnFinished)
+        }
     }
 
     /**
-     * Displays the name and price of the selected item and its actions, e.g.: Consume. The finish turn is displayed again
-     * once an action is selected.
+     * Displays the name and price of the selected item and its actions, e.g.: Consume. It is dismissed once an action is
+     * selected.
      */
     open fun displayItemActions(
         itemName: String,
@@ -67,7 +84,7 @@ open class PlayerCallToActionView(
                 action.copy(
                     onSelected = {
                         action.onSelected()
-                        redisplayFinishTurn()
+                        dismiss()
                     },
                 )
             }

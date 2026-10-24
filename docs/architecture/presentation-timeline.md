@@ -25,7 +25,7 @@ The timeline plays its steps on the scene coroutines, which `BattleScene` runs o
 - Presenters MUST read what a step needs when its event arrives, and only draw it inside the step. By the time the step is played, the battle may have moved on, e.g.: a battle unit that walks is defeated later in the same CPU turn, so it can no longer be found.
 - Every visual change caused by a battle event MUST go through the timeline, so the scene never displays a later state before an earlier one.
 - The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast, finishing the turn and walking the party while exploring are ignored. The scene still displays a past state of the battle meanwhile. The virtual pad is the exception: its last press is kept, and acted on once the timeline is idle (see [Exploration](exploration.md#walking)).
-- The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) keeps it displayed but disabled (greyed out) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
+- The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) displays it during the battles only, from `BattleStarted` to `BattleFinished`, as there are no turns while exploring (see [the plan](../plans/hide-finish-turn-while-exploring.md)). It keeps it disabled (greyed out) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
 
 ## Starting a turn
 
@@ -114,7 +114,7 @@ The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.disp
 The selected battle unit info displays a bag (the chest icon) next to its abilities, only for the battle units of the human player. Clicking it opens the inventory of the battle unit in the HUD, instead of its info, through [`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt):
 
 - [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt) displays one slot per storage space (12, in 2 rows of 6), with the stored items in order and the equipped copy of each equipped item framed in gold (`#FFBB31`).
-- Clicking a stored item frames it in white, and the call to action displays its name and actions instead of the finish turn:
+- Clicking a stored item frames it in white, and the call to action displays its name and actions instead of the finish turn (nothing while exploring):
 
 | Item                            | Actions                                    |
 |---------------------------------|--------------------------------------------|
@@ -124,7 +124,7 @@ The selected battle unit info displays a bag (the chest icon) next to its abilit
 | Equippable, equipped            | Unequip, Discard (disabled), Cancel        |
 | Another copy is equipped        | Equip (disabled), Discard, Cancel          |
 
-- Equipping an item in a zone already used is the swap. Once an action is selected, the finish turn is displayed again.
+- Equipping an item in a zone already used is the swap. Once an action is selected, the finish turn is displayed again in a battle, and nothing while exploring.
 - In a battle, the actions are only offered during the turn of the battle unit player. Out of the battles (e.g.: while exploring), they are always offered. They are ignored while the timeline is playing. Closing the inventory displays the battle unit info again, read again, as the items may have changed it (e.g.: healed it, or raised its maximum health).
 - The inventory is redrawn, in timeline order, when the battle unit stores, consumes, discards, equips or unequips an item. Selecting a battle unit or clearing the selection displays the battle unit info again.
 

@@ -10,6 +10,9 @@ fun PlayerCallToActionView.isDisplayingFinishTurn(): Boolean = visible && callTo
 /** Whether the finish turn is displayed and can be clicked. */
 fun PlayerCallToActionView.isFinishTurnEnabled(): Boolean = isDisplayingFinishTurn() && (callToAction as FinishTurnView).isButtonEnabled()
 
+/** Whether the call to action is empty, e.g.: while exploring, when the player has nothing to choose. */
+fun PlayerCallToActionView.isDisplayingNothing(): Boolean = callToAction == null
+
 fun PlayerCallToActionView.isDisplayingCancelAndConfirm(): Boolean = visible && callToAction is CancelAndConfirmView
 
 suspend fun ViewsForTesting.clickFinishTurn(playerCallToActionView: PlayerCallToActionView) = clickFinishTurn(playerCallToActionView.callToAction as FinishTurnView)

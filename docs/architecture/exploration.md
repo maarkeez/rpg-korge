@@ -99,7 +99,7 @@ A battle starting while shopping abandons the shop, as it abandons the dialog. S
 
 There are no turns while exploring, so the inventory of the party can always be used:
 
-- Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag, and the call to action its item actions, in place of the virtual pad. It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
+- Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag in place of the virtual pad, and the call to action below it the item actions once an item is tapped. There is no finish turn, as there are no turns: the call to action is empty otherwise (see [the plan](../plans/hide-finish-turn-while-exploring.md)). It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
 - The selection stays as it is while the CPU battle units wander, so the inventory stays open until the player closes it: a tile occupied or vacated only displays the selected battle unit again when its own tile changes ([`RefreshMovementRange`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt)).
 - Tapping an empty tile, a CPU battle unit or the selected battle unit again clears the selection, and the virtual pad is displayed again. Tapping another battle unit of the party selects it instead.
 - When an item found on the way does not fit in the inventory (`InventoryFull`), the battle HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
@@ -125,7 +125,7 @@ After the party starts exploring, every time it has walked and every time the CP
 - When a battle round finishes and the CPU battle units out of the battle have wandered, the CPU battle brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt) updates the engagement (`EngagementUpdated`), and requests the next round (`RequestStartNextRound`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
 - Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
-- The battle HUD and the player call to action take the place of the virtual pad as soon as the leader lands on its last tile (`BattleStarted`, played with `BattleSceneTimeline.playNext`), and the battle info announces the battle. Hiding the pad after the announcements (about 950ms later) made the party look frozen.
+- The battle HUD and the player call to action, with the finish turn, take the place of the virtual pad as soon as the leader lands on its last tile (`BattleStarted`, played with `BattleSceneTimeline.playNext`), and the battle info announces the battle. Hiding the pad after the announcements (about 950ms later) made the party look frozen.
 
 While exploring, the battle info displays "Exploring".
 
@@ -140,7 +140,7 @@ Once the battle is finished, a turn finish requested afterwards (e.g.: by the re
 
 - The exploration resumes (`ExplorationResumed`, see [`ResumeExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ResumeExploration.kt)), with the battle units of the party that were not defeated.
 - The summons left (e.g.: the bees a knight summoned) vanish, whatever turns they had left, as they never explore ([`VanishSummonedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/VanishSummonedBattleUnits.kt)). They flash and leave the battlefield, without being defeated: they drop no loot. A player whose last battle units were summons is defeated then, so the human player loses the game when only bees were left.
-- The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, and the virtual pad takes the place of the battle HUD and the player call to action.
+- The battle info announces that the battle is over and displays "Exploring" again. The selection is cleared, the finish turn is removed from the player call to action, and the virtual pad takes the place of the battle HUD and the call to action.
 - The next engagement starts a new battle, which replaces the finished one.
 
 So defeating the last CPU battle unit engaged during the human turn explores again straight away, without finishing the turn. A player with no battle units left on the battlefield still loses the game (`PlayerVictory`), and the game does not go back to exploring then: the player is defeated before the disengaged battle is checked, so only the victory is displayed.

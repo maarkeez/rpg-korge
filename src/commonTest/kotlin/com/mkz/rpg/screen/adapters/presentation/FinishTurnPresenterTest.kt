@@ -1,5 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
+import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
@@ -8,8 +10,10 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
+import com.mkz.rpg.shared.domain.DomainEvent
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -27,10 +31,12 @@ class FinishTurnPresenterTest {
 
     private fun createPresenter() = FinishTurnPresenter(playerCallToActionView, apis.battleApi, apis.playerApi, timeline, eventBus)
 
-    private fun startTurnOf(playerId: String) {
-        eventBus.publish(PlayerTurnStarted(playerId = playerId, battleUnitIds = emptySet()))
+    private fun publish(event: DomainEvent) {
+        eventBus.publish(event)
         eventBus.dispatch()
     }
+
+    private fun startTurnOf(playerId: String) = publish(PlayerTurnStarted(playerId = playerId, battleUnitIds = emptySet()))
 
     // The player clicks on the finish turn the presenter displayed.
     private fun clickFinishTurn() {
@@ -41,12 +47,45 @@ class FinishTurnPresenterTest {
     private fun currentPlayerTurn() = apis.battleApi.searchBattle()?.currentPlayerTurn
 
     @Test
-    fun `Init should display finish turn when is created`() {
+    fun `Init should not display finish turn when is created, as a new game starts exploring`() {
         // Given
         // When
         createPresenter()
         // Then
+        playerCallToActionView.onTurnFinished.shouldBeNull()
+    }
+
+    @Test
+    fun `DisplayFinishTurn should display finish turn when the battle starts`() {
+        // Given
+        createPresenter()
+        // When
+        publish(BattleStarted)
+        // Then
         playerCallToActionView.onTurnFinished.shouldNotBeNull()
+    }
+
+    @Test
+    fun `HideFinishTurn should hide finish turn when the battle finishes`() {
+        // Given
+        createPresenter()
+        publish(BattleStarted)
+        // When
+        publish(BattleFinished)
+        // Then
+        playerCallToActionView.onTurnFinished.shouldBeNull()
+    }
+
+    @Test
+    fun `HideFinishTurn should disable finish turn when the battle finishes during the human player turn`() {
+        // Given
+        createPresenter()
+        publish(BattleStarted)
+        startTurnOf("human")
+        // When
+        publish(BattleFinished)
+        // Then
+        playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
 
     @Test
@@ -107,6 +146,7 @@ class FinishTurnPresenterTest {
     fun `FinishTurn should finish the player turn when the player finishes the turn`() {
         // Given
         createPresenter()
+        publish(BattleStarted)
         startTurnOf("human")
         // When
         clickFinishTurn()
@@ -118,6 +158,7 @@ class FinishTurnPresenterTest {
     fun `FinishTurn should disable finish turn when the player finishes the turn`() {
         // Given
         createPresenter()
+        publish(BattleStarted)
         startTurnOf("human")
         // When
         clickFinishTurn()
@@ -129,6 +170,7 @@ class FinishTurnPresenterTest {
     fun `FinishTurn should not finish the player turn when the timeline is playing`() {
         // Given
         createPresenter()
+        publish(BattleStarted)
         startTurnOf("human")
         timeline.playLongStep()
         // When
@@ -141,6 +183,7 @@ class FinishTurnPresenterTest {
     fun `FinishTurn should not finish the player turn when the cpu player turn is displayed`() {
         // Given
         createPresenter()
+        publish(BattleStarted)
         startTurnOf("cpu")
         // When
         clickFinishTurn()

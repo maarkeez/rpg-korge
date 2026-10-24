@@ -14,7 +14,10 @@ import com.mkz.rpg.screen.adapters.presentation.inventoryView
 import com.mkz.rpg.screen.adapters.presentation.isBagDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isBattleHudShown
 import com.mkz.rpg.screen.adapters.presentation.isDisplayingBattleUnitInfo
+import com.mkz.rpg.screen.adapters.presentation.isDisplayingFinishTurn
+import com.mkz.rpg.screen.adapters.presentation.isDisplayingNothing
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
+import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.playerTurnText
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
@@ -77,6 +80,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the battle HUD to display the knight info") { battleHudView()?.isDisplayingBattleUnitInfo()?.shouldBeTrue() }
             withClue("Expected the bag of the knight to be displayed") { battleUnitInfoView()?.isBagDisplayed()?.shouldBeTrue() }
             withClue("Expected the virtual pad to be hidden while the knight is selected") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
+            withClue("Expected no finish turn while exploring, as there are no turns") { playerCallToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
         }
 
     @Test
@@ -94,6 +98,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { inventoryView() != null }
             // Then
             inventoryView().shouldNotBeNull()
+            withClue("Expected no finish turn while exploring, as there are no turns") { playerCallToActionView()?.isDisplayingNothing()?.shouldBeTrue() }
             waitFor(3.seconds)
             withClue("Expected the inventory of the knight to stay open until the human player closes it") { inventoryView().shouldNotBeNull() }
         }
@@ -125,6 +130,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // Then
             withClue("Expected the virtual pad to be hidden while battling") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
             withClue("Expected the battle HUD to be displayed while battling") { isBattleHudShown().shouldBeTrue() }
+            withClue("Expected the finish turn to be displayed while battling") { playerCallToActionView()?.isDisplayingFinishTurn()?.shouldBeTrue() }
             // The CPU played first, as it engaged.
             battleInfoView()?.roundText() shouldBe "Round 1"
             battleInfoView()?.playerTurnText() shouldBe "Human turn"

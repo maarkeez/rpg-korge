@@ -128,7 +128,7 @@ class InventoryPresenter(
     private fun clearDisplayedInventory() {
         displayedBattleUnitId = null
         displayedSlots = emptyList()
-        if (selectedSlotIndex != null) playerCallToActionView.redisplayFinishTurn()
+        if (selectedSlotIndex != null) playerCallToActionView.dismiss()
         selectedSlotIndex = null
     }
 
@@ -158,7 +158,7 @@ class InventoryPresenter(
         val pendingChoice = choice ?: return
         foundItem = null
         choice = null
-        playerCallToActionView.redisplayFinishTurn()
+        playerCallToActionView.dismiss()
         pendingChoice.complete(Unit)
     }
 
@@ -208,7 +208,7 @@ class InventoryPresenter(
         }
     }
 
-    // The call to action displays the finish turn again once the action is selected.
+    // The call to action is dismissed once the action is selected.
     private fun action(
         label: String,
         isEnabled: Boolean = true,

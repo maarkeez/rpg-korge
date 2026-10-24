@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 // Records what the presenters ask the call to action view to display, instead of drawing it.
 // The player actions are simulated by calling the callbacks it was given (e.g.: `onTurnFinished`).
 class FakePlayerCallToActionView : PlayerCallToActionView() {
+    // The finish turn the presenters displayed, `null` while it is hidden (e.g.: while exploring).
     var onTurnFinished: (() -> Unit)? = null
         private set
     var onCancelled: (() -> Unit)? = null
@@ -24,7 +25,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
         val onLeft: () -> Unit,
     )
 
-    // What the call to action displays last, e.g.: the item actions. `null` while it displays the finish turn.
+    // What the call to action displays last, e.g.: the item actions. `null` once dismissed.
     var displayedItemActions: DisplayedItemActions? = null
         private set
     var displayedInventoryFull: DisplayedInventoryFull? = null
@@ -43,12 +44,16 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
         this.onTurnFinished = onTurnFinished
     }
 
-    override fun redisplayFinishTurn() {
+    override fun hideFinishTurn() {
+        onTurnFinished = null
+    }
+
+    override fun dismiss() {
         displayedItemActions = null
         displayedInventoryFull = null
     }
 
-    // As the real view, the finish turn is displayed again once an action is selected.
+    // As the real view, it is dismissed once an action is selected.
     override fun displayItemActions(
         itemName: String,
         itemPrice: Int,
@@ -63,7 +68,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
                     actions.map { action ->
                         action.copy(onSelected = {
                             action.onSelected()
-                            redisplayFinishTurn()
+                            dismiss()
                         })
                     },
             )
