@@ -270,6 +270,8 @@ open class BattlefieldView(
         tileButton.bgColorOver = Colors.TRANSPARENT
         tileButton.background.borderColor = Colors.TRANSPARENT
         tileButton.background.bgColor = Colors.TRANSPARENT
+        // Without a shadow, as each tile's shadow would draw a line over the borders of its neighbours, like a grid.
+        tileButton.elevation = false
         tileButton.name = tileName(position.row, position.column)
         tileButton.x = position.column * TILE_SIZE.toDouble()
         tileButton.y = position.row * TILE_SIZE.toDouble()

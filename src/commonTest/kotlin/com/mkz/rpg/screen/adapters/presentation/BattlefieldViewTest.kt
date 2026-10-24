@@ -153,6 +153,19 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayBattlefield should display the tiles without a shadow when battlefield is displayed`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            val battlefield = battlefield(rows = 2, columns = 2).toDto()
+            // When
+            battlefieldView.displayBattlefield(battlefield)
+            // Then
+            battlefieldView.hasShadowAt(row = 0, column = 0).shouldBeFalse()
+            battlefieldView.hasShadowAt(row = 1, column = 1).shouldBeFalse()
+        }
+
+    @Test
     fun `DisplayBattlefield should display terrain transition tile on tile adjacent to void when battlefield is displayed`() =
         sharedViewsTest {
             // Given

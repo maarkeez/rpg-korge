@@ -33,6 +33,12 @@ fun BattlefieldView.hasTerrainAt(
     column: Int,
 ): Boolean = isDisplayed && tile(row, column).hasLayer(BattlefieldView.TERRAIN)
 
+/** Whether the tile casts a shadow over its neighbours, which would draw a line along its borders. */
+fun BattlefieldView.hasShadowAt(
+    row: Int,
+    column: Int,
+): Boolean = isDisplayed && tile(row, column).background.shadowRadius > 0.0
+
 fun BattlefieldView.hasBattleUnitAt(
     row: Int,
     column: Int,
