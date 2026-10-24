@@ -8,6 +8,7 @@ import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
+import korlibs.io.async.launchImmediately
 import korlibs.korge.animate.Animator
 import korlibs.korge.animate.alpha
 import korlibs.korge.animate.animator
@@ -37,6 +38,9 @@ import korlibs.math.interpolation.EASE_IN_QUAD
 import korlibs.math.interpolation.EASE_OUT_QUAD
 import korlibs.math.interpolation.Easing
 import korlibs.time.milliseconds
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.joinAll
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.max
@@ -154,6 +158,9 @@ open class BattlefieldView(
 
     // White silhouette of each unit image, keyed by unit id.
     private val flashBitMaps = mutableMapOf<String, Bitmap>()
+
+    // The flashes blinking or waiting on each tile, stopped once its battle unit leaves it.
+    private val flashes = mutableMapOf<PositionDto, MutableList<Job>>()
 
     // A battlefield smaller than the viewport can not be scrolled.
     private var minScrollX = 0.0
@@ -560,12 +567,15 @@ open class BattlefieldView(
         tile(row, column).findViewByName(NPC)?.removeFromParent()
     }
 
+    /** Removes the battle unit standing on the tile, stopping its flashes, e.g.: once it walks away. */
     open fun removeBattleUnit(
         row: Int,
         column: Int,
     ) {
         val tileButton = tile(row, column)
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
+        flashes.remove(PositionDto(row, column))?.forEach(Job::cancel)
+        tileButton.findViewByName(FLASH)?.removeFromParent()
     }
 
     /** How the battlefield scrolls to follow a moving battle unit. */
@@ -722,7 +732,8 @@ open class BattlefieldView(
 
     /**
      * Blinks the battle unit in white, after scrolling the battlefield so the battle unit is visible, e.g.: when it
-     * receives an effect.
+     * receives an effect. It blinks after the flashes already on its tile, so two silhouettes never blink at once, and
+     * stops once the battle unit leaves its tile (e.g.: a step while exploring).
      */
     open suspend fun flashBattleUnit(
         row: Int,
@@ -732,12 +743,26 @@ open class BattlefieldView(
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val flashBitmap = flashBitMaps.getOrPut(unitId) { unitBitmap.whiteSilhouette() }
         followTile(row, column)
+        val position = PositionDto(row, column)
         val tileButton = tile(row, column)
-        repeat(FLASH_COUNT) {
-            tileButton.addImage(flashBitmap, FLASH)
-            delay(FLASH_DURATION)
-            tileButton.findViewByName(FLASH)?.removeFromParent()
-            delay(FLASH_DURATION)
+        val previousFlashes = flashes[position].orEmpty().toList()
+        coroutineScope {
+            val flash =
+                launchImmediately {
+                    previousFlashes.joinAll()
+                    repeat(FLASH_COUNT) {
+                        tileButton.addImage(flashBitmap, FLASH)
+                        delay(FLASH_DURATION)
+                        tileButton.findViewByName(FLASH)?.removeFromParent()
+                        delay(FLASH_DURATION)
+                    }
+                }
+            flashes.getOrPut(position) { mutableListOf() } += flash
+            flash.invokeOnCompletion {
+                val tileFlashes = flashes[position] ?: return@invokeOnCompletion
+                tileFlashes -= flash
+                if (tileFlashes.isEmpty()) flashes -= position
+            }
         }
     }
 

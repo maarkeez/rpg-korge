@@ -12,11 +12,13 @@ import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
+import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.doubles.shouldBeLessThan
@@ -1181,6 +1183,44 @@ class BattlefieldViewTest : ViewsForTesting() {
             blinks shouldBe BattlefieldView.FLASH_COUNT
             battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
             battlefieldView.hasBattleUnitAt(row = 0, column = 0).shouldBeTrue()
+        }
+
+    @Test
+    fun `FlashBattleUnit should stop blinking when the battle unit leaves its tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
+            nextFrame()
+            require(battlefieldView.isFlashingAt(row = 0, column = 0))
+            // When
+            val moving = startMoving(battlefieldView, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1)))
+            val flashingFrames = sampleUntilCompletion(moving) { battlefieldView.isFlashingAt(row = 0, column = 0) }
+            // Then
+            withClue("The tile it left never blinks") { flashingFrames.shouldNotContain(true) }
+            flashing.isCompleted.shouldBeTrue()
+            battlefieldView.isFlashingAt(row = 0, column = 1).shouldBeFalse()
+        }
+
+    @Test
+    fun `FlashBattleUnit should blink after the flash already on the tile when the battle unit is flashed twice at once`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val firstFlashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
+            val secondFlashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
+            val flashingFrames = sampleUntilCompletion(secondFlashing) { battlefieldView.isFlashingAt(row = 0, column = 0) }
+            // Then
+            firstFlashing.isCompleted.shouldBeTrue()
+            val blinks = flashingFrames.zipWithNext().count { (previous, next) -> !previous && next } + if (flashingFrames.first()) 1 else 0
+            blinks shouldBe 2 * BattlefieldView.FLASH_COUNT
         }
 
     @Test

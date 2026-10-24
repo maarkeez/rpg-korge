@@ -29,6 +29,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.math.geom.Size
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -232,6 +233,66 @@ class ExplorationPresenterTest {
         mutableListOf<Set<String>>().also { requests ->
             eventBus.subscribe<BattlefieldEvent.RequestEffectApplicationToOccupants> { requests += it.occupantIds }
         }
+
+    @Test
+    fun `WalkParty should walk the party when an arrow is tapped while its three members flash every second on water`() {
+        // Given
+        val apis = partyOnWaterApis()
+        val timeline = battleSceneTimeline()
+        val battlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val presenter = partyOnWaterPresenters(apis, battlefieldView, timeline)
+        apis.partyApi.startExploration()
+        apis.eventBus.dispatch()
+        repeat(3) {
+            presenter.tick(1.seconds)
+            apis.eventBus.dispatch()
+        }
+        require(battlefieldView.flashedBattleUnits.size == 9) { "The three members flash every second" }
+        // When
+        tapArrow(DirectionDto.NORTH)
+        presenter.tick(1.milliseconds)
+        apis.eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 0)
+    }
+
+    // Three knights stand on water, healing them every second, in a column from (1,0), the leader first. Sand is north.
+    private fun partyOnWaterApis() =
+        SubdomainApis(
+            terrains = listOf(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("water")).toDto(), occupiableTerrain(id = "water", effectId = "water-heal").toDto()),
+            effects = listOf(increaseHealthEffect(id = "water-heal").toDto()),
+            units = listOf(unit(id = "knight").toDto()),
+            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+            tiles = listOf(listOf("sand"), listOf("water"), listOf("water"), listOf("water")),
+            deployments = (1..3).map { index -> Deployment(battleUnitId = "knight-$index", unitId = "knight", playerId = "human", row = index, column = 0) },
+        ).also(SubdomainApis::initialise)
+
+    // The battlefield presenter flashes the battle units on the same timeline the exploration presenter walks with.
+    private fun partyOnWaterPresenters(
+        apis: SubdomainApis,
+        battlefieldView: FakeBattlefieldView,
+        timeline: BattleSceneTimeline,
+    ): ExplorationPresenter {
+        BattlefieldPresenter(
+            battlefieldView = battlefieldView,
+            battleUnitInfoView = FakeBattleUnitInfoView(),
+            attackPreviewView = FakeAttackPreviewView(),
+            playerCallToActionView = FakePlayerCallToActionView(),
+            battleHudView = FakeBattleHudView(),
+            battlefieldApi = apis.battlefieldApi,
+            battleUnitApi = apis.battleUnitApi,
+            playerApi = apis.playerApi,
+            unitApi = apis.unitApi,
+            abilityApi = apis.abilityApi,
+            battleApi = apis.battleApi,
+            partyApi = apis.partyApi,
+            timeline = timeline,
+            eventBus = apis.eventBus,
+        )
+        val shopPresenter =
+            ShopPresenter(shopView, battlefieldView, apis.partyApi, apis.inventoryApi, apis.lootableItemApi, apis.battleUnitApi, apis.unitApi, apis.battlefieldApi, timeline, apis.eventBus)
+        return ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, timeline, apis.eventBus)
+    }
 
     @Test
     fun `Tick should apply the terrain effects of the battle units standing still every second while exploring`() {

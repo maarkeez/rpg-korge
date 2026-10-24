@@ -148,8 +148,9 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> {
                 refreshMovementRange()
             },
+            // While exploring, alongside the timeline, so the party keeps walking, e.g.: while standing on water heals it.
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
-                flashUnit(event.battleUnitId)
+                flashUnit(event.battleUnitId, isAlongside = !isBattling())
             },
             eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
                 flashUnit(event.battleUnitId)
@@ -356,10 +357,14 @@ class BattlefieldPresenter(
         battlefieldView.pickUpLoot(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
     }
 
-    private fun flashUnit(battleUnitId: String) {
+    private fun flashUnit(
+        battleUnitId: String,
+        isAlongside: Boolean = false,
+    ) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
-        timeline.play { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
+        val step: suspend () -> Unit = { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
+        if (isAlongside) timeline.playAlongside(step) else timeline.play(step)
     }
 
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {

@@ -55,7 +55,9 @@ A battle unit blinks in white every time an effect is applied to it:
 | `EffectReceived`             | The battle unit receives an effect                   | sword, heal, venom, lava, water      |
 | `OnTurnStartedEffectApplied` | An effect applied at the start of the turn ticks     | venom damage at the start of the turn |
 
-`BattlefieldView.flashBattleUnit` first scrolls the battlefield to the battle unit, like a moving battle unit, so effects applied at the start of a turn are seen wherever the battle unit is. Then, a white silhouette of the battle unit blinks `FLASH_COUNT` (3) times, for `FLASH_DURATION` (80ms) each. A battle unit receiving several effects at once (e.g.: skull) blinks once per effect, one after the other.
+`BattlefieldView.flashBattleUnit` first scrolls the battlefield to the battle unit, like a moving battle unit, so effects applied at the start of a turn are seen wherever the battle unit is. Then, a white silhouette of the battle unit blinks `FLASH_COUNT` (3) times, for `FLASH_DURATION` (80ms) each. A battle unit receiving several effects at once (e.g.: skull) blinks once per effect, one after the other: a flash waits for the flashes already blinking on its tile.
+
+While exploring, the flash of an `EffectReceived` is played alongside the timeline (`playAlongside`), as the CPU battle units wander, so it never holds the party (see [the plan](../plans/flash-alongside-while-exploring.md)). Played in the timeline, the terrain effects of three battle units standing on water flashed for 1440ms every second, so the timeline was never idle, and the party never walked again. A flash stops as soon as its battle unit leaves its tile (`removeBattleUnit`, e.g.: a step or a swap), so it never blinks over an empty tile, or over the follower stepping on it. In a battle, every flash is still played in the timeline.
 
 ## Selecting tiles
 

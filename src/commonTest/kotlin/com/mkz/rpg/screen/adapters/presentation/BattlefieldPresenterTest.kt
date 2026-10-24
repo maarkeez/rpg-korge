@@ -57,6 +57,9 @@ import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
+import io.kotest.assertions.withClue
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
@@ -65,6 +68,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 
 class BattlefieldPresenterTest {
@@ -547,6 +551,33 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+    }
+
+    @Test
+    fun `FlashUnit should flash the battle unit in the timeline when it receives an effect while battling`() {
+        // Given
+        battlefieldView.flashing = CompletableDeferred()
+        eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "lava-damage"))
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        withClue("The scene plays until the flash finishes") { timeline.isPlaying.shouldBeTrue() }
+    }
+
+    @Test
+    fun `FlashUnit should flash the battle unit alongside the timeline when it receives an effect while exploring`() {
+        // Given
+        val exploringApis = exploringApis()
+        val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val exploringTimeline = battleSceneTimeline()
+        exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
+        exploringApis.eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "water-heal"))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        withClue("The party can walk while it flashes") { exploringTimeline.isPlaying.shouldBeFalse() }
     }
 
     @Test

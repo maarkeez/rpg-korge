@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.RGBA
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.time.Duration
 
 // Records what the presenters ask the battlefield view to display, instead of drawing it.
@@ -75,6 +76,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         private set
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
+
+    // When set, every flash lasts until it is completed, e.g.: to keep the timeline playing while it flashes.
+    var flashing: CompletableDeferred<Unit>? = null
 
     // The loot last displayed on each tile.
     val displayedLoot = mutableMapOf<PositionDto, List<String>>()
@@ -242,5 +246,6 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         unitId: String,
     ) {
         flashedBattleUnits += BattleUnitAt(row, column, unitId)
+        flashing?.await()
     }
 }
