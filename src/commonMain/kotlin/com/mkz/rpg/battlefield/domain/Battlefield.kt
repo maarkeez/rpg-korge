@@ -61,6 +61,26 @@ data class Battlefield private constructor(
         return copy(tiles = updatedTiles, events = events + battlefieldTileOccupiedEvent)
     }
 
+    /**
+     * Occupies every tile of the area at once, from its top-left tile, e.g.: a building. Fails when any of them is not
+     * vacant or not found, occupying none. Its occupant can not be moved, removed nor swapped then.
+     */
+    fun occupyTiles(
+        row: Int,
+        column: Int,
+        rows: Int,
+        columns: Int,
+        occupantId: String,
+    ): Battlefield {
+        val positions = (row until row + rows).flatMap { areaRow -> (column until column + columns).map { areaColumn -> PositionDto(areaRow, areaColumn) } }
+        if (positions.any { position -> !tiles.isVacant(position.row, position.column) }) throw TileIsNotVacant()
+        val occupiedEvents =
+            positions.map { position ->
+                BattlefieldTileOccupied(row = position.row, column = position.column, occupantId = occupantId)
+            }
+        return copy(tiles = tiles.occupyTiles(positions, occupantId), events = events + occupiedEvents)
+    }
+
     fun removeOccupant(occupantId: String): Battlefield {
         if (!tiles.isDeployed(occupantId)) return this
         val occupantPosition = tiles.position(occupantId)!!
@@ -179,6 +199,18 @@ data class Battlefield private constructor(
                 }
             return Tiles(updatedTiles)
         }
+
+        fun occupyTiles(
+            positions: List<PositionDto>,
+            occupantId: String,
+        ): Tiles =
+            Tiles(
+                tiles +
+                    positions.associate { position ->
+                        val tilePosition = Position(row = position.row, column = position.column)
+                        tilePosition to tiles.getValue(tilePosition).occupy(occupantId)
+                    },
+            )
 
         fun swapOccupants(
             position: PositionDto,

@@ -18,13 +18,14 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 | 7  | `RequestInitialiseLootDrops`     | Loot drops                     | Their units and loot tables    |
 | 8  | `RequestInitialisePlayers`       | Players                        | -                              |
 | 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
-| 10 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
-| 11 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
-| 12 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
+| 10 | `RequestInitialiseBuildings`     | The placed buildings           | Their tiles                    |
+| 11 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
+| 12 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
+| 13 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
-The battlefield tiles are occupied by events: once `BattleUnitDeployed` is handled, then once `NpcPlaced` is. So an npc on the tile of a battle unit fails to occupy it (`TileIsNotVacant`), and the game fails to start, as it does when the tile of a battle unit or an npc can not be occupied (e.g.: void, out of the battlefield).
+The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsNotVacant`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc can not be occupied (e.g.: void, out of the battlefield).
 
 Each subdomain follows the same structure:
 
@@ -173,6 +174,19 @@ row = 6
 column = 6
 ```
 
+### `building/<building id>.toml`
+
+A building standing on several tiles of the battlefield: `row` and `column` are its top-left tile, and `rows` and `columns` its size in tiles. It is no battle unit nor npc: it blocks all its tiles for everyone, nobody can attack it, talk to it nor walk through it, and no terrain effect applies to it.
+
+```toml
+row = 17
+column = 13
+rows = 4
+columns = 4
+```
+
+The game fails to start when its size is not positive (`BuildingSizeNotPositive`), or when any of its tiles is out of the battlefield, can not be occupied (`BuildingTileCanNotBeOccupied`), or is taken (`TileIsNotVacant`). Its image must be its size: [`BuildingImageResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/building/adapters/resources/BuildingImageResourcesTest.kt) fails otherwise.
+
 ### `npc/<npc id>.toml`
 
 A character standing on a tile of the battlefield, which says its line when the party talks to it. It is no battle unit: it blocks its tile for everyone, nobody can attack it, and no terrain effect applies to it.
@@ -210,9 +224,14 @@ stock = ["health-potion", "mana-potion", "hammer"]
 2. Add its images, following the [asset conventions](assets.md): `unit/<unit id>.png` and `unit/<unit id>_portrait.png`.
 3. Optionally, deploy it in the battle with a `resources/battleUnit/<battle unit id>.toml` file.
 
+## How to add a building
+
+1. Add `resources/building/<building id>.toml`, on tiles that can be occupied, where no battle unit is deployed and no npc stands.
+2. Add its image, following the [asset conventions](assets.md): `building/<building id>.png`, of 16 pixels per tile.
+
 ## How to add an npc
 
-1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied and where no battle unit is deployed. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
+1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied, where no battle unit is deployed and no building stands. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
 2. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
 
 ## How to add a lootable item

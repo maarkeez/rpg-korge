@@ -305,6 +305,53 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayBuilding should draw a piece of the building on each of its tiles, right above their terrain`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 6, columns = 6).toDto())
+            // When
+            battlefieldView.displayBuilding(row = 1, column = 1, buildingId = "fortress")
+            // Then
+            for (row in 1..4) {
+                for (column in 1..4) {
+                    withClue("($row, $column)") { battlefieldView.hasBuildingAt(row = row, column = column).shouldBeTrue() }
+                }
+            }
+            battlefieldView.hasBuildingAt(row = 0, column = 1).shouldBeFalse()
+            battlefieldView.hasBuildingAt(row = 1, column = 5).shouldBeFalse()
+            battlefieldView.hasBuildingAt(row = 5, column = 1).shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayBuilding should keep the building on its tiles while they are off the screen`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            addChild(battlefieldView)
+            battlefieldView.displayBuilding(row = 1, column = 1, buildingId = "fortress")
+            // When
+            dragBattlefield(battlefieldView, -2400.0 to -2400.0)
+            // Then
+            battlefieldView.isTileOnScreen(row = 1, column = 1).shouldBeFalse()
+            battlefieldView.hasBuildingAt(row = 1, column = 1).shouldBeTrue()
+            battlefieldView.hasBuildingAt(row = 4, column = 4).shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayBuilding should not display the building when it has no image`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            // When
+            battlefieldView.displayBuilding(row = 0, column = 0, buildingId = "castle-in-the-air")
+            // Then
+            battlefieldView.hasBuildingAt(row = 0, column = 0).shouldBeFalse()
+        }
+
+    @Test
     fun `DisplayNpc should display the npc on its tile, and no battle unit, when is displayed`() =
         sharedViewsTest {
             // Given

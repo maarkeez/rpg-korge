@@ -29,6 +29,7 @@ class SubdomainDependencyArchitectureTest {
             "lootableItem" to setOf("shared", "effect"),
             "battle" to setOf("shared", "player"),
             "lootTable" to setOf("shared", "lootableItem"),
+            "building" to setOf("shared", "battlefield"),
             "battlefield" to setOf("shared", "effect", "terrain", "battle"),
             "party" to setOf("shared", "effect", "player", "battle", "battlefield", "battleUnit"),
             "battleUnit" to setOf("shared", "effect", "player", "unit", "ability", "battle", "battlefield"),

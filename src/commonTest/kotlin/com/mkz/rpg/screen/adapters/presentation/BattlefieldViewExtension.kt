@@ -77,6 +77,15 @@ fun BattlefieldView.hasNpcAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.NPC) == true
 
+/** Whether a piece of a building is drawn on the tile, right above its terrain, so the selection is drawn over it. */
+fun BattlefieldView.hasBuildingAt(
+    row: Int,
+    column: Int,
+): Boolean {
+    val layerNames = tileOrNull(row, column)?.children?.map { child -> child.name } ?: return false
+    return isDisplayed && BattlefieldView.BUILDING in layerNames && layerNames.indexOf(BattlefieldView.BUILDING) == layerNames.indexOf(BattlefieldView.TERRAIN) + 1
+}
+
 /** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
 fun BattlefieldView.isFlashingAt(
     row: Int,

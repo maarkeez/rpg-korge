@@ -256,6 +256,64 @@ class BattlefieldTest {
     }
 
     @Test
+    fun `OccupyTiles should occupy every tile of the area and publish one event per tile, row by row, when they are vacant`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield()
+        // When
+        val occupiedBattlefield = battlefield.occupyTiles(row = 1, column = 0, rows = 2, columns = 2, occupantId = "fortress")
+        // Then
+        occupiedBattlefield.occupant(row = 1, column = 0) shouldBe "fortress"
+        occupiedBattlefield.occupant(row = 1, column = 1) shouldBe "fortress"
+        occupiedBattlefield.occupant(row = 2, column = 0) shouldBe "fortress"
+        occupiedBattlefield.occupant(row = 2, column = 1) shouldBe "fortress"
+        occupiedBattlefield.occupant(row = 0, column = 0).shouldBeNull()
+        occupiedBattlefield.occupant(row = 1, column = 2).shouldBeNull()
+        val (events, _) = occupiedBattlefield.pullEvents()
+        events.shouldContainExactly(
+            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 0, occupantId = "fortress"),
+            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 1, occupantId = "fortress"),
+            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 0, occupantId = "fortress"),
+            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 1, occupantId = "fortress"),
+        )
+    }
+
+    @Test
+    fun `OccupyTiles should position the occupant on its top-left tile`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield()
+        // When
+        val occupiedBattlefield = battlefield.occupyTiles(row = 1, column = 1, rows = 2, columns = 2, occupantId = "fortress")
+        // Then
+        occupiedBattlefield.position("fortress") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    @Test
+    fun `OccupyTiles should fail, occupying none, when any tile is not vacant`() {
+        // Given
+        val battlefield =
+            BattlefieldMother
+                .battlefield()
+                .occupy(row = 1, column = 1, occupantId = "battle-unit-1")
+                .pullEvents()
+                .second
+        // When
+        val result = runCatching { battlefield.occupyTiles(row = 0, column = 0, rows = 2, columns = 2, occupantId = "fortress") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
+        battlefield.occupant(row = 0, column = 0).shouldBeNull()
+    }
+
+    @Test
+    fun `OccupyTiles should fail when any tile is not found`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield()
+        // When
+        val result = runCatching { battlefield.occupyTiles(row = 2, column = 2, rows = 2, columns = 2, occupantId = "fortress") }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileNotFound>()
+    }
+
+    @Test
     fun `RemoveOccupant should remove the occupant and publish the event when the battle unit is deployed`() {
         // Given
         val occupantId = "battle-unit-1"

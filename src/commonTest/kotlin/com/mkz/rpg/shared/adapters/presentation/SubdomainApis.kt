@@ -10,6 +10,9 @@ import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
+import com.mkz.rpg.building.adapters.presentation.BuildingApi
+import com.mkz.rpg.building.domain.Building
+import com.mkz.rpg.building.usecases.services.FakeBuildingLoader
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
@@ -53,6 +56,7 @@ class SubdomainApis(
     lootDrops: List<LootDrop.Dto> = emptyList(),
     players: List<Player.Dto> = emptyList(),
     private val tiles: List<List<String>> = emptyList(),
+    buildings: List<Building.Dto> = emptyList(),
     deployments: List<Deployment> = emptyList(),
     npcs: List<Npc.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
@@ -63,6 +67,7 @@ class SubdomainApis(
     val unitApi = UnitApi(eventBus, FakeUnitLoader(units))
     val playerApi = PlayerApi(eventBus, FakePlayerLoader(players))
     val battlefieldApi = BattlefieldApi(terrainApi, eventBus, FakeBattlefieldLoader(tiles))
+    val buildingApi = BuildingApi(battlefieldApi, eventBus, FakeBuildingLoader(buildings))
     val effectApi = EffectApi(eventBus, FakeEffectLoader(effects))
     val abilityApi = AbilityApi(effectApi, eventBus, FakeAbilityLoader(abilities))
     val lootableItemApi = LootableItemApi(effectApi, eventBus, FakeLootableItemLoader(lootableItems))
@@ -74,7 +79,7 @@ class SubdomainApis(
     val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
 
-    /** Stores the given data, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
+    /** Stores the given data, places the buildings, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
     fun initialise() {
         terrainApi.initialiseTerrains()
         effectApi.initialiseEffects()
@@ -85,6 +90,8 @@ class SubdomainApis(
         lootDropApi.initialiseLootDrops()
         playerApi.initialisePlayers()
         if (tiles.isNotEmpty()) battlefieldApi.initialiseBattlefield()
+        eventBus.dispatch()
+        buildingApi.initialiseBuildings()
         eventBus.dispatch()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()

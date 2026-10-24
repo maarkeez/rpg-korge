@@ -53,6 +53,7 @@ For example, given a subdomain called `tomatoes`:
   | `ability`, `lootableItem`             | `shared`, `effect`                                                       |
   | `battle`                              | `shared`, `player`                                                       |
   | `lootTable`                           | `shared`, `lootableItem`                                                 |
+  | `building`                            | `shared`, `battlefield`                                                  |
   | `battlefield`                         | `shared`, `effect`, `terrain`, `battle` (to remove next, see below)      |
   | `party`                               | `shared`, `effect`, `player`, `battle`, `battlefield`, `battleUnit`      |
   | `battleUnit`                          | `shared`, `effect`, `player`, `unit`, `ability`, `battle`, `battlefield` |
@@ -88,6 +89,14 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 | An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Vacates its tile.  |
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
+
+`battlefield` does not depend on `building` either. A building is an occupant over several tiles, and the `Building` aggregate records its request right after its own event:
+
+| When                 | `Building` records                                           | `battlefield`                                                                                         |
+|----------------------|--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| A building is placed | `RequestOccupyTiles(occupantId, row, column, rows, columns)` | Occupies all its tiles, or none when one is taken, publishing one `BattlefieldTileOccupied` per tile. |
+
+A building is never moved, removed nor swapped, so battlefield does not support it for an occupant over several tiles.
 
 `battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about loot. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `LootDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the tile is vacated. `LootFound` is published while handling `BattleUnitMoved`, so it is dispatched before the events of the occupancy update (e.g.: `BattlefieldTileOccupied`):
 

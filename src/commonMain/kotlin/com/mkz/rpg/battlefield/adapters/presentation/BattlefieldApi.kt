@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccup
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.events.OnRequestMoveOccupant
 import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTile
+import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTiles
 import com.mkz.rpg.battlefield.adapters.events.OnRequestRemoveOccupant
 import com.mkz.rpg.battlefield.adapters.events.OnRequestSwapOccupants
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
@@ -12,6 +13,7 @@ import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
+import com.mkz.rpg.battlefield.usecases.commands.OccupyTiles
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.commands.SwapOccupants
@@ -62,6 +64,7 @@ class BattlefieldApi(
         )
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
     val updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus)
+    val occupyTiles = OccupyTiles(battlefieldRepository, eventBus)
     val swapOccupants = SwapOccupants(battlefieldRepository, eventBus)
     val triggerTerrainEffects =
         TriggerTerrainEffects(
@@ -87,6 +90,7 @@ class BattlefieldApi(
 
     // Event Listeners
     private val onRequestOccupyTile = OnRequestOccupyTile(updateBattlefieldOccupancy, eventBus)
+    private val onRequestOccupyTiles = OnRequestOccupyTiles(occupyTiles, eventBus)
     private val onRequestMoveOccupant = OnRequestMoveOccupant(updateBattlefieldOccupancy, eventBus)
     private val onRequestRemoveOccupant = OnRequestRemoveOccupant(removeOccupant, eventBus)
     private val onRequestSwapOccupants = OnRequestSwapOccupants(swapOccupants, eventBus)

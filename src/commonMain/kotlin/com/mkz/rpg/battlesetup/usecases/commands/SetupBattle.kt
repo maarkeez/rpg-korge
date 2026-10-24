@@ -3,6 +3,7 @@ package com.mkz.rpg.battlesetup.usecases.commands
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
+import com.mkz.rpg.building.domain.BuildingEvent
 import com.mkz.rpg.effect.domain.EffectEvent
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.lootTable.domain.LootTableEvent
@@ -31,6 +32,7 @@ class SetupBattle(
         eventBus.publish(LootDropEvent.RequestInitialiseLootDrops)
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
+        eventBus.publish(BuildingEvent.RequestInitialiseBuildings)
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
         eventBus.publish(NpcEvent.RequestInitialiseNpcs)
         eventBus.publish(PartyEvent.RequestStartExploration)

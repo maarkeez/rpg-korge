@@ -24,7 +24,7 @@ Contributors add, edit and remove the individual files under `resources`. The ga
 
 ## Adding an asset
 
-Drop the image in `resources` following the naming conventions below. Neither the bundle, the loader nor the views need to change. A new unit, ability or effect also needs its data file, see [Game data](game-data.md).
+Drop the image in `resources` following the naming conventions below. Neither the bundle, the loader nor the views need to change. A new unit, building, ability or effect also needs its data file, see [Game data](game-data.md).
 
 | Asset                            | Path                                  | Example                          |
 |----------------------------------|---------------------------------------|----------------------------------|
@@ -33,13 +33,15 @@ Drop the image in `resources` following the naming conventions below. Neither th
 | Npc on the battlefield           | `npc/<npc id>.png`                    | `npc/the-guy.png`                |
 | Npc portrait (in its dialog)     | `npc/<npc id>_portrait.png`           | `npc/the-guy_portrait.png`       |
 | Recruitable npc (as its unit)    | `unit/<unit id>.png` and `unit/<unit id>_portrait.png` | `unit/viking.png`  |
+| Building on the battlefield      | `building/<building id>.png`, 16 pixels per tile | `building/fortress.png` |
 | Ability icon                     | `ability/<ability id>.png`            | `ability/poisoned-sword.png`     |
 | Effect icon                      | `effect/<effect id>.png`              | `effect/venom-damage.png`        |
 | Lootable item icon               | `lootableItem/<lootable item id>.png` | `lootableItem/health-potion.png` |
 | Chest (several items on a tile, and the bag) | `battlefield/chest.png`   | `battlefield/chest.png`          |
 | Terrain transition strip         | `terrain/transitions/<from>_to_<to>.png` | `terrain/transitions/sand_to_lava.png` |
 
-- Units, npcs and abilities without an image are not displayed.
+- Units, npcs, buildings and abilities without an image are not displayed.
+- A building image spans its tiles: it is cut into one 16x16 piece per tile, drawn right above the terrain of that tile.
 - Effects without an image fail when displayed.
 
 ## Colour palette

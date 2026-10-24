@@ -20,6 +20,15 @@ sealed interface BattlefieldEvent : DomainEvent {
         val column: Int,
     ) : BattlefieldEvent
 
+    // Requested for an occupant placed on several tiles at once, from its top-left tile, e.g.: a building.
+    data class RequestOccupyTiles(
+        val occupantId: String,
+        val row: Int,
+        val column: Int,
+        val rows: Int,
+        val columns: Int,
+    ) : BattlefieldEvent
+
     // Requested for an occupant that walked or teleported.
     data class RequestMoveOccupant(
         val occupantId: String,

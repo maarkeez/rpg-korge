@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.building.domain.BuildingEvent
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -120,6 +121,9 @@ class BattlefieldPresenter(
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitRespawned> { event ->
                 displayUnit(event.row, event.column, event.battleUnitId)
+            },
+            eventBus.subscribe<BuildingEvent.BuildingPlaced> { event ->
+                timeline.play { battlefieldView.displayBuilding(event.row, event.column, event.buildingId) }
             },
             eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
                 timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId, event.unitId) }

@@ -22,6 +22,7 @@ import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
+import com.mkz.rpg.building.domain.BuildingEvent.BuildingPlaced
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
@@ -45,6 +46,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battle
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BuildingAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.MovedBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.NpcAt
 import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.PickedUpLoot
@@ -225,6 +227,18 @@ class BattlefieldPresenterTest {
         previousStep.complete(Unit)
         // Then
         battlefieldView.displayedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "rat"))
+    }
+
+    @Test
+    fun `DisplayBuilding should display the placed building once the previous steps have been played`() {
+        // Given
+        val previousStep = timeline.playLongStep()
+        publish(BuildingPlaced(buildingId = "fortress", row = 2, column = 2))
+        battlefieldView.displayedBuildings.shouldBeEmpty()
+        // When
+        previousStep.complete(Unit)
+        // Then
+        battlefieldView.displayedBuildings.shouldContainExactly(BuildingAt(row = 2, column = 2, buildingId = "fortress"))
     }
 
     @Test

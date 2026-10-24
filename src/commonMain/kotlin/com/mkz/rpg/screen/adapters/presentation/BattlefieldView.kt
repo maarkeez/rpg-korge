@@ -57,6 +57,7 @@ open class BattlefieldView(
         const val PICKED_UP_LOOT = "PICKED_UP_LOOT"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val NPC = "NPC"
+        const val BUILDING = "BUILDING"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
         const val DIM = "DIM"
@@ -73,7 +74,7 @@ open class BattlefieldView(
 
         // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
         // from the battlefield when they come back into it.
-        private val KEPT_LAYERS = setOf(LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
+        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
 
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
         private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
@@ -414,6 +415,31 @@ open class BattlefieldView(
     ) {
         val npcBitmap = resourcesLoader.bitmapOrNull(unitId?.let { "unit/$it.png" } ?: "npc/$npcId.png") ?: return
         tile(row, column).addImage(npcBitmap, NPC)
+    }
+
+    /**
+     * Displays the building standing on the tiles from the top-left one, as many as its image spans: each tile draws its
+     * piece of the image right above its terrain, so the selection is drawn over it. Nothing is displayed when the
+     * building has no image.
+     */
+    open fun displayBuilding(
+        row: Int,
+        column: Int,
+        buildingId: String,
+    ) {
+        val buildingBitmap = resourcesLoader.bitmapOrNull("building/$buildingId.png") ?: return
+        for (buildingRow in 0 until buildingBitmap.height / TILE_PIXEL_SIZE) {
+            for (buildingColumn in 0 until buildingBitmap.width / TILE_PIXEL_SIZE) {
+                val tileButton = tile(row + buildingRow, column + buildingColumn)
+                val terrainIndex = tileButton.children.indexOfFirst { child -> child.name == TERRAIN }
+                val pieceBitmap =
+                    buildingBitmap.crop(buildingColumn * TILE_PIXEL_SIZE, buildingRow * TILE_PIXEL_SIZE, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
+                tileButton.addImage(pieceBitmap, BUILDING)
+                val pieceView = tileButton.findViewByName(BUILDING)!!
+                pieceView.removeFromParent()
+                tileButton.addChildAt(pieceView, terrainIndex + 1)
+            }
+        }
     }
 
     /**
