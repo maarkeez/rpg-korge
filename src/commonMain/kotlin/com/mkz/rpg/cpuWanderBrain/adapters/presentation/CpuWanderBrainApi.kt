@@ -19,7 +19,9 @@ import com.mkz.rpg.cpuWanderBrain.usecases.commands.ResolveWanderingStep
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.RespawnDefeatedBattleUnits
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderAfterRound
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderWhileExploring
+import com.mkz.rpg.cpuWanderBrain.usecases.queries.IsInSight
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -28,18 +30,22 @@ class CpuWanderBrainApi(
     battleUnitApi: BattleUnitApi,
     battlefieldApi: BattlefieldApi,
     cpuBattleBrainApi: CpuBattleBrainApi,
+    partyApi: PartyApi,
     eventBus: EventBus,
 ) {
     // Storage
     private val cpuWanderBrainRepository: CpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
 
+    // Queries
+    val isInSight = IsInSight(partyApi.searchParty, battlefieldApi.searchPosition, battlefieldApi.searchBattlefieldSize)
+
     // Services
     private val wanderingSteps = WanderingSteps(cpuWanderBrainRepository, cpuBattleBrainApi.whereShouldWander, cpuBattleBrainApi.isOutsideTerritory, battlefieldApi.searchPosition, eventBus)
 
     // Commands
-    val claimHome = ClaimHome(cpuWanderBrainRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById)
-    val wanderWhileExploring = WanderWhileExploring(cpuWanderBrainRepository, wanderingSteps, eventBus)
-    val wanderAfterRound = WanderAfterRound(cpuWanderBrainRepository, wanderingSteps, eventBus)
+    val claimHome = ClaimHome(cpuWanderBrainRepository, battleUnitApi.searchBattleUnitById, playerApi.searchPlayerById, cpuBattleBrainApi.searchDistancesFromHome)
+    val wanderWhileExploring = WanderWhileExploring(cpuWanderBrainRepository, wanderingSteps, isInSight, eventBus)
+    val wanderAfterRound = WanderAfterRound(cpuWanderBrainRepository, wanderingSteps, isInSight, eventBus)
     val resolveWanderingStep = ResolveWanderingStep(cpuWanderBrainRepository, wanderingSteps)
     val awaitRespawn = AwaitRespawn(cpuWanderBrainRepository)
     val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(cpuWanderBrainRepository, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)

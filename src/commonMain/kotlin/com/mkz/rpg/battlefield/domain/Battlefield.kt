@@ -114,6 +114,14 @@ data class Battlefield private constructor(
 
     fun position(occupantId: String): PositionDto? = tiles.position(occupantId)
 
+    /** The terrain of the tile, or `null` out of the battlefield. */
+    fun terrainId(
+        row: Int,
+        column: Int,
+    ): String? = tiles.terrainId(row, column)
+
+    fun size() = Dto.SizeDto(rows = rows.value, columns = columns.value)
+
     fun isInBoundaries(
         row: Int,
         column: Int,
@@ -210,6 +218,11 @@ data class Battlefield private constructor(
             row: Int,
             column: Int,
         ): String? = tiles[Position(row = row, column = column)]?.toDto()?.occupantId
+
+        fun terrainId(
+            row: Int,
+            column: Int,
+        ): String? = tiles[Position(row = row, column = column)]?.terrainIdValue()
 
         fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> =
             tiles.values
@@ -492,6 +505,11 @@ data class Battlefield private constructor(
         data class PositionDto(
             val row: Int,
             val column: Int,
+        )
+
+        data class SizeDto(
+            val rows: Int,
+            val columns: Int,
         )
 
         data class TerrainTransitionRuleDto(

@@ -125,7 +125,7 @@ After the party starts exploring, every time it has walked and every time the CP
 - When a battle round finishes and the CPU battle units out of the battle have wandered, the CPU battle brain [`UpdateEngagement`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/UpdateEngagement.kt) updates the engagement (`EngagementUpdated`), and requests the next round (`RequestStartNextRound`): the CPU battle units out of the battle that now have a battle unit of the party within reach join it, and the CPU battle units in the battle without any leave it (e.g.: left behind). The next round only starts then, so the joining ones play from it.
 - Only the battle units in the battle can be selected: tapping one out of it is as tapping an empty tile.
 - The exploration pauses (`ExplorationPaused`), so the party no longer walks.
-- The battle info announces the battle, and the battle HUD and the player call to action take the place of the virtual pad.
+- The battle HUD and the player call to action take the place of the virtual pad as soon as the leader lands on its last tile (`BattleStarted`, played with `BattleSceneTimeline.playNext`), and the battle info announces the battle. Hiding the pad after the announcements (about 950ms later) made the party look frozen.
 
 While exploring, the battle info displays "Exploring".
 

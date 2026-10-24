@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
@@ -115,6 +116,24 @@ class ExplorationPresenterTest {
         virtualPadView.visible.shouldBeFalse()
         battleHudView.visible.shouldBeTrue()
         playerCallToActionView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `BattleStarted should hide the virtual pad before the steps waiting in the timeline`() {
+        // Given: the leader is landing on its last tile, and the battle is waiting to be announced.
+        createPresenter()
+        startExploring()
+        val leaderLanding = timeline.playLongStep()
+        var isPadVisibleWhenAnnounced: Boolean? = null
+        timeline.play { isPadVisibleWhenAnnounced = virtualPadView.visible }
+        // When
+        eventBus.publish(BattleStarted)
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeTrue()
+        leaderLanding.complete(Unit)
+        isPadVisibleWhenAnnounced shouldBe false
+        battleHudView.visible.shouldBeTrue()
     }
 
     @Test

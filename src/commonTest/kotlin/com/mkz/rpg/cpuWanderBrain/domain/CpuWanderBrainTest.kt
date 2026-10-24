@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuWanderBrain.domain
 
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
 import io.kotest.assertions.throwables.shouldThrow
@@ -23,18 +24,39 @@ class CpuWanderBrainTest {
     @Test
     fun `ClaimHome should remember the home of the battle unit`() {
         // When
-        val cpuWanderBrain = CpuWanderBrain.create().claimHome(battleUnitId = "rat-1", row = 1, column = 2)
+        val cpuWanderBrain = CpuWanderBrain.create().claimHome(battleUnitId = "rat-1", row = 1, column = 2, distancesFromHome = distancesFromHome)
         // Then
         cpuWanderBrain.homeOf("rat-1") shouldBe CpuWanderBrain.Dto.HomeDto(battleUnitId = "rat-1", row = 1, column = 2)
         cpuWanderBrain.toDto().homes.shouldContainExactly(CpuWanderBrain.Dto.HomeDto(battleUnitId = "rat-1", row = 1, column = 2))
     }
 
     @Test
+    fun `ClaimHome should keep the distances from home of the battle unit`() {
+        // When
+        val cpuWanderBrain = CpuWanderBrain.create().claimHome(battleUnitId = "rat-1", row = 1, column = 2, distancesFromHome = distancesFromHome)
+        // Then
+        cpuWanderBrain.distancesFromHome("rat-1") shouldBe distancesFromHome
+    }
+
+    @Test
+    fun `DistancesFromHome should be none when the battle unit has no home`() {
+        // When
+        val distances = cpuWanderBrain().distancesFromHome("knight-1")
+        // Then
+        distances shouldBe emptyMap()
+    }
+
+    @Test
     fun `ClaimHome should keep the first home of the battle unit`() {
         // When
-        val cpuWanderBrain = CpuWanderBrain.create().claimHome(battleUnitId = "rat-1", row = 1, column = 2).claimHome(battleUnitId = "rat-1", row = 3, column = 4)
+        val cpuWanderBrain =
+            CpuWanderBrain
+                .create()
+                .claimHome(battleUnitId = "rat-1", row = 1, column = 2, distancesFromHome = distancesFromHome)
+                .claimHome(battleUnitId = "rat-1", row = 3, column = 4, distancesFromHome = mapOf(PositionDto(row = 3, column = 4) to 0))
         // Then
         cpuWanderBrain.homeOf("rat-1") shouldBe CpuWanderBrain.Dto.HomeDto(battleUnitId = "rat-1", row = 1, column = 2)
+        cpuWanderBrain.distancesFromHome("rat-1") shouldBe distancesFromHome
     }
 
     @Test
@@ -193,19 +215,19 @@ class CpuWanderBrainTest {
     }
 
     @Test
-    fun `StartAfterRound should wander the battle units with a home out of the battle, in the order they were deployed`() {
+    fun `StartAfterRound should wander the given battle units with a home out of the battle, in order`() {
         // When
         val cpuWanderBrain =
             cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2), "rat-3" to (4 to 4)))
-                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"))
+                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"), battleUnitIds = listOf("rat-3", "rat-2", "knight-2", "rat-1"))
         // Then
-        cpuWanderBrain.toDto().pendingBattleUnitIds.shouldContainExactly("rat-1", "rat-3")
+        cpuWanderBrain.toDto().pendingBattleUnitIds.shouldContainExactly("rat-3", "rat-1")
     }
 
     @Test
     fun `StartAfterRound should announce at once that the battle units wandered, with the battle units in the battle, when every one is in the battle`() {
         // When
-        val (events, _) = cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-1")).pullEvents()
+        val (events, _) = cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-1"), battleUnitIds = listOf("rat-1")).pullEvents()
         // Then
         events shouldBe
             setOf(
@@ -219,7 +241,7 @@ class CpuWanderBrainTest {
         // Given
         val cpuWanderBrain =
             cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2)))
-                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"))
+                .startAfterRound(battleUnitIdsInBattle = setOf("knight-1", "rat-2"), battleUnitIds = listOf("rat-1", "rat-2"))
                 .requestStep(battleUnitId = "rat-1", row = 0, column = 1)
         // When
         val (events, _) = cpuWanderBrain.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
@@ -230,6 +252,8 @@ class CpuWanderBrainTest {
                 CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-2")),
             )
     }
+
+    private val distancesFromHome = mapOf(PositionDto(row = 1, column = 2) to 0, PositionDto(row = 1, column = 3) to 1)
 
     private fun CpuWanderBrain.walkPartySteps(steps: Int): CpuWanderBrain = (1..steps).fold(this) { cpuWanderBrain, _ -> cpuWanderBrain.walkPartyStep() }
 

@@ -8,8 +8,10 @@ import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainReposit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.withLeaderApart
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WANDERING_RECOVERY_PERCENTAGE
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
+import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -19,6 +21,7 @@ import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -27,24 +30,26 @@ class WanderWhileExploringTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val eventBus = FakeEventBus()
 
-    // A rest roll below 0.5 rests. Otherwise, the next roll picks the step: each step from home is as likely.
+    // A rest roll below 0.5 rests. Otherwise, the next roll picks the step: each step from home is as likely. The party
+    // leader, knight-1, stands on K.
     private fun wanderWhileExploring(
         vararg rolls: Double,
-        map: String =
-            """
-            A . .
-            . . .
-            . . B
-            """,
+        map: String = withLeaderApart("A . .\n. . .\n. . B"),
     ) {
         val queries = InMemoryQueries(random = FixedDoublesRandom(*rolls))
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu.toDto()))
-        queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('A' to "rat-1", 'B' to "rat-2")))
+        queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('A' to "rat-1", 'B' to "rat-2", 'K' to "knight-1")))
+        queries.partyRepository.save(party(battleUnitIds = listOf("knight-1")))
         val wanderWhileExploring =
-            WanderWhileExploring(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus)
+            WanderWhileExploring(
+                cpuWanderBrainRepository,
+                WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus),
+                queries.isInSight,
+                eventBus,
+            )
         wanderWhileExploring(exploringPlayerId = "human")
     }
 
@@ -98,7 +103,7 @@ class WanderWhileExploringTest {
         // Given: rat-1 has been defeated.
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
-        wanderWhileExploring(0.9, 0.9, map = ". . .\n. . .\n. . B")
+        wanderWhileExploring(0.9, 0.9, map = withLeaderApart(". . .\n. . .\n. . B"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
@@ -111,7 +116,7 @@ class WanderWhileExploringTest {
         // Given: rat-1 is 4 tiles away from home, at (0,0), and rat-2 is not on the battlefield.
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))))
         // When
-        wanderWhileExploring(0.9, map = ". . . . A")
+        wanderWhileExploring(0.9, map = withLeaderApart(". . . . A"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
@@ -125,7 +130,7 @@ class WanderWhileExploringTest {
         // Given: rat-1 left its territory, and is now 2 tiles away from home, at (0,0).
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
         // When
-        wanderWhileExploring(0.0, map = ". . A")
+        wanderWhileExploring(0.0, map = withLeaderApart(". . A"))
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
@@ -139,7 +144,7 @@ class WanderWhileExploringTest {
         // Given: rat-1 left its territory, and is now back home, at (0,0).
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).leaveTerritory("rat-1"))
         // When
-        wanderWhileExploring(0.0, map = "A . .")
+        wanderWhileExploring(0.0, map = withLeaderApart("A . ."))
         // Then: it rests, as any wandering battle unit at home may.
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
@@ -147,6 +152,38 @@ class WanderWhileExploringTest {
             CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"),
         )
         cpuWanderBrainRepository.search()!!.isReturning("rat-1").shouldBeFalse()
+    }
+
+    @Test
+    fun `should only wander the cpu battle units in sight of the party leader`() {
+        // Given: rat-1 is 3 tiles away from the party leader, and rat-2 is 11 tiles away, out of sight.
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 11))))
+        // When
+        wanderWhileExploring(0.9, 0.9, map = "K . . A . . . . . . . B . .")
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 2),
+        )
+        cpuWanderBrainRepository
+            .search()!!
+            .toDto()
+            .pendingBattleUnitIds
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun `should request the recovery of every cpu battle unit with a home, in sight or not`() {
+        // Given: rat-2 is out of sight of the party leader.
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 11))))
+        // When
+        wanderWhileExploring(0.0, map = "K . . A . . . . . . . B . .")
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
+            CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+            CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"),
+        )
     }
 
     @Test

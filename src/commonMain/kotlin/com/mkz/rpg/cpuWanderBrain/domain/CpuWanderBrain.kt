@@ -1,5 +1,6 @@
 package com.mkz.rpg.cpuWanderBrain.domain
 
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestEngageEnemies
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestUpdateEngagement
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.AlreadyAwaitingAStep
@@ -58,17 +59,24 @@ data class CpuWanderBrain private constructor(
             respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
         )
 
-    /** Remembers the tile the battle unit was deployed on as its home. A home never changes. */
+    /**
+     * Remembers the tile the battle unit was deployed on as its home, with how far each tile is from it, as the terrain
+     * never changes while playing. A home never changes.
+     */
     fun claimHome(
         battleUnitId: String,
         row: Int,
         column: Int,
+        distancesFromHome: Map<PositionDto, Int>,
     ): CpuWanderBrain {
         if (battleUnitId in homes.value) return this
-        return copy(homes = Homes(homes.value + (battleUnitId to Home(row = row, column = column))))
+        return copy(homes = Homes(homes.value + (battleUnitId to Home(row = row, column = column, distancesFromHome = distancesFromHome))))
     }
 
     fun homeOf(battleUnitId: String): Dto.HomeDto? = homes.value[battleUnitId]?.let { home -> Dto.HomeDto(battleUnitId = battleUnitId, row = home.row, column = home.column) }
+
+    /** How far each tile is from the home of the battle unit, as remembered when it claimed it, or none without a home. */
+    fun distancesFromHome(battleUnitId: String): Map<PositionDto, Int> = homes.value[battleUnitId]?.distancesFromHome.orEmpty()
 
     /** The battle unit stands outside its territory, so it returns home. */
     fun leaveTerritory(battleUnitId: String): CpuWanderBrain = copy(returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value + battleUnitId))
@@ -115,12 +123,15 @@ data class CpuWanderBrain private constructor(
         ).finishWhenDone()
 
     /**
-     * Battle units in the battle: the ones that do not wander when a round finishes. The other battle units with a home
-     * wander, in the order they were deployed. A wandering in progress is abandoned.
+     * Battle units in the battle: the ones that do not wander when a round finishes. Battle units: those to wander, in
+     * order. The ones without a home, and the ones in the battle, are left out. A wandering in progress is abandoned.
      */
-    fun startAfterRound(battleUnitIdsInBattle: Set<String>): CpuWanderBrain =
+    fun startAfterRound(
+        battleUnitIdsInBattle: Set<String>,
+        battleUnitIds: List<String>,
+    ): CpuWanderBrain =
         copy(
-            pendingBattleUnits = PendingBattleUnits(homes.value.keys.filter { battleUnitId -> battleUnitId !in battleUnitIdsInBattle }),
+            pendingBattleUnits = PendingBattleUnits(battleUnitIds.filter { battleUnitId -> battleUnitId in homes.value && battleUnitId !in battleUnitIdsInBattle }),
             awaitedStep = null,
             purpose = Purpose.AfterRound(battleUnitIdsInBattle),
         ).finishWhenDone()
@@ -190,6 +201,7 @@ data class CpuWanderBrain private constructor(
     private data class Home(
         val row: Int,
         val column: Int,
+        val distancesFromHome: Map<PositionDto, Int>,
     )
 
     private data class Step(

@@ -50,6 +50,15 @@ class BattleSceneTimeline(
     }
 
     /**
+     * Adds a step to be played right after the step being played, before the steps waiting, e.g.: hiding the virtual pad
+     * as soon as the leader lands, before the battle is announced. When the timeline is idle, it plays as [play].
+     */
+    fun playNext(step: suspend () -> Unit) {
+        if (!isPlayingSteps) return play(step)
+        steps.addFirst(step)
+    }
+
+    /**
      * Plays the step straight away, together with the step being played, and the next steps wait for both, e.g.: the
      * followers of the party gliding with its leader. When the timeline is idle, it plays as [play].
      */

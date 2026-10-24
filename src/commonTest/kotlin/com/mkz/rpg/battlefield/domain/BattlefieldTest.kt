@@ -410,6 +410,35 @@ class BattlefieldTest {
     }
 
     @Test
+    fun `TerrainId should return the terrain of the tile`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield(map = ". #")
+        // When / Then
+        battlefield.terrainId(row = 0, column = 0) shouldBe "sand"
+        battlefield.terrainId(row = 0, column = 1) shouldBe "void"
+    }
+
+    @Test
+    fun `TerrainId should return null out of the battlefield`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield()
+        // When
+        val result = battlefield.terrainId(row = 0, column = 3)
+        // Then
+        result.shouldBeNull()
+    }
+
+    @Test
+    fun `Size should return the rows and the columns`() {
+        // Given
+        val battlefield = BattlefieldMother.battlefield(rows = 2, columns = 5)
+        // When
+        val result = battlefield.size()
+        // Then
+        result shouldBe Battlefield.Dto.SizeDto(rows = 2, columns = 5)
+    }
+
+    @Test
     fun `Position should return the position when the battle unit is deployed`() {
         // Given
         val occupantId = "battle-unit-1"

@@ -173,4 +173,28 @@ class BattleSceneTimelineTest {
         // Then
         timeline.isPlaying.shouldBeTrue()
     }
+
+    @Test
+    fun `PlayNext should play the step before the waiting steps once the step being played finishes`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        val longStep = timeline.playLongStep()
+        timeline.play { playedSteps += "waiting" }
+        // When
+        timeline.playNext { playedSteps += "next" }
+        // Then
+        playedSteps.shouldBeEmpty()
+        longStep.complete(Unit)
+        playedSteps.shouldContainExactly("next", "waiting")
+    }
+
+    @Test
+    fun `PlayNext should play the step straight away when the timeline is idle`() {
+        // Given
+        val playedSteps = mutableListOf<String>()
+        // When
+        timeline.playNext { playedSteps += "next" }
+        // Then
+        playedSteps.shouldContainExactly("next")
+    }
 }

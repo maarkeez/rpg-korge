@@ -329,6 +329,8 @@ End-to-end tests play the game as a player would: they boot the game headless, c
 
 To see what the player sees at any step of an end-to-end test, see [How to take a snapshot of the game during an end-to-end test](how-to-take-a-game-snapshot.md).
 
+The end-to-end tests simulate the frames, so they do not catch a game that stutters in the browser. To check it, see [How to measure the frame times of the web build](how-to-measure-the-frame-times.md).
+
 For example: [`MoveKnightEndToEndTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/e2e/MoveKnightEndToEndTest.kt)
 
 ```kotlin

@@ -25,26 +25,24 @@ import kotlin.random.Random
  * heads home: it never rests, and only steps nearer to home, around the harmful terrain. Once home, it wanders again. It
  * stays when home can not be walked to.
  *
+ * Distances from home: those of the battle unit's home, as computed once it claimed it ([SearchDistancesFromHome]).
  * Is returning: whether it left its territory and has not been back home since, as the CPU wander brain remembers.
  */
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
-    private val searchDistancesFromHome: SearchDistancesFromHome,
     private val healingNeed: HealingNeed,
     private val searchTerrainHealthEffect: SearchTerrainHealthEffect,
     private val random: Random = Random.Default,
 ) {
     operator fun invoke(
         battleUnitId: String,
-        homeRow: Int,
-        homeColumn: Int,
+        distancesFromHome: Map<PositionDto, Int>,
         isReturning: Boolean = false,
     ): PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return null
         val position = searchPosition(occupantId = battleUnitId) ?: return null
-        val distancesFromHome = searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)
         val distanceFromHome = distancesFromHome[position] ?: return null
         val isHeadingHome = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0

@@ -5,9 +5,11 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.withLeaderApart
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderWhileExploring
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
 import com.mkz.rpg.party.domain.PartyEvent
+import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -23,7 +25,12 @@ class OnExplorationSecondStartedTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val onExplorationSecondStarted =
         OnExplorationSecondStarted(
-            WanderWhileExploring(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus),
+            WanderWhileExploring(
+                cpuWanderBrainRepository,
+                WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus),
+                queries.isInSight,
+                eventBus,
+            ),
             eventBus,
         )
     private val walkRequests = mutableListOf<BattleUnitEvent.RequestWalkBattleUnit>().also { requests -> eventBus.subscribe<BattleUnitEvent.RequestWalkBattleUnit> { requests += it } }
@@ -34,7 +41,8 @@ class OnExplorationSecondStartedTest {
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
-        queries.battlefieldRepository.create(battlefield("R .\n. .", occupants = mapOf('R' to "rat-1")))
+        queries.battlefieldRepository.create(battlefield(withLeaderApart("R .\n. ."), occupants = mapOf('R' to "rat-1", 'K' to "knight-1")))
+        queries.partyRepository.save(party(battleUnitIds = listOf("knight-1")))
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))))
         eventBus.publish(PartyEvent.ExplorationSecondStarted(playerId = "human"))
         // When

@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
@@ -67,6 +68,11 @@ class ExplorationPresenter(
         listOf(
             eventBus.subscribe<ExplorationStarted> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
+            },
+            // As soon as the leader lands on its last tile, before the battle is announced, so the party does not look
+            // frozen meanwhile. The exploration is paused right after, which hides it again: it does nothing more.
+            eventBus.subscribe<BattleStarted> {
+                if (!isGameOver) timeline.playNext { displayVirtualPad(isDisplayed = false) }
             },
             eventBus.subscribe<ExplorationPaused> {
                 timeline.play { displayVirtualPad(isDisplayed = false) }

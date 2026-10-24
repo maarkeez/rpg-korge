@@ -18,7 +18,6 @@ class InMemoryEventBus : EventBus {
 
     override fun publish(event: DomainEvent) {
         queue += event
-        println("[EVENT] Queued: ${event::class.simpleName}")
     }
 
     override fun dispatch() {
@@ -28,8 +27,6 @@ class InMemoryEventBus : EventBus {
             handlers[event::class]
                 ?.toList()
                 ?.forEach { it(event) }
-
-            println("[EVENT] Dispatched: ${event::class.simpleName}")
         }
     }
 

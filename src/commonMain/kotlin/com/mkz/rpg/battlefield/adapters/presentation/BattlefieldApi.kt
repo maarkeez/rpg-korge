@@ -23,9 +23,11 @@ import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.ParseBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.PreviewBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
+import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefieldSize
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
+import com.mkz.rpg.battlefield.usecases.queries.SearchTerrainId
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldDecoder
@@ -70,6 +72,8 @@ class BattlefieldApi(
 
     // Queries
     val searchBattlefield = SearchBattlefield(battlefieldRepository)
+    val searchBattlefieldSize = SearchBattlefieldSize(battlefieldRepository)
+    val searchTerrainId = SearchTerrainId(battlefieldRepository)
     val searchOccupant = SearchOccupant(battlefieldRepository)
     val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
     val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)

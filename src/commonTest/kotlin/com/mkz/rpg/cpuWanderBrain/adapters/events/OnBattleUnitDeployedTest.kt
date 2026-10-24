@@ -16,7 +16,7 @@ class OnBattleUnitDeployedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val onBattleUnitDeployed = OnBattleUnitDeployed(ClaimHome(cpuWanderBrainRepository, queries.searchBattleUnitById, queries.searchPlayerById), eventBus)
+    private val onBattleUnitDeployed = OnBattleUnitDeployed(ClaimHome(cpuWanderBrainRepository, queries.searchBattleUnitById, queries.searchPlayerById, queries.searchDistancesFromHome), eventBus)
 
     @Test
     fun `should remember the tile a cpu battle unit is deployed on as its home`() {

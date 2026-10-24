@@ -1,6 +1,8 @@
 package com.mkz.rpg.cpuWanderBrain.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
+import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
@@ -15,7 +17,7 @@ import kotlin.test.Test
 class ClaimHomeTest {
     private val queries = InMemoryQueries()
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val claimHome = ClaimHome(cpuWanderBrainRepository, queries.searchBattleUnitById, queries.searchPlayerById)
+    private val claimHome = ClaimHome(cpuWanderBrainRepository, queries.searchBattleUnitById, queries.searchPlayerById, queries.searchDistancesFromHome)
 
     init {
         val human = player(id = "human", type = PlayerTypeDto.HUMAN)
@@ -33,6 +35,23 @@ class ClaimHomeTest {
         claimHome(battleUnitId = "rat-1", row = 1, column = 2)
         // Then
         cpuWanderBrainRepository.search()!!.homeOf("rat-1") shouldBe CpuWanderBrain.Dto.HomeDto(battleUnitId = "rat-1", row = 1, column = 2)
+    }
+
+    @Test
+    fun `should keep the distances from home of the cpu battle unit when it claims its home`() {
+        // Given: the void tile, east, can not be walked to.
+        queries.battlefieldRepository.create(battlefield(". . #\n. . ."))
+        // When
+        claimHome(battleUnitId = "rat-1", row = 0, column = 0)
+        // Then
+        cpuWanderBrainRepository.search()!!.distancesFromHome("rat-1") shouldBe
+            mapOf(
+                PositionDto(row = 0, column = 0) to 0,
+                PositionDto(row = 0, column = 1) to 1,
+                PositionDto(row = 1, column = 0) to 1,
+                PositionDto(row = 1, column = 1) to 2,
+                PositionDto(row = 1, column = 2) to 3,
+            )
     }
 
     @Test

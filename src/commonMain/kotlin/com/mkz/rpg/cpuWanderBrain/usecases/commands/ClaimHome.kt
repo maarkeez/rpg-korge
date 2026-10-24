@@ -1,6 +1,7 @@
 package com.mkz.rpg.cpuWanderBrain.usecases.commands
 
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchDistancesFromHome
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
@@ -9,11 +10,15 @@ import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 /**
  * Remembers the tile a CPU battle unit is deployed on as its home, which it wanders around while out of a battle. The
  * summons claim none, as they never wander: they vanish once their turns are over.
+ *
+ * How far each tile is from home ([SearchDistancesFromHome]) is computed once, as it claims it, since the terrain never
+ * changes while playing.
  */
 class ClaimHome(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPlayerById: SearchPlayerById,
+    private val searchDistancesFromHome: SearchDistancesFromHome,
 ) {
     operator fun invoke(
         battleUnitId: String,
@@ -25,6 +30,8 @@ class ClaimHome(
         val player = searchPlayerById(id = battleUnit.playerId) ?: return
         if (player.type != PlayerTypeDto.CPU) return
         val cpuWanderBrain = cpuWanderBrainRepository.search() ?: CpuWanderBrain.create()
-        cpuWanderBrainRepository.save(cpuWanderBrain.claimHome(battleUnitId = battleUnitId, row = row, column = column))
+        if (cpuWanderBrain.homeOf(battleUnitId) != null) return
+        val distancesFromHome = searchDistancesFromHome(homeRow = row, homeColumn = column)
+        cpuWanderBrainRepository.save(cpuWanderBrain.claimHome(battleUnitId = battleUnitId, row = row, column = column, distancesFromHome = distancesFromHome))
     }
 }

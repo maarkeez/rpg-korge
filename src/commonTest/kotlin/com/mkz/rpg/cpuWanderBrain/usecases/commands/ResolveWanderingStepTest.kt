@@ -7,7 +7,9 @@ import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.withLeaderApart
 import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
+import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -24,13 +26,15 @@ class ResolveWanderingStepTest {
     private val resolveWanderingStep =
         ResolveWanderingStep(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus))
 
-    // rat-1 stepped from its home (0,0) to (1,0), and rat-2 wanders next from its home (2,2).
+    // rat-1 stepped from its home (0,0) to (1,0), and rat-2 wanders next from its home (2,2). The party leader, knight-1,
+    // stands on K.
     private fun givenRatStepped(battleUnitIds: List<String>) {
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
         queries.playerRepository.create(cpu)
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = cpu.toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu.toDto()))
-        queries.battlefieldRepository.create(battlefield(". . .\nA . .\n. . B", occupants = mapOf('A' to "rat-1", 'B' to "rat-2")))
+        queries.battlefieldRepository.create(battlefield(withLeaderApart(". . .\nA . .\n. . B"), occupants = mapOf('A' to "rat-1", 'B' to "rat-2", 'K' to "knight-1")))
+        queries.partyRepository.save(party(battleUnitIds = listOf("knight-1")))
         cpuWanderBrainRepository.save(
             cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2)))
                 .startWhileExploring(exploringPlayerId = "human", battleUnitIds = battleUnitIds)

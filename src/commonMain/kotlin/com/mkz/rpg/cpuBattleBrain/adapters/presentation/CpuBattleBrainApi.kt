@@ -53,9 +53,9 @@ class CpuBattleBrainApi(
 ) {
     // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
-    val searchTerrainHealthEffect = SearchTerrainHealthEffect(battlefieldApi.searchBattlefield, terrainApi.searchTerrainById, effectApi.searchEffectById)
+    val searchTerrainHealthEffect = SearchTerrainHealthEffect(battlefieldApi.searchTerrainId, terrainApi.searchTerrainById, effectApi.searchEffectById)
     val searchDistancesFromHome = SearchDistancesFromHome(battlefieldApi.canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
-    val isOutsideTerritory = IsOutsideTerritory(battlefieldApi.searchPosition, searchDistancesFromHome)
+    val isOutsideTerritory = IsOutsideTerritory(battlefieldApi.searchPosition)
 
     val searchEnemiesWithinReach =
         SearchEnemiesWithinReach(
@@ -97,7 +97,6 @@ class CpuBattleBrainApi(
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
             battlefieldApi.canBattlefieldTileBeOccupied,
-            searchDistancesFromHome,
             healingNeed,
             searchTerrainHealthEffect,
             random,

@@ -18,7 +18,12 @@ class OnBattleRoundFinishedTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
     private val onBattleRoundFinished =
         OnBattleRoundFinished(
-            WanderAfterRound(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus), eventBus),
+            WanderAfterRound(
+                cpuWanderBrainRepository,
+                WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus),
+                queries.isInSight,
+                eventBus,
+            ),
             eventBus,
         )
     private val wanderedEvents =

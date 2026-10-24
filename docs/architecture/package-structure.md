@@ -125,7 +125,7 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 
 The unit of a recruitable npc is not checked when the game starts: [`NpcUnitResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/npc/adapters/resources/NpcUnitResourcesTest.kt) checks that every one in the resources exists.
 
-`cpuBattleBrain` does not depend on `cpuWanderBrain` either. `cpuWanderBrain` asks it where each battle unit wanders (`WhereShouldWander`, `IsOutsideTerritory`), and the `CpuWanderBrain` aggregate records its requests right after its own events:
+`cpuBattleBrain` does not depend on `cpuWanderBrain` either. `cpuWanderBrain` asks it how far each tile is from a home (`SearchDistancesFromHome`) and where each battle unit wanders (`WhereShouldWander`, `IsOutsideTerritory`), and the `CpuWanderBrain` aggregate records its requests right after its own events:
 
 | When                                                                | `CpuWanderBrain` records                  | `cpuBattleBrain`                                      |
 |---------------------------------------------------------------------|-------------------------------------------|-------------------------------------------------------|

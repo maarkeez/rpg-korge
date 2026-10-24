@@ -44,7 +44,7 @@ class IsOutsideTerritoryTest {
         // Given
         givenBattlefield("sand sand sand sand sand", occupants = mapOf("rat-1" to (0 to 4)))
         // When / Then
-        isOutsideTerritory(battleUnitId = "rat-1", homeRow = 0, homeColumn = 0).shouldBeTrue()
+        isOutsideTerritory(battleUnitId = "rat-1", distancesFromHome = queries.searchDistancesFromHome(homeRow = 0, homeColumn = 0)).shouldBeTrue()
     }
 
     @Test
@@ -52,7 +52,7 @@ class IsOutsideTerritoryTest {
         // Given
         givenBattlefield("sand sand sand sand sand", occupants = mapOf("rat-1" to (0 to 3)))
         // When / Then
-        isOutsideTerritory(battleUnitId = "rat-1", homeRow = 0, homeColumn = 0).shouldBeFalse()
+        isOutsideTerritory(battleUnitId = "rat-1", distancesFromHome = queries.searchDistancesFromHome(homeRow = 0, homeColumn = 0)).shouldBeFalse()
     }
 
     @Test
@@ -66,7 +66,7 @@ class IsOutsideTerritoryTest {
             occupants = mapOf("rat-1" to (0 to 2)),
         )
         // When / Then
-        isOutsideTerritory(battleUnitId = "rat-1", homeRow = 0, homeColumn = 0).shouldBeTrue()
+        isOutsideTerritory(battleUnitId = "rat-1", distancesFromHome = queries.searchDistancesFromHome(homeRow = 0, homeColumn = 0)).shouldBeTrue()
     }
 
     @Test
@@ -74,7 +74,7 @@ class IsOutsideTerritoryTest {
         // Given
         givenBattlefield("sand void sand sand sand sand", occupants = mapOf("rat-1" to (0 to 5)))
         // When / Then
-        isOutsideTerritory(battleUnitId = "rat-1", homeRow = 0, homeColumn = 0).shouldBeFalse()
+        isOutsideTerritory(battleUnitId = "rat-1", distancesFromHome = queries.searchDistancesFromHome(homeRow = 0, homeColumn = 0)).shouldBeFalse()
     }
 
     @Test
@@ -82,6 +82,6 @@ class IsOutsideTerritoryTest {
         // Given
         givenBattlefield("sand sand sand sand sand", occupants = emptyMap())
         // When / Then
-        isOutsideTerritory(battleUnitId = "rat-1", homeRow = 0, homeColumn = 0).shouldBeFalse()
+        isOutsideTerritory(battleUnitId = "rat-1", distancesFromHome = queries.searchDistancesFromHome(homeRow = 0, homeColumn = 0)).shouldBeFalse()
     }
 }

@@ -25,8 +25,9 @@ class WhereShouldWanderTest {
         homeColumn: Int,
         isReturning: Boolean = false,
     ): Battlefield.Dto.PositionDto? {
-        val whereShouldWander = queries(*rolls).whereShouldWander
-        return whereShouldWander(battleUnitId = battleUnitId, homeRow = homeRow, homeColumn = homeColumn, isReturning = isReturning)
+        val queries = queries(*rolls)
+        val distancesFromHome = queries.searchDistancesFromHome(homeRow = homeRow, homeColumn = homeColumn)
+        return queries.whereShouldWander(battleUnitId = battleUnitId, distancesFromHome = distancesFromHome, isReturning = isReturning)
     }
 
     private val givens = mutableListOf<(InMemoryQueries) -> Unit>()

@@ -8,6 +8,7 @@ The game resolves its events instantly: a whole CPU turn, with every move and ca
 - Presenters never draw an event straight away. They add a **step** to the timeline with `play { ... }`.
 - The timeline plays its steps one after another, in the order they are added. A step may take time, e.g.: a battle unit walking tile by tile. The following steps wait for it to finish.
 - When the timeline is idle, a new step starts straight away, so instant steps (e.g.: hiding the HUD) are displayed as soon as their event arrives.
+- A step added with `playNext { ... }` is played right after the step being played, before the steps waiting, whatever the order the presenters receive their events in. E.g.: when a battle starts, the virtual pad hides as soon as the leader lands on its last tile, before the battle is announced (see [Exploration](exploration.md#engaging)).
 
 For example, when the CPU moves two rats and the turn passes back to the human player:
 
