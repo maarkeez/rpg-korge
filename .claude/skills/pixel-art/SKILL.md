@@ -62,8 +62,8 @@ exported.
 ## Workflow
 
 1. **Read the design brief** for the asset, under `docs/design/` (e.g. [humanoid characters](../../../docs/design/humanoid-characters.md)),
-   and look at the assets it must match: `pixel preview` them (e.g. the
-   knight, `art/unit/knight.aseprite`) and read the PNG it prints.
+   and look at the assets it must match: `pixel preview` them (e.g. for a humanoid, the A Link to the Past references
+   under `art-drafts/reference/`) and read the PNG it prints.
 2. **Start the source**: `pixel new art/unit/goblin.aseprite --size 16x16 --layer outline --layer shade --layer base`,
    or `pixel layer add` on an existing one. Its PNG is exported right away, so the game can display it.
 3. **Draw** layer by layer, most of it in one `pixel apply` script, which saves once and only when every line
