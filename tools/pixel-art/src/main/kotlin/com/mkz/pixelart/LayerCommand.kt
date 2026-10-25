@@ -39,11 +39,12 @@ private class LayerAdd : EditCommand("add") {
     private val name by argument("NAME", help = "The new layer.")
     private val above by option("--above", help = "Right above this layer.")
     private val below by option("--below", help = "Right below this layer.")
+    private val top by option("--top", help = "At the top (the default).").flag()
     private val bottom by option("--bottom", help = "At the bottom.").flag()
 
     override fun change(sprite: Sprite): Change {
         val layer = sprite.newLayer(name)
-        sprite.layers.add(sprite.insertionIndex(above, below, top = false, bottom = bottom), layer)
+        sprite.layers.add(sprite.insertionIndex(above, below, top, bottom), layer)
         return Change("Added layer '$name'. Layers: ${sprite.layerNamesFromTop().joinToString()}")
     }
 }

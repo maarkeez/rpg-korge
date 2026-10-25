@@ -43,6 +43,8 @@ class Pixels(
     override fun equals(other: Any?): Boolean = other is Pixels && width == other.width && height == other.height && indexes.contentEquals(other.indexes)
 
     override fun hashCode(): Int = indexes.contentHashCode()
+
+    override fun toString(): String = Grid.plain(this)
 }
 
 class Layer(

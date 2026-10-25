@@ -33,6 +33,8 @@ fun pixel(): Pixel =
         LayerCommand(),
         ImportCommand(),
         ExportCommand(),
+        *drawCommands().toTypedArray(),
+        ApplyCommand(),
     )
 
 fun main(args: Array<String>) {
