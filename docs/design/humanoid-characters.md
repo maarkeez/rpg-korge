@@ -2,7 +2,7 @@
 
 > **Status:** in use. The game displays 16x16 and 32x32 units and npcs side by side, each filling its 32px tile (see
 > [Assets](../architecture/assets.md)). The sprites of this brief are drafted in `art-drafts/`, then moved to `art/` once
-> reviewed: the princess is the first one in the game.
+> reviewed: the princess and the knight are in the game.
 >
 > **Summary:** Humanoids (humans, orcs, and later elves, dwarves or goblins) are drawn in the style of *The Legend of
 > Zelda: A Link to the Past* (SNES): big heads, a dark outline, three tone materials lit from the top left, and the role
@@ -171,7 +171,7 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 | Dye     | Line | Shade | Base | Highlight | Notes                             |
 |---------|------|-------|------|-----------|-----------------------------------|
 | Green   | `K`  | `K`   | `L`  | `M`       | Tried; `K` is both line and shade |
-| Blue    | `1`  | `1`   | `2`  | `3`       | Tried                             |
+| Blue    | `1`  | `1`   | `2`  | `3`       | Tried, as the knight's tabard     |
 | Violet  | `a`  | `b`   | `c`  | `d`       | Tried, as the mage's hat and robe |
 | Olive   | `J`  | `I`   | `C`  | `D`       |                                   |
 | Red     | `q`  | `p`   | `r`  | `o`       |                                   |
@@ -187,7 +187,7 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 
 | Material | Line | Shade | Base | Highlight | Notes                                                     |
 |----------|------|-------|------|-----------|-----------------------------------------------------------|
-| Steel    | `X`  | `Y`   | `Z`  | `+`       | Tried, as the orc's axe and pauldron. `=` for a glint      |
+| Steel    | `X`  | `Y`   | `Z`  | `+`       | Tried, as the orc's axe and the knight's armour. `=` for a glint |
 | Leather  | `w`  | `v`   | `u`  | `t`       | Tried, as the orc's belt and kilt                          |
 | Wood     | `w`  | `v`   | `u`  | `t`       | Tried, as a 1 pixel shaft (`u` only)                       |
 | Gold     | `x`  | `B`   | `A`  | `z`       | Tried, as the mage's hat band and the princess's trims. Not on ginger hair, whose highlight is `A` |
@@ -263,7 +263,7 @@ from the suggestions; anything not listed is free.
 | Id               | Who                                                                | LttP reference                         | Look                                                                                                    | Gear                         |
 |------------------|--------------------------------------------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------|
 | `hero`           | The player's first unit ("Knight", sword and heal)                 | Link, Link's uncle                      | Bare head, brown hair, light skin, green tunic, leather belt and boots. Not a copy of Link: no pointed cap, no pointed ears | A short sword                 |
-| `knight`         | A soldier of the realm, the second playable unit                   | The blue Hyrule soldiers                | Steel helmet open on the face, blue tabard, steel greaves. Broader than a villager                       | Sword and shield              |
+| `knight`         | A soldier of the realm, the second playable unit                   | The blue Hyrule soldiers                | Drawn (`art/unit/`): front, steel helmet open on the face with cheek guards and a small crest, light skin, steel pauldrons and gauntlets, blue tabard with a leather belt, steel greaves. Broader than a villager. Its portrait, kept from before, shows the helmet closed | None                         |
 | `herbalist`      | Healer and poisoner who joins the party ("Herbs to heal, venom to kill") | The maidens' robes, the townsfolk | Olive hooded robe closing the legs, medium skin, a leather satchel at the hip                           | A sprig, or a flask of venom  |
 | `viking`         | A northern warrior                                                 | The lumberjacks, for the build          | Horned steel helmet (`+` horns), big ginger beard over the chin, brown fur cloak, broad shoulders         | Sword and a round wooden shield |
 | `viking-warrior` | The viking npc who joins the party ("For Valhalla"), sword and cleave | As `viking`                          | The `viking` drawing in the red dye, a steel chest plate                                                | An axe instead of the sword   |
