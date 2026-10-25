@@ -2,7 +2,7 @@
 
 > **Status:** in use. The game displays 16x16 and 32x32 units and npcs side by side, each filling its 32px tile (see
 > [Assets](../architecture/assets.md)). The sprites of this brief are drafted in `art-drafts/`, then moved to `art/` once
-> reviewed: the princess and the knight are in the game.
+> reviewed: the princess, the knight and the hero are in the game.
 >
 > **Summary:** Humanoids (humans, orcs, and later elves, dwarves or goblins) are drawn in the style of *The Legend of
 > Zelda: A Link to the Past* (SNES): big heads, a dark outline, three tone materials lit from the top left, and the role
@@ -174,7 +174,7 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 | Blue    | `1`  | `1`   | `2`  | `3`       | Tried, as the knight's tabard     |
 | Violet  | `a`  | `b`   | `c`  | `d`       | Tried, as the mage's hat and robe |
 | Olive   | `J`  | `I`   | `C`  | `D`       |                                   |
-| Red     | `q`  | `p`   | `r`  | `o`       |                                   |
+| Red     | `q`  | `p`   | `r`  | `o`       | Tried, as the hero's plume and cross |
 | Gold    | `x`  | `B`   | `A`  | `z`       |                                   |
 | Indigo  | `9`  | `8`   | `7`  | `6`       |                                   |
 | Teal    | `V`  | `P`   | `Q`  | `R`       | Close to the grass: trims only    |
@@ -262,7 +262,7 @@ from the suggestions; anything not listed is free.
 
 | Id               | Who                                                                | LttP reference                         | Look                                                                                                    | Gear                         |
 |------------------|--------------------------------------------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------|
-| `hero`           | The player's first unit ("Knight", sword and heal)                 | As `knight`                             | Drawn: the `knight` drawing and portrait, which it already shared as a 16x16 sprite                     | None                         |
+| `hero`           | The player's first unit ("Knight", sword and heal), the commander | None; a closed great helm knight        | Drawn with a portrait (`art/unit/`): three-quarter, wide stance, closed steel helmet with an eye slit and breathing bars, red plume streaming back, dark mail on the upper arm, leather glove and belt. Larger than the knight | A sword raised forward with a gold hilt and sparkles, a steel heater shield with a red cross over the torso |
 | `knight`         | A soldier of the realm, the second playable unit                   | The blue Hyrule soldiers                | Drawn (`art/unit/`): front, steel helmet open on the face with cheek guards and a small crest, light skin, steel pauldrons and gauntlets, blue tabard with a leather belt, steel greaves. Broader than a villager. Its portrait, kept from before, shows the helmet closed | None                         |
 | `herbalist`      | Healer and poisoner who joins the party ("Herbs to heal, venom to kill") | The maidens' robes, the townsfolk | Olive hooded robe closing the legs, medium skin, a leather satchel at the hip                           | A sprig, or a flask of venom  |
 | `viking`         | A northern warrior                                                 | The lumberjacks, for the build          | Horned steel helmet (`+` horns), big ginger beard over the chin, brown fur cloak, broad shoulders         | Sword and a round wooden shield |
