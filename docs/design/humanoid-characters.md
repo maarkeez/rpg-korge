@@ -70,7 +70,8 @@ link-front, columns 8-23, rows 10-30          the template (a villager), columns
   [Face](#face).
 - **A dark outline, inside too.** The silhouette is outlined, and the same dark splits the big shapes from each other:
   the hairline on the forehead, the eyes, the chin over the body, the arms from the torso, the belt.
-- **Shapes shaded as volumes**, lit from above and the left, with shades warmer than their base, never greyer.
+- **Shapes shaded as volumes**, lit from above and the left, with shades more saturated than their base, never greyer:
+  warmer for skin, cloth and leather, bluer for steel.
 - **A shadow on the ground** under the feet.
 - One drawing, many colours: the green, blue and red soldiers are the same sprite in another palette.
 - The role is told at a glance by the silhouette (headgear, hair, build, gear), then by the main colour.
@@ -147,6 +148,7 @@ not count long ears (an elf's) nor gear.
 |----------------------|----------|-----------------------------------|------------------------------------------------------------|
 | Adult human          | ~21 rows | ~12 rows: ~7 of hair, ~4 of face  | ~9 rows, ~16 columns wide arms and human ears included, 2 of feet |
 | Human with headgear  | + the hat or helmet above the hair line |            |                                                            |
+| Commander (`hero`)   | ~23 rows | ~13 rows, the helmet included     | ~10 rows, ~18 columns wide: a head and a build above the adult's, so it stands out in the party |
 | Child                | ~16 rows | ~10 rows                          | ~6 rows                                                    |
 | Orc                  | ~28 rows | ~11 rows, small for the body      | ~17 rows, ~23 columns wide, hunched: the shoulders reach the jaw |
 
@@ -167,6 +169,12 @@ The face is where a sprite gets its life. On the sprite:
 - **Expression:** the pupils move (both to one side looks away, up looks proud), a brow in `W` or the hair's line over
   the top of an eye frowns, half closed eyes (whites on one row only) are tired or smug, a mouth (1-2 pixels of the
   skin's line) opens it or is shown under a beard. Give every character one.
+- **A closed helmet** keeps the face's rules with steel in place of hair and skin. The eye slit is a `W` band 2 rows
+  tall, where the eyes would be (under the helmet's brow, not in the middle of the head), turned with the facing
+  (on the right half in three-quarter view). A pupil can not show on `W`: each eye is 1-2 `=` glints in the slit, on
+  the inner side. The slit's top edge is the brow: dipping between the eyes frowns, a straight edge stares. Under the
+  slit the face plate is in shade, with one highlight pixel where the nose would be. A closed helmet still needs its
+  expression from the pose and the light, so its portrait shows the face: see [Portraits](#portraits).
 - The skin, the eyes' colour and the features of each species are in [Species](#species).
 
 ## Species
@@ -193,8 +201,14 @@ Add a species here, with its ramps and features, the first time one is drawn.
   and the right. A highlight column down the left edge and a shade column down the right edge is not shading.
 - **Cast shades:** where a shape hangs over another, the one under is in shade: the face under the fringe, the chest
   under the chin, the torso under the arms, the hem under the belt, the inner side of the legs.
-- **Warm shades:** a shade is darker *and* more saturated or warmer than its base (skin shades to orange brown, not to
-  grey pink). A shade too close to its base reads as no light: one clear value step at least.
+- **Shades shift hue, never to grey:** a shade is darker *and* more saturated than its base. Skin, hair, cloth,
+  leather, wood and gold shade warmer (skin to orange brown, not to grey pink); steel and stone shade bluer (`U`, see
+  [Materials](#materials)), as the Hyrule soldiers' armour does. A plain grey shade looks flat and dead. A shade too
+  close to its base reads as no light: one clear value step at least.
+- **Armour is not all grey:** an armoured character keeps at least a third of its body in colour (a tabard, a plume, a
+  shield's emblem, leather straps, gold trims), or it reads cold next to the rest of the cast.
+- **Dark line colours on the silhouette:** a ramp's line colour darker than the outline rule's limit (`X`, `w`, `q`,
+  `J`, `V`, `9`) is drawn `W` wherever it touches the silhouette, including the portrait's bottom edge.
 - **Tones:** each material uses its ramp's base, shade and highlight, plus its line. No dithering, no anti-aliasing,
   no gradients of more than three tones. Ramps may share colours (the skin's shade and the brown hair's base), as `W`
   or a line splits them.
@@ -250,7 +264,8 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 
 | Material | Line | Shade | Base | Highlight | Notes                                                     |
 |----------|------|-------|------|-----------|-----------------------------------------------------------|
-| Steel    | `X`  | `Y`   | `Z`  | `+`       | Tried, as the orc's axe and the knight's armour. `=` for a glint |
+| Steel    | `X`  | `U`   | `Z`  | `+`       | `=` for a glint. The shade is blue grey, not `Y`: the first knight and hero shaded steel with `Y` and looked flat and cold. `Y` may be a second, lighter shade on big plates |
+| Mail     | `W`  | `X`   | `Y`  | `Z`       | Rings: rows of `Y` with `X` between them, offset every other row, `Z` on the lit top left. `X` and `Y` on `base`, `Z` on `highlight`. It touches the silhouette: its edge pixels there are `W` |
 | Leather  | `w`  | `v`   | `u`  | `t`       | Tried, as the orc's belt and kilt                          |
 | Wood     | `w`  | `v`   | `u`  | `t`       | Tried, as a 1 pixel shaft (`u` only)                       |
 | Gold     | `x`  | `B`   | `A`  | `z`       | Tried, as the mage's hat band and the princess's trims. Not on ginger hair, whose highlight is `A` |
@@ -272,6 +287,8 @@ character in the eye:
   body, the hand on it, without bending an arm away from the body just to reach it.
 - **Strings and trims** (a bow string, a banner's cord) are 1 pixel of a light colour (`Z`, `+`), outside the gear's
   `W`, without their own `W`: they are light, so the outline rule allows them on the silhouette.
+- **A shield** is held on the near side in front of the body, but covers at most half the torso: the belt, the far
+  arm and both legs stay visible, or the body reads as a shield on two feet.
 - Gear never covers the eyes, and stays inside the canvas. Long ears and gear on the same side compete for the same
   columns: put the gear on the other side, or lower the hand so the gear passes under the ear.
 
@@ -280,9 +297,14 @@ character in the eye:
 LttP has no portraits, so this part is ours: the first one, `princess_portrait`, is in the game, still under review.
 Review it closely, and update this section with what works.
 
-- The same character as its sprite, closer: same ramps, hair, headgear and clothes, same facing, same expression. Gear
-  only when it reaches the shoulders (a staff's top, a shield's rim).
-- Seen from the front, not from above: a portrait is a face to talk to.
+- The same character as its sprite, closer: same ramps, hair, headgear and clothes, same facing (front, or
+  three-quarter toward the right), same expression. Gear only when it reaches the shoulders (a staff's top, a shield's
+  rim).
+- A level camera, not from above: the forehead shows and the eyes sit in the middle of the head, as when talking face to
+  face. "Front" here is the camera's height, not the facing: a three-quarter character stays three-quarter.
+- **The face shows.** A character in a closed helmet raises its visor (or holds the helmet under the arm) in the
+  portrait, so it gets real eyes, brows and a mouth: a portrait is a face to talk to. Give its helmet a visor on the
+  sprite too, closed, so the two match.
 - Head and shoulders. The head spans about rows 2-23 and 22 columns; the shoulders fill rows 24-31 and are cut by the
   bottom edge.
 - The bottom edge counts as silhouette: its dark pixels must be `W`.
@@ -333,7 +355,7 @@ review it against the reference:
 1. `pixel preview` the draft and `art-drafts/reference/link-front.png` (or `link-side`) at the same scale, and read both.
 2. Write down, for each, what differs from the reference: the **camera** (how much of the head is its top, where the
    eyes sit, how short the body is, the shadow), the **face** (whites, pupils, fringe, shade, expression), the
-   **light** (volumes or stripes, cast shades, warm shades), the **lines** (`W` splitting the big shapes).
+   **light** (volumes or stripes, cast shades, shades that shift hue), the **lines** (`W` splitting the big shapes).
 3. Fix every difference that is not a deliberate choice of the character, and repeat.
 4. Then look at it at 1x, on the grass, next to the rest of the cast.
 
@@ -354,7 +376,8 @@ What makes it fit this brief:
 - [ ] It faces front, or three-quarter toward the viewer's right.
 - [ ] Eyes with whites and pupils, under a `W` fringe, in a face shaded by the hair, with an expression.
 - [ ] `W` splits the big shapes; folds use each ramp's line.
-- [ ] Every shape is shaded as a volume, with warm shades a clear step below their base.
+- [ ] Every shape is shaded as a volume, with shades a clear step below their base, warmer (or bluer for steel), never
+      plain grey.
 - [ ] Filled in black, its silhouette is told apart from the rest of the cast.
 - [ ] At most 20 colours (`pixel info` lists them).
 - [ ] The [review](#review) against the reference was done, and its differences fixed or chosen.
@@ -368,7 +391,8 @@ changes: each keeps the design of its row in the [Cast](#cast) (look, gear, ramp
 |---------------------------------------------|-----------------------------------------------------|-----------------------------------------------|
 | `elf`                                       | With this version                                   | `art/npc/elf.aseprite`, `elf_portrait`        |
 | `princess`                                  | 32x32, with the first version                       | `art/npc/princess.aseprite`, `princess_portrait` |
-| `knight`, `hero`                            | 32x32, with the first version                       | `art/unit/<id>.aseprite`, `<id>_portrait`     |
+| `hero`                                      | With this version                                   | `art/unit/hero.aseprite`, `hero_portrait`     |
+| `knight`                                    | 32x32, with the first version                       | `art/unit/knight.aseprite`, `knight_portrait` |
 | `mage`, `orc`                               | Drafts with the first version, not in the game      | `art-drafts/humanoid/<id>.aseprite`           |
 | `herbalist`, `viking`, `viking-warrior`     | 16x16, before this brief                            | `art/unit/<id>.aseprite`, `<id>_portrait`     |
 | `merchant`, `farmer`, `elder`, `blacksmith`, `alchemist` | 16x16, before this brief               | `art/npc/<id>.aseprite`, `<id>_portrait`      |
@@ -394,7 +418,7 @@ from the suggestions; anything not listed is free.
 
 | Id               | Who                                                                | LttP reference                         | Look                                                                                                    | Gear                         |
 |------------------|--------------------------------------------------------------------|----------------------------------------|---------------------------------------------------------------------------------------------------------|------------------------------|
-| `hero`           | The player's first unit ("Knight", sword and heal), the commander | None; a closed great helm knight        | Drawn with the first version, with a portrait (`art/unit/`): three-quarter, wide stance, closed steel helmet with an eye slit and breathing bars, red plume streaming back, dark mail on the upper arm, leather glove and belt. Larger than the knight | A sword raised forward with a gold hilt and sparkles, a steel heater shield with a red cross over the torso |
+| `hero`           | The player's first unit ("Knight", sword and heal), the commander | None; a closed great helm knight        | Drawn with this version, with a portrait (`art/unit/`): three-quarter, a commander's size (see [Proportions](#proportions)), wide stance, a visored steel helmet shaded blue grey, closed on the sprite (an eye slit with glints, breathing slots, a snout) and raised in the portrait on a lit face with light skin and dark hair, a red plume streaming back, a red tabard, a leather belt with a gold buckle, dark mail on the upper arm, steel greaves and leather boots. To improve on a redraw: the shield hangs low by the feet, the closed visor reads as a dark hole at 1x, and the portrait's face looks young rather than stern, its nose sticking out of the face's edge | A sword raised forward on the far side, 2 pixels wide, with a gold guard and a sparkle on its tip, a small steel heater shield with a red cross on the near arm |
 | `knight`         | A soldier of the realm, the second playable unit                   | The blue Hyrule soldiers                | Drawn with the first version (`art/unit/`): front, steel helmet open on the face with cheek guards and a small crest, light skin, steel pauldrons and gauntlets, blue tabard with a leather belt, steel greaves. Broader than a villager. Its portrait, kept from before, shows the helmet closed | None                         |
 | `herbalist`      | Healer and poisoner who joins the party ("Herbs to heal, venom to kill") | The maidens' robes, the townsfolk | Olive hooded robe closing the legs, medium skin, a leather satchel at the hip                           | A sprig, or a flask of venom  |
 | `viking`         | A northern warrior                                                 | The lumberjacks, for the build          | Horned steel helmet (`+` horns), big ginger beard over the chin, brown fur cloak, broad shoulders         | Sword and a round wooden shield |
