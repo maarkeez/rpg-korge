@@ -160,7 +160,7 @@ The grass terrain is `N` and `O`: do not make them a character's main colour, it
 | Brown        | `w`  | `v`   | `u`  | `B`       | Tried                                 |
 | Black        | `W`  | `W`   | `w`  | `v`       | Tried, as the orc's topknot           |
 | Blond        | `x`  | `B`   | `A`  | `z`       |                                       |
-| Ginger       | `q`  | `x`   | `y`  | `A`       |                                       |
+| Ginger       | `q`  | `x`   | `y`  | `A`       | Tried, as the princess's hair. Reads copper, not red |
 | Grey, white  | `Y`  | `Z`   | `+`  | `=`       | Tried, as the mage's hair and beard   |
 
 ### Clothes (dyes)
@@ -179,7 +179,7 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 | Teal    | `V`  | `P`   | `Q`  | `R`       | Close to the grass: trims only    |
 | Magenta | `i`  | `h`   | `g`  | `f`       |                                   |
 | Brown   | `w`  | `v`   | `u`  | `t`       | Tried, as trousers                |
-| White   | `Y`  | `Z`   | `+`  | `=`       |                                   |
+| White   | `Y`  | `Z`   | `+`  | `=`       | Tried, as the princess's dress    |
 | Black   | `W`  | `W`   | `X`  | `Y`       |                                   |
 
 ### Materials
@@ -189,7 +189,7 @@ As LttP's soldiers, a design keeps each dye on its own ramp, so another variant 
 | Steel    | `X`  | `Y`   | `Z`  | `+`       | Tried, as the orc's axe and pauldron. `=` for a glint      |
 | Leather  | `w`  | `v`   | `u`  | `t`       | Tried, as the orc's belt and kilt                          |
 | Wood     | `w`  | `v`   | `u`  | `t`       | Tried, as a 1 pixel shaft (`u` only)                       |
-| Gold     | `x`  | `B`   | `A`  | `z`       | Tried, as the mage's hat band. Trims, crowns, coins        |
+| Gold     | `x`  | `B`   | `A`  | `z`       | Tried, as the mage's hat band and the princess's trims. Not on ginger hair, whose highlight is `A` |
 | Magic    | `V`  | `P`   | `Q`  | `R`, `S`  | Tried, as the mage's orb; loose `S` pixels around it glow   |
 
 ## Gear
@@ -205,7 +205,7 @@ edge of the canvas) show two ways; `pixel grid` them to read their pixels.
 
 ## Portraits
 
-LttP has no portraits, so this part is ours and is not tried yet: review the first one closely, and update this
+LttP has no portraits, so this part is ours: the first one, `princess_portrait`, is a draft under review. Review it closely, and update this
 section with what works.
 
 - The same character as its sprite, closer: same ramps, hair, headgear and clothes, same facing. Gear only when it
@@ -274,6 +274,7 @@ from the suggestions; anything not listed is free.
 | `mystic`         | Waits at the end of the first path                                 | The fortune teller                      | Indigo hood and robe, a veil over the lower face, only the eyes showing                                 | A glowing teal orb            |
 | `mage`           | New, not in the game yet: a classic wizard                         | Sahasrahla, for the beard               | Drafted: three-quarter, violet pointed hat leaning back with a gold band, long white beard, violet robe widening to the hem | A wooden staff with a magic orb |
 | `orc`            | New, not in the game yet: a brute warrior                          | None; a classic fantasy orc             | Drafted: three-quarter, orc green, hunched, tusks, yellow eyes under a heavy brow, topknot, steel pauldron, leather kilt | A big axe held upright        |
+| `princess`       | New, not in the game yet: a royal npc                              | The maidens, Zelda                      | Drafted with a portrait: front, light skin, ginger hair down to the waist, silver tiara with a blue gem, white dress with gold trims widening to the hem | None: hands clasped at the waist |
 
 `the-guy` is a test npc and is left out. The elder and the alchemist must not read as the mage: keep the elder bent
 and hatless, and the alchemist in magenta with a flask.
