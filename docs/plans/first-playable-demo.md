@@ -1,6 +1,6 @@
 # Plan: First playable demo
 
-> **Status:** done.
+> **Status:** done. The mystic was later replaced by the princess, see [the princess npc](princess-npc.md).
 >
 > **Summary:** The first region of the game, built only from the resources: a lone knight walks out of a room, beats
 > its first bat on its gate, and is told about a village nearby. The village is the hub: a blacksmith, an alchemist, an elder telling

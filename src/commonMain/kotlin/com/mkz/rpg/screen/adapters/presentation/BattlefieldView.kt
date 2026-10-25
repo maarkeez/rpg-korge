@@ -79,19 +79,20 @@ open class BattlefieldView(
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
         private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
 
-        const val TILE_SIZE = 48
+        // A tile is 32px: its 16x16 art (the terrain, most units and npcs) is drawn at 2x, and its 32x32 art at 1x.
+        const val TILE_SIZE = 32
         const val TILE_PIXEL_SIZE = 16
-        const val VISIBLE_TILES = 8
+        const val VISIBLE_TILES = 12
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
         // The loot is drawn smaller than the battle units, so the terrain shows around it.
-        const val LOOT_SCALE = 2.0
+        const val LOOT_SCALE = 1.0
         const val CHEST_PATH = "battlefield/chest.png"
 
         // A picked up item rises this far from the center of its tile, growing to this scale while it fades out.
         const val PICK_UP_RISE = TILE_SIZE / 2.0
-        const val PICK_UP_SCALE = 3.0
+        const val PICK_UP_SCALE = 1.5
         val PICK_UP_DURATION = 400.milliseconds
 
         // How long a moving battle unit glides from one tile of its path to the next.
@@ -722,7 +723,7 @@ open class BattlefieldView(
         leader.removeFromParent()
     }
 
-    // A battle unit gliding from the tile at the position, drawn as on its tile: its image is centered on the tile.
+    // A battle unit gliding from the tile at the position, drawn as on its tile: its image fills the tile, centered on it.
     private fun Container.movingBattleUnit(
         bitmap: Bitmap,
         viewName: String,
@@ -734,7 +735,7 @@ open class BattlefieldView(
             this.x = x
             this.y = y
             image(bitmap) {
-                scale = 3.0
+                scale = tileFillingScale(bitmap)
                 smoothing = false
                 anchor(Anchor.CENTER)
                 this.x = TILE_SIZE / 2.0
@@ -937,10 +938,11 @@ open class BattlefieldView(
             )
     }
 
+    /** Draws the image centered on the tile, by default scaled to fill it, whatever the size of its art (16x16 or 32x32). */
     private fun UIButton.addImage(
         bitmap: Bitmap,
         viewName: String,
-        scale: Double = 3.0,
+        scale: Double = tileFillingScale(bitmap),
     ) {
         val button = this
         val imageScale = scale
@@ -951,6 +953,8 @@ open class BattlefieldView(
             centerOn(button)
         }
     }
+
+    private fun tileFillingScale(bitmap: Bitmap): Double = TILE_SIZE.toDouble() / bitmap.width
 
     private fun Bitmap.whiteSilhouette(): Bitmap {
         val silhouette = Bitmap32(width, height, premultiplied = premultiplied)

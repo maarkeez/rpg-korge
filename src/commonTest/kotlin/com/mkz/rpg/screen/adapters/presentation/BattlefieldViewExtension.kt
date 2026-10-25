@@ -77,6 +77,33 @@ fun BattlefieldView.hasNpcAt(
     column: Int,
 ): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.NPC) == true
 
+/** Where the image of the npc standing on the tile is drawn inside it, and its size, or `null` when there is none. */
+fun BattlefieldView.npcPlacementAt(
+    row: Int,
+    column: Int,
+): TilePlacement? = imagePlacementAt(row, column, BattlefieldView.NPC)
+
+/** Where the image of the battle unit standing on the tile is drawn inside it, and its size, or `null` when there is none. */
+fun BattlefieldView.battleUnitPlacementAt(
+    row: Int,
+    column: Int,
+): TilePlacement? = imagePlacementAt(row, column, BattlefieldView.BATTLE_UNIT)
+
+/** Where the terrain of the tile is drawn inside it, and its size. */
+fun BattlefieldView.terrainPlacementAt(
+    row: Int,
+    column: Int,
+): TilePlacement? = imagePlacementAt(row, column, BattlefieldView.TERRAIN)
+
+private fun BattlefieldView.imagePlacementAt(
+    row: Int,
+    column: Int,
+    layerName: String,
+): TilePlacement? =
+    (tileOrNull(row, column)?.findViewByName(layerName) as? Image)?.let { image ->
+        TilePlacement(image.x, image.y, image.scaledWidth, image.scaledHeight)
+    }
+
 /** Whether a piece of a building is drawn on the tile, right above its terrain, so the selection is drawn over it. */
 fun BattlefieldView.hasBuildingAt(
     row: Int,

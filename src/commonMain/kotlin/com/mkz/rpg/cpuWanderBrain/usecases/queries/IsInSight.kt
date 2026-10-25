@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.party.usecases.queries.SearchParty
 
 /** The tiles the camera shows on each axis, as the battlefield view does (`BattlefieldView.VISIBLE_TILES`). */
-const val VIEW_TILES = 8
+const val VIEW_TILES = 12
 
 /** The tiles around the ones the camera can show where the battle units are still in sight, as they may step into view. */
 const val SIGHT_MARGIN = 1

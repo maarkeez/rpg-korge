@@ -156,10 +156,10 @@ class WanderWhileExploringTest {
 
     @Test
     fun `should only wander the cpu battle units in sight of the party leader`() {
-        // Given: rat-1 is 3 tiles away from the party leader, and rat-2 is 11 tiles away, out of sight.
-        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 11))))
+        // Given: rat-1 is 3 tiles away from the party leader, and rat-2 is 14 tiles away, out of sight.
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 14))))
         // When
-        wanderWhileExploring(0.9, 0.9, map = "K . . A . . . . . . . B . .")
+        wanderWhileExploring(0.9, 0.9, map = "K . . A . . . . . . . . . . B .")
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
@@ -175,9 +175,9 @@ class WanderWhileExploringTest {
     @Test
     fun `should request the recovery of every cpu battle unit with a home, in sight or not`() {
         // Given: rat-2 is out of sight of the party leader.
-        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 11))))
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 3), "rat-2" to (0 to 14))))
         // When
-        wanderWhileExploring(0.0, map = "K . . A . . . . . . . B . .")
+        wanderWhileExploring(0.0, map = "K . . A . . . . . . . . . . B .")
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),

@@ -18,7 +18,8 @@ These are enforced by the architecture tests (see [assets](../../../docs/archite
 - Only the 64 FamiCube colours, fully opaque, or fully transparent. The tool can not write anything else.
 - Battle units, npcs, their portraits, lootable items, buildings and the chest are outlined with `W` (`#151515`): the
   dark pixels of the silhouette, diagonals included, must be `W`. Light or saturated trims on the silhouette are fine.
-- Sizes: units, npcs, items, abilities, effects and the chest are 16x16; portraits are 32x32 (`<id>_portrait`);
+- Sizes: units and npcs are 16x16, or 32x32 when drawn with the [humanoid brief](../../../docs/design/humanoid-characters.md);
+  items, abilities, effects and the chest are 16x16; portraits are 32x32 (`<id>_portrait`);
   buildings are 16 pixels per tile; terrain transition strips are 256x16.
 
 ## Colours

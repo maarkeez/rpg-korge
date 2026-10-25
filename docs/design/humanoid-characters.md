@@ -1,8 +1,8 @@
 # Design brief: humanoid characters
 
-> **Status:** drafts only. The game displays 16x16 units and npcs; the 32x32 sprites of this brief are drawn in
-> `art-drafts/`, to validate the brief and the [`pixel-art` skill](../../.claude/skills/pixel-art/SKILL.md) before the
-> game is changed to display them.
+> **Status:** in use. The game displays 16x16 and 32x32 units and npcs side by side, each filling its 32px tile (see
+> [Assets](../architecture/assets.md)). The sprites of this brief are drafted in `art-drafts/`, then moved to `art/` once
+> reviewed: the princess is the first one in the game.
 >
 > **Summary:** Humanoids (humans, orcs, and later elves, dwarves or goblins) are drawn in the style of *The Legend of
 > Zelda: A Link to the Past* (SNES): big heads, a dark outline, three tone materials lit from the top left, and the role
@@ -46,14 +46,15 @@ drawn), its back views, and its animations.
   herbalist) has one sprite.
 - **The canvas is a limit, not a size to fill.** Draw the character as big as it is: a child is small, a villager about
   24 rows, an orc almost the whole canvas. Leave the rest transparent.
-- **Anchor:** the feet stand on row 31, centred on columns 15-16. The bottom centre 16x16 (columns 8-23, rows 16-31) is
-  the tile the character stands on; everything above and beside it overlaps the neighbouring tiles. Gear may use the
-  whole canvas.
+- **Anchor:** the feet stand on row 31, centred on columns 15-16. The whole canvas is the tile the character stands
+  on, drawn at 1x where 16x16 art is drawn at 2x: nothing overlaps the neighbouring tiles. Gear may use the whole
+  canvas.
 - Sources outside `art/` are not exported. Export the PNG next to the source after every change:
   `tools/pixel-art/pixel export art-drafts/humanoid/<id>.aseprite --out art-drafts/humanoid/<id>.png`.
 - The architecture tests do not see `art-drafts/`, so check their rules by hand (see [Checklist](#checklist)).
-- The current 16x16 sprites and portraits under `art/` stay as they are until the game displays 32x32 sprites; then the
-  drafts move to `art/unit/` or `art/npc/`.
+- Once reviewed, a draft moves to `art/unit/` or `art/npc/`, replacing the 16x16 sprite of its character, and its PNG is
+  exported to `resources/` by the tool; the PNGs next to the drafts are removed. The other 16x16 sprites stay until
+  they are redrawn.
 
 ## Silhouette and pose
 
@@ -205,7 +206,7 @@ edge of the canvas) show two ways; `pixel grid` them to read their pixels.
 
 ## Portraits
 
-LttP has no portraits, so this part is ours: the first one, `princess_portrait`, is a draft under review. Review it closely, and update this
+LttP has no portraits, so this part is ours: the first one, `princess_portrait`, is in the game, still under review. Review it closely, and update this
 section with what works.
 
 - The same character as its sprite, closer: same ramps, hair, headgear and clothes, same facing. Gear only when it
@@ -271,10 +272,9 @@ from the suggestions; anything not listed is free.
 | `elder`          | The village elder who tells of the Goat Wizard                     | Sahasrahla                              | White hair and a long white beard over the chest, robe closing the legs, bent over                      | A wooden staff                |
 | `blacksmith`     | Sells hammers ("Fresh from the forge!")                            | The smiths (draw a human, not a dwarf)  | Bare strong arms, dark skin, black hair under a red bandana, leather apron                              | A hammer                      |
 | `alchemist`      | Sells potions and the teleport essence                             | Syrup, the witch brewing                | A tall pointed hat and robe in magenta, light skin                                                      | A potion flask                |
-| `mystic`         | Waits at the end of the first path                                 | The fortune teller                      | Indigo hood and robe, a veil over the lower face, only the eyes showing                                 | A glowing teal orb            |
 | `mage`           | New, not in the game yet: a classic wizard                         | Sahasrahla, for the beard               | Drafted: three-quarter, violet pointed hat leaning back with a gold band, long white beard, violet robe widening to the hem | A wooden staff with a magic orb |
 | `orc`            | New, not in the game yet: a brute warrior                          | None; a classic fantasy orc             | Drafted: three-quarter, orc green, hunched, tusks, yellow eyes under a heavy brow, topknot, steel pauldron, leather kilt | A big axe held upright        |
-| `princess`       | New, not in the game yet: a royal npc                              | The maidens, Zelda                      | Drafted with a portrait: front, light skin, ginger hair down to the waist, silver tiara with a blue gem, white dress with gold trims widening to the hem | None: hands clasped at the waist |
+| `princess`       | In the game: waits at the end of the first path, in place of the mystic | The maidens, Zelda                      | Drawn with a portrait (`art/npc/`): front, light skin, ginger hair down to the waist, silver tiara with a blue gem, white dress with gold trims widening to the hem | None: hands clasped at the waist |
 
 `the-guy` is a test npc and is left out. The elder and the alchemist must not read as the mage: keep the elder bent
 and hatless, and the alchemist in magenta with a flask.
