@@ -60,7 +60,7 @@ exported.
 
 ## Workflow
 
-1. **Read the design brief** for the asset, under `docs/design/` (e.g. [human characters](../../../docs/design/human-characters.md)),
+1. **Read the design brief** for the asset, under `docs/design/` (e.g. [humanoid characters](../../../docs/design/humanoid-characters.md)),
    and look at the assets it must match: `pixel preview` them (e.g. the
    knight, `art/unit/knight.aseprite`) and read the PNG it prints.
 2. **Start the source**: `pixel new art/unit/goblin.aseprite --size 16x16 --layer outline --layer shade --layer base`,
