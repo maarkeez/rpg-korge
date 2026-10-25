@@ -2,7 +2,7 @@
 
 > **Status:** in use. The game displays 16x16 and 32x32 units and npcs side by side, each filling its 32px tile (see
 > [Assets](../architecture/assets.md)). The sprites of this brief are drafted in `art-drafts/`, then moved to `art/` once
-> reviewed: the princess, the knight and the hero are in the game.
+> reviewed: the princess, the knight, the hero and the elf are in the game.
 >
 > **Summary:** Humanoids (humans, orcs, and later elves, dwarves or goblins) are drawn in the style of *The Legend of
 > Zelda: A Link to the Past* (SNES): big heads, a dark outline, three tone materials lit from the top left, and the role
@@ -121,6 +121,7 @@ human at this scale; start from it only when it helps:
 |---------|------------------------------|---------------------|------------------------------------------------------------------------------------|
 | Human   | The [skin ramps](#skin)      | `9`, 2 pixels tall   | No mouth nor nose on the sprite; a beard or a moustache may cover the chin           |
 | Orc     | Orc green: `J` `I` `H` `G`   | `z`, 1 pixel, in the shade of a heavy brow | Lower tusks (`+`), a jaw jutting forward, pointed ears, a topknot. Bigger than a human, the head small for the body |
+| Elf     | The light [skin ramp](#skin) | `2`, 2 pixels tall   | Long pointed ears rising out of the hair at the sides, up to the top of the head, as a leaf shape with a `l` (`t` on the far side) highlight. Human sized, no mouth nor nose on the sprite |
 
 Add a species here, with its ramps and features, the first time one is drawn.
 
@@ -160,7 +161,7 @@ The grass terrain is `N` and `O`: do not make them a character's main colour, it
 |--------------|------|-------|------|-----------|---------------------------------------|
 | Brown        | `w`  | `v`   | `u`  | `B`       | Tried                                 |
 | Black        | `W`  | `W`   | `w`  | `v`       | Tried, as the orc's topknot           |
-| Blond        | `x`  | `B`   | `A`  | `z`       |                                       |
+| Blond        | `x`  | `B`   | `A`  | `z`       | Tried, as the elf's hair              |
 | Ginger       | `q`  | `x`   | `y`  | `A`       | Tried, as the princess's hair. Reads copper, not red |
 | Grey, white  | `Y`  | `Z`   | `+`  | `=`       | Tried, as the mage's hair and beard   |
 
@@ -274,6 +275,7 @@ from the suggestions; anything not listed is free.
 | `alchemist`      | Sells potions and the teleport essence                             | Syrup, the witch brewing                | A tall pointed hat and robe in magenta, light skin                                                      | A potion flask                |
 | `mage`           | New, not in the game yet: a classic wizard                         | Sahasrahla, for the beard               | Drafted: three-quarter, violet pointed hat leaning back with a gold band, long white beard, violet robe widening to the hem | A wooden staff with a magic orb |
 | `orc`            | New, not in the game yet: a brute warrior                          | None; a classic fantasy orc             | Drafted: three-quarter, orc green, hunched, tusks, yellow eyes under a heavy brow, topknot, steel pauldron, leather kilt | A big axe held upright        |
+| `elf`            | In the game: a forest archer watching over the village             | None; a classic fantasy elf            | Drawn with a portrait (`art/npc/`): front, long pointed ears, blond hair to the jaw under a circlet of green leaves, green tunic with a leather belt, brown trousers and boots. The portrait adds a quiver strap across the chest | A longbow standing on the far side, a leather grip |
 | `princess`       | In the game: waits at the end of the first path, in place of the mystic | The maidens, Zelda                      | Drawn with a portrait (`art/npc/`): front, light skin, ginger hair down to the waist, silver tiara with a blue gem, white dress with gold trims widening to the hem | None: hands clasped at the waist |
 
 `the-guy` is a test npc and is left out. The elder and the alchemist must not read as the mage: keep the elder bent
