@@ -29,7 +29,7 @@ class PackageStructureArchitectureTest {
     @Test
     fun `should reside in a layer package of a subdomain when is a production file`() {
         // Given
-        val productionFiles = Konsist.scopeFromProduction().files
+        val productionFiles = Konsist.scopeFromProduction().files.filterNot { it.isTool() }
         // When
         val misplacedFiles = productionFiles.filterNot { it.isEntryPoint() || it.resideInAllowedPackage() }
         // Then
@@ -42,6 +42,9 @@ class PackageStructureArchitectureTest {
             }
         withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
+
+    // The tools under `tools` are standalone builds, with their own packages (see docs/plans/pixel-art-tool.md).
+    private fun KoFileDeclaration.isTool(): Boolean = path.contains("/tools/")
 
     private fun KoFileDeclaration.isEntryPoint(): Boolean = packagee?.fullyQualifiedName == "com.mkz.rpg" && nameWithExtension == "Main.kt"
 

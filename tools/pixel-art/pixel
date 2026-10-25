@@ -1,0 +1,12 @@
+#!/bin/sh
+# Runs the pixel art tool, building it first when its sources changed. See tools/pixel-art/README.md.
+set -e
+TOOL_DIR=$(cd "$(dirname "$0")" && pwd)
+BINARY="$TOOL_DIR/build/install/pixel/bin/pixel"
+
+if [ ! -x "$BINARY" ] || [ -n "$(find "$TOOL_DIR/src/main" "$TOOL_DIR/build.gradle.kts" "$TOOL_DIR/settings.gradle.kts" -newer "$BINARY" -print -quit)" ]; then
+    "$TOOL_DIR/../../gradlew" -p "$TOOL_DIR" installDist --quiet >&2
+    touch "$BINARY"
+fi
+
+exec "$BINARY" "$@"
