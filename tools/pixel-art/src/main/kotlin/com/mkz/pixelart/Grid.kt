@@ -69,12 +69,18 @@ object Grid {
             (region.x..region.right).map { x -> Palette.char(pixels[x, y]) }.joinToString("")
         }
 
-    /** The grid, with the x coordinates above it, the y coordinates on its left, and the legend of its colours below it. */
+    /**
+     * The grid, with the x coordinates above it, the y coordinates on its left, and the legend of its colours below it.
+     * The pixels [shown] rejects are printed as [Palette.KEEP_CHAR] and left out of the legend.
+     */
     fun annotated(
         pixels: Pixels,
         region: Region = Region.whole(pixels),
         title: String,
+        shown: (Point) -> Boolean = { true },
     ): String {
+        fun char(point: Point): Char = if (shown(point)) Palette.char(pixels[point.x, point.y]) else Palette.KEEP_CHAR
+
         val margin = region.bottom.toString().length + 1
         val columns = region.x..region.right
         val xAxis =
@@ -88,11 +94,12 @@ object Grid {
             }
         val rows =
             (region.y..region.bottom).map { y ->
-                y.toString().padStart(margin - 1) + " " + columns.map { x -> Palette.char(pixels[x, y]) }.joinToString("")
+                y.toString().padStart(margin - 1) + " " + columns.map { x -> char(Point(x, y)) }.joinToString("")
             }
         val counts =
             region
                 .points()
+                .filter(shown)
                 .map { pixels[it.x, it.y] }
                 .groupingBy { it }
                 .eachCount()

@@ -35,6 +35,7 @@ class ApplyCommand : CliktCommand("apply") {
     private val file by argument("FILE", help = "The .aseprite file.").file()
     private val script by argument("SCRIPT", help = "The file holding the script (default: the standard input).").file().optional()
     private val noExport by option("--no-export", help = "Do not export the PNG of a sprite under art/ to resources/.").flag()
+    private val quiet by option("--quiet", "-q", help = "Do not print the layers drawn on after the changes.").flag()
 
     override fun run() {
         val text = if (script == null || script!!.path == "-") System.`in`.bufferedReader().readText() else script!!.readText()
@@ -57,7 +58,7 @@ class ApplyCommand : CliktCommand("apply") {
                 }
             run(tokens, workspace, lineNumber, line)
         }
-        FileWorkspace.save(workspace.sprite, file, workspace.changes, export = !noExport, echo = ::echo)
+        FileWorkspace.save(workspace.sprite, file, workspace.changes, export = !noExport, quiet = quiet, echo = ::echo)
     }
 
     private fun run(

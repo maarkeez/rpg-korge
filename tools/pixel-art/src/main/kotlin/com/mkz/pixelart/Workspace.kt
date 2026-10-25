@@ -35,19 +35,27 @@ class FileWorkspace : Workspace {
     ) {
         val sprite = SpriteFiles.readSprite(file)
         val result = change(sprite)
-        save(sprite, file, listOf(result), export = !command.noExport, echo = command::echo)
+        save(sprite, file, listOf(result), export = !command.noExport, quiet = command.quiet, echo = command::echo)
     }
 
     companion object {
+        /** Saves the sprite, then prints what changed and, unless [quiet], every layer drawn on. */
         fun save(
             sprite: Sprite,
             file: File,
             changes: List<Change>,
             export: Boolean,
+            quiet: Boolean,
             echo: (String) -> Unit,
         ) {
-            changes.forEach { echo(it.description) }
             val exported = SpriteFiles.save(sprite, file, export)
+            changes.forEach { echo(it.description) }
+            if (!quiet) {
+                changes.mapNotNull { it.layerName }.distinct().filter { sprite.layerOrNull(it) != null }.forEach { name ->
+                    echo("")
+                    echo(Grid.annotated(sprite.layer(name).pixels, title = "layer '$name':"))
+                }
+            }
             echo("Saved $file" + (exported?.let { ", exported $it" } ?: ""))
         }
     }
@@ -79,6 +87,7 @@ abstract class EditCommand(
 ) : CliktCommand(name) {
     val file by argument("FILE", help = "The .aseprite file.").file()
     val noExport by option("--no-export", help = "Do not export the PNG of a sprite under art/ to resources/.").flag()
+    val quiet by option("--quiet", "-q", help = "Do not print the layer drawn on after the change.").flag()
 
     protected val workspace: Workspace get() = currentContext.findObject<Workspace>() ?: FileWorkspace()
 

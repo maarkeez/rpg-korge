@@ -35,6 +35,8 @@ fun pixel(): Pixel =
         ExportCommand(),
         *drawCommands().toTypedArray(),
         ApplyCommand(),
+        PreviewCommand(),
+        DiffCommand(),
     )
 
 fun main(args: Array<String>) {
