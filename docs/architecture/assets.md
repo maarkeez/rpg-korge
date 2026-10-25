@@ -49,3 +49,9 @@ Drop the image in `resources` following the naming conventions below. Neither th
 - Assets MUST only use the 64 colours of the FamiCube palette, defined by [`resources/famicube-palette.png`](../../resources/famicube-palette.png).
 - Pixels MUST be fully transparent or fully opaque. Semi-transparent pixels are not allowed.
 - Both rules are enforced for every image under `resources` by [`AssetPaletteArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssetPaletteArchitectureTest.kt). When an asset fails, the test lists each off-palette colour with its closest palette colour.
+
+## Outline
+
+- Battle units, npcs, their portraits, lootable items, buildings and the chest MUST be outlined with `#151515`, the knight's outline. The outline is their silhouette: the opaque pixels next to a transparent pixel or to the edge of the image, diagonals included.
+- Only the dark silhouette pixels (luminance below 60) must be `#151515`. Light or saturated trims on the silhouette are allowed, e.g.: the goat's pink.
+- The rule is enforced by [`AssetOutlineArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssetOutlineArchitectureTest.kt). The rat portrait, drawn without a single outline colour, is excluded.
