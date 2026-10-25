@@ -1,7 +1,9 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
 import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
@@ -15,6 +17,8 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemGiven
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
@@ -151,6 +155,54 @@ class InventoryTest {
         inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.EQUIPPED
         inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25).shouldBeNull()
         inventory().sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.NOT_STORED
+    }
+
+    @Test
+    fun `Give should remove one of the stored items, given to the receiver, when the item is stored`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
+        // When
+        val (events, updatedInventory) = inventory.give("hammer", receiverBattleUnitId = "viking-1").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
+        updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
+        events.shouldContainExactly(ItemGiven(battleUnitId = "knight-1", receiverBattleUnitId = "viking-1", lootableItemId = "hammer"))
+    }
+
+    @Test
+    fun `Give should fail when the item is not stored, or the only stored copy is equipped`() {
+        // Then
+        runCatching { inventory().give("hammer", receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+        runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).give("hammer", receiverBattleUnitId = "viking-1") }
+            .exceptionOrNull()
+            .shouldBeTypeOf<EquippedItemCanNotBeGiven>()
+    }
+
+    @Test
+    fun `GiveRefusal should tell whether no copy that is not equipped is stored`() {
+        // Then
+        inventory(storedItems = listOf("hammer")).giveRefusal("hammer").shouldBeNull()
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveRefusal("hammer") shouldBe GiveRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveRefusal("hammer").shouldBeNull()
+        inventory().giveRefusal("hammer") shouldBe GiveRefusalDto.NOT_STORED
+    }
+
+    @Test
+    fun `Receive should store the given item last when there is space left`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("mana-potion"))
+        // When
+        val (events, updatedInventory) = inventory.receive("hammer", giverBattleUnitId = "knight-1").pullEvents()
+        // Then
+        updatedInventory.toDto().storedItems.shouldContainExactly("mana-potion", "hammer")
+        updatedInventory.toDto().equippedItems shouldBe emptyMap()
+        events.shouldContainExactly(ItemReceived(battleUnitId = "viking-1", giverBattleUnitId = "knight-1", lootableItemId = "hammer"))
+    }
+
+    @Test
+    fun `Receive should fail when there is no space left`() {
+        // Then
+        runCatching { fullInventory().receive("hammer", giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
     }
 
     @Test

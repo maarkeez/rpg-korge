@@ -45,3 +45,9 @@ fun PlayerCallToActionView.inventoryFullMessage(): String = (callToAction as Inv
 fun PlayerCallToActionView.isFoundItemIconDisplayed(): Boolean = (callToAction as InventoryFullView).foundItemIcon != null
 
 suspend fun ViewsForTesting.clickLeaveIt(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as InventoryFullView).leaveButton)
+
+fun PlayerCallToActionView.isDisplayingGiveItem(): Boolean = visible && callToAction is GiveItemView
+
+fun PlayerCallToActionView.giveItemMessage(): String = (callToAction as GiveItemView).messageView.nameText()
+
+suspend fun ViewsForTesting.clickCancelGiving(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveItemView).cancelButton)

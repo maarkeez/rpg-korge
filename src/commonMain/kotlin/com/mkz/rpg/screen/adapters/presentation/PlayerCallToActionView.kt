@@ -72,23 +72,33 @@ open class PlayerCallToActionView(
 
     /**
      * Displays the name and price of the selected item and its actions, e.g.: Consume. It is dismissed once an action is
-     * selected.
+     * selected, unless the action displayed something else instead, e.g.: Give asks for the receiver.
      */
     open fun displayItemActions(
         itemName: String,
         itemPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
+        lateinit var itemActionsView: ItemActionsView
         val itemActions =
             actions.map { action ->
                 action.copy(
                     onSelected = {
                         action.onSelected()
-                        dismiss()
+                        if (callToAction === itemActionsView) dismiss()
                     },
                 )
             }
-        display(ItemActionsView(itemName = itemName, itemPrice = itemPrice, actions = itemActions))
+        itemActionsView = ItemActionsView(itemName = itemName, itemPrice = itemPrice, actions = itemActions)
+        display(itemActionsView)
+    }
+
+    /** Asks the player to tap the party member who receives the item, with Cancel. */
+    open fun displayGiveItem(
+        itemName: String,
+        onCancelled: () -> Unit,
+    ) {
+        display(GiveItemView(itemName = itemName, onCancelled = onCancelled))
     }
 
     /** Asks the player what to do with an item found while the inventory is full. */

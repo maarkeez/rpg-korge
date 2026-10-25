@@ -985,6 +985,31 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `TileSelected should hand the selected tile to the interceptor first, and ignore it when taken, e g while giving an item`() {
+        // Given
+        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
+        eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        val interceptedTiles = mutableListOf<Pair<Int, Int>>()
+        var isTaken = true
+        battlefieldPresenter.setTileInterceptor { row, column ->
+            interceptedTiles += row to column
+            isTaken
+        }
+        // When
+        battlefieldPresenter.tileSelected(row = 1, column = 1)
+        eventBus.dispatch()
+        // Then
+        interceptedTiles.shouldContainExactly(1 to 1)
+        selections.shouldBeEmpty()
+        // When
+        isTaken = false
+        battlefieldPresenter.tileSelected(row = 1, column = 1)
+        eventBus.dispatch()
+        // Then
+        selections.map { selection -> selection.battleUnitId }.shouldContainExactly("knight-1")
+    }
+
+    @Test
     fun `TileSelected should ignore the selected tile when the timeline is playing`() {
         // Given
         val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()

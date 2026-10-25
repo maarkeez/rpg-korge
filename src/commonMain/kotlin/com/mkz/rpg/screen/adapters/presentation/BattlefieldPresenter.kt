@@ -110,6 +110,9 @@ class BattlefieldPresenter(
     // The items displayed on each tile. Changed in timeline order, so each step draws the loot the battle had then.
     private val displayedLoot = mutableMapOf<PositionDto, List<String>>()
 
+    // Takes the tapped tiles before the battlefield HUD, e.g.: while giving an item. Returns whether it took the tap.
+    private var tileInterceptor: ((row: Int, column: Int) -> Boolean)? = null
+
     // The first battle unit of a swap and its unit, until the battle unit it swaps with has moved as well.
     private var pendingSwap: Pair<BattleUnitEvent.BattleUnitMoved, String>? = null
 
@@ -238,6 +241,11 @@ class BattlefieldPresenter(
 
     fun dispose() {
         subscriptions.forEach(Subscription::dispose)
+    }
+
+    /** Hands the tapped tiles to the interceptor first, which returns whether it took the tap, e.g.: to give an item. */
+    fun setTileInterceptor(interceptor: (row: Int, column: Int) -> Boolean) {
+        tileInterceptor = interceptor
     }
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
@@ -572,7 +580,10 @@ class BattlefieldPresenter(
     override fun tileSelected(
         row: Int,
         column: Int,
-    ) = whenIdle { if (!isTalking()) processTileSelected(row = row, column = column) }
+    ) = whenIdle {
+        if (isTalking() || tileInterceptor?.invoke(row, column) == true) return@whenIdle
+        processTileSelected(row = row, column = column)
+    }
 
     // The abilities can only be cast in a battle.
     override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) processAbilitySelected(abilityId) }

@@ -1,7 +1,9 @@
 package com.mkz.rpg.inventory.domain
 
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
 import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
+import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
@@ -15,6 +17,8 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemEquipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemGiven
+import com.mkz.rpg.inventory.domain.InventoryEvent.ItemReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
@@ -26,7 +30,8 @@ import kotlin.jvm.JvmInline
 
 /**
  * The lootable items a battle unit of the human player carries, and its gold. Each item takes one storage space, even while equipped. Each
- * equipment zone holds one equipped item. Items are looted, bought and sold, and the gold goes from 0 to 99,999.
+ * equipment zone holds one equipped item. Items are looted, bought, sold and given to other party members, and the gold goes from 0 to
+ * 99,999.
  */
 @ConsistentCopyVisibility
 data class Inventory private constructor(
@@ -184,6 +189,45 @@ data class Inventory private constructor(
         )
     }
 
+    /** Why it can not give the item to another party member: it stores no copy, or its only copy is equipped. `null` when it can give it. */
+    fun giveRefusal(lootableItemId: String): GiveRefusalDto? {
+        val item = LootableItemId(lootableItemId)
+        val storedCopies = storedItems.count(item)
+        return when {
+            storedCopies == 0 -> GiveRefusalDto.NOT_STORED
+            equippedItems.isEquipped(item) && storedCopies == 1 -> GiveRefusalDto.EQUIPPED
+            else -> null
+        }
+    }
+
+    /** Removes a stored copy that is not equipped, given to the receiver's inventory. */
+    fun give(
+        lootableItemId: String,
+        receiverBattleUnitId: String,
+    ): Inventory {
+        when (giveRefusal(lootableItemId)) {
+            GiveRefusalDto.NOT_STORED -> throw InventoryItemNotFound()
+            GiveRefusalDto.EQUIPPED -> throw EquippedItemCanNotBeGiven()
+            else -> Unit
+        }
+        return copy(
+            storedItems = storedItems.removeOne(LootableItemId(lootableItemId)),
+            events = events + ItemGiven(battleUnitId = battleUnitId.value, receiverBattleUnitId = receiverBattleUnitId, lootableItemId = lootableItemId),
+        )
+    }
+
+    /** Stores the item given by another party member, last and not equipped. Fails when it has no space left. */
+    fun receive(
+        lootableItemId: String,
+        giverBattleUnitId: String,
+    ): Inventory {
+        if (!canStore()) throw NoStorageSpaceLeft()
+        return copy(
+            storedItems = StoredItems(storedItems.value + LootableItemId(lootableItemId)),
+            events = events + ItemReceived(battleUnitId = battleUnitId.value, giverBattleUnitId = giverBattleUnitId, lootableItemId = lootableItemId),
+        )
+    }
+
     /** Unequips an item, which stays stored. */
     fun unequip(lootableItemId: String): Inventory {
         val item = LootableItemId(lootableItemId)
@@ -266,6 +310,20 @@ data class Inventory private constructor(
             NOT_STORED,
             EQUIPPED,
             GOLD_FULL,
+        }
+
+        /** Why a battle unit can not give an item to another party member. */
+        enum class GiveRefusalDto {
+            // The battle unit is not a member of the exploring party, e.g.: in a battle, or while talking to an npc.
+            NOT_EXPLORING,
+            NOT_STORED,
+            EQUIPPED,
+
+            // The battle unit is alone in the party.
+            NO_ONE,
+
+            // Every other party member has no space left.
+            BAGS_FULL,
         }
     }
 }

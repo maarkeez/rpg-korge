@@ -25,10 +25,17 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
         val onLeft: () -> Unit,
     )
 
+    data class DisplayedGiveItem(
+        val itemName: String,
+        val onCancelled: () -> Unit,
+    )
+
     // What the call to action displays last, e.g.: the item actions. `null` once dismissed.
     var displayedItemActions: DisplayedItemActions? = null
         private set
     var displayedInventoryFull: DisplayedInventoryFull? = null
+        private set
+    var displayedGiveItem: DisplayedGiveItem? = null
         private set
     var hideCount = 0
         private set
@@ -51,16 +58,19 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
     override fun dismiss() {
         displayedItemActions = null
         displayedInventoryFull = null
+        displayedGiveItem = null
     }
 
-    // As the real view, it is dismissed once an action is selected.
+    // As the real view, it is dismissed once an action is selected, unless the action displayed something else (e.g.: Give).
     override fun displayItemActions(
         itemName: String,
         itemPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
         displayedInventoryFull = null
-        displayedItemActions =
+        displayedGiveItem = null
+        lateinit var itemActions: DisplayedItemActions
+        itemActions =
             DisplayedItemActions(
                 itemName = itemName,
                 itemPrice = itemPrice,
@@ -68,10 +78,20 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
                     actions.map { action ->
                         action.copy(onSelected = {
                             action.onSelected()
-                            dismiss()
+                            if (displayedItemActions === itemActions) dismiss()
                         })
                     },
             )
+        displayedItemActions = itemActions
+    }
+
+    override fun displayGiveItem(
+        itemName: String,
+        onCancelled: () -> Unit,
+    ) {
+        displayedItemActions = null
+        displayedInventoryFull = null
+        displayedGiveItem = DisplayedGiveItem(itemName, onCancelled)
     }
 
     override fun displayInventoryFull(
@@ -81,6 +101,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView() {
         onLeft: () -> Unit,
     ) {
         displayedItemActions = null
+        displayedGiveItem = null
         displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemPrice, foundItemId, onLeft)
     }
 

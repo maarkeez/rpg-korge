@@ -207,6 +207,36 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayItemActions should keep what the action displayed instead when an item action is clicked, e g give`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView()
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            val give = ItemActionsView.Action(label = "Give") { playerCallToActionView.displayGiveItem(itemName = "Hammer", onCancelled = {}) }
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(give))
+            addChild(playerCallToActionView)
+            // When
+            clickItemAction(playerCallToActionView, "Give")
+            // Then
+            playerCallToActionView.isDisplayingGiveItem().shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayGiveItem should ask to tap a party member, and cancel when cancel is clicked`() =
+        sharedViewsTest {
+            // Given
+            var cancelled = false
+            val playerCallToActionView = PlayerCallToActionView()
+            addChild(playerCallToActionView)
+            playerCallToActionView.displayGiveItem(itemName = "Hammer", onCancelled = { cancelled = true })
+            // When
+            clickCancelGiving(playerCallToActionView)
+            // Then
+            playerCallToActionView.giveItemMessage() shouldBe "Tap a party member to give the Hammer"
+            cancelled.shouldBeTrue()
+        }
+
+    @Test
     fun `DisplayInventoryFull should display the found item with its price and leave it when leave it is clicked`() =
         sharedViewsTest {
             // Given

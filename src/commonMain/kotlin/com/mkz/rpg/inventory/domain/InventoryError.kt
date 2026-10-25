@@ -35,6 +35,10 @@ sealed class InventoryError(
 
     class ItemNotSoldByTheMerchant : InventoryError("The merchant does not sell the item")
 
+    class EquippedItemCanNotBeGiven : InventoryError("The item must be unequipped before giving it")
+
+    class NotExploringTheParty : InventoryError("The items can only be given while the party explores")
+
     class NotAPartyMember : InventoryError("The inventory can only be used by a party member")
 
     class NotTheBattleUnitPlayerTurn : InventoryError("The inventory can only be used during the turn of its battle unit player")

@@ -19,6 +19,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `unequipItem`     | Unequips an item, which stays stored, and requests the removal of its effects. See [Equipment](#equipment).                                         |
 | `buyItem`         | Pays the price of an item the merchant sells, and stores it. See [Buying and selling](#buying-and-selling).                                        |
 | `sellItem`        | Removes an item that is not equipped, and receives half its price. See [Buying and selling](#buying-and-selling).                                  |
+| `giveItem`        | Moves an item that is not equipped to another party member's inventory, while exploring. See [Giving](#giving).                                     |
 
 | Query                           | What it answers                                         |
 |---------------------------------|---------------------------------------------------------|
@@ -27,6 +28,8 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `canConsumeItem`                | Whether the battle unit can consume the item now.       |
 | `searchBuyRefusal`              | Why the battle unit can not buy the item now, if so.    |
 | `searchSellRefusal`             | Why the battle unit can not sell the item now, if so.   |
+| `searchGiveRefusal`             | Why the battle unit can not give the item now, if so.   |
+| `searchGiveReceivers`           | The party members that can receive an item from it.     |
 
 - Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
 - Storing is not limited to the player's turn, as it happens while a battle unit moves.
@@ -84,6 +87,16 @@ A battle unit trades as a party member, while the party talks to a merchant ([`T
 - Buying announces `ItemBought`, and selling `ItemSold`, with the price paid. A sold item leaves the game, so it does not join the merchant's stock.
 - Any item can be sold, also the ones the merchant does not sell.
 - `searchBuyRefusal` and `searchSellRefusal` answer why instead of failing (a `TradeRefusalDto`, e.g.: `NOT_ENOUGH_GOLD`, `BAG_FULL`, `EQUIPPED` or `GOLD_FULL`), or `null` when the trade is allowed, so the shop dims the items and disables Buy and Sell with the reason. The same rules make `buyItem` and `sellItem` fail. See [Shopping at a merchant](exploration.md#shopping-at-a-merchant).
+
+## Giving
+
+While exploring, only the leader walks where the player says, so the other party members hardly ever loot. A battle unit gives a stored item to another member of its party instead (see [the plan](../plans/give-items.md)), through [`GiveRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/GiveRule.kt):
+
+- Only while the party explores: not in a battle, and not while talking to an npc, the merchants included. Otherwise `giveItem` fails (`NotExploringTheParty`). The receiver is another member of the party (`NotAPartyMember`), wherever it stands.
+- One item at a time. The giver removes a stored copy that is not equipped, announcing `ItemGiven`, and the receiver stores it last, not equipped, announcing `ItemReceived`. Both inventories are saved together, so nothing changes when either side fails.
+- The only stored copy of an equipped item can not be given (`EquippedItemCanNotBeGiven`): the player unequips it first. A receiver with no space left can not receive (`NoStorageSpaceLeft`).
+- Gold is never given: each battle unit keeps its own.
+- `searchGiveRefusal` answers why the item can not be given to anyone (a `GiveRefusalDto`: `NOT_EXPLORING`, `NOT_STORED`, `EQUIPPED`, `NO_ONE` when the giver is alone, or `BAGS_FULL` when every other member is full), or `null`. `searchGiveReceivers` answers the other members with space left, in party order. See [Inventory while exploring](exploration.md#inventory).
 
 ## Learning an ability
 
