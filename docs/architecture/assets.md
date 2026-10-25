@@ -22,9 +22,23 @@ Contributors add, edit and remove the individual files under `resources`. The ga
 - Paths are relative to `resources`, e.g.: `unit/knight.png`.
 - Views MUST NOT read resources themselves. This is enforced by [`PresentationResourcesArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/PresentationResourcesArchitectureTest.kt).
 
+## Sources
+
+Every image has a layered Aseprite source under [`art`](../../art), at the same path: `art/unit/knight.aseprite` is the
+source of `resources/unit/knight.png`. Sources are kept out of `resources`, so they are not bundled.
+
+- They are drawn with the [`pixel` tool](../../tools/pixel-art/README.md), which coding agents use through the
+  [`pixel-art` skill](../../.claude/skills/pixel-art/SKILL.md). They can also be opened in Aseprite, as long as they
+  keep a single frame, without layer groups, blend modes, tags nor slices.
+- Every time the tool saves a source, it exports what its visible layers display to its PNG, so the PNG follows its
+  source. A PNG whose pixels did not change is left as it is.
+- Sources are indexed with the colours of the palette below, so they can only hold valid pixels.
+- `famicube-palette.png` has no source: it is the palette itself.
+
 ## Adding an asset
 
-Drop the image in `resources` following the naming conventions below. Neither the bundle, the loader nor the views need to change. A new unit, building, ability or effect also needs its data file, see [Game data](game-data.md).
+Draw its source under `art` with the `pixel` tool, or drop the image in `resources` and import it
+(`tools/pixel-art/pixel import resources/<path>.png art/<path>.aseprite`), following the naming conventions below. Neither the bundle, the loader nor the views need to change. A new unit, building, ability or effect also needs its data file, see [Game data](game-data.md).
 
 | Asset                            | Path                                  | Example                          |
 |----------------------------------|---------------------------------------|----------------------------------|

@@ -1,6 +1,6 @@
 # Plan: A pixel art tool for coding agents
 
-> **Status:** in progress.
+> **Status:** done.
 >
 > **Summary:** A command line tool, `pixel`, for Claude agents to draw the game's low resolution art (16x16, 32x32, ...)
 > following the design brief. It reads and writes Aseprite files, so the art keeps its layers and can still be opened
