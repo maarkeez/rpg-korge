@@ -23,37 +23,37 @@ class IsInSightTest {
     private fun givenParty() = queries.partyRepository.save(party(battleUnitIds = listOf("knight-1")))
 
     @Test
-    fun `should be in sight when it stands within 7 tiles of the leader on each axis`() {
+    fun `should be in sight when it stands within 4 tiles of the leader on each axis`() {
         // Given
         givenParty()
-        givenBattlefield(leader = 10 to 12, rat = 17 to 5)
+        givenBattlefield(leader = 10 to 12, rat = 14 to 8)
         // When / Then
         isInSight(battleUnitId = "rat-1").shouldBeTrue()
     }
 
     @Test
-    fun `should not be in sight when it stands 8 tiles away from the leader`() {
+    fun `should not be in sight when it stands 5 tiles away from the leader`() {
         // Given
         givenParty()
-        givenBattlefield(leader = 10 to 12, rat = 10 to 20)
+        givenBattlefield(leader = 10 to 12, rat = 10 to 17)
         // When / Then
         isInSight(battleUnitId = "rat-1").shouldBeFalse()
     }
 
     @Test
     fun `should shift the area in sight inside the battlefield near a border`() {
-        // Given: the camera does not scroll left of the first column, so it shows the columns 0 to 12, and 13 is 1 tile around.
+        // Given: the camera does not scroll left of the first column, so it shows the columns 0 to 6, and 7 is 1 tile around.
         givenParty()
-        givenBattlefield(leader = 10 to 1, rat = 10 to 13)
+        givenBattlefield(leader = 10 to 1, rat = 10 to 7)
         // When / Then
         isInSight(battleUnitId = "rat-1").shouldBeTrue()
     }
 
     @Test
     fun `should shift the area in sight inside the battlefield near the last row`() {
-        // Given: the camera does not scroll below the last row, so it shows the rows 27 to 39, and 26 is 1 tile around.
+        // Given: the camera does not scroll below the last row, so it shows the rows 33 to 39, and 32 is 1 tile around.
         givenParty()
-        givenBattlefield(leader = 38 to 12, rat = 26 to 12)
+        givenBattlefield(leader = 38 to 12, rat = 32 to 12)
         // When / Then
         isInSight(battleUnitId = "rat-1").shouldBeTrue()
     }

@@ -55,9 +55,10 @@ Draw its source under `art` with the `pixel` tool, or drop the image in `resourc
 | Terrain transition strip         | `terrain/transitions/<from>_to_<to>.png` | `terrain/transitions/sand_to_lava.png` |
 
 - Units, npcs, buildings and abilities without an image are not displayed.
-- A battlefield tile is 32px. Battle units and npcs are 16x16 or 32x32 (the [humanoid characters](../design/humanoid-characters.md)),
-  both scaled to fill their tile: 16x16 at 2x, 32x32 at 1x. The size is read from the image, so replacing a 16x16 image
-  by a 32x32 one is enough. Terrain and building pieces are drawn at 2x, loot at 1x.
+- A battlefield tile is 64px, so every image on it is drawn at a whole scale (see [pixel perfect tiles](../plans/pixel-perfect-tiles.md)).
+  Battle units and npcs are 16x16 or 32x32 (the [humanoid characters](../design/humanoid-characters.md)), both scaled
+  to fill their tile: 16x16 at 4x, 32x32 at 2x. The size is read from the image, so replacing a 16x16 image by a 32x32
+  one is enough. Terrain, building pieces and the tile selections are drawn at 4x, loot at 2x.
 - A building image spans its tiles: it is cut into one 16x16 piece per tile, drawn right above the terrain of that tile.
 - Effects without an image fail when displayed.
 

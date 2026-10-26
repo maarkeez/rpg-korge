@@ -1,7 +1,7 @@
 # Design brief: humanoid characters
 
 > **Status:** in use, rewritten for the top-down view. The game displays 16x16 and 32x32 units and npcs side by side,
-> each filling its 32px tile (see [Assets](../architecture/assets.md)). The sprites of this brief are drafted in
+> each filling its 64px tile (see [Assets](../architecture/assets.md)). The sprites of this brief are drafted in
 > `art-drafts/`, then moved to `art/` once reviewed. The elf is the first character drawn with this version; the rest
 > of the cast is to be redrawn with it, see [Redrawing the cast](#redrawing-the-cast).
 >
@@ -91,7 +91,7 @@ its back views, and its animations.
 - **The canvas is a limit, not a size to fill.** Draw the character as big as it is: a child is small, a villager about
   21 rows, an orc almost the whole canvas. Leave the rest transparent.
 - **Anchor:** the shadow's bottom row is row 31; the feet stand on row 30, centred on columns 15-16. The whole canvas
-  is the tile the character stands on, drawn at 1x where 16x16 art is drawn at 2x: nothing overlaps the neighbouring
+  is the tile the character stands on, drawn at 2x where 16x16 art is drawn at 4x: nothing overlaps the neighbouring
   tiles. Gear may use the whole canvas.
 - Sources outside `art/` are not exported. Export the PNG next to the source after every change:
   `tools/pixel-art/pixel export art-drafts/humanoid/<id>.aseprite --out art-drafts/humanoid/<id>.png`.

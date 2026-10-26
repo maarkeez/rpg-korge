@@ -1,6 +1,6 @@
 # Plan: The princess replaces the mystic, the first 32x32 character
 
-> **Status:** done.
+> **Status:** done. The tiles later became 64px, showing 6x6 tiles, see [pixel perfect tiles](pixel-perfect-tiles.md).
 >
 > **Summary:** The mystic at the end of the first path becomes a princess, drawn with the
 > [humanoid characters brief](../design/humanoid-characters.md). She is the first 32x32 character on the battlefield.

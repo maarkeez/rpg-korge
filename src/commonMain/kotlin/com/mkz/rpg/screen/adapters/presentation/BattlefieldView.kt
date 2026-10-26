@@ -42,8 +42,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.joinAll
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.exp
 import kotlin.math.max
+import kotlin.math.round
 import kotlin.math.sign
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -79,20 +81,21 @@ open class BattlefieldView(
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
         private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
 
-        // A tile is 32px: its 16x16 art (the terrain, most units and npcs) is drawn at 2x, and its 32x32 art at 1x.
-        const val TILE_SIZE = 32
+        // A tile is 64px, so all its art is drawn at a whole scale: its 16x16 art (the terrain, most units and npcs) at 4x,
+        // and its 32x32 art at 2x.
+        const val TILE_SIZE = 64
         const val TILE_PIXEL_SIZE = 16
-        const val VISIBLE_TILES = 12
+        const val VISIBLE_TILES = 6
         const val VIEWPORT_WIDTH = TILE_SIZE * VISIBLE_TILES
         const val VIEWPORT_HEIGHT = TILE_SIZE * VISIBLE_TILES
 
         // The loot is drawn smaller than the battle units, so the terrain shows around it.
-        const val LOOT_SCALE = 1.0
+        const val LOOT_SCALE = 2.0
         const val CHEST_PATH = "battlefield/chest.png"
 
         // A picked up item rises this far from the center of its tile, growing to this scale while it fades out.
         const val PICK_UP_RISE = TILE_SIZE / 2.0
-        const val PICK_UP_SCALE = 1.5
+        const val PICK_UP_SCALE = 3.0
         val PICK_UP_DURATION = 400.milliseconds
 
         // How long a moving battle unit glides from one tile of its path to the next.
@@ -115,9 +118,10 @@ open class BattlefieldView(
         val CATCH_UP_TIME = 80.milliseconds
         const val CATCH_UP_MIN_SPEED = TILE_SIZE * 8.0
 
-        // Swapping, the leader hops over the party member this high, half-way, while the member slides underneath.
+        // Swapping, the leader hops over the party member this high, half-way, while the member slides underneath. A whole
+        // number of pixels, so the hop lands where it started.
         val SWAP_DURATION = 150.milliseconds
-        const val SWAP_HOP_HEIGHT = TILE_SIZE / 3.0
+        const val SWAP_HOP_HEIGHT = (TILE_SIZE / 3).toDouble()
 
         // Opacity of the black mask over the tiles that can not be selected.
         const val DIM_ALPHA = 0.4
@@ -163,6 +167,9 @@ open class BattlefieldView(
 
     // The flashes blinking or waiting on each tile, stopped once its battle unit leaves it.
     private val flashes = mutableMapOf<PositionDto, MutableList<Job>>()
+
+    // The picked up items rising from their tile, drawn at whole pixels like the other views moving on the battlefield.
+    private val risingLoot = mutableSetOf<View>()
 
     // A battlefield smaller than the viewport can not be scrolled.
     private var minScrollX = 0.0
@@ -267,6 +274,7 @@ open class BattlefieldView(
             viewport.container {
                 addUpdater { dt ->
                     trailLeader(dt)
+                    drawAtWholePixels()
                     movingBattleUnits.pos = battlefieldGrid.pos
                     refreshTileWindow()
                 }
@@ -492,12 +500,17 @@ open class BattlefieldView(
                 x = TILE_SIZE / 2.0
                 y = TILE_SIZE / 2.0
             }
-        pickedUpView
-            .animator(parallel = true) {
-                moveBy(pickedUpView, x = 0.0, y = -PICK_UP_RISE, time = PICK_UP_DURATION, easing = Easing.EASE_OUT_QUAD)
-                scaleTo(pickedUpView, PICK_UP_SCALE, time = PICK_UP_DURATION)
-                alpha(pickedUpView, 0.0, time = PICK_UP_DURATION, easing = Easing.EASE_IN_QUAD)
-            }.awaitComplete()
+        risingLoot += pickedUpView
+        try {
+            pickedUpView
+                .animator(parallel = true) {
+                    moveBy(pickedUpView, x = 0.0, y = -PICK_UP_RISE, time = PICK_UP_DURATION, easing = Easing.EASE_OUT_QUAD)
+                    scaleTo(pickedUpView, PICK_UP_SCALE, time = PICK_UP_DURATION)
+                    alpha(pickedUpView, 0.0, time = PICK_UP_DURATION, easing = Easing.EASE_IN_QUAD)
+                }.awaitComplete()
+        } finally {
+            risingLoot -= pickedUpView
+        }
         pickedUpView.removeFromParent()
     }
 
@@ -858,7 +871,8 @@ open class BattlefieldView(
         }
     }
 
-    // The scroll of one axis keeping the trailed offset inside the deadzone, clamped to the battlefield.
+    // The scroll of one axis keeping the trailed offset inside the deadzone, clamped to the battlefield. At a whole pixel,
+    // as the scroll is drawn there anyway (e.g.: while the leader glides).
     private fun trailedScroll(
         trailedOffset: Double,
         scrollOffset: Double,
@@ -871,9 +885,10 @@ open class BattlefieldView(
                 trailedOffsetInViewport > DEADZONE_END -> DEADZONE_END - trailedOffset
                 else -> scrollOffset
             }
-        return trailedScroll.clamp(minScroll, 0.0)
+        return round(trailedScroll).clamp(minScroll, 0.0)
     }
 
+    // Moves by whole pixels, at least one, so the scroll drawn at whole pixels still reaches the target.
     private fun catchUp(
         scrollOffset: Double,
         targetOffset: Double,
@@ -881,8 +896,27 @@ open class BattlefieldView(
     ): Double {
         val distance = targetOffset - scrollOffset
         val eased = abs(distance) * (1 - exp(-(dt / CATCH_UP_TIME)))
-        val step = max(eased, CATCH_UP_MIN_SPEED * dt.toDouble(DurationUnit.SECONDS))
+        val step = ceil(max(eased, CATCH_UP_MIN_SPEED * dt.toDouble(DurationUnit.SECONDS)))
         return if (step >= abs(distance)) targetOffset else scrollOffset + sign(distance) * step
+    }
+
+    /**
+     * Puts the views moving on the battlefield back on whole pixels, once they moved on this frame, so every art pixel is
+     * drawn with the same number of screen pixels: the scroll, the gliding battle units (and the image of the one hopping)
+     * and the rising loot. Their animations go on from where they started, so rounding them does not slow them down.
+     */
+    private fun drawAtWholePixels() {
+        battlefieldGrid.roundPosition()
+        movingBattleUnits.forEachChild { glidingUnit ->
+            glidingUnit.roundPosition()
+            glidingUnit.forEachChild { image -> image.roundPosition() }
+        }
+        risingLoot.forEach { pickedUpView -> pickedUpView.roundPosition() }
+    }
+
+    private fun View.roundPosition() {
+        x = round(x)
+        y = round(y)
     }
 
     // Scrolls each axis where the tile is out of the viewport or on its edge, centering it, and keeps the scroll of the
