@@ -1,5 +1,3 @@
-name = "Blacksmith"
-line = "Fresh from the forge! A sturdy hammer keeps you standing for longer."
 row = 21
 column = 5
 stock = ["hammer", "iron-hammer", "rune-hammer"]

@@ -225,10 +225,10 @@ const DATA = {
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 34, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 39, "importsOut": 64},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 34, "importsOut": 12},
-    {"name": "screen", "files": 67, "fanIn": 0, "fanOut": 21, "instability": 1.0, "importsIn": 0, "importsOut": 175},
+    {"name": "screen", "files": 67, "fanIn": 0, "fanOut": 21, "instability": 1.0, "importsIn": 0, "importsOut": 174},
     {"name": "shared", "files": 13, "fanIn": 21, "fanOut": 0, "instability": 0.0, "importsIn": 398, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 7},
-    {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 21, "importsOut": 15}
+    {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 20, "importsOut": 15}
   ],
   "edges": [
     {"from": "ability", "to": "effect", "weight": 5, "files": 4, "imports": [
@@ -1283,14 +1283,13 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "terrain.adapters.presentation.TerrainApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderScene.kt", "layer": "adapters", "name": "terrain.adapters.presentation.TerrainApi"}
     ]},
-    {"from": "screen", "to": "unit", "weight": 7, "files": 7, "imports": [
+    {"from": "screen", "to": "unit", "weight": 6, "files": 6, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/AttackPreviewView.kt", "layer": "adapters", "name": "unit.domain.Unit"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleUnitInfoView.kt", "layer": "adapters", "name": "unit.domain.Unit"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/ReceiverPreviewView.kt", "layer": "adapters", "name": "unit.domain.Unit"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"}
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ReceiverPreviewView.kt", "layer": "adapters", "name": "unit.domain.Unit"}
     ]},
     {"from": "terrain", "to": "shared", "weight": 7, "files": 5, "imports": [
       {"file": "com/mkz/rpg/terrain/adapters/events/OnRequestInitialiseTerrains.kt", "layer": "adapters", "name": "shared.domain.EventBus"},

@@ -30,7 +30,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should be visible when is displayed`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
             attackPreviewView.display(receivers = emptyList())
             // Then
@@ -41,7 +41,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should not display receivers when no receiver is provided`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
             attackPreviewView.display(receivers = emptyList())
             // Then
@@ -53,7 +53,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should display the receiver without counter when one receiver is provided`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
             attackPreviewView.display(receivers = receivers(1))
             // Then
@@ -67,7 +67,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should display every receiver with its counter when several receivers are provided`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
             attackPreviewView.display(receivers = receivers(3))
             // Then
@@ -81,7 +81,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should hide the previous receivers when fewer receivers are provided`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             attackPreviewView.display(receivers = receivers(3))
             // When
             attackPreviewView.display(receivers = receivers(1))
@@ -94,7 +94,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Drag should scroll to the next receiver when several receivers are displayed`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             addChild(attackPreviewView)
             attackPreviewView.display(receivers = receivers(3))
             // When
@@ -107,7 +107,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Drag should stop on the last receiver when dragged beyond it`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             addChild(attackPreviewView)
             attackPreviewView.display(receivers = receivers(3))
             // When
@@ -120,7 +120,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Drag should stop on the closest row when dragged less than half a row`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             addChild(attackPreviewView)
             attackPreviewView.display(receivers = receivers(3))
             // When
@@ -133,7 +133,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Drag should not scroll when one receiver is displayed`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             addChild(attackPreviewView)
             attackPreviewView.display(receivers = receivers(1))
             // When
@@ -146,7 +146,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Display should show the caster again when it was scrolled out of view`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             addChild(attackPreviewView)
             attackPreviewView.display(receivers = receivers(3))
             dragVertically(attackPreviewView, dy = -100.0)
@@ -160,7 +160,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
     fun `Hide should not be visible when is hidden`() =
         sharedViewsTest {
             // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             attackPreviewView.display(receivers = emptyList())
             // When
             attackPreviewView.hide()

@@ -32,7 +32,6 @@ class ResourcesLootableItemLoader(
 
     @Serializable
     data class LootableItemDefinition(
-        val name: String,
         val price: Int,
         val type: String,
         val consumable: ConsumableDefinition? = null,
@@ -41,7 +40,6 @@ class ResourcesLootableItemLoader(
         fun toDto(lootableItemId: String): LootableItem.Dto =
             LootableItem.Dto(
                 id = lootableItemId,
-                name = name,
                 price = price,
                 lootType =
                     when (enumOf<TypeDto>("type", type)) {

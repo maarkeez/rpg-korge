@@ -9,10 +9,6 @@ sealed class AbilityError(
 
     class EmptyAbilityId : AbilityError(message = "Ability id is empty")
 
-    class EmptyAbilityName : AbilityError(message = "Ability name is empty")
-
-    class AbilityNameTooLong : AbilityError(message = "Ability name is longer than 50 characters")
-
     class NegativeAbilityCost : AbilityError(message = "Ability cost is negative")
 
     class AbilityCostAboveLimit : AbilityError(message = "Ability cost cost is higher than 999")

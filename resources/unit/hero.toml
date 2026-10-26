@@ -1,4 +1,3 @@
-name = "Mage"
 healthPoints = 100
 manaPoints = 30
 movementRange = 3

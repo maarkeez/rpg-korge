@@ -4,11 +4,9 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityCooldownAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
-import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
 import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
-import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
@@ -17,7 +15,6 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class Ability private constructor(
     private val id: Id,
-    private val name: Name,
     private val cost: Cost,
     private val cooldown: Cooldown,
     private val turnsDuration: TurnsDuration?,
@@ -29,7 +26,6 @@ data class Ability private constructor(
         fun create(dto: Dto): Ability =
             Ability(
                 id = Id(dto.id),
-                name = Name(dto.name),
                 cost = Cost(dto.cost),
                 cooldown = Cooldown(dto.cooldown),
                 turnsDuration = dto.turnsDuration?.let(::TurnsDuration),
@@ -42,7 +38,6 @@ data class Ability private constructor(
     fun toDto() =
         Dto(
             id = id.value,
-            name = name.value,
             cost = cost.value,
             cooldown = cooldown.value,
             targeting = targeting.toDto(),
@@ -57,15 +52,6 @@ data class Ability private constructor(
     ) {
         init {
             if (value.isBlank()) throw EmptyAbilityId()
-        }
-    }
-
-    @JvmInline private value class Name(
-        val value: String,
-    ) {
-        init {
-            if (value.isBlank()) throw EmptyAbilityName()
-            if (value.count() > 50) throw AbilityNameTooLong()
         }
     }
 
@@ -191,7 +177,6 @@ data class Ability private constructor(
 
     data class Dto(
         val id: String,
-        val name: String,
         val cost: Int,
         val cooldown: Int,
         val targeting: TargetingDto,

@@ -74,7 +74,6 @@ class UnitTest {
         val unit =
             UnitMother.unit(
                 id = "unit-1",
-                name = "Knight",
                 healthPoints = 10,
                 manaPoints = 5,
                 abilities = listOf("ability-1"),
@@ -86,7 +85,6 @@ class UnitTest {
         result shouldBe
             Unit.Dto(
                 id = "unit-1",
-                name = "Knight",
                 healthPoints = 10,
                 manaPoints = 5,
                 abilities = listOf("ability-1"),

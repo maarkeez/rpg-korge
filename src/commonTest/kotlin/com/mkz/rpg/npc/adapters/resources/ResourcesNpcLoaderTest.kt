@@ -15,13 +15,13 @@ class ResourcesNpcLoaderTest {
             // Given
             val npcRoot =
                 MemoryVfsMix(
-                    "npc/the-guy.toml" to "name = \"The Guy\"\nline = \"G'day bloke!\"\nrow = 10\ncolumn = 2\n",
+                    "npc/the-guy.toml" to "row = 10\ncolumn = 2\n",
                 )["npc"]
             val loader = ResourcesNpcLoader(npcRoot = npcRoot)
             // When
             loader.initResources()
             // Then
-            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 10, column = 2))
+            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "the-guy", row = 10, column = 2))
         }
 
     @Test
@@ -30,13 +30,13 @@ class ResourcesNpcLoaderTest {
             // Given
             val npcRoot =
                 MemoryVfsMix(
-                    "npc/viking.toml" to "name = \"Viking\"\nline = \"For Valhalla!\"\nrow = 12\ncolumn = 2\nunitId = \"viking\"\n",
+                    "npc/viking.toml" to "row = 12\ncolumn = 2\nunitId = \"viking\"\n",
                 )["npc"]
             val loader = ResourcesNpcLoader(npcRoot = npcRoot)
             // When
             loader.initResources()
             // Then
-            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 12, column = 2, unitId = "viking"))
+            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "viking", row = 12, column = 2, unitId = "viking"))
         }
 
     @Test
@@ -45,22 +45,22 @@ class ResourcesNpcLoaderTest {
             // Given
             val npcRoot =
                 MemoryVfsMix(
-                    "npc/merchant.toml" to "name = \"Merchant\"\nline = \"How can I help you?\"\nrow = 14\ncolumn = 2\nstock = [\"mana-potion\", \"hammer\"]\n",
+                    "npc/merchant.toml" to "row = 14\ncolumn = 2\nstock = [\"mana-potion\", \"hammer\"]\n",
                 )["npc"]
             val loader = ResourcesNpcLoader(npcRoot = npcRoot)
             // When
             loader.initResources()
             // Then
             loader.loadNpcs().shouldContainExactly(
-                Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 14, column = 2, stock = listOf("mana-potion", "hammer")),
+                Npc.Dto(id = "merchant", row = 14, column = 2, stock = listOf("mana-potion", "hammer")),
             )
         }
 
     @Test
-    fun `should fail with the file when the npc has no line`() =
+    fun `should fail with the file when the npc has no row`() =
         runTest {
             // Given
-            val npcRoot = MemoryVfsMix("npc/the-guy.toml" to "name = \"The Guy\"\nrow = 10\ncolumn = 2\n")["npc"]
+            val npcRoot = MemoryVfsMix("npc/the-guy.toml" to "column = 2\n")["npc"]
             val loader = ResourcesNpcLoader(npcRoot = npcRoot)
             // When
             val initialisation = suspend { loader.initResources() }

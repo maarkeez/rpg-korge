@@ -9,18 +9,16 @@ import korlibs.io.util.UUID
 object LootableItemMother {
     fun lootableItem(
         id: String = lootableItemId(),
-        name: String = lootableItemName(),
         price: Int = lootableItemPrice(),
         lootType: LootTypeDto = arrayOf(LootTypeDto.consumable(consumable()), LootTypeDto.equippable(equippable())).random(),
     ): LootableItem =
         LootableItem
-            .create(dto = LootableItem.Dto(id = id, name = name, price = price, lootType = lootType))
+            .create(dto = LootableItem.Dto(id = id, price = price, lootType = lootType))
             .pullEvents()
             .second
 
     fun consumableLootableItem(
         id: String = lootableItemId(),
-        name: String = lootableItemName(),
         price: Int = lootableItemPrice(),
         consumable: ConsumableDto = consumable(),
     ): LootableItem =
@@ -29,7 +27,6 @@ object LootableItemMother {
                 dto =
                     LootableItem.Dto(
                         id = id,
-                        name = name,
                         price = price,
                         lootType =
                             LootTypeDto(
@@ -43,7 +40,6 @@ object LootableItemMother {
 
     fun equippableLootableItem(
         id: String = lootableItemId(),
-        name: String = lootableItemName(),
         price: Int = lootableItemPrice(),
         equippable: EquippableDto = equippable(),
     ): LootableItem =
@@ -52,7 +48,6 @@ object LootableItemMother {
                 dto =
                     LootableItem.Dto(
                         id = id,
-                        name = name,
                         price = price,
                         lootType =
                             LootTypeDto(
@@ -72,8 +67,6 @@ object LootableItemMother {
     ): EquippableDto = EquippableDto(effectIds = effectIds, equipmentZone = equipmentZone)
 
     fun lootableItemId(): String = "lootable-item-" + UUID.randomUUID().toString()
-
-    fun lootableItemName(): String = "lootable-item-name-" + UUID.randomUUID().toString()
 
     fun lootableItemPrice(): Int = (0..999).random()
 

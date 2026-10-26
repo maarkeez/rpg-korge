@@ -69,8 +69,8 @@ class InventoryPresenterTest {
                 ),
             lootableItems =
                 listOf(
-                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
-                    equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
+                    consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
+                    equippableLootableItem(id = "hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
                     consumableLootableItem(id = "teleport-essence", consumable = consumable(effectIds = setOf("learn-teleport"))).toDto(),
                     consumableLootableItem(id = "bee-essence", consumable = consumable(effectIds = setOf("learn-bee"))).toDto(),
                 ),

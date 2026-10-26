@@ -44,7 +44,7 @@ class BattleScene(
     private val resourcesLoader = BattleSceneResourcesLoader()
     val battlefieldView = BattlefieldView(resourcesLoader)
     val battleUnitInfoView = BattleUnitInfoView(resourcesLoader, texts)
-    val attackPreviewView = AttackPreviewView(resourcesLoader)
+    val attackPreviewView = AttackPreviewView(resourcesLoader, texts)
     val inventoryView = InventoryView(resourcesLoader, texts)
     val battleHudView =
         BattleHudView(
@@ -55,7 +55,7 @@ class BattleScene(
         )
     val playerCallToActionView = PlayerCallToActionView(texts, resourcesLoader)
     val virtualPadView = VirtualPadView(Size(390, 300))
-    val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
+    val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader, texts)
     val shopView = ShopView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
@@ -184,7 +184,6 @@ class BattleScene(
                         inventoryApi,
                         lootableItemApi,
                         battleUnitApi,
-                        unitApi,
                         battlefieldApi,
                         texts,
                         timeline,

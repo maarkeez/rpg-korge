@@ -11,7 +11,7 @@ import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
 class NpcTest {
-    private val theGuy = Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 10, column = 2)
+    private val theGuy = Npc.Dto(id = "the-guy", row = 10, column = 2)
 
     @Test
     fun `Place should place the npc on its tile when its name and line are given`() {
@@ -35,7 +35,7 @@ class NpcTest {
     @Test
     fun `Place should place a recruitable npc with its unit, in the npc placed event too, when its unit is given`() {
         // Given
-        val viking = Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 12, column = 2, unitId = "viking")
+        val viking = Npc.Dto(id = "viking", row = 12, column = 2, unitId = "viking")
         // When
         val (events, npc) = Npc.place(viking).pullEvents()
         // Then
@@ -56,7 +56,7 @@ class NpcTest {
     @Test
     fun `Place should place a merchant with the items it sells, in their order, when its stock is given`() {
         // Given
-        val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 14, column = 2, stock = listOf("mana-potion", "health-potion", "hammer"))
+        val merchant = Npc.Dto(id = "merchant", row = 14, column = 2, stock = listOf("mana-potion", "health-potion", "hammer"))
         // When
         val (events, npc) = Npc.place(merchant).pullEvents()
         // Then
@@ -117,22 +117,6 @@ class NpcTest {
         val result = runCatching { npc(unitId = null).recruit() }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcNotRecruitable>()
-    }
-
-    @Test
-    fun `Place should fail when the name is empty`() {
-        // When
-        val result = runCatching { Npc.place(theGuy.copy(name = " ")) }
-        // Then
-        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcNameRequired>()
-    }
-
-    @Test
-    fun `Place should fail when the line is empty`() {
-        // When
-        val result = runCatching { Npc.place(theGuy.copy(line = "")) }
-        // Then
-        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcLineRequired>()
     }
 
     @Test

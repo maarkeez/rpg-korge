@@ -53,8 +53,8 @@ class MushroomAbilityAcceptanceTest {
     private val secondRatBattleUnitId = BattleUnitMother.id()
 
     private suspend fun setUp() {
-        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
-        playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, CPU)
         terrainApi.init()
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })

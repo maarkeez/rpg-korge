@@ -50,8 +50,8 @@ class SummonVanishingAcceptanceTest {
     // The summoner summons a battle unit lasting 2 turns, next to it. The enemy stands next to the summoner, and can
     // defeat it at once.
     private suspend fun setUp() {
-        playerApi.requestPlayerCreation(summonerPlayerId, "Summoner", HUMAN)
-        playerApi.requestPlayerCreation(enemyPlayerId, "Enemy", HUMAN)
+        playerApi.requestPlayerCreation(summonerPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(enemyPlayerId, HUMAN)
         terrainApi.init()
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })

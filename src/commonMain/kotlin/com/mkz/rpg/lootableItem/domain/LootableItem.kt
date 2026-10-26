@@ -15,7 +15,6 @@ import kotlin.jvm.JvmInline
 @ConsistentCopyVisibility
 data class LootableItem private constructor(
     private val id: Id,
-    private val name: Name,
     private val price: Price,
     private val lootType: LootType,
     private val events: Set<LootableItemEvent>,
@@ -24,7 +23,6 @@ data class LootableItem private constructor(
         fun create(dto: Dto): LootableItem =
             LootableItem(
                 id = Id(dto.id),
-                name = Name(dto.name),
                 price = Price(dto.price),
                 lootType = LootType(dto.lootType),
                 events = setOf(LootableItemCreated(lootableItemId = dto.id)),
@@ -36,16 +34,11 @@ data class LootableItem private constructor(
     fun toDto() =
         Dto(
             id = id.value,
-            name = name.value,
             price = price.value,
             lootType = lootType.toDto(),
         )
 
     @JvmInline private value class Id(
-        val value: String,
-    )
-
-    @JvmInline private value class Name(
         val value: String,
     )
 
@@ -154,7 +147,6 @@ data class LootableItem private constructor(
 
     data class Dto(
         val id: String,
-        val name: String,
         val price: Int,
         val lootType: LootTypeDto,
     ) {

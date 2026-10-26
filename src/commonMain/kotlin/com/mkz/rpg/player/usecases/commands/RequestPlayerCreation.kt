@@ -10,14 +10,13 @@ class RequestPlayerCreation(
 ) {
     operator fun invoke(
         id: String,
-        name: String,
         type: PlayerType,
     ) {
         if (playerRepository.searchById(id) != null) return
         val (events, player) =
             when (type) {
-                PlayerType.CPU -> Player.createCpu(id, name)
-                PlayerType.HUMAN -> Player.createHuman(id, name)
+                PlayerType.CPU -> Player.createCpu(id)
+                PlayerType.HUMAN -> Player.createHuman(id)
             }.pullEvents()
         playerRepository.create(player)
         eventBus.publish(events)

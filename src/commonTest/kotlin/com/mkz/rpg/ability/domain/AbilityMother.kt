@@ -8,7 +8,6 @@ import kotlin.random.Random
 object AbilityMother {
     fun ability(
         id: String = id(),
-        name: String = name(),
         cost: Int = cost(),
         cooldown: Int = cooldown(),
         effectSpecs: List<Ability.Dto.EffectSpecDto> = effectSpecs(),
@@ -18,7 +17,6 @@ object AbilityMother {
         dto =
             Ability.Dto(
                 id = id,
-                name = name,
                 cost = cost,
                 cooldown = cooldown,
                 effectSpecs = effectSpecs,
@@ -28,8 +26,6 @@ object AbilityMother {
     )
 
     fun id() = "ability-${UUID.randomUUID()}"
-
-    fun name() = "Ability ${UUID.randomUUID().toString().takeLast(5)}"
 
     fun cost() = Random.nextInt(0, 999)
 

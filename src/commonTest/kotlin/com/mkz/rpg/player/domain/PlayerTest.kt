@@ -9,103 +9,59 @@ import kotlin.test.Test
 
 class PlayerTest {
     @Test
-    fun `CreateHuman should create a human player when the id and name are valid`() {
+    fun `CreateHuman should create a human player when the id is valid`() {
         // Given
         val playerId = "player-1"
-        val playerName = "David"
         // When
-        val createdPlayer = Player.createHuman(playerId, playerName)
+        val createdPlayer = Player.createHuman(playerId)
         // Then
-        createdPlayer.toDto() shouldBe Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.HUMAN)
+        createdPlayer.toDto() shouldBe Player.Dto(id = playerId, type = Player.Dto.PlayerTypeDto.HUMAN)
     }
 
     @Test
     fun `CreateHuman should publish the player created event when a human player is created`() {
         // Given
         val playerId = "player-1"
-        val playerName = "David"
         // When
-        val createdPlayer = Player.createHuman(playerId, playerName)
+        val createdPlayer = Player.createHuman(playerId)
         // Then
         val (events, _) = createdPlayer.pullEvents()
-        events.shouldContainExactly(
-            PlayerEvent.PlayerCreated(
-                playerId = playerId,
-                playerName = playerName,
-                playerType = Player.Dto.PlayerTypeDto.HUMAN,
-            ),
-        )
+        events.shouldContainExactly(PlayerEvent.PlayerCreated(playerId = playerId, playerType = Player.Dto.PlayerTypeDto.HUMAN))
     }
 
     @Test
     fun `CreateHuman should fail when the player id is empty`() {
         // When
-        val result = runCatching { Player.createHuman("", "David") }
+        val result = runCatching { Player.createHuman("") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerId>()
     }
 
     @Test
-    fun `CreateHuman should fail when the player name is empty`() {
-        // When
-        val result = runCatching { Player.createHuman("player-1", "") }
-        // Then
-        result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerName>()
-    }
-
-    @Test
-    fun `CreateHuman should create a human player when the name has exactly 50 characters`() {
-        // Given
-        val playerName = "a".repeat(50)
-        // When
-        val createdPlayer = Player.createHuman("player-1", playerName)
-        // Then
-        createdPlayer.toDto().name shouldBe playerName
-    }
-
-    @Test
-    fun `CreateHuman should fail when the player name is longer than 50 characters`() {
-        // Given
-        val playerName = "a".repeat(51)
-        // When
-        val result = runCatching { Player.createHuman("player-1", playerName) }
-        // Then
-        result.exceptionOrNull().shouldBeTypeOf<PlayerError.PlayerNameLongerThanExpected>()
-    }
-
-    @Test
-    fun `CreateCpu should create a cpu player when the id and name are valid`() {
+    fun `CreateCpu should create a cpu player when the id is valid`() {
         // Given
         val playerId = "player-2"
-        val playerName = "Robo"
         // When
-        val createdPlayer = Player.createCpu(playerId, playerName)
+        val createdPlayer = Player.createCpu(playerId)
         // Then
-        createdPlayer.toDto() shouldBe Player.Dto(id = playerId, name = playerName, type = Player.Dto.PlayerTypeDto.CPU)
+        createdPlayer.toDto() shouldBe Player.Dto(id = playerId, type = Player.Dto.PlayerTypeDto.CPU)
     }
 
     @Test
     fun `CreateCpu should publish the player created event when a cpu player is created`() {
         // Given
         val playerId = "player-2"
-        val playerName = "Robo"
         // When
-        val createdPlayer = Player.createCpu(playerId, playerName)
+        val createdPlayer = Player.createCpu(playerId)
         // Then
         val (events, _) = createdPlayer.pullEvents()
-        events.shouldContainExactly(
-            PlayerEvent.PlayerCreated(
-                playerId = playerId,
-                playerName = playerName,
-                playerType = Player.Dto.PlayerTypeDto.CPU,
-            ),
-        )
+        events.shouldContainExactly(PlayerEvent.PlayerCreated(playerId = playerId, playerType = Player.Dto.PlayerTypeDto.CPU))
     }
 
     @Test
     fun `CreateCpu should fail when the player id is empty`() {
         // When
-        val result = runCatching { Player.createCpu("", "Robo") }
+        val result = runCatching { Player.createCpu("") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PlayerError.EmptyPlayerId>()
     }
@@ -113,17 +69,17 @@ class PlayerTest {
     @Test
     fun `ToDto should expose the player data when converted to dto`() {
         // Given
-        val player = Player.createHuman("player-1", "David")
+        val player = Player.createHuman("player-1")
         // When
         val result = player.toDto()
         // Then
-        result shouldBe Player.Dto(id = "player-1", name = "David", type = Player.Dto.PlayerTypeDto.HUMAN)
+        result shouldBe Player.Dto(id = "player-1", type = Player.Dto.PlayerTypeDto.HUMAN)
     }
 
     @Test
     fun `PullEvents should pull the created event when the player has pending events`() {
         // Given
-        val createdPlayer = Player.createHuman("player-1", "David")
+        val createdPlayer = Player.createHuman("player-1")
         // When
         val (events, _) = createdPlayer.pullEvents()
         // Then

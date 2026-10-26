@@ -25,6 +25,7 @@ import kotlin.math.roundToInt
  */
 open class AttackPreviewView(
     private val resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
 ) : Container() {
     companion object {
         private const val WIDTH = 389.0
@@ -104,7 +105,7 @@ open class AttackPreviewView(
         casterNewEffectIds: List<String> = emptyList(),
     ) {
         casterUnitPortraitView.display(casterBattleUnit.unitId)
-        casterUnitNameView.display(unitName = casterUnit.name)
+        casterUnitNameView.display(unitName = texts.unitName(casterUnit.id))
         casterHealthBarView.display(
             remainingBefore = casterBattleUnit.remainingHealthPoints,
             remainingAfter = casterRemainingHealthPoints,
@@ -121,7 +122,7 @@ open class AttackPreviewView(
         )
 
         while (receiverViews.size < receivers.size) {
-            val receiverView = ReceiverPreviewView(resourcesLoader)
+            val receiverView = ReceiverPreviewView(resourcesLoader, texts)
             receiverView.y = (receiverViews.size + 1) * ROW_PITCH
             content.addChild(receiverView)
             receiverViews += receiverView

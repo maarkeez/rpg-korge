@@ -4,11 +4,9 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityCooldownAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
-import com.mkz.rpg.ability.domain.AbilityError.AbilityNameTooLong
 import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
-import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityName
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
 import com.mkz.rpg.ability.domain.AbilityMother.ability
@@ -40,45 +38,6 @@ class AbilityTest {
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
         createdAbility.exceptionOrNull().shouldBeTypeOf<EmptyAbilityId>()
-    }
-
-    @Test
-    fun `Create should fail when the name is blank`() {
-        // Given
-        val dto =
-            ability()
-                .toDto()
-                .copy(name = "  ")
-        // When
-        val createdAbility = runCatching { Ability.create(dto = dto) }
-        // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<EmptyAbilityName>()
-    }
-
-    @Test
-    fun `Create should create ability when the name has exactly 50 characters`() {
-        // Given
-        val dto =
-            ability()
-                .toDto()
-                .copy(name = "a".repeat(50))
-        // When
-        val createdAbility = Ability.create(dto = dto)
-        // Then
-        createdAbility.toDto().name shouldBe "a".repeat(50)
-    }
-
-    @Test
-    fun `Create should fail when the name is longer than 50 characters`() {
-        // Given
-        val dto =
-            ability()
-                .toDto()
-                .copy(name = "a".repeat(51))
-        // When
-        val createdAbility = runCatching { Ability.create(dto = dto) }
-        // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityNameTooLong>()
     }
 
     @Test

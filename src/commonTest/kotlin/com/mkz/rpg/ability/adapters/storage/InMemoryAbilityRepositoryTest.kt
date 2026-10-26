@@ -24,7 +24,7 @@ class InMemoryAbilityRepositoryTest {
         // Given
         val ability = AbilityMother.ability(id = "ability-1")
         abilityRepository.create(ability)
-        val updatedAbility = AbilityMother.ability(id = "ability-1", name = "Updated ability")
+        val updatedAbility = AbilityMother.ability(id = "ability-1")
         // When
         abilityRepository.create(updatedAbility)
         // Then

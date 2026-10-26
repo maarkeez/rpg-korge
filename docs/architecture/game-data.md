@@ -41,6 +41,8 @@ An invalid or missing file fails when the resources are read, with the file path
 
 Unless stated otherwise, there is one file per entity and **the file name is the entity id**. Enum values are written by name (e.g.: `"DECREASE_HEALTH"`).
 
+The files hold no text: the names of the abilities, lootable items, npcs, players, terrains and units, and the npc lines, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`), so they can be translated. See the [localization plan](../plans/localization.md).
+
 ### `effect/<effect id>.toml`
 
 ```toml
@@ -69,7 +71,6 @@ The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 
 ### `ability/<ability id>.toml`
 
 ```toml
-name = "Skull"
 cost = 10
 cooldown = 0
 targeting = "ADJACENT_ENEMY"   # SELF, ADJACENT_ENEMY, ALL_ADJACENT_ENEMIES, VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, VACANT_TILE_ADJACENT_TO_SELF
@@ -89,7 +90,6 @@ An item a battle unit can loot. Its effects must exist and suit its type: a cons
 Its `price` is what it is worth in gold, from 0 to 999. It is displayed as `10 G` in the inventory.
 
 ```toml
-name = "Health Potion"
 price = 10
 type = "CONSUMABLE"              # CONSUMABLE, EQUIPPABLE
 
@@ -119,7 +119,6 @@ weight = 5
 ### `unit/<unit id>.toml`
 
 ```toml
-name = "Knight"
 healthPoints = 100
 manaPoints = 30
 movementRange = 3
@@ -144,7 +143,6 @@ lootTableIds = ["tier-1"]
 ### `player/<player id>.toml`
 
 ```toml
-name = "Human"
 type = "HUMAN"   # HUMAN, CPU
 ```
 
@@ -192,8 +190,6 @@ The game fails to start when its size is not positive (`BuildingSizeNotPositive`
 A character standing on a tile of the battlefield, which says its line when the party talks to it. It is no battle unit: it blocks its tile for everyone, nobody can attack it, and no terrain effect applies to it.
 
 ```toml
-name = "The Guy"
-line = "G'day bloke!"
 row = 10
 column = 2
 ```
@@ -201,8 +197,6 @@ column = 2
 An npc with a `unitId` is recruitable: it joins the party as a battle unit of that unit (e.g.: the viking). The game does not check the unit when it starts: [`NpcUnitResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/npc/adapters/resources/NpcUnitResourcesTest.kt) fails when it does not exist.
 
 ```toml
-name = "Viking"
-line = "For Valhalla!"
 row = 12
 column = 2
 unitId = "viking"
@@ -211,8 +205,6 @@ unitId = "viking"
 An npc with a `stock` is a merchant: once the party talks to it, it shows the lootable items it sells, in the order they are listed (e.g.: the blacksmith). Each item is in unlimited supply, so it is listed once. The game fails to start when an item does not exist (`NpcStockItemNotFound`), when the stock has more than 12 items (`NpcStockTooLarge`), or when it lists an item twice (`NpcStockItemRepeated`).
 
 ```toml
-name = "Merchant"
-line = "How can I help you?"
 row = 14
 column = 2
 stock = ["health-potion", "mana-potion", "hammer"]
@@ -220,7 +212,7 @@ stock = ["health-potion", "mana-potion", "hammer"]
 
 ## How to add a unit
 
-1. Add `resources/unit/<unit id>.toml`.
+1. Add `resources/unit/<unit id>.toml`, and its name to `resources/localization/messages.pot` as `unit.<unit id>.name`.
 2. Add its images, following the [asset conventions](assets.md): `unit/<unit id>.png` and `unit/<unit id>_portrait.png`.
 3. Optionally, deploy it in the battle with a `resources/battleUnit/<battle unit id>.toml` file.
 
@@ -232,12 +224,13 @@ stock = ["health-potion", "mana-potion", "hammer"]
 ## How to add an npc
 
 1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied, where no battle unit is deployed and no building stands. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
-2. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
+2. Add its name and line to `resources/localization/messages.pot`, as `npc.<npc id>.name` and `npc.<npc id>.line`.
+3. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
 
 ## How to add a lootable item
 
 1. Add the effects it applies, if they do not exist yet: `resources/effect/<effect id>.toml`.
-2. Add `resources/lootableItem/<lootable item id>.toml`.
+2. Add `resources/lootableItem/<lootable item id>.toml`, and its name to `resources/localization/messages.pot` as `lootableItem.<lootable item id>.name`.
 3. Add its image, following the [asset conventions](assets.md): `lootableItem/<lootable item id>.png`.
 
 ## How to add a loot table

@@ -24,5 +24,18 @@ class Texts(
     /** An amount of gold, e.g.: `50 G`. */
     fun gold(amount: Int): String = get(UiText.GOLD, "gold" to amount)
 
+    // The game data, translated from its id, e.g.: `unit.bat.name`. See docs/architecture/localization.md.
+    fun unitName(unitId: String): String = localizationApi.translate("unit.$unitId.name")
+
+    fun lootableItemName(lootableItemId: String): String = localizationApi.translate("lootableItem.$lootableItemId.name")
+
+    fun npcName(npcId: String): String = localizationApi.translate("npc.$npcId.name")
+
+    fun npcLine(npcId: String): String = localizationApi.translate("npc.$npcId.line")
+
+    fun playerName(playerId: String): String = localizationApi.translate("player.$playerId.name")
+
+    fun terrainName(terrainId: String): String = localizationApi.translate("terrain.$terrainId.name")
+
     private fun Array<out Pair<String, Any>>.toArguments(): Map<String, String> = associate { (name, value) -> name to value.toString() }
 }

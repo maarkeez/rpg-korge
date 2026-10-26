@@ -15,6 +15,7 @@ import korlibs.math.geom.Size
 /** A battle unit receiving the previewed cast, with the health it would have left. A row of [AttackPreviewView]. */
 class ReceiverPreviewView(
     resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
 ) : Container() {
     internal lateinit var counterLabel: UIText
     private lateinit var unitNameView: UnitNameView
@@ -62,7 +63,7 @@ class ReceiverPreviewView(
         count: Int,
     ) {
         unitPortraitView.display(battleUnit.unitId)
-        unitNameView.display(unitName = unit.name)
+        unitNameView.display(unitName = texts.unitName(unit.id))
         healthBarView.display(
             remainingBefore = battleUnit.remainingHealthPoints,
             remainingAfter = remainingHealthPoints,

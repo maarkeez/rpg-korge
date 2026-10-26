@@ -1,5 +1,3 @@
-name = "Alchemist"
-line = "Potions, elixirs, and an essence that bends space. What will it be?"
 row = 21
 column = 18
 stock = ["health-potion", "mana-potion", "health-elixir", "mana-elixir", "teleport-essence"]

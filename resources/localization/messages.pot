@@ -301,3 +301,232 @@ msgstr ""
 msgctxt "ui.mapFilePicker.maps"
 msgid "Maps"
 msgstr ""
+
+# Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
+
+msgctxt "ability.bat.name"
+msgid "Bat"
+msgstr ""
+
+msgctxt "ability.bee.name"
+msgid "Bee"
+msgstr ""
+
+msgctxt "ability.cleave.name"
+msgid "Cleave"
+msgstr ""
+
+msgctxt "ability.heal.name"
+msgid "Heal"
+msgstr ""
+
+msgctxt "ability.mending.name"
+msgid "Mending"
+msgstr ""
+
+msgctxt "ability.mushroom.name"
+msgid "Mushroom"
+msgstr ""
+
+msgctxt "ability.poisoned-sword.name"
+msgid "Poisoned Sword"
+msgstr ""
+
+msgctxt "ability.skull.name"
+msgid "Skull"
+msgstr ""
+
+msgctxt "ability.sword.name"
+msgid "Sword"
+msgstr ""
+
+msgctxt "ability.teleport.name"
+msgid "Teleport"
+msgstr ""
+
+msgctxt "ability.venom-strike.name"
+msgid "Venom Strike"
+msgstr ""
+
+msgctxt "lootableItem.bee-essence.name"
+msgid "Bee Essence"
+msgstr ""
+
+msgctxt "lootableItem.hammer.name"
+msgid "Hammer"
+msgstr ""
+
+msgctxt "lootableItem.health-elixir.name"
+msgid "Health Elixir"
+msgstr ""
+
+msgctxt "lootableItem.health-potion.name"
+msgid "Health Potion"
+msgstr ""
+
+msgctxt "lootableItem.iron-hammer.name"
+msgid "Iron Hammer"
+msgstr ""
+
+msgctxt "lootableItem.mana-elixir.name"
+msgid "Mana Elixir"
+msgstr ""
+
+msgctxt "lootableItem.mana-potion.name"
+msgid "Mana Potion"
+msgstr ""
+
+msgctxt "lootableItem.rune-hammer.name"
+msgid "Rune Hammer"
+msgstr ""
+
+msgctxt "lootableItem.teleport-essence.name"
+msgid "Teleport Essence"
+msgstr ""
+
+msgctxt "npc.alchemist.name"
+msgid "Alchemist"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.alchemist.line"
+msgid "Potions, elixirs, and an essence that bends space. What will it be?"
+msgstr ""
+
+msgctxt "npc.blacksmith.name"
+msgid "Blacksmith"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.blacksmith.line"
+msgid "Fresh from the forge! A sturdy hammer keeps you standing for longer."
+msgstr ""
+
+msgctxt "npc.elder.name"
+msgid "Elder"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.elder.line"
+msgid "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+msgstr ""
+
+msgctxt "npc.elf.name"
+msgid "Elf"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.elf.line"
+msgid "The forest whispers of strangers who outwit goats and bats alike. Walk softly, travellers: my arrows watch over this village."
+msgstr ""
+
+msgctxt "npc.farmer.name"
+msgid "Farmer"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.farmer.line"
+msgid "Thank you for dealing with that bat! My village is just south, past this meadow. Mind the bats nesting off the path."
+msgstr ""
+
+msgctxt "npc.herbalist.name"
+msgid "Herbalist"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.herbalist.line"
+msgid "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
+msgstr ""
+
+msgctxt "npc.princess.name"
+msgid "Princess"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.princess.line"
+msgid "You defeated the Goat Wizard! The realm thanks you, brave travellers. This was only the first of many paths: keep exploring this world."
+msgstr ""
+
+msgctxt "npc.viking.name"
+msgid "Viking"
+msgstr ""
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.viking.line"
+msgid "Those beasts kept me pinned here for days! For Valhalla, I fight at your side."
+msgstr ""
+
+#. Displayed as "{player} turn" and "{player} wins!".
+msgctxt "player.player-one.name"
+msgid "Human"
+msgstr ""
+
+#. Displayed as "{player} turn" and "{player} wins!".
+msgctxt "player.player-two.name"
+msgid "CPU"
+msgstr ""
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.grass.name"
+msgid "Grass"
+msgstr ""
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.lava.name"
+msgid "Lava"
+msgstr ""
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.sand.name"
+msgid "Sand"
+msgstr ""
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.void.name"
+msgid "Void"
+msgstr ""
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.water.name"
+msgid "Water"
+msgstr ""
+
+msgctxt "unit.bat.name"
+msgid "Bat"
+msgstr ""
+
+msgctxt "unit.bee.name"
+msgid "Bee"
+msgstr ""
+
+msgctxt "unit.goat-wizard.name"
+msgid "Goat Wizard"
+msgstr ""
+
+msgctxt "unit.goat.name"
+msgid "Goat"
+msgstr ""
+
+msgctxt "unit.herbalist.name"
+msgid "Herbalist"
+msgstr ""
+
+msgctxt "unit.hero.name"
+msgid "Mage"
+msgstr ""
+
+msgctxt "unit.knight.name"
+msgid "Knight"
+msgstr ""
+
+msgctxt "unit.rat.name"
+msgid "Rat"
+msgstr ""
+
+msgctxt "unit.viking-warrior.name"
+msgid "Viking"
+msgstr ""
+
+msgctxt "unit.viking.name"
+msgid "Viking"
+msgstr ""

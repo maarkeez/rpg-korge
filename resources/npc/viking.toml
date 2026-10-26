@@ -1,5 +1,3 @@
-name = "Viking"
-line = "Those beasts kept me pinned here for days! For Valhalla, I fight at your side."
 row = 28
 column = 20
 unitId = "viking-warrior"

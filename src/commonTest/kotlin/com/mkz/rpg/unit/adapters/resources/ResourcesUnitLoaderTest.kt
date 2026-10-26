@@ -16,7 +16,7 @@ class ResourcesUnitLoaderTest {
             // Given
             val unitRoot =
                 MemoryVfsMix(
-                    "unit/knight.toml" to "name = \"Knight\"\nhealthPoints = 100\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\", \"heal\"]\n",
+                    "unit/knight.toml" to "healthPoints = 100\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\", \"heal\"]\n",
                     "unit/knight.png" to "not a toml file",
                 )["unit"]
             val loader = ResourcesUnitLoader(unitRoot = unitRoot)
@@ -24,7 +24,7 @@ class ResourcesUnitLoaderTest {
             loader.initResources()
             // Then
             loader.loadUnits().shouldContainExactly(
-                unit(id = "knight", name = "Knight", healthPoints = 100, manaPoints = 30, abilities = listOf("sword", "heal"), movementRange = 3).toDto(),
+                unit(id = "knight", healthPoints = 100, manaPoints = 30, abilities = listOf("sword", "heal"), movementRange = 3).toDto(),
             )
         }
 
@@ -34,8 +34,8 @@ class ResourcesUnitLoaderTest {
             // Given
             val unitRoot =
                 MemoryVfsMix(
-                    "unit/viking.toml" to "name = \"Viking\"\nhealthPoints = 150\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\"]\nstartingGold = 100\n",
-                    "unit/rat.toml" to "name = \"Rat\"\nhealthPoints = 20\nmanaPoints = 10\nmovementRange = 3\nabilities = [\"sword\"]\n",
+                    "unit/viking.toml" to "healthPoints = 150\nmanaPoints = 30\nmovementRange = 3\nabilities = [\"sword\"]\nstartingGold = 100\n",
+                    "unit/rat.toml" to "healthPoints = 20\nmanaPoints = 10\nmovementRange = 3\nabilities = [\"sword\"]\n",
                 )["unit"]
             val loader = ResourcesUnitLoader(unitRoot = unitRoot)
             // When
@@ -48,7 +48,7 @@ class ResourcesUnitLoaderTest {
     fun `should fail with the file when a field is missing`() =
         runTest {
             // Given
-            val unitRoot = MemoryVfsMix("unit/knight.toml" to "name = \"Knight\"\n")["unit"]
+            val unitRoot = MemoryVfsMix("unit/knight.toml" to "")["unit"]
             val loader = ResourcesUnitLoader(unitRoot = unitRoot)
             // When
             val initialisation = suspend { loader.initResources() }

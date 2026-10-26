@@ -14,7 +14,7 @@ class BattleHudViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
             battleHudView.displayAttackPreviewView()
             // When
@@ -28,7 +28,7 @@ class BattleHudViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
             battleHudView.displayBattleUnitInfoView()
             // When
@@ -43,7 +43,7 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, AttackPreviewView(loadedResourcesLoader()), inventoryView)
+            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, AttackPreviewView(loadedResourcesLoader(), TextsMother.texts()), inventoryView)
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.displayInventoryView()
@@ -56,7 +56,7 @@ class BattleHudViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader())
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
             battleHudView.displayBattleUnitInfoView()
             // When

@@ -59,14 +59,13 @@ class BattleInfoPresenter(
             }
         timeline.play {
             val tinting = CoroutineScope(currentCoroutineContext()).launchImmediately { battlefieldView.tint(turnColor) }
-            battleInfoView.announceTurn(playerName = player.name, round = battle.currentRound, turnColor = turnColor)
+            battleInfoView.announceTurn(playerId = player.id, round = battle.currentRound, turnColor = turnColor)
             tinting.join()
         }
     }
 
     fun displayPlayerWin(playerId: String) {
-        val player = playerApi.searchPlayerById(playerId)!!
-        timeline.play { battleInfoView.displayPlayerWin(player.name) }
+        timeline.play { battleInfoView.displayPlayerWin(playerId) }
     }
 
     fun dispose() {

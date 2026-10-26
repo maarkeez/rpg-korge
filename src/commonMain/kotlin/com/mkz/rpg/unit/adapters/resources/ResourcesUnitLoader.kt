@@ -25,7 +25,6 @@ class ResourcesUnitLoader(
 
     @Serializable
     data class UnitDefinition(
-        val name: String,
         val healthPoints: Int,
         val manaPoints: Int,
         val movementRange: Int,
@@ -35,7 +34,6 @@ class ResourcesUnitLoader(
         fun toDto(unitId: String): Unit.Dto =
             Unit.Dto(
                 id = unitId,
-                name = name,
                 healthPoints = healthPoints,
                 manaPoints = manaPoints,
                 abilities = abilities,

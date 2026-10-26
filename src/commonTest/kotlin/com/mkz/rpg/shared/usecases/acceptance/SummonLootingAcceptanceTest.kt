@@ -61,8 +61,8 @@ class SummonLootingAcceptanceTest {
 
     // The knight, at (2,2), explores and summons a bee at (1,2), and a health potion lies at (1,4). The enemy stands far away, at (7,7).
     private suspend fun setUp() {
-        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
-        playerApi.requestPlayerCreation(enemyPlayerId, "Enemy", HUMAN)
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(enemyPlayerId, HUMAN)
         terrainApi.init()
         terrainApi.initialiseTerrains()
         effectApi.init()

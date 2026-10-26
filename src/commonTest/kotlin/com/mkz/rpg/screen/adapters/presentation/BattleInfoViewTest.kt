@@ -16,13 +16,13 @@ class BattleInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView(TextsMother.texts())
-            val playerName = "Player 1"
+            val playerId = "player-one"
             val round = 3
             // When
-            battleInfoView.displayBattleInfo(playerName = playerName, round = round, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
+            battleInfoView.displayBattleInfo(playerId = playerId, round = round, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
             // Then
             battleInfoView.roundText() shouldBe "Round $round"
-            battleInfoView.playerTurnText() shouldBe "$playerName turn"
+            battleInfoView.playerTurnText() shouldBe "Human turn"
         }
 
     @Test
@@ -31,7 +31,7 @@ class BattleInfoViewTest : ViewsForTesting() {
             // Given
             val battleInfoView = BattleInfoView(TextsMother.texts())
             // When
-            battleInfoView.displayBattleInfo(playerName = "CPU", round = 1, turnColor = BattleInfoView.CPU_TURN_COLOR)
+            battleInfoView.displayBattleInfo(playerId = "player-two", round = 1, turnColor = BattleInfoView.CPU_TURN_COLOR)
             // Then
             battleInfoView.playerTurnColor() shouldBe BattleInfoView.CPU_TURN_COLOR
         }
@@ -43,7 +43,7 @@ class BattleInfoViewTest : ViewsForTesting() {
             val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             // When
-            awaitCompletion(startAnimation { battleInfoView.announceTurn(playerName = "CPU", round = 2, turnColor = BattleInfoView.CPU_TURN_COLOR) })
+            awaitCompletion(startAnimation { battleInfoView.announceTurn(playerId = "player-two", round = 2, turnColor = BattleInfoView.CPU_TURN_COLOR) })
             // Then
             battleInfoView.roundText() shouldBe "Round 2"
             battleInfoView.playerTurnText() shouldBe "CPU turn"
@@ -57,7 +57,7 @@ class BattleInfoViewTest : ViewsForTesting() {
             val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             // When
-            val announcing = startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
+            val announcing = startAnimation { battleInfoView.announceTurn(playerId = "player-one", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
             val scales = sampleUntilCompletion(announcing) { battleInfoView.roundScale() to battleInfoView.playerTurnScale() }
             // Then
             scales.maxOf { (roundScale, _) -> roundScale } shouldBe (BattleInfoView.POP_SCALE plusOrMinus 0.05)
@@ -72,9 +72,9 @@ class BattleInfoViewTest : ViewsForTesting() {
             // Given
             val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
-            awaitCompletion(startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) })
+            awaitCompletion(startAnimation { battleInfoView.announceTurn(playerId = "player-one", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) })
             // When
-            val announcing = startAnimation { battleInfoView.announceTurn(playerName = "CPU", round = 1, turnColor = BattleInfoView.CPU_TURN_COLOR) }
+            val announcing = startAnimation { battleInfoView.announceTurn(playerId = "player-two", round = 1, turnColor = BattleInfoView.CPU_TURN_COLOR) }
             val scales = sampleUntilCompletion(announcing) { battleInfoView.roundScale() to battleInfoView.playerTurnScale() }
             // Then
             scales.maxOf { (roundScale, _) -> roundScale } shouldBe 1.0
@@ -86,7 +86,7 @@ class BattleInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView(TextsMother.texts())
-            battleInfoView.displayBattleInfo(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
+            battleInfoView.displayBattleInfo(playerId = "player-one", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
             // When
             battleInfoView.displayExploring()
             // Then
@@ -119,7 +119,7 @@ class BattleInfoViewTest : ViewsForTesting() {
             addChild(battleInfoView)
             awaitCompletion(startAnimation { battleInfoView.announceBattle() })
             // When
-            val announcing = startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
+            val announcing = startAnimation { battleInfoView.announceTurn(playerId = "player-one", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
             val scales = sampleUntilCompletion(announcing) { battleInfoView.roundScale() }
             // Then
             battleInfoView.roundText() shouldBe "Round 1"
@@ -131,11 +131,11 @@ class BattleInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleInfoView = BattleInfoView(TextsMother.texts())
-            val playerName = "Player 1"
+            val playerId = "player-one"
             // When
-            battleInfoView.displayPlayerWin(playerName)
+            battleInfoView.displayPlayerWin(playerId)
             // Then
-            battleInfoView.winnerText() shouldBe "$playerName wins!"
+            battleInfoView.winnerText() shouldBe "Human wins!"
             battleInfoView.roundText().shouldBeNull()
             battleInfoView.playerTurnText().shouldBeNull()
         }

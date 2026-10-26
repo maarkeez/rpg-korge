@@ -7,7 +7,6 @@ import kotlin.random.Random
 object UnitMother {
     fun unit(
         id: String = id(),
-        name: String = name(),
         healthPoints: Int = healthPoints(),
         manaPoints: Int = manaPoints(),
         abilities: List<String> = abilities(),
@@ -18,7 +17,6 @@ object UnitMother {
             unitDto =
                 Unit.Dto(
                     id = id,
-                    name = name,
                     healthPoints = healthPoints,
                     manaPoints = manaPoints,
                     abilities = abilities,
@@ -29,8 +27,6 @@ object UnitMother {
         .second
 
     fun id() = "unit-${UUID.randomUUID()}"
-
-    fun name() = "Unit ${UUID.randomUUID().toString().takeLast(5)}"
 
     fun healthPoints() = Random.nextInt(1, 99)
 

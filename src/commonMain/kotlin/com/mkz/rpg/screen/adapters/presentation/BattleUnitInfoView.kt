@@ -14,7 +14,7 @@ import korlibs.math.geom.Size
 
 open class BattleUnitInfoView(
     resourcesLoader: BattleSceneResourcesLoader,
-    texts: Texts,
+    private val texts: Texts,
 ) : Container() {
     companion object {
         // FamiCube palette colours of the remaining turn actions.
@@ -103,7 +103,7 @@ open class BattleUnitInfoView(
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
         // Name
-        unitNameView.display(unitName = unit.name)
+        unitNameView.display(unitName = texts.unitName(unit.id))
         // Remaining turn actions, out of their maximum
         val remainingTurnActions = battleUnit.remainingTurnActions
         movementPointsView.display(remaining = remainingTurnActions.remainingSteps, maximum = remainingTurnActions.maximumSteps)

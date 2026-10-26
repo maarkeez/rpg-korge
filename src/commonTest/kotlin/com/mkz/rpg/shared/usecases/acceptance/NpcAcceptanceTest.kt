@@ -42,13 +42,13 @@ class NpcAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
-    private val theGuy = Npc.Dto(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 0, column = 0)
+    private val theGuy = Npc.Dto(id = "the-guy", row = 0, column = 0)
 
     // Recruitable, as the viking of the resources: 150 health points.
-    private val viking = Npc.Dto(id = "viking", name = "Viking", line = "For Valhalla!", row = 0, column = 3, unitId = "viking")
+    private val viking = Npc.Dto(id = "viking", row = 0, column = 3, unitId = "viking")
 
     // A merchant, selling the lootable items of the resources. The leader walks east to (0,2) to stand next to it.
-    private val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 1, column = 2, stock = listOf("health-potion", "mana-potion", "hammer"))
+    private val merchant = Npc.Dto(id = "merchant", row = 1, column = 2, stock = listOf("health-potion", "mana-potion", "hammer"))
 
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)
@@ -70,8 +70,8 @@ class NpcAcceptanceTest {
         lootableItemApi.initialiseLootableItems()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation("human", "Human", HUMAN)
-        playerApi.requestPlayerCreation("cpu", "CPU", CPU)
+        playerApi.requestPlayerCreation("human", HUMAN)
+        playerApi.requestPlayerCreation("cpu", CPU)
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { row -> List(8) { column -> if (row == 0 && column == 0) "lava" else "sand" } })
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 0, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("knight-2", "knight", "human", deployAtRow = 1, deployAtColumn = 1)

@@ -29,7 +29,6 @@ class ResourcesAbilityLoader(
 
     @Serializable
     data class AbilityDefinition(
-        val name: String,
         val cost: Int,
         val cooldown: Int,
         val targeting: String,
@@ -39,7 +38,6 @@ class ResourcesAbilityLoader(
         fun toDto(abilityId: String): Ability.Dto =
             Ability.Dto(
                 id = abilityId,
-                name = name,
                 cost = cost,
                 cooldown = cooldown,
                 targeting = enumOf<TargetingDto>("targeting", targeting),

@@ -24,8 +24,6 @@ class ResourcesNpcLoader(
 
     @Serializable
     data class NpcDefinition(
-        val name: String,
-        val line: String,
         val row: Int,
         val column: Int,
         val unitId: String? = null,
@@ -34,8 +32,6 @@ class ResourcesNpcLoader(
         fun toDto(npcId: String): Npc.Dto =
             Npc.Dto(
                 id = npcId,
-                name = name,
-                line = line,
                 row = row,
                 column = column,
                 unitId = unitId,

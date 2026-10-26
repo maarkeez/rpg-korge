@@ -44,8 +44,8 @@ class InventoryPresenterGiveTest {
             effects = listOf(increaseHealthEffect(id = "heal", healing = 10).toDto(), increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto()),
             lootableItems =
                 listOf(
-                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
-                    equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
+                    consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
+                    equippableLootableItem(id = "hammer", price = 50, equippable = equippable(effectIds = setOf("maximum-health-20"), equipmentZone = WEAPON)).toDto(),
                 ),
             units = listOf(unit(id = "knight").toDto(), unit(id = "viking").toDto(), unit(id = "mage").toDto(), unit(id = "rat").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),

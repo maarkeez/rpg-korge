@@ -1,5 +1,3 @@
-name = "Herbalist"
-line = "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
 row = 16
 column = 15
 unitId = "herbalist"

@@ -19,8 +19,8 @@ class InitialisePlayersTest {
     @Test
     fun `should create every loaded player when players are initialised`() {
         // Given
-        val human = player(id = "player-one", name = "Human", type = HUMAN).toDto()
-        val cpu = player(id = "player-two", name = "CPU", type = CPU).toDto()
+        val human = player(id = "player-one", type = HUMAN).toDto()
+        val cpu = player(id = "player-two", type = CPU).toDto()
         val initialisePlayers = InitialisePlayers(FakePlayerLoader(players = listOf(human, cpu)), playerRepository, eventBus)
         // When
         initialisePlayers()
@@ -28,17 +28,17 @@ class InitialisePlayersTest {
         playerRepository.searchById("player-one")?.toDto() shouldBe human
         playerRepository.searchById("player-two")?.toDto() shouldBe cpu
         eventBus.shouldHavePublishedEvents(
-            PlayerCreated(playerId = "player-one", playerName = "Human", playerType = HUMAN),
-            PlayerCreated(playerId = "player-two", playerName = "CPU", playerType = CPU),
+            PlayerCreated(playerId = "player-one", playerType = HUMAN),
+            PlayerCreated(playerId = "player-two", playerType = CPU),
         )
     }
 
     @Test
     fun `should not create a player again when the player already exists`() {
         // Given
-        val human = player(id = "player-one", name = "Human", type = HUMAN)
+        val human = player(id = "player-one", type = HUMAN)
         playerRepository.create(human)
-        val initialisePlayers = InitialisePlayers(FakePlayerLoader(players = listOf(player(id = "player-one", name = "Other", type = CPU).toDto())), playerRepository, eventBus)
+        val initialisePlayers = InitialisePlayers(FakePlayerLoader(players = listOf(player(id = "player-one", type = CPU).toDto())), playerRepository, eventBus)
         // When
         initialisePlayers()
         // Then

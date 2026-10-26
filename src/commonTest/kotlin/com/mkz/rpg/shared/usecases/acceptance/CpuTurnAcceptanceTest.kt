@@ -51,8 +51,8 @@ class CpuTurnAcceptanceTest {
         effectApi.initialiseEffects()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
-        playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, CPU)
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
         battleUnitApi.deployBattleUnit(knightBattleUnitId, "knight", humanPlayerId, deployAtRow = 3, deployAtColumn = 3)
     }

@@ -23,7 +23,6 @@ class ResourcesAbilityLoaderTest {
                 MemoryVfsMix(
                     "ability/skull.toml" to
                         """
-                        name = "Skull"
                         cost = 10
                         cooldown = 1
                         targeting = "ADJACENT_ENEMY"
@@ -44,7 +43,6 @@ class ResourcesAbilityLoaderTest {
             loader.loadAbilities().shouldContainExactly(
                 ability(
                     id = "skull",
-                    name = "Skull",
                     cost = 10,
                     cooldown = 1,
                     targeting = ADJACENT_ENEMY,
@@ -61,7 +59,6 @@ class ResourcesAbilityLoaderTest {
                 MemoryVfsMix(
                     "ability/bat.toml" to
                         """
-                        name = "Bat"
                         cost = 10
                         cooldown = 0
                         targeting = "VACANT_TILE_ADJACENT_TO_SELF"
@@ -79,7 +76,6 @@ class ResourcesAbilityLoaderTest {
             loader.loadAbilities().shouldContainExactly(
                 ability(
                     id = "bat",
-                    name = "Bat",
                     cost = 10,
                     cooldown = 0,
                     targeting = VACANT_TILE_ADJACENT_TO_SELF,
@@ -95,7 +91,7 @@ class ResourcesAbilityLoaderTest {
             // Given
             val abilityRoot =
                 MemoryVfsMix(
-                    "ability/skull.toml" to "name = \"Skull\"\ncost = 10\ncooldown = 1\ntargeting = \"ANYWHERE\"\n\n[[effects]]\neffectId = \"damage\"\ntarget = \"SELECTED_TARGET\"\n",
+                    "ability/skull.toml" to "cost = 10\ncooldown = 1\ntargeting = \"ANYWHERE\"\n\n[[effects]]\neffectId = \"damage\"\ntarget = \"SELECTED_TARGET\"\n",
                 )["ability"]
             val loader = ResourcesAbilityLoader(abilityRoot = abilityRoot)
             // When

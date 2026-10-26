@@ -6,14 +6,18 @@ import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.C
 import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.Companion.TRANSLATION_EXTENSION
 import com.mkz.rpg.localization.adapters.resources.TestCatalogs
 import com.mkz.rpg.localization.domain.Localization
+import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldBeEmpty
 import korlibs.image.font.CharacterSet
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 /**
  * The catalogs under resources/localization must match the text the screen displays: every key it translates is in
  * messages.pot, messages.pot has no other key, and every translation matches messages.pot. Translations may be missing.
+ * The screen translates the UI texts, and the game data from its ids: the name of each resource (e.g.: `unit.bat.name`
+ * for resources/unit/bat.toml), and the line of each npc.
  */
 class LocalizationResourcesTest {
     private val source = PoFile.parse(TestCatalogs.files.getValue(SOURCE_FILE_NAME))
@@ -23,8 +27,16 @@ class LocalizationResourcesTest {
             .filterKeys { fileName -> fileName.endsWith(TRANSLATION_EXTENSION) }
             .mapValues { (_, content) -> PoFile.parse(content) }
 
-    // The keys the screen translates.
-    private val keys: Set<String> = UiText.entries.map(UiText::key).toSet() + Localization.LANGUAGE_NAME_KEY
+    // The game data folders whose resources are named, and the fields translated for each, e.g.: `npc.elder.line`.
+    private val gameDataFields: Map<String, List<String>> =
+        mapOf(
+            "ability" to listOf("name"),
+            "lootableItem" to listOf("name"),
+            "npc" to listOf("name", "line"),
+            "player" to listOf("name"),
+            "terrain" to listOf("name"),
+            "unit" to listOf("name"),
+        )
 
     // The characters the font draws, and the line breaks.
     private val drawnCharacters: Set<Int> = CharacterSet.LATIN_ALL.codePoints.toSet() + '\n'.code
@@ -46,10 +58,19 @@ class LocalizationResourcesTest {
     }
 
     @Test
-    fun `should only have the keys the screen translates in the source catalog`() {
-        val orphans = source.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
-        withClue("Entries of $SOURCE_FILE_NAME the screen does not translate, or without msgctxt: $orphans") { orphans.shouldBeEmpty() }
-    }
+    fun `should have every game data text in the source catalog`() =
+        runTest {
+            val missing = gameDataKeys().filter { key -> key !in sourceEntries }
+            withClue("Game data texts missing from $SOURCE_FILE_NAME: $missing") { missing.shouldBeEmpty() }
+        }
+
+    @Test
+    fun `should only have the keys the screen translates in the source catalog`() =
+        runTest {
+            val keys = UiText.entries.map(UiText::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys()
+            val orphans = source.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
+            withClue("Entries of $SOURCE_FILE_NAME the screen does not translate, or without msgctxt: $orphans") { orphans.shouldBeEmpty() }
+        }
 
     @Test
     fun `should only have the source entries in the translations`() {
@@ -100,6 +121,15 @@ class LocalizationResourcesTest {
                 .distinct()
         withClue("Characters the font does not draw: $undrawn") { undrawn.shouldBeEmpty() }
     }
+
+    private suspend fun gameDataKeys(): Set<String> =
+        gameDataFields
+            .flatMap { (folder, fields) ->
+                ResourcesBundle.root[folder]
+                    .listNames()
+                    .filter { fileName -> fileName.endsWith(".toml") }
+                    .flatMap { fileName -> fields.map { field -> "$folder.${fileName.removeSuffix(".toml")}.$field" } }
+            }.toSet()
 
     private fun placeholders(text: String): Set<String> = placeholder.findAll(text).map { match -> match.groupValues[1] }.toSet()
 }

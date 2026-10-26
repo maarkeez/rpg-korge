@@ -58,8 +58,8 @@ class CpuDeployingAcceptanceTest {
         effectApi.initialiseEffects()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
-        playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, CPU)
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
         battleUnitApi.deployBattleUnit(goatBattleUnitId, "goat", cpuPlayerId, deployAtRow = 0, deployAtColumn = 0)
     }

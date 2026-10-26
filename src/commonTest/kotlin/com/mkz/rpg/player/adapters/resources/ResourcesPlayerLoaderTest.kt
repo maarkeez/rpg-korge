@@ -17,16 +17,16 @@ class ResourcesPlayerLoaderTest {
             // Given
             val playerRoot =
                 MemoryVfsMix(
-                    "player/player-one.toml" to "name = \"Human\"\ntype = \"HUMAN\"\n",
-                    "player/player-two.toml" to "name = \"CPU\"\ntype = \"CPU\"\n",
+                    "player/player-one.toml" to "type = \"HUMAN\"\n",
+                    "player/player-two.toml" to "type = \"CPU\"\n",
                 )["player"]
             val loader = ResourcesPlayerLoader(playerRoot = playerRoot)
             // When
             loader.initResources()
             // Then
             loader.loadPlayers().shouldContainExactly(
-                player(id = "player-one", name = "Human", type = HUMAN).toDto(),
-                player(id = "player-two", name = "CPU", type = CPU).toDto(),
+                player(id = "player-one", type = HUMAN).toDto(),
+                player(id = "player-two", type = CPU).toDto(),
             )
         }
 
@@ -34,7 +34,7 @@ class ResourcesPlayerLoaderTest {
     fun `should fail with the file when the player type is unknown`() =
         runTest {
             // Given
-            val playerRoot = MemoryVfsMix("player/player-one.toml" to "name = \"Human\"\ntype = \"ROBOT\"\n")["player"]
+            val playerRoot = MemoryVfsMix("player/player-one.toml" to "type = \"ROBOT\"\n")["player"]
             val loader = ResourcesPlayerLoader(playerRoot = playerRoot)
             // When
             val initialisation = suspend { loader.initResources() }

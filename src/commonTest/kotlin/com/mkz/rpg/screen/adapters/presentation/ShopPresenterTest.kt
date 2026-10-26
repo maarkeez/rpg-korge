@@ -30,17 +30,17 @@ import kotlin.test.Test
 class ShopPresenterTest {
     // The knight (20 G) leads from (1,1), followed by the viking (100 G) at (2,1). The merchant stands north of the knight,
     // at (0,1), selling health potions (10 G) and hammers (50 G). There is no battle.
-    private val merchant = npc(id = "merchant", name = "Merchant", line = "How can I help you?", row = 0, column = 1, stock = listOf("health-potion", "hammer")).toDto()
+    private val merchant = npc(id = "merchant", row = 0, column = 1, stock = listOf("health-potion", "hammer")).toDto()
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             effects = listOf(increaseHealthEffect(id = "cure").toDto(), increaseMaximumHealthEffect(id = "sturdy").toDto()),
             lootableItems =
                 listOf(
-                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
-                    equippableLootableItem(id = "hammer", name = "Hammer", price = 50, equippable = equippable(effectIds = setOf("sturdy"), equipmentZone = WEAPON)).toDto(),
+                    consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
+                    equippableLootableItem(id = "hammer", price = 50, equippable = equippable(effectIds = setOf("sturdy"), equipmentZone = WEAPON)).toDto(),
                 ),
-            units = listOf(unit(id = "knight", name = "Knight", startingGold = 20).toDto(), unit(id = "viking", name = "Viking", startingGold = 100).toDto()),
+            units = listOf(unit(id = "knight", startingGold = 20).toDto(), unit(id = "viking", startingGold = 100).toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(3) { List(3) { "sand" } },
             deployments =
@@ -62,7 +62,6 @@ class ShopPresenterTest {
             apis.inventoryApi,
             apis.lootableItemApi,
             apis.battleUnitApi,
-            apis.unitApi,
             apis.battlefieldApi,
             TextsMother.texts(),
             timeline,

@@ -26,13 +26,11 @@ class ResourcesPlayerLoader(
 
     @Serializable
     data class PlayerDefinition(
-        val name: String,
         val type: String,
     ) {
         fun toDto(playerId: String): Player.Dto =
             Player.Dto(
                 id = playerId,
-                name = name,
                 type = enumOf<Player.Dto.PlayerTypeDto>("type", type),
             )
     }

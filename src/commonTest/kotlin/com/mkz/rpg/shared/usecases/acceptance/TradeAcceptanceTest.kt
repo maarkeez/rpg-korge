@@ -39,7 +39,7 @@ class TradeAcceptanceTest {
     private val battleApi = BattleApi(eventBus, playerApi)
 
     // West of the knight, selling the potions and the hammer.
-    private val merchant = Npc.Dto(id = "merchant", name = "Merchant", line = "How can I help you?", row = 0, column = 0, stock = listOf("health-potion", "mana-potion", "hammer"))
+    private val merchant = Npc.Dto(id = "merchant", row = 0, column = 0, stock = listOf("health-potion", "mana-potion", "hammer"))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(listOf(merchant)))
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
@@ -56,7 +56,7 @@ class TradeAcceptanceTest {
         lootableItemApi.initialiseLootableItems()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation("human", "Human", HUMAN)
+        playerApi.requestPlayerCreation("human", HUMAN)
         battlefieldApi.requestBattlefieldCreation(4, 4, List(4) { List(4) { "sand" } })
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 0, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("viking-1", "viking", "human", deployAtRow = 1, deployAtColumn = 1)

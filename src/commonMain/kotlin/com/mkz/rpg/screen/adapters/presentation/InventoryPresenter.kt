@@ -114,7 +114,7 @@ class InventoryPresenter(
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
                 val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
-                timeline.play { askWhatToDoWith(event, foundItemName = foundItem.name, foundItemPrice = foundItem.price) }
+                timeline.play { askWhatToDoWith(event, foundItemName = texts.lootableItemName(foundItem.id), foundItemPrice = foundItem.price) }
             },
         )
 
@@ -230,7 +230,7 @@ class InventoryPresenter(
                     val refusal = inventoryApi.searchGiveRefusal(battleUnitId, slot.lootableItemId)
                     add(
                         ItemActionsView.Action(label = giveLabel(refusal), isEnabled = refusal == null) {
-                            if (!timeline.isPlaying) startGiving(battleUnitId, slotIndex, slot.lootableItemId, lootableItem.name)
+                            if (!timeline.isPlaying) startGiving(battleUnitId, slotIndex, slot.lootableItemId, texts.lootableItemName(lootableItem.id))
                         },
                     )
                 }
@@ -254,7 +254,7 @@ class InventoryPresenter(
         timeline.play {
             selectedSlotIndex = slotIndex
             inventoryView.selectSlot(slotIndex)
-            playerCallToActionView.displayItemActions(itemName = lootableItem.name, itemPrice = lootableItem.price, actions = actions)
+            playerCallToActionView.displayItemActions(itemName = texts.lootableItemName(lootableItem.id), itemPrice = lootableItem.price, actions = actions)
         }
     }
 

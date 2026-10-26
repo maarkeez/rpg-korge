@@ -78,24 +78,24 @@ open class BattleInfoView(
     }
 
     open fun displayBattleInfo(
-        playerName: String,
+        playerId: String,
         round: Int,
         turnColor: RGBA,
     ) {
         this.round.text = texts[UiText.BATTLE_INFO_ROUND, "round" to round]
-        this.playerTurn.text = texts[UiText.BATTLE_INFO_PLAYER_TURN, "player" to playerName]
+        this.playerTurn.text = texts[UiText.BATTLE_INFO_PLAYER_TURN, "player" to texts.playerName(playerId)]
         this.playerTurn.styles.textColor = turnColor
         displayedRound = round
     }
 
     /** Displays the battle info and pops the player turn, and the round when it has changed. */
     open suspend fun announceTurn(
-        playerName: String,
+        playerId: String,
         round: Int,
         turnColor: RGBA,
     ) {
         val isNewRound = round != displayedRound
-        displayBattleInfo(playerName, round, turnColor)
+        displayBattleInfo(playerId, round, turnColor)
         pop(if (isNewRound) listOf(this.round, playerTurn) else listOf(playerTurn))
     }
 
@@ -113,13 +113,13 @@ open class BattleInfoView(
         popAnimator.awaitComplete()
     }
 
-    open fun displayPlayerWin(playerName: String) {
+    open fun displayPlayerWin(playerId: String) {
         this.playerTurn.removeFromParent()
         this.round.removeFromParent()
 
         winner =
             layout.uiText(
-                text = texts[UiText.BATTLE_INFO_PLAYER_WINS, "player" to playerName],
+                text = texts[UiText.BATTLE_INFO_PLAYER_WINS, "player" to texts.playerName(playerId)],
                 size = Size(width = width, height = 33),
             ) {
                 this.styles.textAlignment = TextAlignment.MIDDLE_CENTER

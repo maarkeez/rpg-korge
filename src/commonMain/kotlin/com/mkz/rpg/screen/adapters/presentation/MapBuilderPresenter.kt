@@ -135,14 +135,12 @@ class MapBuilderPresenter(
     private fun forbiddenNeighboursMessage(
         terrainId: String,
         neighbourTerrainId: String,
-    ): String = texts[UiText.MAP_BUILDER_FORBIDDEN_NEIGHBOURS, "terrain" to terrainName(terrainId), "neighbour" to terrainName(neighbourTerrainId)]
+    ): String = texts[UiText.MAP_BUILDER_FORBIDDEN_NEIGHBOURS, "terrain" to texts.terrainName(terrainId), "neighbour" to texts.terrainName(neighbourTerrainId)]
 
     private fun askToLeave() {
         infoView.displayInfo(texts[UiText.MAP_BUILDER_MAP_LOST_WHEN_LEAVING])
         callToActionView.displayLeaveConfirmation(onLeft = onLeft, onStayed = { displayExportAndBack() })
     }
-
-    private fun terrainName(terrainId: String): String = terrainId.replaceFirstChar(Char::uppercase)
 
     // Delegates
     override fun tileSelected(

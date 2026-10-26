@@ -14,7 +14,6 @@ class OnRequestPlayerCreation(
         eventBus.subscribe<PlayerEvent.RequestPlayerCreation> { event ->
             requestPlayerCreation(
                 id = event.id,
-                name = event.name,
                 type =
                     when (event.type) {
                         Player.Dto.PlayerTypeDto.CPU -> RequestPlayerCreation.PlayerType.CPU

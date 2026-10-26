@@ -1,4 +1,3 @@
-name = "Herbalist"
 healthPoints = 80
 manaPoints = 40
 movementRange = 3

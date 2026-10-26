@@ -35,7 +35,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 class ExplorationPresenterTest {
-    // The knight explores the sand from (1,1), next to The Guy, who stands west of it at (1,0). The merchant stands at
+    // The knight explores the sand from (1,1), next to the elder, who stands west of it at (1,0). The merchant stands at
     // (2,2), selling a health potion and a mana potion. There is no battle yet.
     private val apis =
         SubdomainApis(
@@ -43,8 +43,8 @@ class ExplorationPresenterTest {
             effects = listOf(increaseHealthEffect(id = "cure").toDto()),
             lootableItems =
                 listOf(
-                    consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
-                    consumableLootableItem(id = "mana-potion", name = "Mana Potion", price = 15, consumable = consumable(effectIds = setOf("cure"))).toDto(),
+                    consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
+                    consumableLootableItem(id = "mana-potion", price = 15, consumable = consumable(effectIds = setOf("cure"))).toDto(),
                 ),
             units = listOf(unit(id = "knight").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -52,13 +52,13 @@ class ExplorationPresenterTest {
             deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
             npcs =
                 listOf(
-                    npc(id = "the-guy", name = "The Guy", line = "G'day bloke!", row = 1, column = 0).toDto(),
-                    npc(id = "merchant", name = "Merchant", line = "How can I help you?", row = 2, column = 2, stock = listOf("health-potion", "mana-potion")).toDto(),
+                    npc(id = "elder", row = 1, column = 0).toDto(),
+                    npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion", "mana-potion")).toDto(),
                 ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
-    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
+    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader(), TextsMother.texts())
     private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val battlefieldView = FakeBattlefieldView()
     private val battleHudView = FakeBattleHudView()
@@ -72,7 +72,6 @@ class ExplorationPresenterTest {
             apis.inventoryApi,
             apis.lootableItemApi,
             apis.battleUnitApi,
-            apis.unitApi,
             apis.battlefieldApi,
             TextsMother.texts(),
             timeline,
@@ -299,7 +298,6 @@ class ExplorationPresenterTest {
                 apis.inventoryApi,
                 apis.lootableItemApi,
                 apis.battleUnitApi,
-                apis.unitApi,
                 apis.battlefieldApi,
                 TextsMother.texts(),
                 timeline,
@@ -433,8 +431,9 @@ class ExplorationPresenterTest {
         talk()
         // Then
         npcDialogView.visible.shouldBeTrue()
-        npcDialogView.displayedName() shouldBe "The Guy"
-        npcDialogView.displayedLine() shouldBe "G'day bloke!"
+        npcDialogView.displayedName() shouldBe "Elder"
+        npcDialogView.displayedLine() shouldBe
+            "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
         virtualPadView.visible.shouldBeFalse()
         battleHudView.visible.shouldBeFalse()
         playerCallToActionView.visible.shouldBeFalse()
@@ -455,7 +454,7 @@ class ExplorationPresenterTest {
         presenter.tick(1.milliseconds)
         eventBus.dispatch()
         // Then
-        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "the-guy"
+        apis.partyApi.searchParty()!!.talkingNpcId shouldBe "elder"
         npcDialogView.visible.shouldBeTrue()
     }
 

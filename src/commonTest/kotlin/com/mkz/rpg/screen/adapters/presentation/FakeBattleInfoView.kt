@@ -5,7 +5,7 @@ import korlibs.image.color.RGBA
 // Records what the presenters ask the battle info view to display, instead of drawing it.
 class FakeBattleInfoView : BattleInfoView(TextsMother.texts()) {
     data class BattleInfo(
-        val playerName: String,
+        val playerId: String,
         val round: Int,
         val turnColor: RGBA,
     )
@@ -30,22 +30,22 @@ class FakeBattleInfoView : BattleInfoView(TextsMother.texts()) {
     }
 
     override fun displayBattleInfo(
-        playerName: String,
+        playerId: String,
         round: Int,
         turnColor: RGBA,
     ) {
-        displayedBattleInfos += BattleInfo(playerName, round, turnColor)
+        displayedBattleInfos += BattleInfo(playerId, round, turnColor)
     }
 
     override suspend fun announceTurn(
-        playerName: String,
+        playerId: String,
         round: Int,
         turnColor: RGBA,
     ) {
-        announcedTurns += BattleInfo(playerName, round, turnColor)
+        announcedTurns += BattleInfo(playerId, round, turnColor)
     }
 
-    override fun displayPlayerWin(playerName: String) {
-        displayedPlayerWins += playerName
+    override fun displayPlayerWin(playerId: String) {
+        displayedPlayerWins += playerId
     }
 }

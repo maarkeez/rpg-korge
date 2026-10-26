@@ -21,7 +21,6 @@ class ResourcesLootableItemLoaderTest {
                 MemoryVfsMix(
                     "lootableItem/health-potion.toml" to
                         """
-                        name = "Health Potion"
                         price = 10
                         type = "CONSUMABLE"
 
@@ -30,7 +29,6 @@ class ResourcesLootableItemLoaderTest {
                         """.trimIndent(),
                     "lootableItem/helmet.toml" to
                         """
-                        name = "Helmet"
                         price = 40
                         type = "EQUIPPABLE"
 
@@ -45,8 +43,8 @@ class ResourcesLootableItemLoaderTest {
             loader.initResources()
             // Then
             loader.loadLootableItems().shouldContainExactly(
-                consumableLootableItem(id = "health-potion", name = "Health Potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
-                equippableLootableItem(id = "helmet", name = "Helmet", price = 40, equippable = equippable(effectIds = setOf("protection"), equipmentZone = HEAD)).toDto(),
+                consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto(),
+                equippableLootableItem(id = "helmet", price = 40, equippable = equippable(effectIds = setOf("protection"), equipmentZone = HEAD)).toDto(),
             )
         }
 
@@ -54,7 +52,7 @@ class ResourcesLootableItemLoaderTest {
     fun `should fail with the file when the loot type details are missing`() =
         runTest {
             // Given
-            val lootableItemRoot = MemoryVfsMix("lootableItem/health-potion.toml" to "name = \"Health Potion\"\nprice = 10\ntype = \"CONSUMABLE\"\n")["lootableItem"]
+            val lootableItemRoot = MemoryVfsMix("lootableItem/health-potion.toml" to "price = 10\ntype = \"CONSUMABLE\"\n")["lootableItem"]
             val loader = ResourcesLootableItemLoader(lootableItemRoot = lootableItemRoot)
             // When
             val initialisation = suspend { loader.initResources() }
@@ -68,7 +66,7 @@ class ResourcesLootableItemLoaderTest {
             // Given
             val lootableItemRoot =
                 MemoryVfsMix(
-                    "lootableItem/helmet.toml" to "name = \"Helmet\"\nprice = 40\ntype = \"EQUIPPABLE\"\n\n[equippable]\neffectIds = [\"protection\"]\nequipmentZone = \"TAIL\"\n",
+                    "lootableItem/helmet.toml" to "price = 40\ntype = \"EQUIPPABLE\"\n\n[equippable]\neffectIds = [\"protection\"]\nequipmentZone = \"TAIL\"\n",
                 )["lootableItem"]
             val loader = ResourcesLootableItemLoader(lootableItemRoot = lootableItemRoot)
             // When
@@ -83,7 +81,7 @@ class ResourcesLootableItemLoaderTest {
             // Given
             val lootableItemRoot =
                 MemoryVfsMix(
-                    "lootableItem/health-potion.toml" to "name = \"Health Potion\"\ntype = \"CONSUMABLE\"\n\n[consumable]\neffectIds = [\"heal\"]\n",
+                    "lootableItem/health-potion.toml" to "type = \"CONSUMABLE\"\n\n[consumable]\neffectIds = [\"heal\"]\n",
                 )["lootableItem"]
             val loader = ResourcesLootableItemLoader(lootableItemRoot = lootableItemRoot)
             // When

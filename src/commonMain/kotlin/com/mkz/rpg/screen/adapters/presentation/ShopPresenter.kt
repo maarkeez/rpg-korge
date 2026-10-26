@@ -14,7 +14,6 @@ import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 /**
  * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
@@ -30,7 +29,6 @@ class ShopPresenter(
     private val inventoryApi: InventoryApi,
     private val lootableItemApi: LootableItemApi,
     private val battleUnitApi: BattleUnitApi,
-    private val unitApi: UnitApi,
     private val battlefieldApi: BattlefieldApi,
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
@@ -117,7 +115,7 @@ class ShopPresenter(
             }
         val buyer =
             ShopView.Buyer(
-                name = battleUnitApi.searchBattleUnitById(buyerId)?.let { battleUnit -> unitApi.searchUnitById(battleUnit.unitId)?.name }.orEmpty(),
+                name = battleUnitApi.searchBattleUnitById(buyerId)?.let { battleUnit -> texts.unitName(battleUnit.unitId) }.orEmpty(),
                 gold = inventory?.gold ?: 0,
                 usedStorageSpace = inventory?.storedItems?.size ?: 0,
                 maximumStorageSpace = inventory?.maximumStorageSpace ?: 0,
@@ -165,7 +163,7 @@ class ShopPresenter(
                 Mode.SELL -> lootableItem.sellPrice to texts[UiText.SHOP_SELL]
             }
         val refusal = refusal(buyerId, lootableItemId)
-        shopView.displayItem(lootableItem.name, price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
+        shopView.displayItem(texts.lootableItemName(lootableItem.id), price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
     }
 
     private fun refusal(

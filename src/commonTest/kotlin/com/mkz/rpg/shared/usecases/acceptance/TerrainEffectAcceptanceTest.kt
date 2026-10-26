@@ -61,8 +61,8 @@ class TerrainEffectAcceptanceTest {
     private val forestBattleUnitId = "battle-unit-forest"
 
     private suspend fun setUp() {
-        playerApi.requestPlayerCreation(playerOneId, "Player One", HUMAN)
-        playerApi.requestPlayerCreation(playerTwoId, "Player Two", HUMAN)
+        playerApi.requestPlayerCreation(playerOneId, HUMAN)
+        playerApi.requestPlayerCreation(playerTwoId, HUMAN)
         terrainApi.init()
         terrainApi.initialiseTerrains()
 

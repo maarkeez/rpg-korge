@@ -14,9 +14,9 @@ import kotlin.test.Test
 
 class NpcDialogViewTest : ViewsForTesting() {
     private var taps = 0
-    private val theGuy = npc(id = "the-guy", name = "The Guy", line = "G'day bloke!").toDto()
+    private val elder = npc(id = "elder").toDto()
 
-    private suspend fun newNpcDialogView() = NpcDialogView(Size(390, 300), loadedResourcesLoader()).also { dialog -> dialog.setOnTapped { taps++ } }
+    private suspend fun newNpcDialogView() = NpcDialogView(Size(390, 300), loadedResourcesLoader(), TextsMother.texts()).also { dialog -> dialog.setOnTapped { taps++ } }
 
     @Test
     fun `NpcDialogView should be hidden when is created`() =
@@ -33,10 +33,11 @@ class NpcDialogViewTest : ViewsForTesting() {
             // Given
             val dialog = newNpcDialogView()
             // When
-            dialog.display(theGuy)
+            dialog.display(elder)
             // Then
-            dialog.displayedName() shouldBe "The Guy"
-            dialog.displayedLine() shouldBe "G'day bloke!"
+            dialog.displayedName() shouldBe "Elder"
+            dialog.displayedLine() shouldBe
+                "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
             dialog.isNameAboveLine().shouldBeTrue()
             dialog.isPortraitLeftOfText().shouldBeTrue()
             dialog.portraitSize() shouldBe (96.0 to 96.0)
@@ -69,12 +70,12 @@ class NpcDialogViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val dialog = newNpcDialogView()
-            dialog.display(theGuy)
+            dialog.display(elder)
             // When
-            dialog.display(npc(id = "the-girl", name = "The Girl", line = "Hi!").toDto())
+            dialog.display(npc(id = "herbalist").toDto())
             // Then
-            dialog.displayedName() shouldBe "The Girl"
-            dialog.displayedLine() shouldBe "Hi!"
+            dialog.displayedName() shouldBe "Herbalist"
+            dialog.displayedLine() shouldBe "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
             dialog.hasPortrait().shouldBeFalse()
         }
 
@@ -83,7 +84,7 @@ class NpcDialogViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val dialog = newNpcDialogView()
-            dialog.display(theGuy)
+            dialog.display(elder)
             dialog.visible = true
             addChild(dialog)
             // When
@@ -98,7 +99,7 @@ class NpcDialogViewTest : ViewsForTesting() {
             // Given
             val dialog = newNpcDialogView()
             // When
-            dialog.display(theGuy, choices = listOf(NpcDialogView.Choice("Buy") {}, NpcDialogView.Choice("Sell") {}, NpcDialogView.Choice("Leave") {}))
+            dialog.display(elder, choices = listOf(NpcDialogView.Choice("Buy") {}, NpcDialogView.Choice("Sell") {}, NpcDialogView.Choice("Leave") {}))
             // Then
             dialog.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
             dialog.areChoicesUnderText().shouldBeTrue()
@@ -109,9 +110,9 @@ class NpcDialogViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val dialog = newNpcDialogView()
-            dialog.display(theGuy, choices = listOf(NpcDialogView.Choice("Buy") {}))
+            dialog.display(elder, choices = listOf(NpcDialogView.Choice("Buy") {}))
             // When
-            dialog.display(theGuy)
+            dialog.display(elder)
             // Then
             dialog.choiceLabels().shouldBeEmpty()
         }
@@ -122,7 +123,7 @@ class NpcDialogViewTest : ViewsForTesting() {
             // Given
             val selectedChoices = mutableListOf<String>()
             val dialog = newNpcDialogView()
-            dialog.display(theGuy, choices = listOf("Buy", "Sell").map { label -> NpcDialogView.Choice(label) { selectedChoices += label } })
+            dialog.display(elder, choices = listOf("Buy", "Sell").map { label -> NpcDialogView.Choice(label) { selectedChoices += label } })
             dialog.visible = true
             addChild(dialog)
             // When

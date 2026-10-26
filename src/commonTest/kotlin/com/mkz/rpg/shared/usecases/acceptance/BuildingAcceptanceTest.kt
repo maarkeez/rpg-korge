@@ -48,7 +48,7 @@ class BuildingAcceptanceTest {
         effectApi.initialiseEffects()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation("human", "Human", HUMAN)
+        playerApi.requestPlayerCreation("human", HUMAN)
         battlefieldApi.requestBattlefieldCreation(4, 5, List(4) { List(5) { "sand" } })
         eventBus.dispatch()
         buildingApi.initialiseBuildings()

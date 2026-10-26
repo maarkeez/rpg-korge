@@ -54,8 +54,8 @@ class CpuRespawnAcceptanceTest {
         effectApi.initialiseEffects()
         abilityApi.initialiseAbilities()
         unitApi.initialiseUnits()
-        playerApi.requestPlayerCreation("human", "Human", HUMAN)
-        playerApi.requestPlayerCreation("cpu", "CPU", CPU)
+        playerApi.requestPlayerCreation("human", HUMAN)
+        playerApi.requestPlayerCreation("cpu", CPU)
         val tiles = List(3) { List(12) { column -> if (column == 9) "void" else "sand" } }
         battlefieldApi.requestBattlefieldCreation(tiles.size, tiles.first().size, tiles)
         battleUnitApi.deployBattleUnit("rat-1", "rat", "cpu", deployAtRow = ratHome.row, deployAtColumn = ratHome.column)

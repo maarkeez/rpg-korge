@@ -57,8 +57,8 @@ class SimpleBattleAcceptanceTest {
     private val cpuBattleUnitId = BattleUnitMother.id()
 
     private suspend fun setUp() {
-        playerApi.requestPlayerCreation(humanPlayerId, "Human", HUMAN)
-        playerApi.requestPlayerCreation(cpuPlayerId, "CPU", CPU)
+        playerApi.requestPlayerCreation(humanPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(cpuPlayerId, CPU)
         terrainApi.init()
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
@@ -75,7 +75,6 @@ class SimpleBattleAcceptanceTest {
         val sword =
             Ability.Dto(
                 id = swordAbilityId,
-                name = "Sword",
                 cost = 0,
                 cooldown = 0,
                 effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
@@ -86,7 +85,6 @@ class SimpleBattleAcceptanceTest {
         val knight =
             Unit.Dto(
                 id = knightUnitId,
-                name = "Knight",
                 healthPoints = 100,
                 manaPoints = 30,
                 abilities = listOf(sword.id),
@@ -95,7 +93,6 @@ class SimpleBattleAcceptanceTest {
         val weakKnight =
             Unit.Dto(
                 id = weakKnightUnitId,
-                name = "Weak Knight",
                 healthPoints = 1,
                 manaPoints = 1,
                 abilities = listOf(sword.id),

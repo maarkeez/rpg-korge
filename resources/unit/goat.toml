@@ -1,4 +1,3 @@
-name = "Goat"
 healthPoints = 30
 manaPoints = 30
 movementRange = 1

@@ -5,13 +5,11 @@ import com.mkz.rpg.shared.domain.DomainEvent
 sealed interface PlayerEvent : DomainEvent {
     data class PlayerCreated(
         val playerId: String,
-        val playerName: String,
         val playerType: Player.Dto.PlayerTypeDto,
     ) : PlayerEvent
 
     data class RequestPlayerCreation(
         val id: String,
-        val name: String,
         val type: Player.Dto.PlayerTypeDto,
     ) : PlayerEvent
 

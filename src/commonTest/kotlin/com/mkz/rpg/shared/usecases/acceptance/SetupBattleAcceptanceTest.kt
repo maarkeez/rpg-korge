@@ -100,7 +100,6 @@ class SetupBattleAcceptanceTest {
             val healthPotion = lootableItemApi.searchLootableItemById(healthPotionId)
             // Then
             healthPotion.shouldNotBeNull()
-            healthPotion.name shouldBe "Health Potion"
             healthPotion.lootType.type shouldBe CONSUMABLE
             healthPotion.lootType.consumable?.effectIds shouldBe setOf("health-potion-heal")
         }
@@ -114,7 +113,6 @@ class SetupBattleAcceptanceTest {
             val manaPotion = lootableItemApi.searchLootableItemById(manaPotionId)
             // Then
             manaPotion.shouldNotBeNull()
-            manaPotion.name shouldBe "Mana Potion"
             manaPotion.lootType.type shouldBe CONSUMABLE
             manaPotion.lootType.consumable?.effectIds shouldBe setOf("mana-potion-restore")
         }
@@ -128,7 +126,6 @@ class SetupBattleAcceptanceTest {
             val hammer = lootableItemApi.searchLootableItemById(hammerId)
             // Then
             hammer.shouldNotBeNull()
-            hammer.name shouldBe "Hammer"
             hammer.lootType.type shouldBe EQUIPPABLE
             hammer.lootType.equippable shouldBe EquippableDto(effectIds = setOf("maximum-health-20", "maximum-mana-20"), equipmentZone = WEAPON)
         }

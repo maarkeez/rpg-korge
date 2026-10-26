@@ -27,6 +27,7 @@ import korlibs.math.geom.Size
 open class NpcDialogView(
     size: Size,
     private val resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
 ) : UIContainer(size) {
     companion object {
         const val PORTRAIT_SCALE = 3.0
@@ -105,8 +106,8 @@ open class NpcDialogView(
                     position(PADDING, PADDING)
                 }
             }
-        nameText.text = text(npc.name, textSize = NAME_TEXT_SIZE, color = NAME_COLOR)
-        lineText.text = text(npc.line, textSize = LINE_TEXT_SIZE, color = LINE_COLOR)
+        nameText.text = text(texts.npcName(npc.id), textSize = NAME_TEXT_SIZE, color = NAME_COLOR)
+        lineText.text = text(texts.npcLine(npc.id), textSize = LINE_TEXT_SIZE, color = LINE_COLOR)
         displayChoices(choices)
     }
 
