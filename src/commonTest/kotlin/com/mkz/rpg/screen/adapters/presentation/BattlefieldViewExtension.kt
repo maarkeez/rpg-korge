@@ -288,6 +288,18 @@ fun BattlefieldView.healthPreviewPlacementAt(
     column: Int,
 ): TilePlacement? = healthPreview(row, column)?.let { preview -> TilePlacement(preview.x, preview.y, preview.width, preview.height) }
 
+/** The health flashed on the tile, e.g.: by a terrain effect while exploring, or `null` when there is none. */
+fun BattlefieldView.flashedHealthAt(
+    row: Int,
+    column: Int,
+): BattlefieldHealthBarPreviewView.PreviewOption? = (tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.previewOption
+
+/** The blinks of the health flashed on the tile, to check later whether they are still blinking. */
+fun BattlefieldView.flashedHealthBlinksAt(
+    row: Int,
+    column: Int,
+) = (tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.blinks().orEmpty()
+
 /** The blinks of the health preview displayed on the tile, to check later whether they are still blinking. */
 fun BattlefieldView.healthPreviewBlinksAt(
     row: Int,

@@ -23,6 +23,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.building.domain.BuildingEvent.BuildingPlaced
+import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
@@ -296,9 +297,11 @@ class BattlefieldPresenterTest {
     private fun exploringApis(
         deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
         npcs: List<Npc.Dto> = emptyList(),
+        effects: List<Effect.Dto> = emptyList(),
     ) = SubdomainApis(
         terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-        units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat", movementRange = 2).toDto()),
+        units = listOf(unit(id = "knight", movementRange = 3, healthPoints = 30).toDto(), unit(id = "rat", movementRange = 2).toDto()),
+        effects = effects,
         players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
         tiles = List(4) { List(4) { "sand" } },
         deployments = deployments,
@@ -592,6 +595,50 @@ class BattlefieldPresenterTest {
         // Then
         exploringBattlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
         withClue("The party can walk while it flashes") { exploringTimeline.isPlaying.shouldBeFalse() }
+    }
+
+    @Test
+    fun `FlashHealth should flash the health left of the battle unit alongside the timeline when it is damaged while exploring`() {
+        // Given
+        val exploringApis = exploringApis(effects = listOf(decreaseHealthEffect(id = "lava-damage", damage = 15, applicationType = "IMMEDIATELY").toDto()))
+        val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val exploringTimeline = battleSceneTimeline()
+        exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
+        val lavaDamage = EffectApplicationDto(source = ApplicationSourceDto.terrain("lava"), target = EffectTargetDto.Unit(id = "knight-1"), effectId = "lava-damage")
+        exploringApis.battleUnitApi.applyEffect(lavaDamage)
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        withClue("15 of its 30 health points are left") {
+            exploringBattlefieldView.flashedHealth.shouldContainExactly(position(1, 1) to PreviewOption.TWO_OUT_OF_THREE)
+        }
+        withClue("The party can walk while its health is displayed") { exploringTimeline.isPlaying.shouldBeFalse() }
+    }
+
+    @Test
+    fun `FlashHealth should flash the full health of the battle unit when it is healed at full health while exploring`() {
+        // Given
+        val exploringApis = exploringApis(effects = listOf(increaseHealthEffect(id = "water-heal", healing = 5).toDto()))
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        val waterHeal = EffectApplicationDto(source = ApplicationSourceDto.terrain("water"), target = EffectTargetDto.Unit(id = "knight-1"), effectId = "water-heal")
+        exploringApis.battleUnitApi.applyEffect(waterHeal)
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.flashedHealth.shouldContainExactly(position(1, 1) to PreviewOption.FULL)
+    }
+
+    @Test
+    fun `FlashHealth should not flash the health of the battle unit when it is damaged in a battle`() {
+        // Given
+        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.Unit(id = "knight-1"), effectId = "poison")
+        apis.battleUnitApi.applyEffect(poisoning)
+        // When
+        eventBus.dispatch()
+        // Then
+        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.flashedHealth.shouldBeEmpty()
     }
 
     @Test

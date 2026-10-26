@@ -84,6 +84,9 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
+    // The health flashed on each tile, in order.
+    val flashedHealth = mutableListOf<Pair<PositionDto, BattlefieldHealthBarPreviewView.PreviewOption>>()
+
     // When set, every flash lasts until it is completed, e.g.: to keep the timeline playing while it flashes.
     var flashing: CompletableDeferred<Unit>? = null
 
@@ -261,6 +264,15 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         unitId: String,
     ) {
         flashedBattleUnits += BattleUnitAt(row, column, unitId)
+        flashing?.await()
+    }
+
+    override suspend fun flashHealth(
+        row: Int,
+        column: Int,
+        previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
+    ) {
+        flashedHealth += PositionDto(row, column) to previewOption
         flashing?.await()
     }
 }

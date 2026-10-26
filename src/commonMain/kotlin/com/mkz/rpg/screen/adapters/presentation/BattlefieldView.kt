@@ -64,6 +64,7 @@ open class BattlefieldView(
         const val FLASH = "FLASH"
         const val DIM = "DIM"
         const val HEALTH_PREVIEW = "HEALTH_PREVIEW"
+        const val HEALTH_FLASH = "HEALTH_FLASH"
         const val BATTLEFIELD = "BATTLEFIELD"
         const val MOVING_BATTLE_UNITS = "MOVING_BATTLE_UNITS"
         const val GLIDING_BATTLE_UNIT = "GLIDING_BATTLE_UNIT"
@@ -76,10 +77,10 @@ open class BattlefieldView(
 
         // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
         // from the battlefield when they come back into it.
-        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, PICKED_UP_LOOT)
+        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
 
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
-        private val ANIMATED_LAYERS = setOf(FLASH, PICKED_UP_LOOT)
+        private val ANIMATED_LAYERS = setOf(FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
 
         // A tile is 64px, so all its art is drawn at a whole scale: its 16x16 art (the terrain, most units and npcs) at 4x,
         // and its 32x32 art at 2x.
@@ -574,10 +575,36 @@ open class BattlefieldView(
         }
     }
 
-    private fun removeHealthPreview(tileButton: UIButton) {
-        val healthPreview = tileButton.findViewByName(HEALTH_PREVIEW) as? BattlefieldHealthBarPreviewView ?: return
-        healthPreview.stop()
-        healthPreview.removeFromParent()
+    private fun removeHealthPreview(tileButton: UIButton) = tileButton.removeHealthBar(HEALTH_PREVIEW)
+
+    private fun UIButton.removeHealthBar(layer: String) {
+        val healthBar = findViewByName(layer) as? BattlefieldHealthBarPreviewView ?: return
+        healthBar.stop()
+        healthBar.removeFromParent()
+    }
+
+    /**
+     * Displays the health the battle unit on the tile has left at the top of the tile, as long as a flash blinks, e.g.:
+     * when standing on lava while exploring. It keeps the selection of the tile, replaces the health already flashed on
+     * it, and is removed once the battle unit leaves its tile.
+     */
+    open suspend fun flashHealth(
+        row: Int,
+        column: Int,
+        previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
+    ) {
+        val tileButton = tile(row, column)
+        tileButton.removeHealthBar(HEALTH_FLASH)
+        val healthBar = BattlefieldHealthBarPreviewView(Size(TILE_SIZE, TILE_SIZE / 5.0))
+        healthBar.name = HEALTH_FLASH
+        healthBar.display(previewOption)
+        tileButton.addChild(healthBar)
+        delay(FLASH_DURATION * FLASH_COUNT * 2)
+        // Unless it was replaced or its battle unit left the tile meanwhile.
+        if (healthBar.parent == tileButton) {
+            healthBar.stop()
+            healthBar.removeFromParent()
+        }
     }
 
     /**
@@ -616,6 +643,7 @@ open class BattlefieldView(
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
         flashes.remove(PositionDto(row, column))?.forEach(Job::cancel)
         tileButton.findViewByName(FLASH)?.removeFromParent()
+        tileButton.removeHealthBar(HEALTH_FLASH)
     }
 
     /** How the battlefield scrolls to follow a moving battle unit. */

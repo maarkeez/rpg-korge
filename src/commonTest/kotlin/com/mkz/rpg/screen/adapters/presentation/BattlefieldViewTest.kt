@@ -1459,6 +1459,72 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.isFlashingAt(row = 0, column = 0).shouldBeFalse()
         }
 
+    @Test
+    fun `FlashHealth should display the health over the tile, keeping its selection, and remove it once a flash has blinked`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            battlefieldView.displayTileSelection(row = 0, column = 0)
+            addChild(battlefieldView)
+            // When
+            val flashingHealth = startFlashingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)
+            // Then
+            battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+            awaitCompletion(flashingHealth)
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+            battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+        }
+
+    @Test
+    fun `FlashHealth should remove the health when the battle unit leaves its tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            startFlashingHealth(battlefieldView, previewOption = PreviewOption.ONE_OUT_OF_THREE)
+            val blinks = battlefieldView.flashedHealthBlinksAt(row = 0, column = 0)
+            // When
+            battlefieldView.removeBattleUnit(row = 0, column = 0)
+            // Then
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+        }
+
+    @Test
+    fun `FlashHealth should replace the health already displayed on the tile when it is flashed again`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            val firstFlashing = startFlashingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
+            val previousBlinks = battlefieldView.flashedHealthBlinksAt(row = 0, column = 0)
+            // A few frames later, so the first flash ends before the second one.
+            repeat(3) { nextFrame() }
+            // When
+            val secondFlashing = startFlashingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)
+            // Then
+            battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            previousBlinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+            awaitCompletion(firstFlashing)
+            withClue("The first flash ending does not remove the second one") {
+                battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            }
+            awaitCompletion(secondFlashing)
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+        }
+
+    private suspend fun startFlashingHealth(
+        battlefieldView: BattlefieldView,
+        previewOption: PreviewOption,
+    ): Job = startAnimation { battlefieldView.flashHealth(row = 0, column = 0, previewOption = previewOption) }
+
     private suspend fun startFlashing(
         battlefieldView: BattlefieldView,
         row: Int,

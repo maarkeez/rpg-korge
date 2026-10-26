@@ -162,6 +162,13 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
                 flashUnit(event.battleUnitId)
             },
+            // While exploring, the health is displayed as the battle unit flashes, e.g.: so standing on lava is seen hurting.
+            eventBus.subscribe<BattleUnitEvent.BattleUnitDamaged> { event ->
+                if (!isBattling()) flashHealth(event.battleUnitId)
+            },
+            eventBus.subscribe<BattleUnitEvent.BattleUnitHealed> { event ->
+                if (!isBattling()) flashHealth(event.battleUnitId)
+            },
             // A vanished summon is deleted, so it is flashed from the event, before its tile is vacated.
             eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
                 timeline.play { battlefieldView.flashBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
@@ -377,6 +384,18 @@ class BattlefieldPresenter(
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
         val step: suspend () -> Unit = { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
         if (isAlongside) timeline.playAlongside(step) else timeline.play(step)
+    }
+
+    // Alongside the timeline, as the flash while exploring, so the party keeps walking.
+    private fun flashHealth(battleUnitId: String) {
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
+        val position = battlefieldApi.searchPosition(battleUnitId) ?: return
+        val previewOption =
+            BattlefieldHealthBarPreviewView.PreviewOption.of(
+                remaining = battleUnit.remainingHealthPoints,
+                maximum = battleUnit.maximumHealthPoints,
+            )
+        timeline.playAlongside { battlefieldView.flashHealth(row = position.row, column = position.column, previewOption = previewOption) }
     }
 
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {
