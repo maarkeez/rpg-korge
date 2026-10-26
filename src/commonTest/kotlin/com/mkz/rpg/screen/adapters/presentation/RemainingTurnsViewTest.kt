@@ -13,7 +13,7 @@ class RemainingTurnsViewTest : ViewsForTesting() {
     fun `Init should not be visible when is initialized`() =
         sharedViewsTest {
             // Given
-            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0))
+            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0), TextsMother.texts())
             // When
             // Then
             remainingTurnsView.isVisibleToUser().shouldBeFalse()
@@ -23,7 +23,7 @@ class RemainingTurnsViewTest : ViewsForTesting() {
     fun `Display should tell the turns left before vanishing when is displayed`() =
         sharedViewsTest {
             // Given
-            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0))
+            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0), TextsMother.texts())
             // When
             remainingTurnsView.display(remainingTurns = 3)
             // Then
@@ -35,7 +35,7 @@ class RemainingTurnsViewTest : ViewsForTesting() {
     fun `Display should tell a single turn left when the current turn is the last one`() =
         sharedViewsTest {
             // Given
-            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0))
+            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0), TextsMother.texts())
             // When
             remainingTurnsView.display(remainingTurns = 1)
             // Then
@@ -46,7 +46,7 @@ class RemainingTurnsViewTest : ViewsForTesting() {
     fun `Hide should not be visible when is hidden`() =
         sharedViewsTest {
             // Given
-            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0))
+            val remainingTurnsView = RemainingTurnsView(Size(width = 150.0, height = 14.0), TextsMother.texts())
             remainingTurnsView.display(remainingTurns = 3)
             // When
             remainingTurnsView.hide()

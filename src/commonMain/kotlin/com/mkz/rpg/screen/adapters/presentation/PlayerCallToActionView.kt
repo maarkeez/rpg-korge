@@ -4,6 +4,7 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
 open class PlayerCallToActionView(
+    private val texts: Texts,
     private val resourcesLoader: BattleSceneResourcesLoader = BattleSceneResourcesLoader(),
 ) : Container() {
     companion object {
@@ -22,7 +23,7 @@ open class PlayerCallToActionView(
     /** Displays the finish turn, which is displayed again once the player has chosen, e.g.: cancelled a cast. */
     open fun displayFinishTurn(onTurnFinished: () -> Unit) {
         this.onTurnFinished = onTurnFinished
-        val finishTurnView = FinishTurnView(onTurnFinished = onTurnFinished)
+        val finishTurnView = FinishTurnView(texts, onTurnFinished = onTurnFinished)
         finishTurnView.isEnabled = isFinishTurnEnabled
         display(finishTurnView)
     }
@@ -53,6 +54,8 @@ open class PlayerCallToActionView(
                     onConfirmed()
                     dismiss()
                 },
+                cancelLabel = texts[UiText.CALL_TO_ACTION_CANCEL],
+                confirmLabel = texts[UiText.CALL_TO_ACTION_CONFIRM],
             )
         display(cancelAndConfirmView)
     }
@@ -89,7 +92,7 @@ open class PlayerCallToActionView(
                     },
                 )
             }
-        itemActionsView = ItemActionsView(itemName = itemName, itemPrice = itemPrice, actions = itemActions)
+        itemActionsView = ItemActionsView(texts, itemName = itemName, itemPrice = itemPrice, actions = itemActions)
         display(itemActionsView)
     }
 
@@ -98,7 +101,7 @@ open class PlayerCallToActionView(
         itemName: String,
         onCancelled: () -> Unit,
     ) {
-        display(GiveItemView(itemName = itemName, onCancelled = onCancelled))
+        display(GiveItemView(texts, itemName = itemName, onCancelled = onCancelled))
     }
 
     /** Asks the player what to do with an item found while the inventory is full. */
@@ -108,7 +111,7 @@ open class PlayerCallToActionView(
         foundItemId: String,
         onLeft: () -> Unit,
     ) {
-        display(InventoryFullView(foundItemName = foundItemName, foundItemPrice = foundItemPrice, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
+        display(InventoryFullView(texts, foundItemName = foundItemName, foundItemPrice = foundItemPrice, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
     }
 
     internal val callToAction: View?

@@ -83,6 +83,7 @@ class InventoryPresenterGiveTest {
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,
             battlefieldView = battlefieldView,
+            texts = TextsMother.texts(),
             timeline = timeline,
             eventBus = eventBus,
         )

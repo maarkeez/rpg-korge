@@ -1,11 +1,14 @@
 package com.mkz.rpg
 
+import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.screen.adapters.presentation.MenuScene
+import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer
 import korlibs.korge.view.Stage
+import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
@@ -22,5 +25,11 @@ suspend fun Stage.startGame(random: Random = Random.Default) {
     ResourcesBundle.prefetch(views)
     val sceneContainer = sceneContainer()
 
-    sceneContainer.changeTo { MenuScene(random) }
+    // The texts of every scene, in the language picked for the session. The menu waits for the catalogs.
+    val eventBus = InMemoryEventBus()
+    addUpdater { eventBus.dispatch() }
+    val localizationApi = LocalizationApi(eventBus)
+    localizationApi.init()
+
+    sceneContainer.changeTo { MenuScene(localizationApi, random) }
 }

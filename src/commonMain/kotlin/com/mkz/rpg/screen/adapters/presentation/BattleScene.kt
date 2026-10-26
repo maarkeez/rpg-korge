@@ -10,6 +10,7 @@ import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
@@ -28,8 +29,10 @@ import korlibs.korge.view.container
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
-// Random: the rolls of the CPU battle brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
+// Localization: the texts of the selected language. Random: the rolls of the CPU battle brain, e.g.: whether a CPU
+// battle unit rests while wandering. The tests choose them.
 class BattleScene(
+    localizationApi: LocalizationApi,
     private val random: Random = Random.Default,
 ) : Scene() {
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
@@ -37,11 +40,12 @@ class BattleScene(
     // but not when running the headless tests (ViewsForTesting), which would run them on Dispatchers.Default instead.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
+    private val texts = Texts(localizationApi)
     private val resourcesLoader = BattleSceneResourcesLoader()
     val battlefieldView = BattlefieldView(resourcesLoader)
-    val battleUnitInfoView = BattleUnitInfoView(resourcesLoader)
+    val battleUnitInfoView = BattleUnitInfoView(resourcesLoader, texts)
     val attackPreviewView = AttackPreviewView(resourcesLoader)
-    val inventoryView = InventoryView(resourcesLoader)
+    val inventoryView = InventoryView(resourcesLoader, texts)
     val battleHudView =
         BattleHudView(
             Size(390, 300),
@@ -49,10 +53,10 @@ class BattleScene(
             attackPreviewView,
             inventoryView,
         )
-    val playerCallToActionView = PlayerCallToActionView(resourcesLoader)
+    val playerCallToActionView = PlayerCallToActionView(texts, resourcesLoader)
     val virtualPadView = VirtualPadView(Size(390, 300))
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
-    val shopView = ShopView(resourcesLoader)
+    val shopView = ShopView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -133,6 +137,7 @@ class BattleScene(
                 partyApi,
                 battlefieldApi,
                 battlefieldView,
+                texts,
                 timeline,
                 eventBus,
             )
@@ -141,7 +146,7 @@ class BattleScene(
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
             // Battle info
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(texts)
             addChild(battleInfoView)
             val battleInfoPresenter =
                 BattleInfoPresenter(
@@ -181,10 +186,11 @@ class BattleScene(
                         battleUnitApi,
                         unitApi,
                         battlefieldApi,
+                        texts,
                         timeline,
                         eventBus,
                     )
-                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, shopPresenter, timeline, eventBus)
+                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, shopPresenter, texts, timeline, eventBus)
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

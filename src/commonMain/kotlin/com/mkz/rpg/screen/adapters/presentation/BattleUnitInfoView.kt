@@ -14,6 +14,7 @@ import korlibs.math.geom.Size
 
 open class BattleUnitInfoView(
     resourcesLoader: BattleSceneResourcesLoader,
+    texts: Texts,
 ) : Container() {
     companion object {
         // FamiCube palette colours of the remaining turn actions.
@@ -54,7 +55,7 @@ open class BattleUnitInfoView(
                             val remainingTurnActionsView = UIContainer(Size(width = this.width, height = 14))
                             remainingTurnActionsView.addChild(movementPointsView)
                             remainingTurnActionsView.addChild(castPointsView)
-                            remainingTurnsView = RemainingTurnsView(Size(width = this.width, height = 14))
+                            remainingTurnsView = RemainingTurnsView(Size(width = this.width, height = 14), texts)
                             remainingTurnActionsView.addChild(remainingTurnsView)
                             addChild(remainingTurnActionsView)
                         }

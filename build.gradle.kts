@@ -7,6 +7,7 @@ import org.gradle.kotlin.dsl.register
 import org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import resourcesbundle.ResourcesBundleTask
+import testcatalogs.TestCatalogsTask
 
 // The korge plugin bundles kotlin-gradle-plugin 2.0.20 on its classpath; declaring the
 // newer version here forces Gradle to resolve the conflict to 2.2.21 (highest version wins),
@@ -102,6 +103,23 @@ val resourcesBundle =
 // The tests read the bundle too, as the JS tests are only served the resources of the test compilation.
 extensions.getByType<KotlinMultiplatformExtension>().sourceSets.matching { it.name in setOf("commonMain", "commonTest") }.configureEach {
     resources.setSrcDirs(listOf(resourcesBundle.flatMap { it.outputDirectory }))
+}
+
+// The tests translate with the real catalogs, embedded in a generated source, as the JS tests can only read the
+// resources asynchronously. See docs/architecture/localization.md.
+val testCatalogs =
+    tasks.register<TestCatalogsTask>("testCatalogs") {
+        group = "build"
+        description = "Generates the test source holding the localization catalogs."
+
+        localizationDirectory.set(file("resources/localization"))
+        packageName.set("com.mkz.rpg.localization.adapters.resources")
+        objectName.set("TestCatalogs")
+        outputDirectory.set(layout.buildDirectory.dir("generated/testCatalogs"))
+    }
+
+extensions.getByType<KotlinMultiplatformExtension>().sourceSets.named("commonTest") {
+    kotlin.srcDir(testCatalogs.flatMap { it.outputDirectory })
 }
 
 // KorGE always packages the files under `resources`, with a `$catalog.json` listing each folder: both are left out.

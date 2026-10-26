@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenter asks the map builder controls to display, instead of drawing them.
-class FakeMapBuilderHudView : MapBuilderHudView() {
+class FakeMapBuilderHudView : MapBuilderHudView(TextsMother.texts()) {
     var delegate: Delegate? = null
         private set
     var displayedSize: Pair<Int, Int>? = null

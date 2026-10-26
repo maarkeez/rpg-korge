@@ -20,10 +20,10 @@ import korlibs.time.milliseconds
 import korlibs.time.seconds
 
 /** The map builder header: its title, and a subtitle with the map size, which messages replace for a while. */
-open class MapBuilderInfoView : UIContainer(Size(width = 390, height = 33)) {
+open class MapBuilderInfoView(
+    private val texts: Texts,
+) : UIContainer(Size(width = 390, height = 33)) {
     companion object {
-        const val TITLE = "Map Builder"
-
         // FamiCube palette colours of the messages.
         val ERROR_COLOR = RGBA(0xE0, 0x3C, 0x28)
         val INFO_COLOR = RGBA(0x00, 0x84, 0xFF)
@@ -35,7 +35,7 @@ open class MapBuilderInfoView : UIContainer(Size(width = 390, height = 33)) {
     }
 
     internal val title =
-        uiText(text = TITLE, size = Size(width = width, height = 18)) {
+        uiText(text = texts[UiText.MAP_BUILDER_INFO_TITLE], size = Size(width = width, height = 18)) {
             styles.textAlignment = TextAlignment.MIDDLE_LEFT
             styles.textSize = 18.0
         }
@@ -62,7 +62,7 @@ open class MapBuilderInfoView : UIContainer(Size(width = 390, height = 33)) {
         rows: Int,
         columns: Int,
     ) {
-        sizeText = "$rows x $columns"
+        sizeText = texts[UiText.MAP_BUILDER_INFO_SIZE, "rows" to rows, "columns" to columns]
         if (messageAnimator == null) displaySizeText()
     }
 

@@ -1,6 +1,5 @@
 package com.mkz.rpg.shared.adapters.e2e
 
-import com.mkz.rpg.screen.adapters.presentation.MapBuilderPresenter
 import com.mkz.rpg.screen.adapters.presentation.actionLabels
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickMenuButton
@@ -66,8 +65,8 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             // When
             clickTile(battlefieldView, row = 2, column = 3)
             // Then
-            waitUntil { mapBuilderInfoView()!!.subtitleText() == "Water can not be next to lava" }
-            mapBuilderInfoView()!!.subtitleText() shouldBe "Water can not be next to lava"
+            waitUntil { mapBuilderInfoView()!!.subtitleText() == "Water can not be next to Lava" }
+            mapBuilderInfoView()!!.subtitleText() shouldBe "Water can not be next to Lava"
             battlefieldView.terrainBitmapAt(row = 2, column = 3) shouldBe sandBitmap
         }
 
@@ -91,8 +90,8 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             // When
             clickPrimaryAction(mapBuilderCallToActionView()!!)
             // Then
-            waitUntil { mapBuilderInfoView()!!.subtitleText() == MapBuilderPresenter.MAP_COPIED }
-            mapBuilderInfoView()!!.subtitleText() shouldBe MapBuilderPresenter.MAP_COPIED
+            waitUntil { mapBuilderInfoView()!!.subtitleText() == "Map copied to the clipboard" }
+            mapBuilderInfoView()!!.subtitleText() shouldBe "Map copied to the clipboard"
         }
 
     @Test
@@ -137,8 +136,8 @@ class MapBuilderEndToEndTest : ViewsForTesting() {
             // When
             clickMenuOption(menuView, "Import")
             // Then
-            waitUntil { mapBuilderInfoView()!!.subtitleText() == MapBuilderPresenter.FILE_NOT_READ }
-            mapBuilderInfoView()!!.subtitleText() shouldBe MapBuilderPresenter.FILE_NOT_READ
+            waitUntil { mapBuilderInfoView()!!.subtitleText() == "The file can not be read" }
+            mapBuilderInfoView()!!.subtitleText() shouldBe "The file can not be read"
             battlefieldView()!!.tileCount() shouldBe 256
         }
 }

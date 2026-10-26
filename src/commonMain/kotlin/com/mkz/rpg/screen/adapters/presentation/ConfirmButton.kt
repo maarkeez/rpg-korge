@@ -8,9 +8,9 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
-/** A primary action button. It reads "Confirm" unless another [label] is given. */
+/** A primary action button, e.g.: Confirm. */
 class ConfirmButton(
-    label: String = "Confirm",
+    label: String,
     buttonWidth: Double = 190.0,
     val onConfirmed: () -> Unit,
 ) : Container() {

@@ -15,7 +15,9 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 
-open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
+open class BattleInfoView(
+    private val texts: Texts,
+) : UIContainer(Size(width = 390, height = 33)) {
     companion object {
         // FamiCube palette colours of each player turn.
         val HUMAN_TURN_COLOR = RGBA(0x00, 0x84, 0xFF)
@@ -54,14 +56,14 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
 
     /** Displays that the player is exploring, out of the battles. */
     open fun displayExploring() {
-        this.round.text = "Exploring"
+        this.round.text = texts[UiText.BATTLE_INFO_EXPLORING]
         this.playerTurn.text = ""
         displayedRound = null
     }
 
     /** Displays and pops that a battle starts, e.g.: when the CPU engages the exploring player. */
     open suspend fun announceBattle() {
-        this.round.text = "Battle!"
+        this.round.text = texts[UiText.BATTLE_INFO_BATTLE]
         this.playerTurn.text = ""
         displayedRound = null
         pop(listOf(this.round))
@@ -69,7 +71,7 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
 
     /** Displays and pops that the battle is over, e.g.: when no CPU battle unit is left in it. */
     open suspend fun announceBattleEnd() {
-        this.round.text = "Battle over!"
+        this.round.text = texts[UiText.BATTLE_INFO_BATTLE_OVER]
         this.playerTurn.text = ""
         displayedRound = null
         pop(listOf(this.round))
@@ -80,8 +82,8 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
         round: Int,
         turnColor: RGBA,
     ) {
-        this.round.text = "Round $round"
-        this.playerTurn.text = "$playerName turn"
+        this.round.text = texts[UiText.BATTLE_INFO_ROUND, "round" to round]
+        this.playerTurn.text = texts[UiText.BATTLE_INFO_PLAYER_TURN, "player" to playerName]
         this.playerTurn.styles.textColor = turnColor
         displayedRound = round
     }
@@ -117,7 +119,7 @@ open class BattleInfoView : UIContainer(Size(width = 390, height = 33)) {
 
         winner =
             layout.uiText(
-                text = "$playerName wins!",
+                text = texts[UiText.BATTLE_INFO_PLAYER_WINS, "player" to playerName],
                 size = Size(width = width, height = 33),
             ) {
                 this.styles.textAlignment = TextAlignment.MIDDLE_CENTER

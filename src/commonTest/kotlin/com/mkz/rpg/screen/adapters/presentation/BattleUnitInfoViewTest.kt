@@ -18,7 +18,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Init should not be visible when is initialized`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             // When
             // Then
             battleUnitInfoView.isVisibleToUser().shouldBeFalse()
@@ -28,7 +28,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should be visible when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val battleUnit = battleUnit(unit = unit).toDto()
             // When
@@ -41,7 +41,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display the remaining steps and casts out of their maximum when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit(movementRange = 3).toDto()
             val battleUnit = battleUnit(unit = unit).move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1))).toDto()
             // When
@@ -57,7 +57,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display the steps in white and the casts in gold when is displayed`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val battleUnit = battleUnit(unit = unit).toDto()
             // When
@@ -71,7 +71,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should display no remaining casts when the battle unit has cast this turn`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val battleUnit = battleUnit(unit = unit).toDto().let { dto -> dto.copy(remainingTurnActions = dto.remainingTurnActions.copy(remainingCasts = 0)) }
             // When
@@ -85,7 +85,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should only darken the abilities in cooldown when the battle unit has no casts left`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val battleUnit = battleUnit(unit = unit).toDto().let { dto -> dto.copy(remainingTurnActions = dto.remainingTurnActions.copy(remainingCasts = 0)) }
             val abilityAvailabilities =
@@ -109,7 +109,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should tell how many turns a summon has left, after its remaining casts`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit(movementRange = 5).toDto()
             val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
             // When
@@ -123,7 +123,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Display should not tell any turns left when the battle unit never vanishes`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
             battleUnitInfoView.display(battleUnit = summon, unit = unit, abilityAvailabilities = emptyList())
@@ -137,7 +137,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `DisplayAbilitySelected should select ability button when ability is selected`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val selectedAbilityIndex = 0
             // When
             battleUnitInfoView.displayAbilitySelected(selectedAbilityIndex)
@@ -151,7 +151,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `DisplayAbilitySelected should unselect other ability buttons when ability is selected`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val abilityButtons = battleUnitInfoView.abilityButtons()
             abilityButtons.forEach { abilityButton -> abilityButton.select() }
             val selectedAbilityIndex = 0
@@ -168,7 +168,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `Hide should not be visible when is hidden`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             val battleUnit = battleUnit(unit = unit).toDto()
             battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
@@ -183,7 +183,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var bagSelected = false
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val unit = unit().toDto()
             battleUnitInfoView.display(battleUnit = battleUnit(unit = unit).toDto(), unit = unit, abilityAvailabilities = emptyList())
             addChild(battleUnitInfoView)
@@ -199,7 +199,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
     fun `HideBag should not display the bag when the bag is hidden`() =
         sharedViewsTest {
             // Given
-            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader())
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             battleUnitInfoView.displayBag(onBagSelected = {})
             // When
             battleUnitInfoView.hideBag()

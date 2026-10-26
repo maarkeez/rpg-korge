@@ -49,7 +49,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Init should display 12 empty slots, under the header and above the footer, without Buy nor Sell`() =
         sharedViewsTest {
             // When
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // Then
             shopView.slotCount() shouldBe 12
             shopView.slotBitmaps().all { bitmap -> bitmap == null }.shouldBeTrue()
@@ -62,7 +62,7 @@ class ShopViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
-            val shopView = ShopView(resourcesLoader)
+            val shopView = ShopView(resourcesLoader, TextsMother.texts())
             // When
             shopView.displayMerchant()
             // Then
@@ -77,7 +77,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should frame the equipped items in gold`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
             shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = true, isTradeable = false)))
             // Then
@@ -88,7 +88,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should dim the items the buyer can not trade`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
             shopView.displayMerchant(slots = listOf(Slot("health-potion", isEquipped = false, isTradeable = true), Slot("hammer", isEquipped = false, isTradeable = false)))
             // Then
@@ -105,7 +105,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should display the buyer's name, gold and bag, between both arrows enabled`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
             shopView.displayMerchant()
             // Then
@@ -117,7 +117,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `Display should display the bag is full, and disable the arrows at the ends of the party`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
             shopView.displayMerchant(buyer = knight.copy(usedStorageSpace = 12, partyIndex = 0, partySize = 2))
             // Then
@@ -133,7 +133,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `SelectSlot should frame only the selected slot, or none when no slot is selected`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             shopView.displayMerchant()
             shopView.selectSlot(0)
             // When
@@ -150,7 +150,7 @@ class ShopViewTest : ViewsForTesting() {
     fun `DisplayItem should display the item's name, price and action, and DisplayHint the hint without action`() =
         sharedViewsTest {
             // Given
-            val shopView = ShopView(loadedResourcesLoader())
+            val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
             shopView.displayItem(itemName = "Hammer", itemPrice = 50, actionLabel = "Not enough gold", isActionEnabled = false)
             // Then
@@ -166,7 +166,7 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     private suspend fun ViewsForTesting.newShopView(delegate: RecordingDelegate): ShopView {
-        val shopView = ShopView(loadedResourcesLoader())
+        val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
         shopView.setDelegate(delegate)
         shopView.displayMerchant()
         views.stage.addChild(shopView)

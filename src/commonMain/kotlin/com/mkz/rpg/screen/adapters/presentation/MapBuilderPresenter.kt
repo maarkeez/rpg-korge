@@ -27,6 +27,7 @@ class MapBuilderPresenter(
     private val mapBuilderApi: MapBuilderApi,
     private val battlefieldApi: BattlefieldApi,
     private val terrainApi: TerrainApi,
+    private val texts: Texts,
     private val clipboard: Clipboard,
     private val mapFilePicker: MapFilePicker,
     private val coroutineScope: CoroutineScope,
@@ -34,15 +35,6 @@ class MapBuilderPresenter(
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
     MapBuilderHudView.Delegate {
-    companion object {
-        const val MAP_COPIED = "Map copied to the clipboard"
-        const val MAP_LOST_WHEN_LEAVING = "The map is lost when leaving"
-        const val MAP_IMPORTED = "Map imported"
-        const val FILE_NOT_READ = "The file can not be read"
-        const val NOT_A_MAP = "The file has no map"
-        val MAP_SIZE_OUT_OF_RANGE = "The map must be ${MapBuilder.MINIMUM_SIZE} to ${MapBuilder.MAXIMUM_SIZE} tiles wide and tall"
-    }
-
     private val subscriptions =
         listOf(
             eventBus.subscribe<MapBuilderEvent.MapCreated> {
@@ -57,7 +49,7 @@ class MapBuilderPresenter(
             },
             eventBus.subscribe<MapBuilderEvent.MapImported> {
                 displayMap()
-                infoView.displayInfo(MAP_IMPORTED)
+                infoView.displayInfo(texts[UiText.MAP_BUILDER_MAP_IMPORTED])
             },
             eventBus.subscribe<MapBuilderEvent.MapImportRejected> { event -> infoView.displayError(importRejectedMessage(event)) },
         )
@@ -65,7 +57,7 @@ class MapBuilderPresenter(
     init {
         battlefieldView.setDelegate(this)
         hudView.setDelegate(this)
-        menuView.displayOptions(listOf(MapBuilderMenuView.Option(label = "Import") { importMap() }))
+        menuView.displayOptions(listOf(MapBuilderMenuView.Option(label = texts[UiText.MAP_BUILDER_IMPORT]) { importMap() }))
         displayExportAndBack()
     }
 
@@ -110,7 +102,7 @@ class MapBuilderPresenter(
         val toml = mapBuilderApi.exportMap()
         coroutineScope.launchImmediately {
             clipboard.copy(toml)
-            infoView.displayInfo(MAP_COPIED)
+            infoView.displayInfo(texts[UiText.MAP_BUILDER_MAP_COPIED])
         }
     }
 
@@ -124,7 +116,7 @@ class MapBuilderPresenter(
                 } catch (exception: CancellationException) {
                     throw exception
                 } catch (_: Exception) {
-                    infoView.displayError(FILE_NOT_READ)
+                    infoView.displayError(texts[UiText.MAP_BUILDER_FILE_NOT_READ])
                     return@launchImmediately
                 }
             if (text != null) mapBuilderApi.importMap(text)
@@ -133,19 +125,20 @@ class MapBuilderPresenter(
 
     private fun importRejectedMessage(event: MapBuilderEvent.MapImportRejected): String =
         when (event.reason) {
-            Reason.NOT_A_MAP -> NOT_A_MAP
-            Reason.SIZE_OUT_OF_RANGE -> MAP_SIZE_OUT_OF_RANGE
-            Reason.UNKNOWN_TERRAIN -> "Unknown terrain: ${event.terrainId}"
+            Reason.NOT_A_MAP -> texts[UiText.MAP_BUILDER_NOT_A_MAP]
+            Reason.SIZE_OUT_OF_RANGE ->
+                texts[UiText.MAP_BUILDER_SIZE_OUT_OF_RANGE, "minimum" to MapBuilder.MINIMUM_SIZE, "maximum" to MapBuilder.MAXIMUM_SIZE]
+            Reason.UNKNOWN_TERRAIN -> texts[UiText.MAP_BUILDER_UNKNOWN_TERRAIN, "terrain" to event.terrainId.orEmpty()]
             Reason.FORBIDDEN_NEIGHBOURS -> forbiddenNeighboursMessage(event.terrainId!!, event.neighbourTerrainId!!)
         }
 
     private fun forbiddenNeighboursMessage(
         terrainId: String,
         neighbourTerrainId: String,
-    ): String = "${terrainName(terrainId)} can not be next to ${terrainName(neighbourTerrainId).lowercase()}"
+    ): String = texts[UiText.MAP_BUILDER_FORBIDDEN_NEIGHBOURS, "terrain" to terrainName(terrainId), "neighbour" to terrainName(neighbourTerrainId)]
 
     private fun askToLeave() {
-        infoView.displayInfo(MAP_LOST_WHEN_LEAVING)
+        infoView.displayInfo(texts[UiText.MAP_BUILDER_MAP_LOST_WHEN_LEAVING])
         callToActionView.displayLeaveConfirmation(onLeft = onLeft, onStayed = { displayExportAndBack() })
     }
 

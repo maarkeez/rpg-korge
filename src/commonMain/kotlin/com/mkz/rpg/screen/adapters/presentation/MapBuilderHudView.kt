@@ -23,7 +23,9 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.Size
 
 /** The map builder controls: the map size, and the terrain the tiles are painted with. */
-open class MapBuilderHudView : UIContainer(Size(width = 390, height = 300)) {
+open class MapBuilderHudView(
+    texts: Texts,
+) : UIContainer(Size(width = 390, height = 300)) {
     companion object {
         // The steps a size stepper changes the size by, so a large map takes a few taps.
         val SIZE_STEPS = listOf(-8, -1, 1, 8)
@@ -67,9 +69,9 @@ open class MapBuilderHudView : UIContainer(Size(width = 390, height = 300)) {
         lateinit var rowsStepper: Pair<UIText, Map<Int, UIButton>>
         lateinit var columnsStepper: Pair<UIText, Map<Int, UIButton>>
         uiVerticalStack(padding = 10.0) {
-            rowsStepper = stepper(label = "Rows") { step -> delegate?.sizeChanged(rows = rows + step, columns = columns) }
-            columnsStepper = stepper(label = "Columns") { step -> delegate?.sizeChanged(rows = rows, columns = columns + step) }
-            uiText(text = "Terrain", size = Size(width = LABEL_WIDTH, height = 20)) { styles.textSize = 15.0 }
+            rowsStepper = stepper(label = texts[UiText.MAP_BUILDER_HUD_ROWS]) { step -> delegate?.sizeChanged(rows = rows + step, columns = columns) }
+            columnsStepper = stepper(label = texts[UiText.MAP_BUILDER_HUD_COLUMNS]) { step -> delegate?.sizeChanged(rows = rows, columns = columns + step) }
+            uiText(text = texts[UiText.MAP_BUILDER_HUD_TERRAIN], size = Size(width = LABEL_WIDTH, height = 20)) { styles.textSize = 15.0 }
             terrainPalette = container()
         }
         rowsValue = rowsStepper.first

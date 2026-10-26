@@ -22,6 +22,7 @@ class SubdomainDependencyArchitectureTest {
         mapOf(
             "shared" to emptySet(),
             "effect" to setOf("shared"),
+            "localization" to setOf("shared"),
             "player" to setOf("shared"),
             "terrain" to setOf("shared"),
             "unit" to setOf("shared"),

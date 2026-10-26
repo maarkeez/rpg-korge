@@ -3,7 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import korlibs.image.color.RGBA
 
 // Records what the presenters ask the battle info view to display, instead of drawing it.
-class FakeBattleInfoView : BattleInfoView() {
+class FakeBattleInfoView : BattleInfoView(TextsMother.texts()) {
     data class BattleInfo(
         val playerName: String,
         val round: Int,

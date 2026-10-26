@@ -4,7 +4,9 @@ import korlibs.korge.view.Container
 import korlibs.korge.view.View
 
 /** The map builder actions: exporting the map, or going back to the menu once the player confirms leaving it. */
-open class MapBuilderCallToActionView : Container() {
+open class MapBuilderCallToActionView(
+    private val texts: Texts,
+) : Container() {
     companion object {
         const val CALL_TO_ACTION = "CALL_TO_ACTION"
     }
@@ -13,7 +15,7 @@ open class MapBuilderCallToActionView : Container() {
         onExported: () -> Unit,
         onBack: () -> Unit,
     ) {
-        display(CancelAndConfirmView(onCancelled = onBack, onConfirmed = onExported, cancelLabel = "Back", confirmLabel = "Export"))
+        display(CancelAndConfirmView(onCancelled = onBack, onConfirmed = onExported, cancelLabel = texts[UiText.MAP_BUILDER_BACK], confirmLabel = texts[UiText.MAP_BUILDER_EXPORT]))
     }
 
     /** Asks the player to confirm leaving, as the map is lost. */
@@ -21,7 +23,7 @@ open class MapBuilderCallToActionView : Container() {
         onLeft: () -> Unit,
         onStayed: () -> Unit,
     ) {
-        display(CancelAndConfirmView(onCancelled = onStayed, onConfirmed = onLeft, cancelLabel = "Stay", confirmLabel = "Leave"))
+        display(CancelAndConfirmView(onCancelled = onStayed, onConfirmed = onLeft, cancelLabel = texts[UiText.MAP_BUILDER_STAY], confirmLabel = texts[UiText.MAP_BUILDER_LEAVE]))
     }
 
     internal val callToAction: CancelAndConfirmView?

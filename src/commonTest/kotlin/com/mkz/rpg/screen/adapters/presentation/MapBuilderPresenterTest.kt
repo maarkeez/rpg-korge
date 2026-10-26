@@ -47,6 +47,7 @@ class MapBuilderPresenterTest {
             mapBuilderApi = mapBuilderApi,
             battlefieldApi = apis.battlefieldApi,
             terrainApi = apis.terrainApi,
+            texts = TextsMother.texts(),
             clipboard = clipboard,
             mapFilePicker = mapFilePicker,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
@@ -147,7 +148,7 @@ class MapBuilderPresenterTest {
         // When
         selectTile(row = 2, column = 4)
         // Then
-        infoView.errors.shouldContainExactly("Water can not be next to lava")
+        infoView.errors.shouldContainExactly("Water can not be next to Lava")
         battlefieldView.updatedTerrains.shouldHaveSize(1)
     }
 
@@ -174,7 +175,7 @@ class MapBuilderPresenterTest {
         exportAndBack().onExported()
         // Then
         clipboard.copiedTexts.shouldContainExactly(mapBuilderApi.exportMap())
-        infoView.infos.shouldContainExactly(MapBuilderPresenter.MAP_COPIED)
+        infoView.infos.shouldContainExactly("Map copied to the clipboard")
     }
 
     @Test
@@ -185,7 +186,7 @@ class MapBuilderPresenterTest {
         exportAndBack().onBack()
         // Then
         callToActionView.displayedActions.shouldBeInstanceOf<Actions.LeaveConfirmation>()
-        infoView.infos.shouldContainExactly(MapBuilderPresenter.MAP_LOST_WHEN_LEAVING)
+        infoView.infos.shouldContainExactly("The map is lost when leaving")
         leftCount shouldBe 0
     }
 
@@ -246,7 +247,7 @@ class MapBuilderPresenterTest {
         battlefieldView.displayedBattlefields.last() shouldBe apis.battlefieldApi.previewBattlefield(tiles)
         infoView.displayedSize shouldBe (2 to 3)
         hudView.displayedSize shouldBe (2 to 3)
-        infoView.infos.shouldContainExactly(MapBuilderPresenter.MAP_IMPORTED)
+        infoView.infos.shouldContainExactly("Map imported")
     }
 
     @Test
@@ -269,7 +270,7 @@ class MapBuilderPresenterTest {
         // When
         importFile("Never read")
         // Then
-        infoView.errors.shouldContainExactly(MapBuilderPresenter.FILE_NOT_READ)
+        infoView.errors.shouldContainExactly("The file can not be read")
         battlefieldView.displayedBattlefields.shouldHaveSize(1)
     }
 
@@ -280,7 +281,7 @@ class MapBuilderPresenterTest {
         // When
         importFile("Hello, map builder!")
         // Then
-        infoView.errors.shouldContainExactly(MapBuilderPresenter.NOT_A_MAP)
+        infoView.errors.shouldContainExactly("The file has no map")
     }
 
     @Test
@@ -290,7 +291,7 @@ class MapBuilderPresenterTest {
         // When
         importFile("")
         // Then
-        infoView.errors.shouldContainExactly(MapBuilderPresenter.NOT_A_MAP)
+        infoView.errors.shouldContainExactly("The file has no map")
     }
 
     @Test
@@ -320,6 +321,6 @@ class MapBuilderPresenterTest {
         // When
         importFile(apis.battlefieldApi.exportBattlefield(listOf(listOf("water", "lava"))))
         // Then
-        infoView.errors.shouldContainExactly("Water can not be next to lava")
+        infoView.errors.shouldContainExactly("Water can not be next to Lava")
     }
 }

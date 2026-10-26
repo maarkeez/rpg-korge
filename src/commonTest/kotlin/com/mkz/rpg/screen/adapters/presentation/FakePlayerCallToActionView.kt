@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenters ask the call to action view to display, instead of drawing it.
 // The player actions are simulated by calling the callbacks it was given (e.g.: `onTurnFinished`).
-class FakePlayerCallToActionView : PlayerCallToActionView() {
+class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
     // The finish turn the presenters displayed, `null` while it is hidden (e.g.: while exploring).
     var onTurnFinished: (() -> Unit)? = null
         private set

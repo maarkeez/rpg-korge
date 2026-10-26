@@ -15,7 +15,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `DisplayBattleInfo should display player name and round when battle info is displayed`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             val playerName = "Player 1"
             val round = 3
             // When
@@ -29,7 +29,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `DisplayBattleInfo should display the player turn with the turn colour when battle info is displayed`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             // When
             battleInfoView.displayBattleInfo(playerName = "CPU", round = 1, turnColor = BattleInfoView.CPU_TURN_COLOR)
             // Then
@@ -40,7 +40,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `AnnounceTurn should display the battle info when the turn is announced`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             // When
             awaitCompletion(startAnimation { battleInfoView.announceTurn(playerName = "CPU", round = 2, turnColor = BattleInfoView.CPU_TURN_COLOR) })
@@ -54,7 +54,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `AnnounceTurn should pop the player turn and the round when the turn of a new round is announced`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             // When
             val announcing = startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) }
@@ -70,7 +70,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `AnnounceTurn should only pop the player turn when the turn of the same round is announced`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             awaitCompletion(startAnimation { battleInfoView.announceTurn(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR) })
             // When
@@ -85,7 +85,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `DisplayExploring should display that the player explores without a player turn when exploring`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             battleInfoView.displayBattleInfo(playerName = "Human", round = 1, turnColor = BattleInfoView.HUMAN_TURN_COLOR)
             // When
             battleInfoView.displayExploring()
@@ -98,7 +98,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `AnnounceBattle should display and pop that a battle starts when combat is engaged`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             battleInfoView.displayExploring()
             // When
@@ -115,7 +115,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `AnnounceTurn should pop the round when the first turn is announced after the battle`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             addChild(battleInfoView)
             awaitCompletion(startAnimation { battleInfoView.announceBattle() })
             // When
@@ -130,7 +130,7 @@ class BattleInfoViewTest : ViewsForTesting() {
     fun `DisplayPlayerWin should display player name when player wins`() =
         sharedViewsTest {
             // Given
-            val battleInfoView = BattleInfoView()
+            val battleInfoView = BattleInfoView(TextsMother.texts())
             val playerName = "Player 1"
             // When
             battleInfoView.displayPlayerWin(playerName)

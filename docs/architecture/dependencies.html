@@ -217,6 +217,7 @@ const DATA = {
     {"name": "cpuWanderBrain", "files": 23, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 53},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 67, "importsOut": 13},
     {"name": "inventory", "files": 29, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 53},
+    {"name": "localization", "files": 14, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 4, "importsOut": 6},
     {"name": "lootDrop", "files": 18, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 26},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 11, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 14},
@@ -224,8 +225,8 @@ const DATA = {
     {"name": "npc", "files": 15, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 34, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 39, "importsOut": 64},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 34, "importsOut": 12},
-    {"name": "screen", "files": 66, "fanIn": 0, "fanOut": 20, "instability": 1.0, "importsIn": 0, "importsOut": 171},
-    {"name": "shared", "files": 13, "fanIn": 20, "fanOut": 0, "instability": 0.0, "importsIn": 392, "importsOut": 0},
+    {"name": "screen", "files": 67, "fanIn": 0, "fanOut": 21, "instability": 1.0, "importsIn": 0, "importsOut": 175},
+    {"name": "shared", "files": 13, "fanIn": 21, "fanOut": 0, "instability": 0.0, "importsIn": 398, "importsOut": 0},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 16, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 21, "importsOut": 15}
   ],
@@ -854,6 +855,14 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/CreateInventory.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchUnitById"}
     ]},
+    {"from": "localization", "to": "shared", "weight": 6, "files": 5, "imports": [
+      {"file": "com/mkz/rpg/localization/adapters/presentation/LocalizationApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/localization/adapters/resources/ResourcesLocalizationLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
+      {"file": "com/mkz/rpg/localization/adapters/resources/ResourcesLocalizationLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.fromResource"},
+      {"file": "com/mkz/rpg/localization/domain/LocalizationEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/localization/usecases/commands/InitialiseLocalization.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/localization/usecases/commands/SelectLanguage.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
     {"from": "lootDrop", "to": "battleUnit", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "battleUnit.domain.BattleUnitEvent.BattleUnitDefeated"},
       {"file": "com/mkz/rpg/lootDrop/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "battleUnit.domain.BattleUnitEvent.BattleUnitMoved"}
@@ -1161,6 +1170,12 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.Inventory.Dto.TradeRefusalDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemBought"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "inventory.domain.InventoryEvent.ItemSold"}
+    ]},
+    {"from": "screen", "to": "localization", "weight": 4, "files": 4, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/Texts.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"}
     ]},
     {"from": "screen", "to": "lootDrop", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "lootDrop.adapters.presentation.LootDropApi"},

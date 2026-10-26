@@ -18,6 +18,7 @@ import korlibs.math.geom.Size
  */
 open class InventoryView(
     resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
 ) : Container() {
     companion object {
         const val SLOTS = 12
@@ -60,7 +61,7 @@ open class InventoryView(
                 titleLine.addChild(goldView)
                 addChild(titleLine)
                 closeButton =
-                    uiButton("Close") {
+                    uiButton(texts[UiText.INVENTORY_CLOSE]) {
                         width = CLOSE_WIDTH
                         bgColorOut = Colors.DIMGRAY
                         bgColorOver = RGBA(85, 85, 85)
@@ -77,7 +78,7 @@ open class InventoryView(
             }
         }
         slotViews.forEachIndexed { index, slotView -> slotView.setOnSelected { delegate?.slotSelected(index) } }
-        titleView.display("Inventory")
+        titleView.display(texts[UiText.INVENTORY_TITLE])
     }
 
     open fun setDelegate(delegate: Delegate) {
@@ -89,7 +90,7 @@ open class InventoryView(
         slots: List<Slot>,
         gold: Int,
     ) {
-        goldView.display(goldText(gold))
+        goldView.display(texts.gold(gold))
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)

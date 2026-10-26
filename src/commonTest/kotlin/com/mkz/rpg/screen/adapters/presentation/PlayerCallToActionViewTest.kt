@@ -15,7 +15,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `DisplayFinishTurn should display finish turn when finish turn is displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             // When
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // Then
@@ -28,7 +28,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var turnFinished = false
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = { turnFinished = true })
             addChild(playerCallToActionView)
             // When
@@ -41,7 +41,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `SetFinishTurnEnabled should display the finish turn disabled when finish turn is disabled`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // When
             playerCallToActionView.setFinishTurnEnabled(false)
@@ -54,7 +54,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `SetFinishTurnEnabled should display the finish turn disabled when it was disabled before being displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.setFinishTurnEnabled(false)
             // When
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
@@ -66,7 +66,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `SetFinishTurnEnabled should display the finish turn enabled again when finish turn is enabled`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.setFinishTurnEnabled(false)
             // When
@@ -79,7 +79,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `SetFinishTurnEnabled should display the finish turn disabled again when it is disabled and cancel is clicked`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayCancelAndConfirm(onCancelled = {}, onConfirmed = {})
             playerCallToActionView.setFinishTurnEnabled(false)
@@ -95,7 +95,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `DisplayCancelAndConfirm should replace finish turn with cancel and confirm when cancel and confirm is displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // When
             playerCallToActionView.displayCancelAndConfirm(onCancelled = {}, onConfirmed = {})
@@ -110,7 +110,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Given
             var cancelled = false
             var confirmed = false
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayCancelAndConfirm(onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
             addChild(playerCallToActionView)
@@ -128,7 +128,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Given
             var cancelled = false
             var confirmed = false
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayCancelAndConfirm(onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
             addChild(playerCallToActionView)
@@ -144,7 +144,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `Hide should not display any call to action when is hidden`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // When
             playerCallToActionView.hide()
@@ -157,7 +157,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `DisplayItemActions should display the item name, its price and its actions when the item actions are displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             val actions =
                 listOf(
@@ -179,7 +179,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `DisplayItemActions should display only the item name and its price when the item has no actions`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // When
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = emptyList())
@@ -195,7 +195,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var consumed = false
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
             addChild(playerCallToActionView)
@@ -210,7 +210,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `DisplayItemActions should keep what the action displayed instead when an item action is clicked, e g give`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             val give = ItemActionsView.Action(label = "Give") { playerCallToActionView.displayGiveItem(itemName = "Hammer", onCancelled = {}) }
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(give))
@@ -226,13 +226,13 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var cancelled = false
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             addChild(playerCallToActionView)
             playerCallToActionView.displayGiveItem(itemName = "Hammer", onCancelled = { cancelled = true })
             // When
             clickCancelGiving(playerCallToActionView)
             // Then
-            playerCallToActionView.giveItemMessage() shouldBe "Tap a party member to give the Hammer"
+            playerCallToActionView.giveItemMessage() shouldBe "Tap a party member to give: Hammer"
             cancelled.shouldBeTrue()
         }
 
@@ -241,14 +241,14 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var left = false
-            val playerCallToActionView = PlayerCallToActionView(loadedResourcesLoader())
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
             addChild(playerCallToActionView)
             playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemPrice = 10, foundItemId = "health-potion", onLeft = { left = true })
             // When
             clickLeaveIt(playerCallToActionView)
             // Then
             playerCallToActionView.isDisplayingInventoryFull().shouldBeTrue()
-            playerCallToActionView.inventoryFullMessage() shouldBe "Tap an item to swap it for the Health Potion (10 G)"
+            playerCallToActionView.inventoryFullMessage() shouldBe "Tap an item to swap it for: Health Potion (10 G)"
             playerCallToActionView.isFoundItemIconDisplayed().shouldBeTrue()
             left.shouldBeTrue()
         }
@@ -257,7 +257,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `Dismiss should display the finish turn again when the item actions were displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
@@ -270,7 +270,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `Dismiss should display nothing when the item actions were displayed and the finish turn was never displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
             playerCallToActionView.dismiss()
@@ -282,7 +282,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `HideFinishTurn should display nothing when the finish turn is displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             // When
             playerCallToActionView.hideFinishTurn()
@@ -294,7 +294,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `HideFinishTurn should keep the item actions displayed when the item actions are displayed`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
@@ -307,7 +307,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
     fun `HideFinishTurn should display nothing once an item action is clicked when the finish turn is hidden`() =
         sharedViewsTest {
             // Given
-            val playerCallToActionView = PlayerCallToActionView()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.hideFinishTurn()
             playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") {}))

@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -14,7 +15,9 @@ import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
 /** Designs a battlefield map, laid out like the battle: the title, the battlefield, the HUD and the calls to action. */
-class MapBuilderScene : Scene() {
+class MapBuilderScene(
+    private val localizationApi: LocalizationApi,
+) : Scene() {
     private companion object {
         const val MENU_MARGIN = 6.0
     }
@@ -22,11 +25,12 @@ class MapBuilderScene : Scene() {
     // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
 
+    private val texts = Texts(localizationApi)
     private val resourcesLoader = BattleSceneResourcesLoader()
     val battlefieldView = BattlefieldView(resourcesLoader)
-    val infoView = MapBuilderInfoView()
-    val hudView = MapBuilderHudView()
-    val callToActionView = MapBuilderCallToActionView()
+    val infoView = MapBuilderInfoView(texts)
+    val hudView = MapBuilderHudView(texts)
+    val callToActionView = MapBuilderCallToActionView(texts)
     val menuView = MapBuilderMenuView()
 
     override suspend fun SContainer.sceneInit() {
@@ -56,10 +60,11 @@ class MapBuilderScene : Scene() {
             mapBuilderApi = mapBuilderApi,
             battlefieldApi = battlefieldApi,
             terrainApi = terrainApi,
+            texts = texts,
             clipboard = GameWindowClipboard(views.gameWindow),
-            mapFilePicker = GameWindowMapFilePicker(views.gameWindow),
+            mapFilePicker = GameWindowMapFilePicker(views.gameWindow, texts),
             coroutineScope = this@MapBuilderScene,
-            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene() } } },
+            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi) } } },
             eventBus = eventBus,
         )
 

@@ -9,6 +9,7 @@ import korlibs.math.geom.Size
  * soon as one is selected, as the scene it opens takes a while to load, and so it can not be selected twice.
  */
 class MenuView(
+    texts: Texts,
     onNewGameSelected: () -> Unit,
     onMapBuilderSelected: () -> Unit,
 ) : UIContainer(Size(width = BUTTON_WIDTH, height = 2 * BUTTON_HEIGHT + BUTTON_GAP)) {
@@ -19,9 +20,9 @@ class MenuView(
     }
 
     internal val playNewGameButton =
-        ConfirmButton(label = "Play new game", buttonWidth = BUTTON_WIDTH, onConfirmed = { select(onNewGameSelected) })
+        ConfirmButton(label = texts[UiText.MENU_PLAY_NEW_GAME], buttonWidth = BUTTON_WIDTH, onConfirmed = { select(onNewGameSelected) })
     internal val buildMapButton =
-        CancelButton(label = "Build a map", buttonWidth = BUTTON_WIDTH, onCancelled = { select(onMapBuilderSelected) })
+        CancelButton(label = texts[UiText.MENU_BUILD_MAP], buttonWidth = BUTTON_WIDTH, onCancelled = { select(onMapBuilderSelected) })
 
     internal val options =
         uiVerticalStack(padding = BUTTON_GAP) {

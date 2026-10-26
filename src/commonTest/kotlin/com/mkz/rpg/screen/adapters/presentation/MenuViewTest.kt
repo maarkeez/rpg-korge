@@ -9,7 +9,7 @@ import kotlin.test.Test
 class MenuViewTest : ViewsForTesting() {
     private val selections = mutableListOf<String>()
 
-    private fun newMenuView() = MenuView(onNewGameSelected = { selections += "new game" }, onMapBuilderSelected = { selections += "map builder" })
+    private fun newMenuView() = MenuView(TextsMother.texts(), onNewGameSelected = { selections += "new game" }, onMapBuilderSelected = { selections += "map builder" })
 
     @Test
     fun `MenuView should display playing a new game and building a map when it is displayed`() =

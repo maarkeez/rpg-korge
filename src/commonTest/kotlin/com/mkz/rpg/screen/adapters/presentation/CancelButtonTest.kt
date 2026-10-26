@@ -12,7 +12,7 @@ class CancelButtonTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val cancelButton = CancelButton(onCancelled = {})
+            val cancelButton = CancelButton(label = "Cancel", onCancelled = {})
             // Then
             cancelButton.buttonText() shouldBe "Cancel"
         }
@@ -22,7 +22,7 @@ class CancelButtonTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var cancelled = false
-            val cancelButton = CancelButton(onCancelled = { cancelled = true })
+            val cancelButton = CancelButton(label = "Cancel", onCancelled = { cancelled = true })
             addChild(cancelButton)
             // When
             clickCancel(cancelButton)

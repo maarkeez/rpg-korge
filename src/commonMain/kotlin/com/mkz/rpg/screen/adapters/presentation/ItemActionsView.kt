@@ -16,6 +16,7 @@ import korlibs.math.geom.Size
  * actions (e.g.: an item a merchant sells), only its name and price are displayed.
  */
 class ItemActionsView(
+    texts: Texts,
     itemName: String,
     itemPrice: Int,
     actions: List<Action>,
@@ -62,6 +63,6 @@ class ItemActionsView(
             }
         }
         itemNameView.display(itemName)
-        itemPriceView.display(goldText(itemPrice))
+        itemPriceView.display(texts.gold(itemPrice))
     }
 }

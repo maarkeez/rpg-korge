@@ -59,7 +59,7 @@ class ExplorationPresenterTest {
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
     private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
-    private val shopView = ShopView(BattleSceneResourcesLoader())
+    private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val battlefieldView = FakeBattlefieldView()
     private val battleHudView = FakeBattleHudView()
     private val playerCallToActionView = FakePlayerCallToActionView()
@@ -74,11 +74,13 @@ class ExplorationPresenterTest {
             apis.battleUnitApi,
             apis.unitApi,
             apis.battlefieldApi,
+            TextsMother.texts(),
             timeline,
             eventBus,
         )
 
-    private fun createPresenter() = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, timeline, eventBus)
+    private fun createPresenter() =
+        ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, TextsMother.texts(), timeline, eventBus)
 
     private fun startExploring() {
         apis.partyApi.startExploration()
@@ -290,8 +292,20 @@ class ExplorationPresenterTest {
             eventBus = apis.eventBus,
         )
         val shopPresenter =
-            ShopPresenter(shopView, battlefieldView, apis.partyApi, apis.inventoryApi, apis.lootableItemApi, apis.battleUnitApi, apis.unitApi, apis.battlefieldApi, timeline, apis.eventBus)
-        return ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, timeline, apis.eventBus)
+            ShopPresenter(
+                shopView,
+                battlefieldView,
+                apis.partyApi,
+                apis.inventoryApi,
+                apis.lootableItemApi,
+                apis.battleUnitApi,
+                apis.unitApi,
+                apis.battlefieldApi,
+                TextsMother.texts(),
+                timeline,
+                apis.eventBus,
+            )
+        return ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, TextsMother.texts(), timeline, apis.eventBus)
     }
 
     @Test

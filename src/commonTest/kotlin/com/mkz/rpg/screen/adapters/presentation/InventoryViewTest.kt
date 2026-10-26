@@ -30,7 +30,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             // Then
             inventoryView.titleText() shouldBe "Inventory"
             inventoryView.slotCount() shouldBe 12
@@ -42,7 +42,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val resourcesLoader = loadedResourcesLoader()
-            val inventoryView = InventoryView(resourcesLoader)
+            val inventoryView = InventoryView(resourcesLoader, TextsMother.texts())
             // When
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             // Then
@@ -57,7 +57,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should display the gold on the title line when is displayed`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             // When
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 120)
             // Then
@@ -69,7 +69,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should frame the equipped items in gold when is displayed`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             // When
             inventoryView.display(listOf(Slot("health-potion", isEquipped = false), Slot("hammer", isEquipped = true)), gold = 0)
             // Then
@@ -80,7 +80,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `Display should clear the selected slot when is displayed again`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
@@ -93,7 +93,7 @@ class InventoryViewTest : ViewsForTesting() {
     fun `SelectSlot should frame only the selected slot when another slot was selected`() =
         sharedViewsTest {
             // Given
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             inventoryView.selectSlot(0)
             // When
@@ -107,7 +107,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.setDelegate(delegate)
             inventoryView.display(listOf(Slot("hammer", isEquipped = false), Slot("health-potion", isEquipped = false)), gold = 0)
             addChild(inventoryView)
@@ -122,7 +122,7 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val inventoryView = InventoryView(loadedResourcesLoader())
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.setDelegate(delegate)
             addChild(inventoryView)
             // When

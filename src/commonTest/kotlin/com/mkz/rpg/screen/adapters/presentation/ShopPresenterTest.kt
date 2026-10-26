@@ -51,7 +51,7 @@ class ShopPresenterTest {
             npcs = listOf(merchant),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
-    private val shopView = ShopView(BattleSceneResourcesLoader())
+    private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val battlefieldView = FakeBattlefieldView()
     private val timeline = battleSceneTimeline()
     private val presenter =
@@ -64,6 +64,7 @@ class ShopPresenterTest {
             apis.battleUnitApi,
             apis.unitApi,
             apis.battlefieldApi,
+            TextsMother.texts(),
             timeline,
             eventBus,
         )

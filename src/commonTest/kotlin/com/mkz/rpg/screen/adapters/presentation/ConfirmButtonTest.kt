@@ -12,7 +12,7 @@ class ConfirmButtonTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val confirmButton = ConfirmButton(onConfirmed = {})
+            val confirmButton = ConfirmButton(label = "Confirm", onConfirmed = {})
             // Then
             confirmButton.buttonText() shouldBe "Confirm"
         }
@@ -22,7 +22,7 @@ class ConfirmButtonTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var confirmed = false
-            val confirmButton = ConfirmButton(onConfirmed = { confirmed = true })
+            val confirmButton = ConfirmButton(label = "Confirm", onConfirmed = { confirmed = true })
             addChild(confirmButton)
             // When
             clickConfirm(confirmButton)

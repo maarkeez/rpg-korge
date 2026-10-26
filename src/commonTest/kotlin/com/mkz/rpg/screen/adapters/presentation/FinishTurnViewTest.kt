@@ -13,7 +13,7 @@ class FinishTurnViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val finishTurnView = FinishTurnView(onTurnFinished = {})
+            val finishTurnView = FinishTurnView(TextsMother.texts(), onTurnFinished = {})
             // Then
             finishTurnView.buttonText() shouldBe "Finish turn"
         }
@@ -23,7 +23,7 @@ class FinishTurnViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var turnFinished = false
-            val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
+            val finishTurnView = FinishTurnView(TextsMother.texts(), onTurnFinished = { turnFinished = true })
             addChild(finishTurnView)
             // When
             clickFinishTurn(finishTurnView)
@@ -36,7 +36,7 @@ class FinishTurnViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             var turnFinished = false
-            val finishTurnView = FinishTurnView(onTurnFinished = { turnFinished = true })
+            val finishTurnView = FinishTurnView(TextsMother.texts(), onTurnFinished = { turnFinished = true })
             finishTurnView.isEnabled = false
             addChild(finishTurnView)
             // When
@@ -50,7 +50,7 @@ class FinishTurnViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             // When
-            val finishTurnView = FinishTurnView(onTurnFinished = {})
+            val finishTurnView = FinishTurnView(TextsMother.texts(), onTurnFinished = {})
             // Then
             finishTurnView.isButtonEnabled().shouldBeTrue()
         }
@@ -59,7 +59,7 @@ class FinishTurnViewTest : ViewsForTesting() {
     fun `IsEnabled should be disabled when is disabled`() =
         sharedViewsTest {
             // Given
-            val finishTurnView = FinishTurnView(onTurnFinished = {})
+            val finishTurnView = FinishTurnView(TextsMother.texts(), onTurnFinished = {})
             // When
             finishTurnView.isEnabled = false
             // Then

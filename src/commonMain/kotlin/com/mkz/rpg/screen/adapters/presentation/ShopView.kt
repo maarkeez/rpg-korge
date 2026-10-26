@@ -28,6 +28,7 @@ import korlibs.math.geom.Size
  */
 open class ShopView(
     resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
 ) : Container() {
     companion object {
         const val SLOTS = 12
@@ -134,8 +135,13 @@ open class ShopView(
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false, isDimmed = slot?.isTradeable == false)
         }
-        val bag = if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) "Bag full" else "Bag ${buyer.usedStorageSpace}/${buyer.maximumStorageSpace}"
-        buyerText.text = "${buyer.name} · ${goldText(buyer.gold)} · $bag"
+        val bag =
+            if (buyer.usedStorageSpace >= buyer.maximumStorageSpace) {
+                texts[UiText.SHOP_BAG_FULL]
+            } else {
+                texts[UiText.SHOP_BAG, "used" to buyer.usedStorageSpace, "maximum" to buyer.maximumStorageSpace]
+            }
+        buyerText.text = texts[UiText.SHOP_BUYER, "name" to buyer.name, "gold" to texts.gold(buyer.gold), "bag" to bag]
         previousBuyerButton.enabled = buyer.partyIndex > 0
         nextBuyerButton.enabled = buyer.partyIndex < buyer.partySize - 1
         selectSlot(null)
@@ -164,7 +170,7 @@ open class ShopView(
         isActionEnabled: Boolean,
     ) {
         itemNameText.text = itemName
-        itemPriceText.text = goldText(itemPrice)
+        itemPriceText.text = texts.gold(itemPrice)
         actionButton.text = actionLabel
         actionButton.enabled = isActionEnabled
         actionButton.visible = true
@@ -185,7 +191,7 @@ open class ShopView(
     // Back  Hammer ....... 50 G  Buy
     private fun footer(): UIContainer =
         UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
-            backButton = button("Back", BACK_WIDTH) { delegate?.shopBackSelected() }
+            backButton = button(texts[UiText.SHOP_BACK], BACK_WIDTH) { delegate?.shopBackSelected() }
             val itemX = BACK_WIDTH + SPACING
             itemNameText =
                 uiText("", size = Size(ITEM_WIDTH, BAR_HEIGHT)) {

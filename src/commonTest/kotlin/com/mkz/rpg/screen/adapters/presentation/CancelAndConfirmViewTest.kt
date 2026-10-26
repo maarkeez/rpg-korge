@@ -13,7 +13,7 @@ class CancelAndConfirmViewTest : ViewsForTesting() {
             // Given
             var cancelled = false
             var confirmed = false
-            val cancelAndConfirmView = CancelAndConfirmView(onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
+            val cancelAndConfirmView = CancelAndConfirmView(cancelLabel = "Cancel", confirmLabel = "Confirm", onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
             addChild(cancelAndConfirmView)
             // When
             clickCancel(cancelAndConfirmView)
@@ -28,7 +28,7 @@ class CancelAndConfirmViewTest : ViewsForTesting() {
             // Given
             var cancelled = false
             var confirmed = false
-            val cancelAndConfirmView = CancelAndConfirmView(onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
+            val cancelAndConfirmView = CancelAndConfirmView(cancelLabel = "Cancel", confirmLabel = "Confirm", onCancelled = { cancelled = true }, onConfirmed = { confirmed = true })
             addChild(cancelAndConfirmView)
             // When
             clickConfirm(cancelAndConfirmView)

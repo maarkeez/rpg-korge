@@ -40,10 +40,11 @@ class GameWindowMapFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(listOf(files["map.toml"]))
             // When
-            val text = GameWindowMapFilePicker(gameWindow).pickMap()
+            val picker = GameWindowMapFilePicker(gameWindow, TextsMother.texts())
+            val text = picker.pickMap()
             // Then
             text shouldBe "tiles = [[\"sand\"]]"
-            gameWindow.filters.shouldContainExactly(GameWindowMapFilePicker.MAP_FILES)
+            gameWindow.filters.shouldContainExactly(picker.mapFiles)
         }
 
     @Test
@@ -52,7 +53,7 @@ class GameWindowMapFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(emptyList())
             // When
-            val text = GameWindowMapFilePicker(gameWindow).pickMap()
+            val text = GameWindowMapFilePicker(gameWindow, TextsMother.texts()).pickMap()
             // Then
             text shouldBe null
         }
@@ -63,7 +64,7 @@ class GameWindowMapFilePickerTest {
             // Given
             val gameWindow = FakeFileDialogGameWindow(listOf(files["missing.toml"]))
             // When
-            val picking = suspend { GameWindowMapFilePicker(gameWindow).pickMap() }
+            val picking = suspend { GameWindowMapFilePicker(gameWindow, TextsMother.texts()).pickMap() }
             // Then
             shouldThrow<Exception> { picking() }
         }

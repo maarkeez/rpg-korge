@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 // Records what the presenter asks the map builder header to display, instead of drawing it.
-class FakeMapBuilderInfoView : MapBuilderInfoView() {
+class FakeMapBuilderInfoView : MapBuilderInfoView(TextsMother.texts()) {
     var displayedSize: Pair<Int, Int>? = null
         private set
     val errors = mutableListOf<String>()

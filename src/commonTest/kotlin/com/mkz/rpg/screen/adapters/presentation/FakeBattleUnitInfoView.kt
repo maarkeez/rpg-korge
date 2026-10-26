@@ -5,7 +5,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.Abili
 import com.mkz.rpg.unit.domain.Unit
 
 // Records what the presenters ask the battle unit info view to display, instead of drawing it.
-class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader()) {
+class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), TextsMother.texts()) {
     data class DisplayedBattleUnit(
         val battleUnit: BattleUnit.Dto,
         val unit: Unit.Dto,

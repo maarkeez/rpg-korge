@@ -32,7 +32,7 @@ class MapBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplaySize should display the title and the map size when the size is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = MapBuilderInfoView()
+            val infoView = MapBuilderInfoView(TextsMother.texts())
             // When
             infoView.displaySize(rows = 16, columns = 24)
             // Then
@@ -44,7 +44,7 @@ class MapBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayError should pop the error in the subtitle and then display the size again when an error is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = MapBuilderInfoView()
+            val infoView = MapBuilderInfoView(TextsMother.texts())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             // When
@@ -66,7 +66,7 @@ class MapBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayInfo should display the information in the subtitle when information is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = MapBuilderInfoView()
+            val infoView = MapBuilderInfoView(TextsMother.texts())
             addChild(infoView)
             // When
             infoView.displayInfo("Map copied to the clipboard")
@@ -79,7 +79,7 @@ class MapBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplaySize should keep the message and display the new size after it when the size changes while a message is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = MapBuilderInfoView()
+            val infoView = MapBuilderInfoView(TextsMother.texts())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             infoView.displayError("Water can not be next to lava")
@@ -96,7 +96,7 @@ class MapBuilderInfoViewTest : ViewsForTesting() {
     fun `DisplayError should replace the previous message when another message is displayed`() =
         sharedViewsTest {
             // Given
-            val infoView = MapBuilderInfoView()
+            val infoView = MapBuilderInfoView(TextsMother.texts())
             addChild(infoView)
             infoView.displaySize(rows = 16, columns = 16)
             infoView.displayError("Water can not be next to lava")

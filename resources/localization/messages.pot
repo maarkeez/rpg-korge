@@ -1,0 +1,303 @@
+# The English text of the game: the source of every translation, keyed by the context of each message.
+# Edit it by hand, then merge it into each translation, see docs/localization/how-to-add-a-language.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: rpg-korge\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. The name of this catalog's language, in that language, e.g.: Español.
+msgctxt "language.name"
+msgid "English"
+msgstr ""
+
+msgctxt "ui.menu.playNewGame"
+msgid "Play new game"
+msgstr ""
+
+msgctxt "ui.menu.buildMap"
+msgid "Build a map"
+msgstr ""
+
+#. The header while the party explores, out of the battles.
+msgctxt "ui.battleInfo.exploring"
+msgid "Exploring"
+msgstr ""
+
+#. The header when a battle starts.
+msgctxt "ui.battleInfo.battle"
+msgid "Battle!"
+msgstr ""
+
+#. The header when a battle finishes.
+msgctxt "ui.battleInfo.battleOver"
+msgid "Battle over!"
+msgstr ""
+
+#. {round}: the number of the battle round, e.g.: 3.
+msgctxt "ui.battleInfo.round"
+msgid "Round {round}"
+msgstr ""
+
+#. {player}: the name of the player whose turn it is.
+msgctxt "ui.battleInfo.playerTurn"
+msgid "{player} turn"
+msgstr ""
+
+#. {player}: the name of the winning player.
+msgctxt "ui.battleInfo.playerWins"
+msgid "{player} wins!"
+msgstr ""
+
+#. How many turns a summon has left, the current one included. {turns}: the number of turns.
+msgctxt "ui.remainingTurns.vanishes"
+msgid "Vanishes in {turns} turn"
+msgid_plural "Vanishes in {turns} turns"
+msgstr[0] ""
+msgstr[1] ""
+
+msgctxt "ui.finishTurn.finishTurn"
+msgid "Finish turn"
+msgstr ""
+
+#. Cancels casting an ability.
+msgctxt "ui.callToAction.cancel"
+msgid "Cancel"
+msgstr ""
+
+#. Confirms casting an ability.
+msgctxt "ui.callToAction.confirm"
+msgid "Confirm"
+msgstr ""
+
+#. An amount of gold, e.g.: a price. {gold}: the amount.
+msgctxt "ui.gold.amount"
+msgid "{gold} G"
+msgstr ""
+
+msgctxt "ui.inventory.title"
+msgid "Inventory"
+msgstr ""
+
+msgctxt "ui.inventory.close"
+msgid "Close"
+msgstr ""
+
+msgctxt "ui.itemActions.cancel"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "ui.itemActions.discard"
+msgid "Discard"
+msgstr ""
+
+#. Gives the item to another party member.
+msgctxt "ui.itemActions.give"
+msgid "Give"
+msgstr ""
+
+#. Why the item can not be given: no party member can receive it.
+msgctxt "ui.itemActions.noOne"
+msgid "No one"
+msgstr ""
+
+#. Why the item can not be given: the bags of the other party members are full.
+msgctxt "ui.itemActions.bagsFull"
+msgid "Bags full"
+msgstr ""
+
+msgctxt "ui.itemActions.consume"
+msgid "Consume"
+msgstr ""
+
+msgctxt "ui.itemActions.equip"
+msgid "Equip"
+msgstr ""
+
+msgctxt "ui.itemActions.unequip"
+msgid "Unequip"
+msgstr ""
+
+#. {item}: the name of the item given.
+msgctxt "ui.giveItem.message"
+msgid "Tap a party member to give: {item}"
+msgstr ""
+
+msgctxt "ui.giveItem.cancel"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "ui.inventoryFull.title"
+msgid "Inventory full"
+msgstr ""
+
+#. {item}: the name of the item found. {price}: its price, e.g.: 10 G.
+msgctxt "ui.inventoryFull.message"
+msgid "Tap an item to swap it for: {item} ({price})"
+msgstr ""
+
+#. Leaves the item found on the ground.
+msgctxt "ui.inventoryFull.leave"
+msgid "Leave it"
+msgstr ""
+
+#. Opens the shop of the merchant to buy.
+msgctxt "ui.npcDialog.buy"
+msgid "Buy"
+msgstr ""
+
+#. Opens the shop of the merchant to sell.
+msgctxt "ui.npcDialog.sell"
+msgid "Sell"
+msgstr ""
+
+#. Closes the dialog of the merchant.
+msgctxt "ui.npcDialog.leave"
+msgid "Leave"
+msgstr ""
+
+#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {bag}: its bag, e.g.: Bag 3/12.
+msgctxt "ui.shop.buyer"
+msgid "{name} · {gold} · {bag}"
+msgstr ""
+
+#. {used}: the items in the bag. {maximum}: how many fit in it.
+msgctxt "ui.shop.bag"
+msgid "Bag {used}/{maximum}"
+msgstr ""
+
+#. The bag of the party member trading is full.
+msgctxt "ui.shop.bagFull"
+msgid "Bag full"
+msgstr ""
+
+msgctxt "ui.shop.back"
+msgid "Back"
+msgstr ""
+
+msgctxt "ui.shop.tapToBuy"
+msgid "Tap an item to buy"
+msgstr ""
+
+msgctxt "ui.shop.tapToSell"
+msgid "Tap an item to sell"
+msgstr ""
+
+msgctxt "ui.shop.nothingToSell"
+msgid "Nothing to sell"
+msgstr ""
+
+msgctxt "ui.shop.buy"
+msgid "Buy"
+msgstr ""
+
+msgctxt "ui.shop.sell"
+msgid "Sell"
+msgstr ""
+
+#. Why the item can not be bought.
+msgctxt "ui.shop.notEnoughGold"
+msgid "Not enough gold"
+msgstr ""
+
+#. Why the item can not be bought: the bag is full.
+msgctxt "ui.shop.noRoom"
+msgid "Bag full"
+msgstr ""
+
+#. Why the item can not be sold: it is equipped.
+msgctxt "ui.shop.equipped"
+msgid "Equipped"
+msgstr ""
+
+#. Why the item can not be sold: the party member can not carry more gold.
+msgctxt "ui.shop.goldFull"
+msgid "Gold full"
+msgstr ""
+
+msgctxt "ui.mapBuilderInfo.title"
+msgid "Map Builder"
+msgstr ""
+
+#. The size of the map. {rows} and {columns}: how many tiles tall and wide it is.
+msgctxt "ui.mapBuilderInfo.size"
+msgid "{rows} x {columns}"
+msgstr ""
+
+msgctxt "ui.mapBuilderHud.rows"
+msgid "Rows"
+msgstr ""
+
+msgctxt "ui.mapBuilderHud.columns"
+msgid "Columns"
+msgstr ""
+
+msgctxt "ui.mapBuilderHud.terrain"
+msgid "Terrain"
+msgstr ""
+
+#. Goes back to the menu.
+msgctxt "ui.mapBuilderCallToAction.back"
+msgid "Back"
+msgstr ""
+
+#. Copies the map to the clipboard.
+msgctxt "ui.mapBuilderCallToAction.export"
+msgid "Export"
+msgstr ""
+
+msgctxt "ui.mapBuilderCallToAction.stay"
+msgid "Stay"
+msgstr ""
+
+#. Leaves the map builder, losing the map.
+msgctxt "ui.mapBuilderCallToAction.leave"
+msgid "Leave"
+msgstr ""
+
+#. Imports a map from a file.
+msgctxt "ui.mapBuilderMenu.import"
+msgid "Import"
+msgstr ""
+
+msgctxt "ui.mapBuilder.mapCopied"
+msgid "Map copied to the clipboard"
+msgstr ""
+
+msgctxt "ui.mapBuilder.mapLostWhenLeaving"
+msgid "The map is lost when leaving"
+msgstr ""
+
+msgctxt "ui.mapBuilder.mapImported"
+msgid "Map imported"
+msgstr ""
+
+msgctxt "ui.mapBuilder.fileNotRead"
+msgid "The file can not be read"
+msgstr ""
+
+msgctxt "ui.mapBuilder.notAMap"
+msgid "The file has no map"
+msgstr ""
+
+#. {minimum} and {maximum}: the smallest and the largest size of a map.
+msgctxt "ui.mapBuilder.sizeOutOfRange"
+msgid "The map must be {minimum} to {maximum} tiles wide and tall"
+msgstr ""
+
+#. {terrain}: the id of the terrain, as written in the file.
+msgctxt "ui.mapBuilder.unknownTerrain"
+msgid "Unknown terrain: {terrain}"
+msgstr ""
+
+#. {terrain} and {neighbour}: the names of two terrains, e.g.: Lava and Water.
+msgctxt "ui.mapBuilder.forbiddenNeighbours"
+msgid "{terrain} can not be next to {neighbour}"
+msgstr ""
+
+#. The kind of files the file dialog shows.
+msgctxt "ui.mapFilePicker.maps"
+msgid "Maps"
+msgstr ""

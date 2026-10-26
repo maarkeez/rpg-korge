@@ -111,6 +111,7 @@ class InventoryPresenterTest {
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,
             battlefieldView = FakeBattlefieldView(),
+            texts = TextsMother.texts(),
             timeline = timeline,
             eventBus = eventBus,
         )

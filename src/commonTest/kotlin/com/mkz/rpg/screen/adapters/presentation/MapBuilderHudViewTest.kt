@@ -29,7 +29,7 @@ class MapBuilderHudViewTest : ViewsForTesting() {
     private val lavaBitmap = Bitmap32(16, 16, Colors.RED)
     private val terrains = listOf(MapBuilderHudView.TerrainOption("lava", lavaBitmap), MapBuilderHudView.TerrainOption("sand", sandBitmap))
 
-    private fun hudView() = MapBuilderHudView().also { hudView -> hudView.setDelegate(delegate) }
+    private fun hudView() = MapBuilderHudView(TextsMother.texts()).also { hudView -> hudView.setDelegate(delegate) }
 
     @Test
     fun `DisplaySize should display the rows and the columns when the size is displayed`() =

@@ -7,10 +7,11 @@ import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
 class FinishTurnView(
+    texts: Texts,
     onTurnFinished: () -> Unit,
 ) : Container() {
     internal val button =
-        uiButton("Finish turn")
+        uiButton(texts[UiText.FINISH_TURN])
             .also { button ->
                 button.width = 390.0
                 button.bgColorOut = RGBA(0, 136, 255)

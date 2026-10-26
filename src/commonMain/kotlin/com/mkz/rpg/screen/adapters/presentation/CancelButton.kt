@@ -8,9 +8,9 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
-/** A secondary action button. It reads "Cancel" unless another [label] is given. */
+/** A secondary action button, e.g.: Cancel. */
 class CancelButton(
-    label: String = "Cancel",
+    label: String,
     buttonWidth: Double = 190.0,
     val onCancelled: () -> Unit,
 ) : Container() {

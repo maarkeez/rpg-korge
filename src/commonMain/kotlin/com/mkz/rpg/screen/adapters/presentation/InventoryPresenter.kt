@@ -46,6 +46,7 @@ class InventoryPresenter(
     private val partyApi: PartyApi,
     private val battlefieldApi: BattlefieldApi,
     private val battlefieldView: BattlefieldView,
+    private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : InventoryView.Delegate {
@@ -222,8 +223,8 @@ class InventoryPresenter(
         val isItemEquipped = displayedSlots.any { displayedSlot -> displayedSlot.lootableItemId == slot.lootableItemId && displayedSlot.isEquipped }
         val actions =
             buildList {
-                add(action("Cancel") {})
-                add(action("Discard", isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
+                add(action(texts[UiText.ITEM_ACTIONS_CANCEL]) {})
+                add(action(texts[UiText.ITEM_ACTIONS_DISCARD], isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
                 // Only while exploring: the battle actions stay as they are.
                 if (isExploring()) {
                     val refusal = inventoryApi.searchGiveRefusal(battleUnitId, slot.lootableItemId)
@@ -237,16 +238,16 @@ class InventoryPresenter(
                     // An item teaching an ability its battle unit can not learn (e.g.: already known) can not be consumed.
                     CONSUMABLE ->
                         add(
-                            action("Consume", isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
+                            action(texts[UiText.ITEM_ACTIONS_CONSUME], isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
                                 inventoryApi.consumeItem(battleUnitId, slot.lootableItemId)
                             },
                         )
                     EQUIPPABLE ->
                         if (slot.isEquipped) {
-                            add(action("Unequip") { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
+                            add(action(texts[UiText.ITEM_ACTIONS_UNEQUIP]) { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
                         } else {
                             // Another copy of the item is already equipped.
-                            add(action("Equip", isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
+                            add(action(texts[UiText.ITEM_ACTIONS_EQUIP], isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
                         }
                 }
             }
@@ -273,9 +274,9 @@ class InventoryPresenter(
     // A disabled Give reads why when no party member can receive the item.
     private fun giveLabel(refusal: GiveRefusalDto?): String =
         when (refusal) {
-            GiveRefusalDto.NO_ONE -> "No one"
-            GiveRefusalDto.BAGS_FULL -> "Bags full"
-            else -> "Give"
+            GiveRefusalDto.NO_ONE -> texts[UiText.ITEM_ACTIONS_NO_ONE]
+            GiveRefusalDto.BAGS_FULL -> texts[UiText.ITEM_ACTIONS_BAGS_FULL]
+            else -> texts[UiText.ITEM_ACTIONS_GIVE]
         }
 
     // Every tile is dimmed but the ones of the party members that can receive the item, and the call to action asks to tap one.

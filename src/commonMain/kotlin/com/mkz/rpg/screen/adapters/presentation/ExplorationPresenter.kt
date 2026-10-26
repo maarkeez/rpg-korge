@@ -43,6 +43,7 @@ class ExplorationPresenter(
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
     private val shopPresenter: ShopPresenter,
+    private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) {
@@ -218,9 +219,9 @@ class ExplorationPresenter(
         val choices =
             if (npc.isMerchant()) {
                 listOf(
-                    NpcDialogView.Choice("Buy") { openShop(Mode.BUY) },
-                    NpcDialogView.Choice("Sell") { openShop(Mode.SELL) },
-                    NpcDialogView.Choice("Leave") { leaveMerchant() },
+                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_BUY]) { openShop(Mode.BUY) },
+                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
+                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_LEAVE]) { leaveMerchant() },
                 )
             } else {
                 emptyList()

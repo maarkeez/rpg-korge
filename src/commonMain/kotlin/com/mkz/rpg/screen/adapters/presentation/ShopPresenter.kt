@@ -32,6 +32,7 @@ class ShopPresenter(
     private val battleUnitApi: BattleUnitApi,
     private val unitApi: UnitApi,
     private val battlefieldApi: BattlefieldApi,
+    private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : ShopView.Delegate {
@@ -142,9 +143,9 @@ class ShopPresenter(
         shopView.selectSlot(null)
         shopView.displayHint(
             when {
-                mode == Mode.BUY -> "Tap an item to buy"
-                displayedSlots.isEmpty() -> "Nothing to sell"
-                else -> "Tap an item to sell"
+                mode == Mode.BUY -> texts[UiText.SHOP_TAP_TO_BUY]
+                displayedSlots.isEmpty() -> texts[UiText.SHOP_NOTHING_TO_SELL]
+                else -> texts[UiText.SHOP_TAP_TO_SELL]
             },
         )
     }
@@ -160,8 +161,8 @@ class ShopPresenter(
         shopView.selectSlot(slotIndex)
         val (price, actionLabel) =
             when (mode) {
-                Mode.BUY -> lootableItem.price to "Buy"
-                Mode.SELL -> lootableItem.sellPrice to "Sell"
+                Mode.BUY -> lootableItem.price to texts[UiText.SHOP_BUY]
+                Mode.SELL -> lootableItem.sellPrice to texts[UiText.SHOP_SELL]
             }
         val refusal = refusal(buyerId, lootableItemId)
         shopView.displayItem(lootableItem.name, price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
@@ -179,10 +180,10 @@ class ShopPresenter(
     // The refusals the shop can meet. The others (e.g.: no longer trading) leave Buy or Sell disabled.
     private fun refusalText(refusal: TradeRefusalDto): String? =
         when (refusal) {
-            TradeRefusalDto.NOT_ENOUGH_GOLD -> "Not enough gold"
-            TradeRefusalDto.BAG_FULL -> "Bag full"
-            TradeRefusalDto.EQUIPPED -> "Equipped"
-            TradeRefusalDto.GOLD_FULL -> "Gold full"
+            TradeRefusalDto.NOT_ENOUGH_GOLD -> texts[UiText.SHOP_NOT_ENOUGH_GOLD]
+            TradeRefusalDto.BAG_FULL -> texts[UiText.SHOP_NO_ROOM]
+            TradeRefusalDto.EQUIPPED -> texts[UiText.SHOP_EQUIPPED]
+            TradeRefusalDto.GOLD_FULL -> texts[UiText.SHOP_GOLD_FULL]
             TradeRefusalDto.NOT_TRADING, TradeRefusalDto.NOT_SOLD_BY_THE_MERCHANT, TradeRefusalDto.NOT_STORED -> null
         }
 

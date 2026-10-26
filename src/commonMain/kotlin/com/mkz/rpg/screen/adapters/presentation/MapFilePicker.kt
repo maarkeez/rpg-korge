@@ -16,11 +16,10 @@ interface MapFilePicker {
 /** The file picker of the device the game runs on: the system file dialog, or the file picker of the browser. */
 class GameWindowMapFilePicker(
     private val gameWindow: GameWindow,
+    texts: Texts,
 ) : MapFilePicker {
-    companion object {
-        // Only the system file dialog filters the files: the browser offers them all.
-        val MAP_FILES = FileFilter("Maps" to listOf("*.toml"))
-    }
+    // Only the system file dialog filters the files: the browser offers them all.
+    internal val mapFiles = FileFilter(texts[UiText.MAP_FILE_PICKER_MAPS] to listOf("*.toml"))
 
-    override suspend fun pickMap(): String? = gameWindow.openFileDialog(MAP_FILES).firstOrNull()?.readString()
+    override suspend fun pickMap(): String? = gameWindow.openFileDialog(mapFiles).firstOrNull()?.readString()
 }
