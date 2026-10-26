@@ -41,7 +41,7 @@ An invalid or missing file fails when the resources are read, with the file path
 
 Unless stated otherwise, there is one file per entity and **the file name is the entity id**. Enum values are written by name (e.g.: `"DECREASE_HEALTH"`).
 
-The files hold no text: the names of the abilities, lootable items, npcs, players, terrains and units, and the npc lines, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`), so they can be translated. See the [localization plan](../plans/localization.md).
+The files hold no text: the names of the abilities, lootable items, npcs, players, terrains and units, and the npc lines, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`), so they can be translated. See [Localization](localization.md).
 
 ### `effect/<effect id>.toml`
 

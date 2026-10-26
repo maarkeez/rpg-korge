@@ -21,6 +21,11 @@ msgctxt "ui.menu.buildMap"
 msgid "Build a map"
 msgstr ""
 
+#. Opens the list of languages, each named in its own language.
+msgctxt "ui.menu.language"
+msgid "Language"
+msgstr ""
+
 #. The header while the party explores, out of the battles.
 msgctxt "ui.battleInfo.exploring"
 msgid "Exploring"

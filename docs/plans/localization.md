@@ -1,6 +1,6 @@
 # Plan: Localization
 
-> **Status:** in progress.
+> **Status:** done. See [Localization](../architecture/localization.md) and [How to add a language](../localization/how-to-add-a-language.md).
 >
 > **Summary:** The game is translated with standard gettext PO files, so contributors can use Weblate, Crowdin, Poedit
 > or any other PO tool. English is the source language and Spanish the first translation. Only the presentation layer
@@ -11,7 +11,7 @@
 
 | Topic             | Decision                                                                                                                                                                                                  |
 |-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Format            | gettext PO. `resources/localization/messages.pot` is the hand-maintained English source, and each translation is a `<language code>.po` next to it (e.g.: `es.po`, `pt_BR.po`). One catalog per language, UI and game data together. |
+| Format            | gettext PO. `resources/localization/messages.pot` is the hand-maintained English source, and each translation is a `<language code>.po` next to it (e.g.: `es.po`, `it.po`). One catalog per language, UI and game data together. |
 | Identifiers       | The key goes in `msgctxt`, the English text in `msgid`: every tool shows translators the English text, the key never changes, and editing the English marks the translations as fuzzy.                     |
 | Keys              | Game data: `<subdomain>.<entity id>.<field>` (`unit.bat.name`, `npc.alchemist.line`, `terrain.grass.name`). UI: `ui.<view>.<message>` (`ui.shop.notEnoughGold`, `ui.menu.playNewGame`). `language.name` names each catalog's language in that language. |
 | Scope             | The UI text (menus, buttons, messages, the map builder) and the game data text (the names of units, abilities, lootable items, npcs, players and terrains, and the npc lines). Log and exception messages stay in English. |

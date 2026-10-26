@@ -10,3 +10,9 @@ You can find the KorGE documentation here: <https://docs.korge.org/korge/>
 # rpg-korge
 
 You can play this game at https://maarkeez.github.io/rpg-korge/
+
+## Translations
+
+The game is translated with gettext PO files, so you can translate it with Poedit, Weblate or any other PO tool. See
+[How to add a language](docs/localization/how-to-add-a-language.md), and [Localization](docs/architecture/localization.md)
+for how the game reads the translations.

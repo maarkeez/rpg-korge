@@ -5,14 +5,18 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.math.geom.Size
 
 /**
- * The first screen of the game: playing a new game, its primary action, or building a map. The options are hidden as
- * soon as one is selected, as the scene it opens takes a while to load, and so it can not be selected twice.
+ * The first screen of the game: playing a new game, its primary action, building a map, or picking the language. The
+ * options are hidden as soon as a game or the map builder is selected, as the scene it opens takes a while to load, and
+ * so it can not be selected twice.
+ *
+ * Language lists the languages in place of the options, each named in its own language. Picking one translates the
+ * game into it, for the rest of the session, and displays the options again, relabelled.
  */
 class MenuView(
-    texts: Texts,
+    private val texts: Texts,
     onNewGameSelected: () -> Unit,
     onMapBuilderSelected: () -> Unit,
-) : UIContainer(Size(width = BUTTON_WIDTH, height = 2 * BUTTON_HEIGHT + BUTTON_GAP)) {
+) : UIContainer(Size(width = BUTTON_WIDTH, height = 3 * BUTTON_HEIGHT + 2 * BUTTON_GAP)) {
     companion object {
         const val BUTTON_WIDTH = 250.0
         const val BUTTON_HEIGHT = 32.0
@@ -23,15 +27,42 @@ class MenuView(
         ConfirmButton(label = texts[UiText.MENU_PLAY_NEW_GAME], buttonWidth = BUTTON_WIDTH, onConfirmed = { select(onNewGameSelected) })
     internal val buildMapButton =
         CancelButton(label = texts[UiText.MENU_BUILD_MAP], buttonWidth = BUTTON_WIDTH, onCancelled = { select(onMapBuilderSelected) })
+    internal val languageButton =
+        CancelButton(label = texts[UiText.MENU_LANGUAGE], buttonWidth = BUTTON_WIDTH, onCancelled = { displayLanguages(isDisplayed = true) })
 
     internal val options =
         uiVerticalStack(padding = BUTTON_GAP) {
             addChild(playNewGameButton)
             addChild(buildMapButton)
+            addChild(languageButton)
+        }
+
+    internal val languageButtons =
+        texts.languages().map { language ->
+            CancelButton(label = language.name, buttonWidth = BUTTON_WIDTH, onCancelled = { selectLanguage(language.code) })
+        }
+
+    internal val languages =
+        uiVerticalStack(padding = BUTTON_GAP) {
+            visible = false
+            languageButtons.forEach(::addChild)
         }
 
     private fun select(onSelected: () -> Unit) {
         options.visible = false
         onSelected()
+    }
+
+    private fun displayLanguages(isDisplayed: Boolean) {
+        options.visible = !isDisplayed
+        languages.visible = isDisplayed
+    }
+
+    private fun selectLanguage(languageCode: String) {
+        texts.selectLanguage(languageCode)
+        playNewGameButton.confirmButton.text = texts[UiText.MENU_PLAY_NEW_GAME]
+        buildMapButton.cancelButton.text = texts[UiText.MENU_BUILD_MAP]
+        languageButton.cancelButton.text = texts[UiText.MENU_LANGUAGE]
+        displayLanguages(isDisplayed = false)
     }
 }

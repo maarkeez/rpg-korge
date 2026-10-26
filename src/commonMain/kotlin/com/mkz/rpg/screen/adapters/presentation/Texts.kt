@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
+import com.mkz.rpg.localization.domain.Localization.Dto.LanguageDto
 
 /**
  * The texts the screen displays, translated into the selected language, e.g.: `texts[UiText.SHOP_NOT_ENOUGH_GOLD]`.
@@ -36,6 +37,12 @@ class Texts(
     fun playerName(playerId: String): String = localizationApi.translate("player.$playerId.name")
 
     fun terrainName(terrainId: String): String = localizationApi.translate("terrain.$terrainId.name")
+
+    /** The languages the game can be played in, English first, each named in its own language, e.g.: `Español`. */
+    fun languages(): List<LanguageDto> = localizationApi.searchLanguages()
+
+    /** Translates every text into the language from now on, e.g.: `es`, for the rest of the session. */
+    fun selectLanguage(languageCode: String) = localizationApi.selectLanguage(languageCode)
 
     private fun Array<out Pair<String, Any>>.toArguments(): Map<String, String> = associate { (name, value) -> name to value.toString() }
 }

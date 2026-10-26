@@ -10,6 +10,7 @@ enum class UiText(
 ) {
     MENU_PLAY_NEW_GAME("ui.menu.playNewGame"),
     MENU_BUILD_MAP("ui.menu.buildMap"),
+    MENU_LANGUAGE("ui.menu.language"),
     BATTLE_INFO_EXPLORING("ui.battleInfo.exploring"),
     BATTLE_INFO_BATTLE("ui.battleInfo.battle"),
     BATTLE_INFO_BATTLE_OVER("ui.battleInfo.battleOver"),

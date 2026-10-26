@@ -1,5 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.localization.domain.Localization.Dto.LanguageDto
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -52,5 +54,29 @@ class TextsTest {
         val text = texts.gold(0)
         // Then
         text shouldBe "0 G"
+    }
+
+    @Test
+    fun `languages should return English first, then the translations, named in their language`() {
+        // When
+        val languages = texts.languages()
+        // Then
+        languages.shouldContainExactly(LanguageDto(code = "en", name = "English"), LanguageDto(code = "es", name = "Español"))
+    }
+
+    @Test
+    fun `selectLanguage should translate the texts and the game data into the language selected`() {
+        // When
+        texts.selectLanguage("es")
+        // Then
+        texts[UiText.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
+        texts.plural(UiText.REMAINING_TURNS, 3, "turns" to 3) shouldBe "Desaparece en 3 turnos"
+        texts.unitName("bat") shouldBe "Murciélago"
+        texts.npcLine("viking") shouldBe "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
+    }
+
+    @Test
+    fun `unitName should return the English name of the unit when no language is selected`() {
+        texts.unitName("hero") shouldBe "Mage"
     }
 }

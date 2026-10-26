@@ -21,3 +21,18 @@ suspend fun ViewsForTesting.clickBuildMap(menuView: MenuView) = clickOn(menuView
 
 /** Whether the options are on the screen, to select one. */
 fun MenuView.areOptionsShown(): Boolean = options.isShown()
+
+fun MenuView.languageLabel(): String = languageButton.cancelButton.text
+
+suspend fun ViewsForTesting.clickLanguage(menuView: MenuView) = clickOn(menuView.languageButton.cancelButton)
+
+/** The languages listed, by their names, e.g.: `Español`. */
+fun MenuView.languageNames(): List<String> = languageButtons.map { button -> button.cancelButton.text }
+
+/** Whether the languages are on the screen, to pick one. */
+fun MenuView.areLanguagesShown(): Boolean = languages.isShown()
+
+suspend fun ViewsForTesting.pickLanguage(
+    menuView: MenuView,
+    languageName: String,
+) = clickOn(menuView.languageButtons.first { button -> button.cancelButton.text == languageName }.cancelButton)

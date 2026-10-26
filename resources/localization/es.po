@@ -1,0 +1,537 @@
+# Spanish translation of the game, merged from messages.pot. See docs/localization/how-to-add-a-language.md.
+msgid ""
+msgstr ""
+"Project-Id-Version: rpg-korge\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. The name of this catalog's language, in that language, e.g.: Español.
+msgctxt "language.name"
+msgid "English"
+msgstr "Español"
+
+msgctxt "ui.menu.playNewGame"
+msgid "Play new game"
+msgstr "Jugar partida nueva"
+
+msgctxt "ui.menu.buildMap"
+msgid "Build a map"
+msgstr "Construir un mapa"
+
+#. Opens the list of languages, each named in its own language.
+msgctxt "ui.menu.language"
+msgid "Language"
+msgstr "Idioma"
+
+#. The header while the party explores, out of the battles.
+msgctxt "ui.battleInfo.exploring"
+msgid "Exploring"
+msgstr "Explorando"
+
+#. The header when a battle starts.
+msgctxt "ui.battleInfo.battle"
+msgid "Battle!"
+msgstr "¡Batalla!"
+
+#. The header when a battle finishes.
+msgctxt "ui.battleInfo.battleOver"
+msgid "Battle over!"
+msgstr "¡Fin de la batalla!"
+
+#. {round}: the number of the battle round, e.g.: 3.
+msgctxt "ui.battleInfo.round"
+msgid "Round {round}"
+msgstr "Ronda {round}"
+
+#. {player}: the name of the player whose turn it is.
+msgctxt "ui.battleInfo.playerTurn"
+msgid "{player} turn"
+msgstr "Turno de {player}"
+
+#. {player}: the name of the winning player.
+msgctxt "ui.battleInfo.playerWins"
+msgid "{player} wins!"
+msgstr "¡{player} gana!"
+
+#. How many turns a summon has left, the current one included. {turns}: the number of turns.
+msgctxt "ui.remainingTurns.vanishes"
+msgid "Vanishes in {turns} turn"
+msgid_plural "Vanishes in {turns} turns"
+msgstr[0] "Desaparece en {turns} turno"
+msgstr[1] "Desaparece en {turns} turnos"
+
+msgctxt "ui.finishTurn.finishTurn"
+msgid "Finish turn"
+msgstr "Terminar turno"
+
+#. Cancels casting an ability.
+msgctxt "ui.callToAction.cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. Confirms casting an ability.
+msgctxt "ui.callToAction.confirm"
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. An amount of gold, e.g.: a price. {gold}: the amount.
+msgctxt "ui.gold.amount"
+msgid "{gold} G"
+msgstr "{gold} O"
+
+msgctxt "ui.inventory.title"
+msgid "Inventory"
+msgstr "Inventario"
+
+msgctxt "ui.inventory.close"
+msgid "Close"
+msgstr "Cerrar"
+
+msgctxt "ui.itemActions.cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "ui.itemActions.discard"
+msgid "Discard"
+msgstr "Tirar"
+
+#. Gives the item to another party member.
+msgctxt "ui.itemActions.give"
+msgid "Give"
+msgstr "Dar"
+
+#. Why the item can not be given: no party member can receive it.
+msgctxt "ui.itemActions.noOne"
+msgid "No one"
+msgstr "Nadie"
+
+#. Why the item can not be given: the bags of the other party members are full.
+msgctxt "ui.itemActions.bagsFull"
+msgid "Bags full"
+msgstr "Bolsas llenas"
+
+msgctxt "ui.itemActions.consume"
+msgid "Consume"
+msgstr "Consumir"
+
+msgctxt "ui.itemActions.equip"
+msgid "Equip"
+msgstr "Equipar"
+
+msgctxt "ui.itemActions.unequip"
+msgid "Unequip"
+msgstr "Desequipar"
+
+#. {item}: the name of the item given.
+msgctxt "ui.giveItem.message"
+msgid "Tap a party member to give: {item}"
+msgstr "Toca a un miembro del grupo para darle: {item}"
+
+msgctxt "ui.giveItem.cancel"
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgctxt "ui.inventoryFull.title"
+msgid "Inventory full"
+msgstr "Inventario lleno"
+
+#. {item}: the name of the item found. {price}: its price, e.g.: 10 G.
+msgctxt "ui.inventoryFull.message"
+msgid "Tap an item to swap it for: {item} ({price})"
+msgstr "Toca un objeto para cambiarlo por: {item} ({price})"
+
+#. Leaves the item found on the ground.
+msgctxt "ui.inventoryFull.leave"
+msgid "Leave it"
+msgstr "Dejarlo"
+
+#. Opens the shop of the merchant to buy.
+msgctxt "ui.npcDialog.buy"
+msgid "Buy"
+msgstr "Comprar"
+
+#. Opens the shop of the merchant to sell.
+msgctxt "ui.npcDialog.sell"
+msgid "Sell"
+msgstr "Vender"
+
+#. Closes the dialog of the merchant.
+msgctxt "ui.npcDialog.leave"
+msgid "Leave"
+msgstr "Salir"
+
+#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {bag}: its bag, e.g.: Bag 3/12.
+msgctxt "ui.shop.buyer"
+msgid "{name} · {gold} · {bag}"
+msgstr "{name} · {gold} · {bag}"
+
+#. {used}: the items in the bag. {maximum}: how many fit in it.
+msgctxt "ui.shop.bag"
+msgid "Bag {used}/{maximum}"
+msgstr "Bolsa {used}/{maximum}"
+
+#. The bag of the party member trading is full.
+msgctxt "ui.shop.bagFull"
+msgid "Bag full"
+msgstr "Bolsa llena"
+
+msgctxt "ui.shop.back"
+msgid "Back"
+msgstr "Volver"
+
+msgctxt "ui.shop.tapToBuy"
+msgid "Tap an item to buy"
+msgstr "Toca un objeto para comprarlo"
+
+msgctxt "ui.shop.tapToSell"
+msgid "Tap an item to sell"
+msgstr "Toca un objeto para venderlo"
+
+msgctxt "ui.shop.nothingToSell"
+msgid "Nothing to sell"
+msgstr "Nada que vender"
+
+msgctxt "ui.shop.buy"
+msgid "Buy"
+msgstr "Comprar"
+
+msgctxt "ui.shop.sell"
+msgid "Sell"
+msgstr "Vender"
+
+#. Why the item can not be bought.
+msgctxt "ui.shop.notEnoughGold"
+msgid "Not enough gold"
+msgstr "No hay suficiente oro"
+
+#. Why the item can not be bought: the bag is full.
+msgctxt "ui.shop.noRoom"
+msgid "Bag full"
+msgstr "Bolsa llena"
+
+#. Why the item can not be sold: it is equipped.
+msgctxt "ui.shop.equipped"
+msgid "Equipped"
+msgstr "Equipado"
+
+#. Why the item can not be sold: the party member can not carry more gold.
+msgctxt "ui.shop.goldFull"
+msgid "Gold full"
+msgstr "Oro al máximo"
+
+msgctxt "ui.mapBuilderInfo.title"
+msgid "Map Builder"
+msgstr "Constructor de mapas"
+
+#. The size of the map. {rows} and {columns}: how many tiles tall and wide it is.
+msgctxt "ui.mapBuilderInfo.size"
+msgid "{rows} x {columns}"
+msgstr "{rows} x {columns}"
+
+msgctxt "ui.mapBuilderHud.rows"
+msgid "Rows"
+msgstr "Filas"
+
+msgctxt "ui.mapBuilderHud.columns"
+msgid "Columns"
+msgstr "Columnas"
+
+msgctxt "ui.mapBuilderHud.terrain"
+msgid "Terrain"
+msgstr "Terreno"
+
+#. Goes back to the menu.
+msgctxt "ui.mapBuilderCallToAction.back"
+msgid "Back"
+msgstr "Volver"
+
+#. Copies the map to the clipboard.
+msgctxt "ui.mapBuilderCallToAction.export"
+msgid "Export"
+msgstr "Exportar"
+
+msgctxt "ui.mapBuilderCallToAction.stay"
+msgid "Stay"
+msgstr "Quedarse"
+
+#. Leaves the map builder, losing the map.
+msgctxt "ui.mapBuilderCallToAction.leave"
+msgid "Leave"
+msgstr "Salir"
+
+#. Imports a map from a file.
+msgctxt "ui.mapBuilderMenu.import"
+msgid "Import"
+msgstr "Importar"
+
+msgctxt "ui.mapBuilder.mapCopied"
+msgid "Map copied to the clipboard"
+msgstr "Mapa copiado al portapapeles"
+
+msgctxt "ui.mapBuilder.mapLostWhenLeaving"
+msgid "The map is lost when leaving"
+msgstr "El mapa se pierde al salir"
+
+msgctxt "ui.mapBuilder.mapImported"
+msgid "Map imported"
+msgstr "Mapa importado"
+
+msgctxt "ui.mapBuilder.fileNotRead"
+msgid "The file can not be read"
+msgstr "No se puede leer el archivo"
+
+msgctxt "ui.mapBuilder.notAMap"
+msgid "The file has no map"
+msgstr "El archivo no tiene ningún mapa"
+
+#. {minimum} and {maximum}: the smallest and the largest size of a map.
+msgctxt "ui.mapBuilder.sizeOutOfRange"
+msgid "The map must be {minimum} to {maximum} tiles wide and tall"
+msgstr "El mapa debe tener de {minimum} a {maximum} casillas de ancho y de alto"
+
+#. {terrain}: the id of the terrain, as written in the file.
+msgctxt "ui.mapBuilder.unknownTerrain"
+msgid "Unknown terrain: {terrain}"
+msgstr "Terreno desconocido: {terrain}"
+
+#. {terrain} and {neighbour}: the names of two terrains, e.g.: Lava and Water.
+msgctxt "ui.mapBuilder.forbiddenNeighbours"
+msgid "{terrain} can not be next to {neighbour}"
+msgstr "{terrain} no puede estar junto a {neighbour}"
+
+#. The kind of files the file dialog shows.
+msgctxt "ui.mapFilePicker.maps"
+msgid "Maps"
+msgstr "Mapas"
+
+# Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
+
+msgctxt "ability.bat.name"
+msgid "Bat"
+msgstr "Murciélago"
+
+msgctxt "ability.bee.name"
+msgid "Bee"
+msgstr "Abeja"
+
+msgctxt "ability.cleave.name"
+msgid "Cleave"
+msgstr "Tajo"
+
+msgctxt "ability.heal.name"
+msgid "Heal"
+msgstr "Curar"
+
+msgctxt "ability.mending.name"
+msgid "Mending"
+msgstr "Remiendo"
+
+msgctxt "ability.mushroom.name"
+msgid "Mushroom"
+msgstr "Seta"
+
+msgctxt "ability.poisoned-sword.name"
+msgid "Poisoned Sword"
+msgstr "Espada envenenada"
+
+msgctxt "ability.skull.name"
+msgid "Skull"
+msgstr "Calavera"
+
+msgctxt "ability.sword.name"
+msgid "Sword"
+msgstr "Espada"
+
+msgctxt "ability.teleport.name"
+msgid "Teleport"
+msgstr "Teletransporte"
+
+msgctxt "ability.venom-strike.name"
+msgid "Venom Strike"
+msgstr "Golpe venenoso"
+
+msgctxt "lootableItem.bee-essence.name"
+msgid "Bee Essence"
+msgstr "Esencia de abeja"
+
+msgctxt "lootableItem.hammer.name"
+msgid "Hammer"
+msgstr "Martillo"
+
+msgctxt "lootableItem.health-elixir.name"
+msgid "Health Elixir"
+msgstr "Elixir de salud"
+
+msgctxt "lootableItem.health-potion.name"
+msgid "Health Potion"
+msgstr "Poción de salud"
+
+msgctxt "lootableItem.iron-hammer.name"
+msgid "Iron Hammer"
+msgstr "Martillo de hierro"
+
+msgctxt "lootableItem.mana-elixir.name"
+msgid "Mana Elixir"
+msgstr "Elixir de maná"
+
+msgctxt "lootableItem.mana-potion.name"
+msgid "Mana Potion"
+msgstr "Poción de maná"
+
+msgctxt "lootableItem.rune-hammer.name"
+msgid "Rune Hammer"
+msgstr "Martillo rúnico"
+
+msgctxt "lootableItem.teleport-essence.name"
+msgid "Teleport Essence"
+msgstr "Esencia de teletransporte"
+
+msgctxt "npc.alchemist.name"
+msgid "Alchemist"
+msgstr "Alquimista"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.alchemist.line"
+msgid "Potions, elixirs, and an essence that bends space. What will it be?"
+msgstr "Pociones, elixires y una esencia que dobla el espacio. ¿Qué va a ser?"
+
+msgctxt "npc.blacksmith.name"
+msgid "Blacksmith"
+msgstr "Herrera"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.blacksmith.line"
+msgid "Fresh from the forge! A sturdy hammer keeps you standing for longer."
+msgstr "¡Recién salido de la forja! Un buen martillo te mantiene en pie más tiempo."
+
+msgctxt "npc.elder.name"
+msgid "Elder"
+msgstr "Anciano"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.elder.line"
+msgid "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+msgstr "Hace mucho, una cabra se comió el libro de hechizos de un mago y se tragó su magia. El Mago Cabra gobierna ahora la guarida del sur. Derrótalo, y puede que sus abejas acudan a tu llamada."
+
+msgctxt "npc.elf.name"
+msgid "Elf"
+msgstr "Elfa"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.elf.line"
+msgid "The forest whispers of strangers who outwit goats and bats alike. Walk softly, travellers: my arrows watch over this village."
+msgstr "El bosque habla de forasteros que burlan a cabras y murciélagos por igual. Caminad con cuidado, viajeros: mis flechas vigilan esta aldea."
+
+msgctxt "npc.farmer.name"
+msgid "Farmer"
+msgstr "Granjero"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.farmer.line"
+msgid "Thank you for dealing with that bat! My village is just south, past this meadow. Mind the bats nesting off the path."
+msgstr "¡Gracias por libraros de ese murciélago! Mi aldea está justo al sur, pasado este prado. Cuidado con los murciélagos que anidan fuera del camino."
+
+msgctxt "npc.herbalist.name"
+msgid "Herbalist"
+msgstr "Herbolaria"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.herbalist.line"
+msgid "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
+msgstr "Hierbas para curar, veneno para matar: conozco ambos. ¡Llevadme con vosotros y enfrentémonos juntos a esa cabra!"
+
+msgctxt "npc.princess.name"
+msgid "Princess"
+msgstr "Princesa"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.princess.line"
+msgid "You defeated the Goat Wizard! The realm thanks you, brave travellers. This was only the first of many paths: keep exploring this world."
+msgstr "¡Habéis derrotado al Mago Cabra! El reino os lo agradece, valientes viajeros. Este era solo el primero de muchos caminos: seguid explorando este mundo."
+
+msgctxt "npc.viking.name"
+msgid "Viking"
+msgstr "Vikingo"
+
+#. What the npc says when the party talks to it.
+msgctxt "npc.viking.line"
+msgid "Those beasts kept me pinned here for days! For Valhalla, I fight at your side."
+msgstr "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
+
+#. Displayed as "{player} turn" and "{player} wins!".
+msgctxt "player.player-one.name"
+msgid "Human"
+msgstr "Humano"
+
+#. Displayed as "{player} turn" and "{player} wins!".
+msgctxt "player.player-two.name"
+msgid "CPU"
+msgstr "CPU"
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.grass.name"
+msgid "Grass"
+msgstr "Hierba"
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.lava.name"
+msgid "Lava"
+msgstr "Lava"
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.sand.name"
+msgid "Sand"
+msgstr "Arena"
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.void.name"
+msgid "Void"
+msgstr "Vacío"
+
+#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+msgctxt "terrain.water.name"
+msgid "Water"
+msgstr "Agua"
+
+msgctxt "unit.bat.name"
+msgid "Bat"
+msgstr "Murciélago"
+
+msgctxt "unit.bee.name"
+msgid "Bee"
+msgstr "Abeja"
+
+msgctxt "unit.goat-wizard.name"
+msgid "Goat Wizard"
+msgstr "Mago Cabra"
+
+msgctxt "unit.goat.name"
+msgid "Goat"
+msgstr "Cabra"
+
+msgctxt "unit.herbalist.name"
+msgid "Herbalist"
+msgstr "Herbolaria"
+
+msgctxt "unit.hero.name"
+msgid "Mage"
+msgstr "Maga"
+
+msgctxt "unit.knight.name"
+msgid "Knight"
+msgstr "Caballero"
+
+msgctxt "unit.rat.name"
+msgid "Rat"
+msgstr "Rata"
+
+msgctxt "unit.viking-warrior.name"
+msgid "Viking"
+msgstr "Vikingo"
+
+msgctxt "unit.viking.name"
+msgid "Viking"
+msgstr "Vikingo"
