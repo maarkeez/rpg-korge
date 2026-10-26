@@ -6,7 +6,7 @@
 > on it looks 2/3 of its old size, too small to read on a phone. A tile becomes 64px, the smallest size above 32 where
 > the 32x32 art is drawn at a whole scale (48px would draw it at 1.5x). The battlefield keeps its 384x384 area on the
 > screen, so it shows 6x6 tiles. So that every art pixel is drawn with the same number of screen pixels, the moving
-> views are drawn at whole pixels, and the stage is scaled to the window by a whole number.
+> views are drawn at whole pixels. The stage is still scaled to fit the window, by a fraction if need be.
 
 ## Decisions
 
@@ -19,7 +19,7 @@
 | Whole pixels   | The views moving on the battlefield are drawn at whole pixels: the scroll (trailing, catching up, dragging, centering a tile), the gliding battle units, the swap hop and the rising loot. Rounded on every frame after they moved, by the camera's updater.      |
 | Camera         | The trailed scroll is rounded, and the catch-up moves by whole pixels (at least one per frame), so the camera reaches the leader at a whole pixel instead of being rounded back on every frame.                                                                 |
 | Swap hop       | `SWAP_HOP_HEIGHT` is a whole number of pixels (`TILE_SIZE / 3`, 21px), so the hop lands back where it started.                                                                                                                                                  |
-| Stage          | A `WholePixelScale` scale mode: the stage is scaled by the largest whole number that fits the window, in its device pixels (a 2x screen shows the 390x844 stage at 2x in a 390x844 window), centred, with the game background around it. When even 1x does not fit, it is scaled down to fit, as before. On the JVM and the web. |
+| Stage          | Scaled to fit the window as before (KorGE's default `SHOW_ALL`), even by a fraction. A whole-number scale (`WholePixelScale`) was tried first and dropped: on a real window it left the game much smaller than the fit. |
 | Enemy sight    | `IsInSight.VIEW_TILES` 12 → 6, as it follows the camera: enemies wake when they may step into view.                                                                                                                                                             |
 | Map builder    | It shares the `BattlefieldView`, so it shows 6x6 tiles too.                                                                                                                                                                                                      |
 | Art            | Nothing is redrawn: the 16x16 art (4 screen pixels per art pixel) and the 32x32 art (2) mix until the cast and the terrain are redrawn.                                                                                                                         |
@@ -36,14 +36,6 @@
     the rising loot to whole pixels.
   - `trailLeader`: the target scroll is rounded; `catchUp` moves by a whole number of pixels, at least one.
 
-## shared
-
-### Adapters
-
-- `WholePixelScale`: a `ScaleMode` scaling the stage by the largest whole number fitting the window, or down to fit it
-  below 1x.
-- `Main.kt`: `Korge` takes it as its display mode, centred, clipping the borders.
-
 ## cpuWanderBrain
 
 ### Use cases
@@ -52,8 +44,6 @@
 
 ## Tests
 
-- `WholePixelScaleTest`: whole scales for windows of 1x, 2x and 3x the stage and in between, the largest fitting one on
-  each axis, and the fit below 1x.
 - `BattlefieldViewTest`: the drag, scroll and camera cases written in pixels of the 32px tiles move to 64px ones; the
   scroll, the gliding battle units and the rising loot are at whole pixels on every frame; loot is drawn at 2x.
 - `IsInSightTest` and `WanderWhileExploringTest`: the sight area is 6 tiles plus the margin; the cases at the edge of
@@ -74,4 +64,5 @@
 
 - The picked up item grows from 2x to 3x while it fades out, so its pixels are not whole during those 400ms.
 - 16x16 and 32x32 art mix pixel sizes, now 4 and 2 screen pixels, until the cast and the terrain are redrawn.
-- A window smaller than the stage (e.g.: a phone browser held in landscape) still scales it down by a fraction.
+- The stage is scaled to the window by a fraction, so the art pixels are only even when the window happens to be a
+  whole multiple of the stage.
