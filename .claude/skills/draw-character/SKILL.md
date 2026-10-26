@@ -19,8 +19,8 @@ yet and stop.
 
 Before talking design, read the whole humanoid brief and the `pixel-art` skill, and look at the reference and at the
 characters already drawn with this version (the "Drawn now" column of "Redrawing the cast"): `pixel preview` them and
-read the PNGs. Keep their files in mind: `art-drafts/reference/link-front` and `link-side`, `art/npc/elf`,
-`art/unit/hero`.
+read the PNGs. Keep their files in mind: `art-drafts/reference/link-front` and `link-side`, and
+`art/npc/elf`.
 
 ## 2. Interview
 
@@ -58,7 +58,7 @@ another model or effort. Run it in the foreground, and keep its agent id for lat
 3. The approved design card, pasted in full.
 4. Draw the sprite at `art-drafts/humanoid/<id>.aseprite` and the portrait at `art-drafts/humanoid/<id>_portrait.aseprite`,
    both 32x32, each PNG exported next to its source. Start from scratch: never from the character's current files nor
-   any other character's; the elf and the hero only to match scale and finish.
+   any other character's; the elf only to match scale and finish.
 5. Do the brief's Review step for real, beside the reference at the same scale and at 1x, and iterate. Then the
    Checklist, with a script for the outline rule (every silhouette pixel, diagonals and image edges included, with a
    luminance under 60 must be `W`).
@@ -73,7 +73,7 @@ Pass on any lesson from earlier characters that the brief does not hold yet (eac
 Before the draft goes in front of the user, save the images it is compared with: for a redraw, copy the current
 `resources/.../<id>.png` and `<id>_portrait.png` to the scratchpad, since installing overwrites them.
 
-Look at the drafts yourself, at 6-8x and at 1x, next to `link-side` (or `link-front`) and the elf and the hero. Judge
+Look at the drafts yourself, at 6-8x and at 1x, next to `link-side` (or `link-front`) and the elf. Judge
 them against the brief's Review: camera, face, light, lines, gear, and whether the portrait matches the sprite.
 
 Publish one comparison page with the Artifact tool (load its design skill first):
