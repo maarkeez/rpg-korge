@@ -96,7 +96,7 @@ class WanderingAcceptanceTest {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit("rat-1"),
+                    target = EffectTargetDto.battleUnit("rat-1"),
                     effectId = "low-physical-damage",
                 ),
             )

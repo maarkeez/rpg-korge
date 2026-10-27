@@ -4,7 +4,6 @@ import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 /**
@@ -31,7 +30,7 @@ class PreviewCastOngoingEffects(
         return castGroup
             .flatMap { position -> abilityExecution(casterId = battleUnitId, ability = ability, selectedRow = position.row, selectedColumn = position.column) }
             .filter { application -> searchEffectById(application.effectId)?.application?.type in ONGOING_APPLICATION_TYPES }
-            .mapNotNull { application -> (application.target as? EffectTargetDto.Unit)?.let { target -> target.id to application.effectId } }
+            .mapNotNull { application -> application.target.battleUnitId?.let { battleUnitId -> battleUnitId to application.effectId } }
             .groupBy(keySelector = { (targetId, _) -> targetId }, valueTransform = { (_, effectId) -> effectId })
     }
 }

@@ -369,15 +369,30 @@ data class Effect private constructor(
             }
         }
 
-        sealed interface EffectTargetDto {
-            data class Unit(
-                val id: String,
-            ) : EffectTargetDto
+        /** A battle unit, or a position of the battlefield. */
+        data class EffectTargetDto(
+            val type: TypeDto,
+            val battleUnitId: String?,
+            val position: PositionDto?,
+        ) {
+            companion object {
+                fun battleUnit(battleUnitId: String) = EffectTargetDto(type = TypeDto.BATTLE_UNIT, battleUnitId = battleUnitId, position = null)
 
-            data class Tile(
+                fun position(
+                    row: Int,
+                    column: Int,
+                ) = EffectTargetDto(type = TypeDto.POSITION, battleUnitId = null, position = PositionDto(row = row, column = column))
+            }
+
+            enum class TypeDto {
+                BATTLE_UNIT,
+                POSITION,
+            }
+
+            data class PositionDto(
                 val row: Int,
                 val column: Int,
-            ) : EffectTargetDto
+            )
         }
 
         data class EffectOutcomeDto(

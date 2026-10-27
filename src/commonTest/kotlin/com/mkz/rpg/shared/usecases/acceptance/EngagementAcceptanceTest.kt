@@ -122,7 +122,7 @@ class EngagementAcceptanceTest {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit(ratId),
+                    target = EffectTargetDto.battleUnit(ratId),
                     effectId = "low-physical-damage",
                 ),
             )

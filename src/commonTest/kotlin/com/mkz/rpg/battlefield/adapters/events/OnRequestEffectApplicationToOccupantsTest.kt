@@ -22,8 +22,8 @@ class OnRequestEffectApplicationToOccupantsTest {
             eventBus,
         )
     private val requestedTargets =
-        mutableListOf<String>().also { targets ->
-            eventBus.subscribe<BattlefieldEvent.TerrainEffectTriggered> { targets += it.application.target.toString() }
+        mutableListOf<String?>().also { targets ->
+            eventBus.subscribe<BattlefieldEvent.TerrainEffectTriggered> { targets += it.application.target.battleUnitId }
         }
 
     @Test
@@ -35,6 +35,6 @@ class OnRequestEffectApplicationToOccupantsTest {
         // When
         eventBus.dispatch()
         // Then
-        requestedTargets.shouldContainExactly("Unit(id=knight-2)")
+        requestedTargets.shouldContainExactly("knight-2")
     }
 }

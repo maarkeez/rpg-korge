@@ -8,7 +8,6 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 /**
@@ -37,12 +36,12 @@ class PreviewCastRemainingHealth(
         castGroup
             .flatMap { position -> abilityExecution(casterId = battleUnitId, ability = ability, selectedRow = position.row, selectedColumn = position.column) }
             .forEach { application ->
-                val target = application.target as? EffectTargetDto.Unit ?: return@forEach
+                val targetId = application.target.battleUnitId ?: return@forEach
                 val effect = searchEffectById(application.effectId) ?: return@forEach
                 if (effect.application.type != ApplicationTypeDto.IMMEDIATELY || effect.outcome.type !in HEALTH_OUTCOME_TYPES) return@forEach
-                val battleUnit = previewedBattleUnits[target.id] ?: battleUnitRepository.searchById(target.id) ?: return@forEach
-                val position = searchPosition(target.id) ?: return@forEach
-                previewedBattleUnits[target.id] = battleUnit.applyImmediateEffect(effect = effect, currentRow = position.row, currentColumn = position.column)
+                val battleUnit = previewedBattleUnits[targetId] ?: battleUnitRepository.searchById(targetId) ?: return@forEach
+                val position = searchPosition(targetId) ?: return@forEach
+                previewedBattleUnits[targetId] = battleUnit.applyImmediateEffect(effect = effect, currentRow = position.row, currentColumn = position.column)
             }
         return previewedBattleUnits.mapValues { (_, battleUnit) -> battleUnit.toDto().remainingHealthPoints }
     }

@@ -77,7 +77,7 @@ class DropLootAcceptanceTest {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit(playerTwoGoatWizardBattleUnitId),
+                    target = EffectTargetDto.battleUnit(playerTwoGoatWizardBattleUnitId),
                     effectId = "low-physical-damage",
                 ),
             )

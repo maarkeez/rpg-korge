@@ -37,7 +37,7 @@ class ApplyOnDefeatedEffectsToNearbyAllies(
                             application =
                                 EffectApplicationDto(
                                     source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId),
-                                    target = EffectTargetDto.Unit(id = nearbyAlly.toDto().id),
+                                    target = EffectTargetDto.battleUnit(nearbyAlly.toDto().id),
                                     effectId = appliedEffectId,
                                 ),
                         ),

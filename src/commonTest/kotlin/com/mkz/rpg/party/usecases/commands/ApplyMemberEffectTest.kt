@@ -24,7 +24,7 @@ class ApplyMemberEffectTest {
         applyMemberEffect(battleUnitId = "knight-1", lootableItemId = "health-potion", effectId = "heal")
         // Then
         eventBus.shouldHavePublishedEvents(
-            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.item("health-potion"), target = EffectTargetDto.Unit("knight-1"), effectId = "heal")),
+            RequestApplyEffect(EffectApplicationDto(source = ApplicationSourceDto.item("health-potion"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "heal")),
         )
     }
 

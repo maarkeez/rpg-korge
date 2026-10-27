@@ -88,7 +88,7 @@ class SummonsAtBattleEndAcceptanceTest {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit(battleUnitId),
+                    target = EffectTargetDto.battleUnit(battleUnitId),
                     effectId = "low-physical-damage",
                 ),
             )

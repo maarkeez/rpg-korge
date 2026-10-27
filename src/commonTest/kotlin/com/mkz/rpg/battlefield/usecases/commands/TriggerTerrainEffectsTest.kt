@@ -39,7 +39,7 @@ class TriggerTerrainEffectsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
-                        target = EffectTargetDto.Unit(id = "battle-unit-1"),
+                        target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
                     ),
             ),
@@ -65,7 +65,7 @@ class TriggerTerrainEffectsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
-                        target = EffectTargetDto.Unit(id = "battle-unit-1"),
+                        target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
                     ),
             ),
@@ -73,7 +73,7 @@ class TriggerTerrainEffectsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
-                        target = EffectTargetDto.Unit(id = "battle-unit-2"),
+                        target = EffectTargetDto.battleUnit("battle-unit-2"),
                         effectId = "effect-1",
                     ),
             ),
@@ -99,7 +99,7 @@ class TriggerTerrainEffectsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.terrain("sand"),
-                        target = EffectTargetDto.Unit(id = "battle-unit-1"),
+                        target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
                     ),
             ),

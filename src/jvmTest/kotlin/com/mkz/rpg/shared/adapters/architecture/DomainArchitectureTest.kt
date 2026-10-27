@@ -101,6 +101,26 @@ class DomainArchitectureTest {
                             declaration.getterNames.shouldBeEmpty()
                         }
                     }
+
+                    // Dto and the declarations nested in it are data classes or enum classes: a choice between shapes is an
+                    // enum type with optional fields, never a sealed class or interface.
+                    val packagePrefix = "${aggregateRoot.packagee?.fullyQualifiedName}."
+                    withClue("Aggregate root '$aggregateName.Dto' must only declare data classes and enum classes.") {
+                        (listOf(dto) + dto.classes(includeNested = true, includeLocal = false))
+                            .filterNot { it.hasDataModifier || it.hasEnumModifier }
+                            .map { it.fullyQualifiedName.removePrefix(packagePrefix) }
+                            .shouldBeEmpty()
+                    }
+                    withClue("Aggregate root '$aggregateName.Dto' must not declare interfaces.") {
+                        dto.interfaces(includeNested = true).map { it.fullyQualifiedName.removePrefix(packagePrefix) }.shouldBeEmpty()
+                    }
+                    withClue("Aggregate root '$aggregateName.Dto' must not declare objects other than companion objects.") {
+                        dto
+                            .objects(includeNested = true)
+                            .filterNot { it.hasCompanionModifier }
+                            .map { it.fullyQualifiedName.removePrefix(packagePrefix) }
+                            .shouldBeEmpty()
+                    }
                 }
                 // TODO: Assert it contains a public method called `toDto()` with return type `<subdomain>.Dto`
 

@@ -36,7 +36,7 @@ class TriggerTerrainEffects(
                     application =
                         EffectApplicationDto(
                             source = ApplicationSourceDto.terrain(application.terrainId),
-                            target = EffectTargetDto.Unit(id = application.occupantId),
+                            target = EffectTargetDto.battleUnit(application.occupantId),
                             effectId = application.effectId,
                         ),
                 ),

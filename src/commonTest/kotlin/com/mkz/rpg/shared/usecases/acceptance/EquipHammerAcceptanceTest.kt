@@ -74,7 +74,7 @@ class EquipHammerAcceptanceTest {
     ) = battleUnitApi.applyEffect(
         EffectApplicationDto(
             source = ApplicationSourceDto.item(lootableItemId),
-            target = EffectTargetDto.Unit(playerOneKnightBattleUnitId),
+            target = EffectTargetDto.battleUnit(playerOneKnightBattleUnitId),
             effectId = effectId,
         ),
     )

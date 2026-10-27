@@ -14,8 +14,6 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.Tile
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.Unit
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 class AbilityExecution(
@@ -80,20 +78,20 @@ class AbilityExecution(
         selectedColumn: Int,
     ): List<EffectTargetDto> =
         when (effectSpec.target.type) {
-            CASTER -> listOf(Unit(id = caster.toDto().id))
+            CASTER -> listOf(EffectTargetDto.battleUnit(caster.toDto().id))
             SELECTED_TARGET -> {
                 val occupantId = searchOccupant(selectedRow, selectedColumn) ?: throw FailedToResolveEffectTarget()
-                listOf(Unit(id = occupantId))
+                listOf(EffectTargetDto.battleUnit(occupantId))
             }
             SELECTED_TILE -> {
                 if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
-                listOf(Tile(row = selectedRow, column = selectedColumn))
+                listOf(EffectTargetDto.position(row = selectedRow, column = selectedColumn))
             }
             CASTER_TILE -> {
                 val position = searchPosition(caster.toDto().id) ?: throw FailedToResolveEffectTarget()
-                listOf(Tile(row = position.row, column = position.column))
+                listOf(EffectTargetDto.position(row = position.row, column = position.column))
             }
-            NEARBY_ALLIES -> searchNearbyAllies(caster = caster).map { ally -> Unit(id = ally.toDto().id) }
+            NEARBY_ALLIES -> searchNearbyAllies(caster = caster).map { ally -> EffectTargetDto.battleUnit(ally.toDto().id) }
         }
 
     private fun destinationFor(
@@ -103,7 +101,7 @@ class AbilityExecution(
     ): EffectTargetDto? {
         val effect = searchEffectById(effectId) ?: return null
         return if (effect.outcome.type == TELEPORT) {
-            Tile(row = selectedRow, column = selectedColumn)
+            EffectTargetDto.position(row = selectedRow, column = selectedColumn)
         } else {
             null
         }

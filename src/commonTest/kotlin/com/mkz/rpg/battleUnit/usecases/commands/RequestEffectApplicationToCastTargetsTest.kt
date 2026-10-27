@@ -64,7 +64,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = battleUnitId),
+                        target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
                     ),
             ),
@@ -99,7 +99,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Tile(row = 1, column = 1),
+                        target = EffectTargetDto.position(row = 1, column = 1),
                         effectId = effectId,
                     ),
             ),
@@ -138,7 +138,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = enemyBattleUnitId),
+                        target = EffectTargetDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
                     ),
             ),
@@ -172,7 +172,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = battleUnitId),
+                        target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
                     ),
             ),
@@ -207,9 +207,9 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = battleUnitId),
+                        target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
-                        destination = EffectTargetDto.Tile(row = 1, column = 1),
+                        destination = EffectTargetDto.position(row = 1, column = 1),
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -243,7 +243,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = enemyBattleUnitId),
+                        target = EffectTargetDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
                     ),
             ),
@@ -315,7 +315,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = enemyId),
+                        target = EffectTargetDto.battleUnit(enemyId),
                         effectId = enemyDamageEffectId,
                     ),
             ),
@@ -323,7 +323,7 @@ class RequestEffectApplicationToCastTargetsTest {
                 application =
                     EffectApplicationDto(
                         source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.Unit(id = casterId),
+                        target = EffectTargetDto.battleUnit(casterId),
                         effectId = casterDamageEffectId,
                     ),
             ),
@@ -360,7 +360,7 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.Unit(id = casterId), effectId = healEffectId),
+                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.battleUnit(casterId), effectId = healEffectId),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = casterId, abilityId = "ability-1"),
         )
@@ -402,10 +402,15 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.Unit(id = enemyId), effectId = damageEffectId),
+                application =
+                    EffectApplicationDto(
+                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        target = EffectTargetDto.battleUnit(enemyId),
+                        effectId = damageEffectId,
+                    ),
             ),
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.Unit(id = casterId), effectId = healEffectId),
+                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.battleUnit(casterId), effectId = healEffectId),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = casterId, abilityId = "ability-1"),
         )

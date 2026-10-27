@@ -557,12 +557,12 @@ class EffectTest {
     @Test
     fun `ToDto should expose the destination when the effect application targets a tile`() {
         // Given
-        val destination = Effect.Dto.EffectTargetDto.Tile(row = 2, column = 3)
+        val destination = Effect.Dto.EffectTargetDto.position(row = 2, column = 3)
         // When
         val effectApplication =
             Effect.Dto.EffectApplicationDto(
                 source = ApplicationSourceDto.battleUnit("battle-unit-1"),
-                target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-2"),
+                target = Effect.Dto.EffectTargetDto.battleUnit("battle-unit-2"),
                 effectId = "effect-1",
                 destination = destination,
             )
@@ -578,7 +578,7 @@ class EffectTest {
         val effectApplication =
             Effect.Dto.EffectApplicationDto(
                 source = source,
-                target = Effect.Dto.EffectTargetDto.Unit(id = "battle-unit-1"),
+                target = Effect.Dto.EffectTargetDto.battleUnit("battle-unit-1"),
                 effectId = "health-potion-heal",
             )
         // Then

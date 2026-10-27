@@ -66,7 +66,7 @@ class ConsumeHealthPotionAcceptanceTest {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.Unit(playerOneKnightBattleUnitId),
+                    target = EffectTargetDto.battleUnit(playerOneKnightBattleUnitId),
                     effectId = "low-physical-damage",
                 ),
             )

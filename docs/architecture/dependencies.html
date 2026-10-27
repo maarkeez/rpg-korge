@@ -209,13 +209,13 @@ const DATA = {
   "subdomains": [
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 24, "importsOut": 17},
     {"name": "battle", "files": 23, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 37, "importsOut": 27},
-    {"name": "battleUnit", "files": 59, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 65, "importsOut": 173},
+    {"name": "battleUnit", "files": 59, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 65, "importsOut": 170},
     {"name": "battlefield", "files": 41, "fanIn": 9, "fanOut": 4, "instability": 0.31, "importsIn": 107, "importsOut": 40},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 14, "instability": 0.93, "importsIn": 1, "importsOut": 15},
     {"name": "building", "files": 10, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 3, "importsOut": 12},
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 23, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 53},
-    {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 67, "importsOut": 13},
+    {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 64, "importsOut": 13},
     {"name": "inventory", "files": 29, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 53},
     {"name": "localization", "files": 14, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 5, "importsOut": 6},
     {"name": "lootDrop", "files": 18, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 26},
@@ -350,7 +350,7 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
     ]},
-    {"from": "battleUnit", "to": "effect", "weight": 39, "files": 9, "imports": [
+    {"from": "battleUnit", "to": "effect", "weight": 36, "files": 9, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "effect.domain.Effect"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES"},
@@ -370,7 +370,8 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto.SourceTypeDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.TypeDto.BATTLE_UNIT"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.TypeDto.POSITION"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnDefeatedEffectsToNearbyAllies.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnDefeatedEffectsToNearbyAllies.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES"},
@@ -378,17 +379,13 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnDefeatedEffectsToNearbyAllies.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnTurnStartedEffects.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectApplicationDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.Tile"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto.Unit"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"}
     ]},
     {"from": "battleUnit", "to": "player", "weight": 6, "files": 6, "imports": [
