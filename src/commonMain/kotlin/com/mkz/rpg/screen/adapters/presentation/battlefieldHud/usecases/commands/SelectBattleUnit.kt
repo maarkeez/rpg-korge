@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
+import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
@@ -14,9 +15,12 @@ import com.mkz.rpg.shared.domain.EventBus
 /**
  * Selects the battle unit with its movement range, as if the player had selected its tile, replacing any selection,
  * e.g.: the party leader when a human turn starts. A battle unit off the battlefield is not selected: the hud goes idle.
+ *
+ * Out of the battles (e.g.: while exploring, the party member the inventory switches to), it has no movement range.
  */
 class SelectBattleUnit(
     private val searchPosition: SearchPosition,
+    private val searchBattle: SearchBattle,
     private val battlefieldHudRepository: BattlefieldHudRepository,
     private val eventBus: EventBus,
     private val movementService: MovementService,
@@ -31,6 +35,7 @@ class SelectBattleUnit(
                 is DisplayAbilityCastPreview -> battlefieldHud.idle()
             }
         val position = searchPosition(battleUnitId)
+        val isBattleInProgress = searchBattle()?.isFinished == false
         val (events, updatedBattlefieldHud) =
             if (position == null) {
                 idleBattlefieldHud.idle().pullEvents()
@@ -39,7 +44,7 @@ class SelectBattleUnit(
                     .selectBattleUnit(
                         tile = TileDto(row = position.row, column = position.column),
                         battleUnitId = battleUnitId,
-                        tilesWhereCanBeMoved = movementService.tilesWhereCanMove(battleUnitId),
+                        tilesWhereCanBeMoved = if (isBattleInProgress) movementService.tilesWhereCanMove(battleUnitId) else emptySet(),
                     ).pullEvents()
             }
         battlefieldHudRepository.update(updatedBattlefieldHud)

@@ -1,8 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.InventoryView.Owner
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -14,10 +16,15 @@ class InventoryViewTest : ViewsForTesting() {
     // Records what the player does on the inventory.
     private class RecordingDelegate : InventoryView.Delegate {
         val selectedSlots = mutableListOf<Int>()
+        val steps = mutableListOf<Int>()
         var isClosed = false
 
         override fun slotSelected(index: Int) {
             selectedSlots += index
+        }
+
+        override fun inventoryOwnerStepped(step: Int) {
+            steps += step
         }
 
         override fun inventoryClosed() {
@@ -33,6 +40,7 @@ class InventoryViewTest : ViewsForTesting() {
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             // Then
             inventoryView.titleText() shouldBe "Inventory"
+            inventoryView.arrowsVisible().shouldBeFalse()
             inventoryView.slotCount() shouldBe 12
             inventoryView.slotBitmaps().all { bitmap -> bitmap == null }.shouldBeTrue()
         }
@@ -129,5 +137,92 @@ class InventoryViewTest : ViewsForTesting() {
             clickClose(inventoryView)
             // Then
             delegate.isClosed.shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should name the owner between both arrows enabled, the gold before the next one`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            addChild(inventoryView)
+            // When
+            inventoryView.display(emptyList(), gold = 20, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            // Then
+            inventoryView.titleText() shouldBe "Viking"
+            inventoryView.goldText() shouldBe "20 G"
+            inventoryView.arrowsVisible().shouldBeTrue()
+            inventoryView.arrowsEnabled() shouldBe (true to true)
+            inventoryView.isTitleLaidOut().shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should disable the arrows at the ends of the party`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 1))
+            // Then
+            inventoryView.arrowsEnabled() shouldBe (false to false)
+        }
+
+    @Test
+    fun `Display should hide the arrows and display the inventory title again when there is no owner`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 2))
+            // When
+            inventoryView.display(emptyList(), gold = 0)
+            // Then
+            inventoryView.titleText() shouldBe "Inventory"
+            inventoryView.arrowsVisible().shouldBeFalse()
+        }
+
+    @Test
+    fun `ArrowClick should notify the delegate of the step when an arrow is clicked`() =
+        sharedViewsTest {
+            // Given
+            val delegate = RecordingDelegate()
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.setDelegate(delegate)
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            addChild(inventoryView)
+            // When
+            clickPreviousOwner(inventoryView)
+            clickNextOwner(inventoryView)
+            // Then
+            delegate.steps.shouldContainExactly(-1, 1)
+        }
+
+    @Test
+    fun `Swipe should notify the delegate of the direction, without selecting a slot`() =
+        sharedViewsTest {
+            // Given
+            val delegate = RecordingDelegate()
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.setDelegate(delegate)
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            addChild(inventoryView)
+            // When
+            swipeInventory(inventoryView, dx = -100.0)
+            swipeInventory(inventoryView, dx = 100.0)
+            // Then
+            delegate.steps.shouldContainExactly(-1, 1)
+            delegate.selectedSlots.shouldBeEmpty()
+        }
+
+    @Test
+    fun `Swipe should not notify the delegate when the drag is too short`() =
+        sharedViewsTest {
+            // Given
+            val delegate = RecordingDelegate()
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.setDelegate(delegate)
+            addChild(inventoryView)
+            // When
+            swipeInventory(inventoryView, dx = 20.0)
+            // Then
+            delegate.steps.shouldBeEmpty()
         }
 }

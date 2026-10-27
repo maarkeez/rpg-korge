@@ -31,6 +31,9 @@ import kotlinx.coroutines.CompletableDeferred
  *
  * While exploring, an item can be given to another party member: Give dims every tile but the ones of the members that
  * can receive it, and tapping one of them gives the item. Until then, every other tap is ignored, but Cancel's.
+ *
+ * While exploring, the arrows (or a swipe) switch the inventory to the previous or next party member, selecting it on the
+ * battlefield through the selector set with [setBattleUnitSelector], so its inventory stays open meanwhile.
  */
 class InventoryPresenter(
     private val inventoryView: InventoryView,
@@ -62,6 +65,10 @@ class InventoryPresenter(
     // The item being given, while the player taps the party member who receives it.
     private var giving: Giving? = null
 
+    // The party member the inventory switches to, until the battlefield HUD has selected it.
+    private var switchingTo: String? = null
+    private var battleUnitSelector: ((battleUnitId: String) -> Unit)? = null
+
     /** The item of the slot being given, and the tile of each party member that can receive it. */
     private data class Giving(
         val giverBattleUnitId: String,
@@ -72,10 +79,12 @@ class InventoryPresenter(
 
     private val subscriptions =
         listOf(
-            // Selecting a battle unit displays its info instead of the inventory.
+            // Selecting a battle unit displays its info instead of the inventory, but the party member the inventory switches to.
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 val battleUnitId = event.battleUnitId
                 val hasInventory = hasInventory(battleUnitId)
+                val isSwitchedTo = switchingTo == battleUnitId
+                switchingTo = null
                 timeline.play {
                     clearDisplayedInventory()
                     if (hasInventory) {
@@ -84,6 +93,7 @@ class InventoryPresenter(
                         battleUnitInfoView.hideBag()
                     }
                 }
+                if (isSwitchedTo && hasInventory) openInventory(battleUnitId)
             },
             eventBus.subscribe<BattlefieldHudEvent.Idle> {
                 timeline.play {
@@ -126,6 +136,11 @@ class InventoryPresenter(
         subscriptions.forEach(Subscription::dispose)
     }
 
+    /** Selects the battle unit on the battlefield, as if the player had tapped its tile, e.g.: the party member switched to. */
+    fun setBattleUnitSelector(selector: (battleUnitId: String) -> Unit) {
+        battleUnitSelector = selector
+    }
+
     /** The stored items of the battle unit, marking the equipped copy of each equipped item. */
     private fun slotsOf(battleUnitId: String): List<InventoryView.Slot> {
         val inventory = inventoryApi.searchInventoryByBattleUnitId(battleUnitId) ?: return emptyList()
@@ -135,33 +150,55 @@ class InventoryPresenter(
 
     private fun goldOf(battleUnitId: String): Int = inventoryApi.searchInventoryByBattleUnitId(battleUnitId)?.gold ?: 0
 
+    // While exploring, the party member and its position in the party, to switch to the members beside it.
+    private fun ownerOf(battleUnitId: String): InventoryView.Owner? {
+        val party = partyApi.searchParty()?.takeIf { party -> party.isExploring } ?: return null
+        val partyIndex = party.battleUnitIds.indexOf(battleUnitId).takeIf { index -> index >= 0 } ?: return null
+        val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return null
+        return InventoryView.Owner(name = texts.unitName(battleUnit.unitId), partyIndex = partyIndex, partySize = party.battleUnitIds.size)
+    }
+
     private fun openInventory(battleUnitId: String) {
         val slots = slotsOf(battleUnitId)
         val gold = goldOf(battleUnitId)
-        timeline.play { displayInventory(battleUnitId, slots, gold) }
+        val owner = ownerOf(battleUnitId)
+        timeline.play { displayInventory(battleUnitId, slots, gold, owner) }
     }
 
     private fun displayInventory(
         battleUnitId: String,
         slots: List<InventoryView.Slot>,
         gold: Int,
+        owner: InventoryView.Owner?,
     ) {
         displayedBattleUnitId = battleUnitId
         displayedSlots = slots
         selectedSlotIndex = null
-        inventoryView.display(slots, gold)
+        inventoryView.display(slots, gold, owner)
         battleHudView.displayInventoryView()
     }
 
     private fun refreshInventory(battleUnitId: String) {
         val slots = slotsOf(battleUnitId)
         val gold = goldOf(battleUnitId)
+        val owner = ownerOf(battleUnitId)
         timeline.play {
             if (displayedBattleUnitId != battleUnitId) return@play
             displayedSlots = slots
             selectedSlotIndex = null
-            inventoryView.display(slots, gold)
+            inventoryView.display(slots, gold, owner)
         }
+    }
+
+    // Selects the previous or next party member on the battlefield, whose inventory is then displayed. Stops at the ends of the party.
+    private fun switchOwner(step: Int) {
+        val battleUnitId = displayedBattleUnitId ?: return
+        val party = partyApi.searchParty()?.takeIf { party -> party.isExploring } ?: return
+        val partyIndex = party.battleUnitIds.indexOf(battleUnitId).takeIf { index -> index >= 0 } ?: return
+        val switchedToId = party.battleUnitIds.getOrNull(partyIndex + step) ?: return
+        val selector = battleUnitSelector ?: return
+        switchingTo = switchedToId
+        selector(switchedToId)
     }
 
     // Forgets the displayed inventory, e.g.: when the HUD displays the battle unit info instead.
@@ -185,7 +222,7 @@ class InventoryPresenter(
         val pendingChoice = CompletableDeferred<Unit>()
         foundItem = found
         choice = pendingChoice
-        displayInventory(found.battleUnitId, slotsOf(found.battleUnitId), goldOf(found.battleUnitId))
+        displayInventory(found.battleUnitId, slotsOf(found.battleUnitId), goldOf(found.battleUnitId), ownerOf(found.battleUnitId))
         playerCallToActionView.displayInventoryFull(
             foundItemName = foundItemName,
             foundItemPrice = foundItemPrice,
@@ -385,9 +422,9 @@ class InventoryPresenter(
     }
 
     // The player can only act once the scene shows the current state of the battle, has chosen what to do with the found
-    // item, and has given the item or cancelled giving it.
+    // item, has given the item or cancelled giving it, and once the party member switched to is selected.
     private fun whenIdle(action: () -> Unit) {
-        if (!timeline.isPlaying && choice == null && giving == null) action()
+        if (!timeline.isPlaying && choice == null && giving == null && switchingTo == null) action()
     }
 
     // Delegates
@@ -399,6 +436,8 @@ class InventoryPresenter(
             whenIdle { selectItem(index) }
         }
     }
+
+    override fun inventoryOwnerStepped(step: Int) = whenIdle { switchOwner(step) }
 
     override fun inventoryClosed() =
         whenIdle {

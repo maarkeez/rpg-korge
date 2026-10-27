@@ -94,6 +94,7 @@ class BattlefieldPresenter(
     private val selectBattleUnit =
         SelectBattleUnit(
             searchPosition = battlefieldApi.searchPosition,
+            searchBattle = battleApi.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = movementService,
@@ -254,6 +255,9 @@ class BattlefieldPresenter(
     fun setTileInterceptor(interceptor: (row: Int, column: Int) -> Boolean) {
         tileInterceptor = interceptor
     }
+
+    /** Selects the battle unit, as if the player had tapped its tile, e.g.: the party member the inventory switches to. */
+    fun select(battleUnitId: String) = selectBattleUnit(battleUnitId)
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return

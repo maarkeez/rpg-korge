@@ -118,6 +118,7 @@ The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.disp
 The selected battle unit info displays a bag (the chest icon) next to its abilities, only for the battle units of the human player. Clicking it opens the inventory of the battle unit in the HUD, instead of its info, through [`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt):
 
 - [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt) displays one slot per storage space (12, in 2 rows of 6), with the stored items in order and the equipped copy of each equipped item framed in gold (`#FFBB31`).
+- Its title line reads `Inventory` and the gold in a battle. While exploring, it names the party member between the arrows that switch to the previous or next member instead (see [Inventory while exploring](exploration.md#inventory)): the presenter selects that member on the battlefield, and opens its inventory once its selection has displayed its info.
 - Clicking a stored item frames it in white, and the call to action displays its name and actions instead of the finish turn (nothing while exploring):
 
 | Item                            | Actions                                    |

@@ -233,6 +233,15 @@ class InventoryPresenterTest {
     }
 
     @Test
+    fun `OpenInventory should display the inventory title, without the arrows, in a battle`() {
+        // Given
+        // When
+        openKnightInventory()
+        // Then
+        inventoryView.displayedOwner.shouldBeNull()
+    }
+
+    @Test
     fun `OpenInventory should ignore the bag when the timeline is playing`() {
         // Given
         select("knight-1", row = 1, column = 1)

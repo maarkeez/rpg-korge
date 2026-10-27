@@ -8,6 +8,8 @@ class FakeInventoryView : InventoryView(BattleSceneResourcesLoader(), TextsMothe
     val displayedSlots = mutableListOf<List<Slot>>()
     var displayedGold: Int? = null
         private set
+    var displayedOwner: Owner? = null
+        private set
     var selectedSlot: Int? = null
         private set
 
@@ -18,9 +20,11 @@ class FakeInventoryView : InventoryView(BattleSceneResourcesLoader(), TextsMothe
     override fun display(
         slots: List<Slot>,
         gold: Int,
+        owner: Owner?,
     ) {
         displayedSlots += slots
         displayedGold = gold
+        displayedOwner = owner
         selectedSlot = null
     }
 

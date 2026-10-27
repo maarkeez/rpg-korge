@@ -12,6 +12,20 @@ fun InventoryView.titleText(): String = titleView.nameText()
 /** The gold of the battle unit, on the title line, e.g.: 120 G. */
 fun InventoryView.goldText(): String = goldView.nameText()
 
+/** Whether the arrows to the previous and the next party member are displayed, and whether each one is enabled. */
+fun InventoryView.arrowsVisible(): Boolean = previousOwnerButton.visible && nextOwnerButton.visible
+
+fun InventoryView.arrowsEnabled(): Pair<Boolean, Boolean> = previousOwnerButton.enabled to nextOwnerButton.enabled
+
+/** Whether the arrows are on each side of the title and the gold, before Close. */
+fun InventoryView.isTitleLaidOut(): Boolean {
+    val title = titleView.getGlobalBounds()
+    val gold = goldView.getGlobalBounds()
+    return previousOwnerButton.getGlobalBounds().right <= title.left &&
+        nextOwnerButton.getGlobalBounds().left >= gold.right &&
+        nextOwnerButton.getGlobalBounds().right < closeButton.getGlobalBounds().left
+}
+
 fun InventoryView.slotCount(): Int = slotViews.size
 
 /** The image of the item stored in each slot, or `null` for the empty slots. */
@@ -29,3 +43,24 @@ suspend fun ViewsForTesting.clickSlot(
 ) = clickOn(inventoryView.slotViews[index])
 
 suspend fun ViewsForTesting.clickClose(inventoryView: InventoryView) = clickOn(inventoryView.closeButton)
+
+suspend fun ViewsForTesting.clickPreviousOwner(inventoryView: InventoryView) = clickOn(inventoryView.previousOwnerButton)
+
+suspend fun ViewsForTesting.clickNextOwner(inventoryView: InventoryView) = clickOn(inventoryView.nextOwnerButton)
+
+/** Drags the mouse across the inventory, starting on its first slot, [dx] pixels to the right (negative to the left). */
+suspend fun ViewsForTesting.swipeInventory(
+    inventoryView: InventoryView,
+    dx: Double,
+) {
+    val start =
+        inventoryView.slotViews
+            .first()
+            .getGlobalBounds()
+            .center
+    mouseMoveTo(start.x, start.y)
+    mouseDown()
+    val steps = 5
+    for (step in 1..steps) mouseMoveTo(start.x + dx * step / steps, start.y)
+    mouseUp()
+}

@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands
 
+import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
@@ -22,13 +23,14 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
 
 class SelectBattleUnitTest {
-    // The battle unit-1 stands at (0,1) and can walk 1 tile: (0,0) and (0,2).
+    // The battle unit-1 stands at (0,1) and can walk 1 tile in the battle: (0,0) and (0,2).
     private val queries = InMemoryQueries()
     private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
     private val eventBus = FakeEventBus()
     private val selectBattleUnit =
         SelectBattleUnit(
             searchPosition = queries.searchPosition,
+            searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
             movementService = MovementService(queries.searchBattleUnitById, queries.searchTilesThatCanBeOccupied, queries.canMoveTo),
@@ -41,9 +43,12 @@ class SelectBattleUnitTest {
         queries.battlefieldRepository.create(battlefield(". K .", occupants = mapOf('K' to "battle-unit-1")))
     }
 
+    private fun startBattle() = queries.battleRepository.create(battle(battleUnitIds = setOf("battle-unit-1")))
+
     @Test
     fun `should select the battle unit with its movement range when the hud is idle`() {
         // Given
+        startBattle()
         battlefieldHudRepository.create(idle())
         // When
         selectBattleUnit("battle-unit-1")
@@ -55,8 +60,24 @@ class SelectBattleUnitTest {
     }
 
     @Test
+    fun `should select the battle unit with no movement range out of the battles`() {
+        // Given
+        // E.g.: the party member the inventory switches to while exploring.
+        battlefieldHudRepository.create(displayMovementRange(battleUnitId = "battle-unit-2", tilesWhereCanBeMoved = emptySet()))
+        // When
+        selectBattleUnit("battle-unit-1")
+        // Then
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = battleUnitTile, battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet())
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.Idle,
+            BattlefieldHudEvent.SelectedBattleUnit(tile = battleUnitTile, battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = emptySet()),
+        )
+    }
+
+    @Test
     fun `should replace the selection when the hud is displaying the movement range of another battle unit`() {
         // Given
+        startBattle()
         battlefieldHudRepository.create(displayMovementRange(battleUnitId = "battle-unit-2"))
         // When
         selectBattleUnit("battle-unit-1")
@@ -71,6 +92,7 @@ class SelectBattleUnitTest {
     @Test
     fun `should replace the selection when the hud is displaying an ability cast range`() {
         // Given
+        startBattle()
         battlefieldHudRepository.create(displayAbilityCastRange())
         // When
         selectBattleUnit("battle-unit-1")
@@ -85,6 +107,7 @@ class SelectBattleUnitTest {
     @Test
     fun `should replace the selection when the hud is previewing an ability cast`() {
         // Given
+        startBattle()
         battlefieldHudRepository.create(displayAbilityCastPreview())
         // When
         selectBattleUnit("battle-unit-1")

@@ -142,6 +142,7 @@ class BattleScene(
                 eventBus,
             )
         battlefieldPresenter.setTileInterceptor(inventoryPresenter::tileSelected)
+        inventoryPresenter.setBattleUnitSelector(battlefieldPresenter::select)
 
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
