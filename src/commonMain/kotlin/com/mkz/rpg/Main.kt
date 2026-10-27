@@ -4,6 +4,10 @@ import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.screen.adapters.presentation.MenuScene
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
+import com.mkz.rpg.storybook.adapters.location.isStorybookRequested
+import com.mkz.rpg.storybook.adapters.location.platformStoryLocation
+import com.mkz.rpg.storybook.adapters.presentation.StorybookScene
+import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.scene.sceneContainer
@@ -14,9 +18,19 @@ import kotlin.random.Random
 
 val GAME_WINDOW_SIZE = Size(390, 844)
 
+// Landscape, so the sidebar and the story info fit on both sides of a phone as large as the game window.
+val STORYBOOK_WINDOW_SIZE = Size(1280, 900)
+
+// The same bundle starts the game, or the Storybook when it is asked for: see docs/plans/storybook.md.
 suspend fun main() =
-    Korge(windowSize = GAME_WINDOW_SIZE, backgroundColor = Colors["#2b2b2b"]) {
-        startGame()
+    if (isStorybookRequested()) {
+        Korge(windowSize = STORYBOOK_WINDOW_SIZE, backgroundColor = Colors["#202020"]) {
+            startStorybook()
+        }
+    } else {
+        Korge(windowSize = GAME_WINDOW_SIZE, backgroundColor = Colors["#2b2b2b"]) {
+            startGame()
+        }
     }
 
 // Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU battle brain.
@@ -32,4 +46,17 @@ suspend fun Stage.startGame(random: Random = Random.Default) {
     localizationApi.init()
 
     sceneContainer.changeTo { MenuScene(localizationApi, random) }
+}
+
+// Shared by `main` and the end-to-end tests, so both boot the Storybook the same way. The tests choose the story asked for.
+suspend fun Stage.startStorybook(storyLocation: StoryLocation = platformStoryLocation()) {
+    val sceneContainer = sceneContainer()
+
+    // The texts of the views on show, in English.
+    val eventBus = InMemoryEventBus()
+    addUpdater { eventBus.dispatch() }
+    val localizationApi = LocalizationApi(eventBus)
+    localizationApi.init()
+
+    sceneContainer.changeTo { StorybookScene(localizationApi, storyLocation) }
 }
