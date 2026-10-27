@@ -5,6 +5,7 @@ import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
 import com.mkz.rpg.ability.usecases.commands.InitialiseAbilities
+import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
@@ -20,7 +21,7 @@ class OnRequestInitialiseAbilitiesTest {
     private val sword = ability(id = "sword", effectSpecs = listOf(effectSpec(effectId = "damage"))).toDto()
     private val onRequestInitialiseAbilities =
         OnRequestInitialiseAbilities(
-            InitialiseAbilities(FakeAbilityLoader(abilities = listOf(sword)), abilityRepository, SearchEffectById(effectRepository), eventBus),
+            InitialiseAbilities(FakeAbilityLoader(abilities = listOf(sword)), AbilityCreation(abilityRepository, SearchEffectById(effectRepository)), eventBus),
             eventBus,
         )
 

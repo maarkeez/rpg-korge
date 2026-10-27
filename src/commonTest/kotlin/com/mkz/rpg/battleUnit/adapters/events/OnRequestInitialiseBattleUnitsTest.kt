@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
@@ -20,9 +21,7 @@ class OnRequestInitialiseBattleUnitsTest {
             InitialiseBattleUnits(
                 battleUnitLoader = FakeBattleUnitLoader(deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 0, column = 0))),
                 battleUnitRepository = queries.battleUnitRepository,
-                searchUnitById = queries.searchUnitById,
-                searchPlayerById = queries.searchPlayerById,
-                canBattlefieldTileBeOccupied = queries.canBattlefieldTileBeOccupied,
+                battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
                 eventBus = eventBus,
             ),
             eventBus,

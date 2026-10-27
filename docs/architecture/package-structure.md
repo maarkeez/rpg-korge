@@ -41,6 +41,11 @@ For example, given a subdomain called `tomatoes`:
 - `com.mkz.rpg.Main.kt` is the application entry point and lives in the root package.
 - `com.mkz.rpg.screen.adapters.presentation.battlefieldHud` is a subdomain that only exists to support the presentation layer of the `screen` subdomain. It is nested in that presentation adapter and follows the same allowed packages as any other subdomain.
 
+## Use cases
+
+- The use cases of a subdomain (the classes of its `usecases.commands`, `usecases.queries` and `usecases.services`) MUST only be instantiated in its presentation Api, `<subdomain>.adapters.presentation.<Subdomain>Api` (e.g.: `BattlefieldCreation` only in `BattlefieldApi`). The Api builds each one once and injects it where it is needed: a use case that needs a service takes it in its constructor instead of building it (e.g.: `InitialiseBattlefield` takes the `BattlefieldCreation` of `BattlefieldApi`). This is enforced, for the production code only, by [`UseCaseInstantiationArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/UseCaseInstantiationArchitectureTest.kt). The tests build the use case under test themselves, with its fakes.
+- The nested `battlefieldHud` subdomain follows it too: its `BattlefieldHudApi` holds its use cases, and each `BattlefieldPresenter` builds its own, with its own selection.
+
 ## Dependencies between subdomains
 
 - Subdomains MUST NOT depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`). This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt), which fails on the same cycles the [dependency report](dependencies.md) highlights.

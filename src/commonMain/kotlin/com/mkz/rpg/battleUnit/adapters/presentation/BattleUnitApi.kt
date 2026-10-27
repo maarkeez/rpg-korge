@@ -53,6 +53,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
@@ -75,6 +76,13 @@ class BattleUnitApi(
 
     // Services
     private val distanceService = DistanceService()
+    private val battleUnitDeployment =
+        BattleUnitDeployment(
+            battleUnitRepository,
+            unitApi.searchUnitById,
+            playerApi.searchPlayerById,
+            battlefieldApi.canBattlefieldTileBeOccupied,
+        )
 
     // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
@@ -139,19 +147,14 @@ class BattleUnitApi(
     // Commands
     val deployBattleUnit =
         DeployBattleUnit(
-            battleUnitRepository,
+            battleUnitDeployment,
             eventBus,
-            unitApi.searchUnitById,
-            playerApi.searchPlayerById,
-            battlefieldApi.canBattlefieldTileBeOccupied,
         )
     val initialiseBattleUnits =
         InitialiseBattleUnits(
             battleUnitLoader,
             battleUnitRepository,
-            unitApi.searchUnitById,
-            playerApi.searchPlayerById,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battleUnitDeployment,
             eventBus,
         )
     val moveBattleUnit =
@@ -182,10 +185,8 @@ class BattleUnitApi(
             battleUnitRepository,
             eventBus,
             effectApi.searchEffectById,
-            unitApi.searchUnitById,
             battlefieldApi.searchPosition,
-            playerApi.searchPlayerById,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battleUnitDeployment,
             abilityApi.searchAbilityById,
         )
     val applyOnDefeatedEffectsToNearbyAllies =

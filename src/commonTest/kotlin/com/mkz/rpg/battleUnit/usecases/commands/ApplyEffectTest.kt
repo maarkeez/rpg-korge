@@ -1,6 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
@@ -21,10 +22,8 @@ class ApplyEffectTest {
             battleUnitRepository = queries.battleUnitRepository,
             eventBus = eventBus,
             searchEffectById = queries.searchEffectById,
-            searchUnitById = queries.searchUnitById,
             searchPosition = queries.searchPosition,
-            searchPlayerById = queries.searchPlayerById,
-            canBattlefieldTileBeOccupied = queries.canBattlefieldTileBeOccupied,
+            battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
             searchAbilityById = queries.searchAbilityById,
         )
 

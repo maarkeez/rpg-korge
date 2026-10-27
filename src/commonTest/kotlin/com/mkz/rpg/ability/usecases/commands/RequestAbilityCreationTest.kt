@@ -6,6 +6,7 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationNotAllowed
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
@@ -23,8 +24,7 @@ class RequestAbilityCreationTest {
     private val eventBus = FakeEventBus()
     private val requestAbilityCreation =
         RequestAbilityCreation(
-            abilityRepository = abilityRepository,
-            searchEffectById = SearchEffectById(effectRepository),
+            abilityCreation = AbilityCreation(abilityRepository, SearchEffectById(effectRepository)),
             eventBus = eventBus,
         )
 

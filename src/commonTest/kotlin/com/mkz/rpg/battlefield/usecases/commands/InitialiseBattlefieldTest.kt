@@ -2,6 +2,7 @@ package com.mkz.rpg.battlefield.usecases.commands
 
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -21,7 +22,7 @@ class InitialiseBattlefieldTest {
         // Given
         terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand"))
         val initialiseBattlefield =
-            InitialiseBattlefield(FakeBattlefieldLoader(tiles = List(2) { List(3) { "sand" } }), battlefieldRepository, SearchTerrainById(terrainRepository), eventBus)
+            InitialiseBattlefield(FakeBattlefieldLoader(tiles = List(2) { List(3) { "sand" } }), BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)), eventBus)
         // When
         initialiseBattlefield()
         // Then

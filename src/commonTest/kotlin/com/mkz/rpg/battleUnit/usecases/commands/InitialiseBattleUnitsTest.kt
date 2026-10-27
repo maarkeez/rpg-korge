@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.UnitNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -23,9 +24,7 @@ class InitialiseBattleUnitsTest {
         InitialiseBattleUnits(
             FakeBattleUnitLoader(loadedDeployments),
             queries.battleUnitRepository,
-            queries.searchUnitById,
-            queries.searchPlayerById,
-            queries.canBattlefieldTileBeOccupied,
+            BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
             eventBus,
         )
 

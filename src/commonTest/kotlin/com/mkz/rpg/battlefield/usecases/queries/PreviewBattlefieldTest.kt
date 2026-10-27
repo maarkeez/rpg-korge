@@ -21,7 +21,7 @@ class PreviewBattlefieldTest {
             create(nonOccupiableTerrain(id = "lava"))
             create(occupiableTerrain(id = "water"))
         }
-    private val previewBattlefield = PreviewBattlefield(battlefieldRepository, SearchTerrainById(terrainRepository))
+    private val previewBattlefield = PreviewBattlefield(BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)))
 
     @Test
     fun `should build the battlefield the battle would create when the tiles are previewed`() {

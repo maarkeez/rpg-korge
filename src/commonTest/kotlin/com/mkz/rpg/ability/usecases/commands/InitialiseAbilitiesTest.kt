@@ -6,6 +6,7 @@ import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectDoesNotExist
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
@@ -21,7 +22,8 @@ class InitialiseAbilitiesTest {
     private val eventBus = FakeEventBus()
     private val effectRepository = InMemoryEffectRepository()
 
-    private fun initialiseAbilities(loadedAbilities: List<Ability.Dto>) = InitialiseAbilities(FakeAbilityLoader(loadedAbilities), abilityRepository, SearchEffectById(effectRepository), eventBus)
+    private fun initialiseAbilities(loadedAbilities: List<Ability.Dto>) =
+        InitialiseAbilities(FakeAbilityLoader(loadedAbilities), AbilityCreation(abilityRepository, SearchEffectById(effectRepository)), eventBus)
 
     @Test
     fun `should create every loaded ability when abilities are initialised`() {

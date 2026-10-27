@@ -3,6 +3,7 @@ package com.mkz.rpg.battlefield.adapters.events
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
@@ -17,7 +18,7 @@ class OnRequestInitialiseBattlefieldTest {
     private val terrainRepository = InMemoryTerrainRepository().also { it.create(occupiableTerrain(id = "sand")) }
     private val onRequestInitialiseBattlefield =
         OnRequestInitialiseBattlefield(
-            InitialiseBattlefield(FakeBattlefieldLoader(tiles = listOf(listOf("sand", "sand"))), battlefieldRepository, SearchTerrainById(terrainRepository), eventBus),
+            InitialiseBattlefield(FakeBattlefieldLoader(tiles = listOf(listOf("sand", "sand"))), BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)), eventBus),
             eventBus,
         )
 

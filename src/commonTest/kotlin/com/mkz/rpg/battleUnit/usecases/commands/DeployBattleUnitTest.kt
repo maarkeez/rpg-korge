@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -20,11 +21,8 @@ class DeployBattleUnitTest {
     private val eventBus = FakeEventBus()
     private val deployBattleUnit =
         DeployBattleUnit(
-            battleUnitRepository = queries.battleUnitRepository,
+            battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
             eventBus = eventBus,
-            searchUnitById = queries.searchUnitById,
-            searchPlayerById = queries.searchPlayerById,
-            canBattlefieldTileBeOccupied = queries.canBattlefieldTileBeOccupied,
         )
 
     @Test

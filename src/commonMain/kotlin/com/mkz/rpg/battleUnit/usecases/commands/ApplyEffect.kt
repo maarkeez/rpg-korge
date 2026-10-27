@@ -5,7 +5,6 @@ import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
@@ -16,25 +15,18 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.POSITION
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.random.Random
 
 class ApplyEffect(
     private val battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
     private val searchEffectById: SearchEffectById,
-    searchUnitById: SearchUnitById,
     private val searchPosition: SearchPosition,
-    searchPlayerById: SearchPlayerById,
-    canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val battleUnitDeployment: BattleUnitDeployment,
     private val searchAbilityById: SearchAbilityById,
 ) {
-    private val battleUnitDeployment =
-        BattleUnitDeployment(battleUnitRepository, searchUnitById, searchPlayerById, canBattlefieldTileBeOccupied)
-
     operator fun invoke(application: EffectApplicationDto) {
         val effect = searchEffectById(application.effectId) ?: throw FailedToReceiveAbilityEffects()
         when (application.target.type) {

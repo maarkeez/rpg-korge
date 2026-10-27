@@ -17,18 +17,9 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.presentation.BattlefieldHudApi
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.CancelCast
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ConfirmCast
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.DeselectBattleUnit
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.InitializeBattlefieldHud
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessAbilitySelected
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.ProcessTileSelected
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.RefreshMovementRange
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.commands.SelectBattleUnit
-import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.services.MovementService
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -51,62 +42,7 @@ class BattlefieldPresenter(
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
     AbilityButtonView.Delegate {
-    private val battlefieldHudRepository = InMemoryBattlefieldHudRepository()
-    private val movementService =
-        MovementService(
-            searchBattleUnitById = battleUnitApi.searchBattleUnitById,
-            searchTilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied,
-            canMoveTo = battleUnitApi.canMoveTo,
-        )
-    private val initializeBattlefieldHud = InitializeBattlefieldHud(battlefieldHudRepository)
-    private val processTileSelected =
-        ProcessTileSelected(
-            searchOccupant = battlefieldApi.searchOccupant,
-            searchBattleUnitById = battleUnitApi.searchBattleUnitById,
-            searchPlayerById = playerApi.searchPlayerById,
-            searchBattle = battleApi.searchBattle,
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-            movementService = movementService,
-        )
-    private val processAbilitySelected =
-        ProcessAbilitySelected(
-            canCastAbility = battleUnitApi.canCastAbility,
-            whereCanCast = battleUnitApi.whereCanCast,
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-        )
-    private val confirmCast =
-        ConfirmCast(
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-        )
-    private val cancelCast =
-        CancelCast(
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-        )
-    private val deselectBattleUnit =
-        DeselectBattleUnit(
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-        )
-    private val selectBattleUnit =
-        SelectBattleUnit(
-            searchPosition = battlefieldApi.searchPosition,
-            searchBattle = battleApi.searchBattle,
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-            movementService = movementService,
-        )
-    private val refreshMovementRange =
-        RefreshMovementRange(
-            searchPosition = battlefieldApi.searchPosition,
-            searchBattle = battleApi.searchBattle,
-            battlefieldHudRepository = battlefieldHudRepository,
-            eventBus = eventBus,
-            movementService = movementService,
-        )
+    private val battlefieldHudApi = BattlefieldHudApi(battlefieldApi, battleUnitApi, playerApi, battleApi, eventBus)
 
     // The items displayed on each tile. Changed in timeline order, so each step draws the loot the battle had then.
     private val displayedLoot = mutableMapOf<PositionDto, List<String>>()
@@ -152,11 +88,11 @@ class BattlefieldPresenter(
             },
             // The selected caster is displayed again once its cast has been resolved.
             eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> {
-                refreshMovementRange()
+                battlefieldHudApi.refreshMovementRange()
             },
             // An occupied tile (e.g.: a battle unit moved or deployed) may close paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> {
-                refreshMovementRange()
+                battlefieldHudApi.refreshMovementRange()
             },
             // While exploring, alongside the timeline, so the party keeps walking, e.g.: while standing on water heals it.
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
@@ -179,7 +115,7 @@ class BattlefieldPresenter(
             // A vacated tile (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
-                refreshMovementRange()
+                battlefieldHudApi.refreshMovementRange()
             },
             eventBus.subscribe<LootDropEvent.LootDropped> { event ->
                 timeline.play { dropLoot(event.row, event.column, event.lootableItemId) }
@@ -192,13 +128,13 @@ class BattlefieldPresenter(
             // turn starts, so it is drawn once the turn has been announced.
             eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
                 timeline.play { clearSelection() }
-                deselectBattleUnit()
+                battlefieldHudApi.deselectBattleUnit()
                 selectPartyLeader(event)
             },
             // The selection is cleared when the battle finishes, as the party explores again.
             eventBus.subscribe<BattleEvent.BattleFinished> {
                 timeline.play { clearSelection() }
-                deselectBattleUnit()
+                battlefieldHudApi.deselectBattleUnit()
             },
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event ->
                 timeline.play(displayMovementRange(event))
@@ -221,7 +157,7 @@ class BattlefieldPresenter(
         )
 
     init {
-        initializeBattlefieldHud.invoke()
+        battlefieldHudApi.initializeBattlefieldHud()
         battlefieldView.setDelegate(this)
         battleUnitInfoView.setDelegate(this)
     }
@@ -259,7 +195,7 @@ class BattlefieldPresenter(
     }
 
     /** Selects the battle unit, as if the player had tapped its tile, e.g.: the party member the inventory switches to. */
-    fun select(battleUnitId: String) = selectBattleUnit(battleUnitId)
+    fun select(battleUnitId: String) = battlefieldHudApi.selectBattleUnit(battleUnitId)
 
     private fun moveUnit(event: BattleUnitEvent.BattleUnitMoved) {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId) ?: return
@@ -432,7 +368,7 @@ class BattlefieldPresenter(
     private fun selectPartyLeader(event: BattleEvent.PlayerTurnStarted) {
         if (playerApi.searchPlayerById(event.playerId)?.type != Player.Dto.PlayerTypeDto.HUMAN) return
         val leaderId = partyApi.searchParty()?.leaderBattleUnitId ?: return
-        if (leaderId in event.battleUnitIds) selectBattleUnit(leaderId)
+        if (leaderId in event.battleUnitIds) battlefieldHudApi.selectBattleUnit(leaderId)
     }
 
     private fun clearSelection() {
@@ -576,8 +512,8 @@ class BattlefieldPresenter(
     private fun displayAttackPreview() {
         battleHudView.displayAttackPreviewView()
         playerCallToActionView.displayCancelAndConfirm(
-            onCancelled = { whenIdle { cancelCast() } },
-            onConfirmed = { whenIdle { confirmCast() } },
+            onCancelled = { whenIdle { battlefieldHudApi.cancelCast() } },
+            onConfirmed = { whenIdle { battlefieldHudApi.confirmCast() } },
         )
     }
 
@@ -607,9 +543,9 @@ class BattlefieldPresenter(
         column: Int,
     ) = whenIdle {
         if (isTimeStopped() || tileInterceptor?.invoke(row, column) == true) return@whenIdle
-        processTileSelected(row = row, column = column)
+        battlefieldHudApi.processTileSelected(row = row, column = column)
     }
 
     // The abilities can only be cast in a battle.
-    override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) processAbilitySelected(abilityId) }
+    override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) battlefieldHudApi.processAbilitySelected(abilityId) }
 }

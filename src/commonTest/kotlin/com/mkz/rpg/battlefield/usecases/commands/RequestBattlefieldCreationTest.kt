@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldError
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.terrainId
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
@@ -28,8 +29,7 @@ class RequestBattlefieldCreationTest {
     private val eventBus = FakeEventBus()
     private val requestBattlefieldCreation =
         RequestBattlefieldCreation(
-            battlefieldRepository = battlefieldRepository,
-            searchTerrainById = SearchTerrainById(terrainRepository),
+            battlefieldCreation = BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)),
             eventBus = eventBus,
         )
 

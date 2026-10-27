@@ -32,6 +32,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTerrainId
 import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
+import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldDecoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldEncoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
@@ -48,18 +49,19 @@ class BattlefieldApi(
     // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
 
+    // Services
+    private val battlefieldCreation = BattlefieldCreation(battlefieldRepository, terrainApi.searchTerrainById)
+
     // Commands
     val requestBattlefieldCreation =
         RequestBattlefieldCreation(
-            battlefieldRepository = battlefieldRepository,
-            searchTerrainById = terrainApi.searchTerrainById,
+            battlefieldCreation = battlefieldCreation,
             eventBus = eventBus,
         )
     val initialiseBattlefield =
         InitialiseBattlefield(
             battlefieldLoader = battlefieldLoader,
-            battlefieldRepository = battlefieldRepository,
-            searchTerrainById = terrainApi.searchTerrainById,
+            battlefieldCreation = battlefieldCreation,
             eventBus = eventBus,
         )
     val removeOccupant = RemoveOccupant(battlefieldRepository, eventBus)
@@ -84,7 +86,7 @@ class BattlefieldApi(
     val searchPosition = SearchPosition(battlefieldRepository)
     val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
     val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
-    val previewBattlefield = PreviewBattlefield(battlefieldRepository, terrainApi.searchTerrainById)
+    val previewBattlefield = PreviewBattlefield(battlefieldCreation)
     val exportBattlefield = ExportBattlefield(battlefieldEncoder)
     val parseBattlefield = ParseBattlefield(battlefieldDecoder)
 

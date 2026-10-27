@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
+import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -16,7 +17,7 @@ class OnRequestDeployBattleUnitTest {
     private val queries = InMemoryQueries()
     private val onRequestDeployBattleUnit =
         OnRequestDeployBattleUnit(
-            DeployBattleUnit(queries.battleUnitRepository, eventBus, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+            DeployBattleUnit(BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied), eventBus),
             eventBus,
         )
 
