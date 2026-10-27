@@ -46,6 +46,14 @@ For example, given a subdomain called `tomatoes`:
 - The use cases of a subdomain (the classes of its `usecases.commands`, `usecases.queries` and `usecases.services`) MUST only be instantiated in its presentation Api, `<subdomain>.adapters.presentation.<Subdomain>Api` (e.g.: `BattlefieldCreation` only in `BattlefieldApi`). The Api builds each one once and injects it where it is needed: a use case that needs a service takes it in its constructor instead of building it (e.g.: `InitialiseBattlefield` takes the `BattlefieldCreation` of `BattlefieldApi`). This is enforced, for the production code only, by [`UseCaseInstantiationArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/UseCaseInstantiationArchitectureTest.kt). The tests build the use case under test themselves, with its fakes.
 - The nested `battlefieldHud` subdomain follows it too: its `BattlefieldHudApi` holds its use cases, and each `BattlefieldPresenter` builds its own, with its own selection.
 
+## Storybook
+
+The [Storybook](../plans/storybook.md) shows each view of the game in isolation, in each of its states. It is the `storybook` subdomain, published at `/storybook/`.
+
+- The `storybook` subdomain MUST only depend on `shared`, `localization` and the `adapters.presentation` package of the other subdomains, but not on the packages nested in it (e.g.: `screen.adapters.presentation.battlefieldHud`): its stories feed the views plain data, never domain objects nor use cases. Nothing MUST depend on `storybook` but the entry point, `Main.kt`, which starts it instead of the game when it is asked for. This is enforced by [`StorybookDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StorybookDependencyArchitectureTest.kt).
+- Every view of an `adapters.presentation` package (a top-level class extending a KorGE view, directly or through another view, e.g.: `HealthBarView` → `BarView` → `UIContainer`) MUST have its stories: a `<View>Stories` binding in `storybook.adapters.presentation` (e.g.: `HealthBarViewStories`), listed in `StorybookApi.STORY_BINDINGS`, as JS has no reflection to find it. The views that have none yet are allowed, and only those: a view leaves the allowed views once it has its stories, so the list can only shrink. The presenters, the scenes and the Storybook's own views are left out. This is enforced by [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt).
+- Reading the page URL is the only platform specific code: `storybook.adapters.location` declares it in `src/commonMain`, and implements it in `src/jsMain` (the page URL) and `src/jvmMain` (a system property, no URL), in the same package, so the architecture tests check them too.
+
 ## Dependencies between subdomains
 
 - Subdomains MUST NOT depend on each other, even indirectly (e.g.: `a` → `b` → `c` → `a`). This is enforced by [`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt), which fails on the same cycles the [dependency report](dependencies.md) highlights.
@@ -62,6 +70,7 @@ For example, given a subdomain called `tomatoes`:
   | `battlefield`                         | `shared`, `effect`, `terrain`, `battle` (to remove next, see below)      |
   | `party`                               | `shared`, `effect`, `player`, `battle`, `battlefield`, `battleUnit`      |
   | `battleUnit`                          | `shared`, `effect`, `player`, `unit`, `ability`, `battle`, `battlefield` |
+  | `storybook`                           | `shared`, `localization`, and the presentation of any subdomain, see [Storybook](#storybook) |
 
   `battlefield` still depends on `battle`: only `OnBattleRoundStarted` listens to `BattleEvent`. It is the next dependency to remove, by a `Request…` event of `battlefield` that `battle` publishes.
 - To have the upstream subdomain react to the downstream one without depending on it, the upstream subdomain declares a `Request…` event in its own events (e.g.: `BattleEvent.RequestDefeatPlayer`), and a downstream command use case publishes it (e.g.: `battleUnit`'s `RequestBattleLeave`). The upstream subdomain listens to its own request, and the data it needs travels in the event (e.g.: the player of the battle unit joining the battle), instead of being queried from the downstream subdomain.

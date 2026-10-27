@@ -20,7 +20,7 @@
 | Granularity      | Views and composite views (e.g.: `HealthBarView`, `InventorySlotView`, `ShopView`, `BattleHudView`). Not whole scenes: they need the full domain state, which the end-to-end tests and the [game snapshots](../testing/how-to-take-a-game-snapshot.md) already cover. |
 | Location         | A new `storybook` subdomain in the game module, `com.mkz.rpg.storybook`, so every existing architecture test applies to it. It ships in the same JS bundle as the game.                                                                          |
 | Hosting          | Published by the [`Deploy JS`](../../.github/workflows/deploy-js.yml) workflow at `/storybook/`, as the [dependency report](../architecture/dependencies.md) is at `/dependencies/`: https://maarkeez.github.io/rpg-korge/storybook/.             |
-| Entry            | One bundle, a startup flag choosing the game or the Storybook. On JS, `/storybook/index.html` sets it. On the JVM, a `runJvmStorybook` task and a `.run/` configuration with autoreload set it. The game menu has no Storybook button.             |
+| Entry            | One bundle, a startup flag choosing the game or the Storybook. On JS, the page being in the `/storybook/` folder sets it. On the JVM, a `runJvmStorybook` task and a `.run/` configuration with autoreload set it. The game menu has no Storybook button.             |
 | Ubiquitous language | Storybook's own terms, known to the author and to collaborators: **Component**, **Story**, **Args**, **Controls**, **Actions**, **Globals**. See [Glossary](#glossary).                                                                       |
 | Stories          | Fixed, named states of a component, with a stable id. Their args can be edited live with the Controls.                                                                                                                                           |
 | Controls         | Boolean, int (with a minimum and a maximum), enum, text, pick from a list (e.g.: a lootable item id) and color.                                                                                                                                   |
@@ -83,55 +83,76 @@ or a better name found while building asks otherwise, and update this section wh
 
 ### Package layout
 
-Following [Package structure](../architecture/package-structure.md), with the leaf packages only:
+Following [Package structure](../architecture/package-structure.md), with the leaf packages only. Built in M1 unless
+marked with the milestone that adds it:
 
 ```
 com.mkz.rpg.storybook
-├── domain                  Component, Story, Control, ArgValue, Args, Globals, Action, StorySession,
-│                           StorySessionRepository, StorybookEvent, StorybookError
+├── domain                  Storybook (the aggregate root: the catalogue and the story on show; the args, globals and
+│                           actions log in M2 and M3), StorybookRepository, StorybookEvent, StorybookError
 ├── usecases
-│   ├── commands            InitialiseCatalogue, SelectStory, ChangeArg, ResetArgs, ChangeGlobal,
-│   │                       RecordAction, ClearActions
+│   ├── commands            InitialiseCatalogue, SelectStory; ChangeArg, ResetArgs, ChangeGlobal (M2);
+│   │                       RecordAction, ClearActions (M3)
 │   ├── queries             SearchCatalogue, SearchSelectedStory
 │   └── services            StoryLocation (the port to the URL)
 └── adapters
-    ├── presentation        StorybookApi, StorybookScene, the Storybook's own views and presenters
-    │                       (sidebar, phone frame, toolbar, Controls, Actions), StoryBinding,
-    │                       StoryContext, and one <View>Stories file per component
-    ├── storage             InMemoryStorySessionRepository, InMemoryCatalogueRepository
-    └── location            BrowserStoryLocation (jsMain), NoStoryLocation (JVM)
+    ├── presentation        StorybookApi, StorybookScene, StorybookPresenter, the Storybook's own views (SidebarView,
+    │                       PhoneFrameView, StoryInfoView; the toolbar, Controls and Actions in M2 and M3),
+    │                       StoryBinding, StoryContext, and one <View>Stories object per component
+    ├── storage             InMemoryStorybookRepository
+    └── location            isStorybookRequested() and platformStoryLocation() (expect, in commonMain),
+                            NoStoryLocation (commonMain, used on the JVM), BrowserStoryLocation (jsMain)
 ```
 
+- The domain package only allows the aggregate root, its repository, events and errors, named after the subdomain
+  (`DomainArchitectureTest`), so there is a single aggregate, `Storybook`, instead of a catalogue and a session: the
+  components and stories are its `Dto.ComponentDto` and `Dto.StoryDto`, and its private nested classes validate them.
+  The args, globals and actions of M2 and M3 go into it too.
 - `StorybookApi` is the only place where the `storybook` use cases are instantiated
-  (`UseCaseInstantiationArchitectureTest`).
+  (`UseCaseInstantiationArchitectureTest`). It also holds `STORY_BINDINGS`, the list of every `<View>Stories`.
 - The `<View>Stories` files live in `adapters.presentation`, not in a package of their own: they build the views'
   `Texts`, and only `adapters.presentation` packages may import `localization` (`LocalizationArchitectureTest`).
 - The Dtos follow the existing rules: data classes and enum classes only, no methods, no default values (see
   [Dto of data and enums](dto-of-data-and-enums.md), [Dto without methods](dto-without-methods.md) and
-  [Dto without default values](dto-without-default-values.md)).
+  [Dto without default values](dto-without-default-values.md)). An arg value in M2 is then an enum type with optional
+  fields (e.g.: `ArgDto(type, boolean, int, text)`) built by companion factories, never a sealed class.
 
 ### Domain model
 
-- **Catalogue.** The components, each with an id, a group (its subdomain, e.g.: `Screen`), a title, a description, its
-  controls, its default args, and its stories. Built once by `InitialiseCatalogue` from the registry of
-  `StorybookApi`. Rules: the ids are unique; every story's args name a control of its component and hold a valid value
-  for it.
-- **Ids.** Kebab case, as Storybook: the component id is `<group>-<title>` (e.g.: `screen-shop`), and the story id
-  `<component id>--<story name>` (e.g.: `screen-shop--sell-inventory-full`). They are stable: renaming one breaks the
-  links shared, so a test lists them.
-- **Control** (sealed): `BooleanControl`, `IntControl(min, max)`, `EnumControl(options)`, `TextControl`,
-  `PickControl(options)` and `ColorControl`. Each validates an `ArgValue` (sealed: boolean, int, text, color as
-  `RRGGBB` or `RRGGBBAA`). An enum and a pick hold their option as text.
-- **StorySession** (the aggregate root): the selected story, its current args (the story's args over the component's
-  default args, then the changes), the globals and the actions log. Rules: only a story of the catalogue can be
-  selected; an arg can only be changed to a value its control accepts; selecting another story resets the args to its
-  own; the log keeps the last 50 actions, the newest first.
-- **Events** (`StorybookEvent`): `StorySelected`, `ArgChanged`, `ArgsReset`, `GlobalChanged`, `ActionRecorded`,
-  `ActionsCleared`. The presenters subscribe to them to re-render, as `BattlefieldPresenter` does.
+- **Catalogue.** The components, each with an id, a group (its subdomain, e.g.: `Screen`), a title, a description and
+  its stories, each with an id, a name and a description. Built once by `InitialiseCatalogue` from `STORY_BINDINGS`.
+  Rules: there is at least one component; every component has at least one story; the ids are unique. In M2 each
+  component also gets its controls and default args, and each story its args, valid for the controls.
+- **Ids.** Kebab case, as Storybook: the component id is its group and title (e.g.: `screen-health-bar`), and the
+  story id `<component id>--<story name>` (e.g.: `screen-health-bar--full`). They are written in the binding, not
+  derived from the title and name, so renaming a component or a story keeps the links shared. The domain checks that a
+  component id is in kebab case and that a story id is its component id, two dashes, and a name in kebab case.
+  `StorySmokeTest` lists every id, so changing one is deliberate.
+- **The story on show.** Opened on the story the location asks for, or on the first story when none is asked for or
+  it is not in the catalogue (e.g.: a link to a renamed story): it is ignored, never a failure. Only a story of the
+  catalogue can be selected; selecting the story on show changes nothing. In M2, selecting another story resets the
+  args to its own, and an arg can only be changed to a value its control accepts. In M3, the log keeps the last 50
+  actions, the newest first.
+- **Events** (`StorybookEvent`): `CatalogueInitialised` and `StorySelected` in M1; `ArgChanged`, `ArgsReset`,
+  `GlobalChanged` (M2), `ActionRecorded`, `ActionsCleared` (M3). The presenter subscribes to them to re-render, as
+  `BattlefieldPresenter` does.
 
 ### Binding a story to a view
 
-A `StoryBinding` per component, in `adapters.presentation`, builds the real view from the args, e.g.:
+A `StoryBinding` per component, in `adapters.presentation`, builds the real view. In M1 the stories are fixed, so it
+renders a story by its id, e.g.:
+
+```kotlin
+object HealthBarViewStories : StoryBinding {
+    override val component = ComponentDto(id = "screen-health-bar", group = "Screen", title = "Health bar", description = "...", stories = listOf(full, half, empty))
+
+    override fun render(storyId: String, context: StoryContext): View =
+        HealthBarView(SIZE).apply { display(remaining = remainingHealth.getValue(storyId), maximum = MAXIMUM_HEALTH) }
+}
+```
+
+From M2 it renders the current args instead, e.g.: `fun render(args: Args, context: StoryContext): View`, and the
+stories become their args:
 
 ```kotlin
 object ShopViewStories : StoryBinding {
@@ -149,10 +170,14 @@ object ShopViewStories : StoryBinding {
 }
 ```
 
-- `StoryContext` gives the binding the shared `BattleSceneResourcesLoader`, the `Texts` in the selected language, and
-  `action(...)`, which runs `RecordAction` and, when it maps the action to an arg, `ChangeArg`.
-- The view is rebuilt from scratch when the args or the globals change: simpler and deterministic. Its animations
-  restart, which is acceptable in v1.
+- `StoryContext` gives the binding the shared `BattleSceneResourcesLoader` and the `Texts` (in English in M1, in the
+  selected language from M2), and from M3 `action(...)`, which runs `RecordAction` and, when it maps the action to an
+  arg, `ChangeArg`.
+- The view is rebuilt from scratch whenever the story changes (and from M2 when the args or the globals change):
+  simpler and deterministic. Its animations restart, which is acceptable in v1.
+- `PhoneFrameView` shows it at its real size, in the middle of a 390x844 screen with the game background, which crops
+  what does not fit. A full-screen view placed at the bottom (e.g.: `BattleHudView`) may need a placement in its
+  binding.
 - A view taking lambdas instead of a `Delegate` (e.g.: `MenuView`) passes lambdas calling `context.action(...)`.
 - The options of a `PickControl` come from presentation sources only, e.g.: `resourcesLoader.bitmaps("lootableItem")`
   for the item ids, so the dependency rule holds. If a story ever needs a Dto of another subdomain, revisit the rule
@@ -161,58 +186,64 @@ object ShopViewStories : StoryBinding {
 
 ### Startup flag and hosting
 
-- `Main.kt` keeps a single `main`: it reads the flag and starts either the game (`startGame`) or the Storybook in its
-  own window size. Reading the flag is platform specific: an `expect` in `commonMain` with an `actual` in a new
-  `jsMain` source set (e.g.: the page's path ending in `/storybook/`, or a value set by its `index.html`) and in a new
-  `jvmMain` source set (a system property, e.g.: `-Drpg.entry=storybook`). Check that `PackageStructureArchitectureTest`
-  and the other Konsist tests also scan the new source sets.
-- The window: about 1280x900, scaled to fit as the game is. The 390x844 phone frame plus a toolbar set the height.
-- `runJvmStorybook`: a `JavaExec` copying the KorGE `runJvm` task with the system property. The autoreload
-  configuration mirrors `.run/runJvmAutoreload.run.xml`; check how the KorGE plugin defines `runJvmAutoreload` to pass
-  the property through it.
-- `/storybook/`: a step of `Deploy JS`, after the bundle is built, adds `build/www/storybook/index.html`. The preferred
-  way is a copy of `build/www/index.html` with `<base href="../">`, so the JS and `resources.zip` (read relative to the
-  page by `ResourcesBundle`) are loaded from the game's files instead of copied. The URL updates must then use
-  absolute paths, as the base changes how relative URLs resolve. Fall back to copying `build/www` into
-  `build/www/storybook` if KorGE's JS loader does not follow the base. Guard the step with a `grep`, as the dependency
-  report step does.
+- `Main.kt` keeps a single `main`: `isStorybookRequested()` chooses between `startGame()` in the game window and
+  `startStorybook()` in `STORYBOOK_WINDOW_SIZE` (1280x900, scaled to fit as the game is). `startStorybook(storyLocation)`
+  is shared with the end-to-end tests, as `startGame` is. `isStorybookRequested()` and `platformStoryLocation()` are
+  `expect` functions of `storybook.adapters.location`, with an `actual` in `src/jsMain` (the page is in a
+  `/storybook/` folder) and in `src/jvmMain` (the system property `-Drpg.entry=storybook`). The Konsist tests scan
+  the new source sets with no change, as they are production source sets.
+- The layout: the sidebar (260 wide) on the left, the 414x868 phone frame (the 390x844 screen and its bezel) 16 from
+  the top, and `StoryInfoView` on the right, with the component and the story, each with its description. The Controls
+  and the Actions go under it in M2 and M3, and the toolbar with the Globals above it.
+- `runJvmStorybook` and `runJvmStorybookAutoreload`: KorGE makes both for an extra entry point,
+  `entrypoint("storybook", "com.mkz.rpg.MainKt")` in `build.gradle.kts`, which also sets the system property on both.
+  `.run/runJvmStorybookAutoreload.run.xml` runs the second one, as `.run/runJvmAutoreload.run.xml` does the game.
+- `/storybook/`: the `Add Storybook` step of `Deploy JS`, after the bundle is built, copies the files of `build/www`
+  (the page, the JS and `resources.zip`) into `build/www/storybook`, guarded by a `test` and a `grep`. A copy of the
+  page with `<base href="../">` does not work: KorGE's JS loader reads the resources relative to
+  `document.location.href`, ignoring the base, so `resources.zip` is not found.
 
 ### URL
 
-- `?story=<story id>&args=<name>:<value>;<name>:<value>&globals=<name>:<value>`, as Storybook. Only the args changed
-  from the story's own are written. The values are URL-encoded, a color as its hex without `#`.
-- `StoryLocation` (a port in `usecases.services`) reads the URL at startup and replaces it with
-  `history.replaceState` on every `StorybookEvent` that changes it, so the back button does not step through every
-  arg change. On the JVM it reads nothing and writes nothing (or reads the program arguments, if useful for
-  `runJvmStorybook --args`).
-- An unknown story or an invalid arg in the URL is ignored and logged, never a crash: the Storybook opens the first
-  story, or the story with its default args.
+- `?story=<story id>` in M1. From M2: `&args=<name>:<value>;<name>:<value>&globals=<name>:<value>`, as Storybook. Only
+  the args changed from the story's own are written. The values are URL-encoded, a color as its hex without `#`.
+- `StoryLocation` (a port in `usecases.services`) is read by `InitialiseCatalogue` at startup, and written by
+  `SelectStory` (and from M2 by the commands changing the args or the globals) with `history.replaceState`, so the back
+  button does not step through every change. `BrowserStoryLocation` writes the page path, which is absolute, with the
+  parameters and the hash. `NoStoryLocation`, on the JVM, reads nothing and writes nothing.
+- An unknown story in the URL is ignored, never a crash: the Storybook opens the first story. From M2, an invalid arg
+  is ignored the same way: the story opens with its default args. They are not logged.
 
 ### Architecture tests
 
-- **Dependency rule**, e.g.: `StorybookDependencyArchitectureTest`: the files of `com.mkz.rpg.storybook` only import
-  other subdomains from their `adapters.presentation` packages, except `shared` and `localization`. Also add
-  `storybook` to the table of [Package structure](../architecture/package-structure.md#dependencies-between-subdomains).
-- **Coverage rule**, e.g.: `StoryCoverageArchitectureTest`: every class of an `adapters.presentation` package that
-  extends a KorGE `View`, directly or through another view (e.g.: `HealthBarView` → `BarView` → `Container`), has a
-  `<View>Stories` binding, unless it is in the allowlist. Scenes, presenters and the views of `storybook` itself are
-  left out. An allowlisted view that has a story fails the test, so the allowlist can only shrink. Check that Konsist
-  resolves the indirect parents; otherwise list the view base classes in the test.
-- **Registry rule**: every `<View>Stories` object is registered in the list of `StorybookApi`, so none is forgotten by
-  the smoke test nor the app.
+- **Dependency rule**: `StorybookDependencyArchitectureTest`. The files of `com.mkz.rpg.storybook` only import other
+  subdomains from a declaration of their `adapters.presentation` package (not from a package nested in it, e.g.:
+  `screen.adapters.presentation.battlefieldHud`), except `shared` and `localization`, which they may import entirely.
+  No other subdomain imports `storybook`; only `Main.kt` does. `storybook` is also in the table of
+  [Package structure](../architecture/package-structure.md#dependencies-between-subdomains).
+- **Coverage rule**: `StoryCoverageArchitectureTest`. Every top-level class of an `adapters.presentation` package that
+  extends a KorGE view, directly or through another class of the project (e.g.: `HealthBarView` → `BarView` →
+  `UIContainer`), has a `<View>Stories` binding, unless it is in the allowlist. Konsist 0.13 only gives the direct
+  parents, so the test walks them through the classes of the project up to a list of KorGE view classes. Presenters,
+  scenes and the views of `storybook` itself are left out. An allowlisted view that has a story fails the test, and so
+  does an allowlisted name that is no view, so the allowlist can only shrink.
+- **Registry rule**, in the same test: every `<View>Stories` object is named after a view of the game, and listed in
+  `StorybookApi.kt`, so none is forgotten by the smoke test nor the app.
 - Mutation testing: PIT already leaves out the classes declared directly in `<subdomain>.adapters.presentation`, so the
   `storybook` domain and use cases are mutation tested, and its presentation is not.
 
 ### Tests
 
-- Unit tests of the domain and the use cases, with fakes, as any subdomain. See
+- Unit tests of the domain and the use cases, with fakes (`FakeStoryLocation`), as any subdomain. See
   [How to add a new test](../testing/how-to-add-a-new-test.md).
-- View tests of the Storybook's own views, with their page objects (`…Extension`), as `ViewTestPageObjectArchitectureTest`
-  requires.
-- The smoke test, in `commonTest` so it runs on the JVM and JS: for every story of the registry, render it with its
-  default args in a `ViewsForTesting`, with `BattleSceneResourcesLoaderMother` and `TestCatalogs`, and fail on any
-  exception. Also check that the story ids are unique and stable.
-- An end-to-end test of the Storybook: start it on a story id, change an arg, tap the view, check the Actions.
+- View tests of the Storybook's own views, with their page objects (`SidebarViewExtension`, `PhoneFrameViewExtension`,
+  `StoryInfoViewExtension`), as `ViewTestPageObjectArchitectureTest` requires, and `StorybookPresenterTest` with fake
+  views.
+- The smoke test, `StorySmokeTest` in `commonTest`, so it runs on the JVM and JS: for every story of the registry, it
+  renders it in a `ViewsForTesting`, with `BattleSceneResourcesLoaderMother` and `TestCatalogs`, and fails on any
+  exception (with its default args from M2). It also lists every component and story id.
+- `StorybookEndToEndTest`: starts the Storybook on a story id, and taps another story in the sidebar. In M3: change an
+  arg, tap the view, check the Actions.
 
 ### Claude skill
 
@@ -222,17 +253,20 @@ object ShopViewStories : StoryBinding {
   the scratchpad, or `build/storybook`, to read it.
 - **Readiness signal**: once the selected story has rendered, the Storybook sets a value Playwright can wait for, e.g.:
   `document.title = "Storybook – <story id>"` or a `window.storybookRenderedStory` set through the `jsMain` adapter.
-  Without it, a screenshot may be taken before the resources bundle is loaded.
+  Without it, a screenshot may be taken before the resources bundle is loaded: in M1, waiting about 8 seconds was
+  enough locally.
 - In a cloud session, Chromium and Playwright are already installed: do not install them. Headless Chromium renders
   WebGL in software, so check in M4 that KorGE renders there, and that it also does on the CI runners, as visual
-  regression would need it.
+  regression would need it. Locally, `playwright-core` driving the installed Chrome with
+  `--use-angle=swiftshader --enable-unsafe-swiftshader` rendered the Storybook and its clicks (a click needs the mouse
+  moved over the row first, and a short press).
 
-### Technical risks to check early in M1
+### Technical risks checked in M1
 
-| Risk                                                                    | How to check it                                                              | Fallback                                                         |
-|-------------------------------------------------------------------------|------------------------------------------------------------------------------|------------------------------------------------------------------|
-| KorGE's JS loader does not follow `<base href="../">`                   | Deploy to a local `build/www/storybook/` and open it                         | Copy `build/www` into `build/www/storybook`                      |
-| Adding `jsMain` and `jvmMain` changes what the Konsist tests scan       | Run the architecture tests after adding them                                 | Adjust the scopes of the tests                                   |
-| `runJvmAutoreload` can not pass a system property                       | Read the KorGE plugin's task, try `-D` on the `.run/` configuration           | An environment variable, read by the `jvmMain` actual            |
-| Konsist does not resolve indirect parents of a view                     | Write the coverage test against `HealthBarView` (`BarView` → `Container`)    | List the view base classes in the test                           |
-| The smoke test is slow, rendering every story on JS                     | Time `jsTest` before and after                                               | Render every story on the JVM and a sample on JS                 |
+| Risk                                                                    | Outcome                                                                                                          |
+|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
+| KorGE's JS loader does not follow `<base href="../">`                   | It does not: `resourcesVfs` is relative to `document.location.href`. The fallback copies `build/www`.            |
+| Adding `jsMain` and `jvmMain` changes what the Konsist tests scan       | They are production source sets, so the tests scan them with no change.                                          |
+| `runJvmAutoreload` can not pass a system property                       | It can: KorGE makes `runJvmStorybookAutoreload` for the extra entry point, and `build.gradle.kts` sets the property on it as on `runJvmStorybook`, which was run. |
+| Konsist does not resolve indirect parents of a view                     | It does not (0.13): the coverage test walks the project parents up to a list of KorGE view classes.              |
+| The smoke test is slow, rendering every story on JS                     | Not with three stories: it renders every story on both. Time `jsTest` again as stories are added.                 |
