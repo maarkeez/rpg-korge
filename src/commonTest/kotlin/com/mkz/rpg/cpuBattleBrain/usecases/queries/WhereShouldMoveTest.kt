@@ -9,7 +9,7 @@ import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -42,7 +42,7 @@ class WhereShouldMoveTest {
         effect: Effect? = null,
     ) {
         effect?.let(queries.effectRepository::create)
-        queries.terrainRepository.create(Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, effectId = effect?.toDto()?.id)))
+        queries.terrainRepository.create(occupiableTerrain(id = id, effectId = effect?.toDto()?.id))
     }
 
     // Stores a single row battlefield with the given terrain on each tile, and the battle units standing on the given columns.

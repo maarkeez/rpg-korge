@@ -98,6 +98,7 @@ class WanderingAcceptanceTest {
                     source = ApplicationSourceDto.terrain("lava"),
                     target = EffectTargetDto.battleUnit("rat-1"),
                     effectId = "low-physical-damage",
+                    destination = null,
                 ),
             )
             eventBus.dispatch()

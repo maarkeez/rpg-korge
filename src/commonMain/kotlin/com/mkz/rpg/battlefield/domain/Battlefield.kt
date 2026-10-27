@@ -525,7 +525,7 @@ data class Battlefield private constructor(
         data class TileDto(
             val occupantId: String?,
             val terrainId: String,
-            val terrainTransition: TerrainTransitionDto? = null,
+            val terrainTransition: TerrainTransitionDto?,
         )
 
         data class TerrainTransitionDto(

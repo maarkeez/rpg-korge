@@ -27,6 +27,6 @@ class ResourcesLootDropLoader(
     data class LootDropDefinition(
         val lootTableIds: List<String>,
     ) {
-        fun toDto(unitId: String): LootDrop.Dto = LootDrop.Dto(unitId = unitId, lootTableIds = lootTableIds)
+        fun toDto(unitId: String): LootDrop.Dto = LootDrop.Dto(unitId = unitId, lootTableIds = lootTableIds, droppedItems = emptyMap())
     }
 }

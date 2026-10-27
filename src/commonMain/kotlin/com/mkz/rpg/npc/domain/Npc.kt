@@ -105,7 +105,7 @@ data class Npc private constructor(
         val id: String,
         val row: Int,
         val column: Int,
-        val unitId: String? = null,
-        val stock: List<String> = emptyList(),
+        val unitId: String?,
+        val stock: List<String>,
     )
 }

@@ -83,6 +83,6 @@ data class Unit private constructor(
         val manaPoints: Int,
         val abilities: List<String>,
         val movementRange: Int,
-        val startingGold: Int = 0,
+        val startingGold: Int,
     )
 }

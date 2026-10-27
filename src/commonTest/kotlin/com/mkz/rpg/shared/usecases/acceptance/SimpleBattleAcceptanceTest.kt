@@ -79,6 +79,7 @@ class SimpleBattleAcceptanceTest {
                 cooldown = 0,
                 effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                turnsDuration = null,
             )
         abilityApi.requestAbilityCreation(sword)
 
@@ -89,6 +90,7 @@ class SimpleBattleAcceptanceTest {
                 manaPoints = 30,
                 abilities = listOf(sword.id),
                 movementRange = 3,
+                startingGold = 0,
             )
         val weakKnight =
             Unit.Dto(
@@ -97,6 +99,7 @@ class SimpleBattleAcceptanceTest {
                 manaPoints = 1,
                 abilities = listOf(sword.id),
                 movementRange = 3,
+                startingGold = 0,
             )
         unitApi.requestUnitCreation(knight)
         unitApi.requestUnitCreation(weakKnight)

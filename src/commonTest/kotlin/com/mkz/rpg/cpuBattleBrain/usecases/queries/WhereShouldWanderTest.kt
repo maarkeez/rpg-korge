@@ -9,7 +9,7 @@ import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -44,9 +44,9 @@ class WhereShouldWanderTest {
 
     private fun terrains() =
         listOf(
-            Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)),
-            Terrain.create(Terrain.Dto(id = "lava", canBeOccupied = true, effectId = "effect-lava")),
-            Terrain.create(Terrain.Dto(id = "water", canBeOccupied = true, effectId = "effect-water")),
+            occupiableTerrain(id = "sand"),
+            occupiableTerrain(id = "lava", effectId = "effect-lava"),
+            occupiableTerrain(id = "water", effectId = "effect-water"),
         )
 
     // Stores the battle units of the CPU player, of a unit with 10 health points.

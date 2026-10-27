@@ -66,6 +66,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -101,6 +102,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
                         target = EffectTargetDto.position(row = 1, column = 1),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -140,6 +142,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -174,6 +177,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -245,6 +249,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -317,6 +322,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(enemyId),
                         effectId = enemyDamageEffectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.RequestApplyEffect(
@@ -325,6 +331,7 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(casterId),
                         effectId = casterDamageEffectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = casterId, abilityId = "ability-1"),
@@ -360,7 +367,13 @@ class RequestEffectApplicationToCastTargetsTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.battleUnit(casterId), effectId = healEffectId),
+                application =
+                    EffectApplicationDto(
+                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        target = EffectTargetDto.battleUnit(casterId),
+                        effectId = healEffectId,
+                        destination = null,
+                    ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = casterId, abilityId = "ability-1"),
         )
@@ -407,10 +420,17 @@ class RequestEffectApplicationToCastTargetsTest {
                         source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
                         target = EffectTargetDto.battleUnit(enemyId),
                         effectId = damageEffectId,
+                        destination = null,
                     ),
             ),
             BattleUnitEvent.RequestApplyEffect(
-                application = EffectApplicationDto(source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"), target = EffectTargetDto.battleUnit(casterId), effectId = healEffectId),
+                application =
+                    EffectApplicationDto(
+                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        target = EffectTargetDto.battleUnit(casterId),
+                        effectId = healEffectId,
+                        destination = null,
+                    ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = casterId, abilityId = "ability-1"),
         )

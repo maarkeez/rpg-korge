@@ -58,7 +58,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.shouldContainExactly(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand")))
+            terrains.shouldContainExactly(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand"), effectId = null))
         }
 
     @Test

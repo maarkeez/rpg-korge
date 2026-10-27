@@ -91,86 +91,16 @@ data class Effect private constructor(
 
         fun toDto() =
             when (this) {
-                is DecreaseHealth ->
-                    Dto.EffectOutcomeDto(
-                        type = DECREASE_HEALTH,
-                        increaseHealth = null,
-                        decreaseHealth = this.toDecreaseHealthDto(),
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = null,
-                    )
-                is IncreaseHealth ->
-                    Dto.EffectOutcomeDto(
-                        type = INCREASE_HEALTH,
-                        increaseHealth = this.toIncreaseHealthDto(),
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = null,
-                    )
-                NegateIncreaseHealth ->
-                    Dto.EffectOutcomeDto(
-                        type = NEGATE_INCREASE_HEALTH,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = null,
-                    )
-                Teleport ->
-                    Dto.EffectOutcomeDto(
-                        type = TELEPORT,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = null,
-                    )
-                is ApplyEffectOnNearbyAllies ->
-                    Dto.EffectOutcomeDto(
-                        type = APPLY_EFFECT_ON_NEARBY_ALLIES,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = this.toApplyEffectOnNearbyAlliesDto(),
-                        deployBattleUnit = null,
-                    )
-                is DeployBattleUnit ->
-                    Dto.EffectOutcomeDto(
-                        type = DEPLOY_BATTLE_UNIT,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = this.toDeployBattleUnitDto(),
-                    )
-                is IncreaseMana ->
-                    Dto.EffectOutcomeDto(
-                        type = INCREASE_MANA,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMana = this.toIncreaseManaDto(),
-                    )
-                is IncreaseMaximumHealth ->
-                    Dto.EffectOutcomeDto(
-                        type = INCREASE_MAXIMUM_HEALTH,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMaximumHealth = this.toIncreaseMaximumHealthDto(),
-                    )
-                is IncreaseMaximumMana ->
-                    Dto.EffectOutcomeDto(
-                        type = INCREASE_MAXIMUM_MANA,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMaximumMana = this.toIncreaseMaximumManaDto(),
-                    )
-                is LearnAbility ->
-                    Dto.EffectOutcomeDto(
-                        type = LEARN_ABILITY,
-                        increaseHealth = null,
-                        decreaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        learnAbility = this.toLearnAbilityDto(),
-                    )
+                is DecreaseHealth -> Dto.EffectOutcomeDto.decreaseHealth(damage = damage)
+                is IncreaseHealth -> Dto.EffectOutcomeDto.increaseHealth(healing = healing)
+                NegateIncreaseHealth -> Dto.EffectOutcomeDto.negateIncreaseHealth()
+                Teleport -> Dto.EffectOutcomeDto.teleport()
+                is ApplyEffectOnNearbyAllies -> Dto.EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = effectId)
+                is DeployBattleUnit -> Dto.EffectOutcomeDto.deployBattleUnit(unitId = unitId)
+                is IncreaseMana -> Dto.EffectOutcomeDto.increaseMana(mana = mana)
+                is IncreaseMaximumHealth -> Dto.EffectOutcomeDto.increaseMaximumHealth(healthPoints = healthPoints)
+                is IncreaseMaximumMana -> Dto.EffectOutcomeDto.increaseMaximumMana(manaPoints = manaPoints)
+                is LearnAbility -> Dto.EffectOutcomeDto.learnAbility(abilityId = abilityId)
             }
 
         @JvmInline private value class DecreaseHealth(
@@ -180,8 +110,6 @@ data class Effect private constructor(
                 if (damage < 0) throw NegativePower()
                 if (damage > 999) throw PowerAboveLimit()
             }
-
-            fun toDecreaseHealthDto() = Dto.EffectOutcomeDto.DecreaseHealthDto(damage = damage)
         }
 
         @JvmInline private value class IncreaseHealth(
@@ -191,8 +119,6 @@ data class Effect private constructor(
                 if (healing < 0) throw NegativePower()
                 if (healing > 999) throw PowerAboveLimit()
             }
-
-            fun toIncreaseHealthDto() = Dto.EffectOutcomeDto.IncreaseHealthDto(healing = healing)
         }
 
         @JvmInline private value class IncreaseMana(
@@ -202,8 +128,6 @@ data class Effect private constructor(
                 if (mana < 0) throw NegativePower()
                 if (mana > 999) throw PowerAboveLimit()
             }
-
-            fun toIncreaseManaDto() = Dto.EffectOutcomeDto.IncreaseManaDto(mana = mana)
         }
 
         @JvmInline private value class IncreaseMaximumHealth(
@@ -213,8 +137,6 @@ data class Effect private constructor(
                 if (healthPoints < 0) throw NegativePower()
                 if (healthPoints > 999) throw PowerAboveLimit()
             }
-
-            fun toIncreaseMaximumHealthDto() = Dto.EffectOutcomeDto.IncreaseMaximumHealthDto(healthPoints = healthPoints)
         }
 
         @JvmInline private value class IncreaseMaximumMana(
@@ -224,28 +146,20 @@ data class Effect private constructor(
                 if (manaPoints < 0) throw NegativePower()
                 if (manaPoints > 999) throw PowerAboveLimit()
             }
-
-            fun toIncreaseMaximumManaDto() = Dto.EffectOutcomeDto.IncreaseMaximumManaDto(manaPoints = manaPoints)
         }
 
         @JvmInline private value class ApplyEffectOnNearbyAllies(
             val effectId: String,
-        ) : Outcome {
-            fun toApplyEffectOnNearbyAlliesDto() = Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto(effectId = effectId)
-        }
+        ) : Outcome
 
         @JvmInline private value class DeployBattleUnit(
             val unitId: String,
-        ) : Outcome {
-            fun toDeployBattleUnitDto() = Dto.EffectOutcomeDto.DeployBattleUnitDto(unitId = unitId)
-        }
+        ) : Outcome
 
         /** Teaches its battle unit the ability for good. */
         @JvmInline private value class LearnAbility(
             val abilityId: String,
-        ) : Outcome {
-            fun toLearnAbilityDto() = Dto.EffectOutcomeDto.LearnAbilityDto(abilityId = abilityId)
-        }
+        ) : Outcome
 
         private object NegateIncreaseHealth : Outcome
 
@@ -325,15 +239,15 @@ data class Effect private constructor(
             val source: ApplicationSourceDto,
             val target: EffectTargetDto,
             val effectId: String,
-            val destination: EffectTargetDto? = null,
+            val destination: EffectTargetDto?,
         ) {
             data class ApplicationSourceDto(
                 val type: SourceTypeDto,
-                val battleUnitId: String? = null,
-                val terrainId: String? = null,
-                val lootableItemId: String? = null,
+                val battleUnitId: String?,
+                val terrainId: String?,
+                val lootableItemId: String?,
                 // The ability a battle unit cast, when the effect is applied by a cast.
-                val abilityId: String? = null,
+                val abilityId: String?,
             ) {
                 enum class SourceTypeDto {
                     BATTLE_UNIT,
@@ -349,6 +263,7 @@ data class Effect private constructor(
                         type = SourceTypeDto.BATTLE_UNIT,
                         battleUnitId = battleUnitId,
                         terrainId = null,
+                        lootableItemId = null,
                         abilityId = abilityId,
                     )
 
@@ -357,13 +272,18 @@ data class Effect private constructor(
                             type = SourceTypeDto.TERRAIN,
                             battleUnitId = null,
                             terrainId = terrainId,
+                            lootableItemId = null,
+                            abilityId = null,
                         )
 
                     /** A consumed or equipped item. */
                     fun item(lootableItemId: String) =
                         ApplicationSourceDto(
                             type = SourceTypeDto.ITEM,
+                            battleUnitId = null,
+                            terrainId = null,
                             lootableItemId = lootableItemId,
+                            abilityId = null,
                         )
                 }
             }
@@ -400,12 +320,49 @@ data class Effect private constructor(
             val decreaseHealth: DecreaseHealthDto?,
             val increaseHealth: IncreaseHealthDto?,
             val applyEffectOnNearbyAllies: ApplyEffectOnNearbyAlliesDto?,
-            val deployBattleUnit: DeployBattleUnitDto? = null,
-            val increaseMana: IncreaseManaDto? = null,
-            val increaseMaximumHealth: IncreaseMaximumHealthDto? = null,
-            val increaseMaximumMana: IncreaseMaximumManaDto? = null,
-            val learnAbility: LearnAbilityDto? = null,
+            val deployBattleUnit: DeployBattleUnitDto?,
+            val increaseMana: IncreaseManaDto?,
+            val increaseMaximumHealth: IncreaseMaximumHealthDto?,
+            val increaseMaximumMana: IncreaseMaximumManaDto?,
+            val learnAbility: LearnAbilityDto?,
         ) {
+            companion object {
+                fun decreaseHealth(damage: Int) = withoutDetails(TypeDto.DECREASE_HEALTH).copy(decreaseHealth = DecreaseHealthDto(damage = damage))
+
+                fun increaseHealth(healing: Int) = withoutDetails(TypeDto.INCREASE_HEALTH).copy(increaseHealth = IncreaseHealthDto(healing = healing))
+
+                fun negateIncreaseHealth() = withoutDetails(TypeDto.NEGATE_INCREASE_HEALTH)
+
+                fun teleport() = withoutDetails(TypeDto.TELEPORT)
+
+                fun applyEffectOnNearbyAllies(effectId: String) =
+                    withoutDetails(TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES).copy(applyEffectOnNearbyAllies = ApplyEffectOnNearbyAlliesDto(effectId = effectId))
+
+                fun deployBattleUnit(unitId: String) = withoutDetails(TypeDto.DEPLOY_BATTLE_UNIT).copy(deployBattleUnit = DeployBattleUnitDto(unitId = unitId))
+
+                fun increaseMana(mana: Int) = withoutDetails(TypeDto.INCREASE_MANA).copy(increaseMana = IncreaseManaDto(mana = mana))
+
+                fun increaseMaximumHealth(healthPoints: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_HEALTH).copy(increaseMaximumHealth = IncreaseMaximumHealthDto(healthPoints = healthPoints))
+
+                fun increaseMaximumMana(manaPoints: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_MANA).copy(increaseMaximumMana = IncreaseMaximumManaDto(manaPoints = manaPoints))
+
+                fun learnAbility(abilityId: String) = withoutDetails(TypeDto.LEARN_ABILITY).copy(learnAbility = LearnAbilityDto(abilityId = abilityId))
+
+                // The outcome of the type, before the factory sets its own details.
+                private fun withoutDetails(type: TypeDto) =
+                    EffectOutcomeDto(
+                        type = type,
+                        decreaseHealth = null,
+                        increaseHealth = null,
+                        applyEffectOnNearbyAllies = null,
+                        deployBattleUnit = null,
+                        increaseMana = null,
+                        increaseMaximumHealth = null,
+                        increaseMaximumMana = null,
+                        learnAbility = null,
+                    )
+            }
+
             enum class TypeDto {
                 DECREASE_HEALTH,
                 INCREASE_HEALTH,

@@ -10,7 +10,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import kotlin.test.Test
 
@@ -30,7 +30,7 @@ class TriggerTerrainEffectsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
         // When
         triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -41,6 +41,7 @@ class TriggerTerrainEffectsTest {
                         source = ApplicationSourceDto.terrain("sand"),
                         target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
+                        destination = null,
                     ),
             ),
         )
@@ -56,7 +57,7 @@ class TriggerTerrainEffectsTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
         // When
         triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -67,6 +68,7 @@ class TriggerTerrainEffectsTest {
                         source = ApplicationSourceDto.terrain("sand"),
                         target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
+                        destination = null,
                     ),
             ),
             BattlefieldEvent.TerrainEffectTriggered(
@@ -75,6 +77,7 @@ class TriggerTerrainEffectsTest {
                         source = ApplicationSourceDto.terrain("sand"),
                         target = EffectTargetDto.battleUnit("battle-unit-2"),
                         effectId = "effect-1",
+                        destination = null,
                     ),
             ),
         )
@@ -90,7 +93,7 @@ class TriggerTerrainEffectsTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
         // When
         triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -101,6 +104,7 @@ class TriggerTerrainEffectsTest {
                         source = ApplicationSourceDto.terrain("sand"),
                         target = EffectTargetDto.battleUnit("battle-unit-1"),
                         effectId = "effect-1",
+                        destination = null,
                     ),
             ),
         )
@@ -110,7 +114,7 @@ class TriggerTerrainEffectsTest {
     fun `should not trigger terrain effects when the battlefield has no occupant`() {
         // Given
         battlefieldRepository.create(battlefield())
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
         // When
         triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -122,7 +126,7 @@ class TriggerTerrainEffectsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
+        terrainRepository.create(occupiableTerrain(id = "sand"))
         // When
         triggerTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then

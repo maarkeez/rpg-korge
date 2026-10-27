@@ -580,6 +580,7 @@ class EffectTest {
                 source = source,
                 target = Effect.Dto.EffectTargetDto.battleUnit("battle-unit-1"),
                 effectId = "health-potion-heal",
+                destination = null,
             )
         // Then
         effectApplication.source.type shouldBe ApplicationSourceDto.SourceTypeDto.ITEM

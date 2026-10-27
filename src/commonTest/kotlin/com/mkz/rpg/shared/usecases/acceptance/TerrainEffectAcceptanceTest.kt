@@ -37,7 +37,7 @@ class TerrainEffectAcceptanceTest {
             StubTerrainLoader(
                 listOf(
                     Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("forest"), effectId = terrainEffectId),
-                    Terrain.Dto(id = "forest", canBeOccupied = true, allowedTransitionTo = setOf("sand")),
+                    Terrain.Dto(id = "forest", canBeOccupied = true, allowedTransitionTo = setOf("sand"), effectId = null),
                 ),
             ),
         )

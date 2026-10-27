@@ -7,7 +7,7 @@ import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
@@ -30,7 +30,7 @@ class OnRequestEffectApplicationToOccupantsTest {
     fun `should trigger the terrain effect for the requested occupants only when it is requested`() {
         // Given
         battlefieldRepository.create(battlefield("K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2")))
-        terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true, effectId = "effect-1")))
+        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
         eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-2")))
         // When
         eventBus.dispatch()

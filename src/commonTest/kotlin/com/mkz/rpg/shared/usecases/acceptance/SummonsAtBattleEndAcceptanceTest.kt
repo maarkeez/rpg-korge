@@ -90,6 +90,7 @@ class SummonsAtBattleEndAcceptanceTest {
                     source = ApplicationSourceDto.terrain("lava"),
                     target = EffectTargetDto.battleUnit(battleUnitId),
                     effectId = "low-physical-damage",
+                    destination = null,
                 ),
             )
         }

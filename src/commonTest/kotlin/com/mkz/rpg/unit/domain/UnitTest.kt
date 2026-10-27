@@ -89,6 +89,7 @@ class UnitTest {
                 manaPoints = 5,
                 abilities = listOf("ability-1"),
                 movementRange = 3,
+                startingGold = 0,
             )
     }
 

@@ -181,7 +181,7 @@ data class Ability private constructor(
         val cooldown: Int,
         val targeting: TargetingDto,
         val effectSpecs: List<EffectSpecDto>,
-        val turnsDuration: Int? = null,
+        val turnsDuration: Int?,
     ) {
         enum class TargetingDto {
             SELF,

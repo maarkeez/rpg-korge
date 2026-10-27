@@ -150,7 +150,7 @@ data class LootDrop private constructor(
     data class Dto(
         val unitId: String,
         val lootTableIds: List<String>,
-        val droppedItems: Map<PositionDto, List<String>> = emptyMap(),
+        val droppedItems: Map<PositionDto, List<String>>,
     ) {
         data class PositionDto(
             val row: Int,

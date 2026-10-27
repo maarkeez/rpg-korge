@@ -53,7 +53,7 @@ data class Terrain private constructor(
     data class Dto(
         val id: String,
         val canBeOccupied: Boolean,
-        val allowedTransitionTo: Set<String> = emptySet(),
-        val effectId: String? = null,
+        val allowedTransitionTo: Set<String>,
+        val effectId: String?,
     )
 }

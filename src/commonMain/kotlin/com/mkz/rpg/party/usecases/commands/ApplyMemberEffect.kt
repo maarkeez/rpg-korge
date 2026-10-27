@@ -26,6 +26,7 @@ class ApplyMemberEffect(
                         source = ApplicationSourceDto.item(lootableItemId),
                         target = EffectTargetDto.battleUnit(battleUnitId),
                         effectId = effectId,
+                        destination = null,
                     ),
             ),
         )

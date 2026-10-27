@@ -52,5 +52,5 @@ class ApplyEffectTest {
         eventBus.shouldNotHavePublishedEvents()
     }
 
-    private fun application(target: EffectTargetDto) = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("knight-1"), target = target, effectId = "poison")
+    private fun application(target: EffectTargetDto) = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("knight-1"), target = target, effectId = "poison", destination = null)
 }

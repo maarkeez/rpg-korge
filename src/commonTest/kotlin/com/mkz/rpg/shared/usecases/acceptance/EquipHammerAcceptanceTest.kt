@@ -76,6 +76,7 @@ class EquipHammerAcceptanceTest {
             source = ApplicationSourceDto.item(lootableItemId),
             target = EffectTargetDto.battleUnit(playerOneKnightBattleUnitId),
             effectId = effectId,
+            destination = null,
         ),
     )
 

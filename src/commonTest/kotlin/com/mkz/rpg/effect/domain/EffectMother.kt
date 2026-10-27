@@ -3,23 +3,6 @@ package com.mkz.rpg.effect.domain
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DeployBattleUnitDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.LearnAbilityDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import korlibs.io.util.UUID
 
 object EffectMother {
@@ -31,13 +14,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = DECREASE_HEALTH,
-                        decreaseHealth = DecreaseHealthDto(damage = damage),
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.decreaseHealth(damage = damage),
                 application =
                     if (applicationType == "IMMEDIATELY") {
                         ApplicationDto(
@@ -66,13 +43,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = INCREASE_HEALTH,
-                        decreaseHealth = null,
-                        increaseHealth = IncreaseHealthDto(healing = healing),
-                        applyEffectOnNearbyAllies = null,
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseHealth(healing = healing),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.IMMEDIATELY,
@@ -90,14 +61,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = INCREASE_MANA,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMana = IncreaseManaDto(mana = mana),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseMana(mana = mana),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.IMMEDIATELY,
@@ -115,14 +79,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = INCREASE_MAXIMUM_HEALTH,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMaximumHealth = IncreaseMaximumHealthDto(healthPoints = healthPoints),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumHealth(healthPoints = healthPoints),
                 application = whileEquippedApplication(),
             ),
         ).pullEvents()
@@ -135,14 +92,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = INCREASE_MAXIMUM_MANA,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        increaseMaximumMana = IncreaseMaximumManaDto(manaPoints = manaPoints),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumMana(manaPoints = manaPoints),
                 application = whileEquippedApplication(),
             ),
         ).pullEvents()
@@ -160,13 +110,7 @@ object EffectMother {
             .create(
                 Effect.Dto(
                     id = id,
-                    outcome =
-                        Effect.Dto.EffectOutcomeDto(
-                            type = TELEPORT,
-                            decreaseHealth = null,
-                            increaseHealth = null,
-                            applyEffectOnNearbyAllies = null,
-                        ),
+                    outcome = Effect.Dto.EffectOutcomeDto.teleport(),
                     application =
                         ApplicationDto(
                             type = ApplicationTypeDto.IMMEDIATELY,
@@ -184,13 +128,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = APPLY_EFFECT_ON_NEARBY_ALLIES,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = ApplyEffectOnNearbyAlliesDto(effectId = effectId),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = effectId),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.ON_DEFEATED,
@@ -208,14 +146,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = DEPLOY_BATTLE_UNIT,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        deployBattleUnit = DeployBattleUnitDto(unitId = unitId),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.deployBattleUnit(unitId = unitId),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.IMMEDIATELY,
@@ -233,14 +164,7 @@ object EffectMother {
         .create(
             Effect.Dto(
                 id = id,
-                outcome =
-                    Effect.Dto.EffectOutcomeDto(
-                        type = LEARN_ABILITY,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
-                        learnAbility = LearnAbilityDto(abilityId = abilityId),
-                    ),
+                outcome = Effect.Dto.EffectOutcomeDto.learnAbility(abilityId = abilityId),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.IMMEDIATELY,

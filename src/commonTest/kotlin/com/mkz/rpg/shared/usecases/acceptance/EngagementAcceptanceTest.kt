@@ -124,6 +124,7 @@ class EngagementAcceptanceTest {
                     source = ApplicationSourceDto.terrain("lava"),
                     target = EffectTargetDto.battleUnit(ratId),
                     effectId = "low-physical-damage",
+                    destination = null,
                 ),
             )
         }

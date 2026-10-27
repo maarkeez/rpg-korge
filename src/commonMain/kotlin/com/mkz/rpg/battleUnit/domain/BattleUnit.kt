@@ -880,7 +880,7 @@ data class BattleUnit private constructor(
         val unitId: String,
         val ongoingEffects: OngoingEffectsDto,
         // The turns a summon has left, counting the one it is on. None for the battle units that never vanish.
-        val remainingTurns: Int? = null,
+        val remainingTurns: Int?,
     ) {
         data class RemainingTurnActionsDto(
             val remainingCasts: Int,

@@ -1,6 +1,6 @@
 # Plan: Dto without default values
 
-> **Status:** planned.
+> **Status:** done.
 >
 > **Summary:** A new architecture rule makes every field of the `Dto` of each aggregate root, and of every data class
 > nested in it, a required constructor parameter: no default values. The defaults that make building a Dto short move to

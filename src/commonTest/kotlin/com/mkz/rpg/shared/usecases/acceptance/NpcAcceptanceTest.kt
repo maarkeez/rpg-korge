@@ -42,13 +42,13 @@ class NpcAcceptanceTest {
     private val abilityApi = AbilityApi(effectApi, eventBus)
     private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
     private val lootableItemApi = LootableItemApi(effectApi, eventBus)
-    private val theGuy = Npc.Dto(id = "the-guy", row = 0, column = 0)
+    private val theGuy = Npc.Dto(id = "the-guy", row = 0, column = 0, unitId = null, stock = emptyList())
 
     // Recruitable, as the viking of the resources: 150 health points.
-    private val viking = Npc.Dto(id = "viking", row = 0, column = 3, unitId = "viking")
+    private val viking = Npc.Dto(id = "viking", row = 0, column = 3, unitId = "viking", stock = emptyList())
 
     // A merchant, selling the lootable items of the resources. The leader walks east to (0,2) to stand next to it.
-    private val merchant = Npc.Dto(id = "merchant", row = 1, column = 2, stock = listOf("health-potion", "mana-potion", "hammer"))
+    private val merchant = Npc.Dto(id = "merchant", row = 1, column = 2, unitId = null, stock = listOf("health-potion", "mana-potion", "hammer"))
 
     // The npcs placed by the set up, The Guy unless a test says otherwise.
     private var npcs = listOf(theGuy)

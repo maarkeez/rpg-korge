@@ -21,7 +21,7 @@ class ResourcesNpcLoaderTest {
             // When
             loader.initResources()
             // Then
-            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "the-guy", row = 10, column = 2))
+            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "the-guy", row = 10, column = 2, unitId = null, stock = emptyList()))
         }
 
     @Test
@@ -36,7 +36,7 @@ class ResourcesNpcLoaderTest {
             // When
             loader.initResources()
             // Then
-            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "viking", row = 12, column = 2, unitId = "viking"))
+            loader.loadNpcs().shouldContainExactly(Npc.Dto(id = "viking", row = 12, column = 2, unitId = "viking", stock = emptyList()))
         }
 
     @Test
@@ -52,7 +52,7 @@ class ResourcesNpcLoaderTest {
             loader.initResources()
             // Then
             loader.loadNpcs().shouldContainExactly(
-                Npc.Dto(id = "merchant", row = 14, column = 2, stock = listOf("mana-potion", "hammer")),
+                Npc.Dto(id = "merchant", row = 14, column = 2, unitId = null, stock = listOf("mana-potion", "hammer")),
             )
         }
 

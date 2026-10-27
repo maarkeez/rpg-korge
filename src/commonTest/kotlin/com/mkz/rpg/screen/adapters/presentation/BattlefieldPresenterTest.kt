@@ -621,7 +621,7 @@ class BattlefieldPresenterTest {
         val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
         val exploringTimeline = battleSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
-        val lavaDamage = EffectApplicationDto(source = ApplicationSourceDto.terrain("lava"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "lava-damage")
+        val lavaDamage = EffectApplicationDto(source = ApplicationSourceDto.terrain("lava"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "lava-damage", destination = null)
         exploringApis.battleUnitApi.applyEffect(lavaDamage)
         // When
         exploringApis.eventBus.dispatch()
@@ -638,7 +638,7 @@ class BattlefieldPresenterTest {
         val exploringApis = exploringApis(effects = listOf(increaseHealthEffect(id = "water-heal", healing = 5).toDto()))
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
-        val waterHeal = EffectApplicationDto(source = ApplicationSourceDto.terrain("water"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "water-heal")
+        val waterHeal = EffectApplicationDto(source = ApplicationSourceDto.terrain("water"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "water-heal", destination = null)
         exploringApis.battleUnitApi.applyEffect(waterHeal)
         // When
         exploringApis.eventBus.dispatch()
@@ -649,7 +649,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashHealth should not flash the health of the battle unit when it is damaged in a battle`() {
         // Given
-        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison")
+        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         // When
         eventBus.dispatch()
@@ -1182,7 +1182,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `DisplaySelfAbilityCastPreview should preview the health the caster would have left when it is healed`() {
         // Given
-        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison")
+        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
         eventBus.publish(

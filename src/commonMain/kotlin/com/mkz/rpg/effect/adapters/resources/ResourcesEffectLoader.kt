@@ -6,14 +6,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.ApplyEffectOnNearbyAlliesDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DecreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.DeployBattleUnitDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseManaDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumHealthDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.IncreaseMaximumManaDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.LearnAbilityDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
 import com.mkz.rpg.effect.usecases.services.EffectLoader
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
@@ -65,35 +57,19 @@ class ResourcesEffectLoader(
         val manaPoints: Int? = null,
         val abilityId: String? = null,
     ) {
-        fun toDto(): EffectOutcomeDto {
-            val outcomeType = enumOf<TypeDto>("outcome.type", type)
-            return EffectOutcomeDto(
-                type = outcomeType,
-                decreaseHealth = if (outcomeType == TypeDto.DECREASE_HEALTH) DecreaseHealthDto(required("outcome.damage", damage)) else null,
-                increaseHealth = if (outcomeType == TypeDto.INCREASE_HEALTH) IncreaseHealthDto(required("outcome.healing", healing)) else null,
-                applyEffectOnNearbyAllies =
-                    if (outcomeType == TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES) {
-                        ApplyEffectOnNearbyAlliesDto(required("outcome.effectId", effectId))
-                    } else {
-                        null
-                    },
-                deployBattleUnit = if (outcomeType == TypeDto.DEPLOY_BATTLE_UNIT) DeployBattleUnitDto(required("outcome.unitId", unitId)) else null,
-                increaseMana = if (outcomeType == TypeDto.INCREASE_MANA) IncreaseManaDto(required("outcome.mana", mana)) else null,
-                increaseMaximumHealth =
-                    if (outcomeType == TypeDto.INCREASE_MAXIMUM_HEALTH) {
-                        IncreaseMaximumHealthDto(required("outcome.healthPoints", healthPoints))
-                    } else {
-                        null
-                    },
-                increaseMaximumMana =
-                    if (outcomeType == TypeDto.INCREASE_MAXIMUM_MANA) {
-                        IncreaseMaximumManaDto(required("outcome.manaPoints", manaPoints))
-                    } else {
-                        null
-                    },
-                learnAbility = if (outcomeType == TypeDto.LEARN_ABILITY) LearnAbilityDto(required("outcome.abilityId", abilityId)) else null,
-            )
-        }
+        fun toDto(): EffectOutcomeDto =
+            when (enumOf<TypeDto>("outcome.type", type)) {
+                TypeDto.DECREASE_HEALTH -> EffectOutcomeDto.decreaseHealth(damage = required("outcome.damage", damage))
+                TypeDto.INCREASE_HEALTH -> EffectOutcomeDto.increaseHealth(healing = required("outcome.healing", healing))
+                TypeDto.NEGATE_INCREASE_HEALTH -> EffectOutcomeDto.negateIncreaseHealth()
+                TypeDto.TELEPORT -> EffectOutcomeDto.teleport()
+                TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES -> EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = required("outcome.effectId", effectId))
+                TypeDto.DEPLOY_BATTLE_UNIT -> EffectOutcomeDto.deployBattleUnit(unitId = required("outcome.unitId", unitId))
+                TypeDto.INCREASE_MANA -> EffectOutcomeDto.increaseMana(mana = required("outcome.mana", mana))
+                TypeDto.INCREASE_MAXIMUM_HEALTH -> EffectOutcomeDto.increaseMaximumHealth(healthPoints = required("outcome.healthPoints", healthPoints))
+                TypeDto.INCREASE_MAXIMUM_MANA -> EffectOutcomeDto.increaseMaximumMana(manaPoints = required("outcome.manaPoints", manaPoints))
+                TypeDto.LEARN_ABILITY -> EffectOutcomeDto.learnAbility(abilityId = required("outcome.abilityId", abilityId))
+            }
     }
 
     // Only the fields required by the application type are set, e.g.: `duration` for `ON_TURN_STARTED`.

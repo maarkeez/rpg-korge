@@ -3,7 +3,7 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.terrain.domain.Terrain
+import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
@@ -13,8 +13,8 @@ class IsOutsideTerritoryTest {
     private val isOutsideTerritory = queries.isOutsideTerritory
 
     init {
-        queries.terrainRepository.create(Terrain.create(Terrain.Dto(id = "sand", canBeOccupied = true)))
-        queries.terrainRepository.create(Terrain.create(Terrain.Dto(id = "lava", canBeOccupied = true, effectId = "effect-lava")))
+        queries.terrainRepository.create(occupiableTerrain(id = "sand"))
+        queries.terrainRepository.create(occupiableTerrain(id = "lava", effectId = "effect-lava"))
         queries.effectRepository.create(decreaseHealthEffect(id = "effect-lava", damage = 10))
     }
 

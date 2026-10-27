@@ -121,6 +121,19 @@ class DomainArchitectureTest {
                             .map { it.fullyQualifiedName.removePrefix(packagePrefix) }
                             .shouldBeEmpty()
                     }
+
+                    // Dto and the classes nested in it are built with every field: the defaults belong to their factories.
+                    (listOf(dto) + dto.classes(includeNested = true, includeLocal = false)).forEach { declaration ->
+                        val declarationName = declaration.fullyQualifiedName.removePrefix(packagePrefix)
+                        withClue("Aggregate root '$declarationName' must not declare default values.") {
+                            declaration.primaryConstructor
+                                ?.parameters
+                                .orEmpty()
+                                .filter { it.defaultValue != null }
+                                .map { it.name }
+                                .shouldBeEmpty()
+                        }
+                    }
                 }
                 // TODO: Assert it contains a public method called `toDto()` with return type `<subdomain>.Dto`
 
