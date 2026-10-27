@@ -226,7 +226,8 @@ const DATA = {
     {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 42, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
     {"name": "screen", "files": 70, "fanIn": 0, "fanOut": 21, "instability": 1.0, "importsIn": 0, "importsOut": 186},
-    {"name": "shared", "files": 13, "fanIn": 21, "fanOut": 0, "instability": 0.0, "importsIn": 401, "importsOut": 0},
+    {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 404, "importsOut": 0},
+    {"name": "storybook", "files": 10, "fanIn": 0, "fanOut": 1, "instability": 1.0, "importsIn": 0, "importsOut": 3},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 15}
   ],
@@ -1288,6 +1289,11 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ReceiverPreviewView.kt", "layer": "adapters", "name": "unit.domain.Unit"}
+    ]},
+    {"from": "storybook", "to": "shared", "weight": 3, "files": 3, "imports": [
+      {"file": "com/mkz/rpg/storybook/domain/StorybookEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/storybook/usecases/commands/InitialiseCatalogue.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/storybook/usecases/commands/SelectStory.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "terrain", "to": "shared", "weight": 7, "files": 5, "imports": [
       {"file": "com/mkz/rpg/terrain/adapters/events/OnRequestInitialiseTerrains.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
