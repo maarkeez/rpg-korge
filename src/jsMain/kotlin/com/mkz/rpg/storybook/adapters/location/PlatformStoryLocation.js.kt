@@ -11,4 +11,4 @@ actual fun isStorybookRequested(): Boolean =
         .substringBeforeLast("/")
         .endsWith(STORYBOOK_FOLDER)
 
-actual fun platformStoryLocation(): StoryLocation = NoStoryLocation()
+actual fun platformStoryLocation(): StoryLocation = BrowserStoryLocation()

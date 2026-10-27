@@ -41,6 +41,9 @@ korge {
     id = "com.sample.demo"
     jvmMainClassName = "com.mkz.rpg.MainKt"
 
+    // Adds `runJvmStorybook` and `runJvmStorybookAutoreload`, which start the Storybook instead of the game. See below.
+    entrypoint("storybook", "com.mkz.rpg.MainKt")
+
     // To enable all targets at once
     // targetAll()
 
@@ -74,6 +77,11 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+// The Storybook starts from the same `main` as the game, which reads this system property. See docs/plans/storybook.md.
+tasks.matching { it.name in setOf("runJvmStorybook", "runJvmStorybookAutoreload") }.configureEach {
+    (this as JavaExec).systemProperty("rpg.entry", "storybook")
 }
 
 tasks.withType<ConfigurableKtLintTask>().configureEach {
