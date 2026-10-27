@@ -145,6 +145,8 @@ class BattlefieldPresenter(
             // While exploring, the camera trails the leader, e.g.: once a battle finishes, and stops when a battle starts.
             eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
             eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
+            // The camera eases to the new leader once the formation is closed.
+            eventBus.subscribe<PartyEvent.FormationClosed> { trailPartyLeader() },
             eventBus.subscribe<PartyEvent.ExplorationPaused> {
                 timeline.play { battlefieldView.stopTrailing() }
             },
@@ -596,15 +598,15 @@ class BattlefieldPresenter(
         return battleUnit.id !in battle.battleUnitIds
     }
 
-    // While talking to an npc, time stops: the tiles can not be selected.
-    private fun isTalking(): Boolean = partyApi.searchParty()?.talkingNpcId != null
+    // While talking to an npc, or setting the party order in the formation, time stops: the tiles can not be selected.
+    private fun isTimeStopped(): Boolean = partyApi.searchParty()?.let { party -> party.talkingNpcId != null || party.isInFormation } == true
 
     // Delegates
     override fun tileSelected(
         row: Int,
         column: Int,
     ) = whenIdle {
-        if (isTalking() || tileInterceptor?.invoke(row, column) == true) return@whenIdle
+        if (isTimeStopped() || tileInterceptor?.invoke(row, column) == true) return@whenIdle
         processTileSelected(row = row, column = column)
     }
 

@@ -78,8 +78,23 @@ class ExplorationPresenterTest {
             eventBus,
         )
 
+    private val formationView = FormationView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+
     private fun createPresenter() =
-        ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, TextsMother.texts(), timeline, eventBus)
+        ExplorationPresenter(
+            virtualPadView,
+            npcDialogView,
+            battleHudView,
+            playerCallToActionView,
+            apis.partyApi,
+            apis.npcApi,
+            shopPresenter,
+            formationPresenter,
+            TextsMother.texts(),
+            timeline,
+            eventBus,
+        )
 
     private fun startExploring() {
         apis.partyApi.startExploration()
@@ -303,7 +318,20 @@ class ExplorationPresenterTest {
                 timeline,
                 apis.eventBus,
             )
-        return ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, apis.partyApi, apis.npcApi, shopPresenter, TextsMother.texts(), timeline, apis.eventBus)
+        val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+        return ExplorationPresenter(
+            virtualPadView,
+            npcDialogView,
+            battleHudView,
+            playerCallToActionView,
+            apis.partyApi,
+            apis.npcApi,
+            shopPresenter,
+            formationPresenter,
+            TextsMother.texts(),
+            timeline,
+            apis.eventBus,
+        )
     }
 
     @Test
@@ -700,5 +728,100 @@ class ExplorationPresenterTest {
         battleHudView.visible.shouldBeTrue()
         playerCallToActionView.visible.shouldBeTrue()
         playerCallToActionView.displayedItemActions shouldBe null
+    }
+
+    private fun openFormation() {
+        virtualPadView.pressBButton()
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `OpenFormation should display the party formation in place of the pad when B is pressed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        openFormation()
+        // Then
+        formationView.visible.shouldBeTrue()
+        formationView.names().shouldContainExactly("Knight")
+        formationView.crownedRowIndexes().shouldContainExactly(0)
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+        apis.partyApi
+            .searchParty()!!
+            .isInFormation
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `OpenFormation should open once the scene is idle when B was pressed while it played`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        val longStep = timeline.playLongStep()
+        // When
+        openFormation()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isInFormation
+            .shouldBeFalse()
+        // When
+        longStep.complete(Unit)
+        presenter.tick(1.milliseconds)
+        eventBus.dispatch()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isInFormation
+            .shouldBeTrue()
+        formationView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `Tick should not apply the terrain effects while in the party formation`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openFormation()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(3.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+    }
+
+    @Test
+    fun `WalkParty should not walk the party while in the party formation, even when an arrow is still held`() {
+        // Given
+        createPresenter()
+        startExploring()
+        openFormation()
+        // When
+        virtualPadView.holdArrow(DirectionDto.NORTH)
+        eventBus.dispatch()
+        // Then
+        apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
+    }
+
+    @Test
+    fun `CloseFormation should display the pad again and explore when Close is tapped`() {
+        // Given
+        createPresenter()
+        startExploring()
+        openFormation()
+        // When
+        formationPresenter.formationCloseSelected()
+        eventBus.dispatch()
+        // Then
+        formationView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
     }
 }

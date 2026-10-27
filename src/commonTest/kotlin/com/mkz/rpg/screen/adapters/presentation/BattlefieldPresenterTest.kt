@@ -437,6 +437,23 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `FormationClosed should trail the new leader of the party`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.partyApi.startExploration()
+        exploringApis.eventBus.dispatch()
+        exploringApis.partyApi.openFormation()
+        exploringApis.eventBus.dispatch()
+        exploringApis.partyApi.closeFormation(listOf("knight-2", "knight-1"))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.trailedTiles.shouldContainExactly(position(1, 1), position(2, 1))
+    }
+
+    @Test
     fun `ExplorationPaused should stop trailing the leader of the party`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
@@ -1009,6 +1026,23 @@ class BattlefieldPresenterTest {
         val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
         exploringApis.partyApi.startExploration()
         exploringApis.npcApi.talkToAdjacentNpc()
+        exploringApis.eventBus.dispatch()
+        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
+        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        // When
+        presenter.tileSelected(row = 1, column = 1)
+        exploringApis.eventBus.dispatch()
+        // Then
+        selections.shouldBeEmpty()
+    }
+
+    @Test
+    fun `TileSelected should ignore the selected tile while in the party formation`() {
+        // Given
+        val exploringApis = exploringApis()
+        val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
+        exploringApis.partyApi.startExploration()
+        exploringApis.partyApi.openFormation()
         exploringApis.eventBus.dispatch()
         val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
         exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }

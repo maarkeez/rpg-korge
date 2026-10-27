@@ -52,6 +52,7 @@ Draw its source under `art` with the `pixel` tool, or drop the image in `resourc
 | Effect icon                      | `effect/<effect id>.png`              | `effect/venom-damage.png`        |
 | Lootable item icon               | `lootableItem/<lootable item id>.png` | `lootableItem/health-potion.png` |
 | Chest (several items on a tile, and the bag) | `battlefield/chest.png`   | `battlefield/chest.png`          |
+| Crown (the leader, in the party formation) | `battlefield/crown.png`   | `battlefield/crown.png`          |
 | Terrain transition strip         | `terrain/transitions/<from>_to_<to>.png` | `terrain/transitions/sand_to_lava.png` |
 
 - Units, npcs, buildings and abilities without an image are not displayed.

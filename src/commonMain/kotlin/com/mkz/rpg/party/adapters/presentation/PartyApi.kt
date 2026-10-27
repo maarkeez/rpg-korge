@@ -17,10 +17,12 @@ import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.party.usecases.commands.ApplyMemberEffect
 import com.mkz.rpg.party.usecases.commands.ApplyStandingTerrainEffects
+import com.mkz.rpg.party.usecases.commands.CloseFormation
 import com.mkz.rpg.party.usecases.commands.FinishTalk
 import com.mkz.rpg.party.usecases.commands.JoinParty
 import com.mkz.rpg.party.usecases.commands.LeaveParty
 import com.mkz.rpg.party.usecases.commands.MarkBattleUnitMoved
+import com.mkz.rpg.party.usecases.commands.OpenFormation
 import com.mkz.rpg.party.usecases.commands.PauseExploration
 import com.mkz.rpg.party.usecases.commands.RecruitMember
 import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
@@ -59,6 +61,8 @@ class PartyApi(
     val markBattleUnitMoved = MarkBattleUnitMoved(partyRepository)
     val startTalk = StartTalk(partyRepository, eventBus)
     val finishTalk = FinishTalk(partyRepository, eventBus)
+    val openFormation = OpenFormation(partyRepository, eventBus)
+    val closeFormation = CloseFormation(partyRepository, battlefieldApi.searchPosition, eventBus)
     val applyStandingTerrainEffects = ApplyStandingTerrainEffects(partyRepository, battlefieldApi.searchBattlefield, battleUnitApi.searchBattleUnitById, eventBus)
     val applyMemberEffect = ApplyMemberEffect(partyRepository, eventBus)
     val removeMemberEquippedEffects = RemoveMemberEquippedEffects(partyRepository, eventBus)

@@ -3,12 +3,15 @@ package com.mkz.rpg.party.domain
 import com.mkz.rpg.party.domain.PartyError.AlreadyWalking
 import com.mkz.rpg.party.domain.PartyError.NotAFollower
 import com.mkz.rpg.party.domain.PartyError.NotExploring
+import com.mkz.rpg.party.domain.PartyError.NotTheParty
 import com.mkz.rpg.party.domain.PartyError.PartyRequired
 import com.mkz.rpg.party.domain.PartyError.StepsRequired
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationSecondStarted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
+import com.mkz.rpg.party.domain.PartyEvent.FormationClosed
+import com.mkz.rpg.party.domain.PartyEvent.FormationOpened
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PartyJoined
@@ -30,6 +33,7 @@ import kotlin.math.abs
  * remembers the battle units that moved during the current second.
  *
  * The party can talk to an npc while exploring. Time stops while talking: the party does not walk, and no second starts.
+ * Time also stops while the player sets the party order in the formation, which decides who leads.
  */
 @ConsistentCopyVisibility
 data class Party private constructor(
@@ -74,6 +78,7 @@ data class Party private constructor(
             isExploring = mode == Mode.EXPLORING,
             isWalking = isWalking(),
             talkingNpcId = talkingNpcId?.value,
+            isInFormation = mode == Mode.FORMATION,
         )
 
     /** Whether the party can walk: it is exploring and has finished walking. */
@@ -151,7 +156,38 @@ data class Party private constructor(
         )
     }
 
-    /** Stops exploring, e.g.: when a battle starts. A walk or a talk in progress is abandoned. */
+    /** Opens the formation, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    fun openFormation(): Party {
+        if (!canWalk()) return this
+        return copy(mode = Mode.FORMATION, events = events + FormationOpened(playerId = playerId.value))
+    }
+
+    /**
+     * Closes the formation with the new party order, the leader first, so the party explores again. Nobody moves: the
+     * line is rebuilt from the new leader, as after a swap, unless the order is the same. Positions: where each battle
+     * unit of the party stands. Nothing changes when it is not in formation.
+     */
+    fun closeFormation(
+        battleUnitIds: List<String>,
+        positions: Map<String, Dto.PositionDto>,
+    ): Party {
+        if (mode != Mode.FORMATION) return this
+        if (battleUnitIds.size != members.value.size || battleUnitIds.toSet() != members.value.toSet()) throw NotTheParty()
+        val reorderedLine =
+            when {
+                battleUnitIds == members.value -> line
+                battleUnitIds.first() !in positions -> Line(battleUnitIds)
+                else -> Line.closestFirst(leaderId = battleUnitIds.first(), memberIds = battleUnitIds, positions = positions)
+            }
+        return copy(
+            mode = Mode.EXPLORING,
+            members = Members(battleUnitIds),
+            line = reorderedLine,
+            events = events + FormationClosed(playerId = playerId.value, battleUnitIds = battleUnitIds),
+        )
+    }
+
+    /** Stops exploring, e.g.: when a battle starts. A walk, a talk or a formation in progress is abandoned. */
     fun pause(): Party =
         copy(
             mode = Mode.BATTLING,
@@ -220,6 +256,7 @@ data class Party private constructor(
     private enum class Mode {
         EXPLORING,
         TALKING,
+        FORMATION,
         BATTLING,
     }
 
@@ -273,8 +310,8 @@ data class Party private constructor(
 
     /**
      * Leader: `null` once every battle unit of the party has been defeated. Line: the battle units in walking order, the
-     * leader first. Exploring: `false` while battling and while
-     * talking. Talking npc: the npc the party talks to, or `null` when it talks to none.
+     * leader first. Exploring: `false` while battling, while talking and while in formation. Talking npc: the npc the
+     * party talks to, or `null` when it talks to none. In formation: whether the player sets the party order.
      */
     data class Dto(
         val playerId: String,
@@ -284,6 +321,7 @@ data class Party private constructor(
         val isExploring: Boolean,
         val isWalking: Boolean,
         val talkingNpcId: String?,
+        val isInFormation: Boolean,
     ) {
         /** Where the leader walks to, one tile away. */
         enum class DirectionDto(

@@ -1,6 +1,6 @@
 # Plan: Party formation
 
-> **Status:** planned.
+> **Status:** done.
 >
 > **Summary:** The party leader is always the first battle unit deployed, so the player can not choose who walks in
 > front. Choosing it is a strategy: the CPU battle brain does not target the leader as such, but the leader walks first
@@ -30,7 +30,7 @@ For example, the knight leads the party, followed by the viking and the mage, wa
 | The player        | The game                                                                                                                 |
 |-------------------|--------------------------------------------------------------------------------------------------------------------------|
 | Presses B         | The panel replaces the pad: `Knight` (crowned), `Viking`, `Mage`. Every tile but the party's is dimmed.                  |
-| Taps the mage     | Its row and its tile are framed. The hint reads `Tap another member to swap it with Mage`.                               |
+| Taps the mage     | Its row and its tile are framed. The hint reads `Swap Mage with...`.                                                       |
 | Taps the knight   | `Mage` (crowned), `Viking`, `Knight`. Nothing is selected.                                                               |
 | Taps Close        | The pad is back, and the camera eases to the mage, at the back of the line. Nobody has moved.                            |
 | Walks east        | The mage swaps with the viking, then with the knight on the next walk: it walks in front, the knight right behind it.    |
@@ -81,7 +81,7 @@ For example, the knight leads the party, followed by the viking and the mage, wa
 - `FormationPresenterTest`: opening, dimming, selecting, swapping, clearing the selection, Close.
 - `ExplorationPresenterTest`: B opens the formation, the pad is hidden then displayed again once it is closed.
 - `BattlefieldPresenterTest`: the tapped tiles are ignored while in formation, the camera trails the new leader.
-- End-to-end: `FormationEndToEndTest`, recruiting the viking, then making it lead.
+- End-to-end: `FormationEndToEndTest`, opening the formation with the hero alone in the party, crowned, and closing it.
 
 ## Docs
 

@@ -15,6 +15,9 @@ fun Stage.playerCallToActionView(): PlayerCallToActionView? = descendants().filt
 /** The virtual pad on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.virtualPadView(): VirtualPadView? = descendants().filterIsInstance<VirtualPadView>().firstOrNull()
 
+/** The party formation of the battle scene, or `null` when the scene is not displayed yet. */
+fun Stage.formationView(): FormationView? = descendants().filterIsInstance<FormationView>().firstOrNull()
+
 /** The battle HUD on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleHudView(): BattleHudView? = descendants().filterIsInstance<BattleHudView>().firstOrNull()
 

@@ -4,7 +4,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 ## The party
 
-- Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, and the rest follow it in a line.
+- Once the battle units are deployed, [`StartExploration`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartExploration.kt) puts every battle unit of the human player in the party, in their deployment order. The first one leads, until the player chooses another one (see [Choosing the leader](#choosing-the-leader)), and the rest follow it in a line.
 - The CPU battle units wander around the tile they were deployed on while the party explores (see [CPU battle brain](cpu-battle-brain.md#wandering)).
 - A defeated CPU battle unit respawns on the tile it was deployed on once the party has walked 50 steps since its defeat (see [CPU battle brain](cpu-battle-brain.md#respawning)).
 - A defeated battle unit leaves the party ([`LeaveParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/LeaveParty.kt)). When it was leading, the next one leads.
@@ -15,7 +15,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 - The arrows walk the party (see [Walking](#walking)).
 - A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
-- B is displayed, but does nothing for now.
+- B opens the party formation, where the player chooses who leads (see [Choosing the leader](#choosing-the-leader)).
 
 ## Walking
 
@@ -94,6 +94,32 @@ An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [G
 8. Back, on the left of the footer, closes the shop, the tiles are no longer dimmed, and the merchant's dialog is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
 A battle starting while shopping abandons the shop, as it abandons the dialog. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
+
+## Choosing the leader
+
+The leader walks in front, so it is usually the first battle unit of the party within reach of a CPU battle unit, and
+the first one hit, as the CPU plays first once it engages (see [the plan](../plans/party-formation.md)). The CPU battle
+brain does not target the leader as such. While exploring, B opens the party formation, where the player sets the party
+order, and so who leads:
+
+1. B is handled as A: once the timeline is idle, and while the pad is displayed. [`OpenFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/OpenFormation.kt)
+   only opens it when the party can walk (`FormationOpened`). Time stops meanwhile, as while talking: the party is in
+   formation, so it does not walk, no second starts, the CPU battle units do not wander, no terrain effect is applied,
+   and tapping the battlefield does nothing.
+2. [`FormationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FormationPresenter.kt) displays
+   [`FormationView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FormationView.kt) in place of the pad:
+   a row per party member, in party order, with the crown on the leader, its portrait, its name, and its health and mana
+   bars. Every tile but the party's is dimmed.
+3. Tapping a member selects it, framing its row and its tile. Tapping another one swaps both, and tapping the selected
+   one again clears the selection.
+4. Close applies the order displayed ([`CloseFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseFormation.kt),
+   `FormationClosed`), and the pad is displayed again. Its first member leads.
+
+Nobody moves when the order changes: the line is rebuilt from the new leader, as after a swap, unless the order is the
+same. On its next walk, the leader reaches the front by swapping with the members in its way. The camera eases to the
+new leader, and the CPU battle units in sight, the npc A talks to and the battle unit selected when a human turn starts
+follow it. The party order also decides who leads next when the leader is defeated, and the order of the shop's and the
+inventory's arrows. A recruited member still joins last.
 
 ## Inventory
 

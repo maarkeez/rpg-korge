@@ -62,4 +62,19 @@ class PauseExplorationTest {
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
+
+    @Test
+    fun `should close the formation when a battle starts while the party is in formation`() {
+        // Given
+        partyRepository.save(party(playerId = "human").openFormation().pullEvents().second)
+        // When
+        pauseExploration()
+        // Then
+        partyRepository
+            .search()!!
+            .toDto()
+            .isInFormation
+            .shouldBeFalse()
+        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationPaused(playerId = "human"))
+    }
 }

@@ -12,4 +12,6 @@ sealed class PartyError(
     class NotAFollower : PartyError("The leader can only swap tiles with a follower of the party")
 
     class StepsRequired : PartyError("At least one step is required to walk")
+
+    class NotTheParty : PartyError("The formation must order every battle unit of the party once")
 }

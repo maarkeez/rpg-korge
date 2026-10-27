@@ -30,6 +30,7 @@ class PartyTest {
                 isExploring = true,
                 isWalking = false,
                 talkingNpcId = null,
+                isInFormation = false,
             )
         party.pullEvents().first.shouldContainExactly(
             PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight")),
@@ -427,6 +428,112 @@ class PartyTest {
         val pausedParty = talkingParty.pause().resume()
         // Then
         pausedParty.toDto().talkingNpcId.shouldBeNull()
+        pausedParty.canWalk().shouldBeTrue()
+    }
+
+    @Test
+    fun `OpenFormation should stop exploring when the party can walk`() {
+        // When
+        val party = party().openFormation()
+        // Then
+        party.toDto().isInFormation.shouldBeTrue()
+        party.toDto().isExploring.shouldBeFalse()
+        party.canWalk().shouldBeFalse()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.FormationOpened(playerId = "human"))
+    }
+
+    @Test
+    fun `OpenFormation should not open while the party is walking`() {
+        // Given
+        val walkingParty = party().walkParty(listOf(leaderStep))
+        // When
+        val party = walkingParty.openFormation()
+        // Then
+        party shouldBe walkingParty
+    }
+
+    @Test
+    fun `OpenFormation should not open while talking`() {
+        // Given
+        val talkingParty = party().talk("the-guy").pullEvents().second
+        // When
+        val party = talkingParty.openFormation()
+        // Then
+        party shouldBe talkingParty
+    }
+
+    @Test
+    fun `MarkMoved should not remember the battle units moving while in formation`() {
+        // Given
+        val party = party().openFormation()
+        // When
+        val movedParty = party.markMoved("knight-1")
+        // Then
+        movedParty.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
+    }
+
+    @Test
+    fun `CloseFormation should reorder the party and rebuild the line from the new leader`() {
+        // Given the corridor "M L K", K leading, then L and M
+        val positions = mapOf("knight-1" to PositionDto(0, 2), "knight-2" to PositionDto(0, 1), "knight-3" to PositionDto(0, 0))
+        val formationParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).openFormation().pullEvents().second
+        // When M leads, then K and L
+        val party = formationParty.closeFormation(battleUnitIds = listOf("knight-3", "knight-1", "knight-2"), positions = positions)
+        // Then L, the closest to M, follows it
+        party.toDto().leaderBattleUnitId shouldBe "knight-3"
+        party.toDto().battleUnitIds.shouldContainExactly("knight-3", "knight-1", "knight-2")
+        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
+        party.toDto().isInFormation.shouldBeFalse()
+        party.canWalk().shouldBeTrue()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.FormationClosed(playerId = "human", battleUnitIds = listOf("knight-3", "knight-1", "knight-2")))
+    }
+
+    @Test
+    fun `CloseFormation should keep the line when the order is the same`() {
+        // Given the line K, M, L after K swapped with M in the corridor "K M L"
+        val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
+        val swappedParty =
+            party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"))
+                .swapLeader(followerId = "knight-3", positions = positions)
+                .resolveStep(battleUnitId = "knight-1", row = 0, column = 2)
+                .pullEvents()
+                .second
+        val formationParty = swappedParty.openFormation().pullEvents().second
+        // When
+        val party = formationParty.closeFormation(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"), positions = positions)
+        // Then
+        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
+        party.canWalk().shouldBeTrue()
+    }
+
+    @Test
+    fun `CloseFormation should fail when the order is not the party`() {
+        // Given
+        val formationParty = party().openFormation().pullEvents().second
+        // When
+        val result = runCatching { formationParty.closeFormation(battleUnitIds = listOf("knight-1", "rat-1"), positions = emptyMap()) }
+        // Then
+        result.exceptionOrNull().shouldBeTypeOf<PartyError.NotTheParty>()
+    }
+
+    @Test
+    fun `CloseFormation should not change when the party is not in formation`() {
+        // Given
+        val exploringParty = party()
+        // When
+        val party = exploringParty.closeFormation(battleUnitIds = listOf("knight-2", "knight-1"), positions = emptyMap())
+        // Then
+        party shouldBe exploringParty
+    }
+
+    @Test
+    fun `Pause should abandon the formation when a battle starts`() {
+        // Given
+        val formationParty = party().openFormation().pullEvents().second
+        // When
+        val pausedParty = formationParty.pause().resume()
+        // Then
+        pausedParty.toDto().isInFormation.shouldBeFalse()
         pausedParty.canWalk().shouldBeTrue()
     }
 }

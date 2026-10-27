@@ -23,7 +23,7 @@ import korlibs.math.interpolation.Ratio
  *
  * Holding an arrow keeps walking the party towards it: the held listener is called when the arrow is pressed, and on
  * every frame while it is held. The pressed listener is called once before, so a tap is known even when it is released
- * before it can be walked. Tapping A calls its listener once (e.g.: to talk). B has no listener yet.
+ * before it can be walked. Tapping A or B calls its listener once (e.g.: to talk, or to open the party formation).
  */
 open class VirtualPadView(
     size: Size = Size(390, 300),
@@ -57,6 +57,7 @@ open class VirtualPadView(
     private var onDirectionPressed: ((DirectionDto) -> Unit)? = null
     private var onDirectionHeld: ((DirectionDto) -> Unit)? = null
     private var onAPressed: (() -> Unit)? = null
+    private var onBPressed: (() -> Unit)? = null
     internal var heldDirection: DirectionDto? = null
         private set
 
@@ -70,7 +71,7 @@ open class VirtualPadView(
 
     private val buttonsCenterX = size.width * BUTTONS_CENTER_RATIO
     private val buttonsCenterY = size.height / 2
-    internal val bButton = button("B", centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) {}
+    internal val bButton = button("B", centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) { pressB() }
     internal val aButton = button("A", centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
 
     init {
@@ -89,8 +90,16 @@ open class VirtualPadView(
         onAPressed = listener
     }
 
+    open fun setOnBPressed(listener: () -> Unit) {
+        onBPressed = listener
+    }
+
     internal fun pressA() {
         onAPressed?.invoke()
+    }
+
+    internal fun pressB() {
+        onBPressed?.invoke()
     }
 
     internal fun hold(direction: DirectionDto) {

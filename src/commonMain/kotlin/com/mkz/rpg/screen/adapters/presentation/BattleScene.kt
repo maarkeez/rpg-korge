@@ -57,6 +57,7 @@ class BattleScene(
     val virtualPadView = VirtualPadView(Size(390, 300))
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader, texts)
     val shopView = ShopView(resourcesLoader, texts)
+    val formationView = FormationView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -164,12 +165,13 @@ class BattleScene(
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
                 // While exploring, the virtual pad takes the place of the battle HUD, an npc dialog the place of the pad, and a
-                // merchant's shop the place of its dialog.
+                // merchant's shop the place of its dialog. The party formation also takes the place of the pad.
                 container {
                     addChild(battleHudView)
                     addChild(virtualPadView)
                     addChild(npcDialogView)
                     addChild(shopView)
+                    addChild(formationView)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
@@ -190,7 +192,21 @@ class BattleScene(
                         timeline,
                         eventBus,
                     )
-                val explorationPresenter = ExplorationPresenter(virtualPadView, npcDialogView, battleHudView, playerCallToActionView, partyApi, npcApi, shopPresenter, texts, timeline, eventBus)
+                val formationPresenter = FormationPresenter(formationView, battlefieldView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
+                val explorationPresenter =
+                    ExplorationPresenter(
+                        virtualPadView,
+                        npcDialogView,
+                        battleHudView,
+                        playerCallToActionView,
+                        partyApi,
+                        npcApi,
+                        shopPresenter,
+                        formationPresenter,
+                        texts,
+                        timeline,
+                        eventBus,
+                    )
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }

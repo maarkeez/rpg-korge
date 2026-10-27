@@ -7,9 +7,11 @@ import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
 
+// Portrait scale: how many screen pixels each pixel of the 32x32 portrait takes, a whole number so it stays sharp.
 class UnitPortraitView(
     size: Size,
     private val resourcesLoader: BattleSceneResourcesLoader,
+    private val portraitScale: Double = 3.0,
 ) : UIContainer(size) {
     companion object {
         const val PORTRAIT = "PORTRAIT"
@@ -33,7 +35,7 @@ class UnitPortraitView(
             battleUnitPortrait.image(avatarBitmap) {
                 name = PORTRAIT
                 smoothing = false
-                scale = 3.0
+                scale = portraitScale
                 centerOn(battleUnitPortrait)
             }
         }

@@ -50,6 +50,17 @@ sealed interface PartyEvent : DomainEvent {
         val npcId: String,
     ) : PartyEvent
 
+    /** The player sets the party order: time stops until the formation is closed. */
+    data class FormationOpened(
+        val playerId: String,
+    ) : PartyEvent
+
+    /** Battle units: the party in its new order, the leader first. */
+    data class FormationClosed(
+        val playerId: String,
+        val battleUnitIds: List<String>,
+    ) : PartyEvent
+
     // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
     data class RequestRecruitMember(
         val battleUnitId: String,

@@ -18,12 +18,14 @@ class VirtualPadViewTest : ViewsForTesting() {
     private val pressedDirections = mutableListOf<DirectionDto>()
     private val heldDirections = mutableListOf<DirectionDto>()
     private var aPresses = 0
+    private var bPresses = 0
 
     private fun newVirtualPadView() =
         VirtualPadView().also { pad ->
             pad.setOnDirectionPressed { direction -> pressedDirections += direction }
             pad.setOnDirectionHeld { direction -> heldDirections += direction }
             pad.setOnAPressed { aPresses++ }
+            pad.setOnBPressed { bPresses++ }
         }
 
     @Test
@@ -68,7 +70,7 @@ class VirtualPadViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `ClickB should do nothing yet when B is tapped`() =
+    fun `ClickB should call the B listener once when B is tapped`() =
         sharedViewsTest {
             // Given
             val pad = newVirtualPadView()
@@ -76,6 +78,7 @@ class VirtualPadViewTest : ViewsForTesting() {
             // When
             clickB(pad)
             // Then
+            bPresses shouldBe 1
             aPresses shouldBe 0
             heldDirections.shouldBeEmpty()
         }

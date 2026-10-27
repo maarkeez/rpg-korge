@@ -222,6 +222,20 @@ msgctxt "ui.shop.goldFull"
 msgid "Gold full"
 msgstr "Oro al máximo"
 
+#. The hint of the party formation, where the player swaps two party members to set the party order.
+msgctxt "ui.formation.tapToSelect"
+msgid "Tap two members to swap them"
+msgstr "Toca dos para intercambiarlos"
+
+#. The hint once a party member is selected in the formation, until another one is tapped. {name}: its name.
+msgctxt "ui.formation.tapToSwap"
+msgid "Swap {name} with..."
+msgstr "Cambia a {name} por..."
+
+msgctxt "ui.formation.close"
+msgid "Close"
+msgstr "Cerrar"
+
 msgctxt "ui.mapBuilderInfo.title"
 msgid "Map Builder"
 msgstr "Constructor de mapas"
