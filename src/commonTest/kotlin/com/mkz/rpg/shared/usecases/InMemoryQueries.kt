@@ -41,7 +41,9 @@ import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
+import com.mkz.rpg.lootableItem.usecases.queries.SearchSellPrice
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
+import com.mkz.rpg.npc.usecases.queries.SearchIsMerchant
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
@@ -90,10 +92,12 @@ class InMemoryQueries(
 
     // Lootable item
     val searchLootableItemById = SearchLootableItemById(lootableItemRepository)
+    val searchSellPrice = SearchSellPrice(lootableItemRepository)
 
     // Npc
     val searchNpcById = SearchNpcById(npcRepository)
     val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+    val searchIsMerchant = SearchIsMerchant(npcRepository)
 
     // Party
     val searchParty = SearchParty(partyRepository)

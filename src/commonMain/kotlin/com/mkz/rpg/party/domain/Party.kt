@@ -285,12 +285,18 @@ data class Party private constructor(
                 val remaining = (memberIds - leaderId).filter { memberId -> memberId in positions }.toMutableList()
                 while (remaining.isNotEmpty()) {
                     val ahead = positions.getValue(lined.last())
-                    val closest = remaining.minBy { memberId -> positions.getValue(memberId).distanceTo(ahead) }
+                    val closest = remaining.minBy { memberId -> distance(positions.getValue(memberId), ahead) }
                     lined += closest
                     remaining -= closest
                 }
                 return Line(lined + (memberIds - lined.toSet()))
             }
+
+            // The tiles between both, in rows plus columns.
+            private fun distance(
+                position: Dto.PositionDto,
+                other: Dto.PositionDto,
+            ): Int = abs(position.row - other.row) + abs(position.column - other.column)
         }
     }
 
@@ -338,10 +344,7 @@ data class Party private constructor(
         data class PositionDto(
             val row: Int,
             val column: Int,
-        ) {
-            /** The tiles between both, in rows plus columns. */
-            fun distanceTo(other: PositionDto): Int = abs(row - other.row) + abs(column - other.column)
-        }
+        )
 
         /** A battle unit walking to a tile. */
         data class StepDto(

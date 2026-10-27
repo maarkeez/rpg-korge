@@ -199,7 +199,7 @@ class ExplorationPresenter(
 
     // Finishes the talk, but with a merchant, which is left with its Leave choice.
     private fun dialogTapped() {
-        if (timeline.isPlaying || !npcDialogView.visible || talkingNpc()?.isMerchant() == true) return
+        if (timeline.isPlaying || !npcDialogView.visible || talkingNpc()?.let { npc -> npcApi.searchIsMerchant(npc.id) } == true) return
         partyApi.finishTalk()
     }
 
@@ -230,8 +230,6 @@ class ExplorationPresenter(
 
     private fun talkingNpc(): Npc.Dto? = partyApi.searchParty()?.talkingNpcId?.let { npcId -> npcApi.searchNpcById(npcId) }
 
-    private fun Npc.Dto.isMerchant() = stock.isNotEmpty()
-
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
     // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog,
@@ -248,7 +246,7 @@ class ExplorationPresenter(
     // The dialog takes the place of the pad, with Buy, Sell and Leave for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
         val choices =
-            if (npc.isMerchant()) {
+            if (npcApi.searchIsMerchant(npc.id)) {
                 listOf(
                     NpcDialogView.Choice(texts[UiText.NPC_DIALOG_BUY]) { openShop(Mode.BUY) },
                     NpcDialogView.Choice(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },

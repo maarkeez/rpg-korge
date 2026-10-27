@@ -106,6 +106,16 @@ class LootableItemTest {
     }
 
     @Test
+    fun `SellPrice should be half the price, rounded down`() {
+        // Given
+        val lootableItems = listOf(0, 1, 50, 51).map { price -> LootableItemMother.lootableItem(price = price) }
+        // When
+        val sellPrices = lootableItems.map(LootableItem::sellPrice)
+        // Then
+        sellPrices.shouldContainExactly(0, 0, 25, 25)
+    }
+
+    @Test
     fun `PullEvents should pull the created event when the lootable item has pending events`() {
         // Given
         val createdLootableItem = LootableItem.create(LootableItemMother.lootableItem().toDto())

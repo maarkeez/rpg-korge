@@ -7,6 +7,7 @@ import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItemRepository
 import com.mkz.rpg.lootableItem.usecases.commands.InitialiseLootableItems
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
+import com.mkz.rpg.lootableItem.usecases.queries.SearchSellPrice
 import com.mkz.rpg.lootableItem.usecases.services.LootableItemLoader
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -23,6 +24,7 @@ class LootableItemApi(
 
     // Queries
     val searchLootableItemById = SearchLootableItemById(lootableItemRepository)
+    val searchSellPrice = SearchSellPrice(lootableItemRepository)
 
     // Events
     private val onRequestInitialiseLootableItems = OnRequestInitialiseLootableItems(initialiseLootableItems, eventBus)

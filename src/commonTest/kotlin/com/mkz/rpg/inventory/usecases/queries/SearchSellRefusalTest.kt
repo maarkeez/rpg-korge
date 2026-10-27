@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class SearchSellRefusalTest {
     private val trade = TradeMother()
-    private val searchSellRefusal = SearchSellRefusal(trade.inventoryRepository, trade.queries.searchLootableItemById, trade.tradeRule)
+    private val searchSellRefusal = SearchSellRefusal(trade.inventoryRepository, trade.queries.searchSellPrice, trade.tradeRule)
 
     @Test
     fun `should not refuse selling a stored copy that is not equipped while talking to a merchant`() {

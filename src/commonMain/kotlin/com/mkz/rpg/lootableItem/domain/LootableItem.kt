@@ -31,6 +31,9 @@ data class LootableItem private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
+    /** What a merchant pays for it: half its price, rounded down. */
+    fun sellPrice(): Int = price.value / 2
+
     fun toDto() =
         Dto(
             id = id.value,
@@ -150,9 +153,6 @@ data class LootableItem private constructor(
         val price: Int,
         val lootType: LootTypeDto,
     ) {
-        /** What a merchant pays for it: half its price, rounded down. */
-        val sellPrice: Int get() = price / 2
-
         data class LootTypeDto(
             val type: TypeDto,
             val consumable: ConsumableDto?,

@@ -1,6 +1,8 @@
 package com.mkz.rpg.shared.adapters.architecture
 
 import com.lemonappdev.konsist.api.Konsist
+import com.lemonappdev.konsist.api.declaration.KoClassDeclaration
+import com.lemonappdev.konsist.api.declaration.KoFileDeclaration
 import io.kotest.assertions.assertSoftly
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -55,23 +57,8 @@ class DomainArchitectureTest {
 
     @Test
     fun `should follow domain encapsulation rules when is the aggregate root`() {
-        val allClasses = Konsist.scopeFromProduction().classes()
-
-        val aggregateRoots =
-            allClasses.filter { it.isTopLevel }.mapNotNull { declaration ->
-                val packageName = declaration.packagee?.fullyQualifiedName ?: return@mapNotNull null
-                if (!packageName.endsWith(".domain")) {
-                    return@mapNotNull null
-                }
-                if (packageName == "com.mkz.rpg.shared.domain") {
-                    return@mapNotNull null
-                }
-                val expectedAggregateRootName = packageName.substringBeforeLast(".domain").substringAfterLast(".").replaceFirstChar { it.uppercase() }
-                declaration.takeIf { it.name == expectedAggregateRootName }
-            }
-
         assertSoftly {
-            aggregateRoots.forEach { aggregateRoot ->
+            aggregateRoots().forEach { aggregateRoot ->
                 val aggregateName = aggregateRoot.name
 
                 // Aggregate root must have a private primary constructor.
@@ -103,6 +90,17 @@ class DomainArchitectureTest {
                     withClue("Aggregate root '$aggregateName.Dto' must be public.") {
                         dto.hasPublicOrDefaultModifier.shouldBeTrue()
                     }
+
+                    // Dto and the declarations nested in it are plain data: companion object methods are their factories.
+                    dataDeclarations(dto).forEach { declaration ->
+                        val declarationName = declaration.fullyQualifiedName.substringAfter("${aggregateRoot.packagee?.fullyQualifiedName}.")
+                        withClue("Aggregate root '$declarationName' must not declare methods.") {
+                            declaration.functionNames.shouldBeEmpty()
+                        }
+                        withClue("Aggregate root '$declarationName' must not declare properties with a getter.") {
+                            declaration.getterNames.shouldBeEmpty()
+                        }
+                    }
                 }
                 // TODO: Assert it contains a public method called `toDto()` with return type `<subdomain>.Dto`
 
@@ -115,6 +113,86 @@ class DomainArchitectureTest {
                         }
                     }
             }
+        }
+    }
+
+    @Test
+    fun `should not declare extensions on the Dto of an aggregate root`() {
+        val dtoNames =
+            aggregateRoots()
+                .flatMap { aggregateRoot -> aggregateRoot.classes(includeNested = false, includeLocal = false).filter { it.name == "Dto" } }
+                .flatMap { dto -> dataDeclarations(dto).map { it.fullyQualifiedName } }
+                .toSet()
+
+        val scope = Konsist.scopeFromProduction()
+        val extensions =
+            scope.functions(includeNested = true, includeLocal = true).mapNotNull { function ->
+                function.receiverType?.let { receiverType -> Extension(function.name, receiverType.sourceType, function.containingFile) }
+            } +
+                scope.properties(includeNested = true, includeLocal = true).mapNotNull { property ->
+                    property.receiverType?.let { receiverType -> Extension(property.name, receiverType.sourceType, property.containingFile) }
+                }
+
+        val dtoExtensions =
+            extensions
+                .filter { extension -> extension.receiverFullyQualifiedName() in dtoNames }
+                .map { extension -> "${extension.receiver}.${extension.name} in ${extension.file.name}" }
+
+        withClue("Extensions must not be declared on the Dto of an aggregate root, nor on a declaration nested in it.") {
+            dtoExtensions.shouldBeEmpty()
+        }
+    }
+
+    private fun aggregateRoots(): List<KoClassDeclaration> =
+        Konsist.scopeFromProduction().classes().filter { it.isTopLevel }.mapNotNull { declaration ->
+            val packageName = declaration.packagee?.fullyQualifiedName ?: return@mapNotNull null
+            if (!packageName.endsWith(".domain")) {
+                return@mapNotNull null
+            }
+            if (packageName == "com.mkz.rpg.shared.domain") {
+                return@mapNotNull null
+            }
+            val expectedAggregateRootName = packageName.substringBeforeLast(".domain").substringAfterLast(".").replaceFirstChar { it.uppercase() }
+            declaration.takeIf { it.name == expectedAggregateRootName }
+        }
+
+    // The Dto, with the classes and interfaces nested in it at any depth. Companion objects are left out: their methods
+    // are the factories of the Dto.
+    private fun dataDeclarations(dto: KoClassDeclaration): List<DataDeclaration> =
+        (listOf(dto) + dto.classes(includeNested = true, includeLocal = false)).map { declaration ->
+            DataDeclaration(
+                fullyQualifiedName = declaration.fullyQualifiedName,
+                functionNames = declaration.functions(includeNested = false, includeLocal = false).map { it.name },
+                getterNames = declaration.properties(includeNested = false, includeLocal = false).filter { it.hasGetter }.map { it.name },
+            )
+        } +
+            dto.interfaces(includeNested = true).map { declaration ->
+                DataDeclaration(
+                    fullyQualifiedName = declaration.fullyQualifiedName,
+                    functionNames = declaration.functions(includeNested = false, includeLocal = false).map { it.name },
+                    getterNames = declaration.properties(includeNested = false, includeLocal = false).filter { it.hasGetter }.map { it.name },
+                )
+            }
+
+    private class DataDeclaration(
+        val fullyQualifiedName: String,
+        val functionNames: List<String>,
+        val getterNames: List<String>,
+    )
+
+    private class Extension(
+        val name: String,
+        val receiver: String,
+        val file: KoFileDeclaration,
+    ) {
+        // Konsist does not resolve a nested receiver type (`Npc.Dto` stays `Npc.Dto`), so its first segment is resolved
+        // with the imports of the file, or else with its package.
+        fun receiverFullyQualifiedName(): String {
+            val type = receiver.substringBefore("<").removeSuffix("?")
+            val firstSegment = type.substringBefore(".")
+            val imported = file.imports.firstOrNull { it.name.substringAfterLast(".") == firstSegment }?.name
+            val packageName = imported?.substringBeforeLast(".") ?: file.packagee?.fullyQualifiedName
+            return listOfNotNull(packageName, type).joinToString(".")
         }
     }
 }

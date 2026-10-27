@@ -10,6 +10,7 @@ import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.npc.usecases.commands.InitialiseNpcs
 import com.mkz.rpg.npc.usecases.commands.RecruitNpc
 import com.mkz.rpg.npc.usecases.commands.TalkToAdjacentNpc
+import com.mkz.rpg.npc.usecases.queries.SearchIsMerchant
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
 import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.npc.usecases.services.NpcLoader
@@ -29,6 +30,7 @@ class NpcApi(
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)
     val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+    val searchIsMerchant = SearchIsMerchant(npcRepository)
 
     // Commands
     val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, lootableItemApi.searchLootableItemById, eventBus)

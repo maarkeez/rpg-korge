@@ -59,7 +59,7 @@ class InventoryApi(
     val equipItem = EquipItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
     val unequipItem = UnequipItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
     val buyItem = BuyItem(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule, eventBus)
-    val sellItem = SellItem(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule, eventBus)
+    val sellItem = SellItem(inventoryRepository, lootableItemApi.searchSellPrice, tradeRule, eventBus)
     val giveItem = GiveItem(inventoryRepository, giveRule, eventBus)
 
     // Queries
@@ -67,7 +67,7 @@ class InventoryApi(
     val canStoreItem = CanStoreItem(inventoryRepository)
     val canConsumeItem = CanConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, consumptionRule)
     val searchBuyRefusal = SearchBuyRefusal(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
-    val searchSellRefusal = SearchSellRefusal(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
+    val searchSellRefusal = SearchSellRefusal(inventoryRepository, lootableItemApi.searchSellPrice, tradeRule)
     val searchGiveReceivers = SearchGiveReceivers(inventoryRepository, giveRule)
     val searchGiveRefusal = SearchGiveRefusal(inventoryRepository, giveRule, searchGiveReceivers)
 

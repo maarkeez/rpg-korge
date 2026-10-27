@@ -18,7 +18,7 @@ import kotlin.test.Test
 class SellItemTest {
     private val trade = TradeMother()
     private val eventBus = FakeEventBus()
-    private val sellItem = SellItem(trade.inventoryRepository, trade.queries.searchLootableItemById, trade.tradeRule, eventBus)
+    private val sellItem = SellItem(trade.inventoryRepository, trade.queries.searchSellPrice, trade.tradeRule, eventBus)
 
     // The viking carries 50 G, two hammers, the first one equipped, and a mana potion.
     @BeforeTest

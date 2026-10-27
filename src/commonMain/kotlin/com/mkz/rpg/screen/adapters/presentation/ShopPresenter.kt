@@ -155,13 +155,13 @@ class ShopPresenter(
         if (slotIndex == selectedSlotIndex) return clearSelection()
         val lootableItemId = displayedSlots.getOrNull(slotIndex)?.lootableItemId ?: return clearSelection()
         val lootableItem = lootableItemApi.searchLootableItemById(lootableItemId) ?: return
-        selectedSlotIndex = slotIndex
-        shopView.selectSlot(slotIndex)
         val (price, actionLabel) =
             when (mode) {
                 Mode.BUY -> lootableItem.price to texts[UiText.SHOP_BUY]
-                Mode.SELL -> lootableItem.sellPrice to texts[UiText.SHOP_SELL]
+                Mode.SELL -> (lootableItemApi.searchSellPrice(lootableItemId) ?: return) to texts[UiText.SHOP_SELL]
             }
+        selectedSlotIndex = slotIndex
+        shopView.selectSlot(slotIndex)
         val refusal = refusal(buyerId, lootableItemId)
         shopView.displayItem(texts.lootableItemName(lootableItem.id), price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
     }
