@@ -1,6 +1,6 @@
 # Plan: Story coverage
 
-> **Status:** in progress: M1 and M2 are done.
+> **Status:** in progress: M1, M2 and M3 are done.
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
@@ -35,7 +35,7 @@ that completes each milestone to **Done in**.
 |----|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ✅      | c4b8d2d, 12c8421, feea986 |
 | M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ✅      | 56aeba0, 343b4c8, 9d48c7d, 9c5bd59 |
-| M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ⬜      |         |
+| M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ✅      | 2ad229d |
 | M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ⬜      |         |
 | M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ⬜      |         |
 | M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ⬜      |         |
@@ -129,6 +129,35 @@ The four commits are as listed, plus these decisions:
 1. **The map builder views.** `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`,
    `MapBuilderMenuView`.
 2. **The plan.** These commits.
+
+### M3 as built
+
+The two commits are as listed, plus these decisions:
+
+- **`StoryContext.terrainIds()`** lists the terrains that have a tile, from the names of the transition strips
+  (`sand_to_grass` gives `grass` and `sand`), next to the other ids. `MapBuilderHudViewStories` takes each tile from a
+  `BattlefieldView`'s `terrainTileBitmap`, as `MapBuilderPresenter` does: **M5**, which splits `BattlefieldView`, has to
+  keep that binding working.
+- **The map sizes are written in the bindings** (1 to 128, 16 by default): they are constants of the `mapBuilder` domain,
+  which the Storybook must not import. `MapBuilderHudView` and `MapBuilderInfoView` have a `rows` and a `columns`
+  control; the steps of the HUD set whichever changed, and tapping a terrain sets `selectedTerrain` (a pick of the terrain
+  ids).
+- **`MapBuilderInfoView` messages are transient**: an error or an info pops in the subtitle for two seconds and the size
+  comes back, as in the game. The `messageKind` (`NONE`, `ERROR`, `INFO`) and `message` controls, and every change of an
+  arg, show it again. It has no callbacks. The stories use English messages, not the translations of the presenter.
+- **`MapBuilderCallToActionView`** has a `callToAction` enum, and the callbacks do as the map builder: `onBack` sets
+  `LEAVE_CONFIRMATION`, `onStayed` brings back `EXPORT_AND_BACK`, and `onExported` and `onLeft` only log themselves (the
+  game copies the map, or changes scene).
+- **`MapBuilderMenuView`** has an `open` boolean and an `options` count (1 to 6): the first option is the Import of the
+  game, the others (`Option 2`, ...) only show a longer list. The open stories open it on the phone, in the first frame,
+  as `open()` measures where the view is. It is wrapped in a view as big as its button: the options would otherwise move
+  the button when the phone centers it. Choosing an option logs `onSelected` and sets `open` to `false`. In the phone it
+  is in the middle, not at the top right: the transparent view catching the taps out of the open menu is placed by the
+  position on the whole page, so out of the phone it closes it only partly.
+- **The sidebar** lists them after the menu, in the order of the map builder screen: the info, the HUD, the call to
+  action and the menu. With them the Storybook has 162 ids (34 components, 128 stories).
+- **The HUD** is 390 wide, the width of the phone, so the border of the selected terrain, drawn 3px out of its button,
+  is cropped when the first terrain is selected. Noted, not changed.
 
 ### M4 commits
 
