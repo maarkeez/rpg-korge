@@ -27,6 +27,8 @@ class StoryContext(
         const val EFFECTS_DIRECTORY = "effect"
         const val ABILITIES_DIRECTORY = "ability"
         const val ABILITY_SELECTION = "ability_selection"
+        const val TERRAIN_TRANSITIONS_DIRECTORY = "terrain/transitions"
+        const val TRANSITION_NAME_SEPARATOR = "_to_"
         const val PORTRAIT_SUFFIX = "_portrait"
         const val IMAGE_EXTENSION = ".png"
     }
@@ -48,6 +50,13 @@ class StoryContext(
 
     /** Every ability that has an icon, in alphabetical order, e.g.: the options of a pick control of an ability. */
     fun abilityIds(): List<String> = imageIds(ABILITIES_DIRECTORY) - ABILITY_SELECTION
+
+    /** Every terrain that has a tile, in alphabetical order, e.g.: the options of a pick control of a terrain. */
+    fun terrainIds(): List<String> =
+        imageIds(TERRAIN_TRANSITIONS_DIRECTORY)
+            .flatMap { transition -> transition.split(TRANSITION_NAME_SEPARATOR) }
+            .distinct()
+            .sorted()
 
     private fun imageIds(directory: String): List<String> =
         resourcesLoader

@@ -225,9 +225,9 @@ const DATA = {
     {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 42, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 40, "importsOut": 186},
+    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 46, "importsOut": 186},
     {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 416, "importsOut": 0},
-    {"name": "storybook", "files": 67, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 57},
+    {"name": "storybook", "files": 71, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 63},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 15}
   ],
@@ -1294,7 +1294,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 40, "files": 30, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 46, "files": 34, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BagButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BagButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleInfoView"},
@@ -1321,6 +1321,12 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ItemActionsViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.UiText"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ManaBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ManaBarPreviewView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ManaBarViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ManaBarView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderCallToActionViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.MapBuilderCallToActionView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattlefieldView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.MapBuilderHudView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.MapBuilderInfoView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderMenuViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.MapBuilderMenuView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/MapBuilderMenuViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.UiText"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/MenuViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.MenuView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/PlayerCallToActionViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ItemActionsView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/PlayerCallToActionViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.PlayerCallToActionView"},

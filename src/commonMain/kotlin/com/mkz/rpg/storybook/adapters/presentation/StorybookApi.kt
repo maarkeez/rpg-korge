@@ -62,6 +62,10 @@ class StorybookApi(
                 FormationViewStories,
                 BattleInfoViewStories,
                 MenuViewStories,
+                MapBuilderInfoViewStories,
+                MapBuilderHudViewStories,
+                MapBuilderCallToActionViewStories,
+                MapBuilderMenuViewStories,
                 ShopViewStories,
             )
 
