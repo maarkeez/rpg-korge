@@ -1,6 +1,6 @@
 # Plan: Story coverage
 
-> **Status:** to do.
+> **Status:** in progress: M1 is done.
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
@@ -33,7 +33,7 @@ that completes each milestone to **Done in**.
 
 | #  | Milestone                 | Views leaving the list                                                                                                                                                                                  | Done when                                                                                                                         | Status | Done in |
 |----|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ⬜      |         |
+| M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ✅      | c4b8d2d, 12c8421, feea986 |
 | M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ⬜      |         |
 | M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ⬜      |         |
 | M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ⬜      |         |
@@ -53,6 +53,27 @@ new story with the [`storybook` skill](../../.claude/skills/storybook/SKILL.md).
 3. **The effects and the buttons.** `EffectView` (a pick of the effect ids), `EffectsView`, `AbilityButtonView` (a pick
    of the ability ids, and its cooldown badge), `BagButtonView`.
 4. **The plan.** These commits.
+
+### M1 as built
+
+The three commits are as listed, plus these decisions:
+
+- **The sidebar overflows**: with the 79 ids of M1 (17 components, 62 stories), the list is taller than the sidebar, 900
+  high, which has no scroll: it is cut after `Battlefield health bar preview`, the seventh component, and the stories
+  below are only reachable by a link. It was found by looking at the stories, not fixed (see Out of scope): the sidebar
+  needs a scroll, or components that collapse, **before M2** adds a dozen components more.
+- **`PreviewBarView` has two color controls**, `filledColor` and `previewColor`, the second drawn at half its alpha, as the
+  game does. The preview colors of `HealthBarPreviewView` and `ManaBarPreviewView` are `RGBA.float(205.0, 105.0, 145.0, 0.5)`
+  and `RGBA.float(50.0, 95.0, 205.0, 0.5)`, whose channels above 1 clamp: both are white at half alpha. Noted, not
+  changed.
+- **`StoryContext`** lists the ids of the resources the views take, never written by hand: `unitIds()` (the units
+  with a portrait), `effectIds()` and `abilityIds()` (without the selection frame), next to `lootableItemIds()`. Only
+  two effects have an icon, `venom-damage` and `venom-on-death`.
+- **`BagButtonView` has no control**: it displays nothing but its chest, so it has a single story, `Chest`, logging
+  `onBagSelected`. `AbilityButtonView` logs `abilitySelected`, which sets its `selected` arg.
+- **`EffectsView`** takes a count of effects and of new effects, which cycle through the effects with an icon.
+- **`StorybookEndToEndTest`** opens `screen-health-bar--full` explicitly, and taps its story by id (`clickStoryId`):
+  it relied on the health bar being the first story, and on `Empty` being unique.
 
 ### M2 commits
 
