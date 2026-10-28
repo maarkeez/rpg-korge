@@ -1,8 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battleUnit.domain.BattleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.AbilityAvailability
-import com.mkz.rpg.unit.domain.Unit
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.ui.UIContainer
@@ -26,6 +23,22 @@ open class BattleUnitInfoView(
         // Space between the info rows, e.g.: between the health and the mana bars.
         private const val ROWS_SPACING = 4
     }
+
+    /** The steps and casts the battle unit has left this turn, out of the ones it has each turn. */
+    data class TurnActions(
+        val remainingSteps: Int,
+        val maximumSteps: Int,
+        val remainingCasts: Int,
+        val maximumCasts: Int,
+    )
+
+    /** An ability of the battle unit, and why it can or can not be cast. */
+    data class Ability(
+        val abilityId: String,
+        // The turns left until it can be cast again, e.g.: 1 when it can be cast on the next turn.
+        val cooldownTurnsLeft: Int,
+        val hasEnoughMana: Boolean,
+    )
 
     internal lateinit var unitNameView: UnitNameView
     internal val movementPointsView = PointsView(MOVEMENT_POINTS_COLOR)
@@ -94,23 +107,26 @@ open class BattleUnitInfoView(
         abilityButtons.forEach { abilityButton -> abilityButton.setDelegate(delegate) }
     }
 
+    /**
+     * Displays the battle unit with the turn actions it has left, and the turns left before it vanishes if it is a
+     * summon (none for the others).
+     */
     open fun display(
-        battleUnit: BattleUnit.Dto,
-        unit: Unit.Dto,
-        abilityAvailabilities: List<AbilityAvailability>,
+        battleUnit: BattleUnitInfo,
+        turnActions: TurnActions,
+        remainingTurns: Int?,
+        abilities: List<Ability>,
     ) {
         abilityButtons.forEach(AbilityButtonView::hide)
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
         // Name
-        unitNameView.display(unitName = texts.unitName(unit.id))
+        unitNameView.display(unitName = texts.unitName(battleUnit.unitId))
         // Remaining turn actions, out of their maximum
-        val remainingTurnActions = battleUnit.remainingTurnActions
-        movementPointsView.display(remaining = remainingTurnActions.remainingSteps, maximum = remainingTurnActions.maximumSteps)
-        castPointsView.display(remaining = remainingTurnActions.remainingCasts, maximum = remainingTurnActions.maximumCasts)
+        movementPointsView.display(remaining = turnActions.remainingSteps, maximum = turnActions.maximumSteps)
+        castPointsView.display(remaining = turnActions.remainingCasts, maximum = turnActions.maximumCasts)
         castPointsView.x = movementPointsView.width + TURN_ACTIONS_SPACING
         // Turns left, only for the summons, after the casts
-        val remainingTurns = battleUnit.remainingTurns
         if (remainingTurns != null) remainingTurnsView.display(remainingTurns) else remainingTurnsView.hide()
         remainingTurnsView.x = castPointsView.x + castPointsView.width + TURN_ACTIONS_SPACING
         // Health
@@ -125,15 +141,15 @@ open class BattleUnitInfoView(
         )
         // Abilities, telling apart the cooldowns from the lack of mana. No casts left darkens none, as the cast points
         // already tell it.
-        abilityAvailabilities.forEachIndexed { index, abilityAvailability ->
+        abilities.forEachIndexed { index, ability ->
             abilityButtons[index].display(
-                abilityId = abilityAvailability.abilityId,
-                cooldownTurnsLeft = abilityAvailability.cooldownTurnsLeft,
-                hasEnoughMana = abilityAvailability.hasEnoughMana,
+                abilityId = ability.abilityId,
+                cooldownTurnsLeft = ability.cooldownTurnsLeft,
+                hasEnoughMana = ability.hasEnoughMana,
             )
         }
         // Effects
-        effectsView.display(effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects)
+        effectsView.display(effectIds = battleUnit.effectIds)
         visible = true
     }
 

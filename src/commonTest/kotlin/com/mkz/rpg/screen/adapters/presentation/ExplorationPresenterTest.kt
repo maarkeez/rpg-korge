@@ -298,7 +298,6 @@ class ExplorationPresenterTest {
             battlefieldApi = apis.battlefieldApi,
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
-            unitApi = apis.unitApi,
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,

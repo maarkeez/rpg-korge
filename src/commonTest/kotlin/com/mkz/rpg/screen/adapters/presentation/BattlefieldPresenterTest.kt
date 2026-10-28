@@ -133,7 +133,6 @@ class BattlefieldPresenterTest {
             battlefieldApi = apis.battlefieldApi,
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
-            unitApi = apis.unitApi,
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,
@@ -321,7 +320,6 @@ class BattlefieldPresenterTest {
         battlefieldApi = apis.battlefieldApi,
         battleUnitApi = apis.battleUnitApi,
         playerApi = apis.playerApi,
-        unitApi = apis.unitApi,
         abilityApi = apis.abilityApi,
         battleApi = apis.battleApi,
         partyApi = apis.partyApi,
@@ -933,10 +931,74 @@ class BattlefieldPresenterTest {
         selectKnight()
         // Then
         val displayed = battleUnitInfoView.displayedBattleUnits.last()
-        displayed.abilityAvailabilities shouldBe apis.battleUnitApi.searchAbilityAvailabilities("knight-1")
-        displayed.abilityAvailabilities.map { availability -> availability.abilityId } shouldBe
-            displayed.battleUnit.abilityCooldowns.keys
+        displayed.abilities shouldBe
+            apis.battleUnitApi.searchAbilityAvailabilities("knight-1").map { availability ->
+                BattleUnitInfoView.Ability(abilityId = availability.abilityId, cooldownTurnsLeft = availability.cooldownTurnsLeft, hasEnoughMana = availability.hasEnoughMana)
+            }
+        displayed.abilities.map { ability -> ability.abilityId } shouldBe
+            apis.battleUnitApi
+                .searchBattleUnitById("knight-1")!!
+                .abilityCooldowns.keys
                 .toList()
+    }
+
+    @Test
+    fun `SelectBattleUnit should display the unit, health and mana of the selected battle unit when it is selected`() {
+        // Given
+        val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
+        // When
+        selectKnight()
+        // Then
+        battleUnitInfoView.displayedBattleUnits.last().battleUnit shouldBe
+            BattleUnitInfo(
+                unitId = "knight",
+                remainingHealthPoints = 30,
+                maximumHealthPoints = 30,
+                remainingManaPoints = knight.remainingManaPoints,
+                maximumManaPoints = knight.maximumManaPoints,
+                effectIds = emptyList(),
+            )
+    }
+
+    @Test
+    fun `SelectBattleUnit should display the remaining turn actions of the selected battle unit out of their maximum when it is selected`() {
+        // Given
+        // When
+        selectKnight()
+        // Then
+        val displayed = battleUnitInfoView.displayedBattleUnits.last()
+        displayed.turnActions shouldBe BattleUnitInfoView.TurnActions(remainingSteps = 3, maximumSteps = 3, remainingCasts = 1, maximumCasts = 1)
+        displayed.remainingTurns shouldBe null
+    }
+
+    @Test
+    fun `SelectBattleUnit should display the effects applied when the turn starts followed by the ones applied when defeated of the selected battle unit when it is selected`() {
+        // Given
+        val venom = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "venom", destination = null)
+        apis.battleUnitApi.applyEffect(venom)
+        val ongoingEffects = apis.battleUnitApi.searchBattleUnitById("knight-1")!!.ongoingEffects
+        // When
+        selectKnight()
+        // Then
+        val effectIds =
+            battleUnitInfoView.displayedBattleUnits
+                .last()
+                .battleUnit.effectIds
+        effectIds shouldBe ongoingEffects.onTurnStarted + ongoingEffects.onDefeatedEffects
+        effectIds.shouldContain("venom")
+    }
+
+    @Test
+    fun `SelectBattleUnit should display the health the selected battle unit has left when it is hurt`() {
+        // Given
+        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
+        apis.battleUnitApi.applyEffect(poisoning)
+        // When
+        selectKnight()
+        // Then
+        val battleUnit = battleUnitInfoView.displayedBattleUnits.last().battleUnit
+        battleUnit.remainingHealthPoints shouldBe 23
+        battleUnit.maximumHealthPoints shouldBe 30
     }
 
     @Test
@@ -961,7 +1023,7 @@ class BattlefieldPresenterTest {
         // When
         publish(PlayerTurnStarted(playerId = "human", battleUnitIds = battleUnitIdsInBattle))
         // Then
-        battleUnitInfoView.displayedBattleUnits.map { displayed -> displayed.battleUnit.id }.shouldContainExactly("knight-1")
+        battleUnitInfoView.displayedBattleUnits.map { displayed -> displayed.battleUnit.unitId }.shouldContainExactly("knight")
         battlefieldView.tileSelections.shouldContainExactly(position(1, 1))
         battlefieldView.potentialMovements shouldContain position(1, 2)
     }
@@ -1118,10 +1180,9 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         val preview = attackPreviewView.displayedAttackPreviews.single()
-        preview.casterBattleUnit.id shouldBe "knight-1"
+        preview.casterBattleUnit.unitId shouldBe "knight"
         preview.manaCost shouldBe 10
-        preview.receivers.map { receiver -> receiver.battleUnit.id }.shouldContainExactly("rat-1", "rat-2")
-        preview.receivers.map { receiver -> receiver.unit.id }.shouldContainExactly("rat", "rat")
+        preview.receivers.map { receiver -> receiver.battleUnit.unitId }.shouldContainExactly("rat", "rat")
         preview.receivers.map { receiver -> receiver.remainingHealthPoints }.shouldContainExactly(14, 14)
     }
 
@@ -1142,6 +1203,46 @@ class BattlefieldPresenterTest {
         val preview = attackPreviewView.displayedAttackPreviews.single()
         preview.receivers.map { receiver -> receiver.newEffectIds }.shouldContainExactly(listOf("venom"), listOf("venom"))
         preview.casterNewEffectIds.shouldBeEmpty()
+    }
+
+    @Test
+    fun `DisplayEnemyAbilityCastPreview should preview the unit, health and mana of the caster and of each enemy when an enemy ability cast is previewed`() {
+        // Given
+        val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
+        val rat = apis.battleUnitApi.searchBattleUnitById("rat-1")!!
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3), TileDto(row = 0, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1", "rat-2"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        val preview = attackPreviewView.displayedAttackPreviews.single()
+        preview.casterBattleUnit shouldBe
+            BattleUnitInfo(
+                unitId = "knight",
+                remainingHealthPoints = 30,
+                maximumHealthPoints = 30,
+                remainingManaPoints = knight.remainingManaPoints,
+                maximumManaPoints = knight.maximumManaPoints,
+                effectIds = emptyList(),
+            )
+        preview.receivers.map { receiver -> receiver.battleUnit }.shouldContainExactly(
+            List(2) {
+                BattleUnitInfo(
+                    unitId = "rat",
+                    remainingHealthPoints = 21,
+                    maximumHealthPoints = 21,
+                    remainingManaPoints = rat.remainingManaPoints,
+                    maximumManaPoints = rat.maximumManaPoints,
+                    effectIds = emptyList(),
+                )
+            },
+        )
     }
 
     @Test

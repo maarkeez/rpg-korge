@@ -1,9 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoMother.battleUnitInfo
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.nulls.shouldBeNull
@@ -12,19 +11,17 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class AttackPreviewViewTest : ViewsForTesting() {
-    private val casterBattleUnit = battleUnit(unit = unit(id = "knight").toDto()).toDto()
-    private val casterUnit = unit(id = "knight").toDto()
+    private val casterBattleUnit = battleUnitInfo(unitId = "knight")
 
     private fun receivers(count: Int): List<AttackPreviewView.Receiver> =
         List(count) {
             AttackPreviewView.Receiver(
-                battleUnit = battleUnit(unit = unit(id = "rat").toDto()).toDto(),
-                unit = unit(id = "rat").toDto(),
+                battleUnit = battleUnitInfo(unitId = "rat"),
                 remainingHealthPoints = 10,
             )
         }
 
-    private fun AttackPreviewView.display(receivers: List<AttackPreviewView.Receiver>) = display(casterBattleUnit = casterBattleUnit, casterUnit = casterUnit, manaCost = 10, receivers = receivers)
+    private fun AttackPreviewView.display(receivers: List<AttackPreviewView.Receiver>) = display(casterBattleUnit = casterBattleUnit, manaCost = 10, receivers = receivers)
 
     @Test
     fun `Display should be visible when is displayed`() =

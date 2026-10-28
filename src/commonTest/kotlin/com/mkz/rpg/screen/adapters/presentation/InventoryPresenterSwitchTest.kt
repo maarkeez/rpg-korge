@@ -75,7 +75,6 @@ class InventoryPresenterSwitchTest {
             lootableItemApi = apis.lootableItemApi,
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
-            unitApi = apis.unitApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,
             battlefieldApi = apis.battlefieldApi,

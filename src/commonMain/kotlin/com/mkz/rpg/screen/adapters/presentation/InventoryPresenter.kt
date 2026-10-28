@@ -22,7 +22,6 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import kotlinx.coroutines.CompletableDeferred
 
 /**
@@ -44,7 +43,6 @@ class InventoryPresenter(
     private val lootableItemApi: LootableItemApi,
     private val battleUnitApi: BattleUnitApi,
     private val playerApi: PlayerApi,
-    private val unitApi: UnitApi,
     private val battleApi: BattleApi,
     private val partyApi: PartyApi,
     private val battlefieldApi: BattlefieldApi,
@@ -443,12 +441,16 @@ class InventoryPresenter(
         whenIdle {
             val battleUnitId = displayedBattleUnitId ?: return@whenIdle
             val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return@whenIdle
-            val unit = unitApi.searchUnitById(battleUnit.unitId) ?: return@whenIdle
             val abilityAvailabilities = battleUnitApi.searchAbilityAvailabilities(battleUnitId)
             timeline.play {
                 clearDisplayedInventory()
                 // The info is read again, as the items may have changed the battle unit, e.g.: healed it.
-                battleUnitInfoView.display(battleUnit, unit, abilityAvailabilities)
+                battleUnitInfoView.display(
+                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit),
+                    turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
+                    remainingTurns = battleUnit.remainingTurns,
+                    abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
+                )
                 battleHudView.displayBattleUnitInfoView()
             }
         }

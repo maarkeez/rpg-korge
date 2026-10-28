@@ -23,7 +23,6 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class BattlefieldPresenter(
     private val battlefieldView: BattlefieldView,
@@ -34,7 +33,6 @@ class BattlefieldPresenter(
     private val battlefieldApi: BattlefieldApi,
     private val battleUnitApi: BattleUnitApi,
     private val playerApi: PlayerApi,
-    private val unitApi: UnitApi,
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
     private val partyApi: PartyApi,
@@ -342,7 +340,6 @@ class BattlefieldPresenter(
 
     private fun displayMovementRange(selectedBattleUnitEvent: BattlefieldHudEvent.SelectedBattleUnit): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(selectedBattleUnitEvent.battleUnitId)!!
-        val unit = unitApi.searchUnitById(battleUnit.unitId)!!
         val abilityAvailabilities = battleUnitApi.searchAbilityAvailabilities(battleUnit.id)
         val isBattling = isBattling()
         return {
@@ -350,7 +347,12 @@ class BattlefieldPresenter(
             // starts), when it is out of the viewport or on its edge.
             if (isBattling) battlefieldView.scrollToTile(row = selectedBattleUnitEvent.tile.row, column = selectedBattleUnitEvent.tile.column)
             battlefieldView.resetTiles()
-            battleUnitInfoView.display(battleUnit, unit, abilityAvailabilities)
+            battleUnitInfoView.display(
+                battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit),
+                turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
+                remainingTurns = battleUnit.remainingTurns,
+                abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
+            )
             battleHudView.displayBattleUnitInfoView()
             selectedBattleUnitEvent.tilesWhereCanBeMoved.forEach { tile ->
                 battlefieldView.displayPotentialMovement(row = tile.row, column = tile.column)
@@ -399,15 +401,13 @@ class BattlefieldPresenter(
 
     private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed): suspend () -> Unit {
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
-        val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
         val remainingHealth = previewCastRemainingHealth(event.casterBattleUnitId, event.abilityId, event.castGroup)
         val castGroupTiles = castGroupTiles(event.castGroup, remainingHealth)
         val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         return {
             attackPreviewView.display(
-                casterBattleUnit = casterBattleUnit,
-                casterUnit = casterUnit,
+                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit),
                 manaCost = ability.cost,
                 receivers = emptyList(),
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
@@ -420,7 +420,6 @@ class BattlefieldPresenter(
 
     private fun displayEnemyAbilityCastPreview(event: BattlefieldHudEvent.EnemyAbilityCastPreviewed): suspend () -> Unit {
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
-        val casterUnit = unitApi.searchUnitById(casterBattleUnit.unitId)!!
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
         val remainingHealth = previewCastRemainingHealth(event.casterBattleUnitId, event.abilityId, event.castGroup)
         val castGroupTiles = castGroupTiles(event.castGroup, remainingHealth)
@@ -428,18 +427,15 @@ class BattlefieldPresenter(
         val receivers =
             event.enemyBattleUnitIds.map { enemyBattleUnitId ->
                 val enemyBattleUnit = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
-                val enemyUnit = unitApi.searchUnitById(enemyBattleUnit.unitId)!!
                 AttackPreviewView.Receiver(
-                    battleUnit = enemyBattleUnit,
-                    unit = enemyUnit,
+                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(enemyBattleUnit),
                     remainingHealthPoints = remainingHealth[enemyBattleUnitId] ?: enemyBattleUnit.remainingHealthPoints,
                     newEffectIds = newEffectIds[enemyBattleUnitId].orEmpty(),
                 )
             }
         return {
             attackPreviewView.display(
-                casterBattleUnit = casterBattleUnit,
-                casterUnit = casterUnit,
+                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit),
                 manaCost = ability.cost,
                 receivers = receivers,
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,

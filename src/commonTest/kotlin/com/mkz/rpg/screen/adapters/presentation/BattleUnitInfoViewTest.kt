@@ -1,11 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.AbilityAvailability
-import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoMother.battleUnitInfo
+import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoMother.turnActions
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
@@ -14,6 +12,12 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class BattleUnitInfoViewTest : ViewsForTesting() {
+    private fun BattleUnitInfoView.display(
+        turnActions: BattleUnitInfoView.TurnActions = turnActions(),
+        remainingTurns: Int? = null,
+        abilities: List<BattleUnitInfoView.Ability> = emptyList(),
+    ) = display(battleUnit = battleUnitInfo(), turnActions = turnActions, remainingTurns = remainingTurns, abilities = abilities)
+
     @Test
     fun `Init should not be visible when is initialized`() =
         sharedViewsTest {
@@ -29,10 +33,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val battleUnit = battleUnit(unit = unit).toDto()
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display()
             // Then
             battleUnitInfoView.isVisibleToUser().shouldBeTrue()
         }
@@ -42,10 +44,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit(movementRange = 3).toDto()
-            val battleUnit = battleUnit(unit = unit).move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1))).toDto()
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display(turnActions = turnActions(remainingSteps = 2, maximumSteps = 3, remainingCasts = 1, maximumCasts = 1))
             // Then
             battleUnitInfoView.remainingSteps() shouldBe 2
             battleUnitInfoView.maximumSteps() shouldBe 3
@@ -58,10 +58,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val battleUnit = battleUnit(unit = unit).toDto()
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display()
             // Then
             battleUnitInfoView.movementPointColors().shouldContainExactly(BattleUnitInfoView.MOVEMENT_POINTS_COLOR)
             battleUnitInfoView.castPointColors().shouldContainExactly(BattleUnitInfoView.CAST_POINTS_COLOR)
@@ -72,10 +70,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val battleUnit = battleUnit(unit = unit).toDto().let { dto -> dto.copy(remainingTurnActions = dto.remainingTurnActions.copy(remainingCasts = 0)) }
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display(turnActions = turnActions(remainingCasts = 0, maximumCasts = 1))
             // Then
             battleUnitInfoView.remainingCasts() shouldBe 0
             battleUnitInfoView.maximumCasts() shouldBe 1
@@ -86,16 +82,14 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val battleUnit = battleUnit(unit = unit).toDto().let { dto -> dto.copy(remainingTurnActions = dto.remainingTurnActions.copy(remainingCasts = 0)) }
-            val abilityAvailabilities =
+            val abilities =
                 listOf(
-                    AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true),
-                    AbilityAvailability(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true),
-                    AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false),
+                    BattleUnitInfoView.Ability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true),
+                    BattleUnitInfoView.Ability(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true),
+                    BattleUnitInfoView.Ability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false),
                 )
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = abilityAvailabilities)
+            battleUnitInfoView.display(turnActions = turnActions(remainingCasts = 0, maximumCasts = 1), abilities = abilities)
             // Then
             val (sword, mushroom, heal) = battleUnitInfoView.abilityButtons()
             sword.isAbilityIconDarkened().shouldBeFalse()
@@ -110,10 +104,8 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit(movementRange = 5).toDto()
-            val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
             // When
-            battleUnitInfoView.display(battleUnit = summon, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display(remainingTurns = 3)
             // Then
             battleUnitInfoView.remainingTurnsText() shouldBe "Vanishes in 3 turns"
             battleUnitInfoView.isRemainingTurnsAfterCasts().shouldBeTrue()
@@ -124,11 +116,9 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val summon = battleUnit(unit = unit, remainingTurns = 3).toDto()
-            battleUnitInfoView.display(battleUnit = summon, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display(remainingTurns = 3)
             // When
-            battleUnitInfoView.display(battleUnit = battleUnit(unit = unit).toDto(), unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display(remainingTurns = null)
             // Then
             battleUnitInfoView.remainingTurnsText() shouldBe null
         }
@@ -169,9 +159,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            val battleUnit = battleUnit(unit = unit).toDto()
-            battleUnitInfoView.display(battleUnit = battleUnit, unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display()
             // When
             battleUnitInfoView.hide()
             // Then
@@ -184,8 +172,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             // Given
             var bagSelected = false
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
-            val unit = unit().toDto()
-            battleUnitInfoView.display(battleUnit = battleUnit(unit = unit).toDto(), unit = unit, abilityAvailabilities = emptyList())
+            battleUnitInfoView.display()
             addChild(battleUnitInfoView)
             battleUnitInfoView.displayBag(onBagSelected = { bagSelected = true })
             // When

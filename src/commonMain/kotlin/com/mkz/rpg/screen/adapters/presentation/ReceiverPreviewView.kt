@@ -1,7 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battleUnit.domain.BattleUnit
-import com.mkz.rpg.unit.domain.Unit
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIText
 import korlibs.korge.ui.uiHorizontalStack
@@ -55,15 +53,14 @@ class ReceiverPreviewView(
 
     /** Displays the receiver, being the [position] out of [count] receivers. The counter is only displayed when there are several. */
     fun display(
-        battleUnit: BattleUnit.Dto,
-        unit: Unit.Dto,
+        battleUnit: BattleUnitInfo,
         remainingHealthPoints: Int,
         newEffectIds: List<String>,
         position: Int,
         count: Int,
     ) {
         unitPortraitView.display(battleUnit.unitId)
-        unitNameView.display(unitName = texts.unitName(unit.id))
+        unitNameView.display(unitName = texts.unitName(battleUnit.unitId))
         healthBarView.display(
             remainingBefore = battleUnit.remainingHealthPoints,
             remainingAfter = remainingHealthPoints,
@@ -74,7 +71,7 @@ class ReceiverPreviewView(
             maximum = battleUnit.maximumManaPoints,
         )
         effectsView.display(
-            effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
+            effectIds = battleUnit.effectIds,
             newEffectIds = newEffectIds,
         )
         counterLabel.setText("$position/$count")

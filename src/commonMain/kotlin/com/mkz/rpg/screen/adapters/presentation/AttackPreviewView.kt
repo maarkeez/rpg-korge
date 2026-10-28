@@ -1,7 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battleUnit.domain.BattleUnit
-import com.mkz.rpg.unit.domain.Unit
 import korlibs.korge.animate.Animator
 import korlibs.korge.animate.animator
 import korlibs.korge.animate.moveTo
@@ -38,8 +36,7 @@ open class AttackPreviewView(
 
     /** A battle unit receiving the cast, the health it would have left and the effects that would stay on it. */
     data class Receiver(
-        val battleUnit: BattleUnit.Dto,
-        val unit: Unit.Dto,
+        val battleUnit: BattleUnitInfo,
         val remainingHealthPoints: Int,
         val newEffectIds: List<String> = emptyList(),
     )
@@ -97,15 +94,14 @@ open class AttackPreviewView(
     }
 
     open fun display(
-        casterBattleUnit: BattleUnit.Dto,
-        casterUnit: Unit.Dto,
+        casterBattleUnit: BattleUnitInfo,
         manaCost: Int,
         receivers: List<Receiver>,
         casterRemainingHealthPoints: Int = casterBattleUnit.remainingHealthPoints,
         casterNewEffectIds: List<String> = emptyList(),
     ) {
         casterUnitPortraitView.display(casterBattleUnit.unitId)
-        casterUnitNameView.display(unitName = texts.unitName(casterUnit.id))
+        casterUnitNameView.display(unitName = texts.unitName(casterBattleUnit.unitId))
         casterHealthBarView.display(
             remainingBefore = casterBattleUnit.remainingHealthPoints,
             remainingAfter = casterRemainingHealthPoints,
@@ -117,7 +113,7 @@ open class AttackPreviewView(
             maximum = casterBattleUnit.maximumManaPoints,
         )
         casterEffectsView.display(
-            effectIds = casterBattleUnit.ongoingEffects.onTurnStarted + casterBattleUnit.ongoingEffects.onDefeatedEffects,
+            effectIds = casterBattleUnit.effectIds,
             newEffectIds = casterNewEffectIds,
         )
 
@@ -134,7 +130,6 @@ open class AttackPreviewView(
             } else {
                 receiverView.display(
                     battleUnit = receiver.battleUnit,
-                    unit = receiver.unit,
                     remainingHealthPoints = receiver.remainingHealthPoints,
                     newEffectIds = receiver.newEffectIds,
                     position = index + 1,
