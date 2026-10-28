@@ -85,6 +85,16 @@ the dependency rule in M1) and regenerates the [dependency report](../architectu
    unit, view, presenter, smoke and end-to-end tests, and the dependency report.
 2. **The plan.** These commits, and the Reference updated to what was built.
 
+### M3 commits
+
+1. **Actions and the shop stories.** The actions log in `Storybook` (`recordAction`, `clearActions`, cleared when
+   another story is shown), with `RecordAction`, `ClearActions` and `SearchActions`; `StoryContext.action(...)` and its
+   delegate, which the presenter maps to `RecordAction` and `ChangeArg`; the `ActionsView` under the controls, with
+   `Clear`; `ControlsView.MAXIMUM_HEIGHT`, checked for every component by the smoke test; and `ShopViewStories`, out of
+   the allowlist, mapping a slot tapped to `selectedSlot` and an arrow or swipe to `buyerIndex`. With the unit, view,
+   presenter, smoke and end-to-end tests, and the dependency report.
+2. **The plan.** These commits, and the Reference updated to what was built.
+
 ## Reference
 
 Detailed technical notes for whoever implements the plan. The names are proposals: keep them unless an architecture test
@@ -102,12 +112,12 @@ com.mkz.rpg.storybook
 ├── usecases
 │   ├── commands            InitialiseCatalogue, SelectStory; ChangeArg, ResetArgs, ChangeGlobal (M2);
 │   │                       RecordAction, ClearActions (M3)
-│   ├── queries             SearchCatalogue, SearchSelectedStory; SearchArgs, SearchGlobals (M2)
+│   ├── queries             SearchCatalogue, SearchSelectedStory; SearchArgs, SearchGlobals (M2); SearchActions (M3)
 │   └── services            StoryLocation (the port to the URL)
 └── adapters
     ├── presentation        StorybookApi, StorybookScene, StorybookPresenter, the Storybook's own views (SidebarView,
-    │                       PhoneFrameView, StoryInfoView, StorybookButton; ToolbarView and ControlsView in M2; the
-    │                       Actions in M3), StoryBinding, StoryContext, Args, and one <View>Stories object per component
+    │                       PhoneFrameView, StoryInfoView, StorybookButton; ToolbarView and ControlsView in M2;
+    │                       ActionsView in M3), StoryBinding, StoryContext, Args, and one <View>Stories object per component
     ├── storage             InMemoryStorybookRepository
     └── location            isStorybookRequested() and platformStoryLocation() (expect, in commonMain),
                             NoStoryLocation (commonMain, used on the JVM), LocationQuery (commonMain, M2),
@@ -129,7 +139,8 @@ com.mkz.rpg.storybook
   `ControlDto(name, type, minimum, maximum, options)` with `boolean`, `int`, `enum`, `text`, `pick` and `color`
   factories, `ArgDto` with `boolean`, `int` and `text` factories (an enum, pick or color value is a text), and
   `LocationDto(storyId, args, globals)`, what a link keeps, as text. Inside the aggregate, private sealed `Control`s and
-  `Value`s validate and parse them.
+  `Value`s validate and parse them. Built in M3: `ActionDto(name, arguments)`, the arguments as text, in
+  `Storybook.Dto.actions`, the newest first.
 
 ### Domain model
 
@@ -155,9 +166,12 @@ com.mkz.rpg.storybook
   catalogue can be selected; selecting the story on show changes nothing. In M2, selecting another story resets the
   args to its own, keeping the globals, and an arg or a global can only be changed to a value its control accepts;
   changing it to the value it has, or resetting args none of which were changed, changes nothing. In M3, the log keeps the last 50
-  actions, the newest first.
+  (`Storybook.MAXIMUM_ACTIONS`) actions, the newest first. Changing an arg keeps them, so an action mapped to an arg
+  stays logged, and showing another story empties them, as Storybook does. Clearing an empty log changes nothing. A
+  link does not keep them.
 - **Events** (`StorybookEvent`): `CatalogueInitialised` and `StorySelected` in M1; `ArgChanged(storyId, argName)`,
-  `ArgsReset(storyId)`, `GlobalChanged(globalName)` (M2), `ActionRecorded`, `ActionsCleared` (M3). The presenter subscribes to them to re-render, as
+  `ArgsReset(storyId)`, `GlobalChanged(globalName)` (M2), `ActionRecorded(storyId, actionName)`,
+  `ActionsCleared(storyId)` (M3). The actions only redisplay the Actions panel, not the view. The presenter subscribes to them to re-render, as
   `BattlefieldPresenter` does.
 
 ### Binding a story to a view
@@ -181,23 +195,27 @@ control may come from the images loaded (see `InventorySlotViewStories`):
 
 ```kotlin
 object ShopViewStories : StoryBinding {
-    override val component = /* id, group, title, description, controls, default args, stories */
+    override fun component(context: StoryContext) = /* id, group, title, description, controls, default args, stories */
 
     override fun render(args: Args, context: StoryContext): View =
         ShopView(context.resourcesLoader, context.texts).apply {
             setDelegate(object : ShopView.Delegate {
-                override fun shopSlotSelected(index: Int) = context.action("shopSlotSelected", index, setArg = "selectedSlot" to index)
+                override fun shopSlotSelected(index: Int) = context.action("shopSlotSelected", index, setArg = "selectedSlot" to ArgDto.text("$index"))
                 // ...
             })
             display(/* from args */)
-            selectSlot(args.int("selectedSlot"))
+            // ...
         }
 }
 ```
 
 - `StoryContext` gives the binding the shared `BattleSceneResourcesLoader` and the `Texts` (in English in M1, in the
   selected language from M2: the presenter selects the language global on the `Texts` before every render), and from M3 `action(...)`, which runs `RecordAction` and, when it maps the action to an
-  arg, `ChangeArg`.
+  arg, `ChangeArg`. Built in M3: `action(name, vararg arguments, setArg: Pair<String, ArgDto>? = null)` hands them to
+  its `Delegate`, which the presenter sets, as views do; with none (e.g.: in the smoke test) it does nothing. The
+  arguments are logged as text. `ChangeArg` fails on a value the control does not accept, so the binding only maps to
+  valid values, or maps to none (e.g.: `shopBuyerStepped` at an end of the party). `StoryContext.lootableItemIds()`
+  gives the item ids of the images loaded, for a pick control or the items of a view.
 - The view is rebuilt from scratch whenever the story changes (and from M2 when the args or the globals change):
   simpler and deterministic. Its animations restart, which is acceptable in v1.
 - `PhoneFrameView` shows it at its real size, in the middle of a 390x844 screen with the game background, which crops
@@ -220,7 +238,16 @@ object ShopViewStories : StoryBinding {
   are `StorybookButton`s, which paint their own selection, as `UIButton`'s hover tween overwrites it.
 - No story of M2 uses the text and color controls: `HealthBarView` has two ints, and `InventorySlotView` a pick and
   three booleans. They are covered by `StorybookTest` and `ControlsViewTest`, and only seen in the app once a story
-  uses them (`ShopView` in M3 brings an enum).
+  uses them. `ShopView` in M3 brings an enum and a text (`buyer`), checked in the JS build; no story uses a color yet.
+- `ShopViewStories` (M3) displays the shop as `ShopPresenter` does, from 8 args: `mode` (enum), `buyer` (text), `gold`,
+  `bagUsed`, `buyerIndex` and `items` (ints, the items being the first lootable item ids, round), `selectedSlot` (a pick
+  of `none` and the slot indexes) and `refusal` (an enum, `NONE` or why the items can not be traded: they are dimmed,
+  `EQUIPPED` frames them in gold, and Buy or Sell shows it, disabled). The bag size (12), the party size (3) and the
+  prices (50 to buy, 25 to sell) are fixed. `shopSlotSelected` sets `selectedSlot`, to `none` for the selected or an
+  empty slot, as in the game; `shopBuyerStepped` sets `buyerIndex` within the party; `shopActionSelected` and
+  `shopBackSelected` are only logged.
+- The Actions panel (`ActionsView`, M3) lists `name(arguments)`, e.g.: `shopSlotSelected(3)`, the newest on top, the
+  five that fit, and how many there are in its title, e.g.: `Actions (12)`, with a `Clear` button.
 
 ### Startup flag and hosting
 
@@ -233,7 +260,11 @@ object ShopViewStories : StoryBinding {
 - The layout: the sidebar (260 wide) on the left, the 414x868 phone frame (the 390x844 screen and its bezel) 16 from
   the top, and `StoryInfoView` on the right, with the component and the story, each with its description. The Controls
   and the Actions go under it in M2 and M3, and the toolbar with the Globals above it. Built in M2: the toolbar 32
-  from the top, the story info under it, and the Controls under the story info (from y = 344).
+  from the top, the story info under it, and the Controls under the story info (from y = 344). Built in M3: the
+  Actions (140 high) at a fixed place under the most the controls may take, `ControlsView.MAXIMUM_HEIGHT` (384), so
+  from y = 744 to the bottom margin. `StorySmokeTest` displays the controls of every component and fails when they
+  take more, so a component with too many controls is found before the panels overlap: `ShopView`'s 8 controls (an
+  enum on two lines) take about 372.
 - `runJvmStorybook` and `runJvmStorybookAutoreload`: KorGE makes both for an extra entry point,
   `entrypoint("storybook", "com.mkz.rpg.MainKt")` in `build.gradle.kts`, which also sets the system property on both.
   `.run/runJvmStorybookAutoreload.run.xml` runs the second one, as `.run/runJvmAutoreload.run.xml` does the game.
@@ -287,8 +318,11 @@ object ShopViewStories : StoryBinding {
   renders it in a `ViewsForTesting`, with `BattleSceneResourcesLoaderMother` and `TestCatalogs`, and fails on any
   exception (with its default args from M2). It also lists every component and story id.
 - `StorybookEndToEndTest`: starts the Storybook on a story id, and taps another story in the sidebar. In M2: starts it
-  on a link with args and a language, taps a control, and taps a language in the toolbar. In M3: tap the view, check
-  the Actions.
+  on a link with args and a language, taps a control, and taps a language in the toolbar. In M3: taps a slot of the
+  shop, which is logged and selected through `selectedSlot`, and Back, which is only logged.
+- In M3, `ActionsViewTest` (with `ActionsViewExtension`), `FakeActionsView` in `StorybookPresenterTest`, which calls
+  `StoryContext.action` directly with the health bar, and the use case tests of `RecordAction`, `ClearActions` and
+  `SearchActions`.
 - In M2, `ControlsViewTest` and `ToolbarViewTest` (with `ControlsViewExtension` and `ToolbarViewExtension`),
   `LocationQueryTest`, and the smoke test also opens the catalogue of every binding, so a default arg its control does
   not accept (e.g.: an item with no image) fails there.
