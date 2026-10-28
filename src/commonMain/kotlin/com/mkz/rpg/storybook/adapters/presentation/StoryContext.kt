@@ -24,6 +24,9 @@ class StoryContext(
     private companion object {
         const val ITEMS_DIRECTORY = "lootableItem"
         const val UNITS_DIRECTORY = "unit"
+        const val EFFECTS_DIRECTORY = "effect"
+        const val ABILITIES_DIRECTORY = "ability"
+        const val ABILITY_SELECTION = "ability_selection"
         const val PORTRAIT_SUFFIX = "_portrait"
         const val IMAGE_EXTENSION = ".png"
     }
@@ -39,6 +42,12 @@ class StoryContext(
 
     /** Every unit that has a portrait, in alphabetical order, e.g.: the options of a pick control of a unit. */
     fun unitIds(): List<String> = imageIds(UNITS_DIRECTORY).filter { id -> id.endsWith(PORTRAIT_SUFFIX) }.map { id -> id.removeSuffix(PORTRAIT_SUFFIX) }
+
+    /** Every effect that has an icon, in alphabetical order, e.g.: the options of a pick control of an effect. */
+    fun effectIds(): List<String> = imageIds(EFFECTS_DIRECTORY)
+
+    /** Every ability that has an icon, in alphabetical order, e.g.: the options of a pick control of an ability. */
+    fun abilityIds(): List<String> = imageIds(ABILITIES_DIRECTORY) - ABILITY_SELECTION
 
     private fun imageIds(directory: String): List<String> =
         resourcesLoader

@@ -21,9 +21,7 @@ class StoryCoverageArchitectureTest {
     // The views that have no stories yet. Remove a view once it has its stories.
     private val viewsWithoutStories =
         setOf(
-            "AbilityButtonView",
             "AttackPreviewView",
-            "BagButtonView",
             "BattleHudView",
             "BattleInfoView",
             "BattleUnitInfoView",
@@ -31,8 +29,6 @@ class StoryCoverageArchitectureTest {
             "CancelAndConfirmView",
             "CancelButton",
             "ConfirmButton",
-            "EffectView",
-            "EffectsView",
             "FinishTurnView",
             "FormationRowView",
             "FormationView",

@@ -44,6 +44,10 @@ class StorybookApi(
                 UnitNameViewStories,
                 RemainingTurnsViewStories,
                 PointsViewStories,
+                EffectViewStories,
+                EffectsViewStories,
+                AbilityButtonViewStories,
+                BagButtonViewStories,
                 InventorySlotViewStories,
                 ShopViewStories,
             )
