@@ -11,8 +11,6 @@ import korlibs.math.geom.Size
 /** The stories of [InventorySlotView], at the size the inventory and the shop display it. */
 object InventorySlotViewStories : StoryBinding {
     private val SIZE = Size(60, 60)
-    private const val ITEMS_DIRECTORY = "lootableItem"
-    private const val IMAGE_EXTENSION = ".png"
 
     // The option of the item control for an empty slot, which no lootable item id is.
     private const val NO_ITEM = "none"
@@ -48,7 +46,7 @@ object InventorySlotViewStories : StoryBinding {
             description = "One storage space of the inventory and the shop: empty, or the icon of the item it holds.",
             controls =
                 listOf(
-                    ControlDto.pick(ITEM, listOf(NO_ITEM) + lootableItemIds(context)),
+                    ControlDto.pick(ITEM, listOf(NO_ITEM) + context.lootableItemIds()),
                     ControlDto.boolean(EQUIPPED),
                     ControlDto.boolean(DIMMED),
                     ControlDto.boolean(SELECTED),
@@ -65,13 +63,4 @@ object InventorySlotViewStories : StoryBinding {
             display(lootableItemId = args.text(ITEM).takeUnless { it == NO_ITEM }, isEquipped = args.boolean(EQUIPPED), isDimmed = args.boolean(DIMMED))
             if (args.boolean(SELECTED)) select()
         }
-
-    // Every lootable item that has an icon, in alphabetical order.
-    private fun lootableItemIds(context: StoryContext): List<String> =
-        context.resourcesLoader
-            .bitmaps(ITEMS_DIRECTORY)
-            .keys
-            .filter { name -> name.endsWith(IMAGE_EXTENSION) }
-            .map { name -> name.removeSuffix(IMAGE_EXTENSION) }
-            .sorted()
 }

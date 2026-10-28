@@ -52,8 +52,34 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-inventory-slot--equipped",
                     "screen-inventory-slot--selected",
                     "screen-inventory-slot--dimmed",
+                    "screen-shop",
+                    "screen-shop--buy",
+                    "screen-shop--buy-item-selected",
+                    "screen-shop--buy-not-enough-gold",
+                    "screen-shop--buy-bag-full",
+                    "screen-shop--sell",
+                    "screen-shop--sell-equipped",
+                    "screen-shop--sell-bag-full",
+                    "screen-shop--sell-nothing",
                 )
             }
+        }
+
+    @Test
+    fun `ControlsView should fit the controls of every story binding above the actions when they are displayed`() =
+        sharedViewsTest {
+            // Given
+            val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
+            val controlsView = ControlsView()
+            addChild(controlsView)
+            // When
+            val overflowing =
+                StorybookApi.STORY_BINDINGS.map { binding -> binding.component(storyContext) }.filterNot { component ->
+                    controlsView.display(component.controls, component.args)
+                    controlsView.fitsItsMaximumHeight()
+                }
+            // Then
+            withClue("Components whose controls cover the actions: give them fewer controls") { overflowing.map { component -> component.id }.shouldBeEmpty() }
         }
 
     @Test

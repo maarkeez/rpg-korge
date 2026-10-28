@@ -1,5 +1,6 @@
 package com.mkz.rpg.storybook.domain
 
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -17,6 +18,8 @@ import com.mkz.rpg.storybook.domain.StorybookError.RepeatedComponentId
 import com.mkz.rpg.storybook.domain.StorybookError.RepeatedControl
 import com.mkz.rpg.storybook.domain.StorybookError.RepeatedStoryId
 import com.mkz.rpg.storybook.domain.StorybookError.StoryNotFound
+import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
+import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgsReset
 import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
@@ -30,7 +33,9 @@ import kotlin.jvm.JvmInline
  * links shared, so they are stable: renaming a component or a story keeps its id.
  *
  * The story on show is displayed with its args, one per control of its component (e.g.: `remaining = 15`), which can be
- * changed to any value its control accepts, and with the globals shared by every story (e.g.: `language = es`).
+ * changed to any value its control accepts, and with the globals shared by every story (e.g.: `language = es`). The
+ * actions log the callbacks the view on show made, e.g.: `shopSlotSelected(3)`, the newest first, until another story
+ * is shown.
  */
 @ConsistentCopyVisibility
 data class Storybook private constructor(
@@ -40,9 +45,13 @@ data class Storybook private constructor(
     private val selectedStoryId: StoryId,
     private val changedArgs: Values,
     private val globals: Values,
+    private val actions: List<Action>,
     private val events: Set<StorybookEvent>,
 ) {
     companion object {
+        /** How many actions the log keeps: the newest ones. */
+        const val MAXIMUM_ACTIONS = 50
+
         private val KEBAB_CASE = Regex("[a-z0-9]+(-[a-z0-9]+)*")
         private val HEX_COLOR = Regex("[0-9A-F]{6}")
         private const val STORY_SEPARATOR = "--"
@@ -74,6 +83,7 @@ data class Storybook private constructor(
                 selectedStoryId = selectedStoryId,
                 changedArgs = changedArgs,
                 globals = defaults + controls.parse(location.globals),
+                actions = emptyList(),
                 events = setOf(CatalogueInitialised, StorySelected(storyId = selectedStoryId.value)),
             )
         }
@@ -89,6 +99,7 @@ data class Storybook private constructor(
             selectedStoryId = selectedStoryId.value,
             args = args().toDto(),
             globals = globals.toDto(),
+            actions = actions.map(Action::toDto),
         )
 
     /** What a link keeps to open the same: the story on show, the args changed from its own, and the globals changed from their defaults. */
@@ -99,11 +110,14 @@ data class Storybook private constructor(
             globals = globalControls.asText(globals.changedFrom(defaultGlobals)),
         )
 
-    /** Shows the story, with its own args. Nothing changes when it is already on show. Fails when it is not in the catalogue. */
+    /**
+     * Shows the story, with its own args and no actions, as those were of the story on show. Nothing changes when it is
+     * already on show. Fails when it is not in the catalogue.
+     */
     fun selectStory(storyId: String): Storybook {
         val story = components.storyIdOrNull(storyId) ?: throw StoryNotFound(storyId)
         if (story == selectedStoryId) return this
-        return copy(selectedStoryId = story, changedArgs = Values.NONE, events = events + StorySelected(storyId = story.value))
+        return copy(selectedStoryId = story, changedArgs = Values.NONE, actions = emptyList(), events = events + StorySelected(storyId = story.value))
     }
 
     /** Changes an arg of the story on show. Nothing changes when it has that value. Fails when its control does not accept it. */
@@ -134,6 +148,25 @@ data class Storybook private constructor(
         val global = globalControls.valueOf(name, value)
         if (globals[name] == global) return this
         return copy(globals = globals + Values(mapOf(name to global)), events = events + GlobalChanged(globalName = name))
+    }
+
+    /**
+     * Logs an action of the view on show, e.g.: `shopSlotSelected` with `3`, as the newest one, keeping the last
+     * [MAXIMUM_ACTIONS].
+     */
+    fun recordAction(
+        name: String,
+        arguments: List<String>,
+    ): Storybook =
+        copy(
+            actions = (listOf(Action(name, arguments)) + actions).take(MAXIMUM_ACTIONS),
+            events = events + ActionRecorded(storyId = selectedStoryId.value, actionName = name),
+        )
+
+    /** Empties the log of actions. Nothing changes when it is empty. */
+    fun clearActions(): Storybook {
+        if (actions.isEmpty()) return this
+        return copy(actions = emptyList(), events = events + ActionsCleared(storyId = selectedStoryId.value))
     }
 
     private fun selectedComponent(): Component = components.componentOf(selectedStoryId)
@@ -423,6 +456,14 @@ data class Storybook private constructor(
         fun toDto(): Map<String, ArgDto> = value.mapValues { (_, value) -> value.toDto() }
     }
 
+    /** A callback the view on show made, e.g.: `shopSlotSelected` with `3`. */
+    private data class Action(
+        val name: String,
+        val arguments: List<String>,
+    ) {
+        fun toDto(): ActionDto = ActionDto(name = name, arguments = arguments)
+    }
+
     /** In kebab case, e.g.: `screen-health-bar`. */
     @JvmInline private value class ComponentId(
         val value: String,
@@ -446,7 +487,8 @@ data class Storybook private constructor(
      * Components: in the order they are listed, each with its stories in order, the first one opened by default.
      * Global controls: the settings shared by every story, e.g.: the language, with their default values.
      * Selected story: the id of the story on show. Args: the values the story on show is displayed with, one per
-     * control of its component. Globals: the value of each global control.
+     * control of its component. Globals: the value of each global control. Actions: the callbacks the view on show made,
+     * the newest first.
      */
     data class Dto(
         val components: List<ComponentDto>,
@@ -455,6 +497,7 @@ data class Storybook private constructor(
         val selectedStoryId: String,
         val args: Map<String, ArgDto>,
         val globals: Map<String, ArgDto>,
+        val actions: List<ActionDto>,
     ) {
         /**
          * Id: its group and title in kebab case, e.g.: `screen-health-bar`, kept when they are renamed. Group: the
@@ -554,6 +597,15 @@ data class Storybook private constructor(
                 TEXT,
             }
         }
+
+        /**
+         * A callback the view on show made, by its name, e.g.: `shopSlotSelected`. Arguments: what it was made with, as
+         * text, e.g.: `3`.
+         */
+        data class ActionDto(
+            val name: String,
+            val arguments: List<String>,
+        )
 
         /**
          * Where a link keeps what is on show, as text, e.g.: the page URL `?story=screen-health-bar--full&args=remaining:3`.

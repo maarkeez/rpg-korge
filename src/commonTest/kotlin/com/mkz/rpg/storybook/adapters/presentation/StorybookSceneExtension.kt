@@ -19,3 +19,6 @@ fun Stage.toolbarView(): ToolbarView? = descendants().filterIsInstance<ToolbarVi
 
 /** The controls on the screen, or `null` while the Storybook is not on the stage. */
 fun Stage.controlsView(): ControlsView? = descendants().filterIsInstance<ControlsView>().firstOrNull()
+
+/** The actions on the screen, or `null` while the Storybook is not on the stage. */
+fun Stage.actionsView(): ActionsView? = descendants().filterIsInstance<ActionsView>().firstOrNull()

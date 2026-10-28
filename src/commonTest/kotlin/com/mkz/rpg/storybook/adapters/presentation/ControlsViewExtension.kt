@@ -51,3 +51,6 @@ fun ControlsView.enterText(
 }
 
 private fun ControlsView.rowOf(controlName: String): ControlsView.ControlRow = controlRows.first { row -> row.control.name == controlName }
+
+/** Whether the title and the rows fit in the most the controls may take, so the actions under them are not covered. */
+fun ControlsView.fitsItsMaximumHeight(): Boolean = rows.y + rows.height <= ControlsView.MAXIMUM_HEIGHT

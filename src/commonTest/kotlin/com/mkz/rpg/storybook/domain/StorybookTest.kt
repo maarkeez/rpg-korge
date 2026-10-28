@@ -1,9 +1,12 @@
 package com.mkz.rpg.storybook.domain
 
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
+import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
+import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgsReset
 import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
@@ -68,6 +71,7 @@ class StorybookTest {
                 selectedStoryId = "screen-health-bar--full",
                 args = mapOf("remaining" to ArgDto.int(30)),
                 globals = mapOf("language" to ArgDto.text("en")),
+                actions = emptyList(),
             )
     }
 
@@ -494,6 +498,72 @@ class StorybookTest {
         val location = storybook.toLocation()
         // Then
         location.globals shouldBe emptyMap()
+    }
+
+    @Test
+    fun `RecordAction should log the action as the newest one and publish the action recorded`() {
+        // Given
+        val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3")).pullEvents().second
+        // When
+        val (events, recordedStorybook) = storybook.recordAction("shopBuyerStepped", listOf("-1")).pullEvents()
+        // Then
+        recordedStorybook.toDto().actions.shouldContainExactly(ActionDto(name = "shopBuyerStepped", arguments = listOf("-1")), ActionDto(name = "shopSlotSelected", arguments = listOf("3")))
+        events.shouldContainExactly(ActionRecorded(storyId = "screen-health-bar--full", actionName = "shopBuyerStepped"))
+    }
+
+    @Test
+    fun `RecordAction should keep only the newest actions when the log is full`() {
+        // Given
+        val storybook = (1..Storybook.MAXIMUM_ACTIONS).fold(storybook()) { recorded, index -> recorded.recordAction("shopSlotSelected", listOf(index.toString())) }
+        // When
+        val recordedStorybook = storybook.recordAction("shopBackSelected", emptyList())
+        // Then
+        val actions = recordedStorybook.toDto().actions
+        actions.size shouldBe Storybook.MAXIMUM_ACTIONS
+        actions.first() shouldBe ActionDto(name = "shopBackSelected", arguments = emptyList())
+        actions.last() shouldBe ActionDto(name = "shopSlotSelected", arguments = listOf("2"))
+    }
+
+    @Test
+    fun `RecordAction should keep the actions when an arg of the story on show is changed`() {
+        // Given
+        val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3"))
+        // When
+        val changedStorybook = storybook.changeArg("remaining", ArgDto.int(3))
+        // Then
+        changedStorybook.toDto().actions.shouldContainExactly(ActionDto(name = "shopSlotSelected", arguments = listOf("3")))
+    }
+
+    @Test
+    fun `SelectStory should show the story with no actions when actions of the story on show were logged`() {
+        // Given
+        val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3"))
+        // When
+        val selectedStorybook = storybook.selectStory("screen-health-bar--empty")
+        // Then
+        selectedStorybook.toDto().actions.shouldBeEmpty()
+    }
+
+    @Test
+    fun `ClearActions should empty the log and publish the actions cleared when actions were logged`() {
+        // Given
+        val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3")).pullEvents().second
+        // When
+        val (events, clearedStorybook) = storybook.clearActions().pullEvents()
+        // Then
+        clearedStorybook.toDto().actions.shouldBeEmpty()
+        events.shouldContainExactly(ActionsCleared(storyId = "screen-health-bar--full"))
+    }
+
+    @Test
+    fun `ClearActions should change nothing when no action was logged`() {
+        // Given
+        val storybook = storybook(components = listOf(healthBar))
+        // When
+        val (events, clearedStorybook) = storybook.clearActions().pullEvents()
+        // Then
+        clearedStorybook shouldBe storybook
+        events.shouldBeEmpty()
     }
 
     @Test

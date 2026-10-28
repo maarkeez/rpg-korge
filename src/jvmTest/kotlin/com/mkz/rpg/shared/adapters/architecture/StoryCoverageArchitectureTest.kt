@@ -56,7 +56,6 @@ class StoryCoverageArchitectureTest {
             "PreviewBarView",
             "ReceiverPreviewView",
             "RemainingTurnsView",
-            "ShopView",
             "UnitNameView",
             "UnitPortraitView",
             "VirtualPadView",

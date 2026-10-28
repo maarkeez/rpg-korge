@@ -13,7 +13,7 @@ import korlibs.korge.view.position
 
 /**
  * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and on the right
- * the globals, what the story is and its controls. Localization: the texts of the views on show, in the language global.
+ * the globals, what the story is, its controls and its actions. Localization: the texts of the views on show, in the language global.
  * Location: where what is on show is kept, e.g.: the page URL.
  */
 class StorybookScene(
@@ -30,6 +30,7 @@ class StorybookScene(
     val storyInfoView = StoryInfoView()
     val toolbarView = ToolbarView()
     val controlsView = ControlsView()
+    val actionsView = ActionsView()
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -44,14 +45,16 @@ class StorybookScene(
         val margin = (STORYBOOK_WINDOW_SIZE.height - PhoneFrameView.SIZE.height) / 2
         addChild(sidebarView)
         addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
-        // On the right of the phone: the globals on top, then what the story is, then its controls.
+        // On the right of the phone: the globals on top, then what the story is, its controls, and its actions under the
+        // most the controls may take, which fit in the window.
         val panelsX = SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width
         addChild(toolbarView.position(panelsX, margin * 2))
         addChild(storyInfoView.position(panelsX, toolbarView.y + ToolbarView.HEIGHT + margin * 2))
         addChild(controlsView.position(panelsX, storyInfoView.y + StoryInfoView.HEIGHT + margin))
+        addChild(actionsView.position(panelsX, controlsView.y + ControlsView.MAXIMUM_HEIGHT + margin))
 
         val storyContext = StoryContext(resourcesLoader, texts)
-        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, phoneFrameView, storybookApi, storyContext, eventBus)
+        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, eventBus)
         storybookApi.init(storyContext)
     }
 }

@@ -25,6 +25,9 @@ import korlibs.math.geom.Size
 open class ControlsView : Container() {
     companion object {
         const val WIDTH = 480.0
+
+        /** The most the title and the rows of a component may take, so the actions fit under them in the window. */
+        const val MAXIMUM_HEIGHT = 384.0
         const val TITLE_HEIGHT = 44.0
         const val NAME_WIDTH = 150.0
         const val ROW_GAP = 10.0

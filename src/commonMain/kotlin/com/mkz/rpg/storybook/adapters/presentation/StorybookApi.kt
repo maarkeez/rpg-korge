@@ -8,9 +8,12 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.commands.ChangeArg
 import com.mkz.rpg.storybook.usecases.commands.ChangeGlobal
+import com.mkz.rpg.storybook.usecases.commands.ClearActions
 import com.mkz.rpg.storybook.usecases.commands.InitialiseCatalogue
+import com.mkz.rpg.storybook.usecases.commands.RecordAction
 import com.mkz.rpg.storybook.usecases.commands.ResetArgs
 import com.mkz.rpg.storybook.usecases.commands.SelectStory
+import com.mkz.rpg.storybook.usecases.queries.SearchActions
 import com.mkz.rpg.storybook.usecases.queries.SearchArgs
 import com.mkz.rpg.storybook.usecases.queries.SearchCatalogue
 import com.mkz.rpg.storybook.usecases.queries.SearchGlobals
@@ -32,6 +35,7 @@ class StorybookApi(
             listOf(
                 HealthBarViewStories,
                 InventorySlotViewStories,
+                ShopViewStories,
             )
 
         /** The global choosing the language of the views on show, by its code, e.g.: `es`. */
@@ -47,12 +51,15 @@ class StorybookApi(
     val changeArg = ChangeArg(storybookRepository, storyLocation, eventBus)
     val resetArgs = ResetArgs(storybookRepository, storyLocation, eventBus)
     val changeGlobal = ChangeGlobal(storybookRepository, storyLocation, eventBus)
+    val recordAction = RecordAction(storybookRepository, eventBus)
+    val clearActions = ClearActions(storybookRepository, eventBus)
 
     // Queries
     val searchCatalogue = SearchCatalogue(storybookRepository)
     val searchSelectedStory = SearchSelectedStory(storybookRepository)
     val searchArgs = SearchArgs(storybookRepository)
     val searchGlobals = SearchGlobals(storybookRepository)
+    val searchActions = SearchActions(storybookRepository)
 
     // The binding of each component, by its id, once the catalogue is open.
     private var bindingsByComponentId: Map<String, StoryBinding> = emptyMap()

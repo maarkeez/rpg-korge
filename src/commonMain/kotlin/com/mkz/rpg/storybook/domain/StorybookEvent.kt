@@ -21,4 +21,13 @@ sealed interface StorybookEvent : DomainEvent {
     data class GlobalChanged(
         val globalName: String,
     ) : StorybookEvent
+
+    data class ActionRecorded(
+        val storyId: String,
+        val actionName: String,
+    ) : StorybookEvent
+
+    data class ActionsCleared(
+        val storyId: String,
+    ) : StorybookEvent
 }
