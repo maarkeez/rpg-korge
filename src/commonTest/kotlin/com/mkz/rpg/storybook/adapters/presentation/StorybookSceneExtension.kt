@@ -13,3 +13,9 @@ fun Stage.phoneFrameView(): PhoneFrameView? = descendants().filterIsInstance<Pho
 
 /** The story info on the screen, or `null` while the Storybook is not on the stage. */
 fun Stage.storyInfoView(): StoryInfoView? = descendants().filterIsInstance<StoryInfoView>().firstOrNull()
+
+/** The toolbar on the screen, or `null` while the Storybook is not on the stage. */
+fun Stage.toolbarView(): ToolbarView? = descendants().filterIsInstance<ToolbarView>().firstOrNull()
+
+/** The controls on the screen, or `null` while the Storybook is not on the stage. */
+fun Stage.controlsView(): ControlsView? = descendants().filterIsInstance<ControlsView>().firstOrNull()

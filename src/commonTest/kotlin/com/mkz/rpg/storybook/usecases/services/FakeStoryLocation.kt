@@ -1,14 +1,19 @@
 package com.mkz.rpg.storybook.usecases.services
 
-// Asks for the given story, and records the stories kept, instead of reading and writing a page URL.
+import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
+
+// Asks for the given story, args and globals, and records what is kept, instead of reading and writing a page URL.
 class FakeStoryLocation(
     private val requestedStoryId: String? = null,
+    private val requestedArgs: Map<String, String> = emptyMap(),
+    private val requestedGlobals: Map<String, String> = emptyMap(),
 ) : StoryLocation {
-    val keptStoryIds = mutableListOf<String>()
+    val keptLocations = mutableListOf<LocationDto>()
+    val keptStoryIds get() = keptLocations.map { location -> location.storyId }
 
-    override fun searchStoryId(): String? = requestedStoryId
+    override fun search() = LocationDto(storyId = requestedStoryId, args = requestedArgs, globals = requestedGlobals)
 
-    override fun replaceStoryId(storyId: String) {
-        keptStoryIds += storyId
+    override fun replace(location: LocationDto) {
+        keptLocations += location
     }
 }

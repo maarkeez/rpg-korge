@@ -4,7 +4,7 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
-/** Shows the story, and keeps it in the location, so a link opens it. Nothing happens when it is already on show. */
+/** Shows the story, with its own args, and keeps it in the location, so a link opens it. Nothing happens when it is already on show. */
 class SelectStory(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,
@@ -15,7 +15,7 @@ class SelectStory(
         val (events, selectedStorybook) = storybook.selectStory(storyId).pullEvents()
         if (events.isEmpty()) return
         storybookRepository.save(selectedStorybook)
-        storyLocation.replaceStoryId(storyId)
+        storyLocation.replace(selectedStorybook.toLocation())
         eventBus.publish(events)
     }
 }

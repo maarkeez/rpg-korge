@@ -28,4 +28,26 @@ sealed class StorybookError(
     class StoryNotFound(
         storyId: String,
     ) : StorybookError("The story '$storyId' is not in the catalogue")
+
+    class InvalidControl(
+        controlName: String,
+        reason: String,
+    ) : StorybookError("The control '$controlName' is not valid: $reason")
+
+    class RepeatedControl(
+        controlName: String,
+    ) : StorybookError("The control '$controlName' is repeated")
+
+    class ControlNotFound(
+        controlName: String,
+    ) : StorybookError("There is no control '$controlName'")
+
+    class MissingValue(
+        controlName: String,
+    ) : StorybookError("The control '$controlName' has no default value")
+
+    class InvalidValue(
+        controlName: String,
+        value: Any?,
+    ) : StorybookError("The control '$controlName' does not accept the value '$value'")
 }

@@ -1,10 +1,15 @@
 package com.mkz.rpg.storybook.usecases.services
 
-/** Where the story on show is kept, so a link opens it, e.g.: the page URL `?story=screen-health-bar--full`. */
-interface StoryLocation {
-    /** The id of the story asked for, or `null` when none is. */
-    fun searchStoryId(): String?
+import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 
-    /** Keeps the story on show in place of the one kept, so going back does not step through every story shown. */
-    fun replaceStoryId(storyId: String)
+/**
+ * Where what is on show is kept, so a link opens it, e.g.: the page URL
+ * `?story=screen-health-bar--full&args=remaining:3&globals=language:es`.
+ */
+interface StoryLocation {
+    /** The story, args and globals asked for, none when nothing is. */
+    fun search(): LocationDto
+
+    /** Keeps what is on show in place of what is kept, so going back does not step through every change. */
+    fun replace(location: LocationDto)
 }

@@ -217,7 +217,7 @@ const DATA = {
     {"name": "cpuWanderBrain", "files": 23, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 53},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 62, "importsOut": 13},
     {"name": "inventory", "files": 29, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 53},
-    {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 6, "importsOut": 6},
+    {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 18, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 26},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 14},
@@ -225,9 +225,9 @@ const DATA = {
     {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 42, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 5, "importsOut": 186},
-    {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 409, "importsOut": 0},
-    {"name": "storybook", "files": 21, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 14},
+    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 6, "importsOut": 186},
+    {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 412, "importsOut": 0},
+    {"name": "storybook", "files": 32, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 19},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 15}
   ],
@@ -1290,24 +1290,29 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ReceiverPreviewView.kt", "layer": "adapters", "name": "unit.domain.Unit"}
     ]},
-    {"from": "storybook", "to": "localization", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"}
+    {"from": "storybook", "to": "localization", "weight": 2, "files": 2, "imports": [
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 5, "files": 3, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 6, "files": 4, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/HealthBarViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.HealthBarView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/InventorySlotViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.InventorySlotView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StoryContext.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleSceneResourcesLoader"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StoryContext.kt", "layer": "adapters", "name": "screen.adapters.presentation.Texts"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleSceneResourcesLoader"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "screen.adapters.presentation.Texts"}
     ]},
-    {"from": "storybook", "to": "shared", "weight": 8, "files": 6, "imports": [
+    {"from": "storybook", "to": "shared", "weight": 11, "files": 9, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "shared.adapters.events.InMemoryEventBus"},
       {"file": "com/mkz/rpg/storybook/domain/StorybookEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/storybook/usecases/commands/ChangeArg.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/storybook/usecases/commands/ChangeGlobal.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/usecases/commands/InitialiseCatalogue.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/storybook/usecases/commands/ResetArgs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/storybook/usecases/commands/SelectStory.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "terrain", "to": "shared", "weight": 7, "files": 5, "imports": [

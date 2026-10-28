@@ -41,7 +41,6 @@ class StoryCoverageArchitectureTest {
             "GiveItemView",
             "HealthBarPreviewView",
             "InventoryFullView",
-            "InventorySlotView",
             "InventoryView",
             "ItemActionsView",
             "ManaBarPreviewView",

@@ -6,6 +6,7 @@ import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 import com.mkz.rpg.storybook.domain.StorybookMother.component
+import com.mkz.rpg.storybook.domain.StorybookMother.location
 import com.mkz.rpg.storybook.domain.StorybookMother.story
 import com.mkz.rpg.storybook.domain.StorybookMother.storybook
 import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
@@ -33,7 +34,7 @@ class SelectStoryTest {
         selectStory(storyId = "screen-health-bar--empty")
         // Then
         storybookRepository.search()?.toDto()?.selectedStoryId shouldBe "screen-health-bar--empty"
-        storyLocation.keptStoryIds.shouldContainExactly("screen-health-bar--empty")
+        storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--empty"))
         eventBus.shouldHavePublishedEvents(StorySelected(storyId = "screen-health-bar--empty"))
     }
 

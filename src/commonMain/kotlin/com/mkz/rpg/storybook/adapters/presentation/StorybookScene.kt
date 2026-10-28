@@ -12,8 +12,9 @@ import korlibs.korge.view.addUpdater
 import korlibs.korge.view.position
 
 /**
- * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and what it is on
- * the right. Localization: the texts of the views on show. Location: where the story on show is kept, e.g.: the page URL.
+ * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and on the right
+ * the globals, what the story is and its controls. Localization: the texts of the views on show, in the language global.
+ * Location: where what is on show is kept, e.g.: the page URL.
  */
 class StorybookScene(
     localizationApi: LocalizationApi,
@@ -27,6 +28,8 @@ class StorybookScene(
     val sidebarView = SidebarView()
     val phoneFrameView = PhoneFrameView()
     val storyInfoView = StoryInfoView()
+    val toolbarView = ToolbarView()
+    val controlsView = ControlsView()
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -41,9 +44,14 @@ class StorybookScene(
         val margin = (STORYBOOK_WINDOW_SIZE.height - PhoneFrameView.SIZE.height) / 2
         addChild(sidebarView)
         addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
-        addChild(storyInfoView.position(SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width, margin * 2))
+        // On the right of the phone: the globals on top, then what the story is, then its controls.
+        val panelsX = SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width
+        addChild(toolbarView.position(panelsX, margin * 2))
+        addChild(storyInfoView.position(panelsX, toolbarView.y + ToolbarView.HEIGHT + margin * 2))
+        addChild(controlsView.position(panelsX, storyInfoView.y + StoryInfoView.HEIGHT + margin))
 
-        StorybookPresenter(sidebarView, storyInfoView, phoneFrameView, storybookApi, StoryContext(resourcesLoader, texts), eventBus)
-        storybookApi.init()
+        val storyContext = StoryContext(resourcesLoader, texts)
+        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, phoneFrameView, storybookApi, storyContext, eventBus)
+        storybookApi.init(storyContext)
     }
 }

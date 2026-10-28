@@ -8,12 +8,15 @@ import korlibs.korge.view.View
  * [HealthBarViewStories] for `HealthBarView`). Each one is listed in [StorybookApi.STORY_BINDINGS].
  */
 interface StoryBinding {
-    /** The component, with its stories, in the order they are listed. */
-    val component: ComponentDto
+    /**
+     * The component, with its controls, its default args and its stories, in the order they are listed. The options of
+     * its controls may come from the [context], e.g.: the lootable item ids from the images loaded.
+     */
+    fun component(context: StoryContext): ComponentDto
 
-    /** A new view, displaying the story, which must be one of the [component]. */
+    /** A new view, displaying the [args], one per control of the component. */
     fun render(
-        storyId: String,
+        args: Args,
         context: StoryContext,
     ): View
 }

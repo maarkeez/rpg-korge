@@ -52,7 +52,7 @@ suspend fun Stage.startGame(random: Random = Random.Default) {
 suspend fun Stage.startStorybook(storyLocation: StoryLocation = platformStoryLocation()) {
     val sceneContainer = sceneContainer()
 
-    // The texts of the views on show, in English.
+    // The texts of the views on show, in English until the language global selects another one.
     val eventBus = InMemoryEventBus()
     addUpdater { eventBus.dispatch() }
     val localizationApi = LocalizationApi(eventBus)

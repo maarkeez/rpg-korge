@@ -20,6 +20,7 @@ import korlibs.math.geom.Size
 open class StoryInfoView : Container() {
     companion object {
         const val WIDTH = 480.0
+        const val HEIGHT = 236.0
         val SECONDARY_COLOR = RGBA(0xBB, 0xBB, 0xBB)
     }
 
