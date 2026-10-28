@@ -33,7 +33,13 @@ class StorybookApi(
         /** Every story binding, in the order the sidebar lists them. They are listed by hand, as JS has no reflection. */
         val STORY_BINDINGS: List<StoryBinding> =
             listOf(
+                BarViewStories,
+                PreviewBarViewStories,
                 HealthBarViewStories,
+                ManaBarViewStories,
+                HealthBarPreviewViewStories,
+                ManaBarPreviewViewStories,
+                BattlefieldHealthBarPreviewViewStories,
                 InventorySlotViewStories,
                 ShopViewStories,
             )

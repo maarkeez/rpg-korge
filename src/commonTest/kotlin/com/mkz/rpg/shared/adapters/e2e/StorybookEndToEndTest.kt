@@ -15,7 +15,7 @@ import com.mkz.rpg.storybook.adapters.presentation.actionTexts
 import com.mkz.rpg.storybook.adapters.presentation.actionsView
 import com.mkz.rpg.storybook.adapters.presentation.clickControlButton
 import com.mkz.rpg.storybook.adapters.presentation.clickLanguage
-import com.mkz.rpg.storybook.adapters.presentation.clickStory
+import com.mkz.rpg.storybook.adapters.presentation.clickStoryId
 import com.mkz.rpg.storybook.adapters.presentation.controlsView
 import com.mkz.rpg.storybook.adapters.presentation.displayedValue
 import com.mkz.rpg.storybook.adapters.presentation.displayedView
@@ -71,12 +71,12 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
     fun `should show a story when it is tapped in the sidebar`() =
         sharedViewsTest {
             // Given
-            val storyLocation = FakeStoryLocation()
+            val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--full")
             startStorybook(storyLocation)
             waitUntil { displayedHealthBarLabel() != null }
             val sidebarView = requireNotNull(stage.sidebarView()) { "The sidebar is not displayed" }
             // When
-            clickStory(sidebarView, "Empty")
+            clickStoryId(sidebarView, "screen-health-bar--empty")
             // Then
             waitUntil { displayedHealthBarLabel() == "0 / 30" }
             displayedHealthBarLabel() shouldBe "0 / 30"
@@ -100,7 +100,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
     fun `should show the story again with the arg, and keep it in the link, when a control is edited`() =
         sharedViewsTest {
             // Given
-            val storyLocation = FakeStoryLocation()
+            val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--full")
             startStorybook(storyLocation)
             waitUntil { displayedHealthBarLabel() != null }
             val controlsView = requireNotNull(stage.controlsView()) { "The controls are not displayed" }
@@ -117,7 +117,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
     fun `should keep the language in the link when a language is tapped in the toolbar`() =
         sharedViewsTest {
             // Given
-            val storyLocation = FakeStoryLocation()
+            val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--full")
             startStorybook(storyLocation)
             waitUntil { displayedHealthBarLabel() != null }
             val toolbarView = requireNotNull(stage.toolbarView()) { "The toolbar is not displayed" }

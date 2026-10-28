@@ -31,3 +31,9 @@ suspend fun ViewsForTesting.clickStory(
     sidebarView: SidebarView,
     storyName: String,
 ) = clickOn(sidebarView.storyRows.first { row -> row.label.text == storyName })
+
+/** Taps the story by its id, when several components have a story of the same name, e.g.: `Empty`. */
+suspend fun ViewsForTesting.clickStoryId(
+    sidebarView: SidebarView,
+    storyId: String,
+) = clickOn(sidebarView.storyRows.first { row -> row.storyId == storyId })
