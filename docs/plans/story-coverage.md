@@ -1,0 +1,130 @@
+# Plan: Story coverage
+
+> **Status:** to do.
+>
+> **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
+> views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
+> allows to have none leave its list, one area at a time, and the list is then removed: the rule becomes "every view
+> has its stories", with no exception. The views that take domain data are moved to view data first, and
+> `BattlefieldView` is split by layer, so every story feeds its view plain data, as the Storybook requires. A new
+> architecture test then keeps the views free of the domain.
+
+## Decisions
+
+| Topic               | Decision                                                                                                                                                                                                                                       |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Goal                | Every view of an `adapters.presentation` package has a `<View>Stories` binding, and `viewsWithoutStories` and its test are deleted.                                                                                                             |
+| Base views          | `BarView` and `PreviewBarView`, only extended by the bars of the game, get stories too, in the **Shared** group, with a color control. The rule keeps no exception.                                                                             |
+| Composite views     | Every view gets its own stories, also when another view contains it (e.g.: `EffectView` and `EffectsView`, `FormationRowView` and `FormationView`, `CancelButton` and `CancelAndConfirmView`). A composite's story builds its real children. |
+| Domain data         | The views that take domain Dtos (`BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView` take `Unit.Dto` and `BattleUnit.Dto`, `NpcDialogView` takes `Npc.Dto`, `BattlefieldView` takes `Battlefield.Dto`) take view data instead: a data class in `screen.adapters.presentation` holding only what the view draws, mapped from the domain by its presenter. The Storybook dependency rule stays as it is. |
+| Virtual pad         | `VirtualPadView` gets its own `Direction` enum, which `ExplorationPresenter` maps to `Party.Dto.DirectionDto`, instead of an exception to the dependency rule.                                                                                   |
+| Battlefield         | `BattlefieldView` is split by layer before its stories: the terrain tile (with its transitions), the tile overlays (highlight, dim, flash, trail, health preview) and the unit sprite become views of their own, each with stories. `BattlefieldView` stays the composition (the tile window, the camera, the input), with the story of a tiny fixed map. |
+| Stories per view    | The states that matter to an artist or a designer, usually 2 to 4: a default, and e.g. empty and full, selected, disabled, a long text. A control for every value the view displays, within `ControlsView.MAXIMUM_HEIGHT`.                     |
+| Groups              | The subdomain of the view, as in [How to add a story](../testing/how-to-add-a-story.md): **Screen** for the views of `screen`, **Shared** for `BarView` and `PreviewBarView`.                                                                 |
+| Guard rule          | Once no view takes domain data, a new architecture test forbids the views of the game (the classes extending a KorGE view, but the presenters) from importing a `.domain` or `.usecases` package, with no allowlist, so every future view can have stories. |
+| End state           | `viewsWithoutStories` and `should only allow the views that have no stories yet...` are deleted. Docs: [Storybook](../architecture/storybook.md#architecture-rules), [How to add a story](../testing/how-to-add-a-story.md) (step 5) and [Package structure](../architecture/package-structure.md) are updated to match. |
+| Delivery            | Six milestones, by area, each a few commits straight on `main`, green on CI, the list shrinking each time. See [Milestones](#milestones).                                                                                                       |
+| Out of scope        | Visual regression, whole scenes (`BattleScene`, `MapBuilderScene`, `MenuScene`), new controls or globals, and redesigning a view while writing its stories (a design issue found is noted, not fixed, unless it blocks the story).         |
+
+## Milestones
+
+Update the **Status** column as the work progresses: ⬜ to do, 🟡 in progress, ✅ done. Add the commit or pull request
+that completes each milestone to **Done in**.
+
+| #  | Milestone                 | Views leaving the list                                                                                                                                                                                  | Done when                                                                                                                         | Status | Done in |
+|----|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------|---------|
+| M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ⬜      |         |
+| M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ⬜      |         |
+| M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ⬜      |         |
+| M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ⬜      |         |
+| M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ⬜      |         |
+| M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ⬜      |         |
+
+Each milestone also adds its component and story ids to `StorySmokeTest`, registers its bindings in
+`StorybookApi.STORY_BINDINGS` (grouped as the sidebar should list them), regenerates the
+[dependency report](../architecture/dependencies.md) when the Storybook depends on a new subdomain, and looks at each
+new story with the [`storybook` skill](../../.claude/skills/storybook/SKILL.md).
+
+### M1 commits
+
+1. **The bars.** `BarView` and `PreviewBarView` in **Shared**, with a color control, and `ManaBarView`,
+   `HealthBarPreviewView`, `ManaBarPreviewView` and `BattlefieldHealthBarPreviewView`.
+2. **The unit badges.** `PointsView`, `UnitNameView`, `UnitPortraitView` (a pick of the unit ids), `RemainingTurnsView`.
+3. **The effects and the buttons.** `EffectView` (a pick of the effect ids), `EffectsView`, `AbilityButtonView` (a pick
+   of the ability ids, and its cooldown badge), `BagButtonView`.
+4. **The plan.** These commits.
+
+### M2 commits
+
+1. **The buttons.** `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, logging their callbacks.
+2. **The item dialogs.** `GiveItemView`, `ItemActionsView`, `InventoryFullView` (an item pick, its price, long names),
+   and `InventoryView`.
+3. **The formation, the menu and the battle info.** `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`,
+   `PlayerCallToActionView`.
+4. **The plan.** These commits.
+
+### M3 commits
+
+1. **The map builder views.** `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`,
+   `MapBuilderMenuView`.
+2. **The plan.** These commits.
+
+### M4 commits
+
+1. **The battle unit on view data.** A `BattleUnitInfo` (and what `AttackPreviewView` and `ReceiverPreviewView` need,
+   reusing it where it fits) in `screen.adapters.presentation`, mapped from `Unit.Dto` and `BattleUnit.Dto` by the
+   presenters displaying them (`BattlefieldPresenter`, `InventoryPresenter`). With the presenter and view tests updated, and no change to what the game shows.
+2. **The NPC dialog and the pad on view data.** An `NpcDialog` for `NpcDialogView`, and a `Direction` enum for
+   `VirtualPadView`, mapped by `ExplorationPresenter`.
+3. **Their stories.** `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView` (building its
+   real children), `NpcDialogView` and `VirtualPadView`, logging the directions pressed and held.
+4. **The plan.** These commits.
+
+### M5 commits
+
+The split is grilled again when M5 starts, with `BattlefieldView` as it is then. A starting point:
+
+1. **The battlefield on view data.** What `displayBattlefield` needs of `Battlefield.Dto` (the tiles, their terrain and
+   transitions) as view data in `screen.adapters.presentation`, mapped by `BattlefieldPresenter`, and a view
+   `Position` for the tiles. No change to what the game shows.
+2. **The split.** The terrain tile, the tile overlays and the unit sprite out of `BattlefieldView`, as views of their
+   own, with view tests. `BattlefieldView` keeps the tile window, the camera, the trail and the input.
+3. **Their stories.** One binding per view split, and `BattlefieldView` with a tiny fixed map (a few tiles of each
+   terrain, a battle unit, an NPC, a building and loot), with stories for a move range, a cast range, a selected tile
+   and a health preview, logging `tileSelected`.
+4. **The plan.** These commits.
+
+### M6 commits
+
+1. **The rule without exceptions.** `viewsWithoutStories` and its test deleted from `StoryCoverageArchitectureTest`;
+   a new `ViewArchitectureTest` (or a test in the existing presentation tests), forbidding the views from importing a
+   `.domain` or `.usecases` package; the docs updated.
+2. **The plan.** These commits, and the status set to done.
+
+## Reference
+
+The names are proposals: keep them unless an architecture test or a better name found while building asks otherwise,
+and update this section when they change.
+
+### The views and their area
+
+| View                                                                                     | Group   | Milestone | Notes                                                                 |
+|------------------------------------------------------------------------------------------|---------|-----------|-----------------------------------------------------------------------|
+| `BarView`, `PreviewBarView`                                                              | Shared  | M1        | Base views, in `shared.adapters.presentation`. A color control.       |
+| `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView` | Screen | M1   | As `HealthBarViewStories`.                                            |
+| `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`                   | Screen  | M1        | `UnitPortraitView` needs the resources, from `StoryContext`.           |
+| `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView`                        | Screen  | M1        | The ids from what the resources loaded, never written by hand.        |
+| `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`                | Screen  | M2        | Lambdas, logged as actions.                                           |
+| `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`                  | Screen  | M2        | `context.lootableItemIds()` for the items.                            |
+| `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` | Screen | M2       |                                                                       |
+| `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` | Screen | M3     |                                                                       |
+| `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`        | Screen  | M4        | On view data first.                                                   |
+| `NpcDialogView`, `VirtualPadView`                                                        | Screen  | M4        | On view data first; the pad's own `Direction`.                        |
+| `BattlefieldView`, and the views split from it                                           | Screen  | M5        | Split by layer, on view data first.                                   |
+
+### The guard rule
+
+The views are found as `StoryCoverageArchitectureTest` finds them: the top-level classes of an
+`adapters.presentation` package extending a KorGE view, directly or through another view of the game, but the
+presenters. None of them MUST import a `com.mkz.rpg.<subdomain>.domain` or `.usecases` package. The presenters keep
+mapping the domain to the view data. With no view importing the domain by M6, the rule needs no allowlist.
