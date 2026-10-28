@@ -1,6 +1,6 @@
 # Plan: Story coverage
 
-> **Status:** in progress: M1 is done.
+> **Status:** in progress: M1 and M2 are done.
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
@@ -34,7 +34,7 @@ that completes each milestone to **Done in**.
 | #  | Milestone                 | Views leaving the list                                                                                                                                                                                  | Done when                                                                                                                         | Status | Done in |
 |----|---------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ✅      | c4b8d2d, 12c8421, feea986 |
-| M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ⬜      |         |
+| M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ✅      | 56aeba0, 343b4c8, 9d48c7d, 9c5bd59 |
 | M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ⬜      |         |
 | M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ⬜      |         |
 | M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ⬜      |         |
@@ -87,6 +87,42 @@ The three commits are as listed, plus these decisions:
 4. **The formation, the menu and the battle info.** `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`,
    `PlayerCallToActionView`.
 5. **The plan.** These commits.
+
+### M2 as built
+
+The four commits are as listed, plus these decisions:
+
+- **The sidebar scrolls**: the M1 overflow is fixed first. `SidebarView` lists the components in a clipped `list` under
+  its fixed title, which moves with the mouse wheel and by dragging (the drag is relative to where it started, as
+  `BattlefieldView`'s), never past either end. Showing a story that is not fully in sight, e.g.: opened from a link,
+  scrolls it to the middle of the list; it only does so when the story changes, so an arg change does not undo a scroll
+  of the person. The title is drawn over the list, with a background of its own: the rounded rectangle behind each story
+  is not clipped by the list, and showed over the title when scrolled. With the 144 ids of M1 and M2 (30 components,
+  114 stories) the list is about five times the height of the sidebar.
+- **The labels are texts**: `CancelButton`, `ConfirmButton` and `CancelAndConfirmView` take their labels, and the width
+  of the buttons, as controls, with English defaults and a long label story: the view takes any text. The views that
+  read a `UiText` (`FinishTurnView`, `MenuView`, `BattleInfoView`) follow the language global.
+- **Item names are texts**: `GiveItemView`, `ItemActionsView` and `InventoryFullView` take the name of the item as a
+  text control, so there is a long name story. Only `InventoryFullView` picks an item (`foundItem`), for its icon.
+  `ItemActionsView` has an `actions` enum of the kinds of item the inventory presents: a merchant's item with no
+  actions, a consumable (also one that can not be consumed), an equippable, an equipped one, and Give refused for no
+  one to give to or full bags.
+- **Selection is an arg**: `InventoryView`, `FormationView` and `FormationRowView` log the tap and set `selectedSlot`,
+  `selectedRow` and `selected`, clearing it when the selected one is tapped again, as `ShopViewStories` does. The
+  arrows of `InventoryView` set `partyIndex`; `InventoryView` and `FormationView` cycle through the lootable items and
+  the units with a portrait.
+- **`PlayerCallToActionView`** builds its real children, one at a time by a `callToAction` enum. Choosing something
+  (Cancel, Confirm, an item action, Leave it) logs it and sets `callToAction` back to `FINISH_TURN`, as the view
+  dismisses itself in the game.
+- **`BattleInfoView`** shows exploring, the turn of the human or the CPU player in a round, and the winner. The
+  announcements that pop (`announceBattle`, `announceBattleEnd`, `announceTurn`) are suspended animations that the
+  stories cannot await, so the state they leave is shown, and `Battle!` and `Battle over!` have no story.
+- **`MenuView` changes the shared texts**: picking a language in it calls `Texts.selectLanguage`, as in the game, so the
+  views on show change language until the next story, arg or global change restores the language global. Playing or
+  building a map hides its options, also as in the game, until the story is shown again. It has no controls, and a
+  single story.
+- **`GiveItemView`, `ItemActionsView` and `InventoryFullView`** are 390 wide like the screen; `FormationRowView` is shown
+  at 370x44, the size the formation gives it.
 
 ### M3 commits
 
