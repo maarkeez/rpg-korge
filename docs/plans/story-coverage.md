@@ -77,12 +77,16 @@ The three commits are as listed, plus these decisions:
 
 ### M2 commits
 
-1. **The buttons.** `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, logging their callbacks.
-2. **The item dialogs.** `GiveItemView`, `ItemActionsView`, `InventoryFullView` (an item pick, its price, long names),
+1. **The sidebar scrolls.** `SidebarView` lists its components in a clipped list under its title, which scrolls with the
+   mouse wheel and by dragging, and scrolls to the story on show when it is out of sight, with view tests; the
+   [Storybook](../architecture/storybook.md#what-it-shows) doc says so. Found in M1, needed before M2 adds a dozen
+   components more.
+2. **The buttons.** `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, logging their callbacks.
+3. **The item dialogs.** `GiveItemView`, `ItemActionsView`, `InventoryFullView` (an item pick, its price, long names),
    and `InventoryView`.
-3. **The formation, the menu and the battle info.** `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`,
+4. **The formation, the menu and the battle info.** `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`,
    `PlayerCallToActionView`.
-4. **The plan.** These commits.
+5. **The plan.** These commits.
 
 ### M3 commits
 

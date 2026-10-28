@@ -5,13 +5,17 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
+import korlibs.korge.input.onMouseDrag
 import korlibs.korge.input.onOut
 import korlibs.korge.input.onOver
+import korlibs.korge.input.onScroll
 import korlibs.korge.ui.UIContainer
+import korlibs.korge.view.ClipContainer
 import korlibs.korge.view.Container
 import korlibs.korge.view.RoundRect
 import korlibs.korge.view.Text
 import korlibs.korge.view.addTo
+import korlibs.korge.view.clipContainer
 import korlibs.korge.view.container
 import korlibs.korge.view.position
 import korlibs.korge.view.roundRect
@@ -22,7 +26,8 @@ import korlibs.math.geom.Size
 
 /**
  * The catalogue, on the left of the Storybook: the components, grouped by their subdomain, each with its stories below
- * it. Tapping a story shows it, and the story on show is highlighted.
+ * it. Tapping a story shows it, and the story on show is highlighted. The list scrolls under the title, with the mouse
+ * wheel or by dragging it, and scrolls to a story that is not in sight when it is shown, e.g.: from a link.
  */
 open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) {
     companion object {
@@ -43,6 +48,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         private const val STORY_TEXT_PADDING = 10.0
         private const val STORY_TEXT_SIZE = 15.0
         private const val GROUP_GAP = 12.0
+        private val LIST_HEIGHT = STORYBOOK_WINDOW_SIZE.height - TITLE_HEIGHT
     }
 
     interface Delegate {
@@ -52,6 +58,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
     private var delegate: Delegate? = null
 
     internal val title: Text
+    internal val list: ClipContainer
     internal val catalogue: Container
     internal var groupTexts: List<Text> = emptyList()
         private set
@@ -62,10 +69,26 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
     internal var storyRows: List<StoryRow> = emptyList()
         private set
 
+    // The height of the whole list, of which the scroll shows LIST_HEIGHT.
+    private var contentHeight = 0.0
+
+    // The story on show last time it was scrolled to, so the list only moves when the story changes.
+    private var scrolledStoryId: String? = null
+
     init {
         solidRect(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height), BACKGROUND_COLOR)
+        list = clipContainer(Size(WIDTH, LIST_HEIGHT)).position(0.0, TITLE_HEIGHT)
+        catalogue = list.container()
+        // The scroll is relative to where the drag started, not to the previous drag event.
+        var dragStartY = 0.0
+        onMouseDrag { event ->
+            if (event.start) dragStartY = catalogue.y
+            scrollTo(dragStartY + event.dy)
+        }
+        onScroll { event -> scrollTo(catalogue.y - event.scrollDeltaYPixels) }
+        // Over the list, as the rounded rectangles of the stories are not clipped: they would show over the title.
+        solidRect(Size(WIDTH, TITLE_HEIGHT), BACKGROUND_COLOR)
         title = text("Storybook", textSize = 24.0, color = Colors.WHITE).position(PADDING, PADDING)
-        catalogue = container().position(0.0, TITLE_HEIGHT)
     }
 
     open fun setDelegate(delegate: Delegate) {
@@ -95,11 +118,24 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         groupTexts = groups
         componentTexts = titles
         storyRows = rows
+        contentHeight = y
+        scrollTo(catalogue.y)
     }
 
-    /** Highlights the story on show, and only that one. */
+    /** Highlights the story on show, and only that one, scrolling to it when it is not in sight. */
     open fun selectStory(storyId: String) {
         storyRows.forEach { row -> row.isSelected = row.storyId == storyId }
+        if (storyId == scrolledStoryId) return
+        scrolledStoryId = storyId
+        storyRows.firstOrNull { row -> row.storyId == storyId }?.let { row ->
+            val isInSight = row.y + catalogue.y >= 0.0 && row.y + STORY_HEIGHT + catalogue.y <= LIST_HEIGHT
+            if (!isInSight) scrollTo(LIST_HEIGHT / 2 - (row.y + STORY_HEIGHT / 2))
+        }
+    }
+
+    // The scroll goes from 0, the top, to minus what does not fit.
+    private fun scrollTo(y: Double) {
+        catalogue.y = y.coerceIn(minOf(0.0, LIST_HEIGHT - contentHeight), 0.0)
     }
 
     /** A story of the list, highlighted while it is on show or under the mouse, that shows it when tapped. */

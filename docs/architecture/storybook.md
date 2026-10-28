@@ -19,7 +19,8 @@ To add a story, see [How to add a story](../testing/how-to-add-a-story.md). The 
 ## What it shows
 
 - **The sidebar**, on the left, lists the components by their group, and the stories of each one. Tapping a story
-  shows it.
+  shows it. The list scrolls under the title, with the mouse wheel or by dragging it, and scrolls to the story on show
+  when it is out of sight, e.g.: when opened from a link.
 - **The phone**, in the middle, shows the story: the real view, at its real size, in a 390x844 screen, the game window,
   with the game background. What does not fit the screen is cropped, as in the game.
 - **The toolbar**, on the top right, holds the globals: the language of the views on show.
