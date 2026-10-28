@@ -1,6 +1,6 @@
 # Plan: Storybook
 
-> **Status:** in progress, M1 done. Track the progress in [Milestones](#milestones).
+> **Status:** in progress, M1 and M2 done. Track the progress in [Milestones](#milestones).
 >
 > **Summary:** A Storybook for the game's views, like [Storybook](https://storybook.js.org) for web components: a live
 > KorGE app that shows each view in isolation, in each of its states, without playing the game up to it. A sidebar lists
@@ -76,6 +76,15 @@ the dependency rule in M1) and regenerates the [dependency report](../architectu
    and the `/storybook/` step of `Deploy JS`.
 4. **The architecture rules.** The dependency rule and the coverage rule with its allowlist, and the docs of both.
 
+### M2 commits
+
+1. **Args, Controls and the language Global.** The controls, default args, story args and globals in `Storybook`, with
+   `ChangeArg`, `ResetArgs`, `ChangeGlobal`, `SearchArgs` and `SearchGlobals`; `StoryLocation` reading and writing the
+   story, args and globals, through `LocationQuery`; `StoryBinding` rendering from `Args`; the `ControlsView` and the
+   `ToolbarView`; `HealthBarViewStories` with controls, and `InventorySlotViewStories`, out of the allowlist. With the
+   unit, view, presenter, smoke and end-to-end tests, and the dependency report.
+2. **The plan.** These commits, and the Reference updated to what was built.
+
 ## Reference
 
 Detailed technical notes for whoever implements the plan. The names are proposals: keep them unless an architecture test
@@ -88,20 +97,21 @@ marked with the milestone that adds it:
 
 ```
 com.mkz.rpg.storybook
-├── domain                  Storybook (the aggregate root: the catalogue and the story on show; the args, globals and
-│                           actions log in M2 and M3), StorybookRepository, StorybookEvent, StorybookError
+├── domain                  Storybook (the aggregate root: the catalogue, the story on show, its args and the globals;
+│                           the actions log in M3), StorybookRepository, StorybookEvent, StorybookError
 ├── usecases
 │   ├── commands            InitialiseCatalogue, SelectStory; ChangeArg, ResetArgs, ChangeGlobal (M2);
 │   │                       RecordAction, ClearActions (M3)
-│   ├── queries             SearchCatalogue, SearchSelectedStory
+│   ├── queries             SearchCatalogue, SearchSelectedStory; SearchArgs, SearchGlobals (M2)
 │   └── services            StoryLocation (the port to the URL)
 └── adapters
     ├── presentation        StorybookApi, StorybookScene, StorybookPresenter, the Storybook's own views (SidebarView,
-    │                       PhoneFrameView, StoryInfoView; the toolbar, Controls and Actions in M2 and M3),
-    │                       StoryBinding, StoryContext, and one <View>Stories object per component
+    │                       PhoneFrameView, StoryInfoView, StorybookButton; ToolbarView and ControlsView in M2; the
+    │                       Actions in M3), StoryBinding, StoryContext, Args, and one <View>Stories object per component
     ├── storage             InMemoryStorybookRepository
     └── location            isStorybookRequested() and platformStoryLocation() (expect, in commonMain),
-                            NoStoryLocation (commonMain, used on the JVM), BrowserStoryLocation (jsMain)
+                            NoStoryLocation (commonMain, used on the JVM), LocationQuery (commonMain, M2),
+                            BrowserStoryLocation (jsMain)
 ```
 
 - The domain package only allows the aggregate root, its repository, events and errors, named after the subdomain
@@ -115,14 +125,26 @@ com.mkz.rpg.storybook
 - The Dtos follow the existing rules: data classes and enum classes only, no methods, no default values (see
   [Dto of data and enums](dto-of-data-and-enums.md), [Dto without methods](dto-without-methods.md) and
   [Dto without default values](dto-without-default-values.md)). An arg value in M2 is then an enum type with optional
-  fields (e.g.: `ArgDto(type, boolean, int, text)`) built by companion factories, never a sealed class.
+  fields (e.g.: `ArgDto(type, boolean, int, text)`) built by companion factories, never a sealed class. Built in M2:
+  `ControlDto(name, type, minimum, maximum, options)` with `boolean`, `int`, `enum`, `text`, `pick` and `color`
+  factories, `ArgDto` with `boolean`, `int` and `text` factories (an enum, pick or color value is a text), and
+  `LocationDto(storyId, args, globals)`, what a link keeps, as text. Inside the aggregate, private sealed `Control`s and
+  `Value`s validate and parse them.
 
 ### Domain model
 
 - **Catalogue.** The components, each with an id, a group (its subdomain, e.g.: `Screen`), a title, a description and
   its stories, each with an id, a name and a description. Built once by `InitialiseCatalogue` from `STORY_BINDINGS`.
   Rules: there is at least one component; every component has at least one story; the ids are unique. In M2 each
-  component also gets its controls and default args, and each story its args, valid for the controls.
+  component also gets its controls and default args, and each story its args, valid for the controls: the control
+  names are unique in a component (`RepeatedControl`), an int control has a minimum and a maximum, in order, and an
+  enum or pick control at least one option, each once (`InvalidControl`), every control has a default arg
+  (`MissingValue`), every arg has a control (`ControlNotFound`) and its control accepts it (`InvalidValue`). The
+  globals follow the same rules: `InitialiseCatalogue` gets the global controls and their defaults besides the
+  components.
+- **Values.** A boolean; an int within the minimum and the maximum of its control; an option of an enum or a pick
+  control; any text; and a color as its hex in upper case, without `#` (e.g.: `FF375F`). Written as text in a link,
+  the domain parses them by their control, so a link may write a color in lower case.
 - **Ids.** Kebab case, as Storybook: the component id is its group and title (e.g.: `screen-health-bar`), and the
   story id `<component id>--<story name>` (e.g.: `screen-health-bar--full`). They are written in the binding, not
   derived from the title and name, so renaming a component or a story keeps the links shared. The domain checks that a
@@ -131,10 +153,11 @@ com.mkz.rpg.storybook
 - **The story on show.** Opened on the story the location asks for, or on the first story when none is asked for or
   it is not in the catalogue (e.g.: a link to a renamed story): it is ignored, never a failure. Only a story of the
   catalogue can be selected; selecting the story on show changes nothing. In M2, selecting another story resets the
-  args to its own, and an arg can only be changed to a value its control accepts. In M3, the log keeps the last 50
+  args to its own, keeping the globals, and an arg or a global can only be changed to a value its control accepts;
+  changing it to the value it has, or resetting args none of which were changed, changes nothing. In M3, the log keeps the last 50
   actions, the newest first.
-- **Events** (`StorybookEvent`): `CatalogueInitialised` and `StorySelected` in M1; `ArgChanged`, `ArgsReset`,
-  `GlobalChanged` (M2), `ActionRecorded`, `ActionsCleared` (M3). The presenter subscribes to them to re-render, as
+- **Events** (`StorybookEvent`): `CatalogueInitialised` and `StorySelected` in M1; `ArgChanged(storyId, argName)`,
+  `ArgsReset(storyId)`, `GlobalChanged(globalName)` (M2), `ActionRecorded`, `ActionsCleared` (M3). The presenter subscribes to them to re-render, as
   `BattlefieldPresenter` does.
 
 ### Binding a story to a view
@@ -151,8 +174,10 @@ object HealthBarViewStories : StoryBinding {
 }
 ```
 
-From M2 it renders the current args instead, e.g.: `fun render(args: Args, context: StoryContext): View`, and the
-stories become their args:
+From M2 it renders the current args instead, `fun render(args: Args, context: StoryContext): View`, where `Args`
+reads them by name (`args.int("remaining")`, `boolean`, `text`, `color`), and the stories become their args. The
+component is a function of the context, `fun component(context: StoryContext): ComponentDto`, as the options of a pick
+control may come from the images loaded (see `InventorySlotViewStories`):
 
 ```kotlin
 object ShopViewStories : StoryBinding {
@@ -171,7 +196,7 @@ object ShopViewStories : StoryBinding {
 ```
 
 - `StoryContext` gives the binding the shared `BattleSceneResourcesLoader` and the `Texts` (in English in M1, in the
-  selected language from M2), and from M3 `action(...)`, which runs `RecordAction` and, when it maps the action to an
+  selected language from M2: the presenter selects the language global on the `Texts` before every render), and from M3 `action(...)`, which runs `RecordAction` and, when it maps the action to an
   arg, `ChangeArg`.
 - The view is rebuilt from scratch whenever the story changes (and from M2 when the args or the globals change):
   simpler and deterministic. Its animations restart, which is acceptable in v1.
@@ -179,10 +204,23 @@ object ShopViewStories : StoryBinding {
   what does not fit. A full-screen view placed at the bottom (e.g.: `BattleHudView`) may need a placement in its
   binding.
 - A view taking lambdas instead of a `Delegate` (e.g.: `MenuView`) passes lambdas calling `context.action(...)`.
-- The options of a `PickControl` come from presentation sources only, e.g.: `resourcesLoader.bitmaps("lootableItem")`
-  for the item ids, so the dependency rule holds. If a story ever needs a Dto of another subdomain, revisit the rule
+- The options of a pick control come from presentation sources only, e.g.: `resourcesLoader.bitmaps("lootableItem")`
+  for the item ids, so the dependency rule holds. A pick that may be empty adds an option of its own for it, e.g.:
+  `none` for an empty inventory slot. If a story ever needs a Dto of another subdomain, revisit the rule
   first.
-- The language Global lists `LocalizationApi.searchLanguages` and applies with `LocalizationApi.selectLanguage`.
+- The language Global is a pick control of the language codes of `Texts.languages()` (`LocalizationApi.searchLanguages`),
+  English first, its default, named `StorybookApi.LANGUAGE_GLOBAL`, and applies with `Texts.selectLanguage`. The
+  toolbar names each language in its own language, e.g.: `Español`.
+- `StorybookApi.init(context)` builds the components of its story bindings, every one unless a test passes fewer
+  (`storyBindings`), and `bindingOf(componentId)` finds the binding of the component on show.
+- The Controls panel (`ControlsView`) lists one row per control, with a `Reset` button: a boolean is a switch, an int
+  `-` and `+` around it (stopping at its minimum and maximum), an enum a button per option, a pick `<` and `>` going
+  round its options, a text an input, and a color a swatch and an input of its hex (undone when it is no hex). A text
+  or a color is changed when it is entered or left. The views only ask for values their control accepts. Their buttons
+  are `StorybookButton`s, which paint their own selection, as `UIButton`'s hover tween overwrites it.
+- No story of M2 uses the text and color controls: `HealthBarView` has two ints, and `InventorySlotView` a pick and
+  three booleans. They are covered by `StorybookTest` and `ControlsViewTest`, and only seen in the app once a story
+  uses them (`ShopView` in M3 brings an enum).
 
 ### Startup flag and hosting
 
@@ -194,7 +232,8 @@ object ShopViewStories : StoryBinding {
   the new source sets with no change, as they are production source sets.
 - The layout: the sidebar (260 wide) on the left, the 414x868 phone frame (the 390x844 screen and its bezel) 16 from
   the top, and `StoryInfoView` on the right, with the component and the story, each with its description. The Controls
-  and the Actions go under it in M2 and M3, and the toolbar with the Globals above it.
+  and the Actions go under it in M2 and M3, and the toolbar with the Globals above it. Built in M2: the toolbar 32
+  from the top, the story info under it, and the Controls under the story info (from y = 344).
 - `runJvmStorybook` and `runJvmStorybookAutoreload`: KorGE makes both for an extra entry point,
   `entrypoint("storybook", "com.mkz.rpg.MainKt")` in `build.gradle.kts`, which also sets the system property on both.
   `.run/runJvmStorybookAutoreload.run.xml` runs the second one, as `.run/runJvmAutoreload.run.xml` does the game.
@@ -206,13 +245,18 @@ object ShopViewStories : StoryBinding {
 ### URL
 
 - `?story=<story id>` in M1. From M2: `&args=<name>:<value>;<name>:<value>&globals=<name>:<value>`, as Storybook. Only
-  the args changed from the story's own are written. The values are URL-encoded, a color as its hex without `#`.
-- `StoryLocation` (a port in `usecases.services`) is read by `InitialiseCatalogue` at startup, and written by
-  `SelectStory` (and from M2 by the commands changing the args or the globals) with `history.replaceState`, so the back
-  button does not step through every change. `BrowserStoryLocation` writes the page path, which is absolute, with the
-  parameters and the hash. `NoStoryLocation`, on the JVM, reads nothing and writes nothing.
-- An unknown story in the URL is ignored, never a crash: the Storybook opens the first story. From M2, an invalid arg
-  is ignored the same way: the story opens with its default args. They are not logged.
+  the args changed from the story's own, in the order of their controls, and the globals changed from their defaults
+  are written. The names and values are URL-encoded (`URL.encodeComponent`, so a `:` or `;` in a text is kept), a color
+  as its hex without `#`. The other parameters of the page are kept.
+- `StoryLocation` (a port in `usecases.services`) has `search(): LocationDto` and `replace(location: LocationDto)`. It is
+  read by `InitialiseCatalogue` at startup, and written with `Storybook.toLocation()` by `SelectStory`, `ChangeArg`,
+  `ResetArgs` and `ChangeGlobal`, with `history.replaceState`, so the back button does not step through every change.
+  `LocationQuery` (commonMain, so it is tested on both platforms) encodes and decodes the query; `BrowserStoryLocation`
+  writes the page path, which is absolute, with the query and the hash. `NoStoryLocation`, on the JVM, reads nothing
+  and writes nothing.
+- An unknown story in the URL is ignored, never a crash: the Storybook opens the first story, and the args of the URL
+  are ignored too, as they were for another story. From M2, an unknown or invalid arg or global, or a malformed escape,
+  is ignored the same way, one by one: it keeps its own value, and the others still apply. They are not logged.
 
 ### Architecture tests
 
@@ -242,8 +286,12 @@ object ShopViewStories : StoryBinding {
 - The smoke test, `StorySmokeTest` in `commonTest`, so it runs on the JVM and JS: for every story of the registry, it
   renders it in a `ViewsForTesting`, with `BattleSceneResourcesLoaderMother` and `TestCatalogs`, and fails on any
   exception (with its default args from M2). It also lists every component and story id.
-- `StorybookEndToEndTest`: starts the Storybook on a story id, and taps another story in the sidebar. In M3: change an
-  arg, tap the view, check the Actions.
+- `StorybookEndToEndTest`: starts the Storybook on a story id, and taps another story in the sidebar. In M2: starts it
+  on a link with args and a language, taps a control, and taps a language in the toolbar. In M3: tap the view, check
+  the Actions.
+- In M2, `ControlsViewTest` and `ToolbarViewTest` (with `ControlsViewExtension` and `ToolbarViewExtension`),
+  `LocationQueryTest`, and the smoke test also opens the catalogue of every binding, so a default arg its control does
+  not accept (e.g.: an item with no image) fails there.
 
 ### Claude skill
 
