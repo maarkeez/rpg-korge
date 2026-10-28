@@ -31,7 +31,7 @@ object InventorySlotViewStories : StoryBinding {
         StoryDto(
             id = "screen-inventory-slot--dimmed",
             name = "Dimmed",
-            description = "An item that can not be traded, e.g.: at a merchant that does not buy it.",
+            description = "An item that can not be traded in the shop, e.g.: one the buyer can not afford.",
             args =
                 mapOf(
                     DIMMED to ArgDto.boolean(true),

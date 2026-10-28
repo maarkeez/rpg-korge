@@ -162,6 +162,7 @@ View tests are a bit different from the rest of the tests because they need to r
 * The test class **MUST** extend `korlibs.korge.tests.ViewsForTesting`.
 * Each test function **MUST** start by using [`sharedViewsTest`](../../src/commonTest/kotlin/com/mkz/rpg/shared/adapters/presentation/SharedViewsTestExtension.kt), and never KorGE's `viewsTest` directly. KorGE's `viewsTest` skips the test on JS, so the test would pass on JS without asserting anything. `sharedViewsTest` runs it on every target, letting the browser load the resources between frames. This is enforced by [`TestFrameworkArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/TestFrameworkArchitectureTest.kt).
 * The test **MUST** interact with the view through its page object, and never through the view internals (child views, `findViewByName`, `children`, KorGE view classes...). This is enforced by [`ViewTestPageObjectArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewTestPageObjectArchitectureTest.kt).
+* A new view of the game **MUST** also have its stories in the [Storybook](../architecture/storybook.md), which renders each one in the smoke test. See [How to add a story](how-to-add-a-story.md).
 
 ### View page objects
 

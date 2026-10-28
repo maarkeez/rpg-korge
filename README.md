@@ -11,6 +11,11 @@ You can find the KorGE documentation here: <https://docs.korge.org/korge/>
 
 You can play this game at https://maarkeez.github.io/rpg-korge/
 
+## Storybook
+
+Every view of the game, in each of its states, can be browsed at https://maarkeez.github.io/rpg-korge/storybook/, and
+shared with a link. See [Storybook](docs/architecture/storybook.md), and [How to add a story](docs/testing/how-to-add-a-story.md).
+
 ## Translations
 
 The game is translated with gettext PO files, so you can translate it with Poedit, Weblate or any other PO tool. See

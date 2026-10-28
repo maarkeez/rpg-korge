@@ -3,6 +3,7 @@ package com.mkz.rpg.storybook.adapters.presentation
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.storybook.adapters.page.StorybookPage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
@@ -15,7 +16,8 @@ import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 /**
  * Lists the catalogue in the sidebar, and shows the story on show with its args and globals, rebuilding its view from
  * scratch whenever any of them changes. The language global selects the language of the texts the views are built with.
- * The callbacks the view makes are logged in the actions, and change the arg they are mapped to, if any.
+ * The callbacks the view makes are logged in the actions, and change the arg they are mapped to, if any. The page is told
+ * once the story has rendered, so a script can wait for it.
  */
 class StorybookPresenter(
     private val sidebarView: SidebarView,
@@ -26,6 +28,7 @@ class StorybookPresenter(
     private val phoneFrameView: PhoneFrameView,
     private val storybookApi: StorybookApi,
     private val storyContext: StoryContext,
+    private val storybookPage: StorybookPage,
     eventBus: EventBus,
 ) {
     private val subscriptions =
@@ -93,6 +96,7 @@ class StorybookPresenter(
         controlsView.display(component.controls, args)
         displayActions()
         phoneFrameView.display(storybookApi.bindingOf(component.id).render(Args(args), storyContext))
+        storybookPage.storyRendered(story.id)
     }
 
     private fun displayActions() {

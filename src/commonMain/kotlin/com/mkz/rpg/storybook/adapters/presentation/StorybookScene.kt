@@ -5,6 +5,7 @@ import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.Texts
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
+import com.mkz.rpg.storybook.adapters.page.StorybookPage
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import korlibs.korge.scene.Scene
 import korlibs.korge.view.SContainer
@@ -14,11 +15,12 @@ import korlibs.korge.view.position
 /**
  * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and on the right
  * the globals, what the story is, its controls and its actions. Localization: the texts of the views on show, in the language global.
- * Location: where what is on show is kept, e.g.: the page URL.
+ * Location: where what is on show is kept, e.g.: the page URL. Page: told when the story on show has rendered.
  */
 class StorybookScene(
     localizationApi: LocalizationApi,
     private val storyLocation: StoryLocation,
+    private val storybookPage: StorybookPage,
 ) : Scene() {
     // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
     override val coroutineContext by lazy { super.coroutineContext + views.gameWindow.coroutineDispatcher }
@@ -54,7 +56,7 @@ class StorybookScene(
         addChild(actionsView.position(panelsX, controlsView.y + ControlsView.MAXIMUM_HEIGHT + margin))
 
         val storyContext = StoryContext(resourcesLoader, texts)
-        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, eventBus)
+        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, storybookPage, eventBus)
         storybookApi.init(storyContext)
     }
 }

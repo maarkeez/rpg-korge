@@ -10,6 +10,7 @@ import com.mkz.rpg.screen.adapters.presentation.selectedSlotIndexes
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.startStorybook
+import com.mkz.rpg.storybook.adapters.page.FakeStorybookPage
 import com.mkz.rpg.storybook.adapters.presentation.actionTexts
 import com.mkz.rpg.storybook.adapters.presentation.actionsView
 import com.mkz.rpg.storybook.adapters.presentation.clickControlButton
@@ -30,6 +31,7 @@ import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
@@ -50,6 +52,19 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             stage.sidebarView()?.selectedStoryNames().shouldContainExactly("Half")
             stage.storyInfoView()?.storyName() shouldBe "Half"
             stage.phoneFrameView()?.isViewCenteredOnScreen()?.shouldBeTrue()
+        }
+
+    @Test
+    fun `should tell the page once the story a link asks for has rendered, so a script can wait for it`() =
+        sharedViewsTest {
+            // Given
+            val storybookPage = FakeStorybookPage()
+            // When
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-shop--sell"), storybookPage)
+            // Then
+            waitUntil { storybookPage.renderedStoryIds.isNotEmpty() }
+            storybookPage.renderedStoryIds.shouldContainExactly("screen-shop--sell")
+            displayedShopView().shouldNotBeNull()
         }
 
     @Test

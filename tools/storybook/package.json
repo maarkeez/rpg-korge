@@ -1,0 +1,15 @@
+{
+  "name": "storybook-screenshot",
+  "private": true,
+  "description": "Opens a story of the Storybook in Chrome and saves a screenshot. See .claude/skills/storybook/SKILL.md.",
+  "type": "commonjs",
+  "scripts": {
+    "screenshot": "node screenshot.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright-core": "1.47.2"
+  }
+}

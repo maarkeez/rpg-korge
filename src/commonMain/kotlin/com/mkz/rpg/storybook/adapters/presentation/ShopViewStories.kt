@@ -77,7 +77,7 @@ object ShopViewStories : StoryBinding {
         StoryDto(
             id = "screen-shop--sell-bag-full",
             name = "Sell, bag full",
-            description = "A buyer whose bag is full, selling the last of its items.",
+            description = "A full bag can still sell: the last item tapped, with Sell enabled.",
             args = mapOf(MODE to ArgDto.text(ShopView.Mode.SELL.name), ITEMS to ArgDto.int(BAG_SIZE), BAG_USED to ArgDto.int(BAG_SIZE), SELECTED_SLOT to ArgDto.text("11")),
         )
     private val sellNothing =
@@ -94,8 +94,8 @@ object ShopViewStories : StoryBinding {
             group = "Screen",
             title = "Shop",
             description =
-                "A merchant's shop, where a party member buys or sells: the buyer on top, between the arrows that switch it, " +
-                    "the items under it, one per slot, and Back at the bottom, with the item tapped and Buy or Sell.",
+                "A merchant's shop: the party member buying or selling on top, with arrows to switch it, then the items, " +
+                    "then Back, the item tapped and Buy or Sell. refusal: why the items can not be traded.",
             controls =
                 listOf(
                     ControlDto.enum(MODE, ShopView.Mode.entries.map { mode -> mode.name }),

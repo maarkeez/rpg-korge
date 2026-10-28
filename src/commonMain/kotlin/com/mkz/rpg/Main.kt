@@ -6,6 +6,8 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import com.mkz.rpg.storybook.adapters.location.isStorybookRequested
 import com.mkz.rpg.storybook.adapters.location.platformStoryLocation
+import com.mkz.rpg.storybook.adapters.page.StorybookPage
+import com.mkz.rpg.storybook.adapters.page.platformStorybookPage
 import com.mkz.rpg.storybook.adapters.presentation.StorybookScene
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import korlibs.image.color.Colors
@@ -48,8 +50,12 @@ suspend fun Stage.startGame(random: Random = Random.Default) {
     sceneContainer.changeTo { MenuScene(localizationApi, random) }
 }
 
-// Shared by `main` and the end-to-end tests, so both boot the Storybook the same way. The tests choose the story asked for.
-suspend fun Stage.startStorybook(storyLocation: StoryLocation = platformStoryLocation()) {
+// Shared by `main` and the end-to-end tests, so both boot the Storybook the same way. The tests choose the story asked for,
+// and see when it has rendered.
+suspend fun Stage.startStorybook(
+    storyLocation: StoryLocation = platformStoryLocation(),
+    storybookPage: StorybookPage = platformStorybookPage(),
+) {
     val sceneContainer = sceneContainer()
 
     // The texts of the views on show, in English until the language global selects another one.
@@ -58,5 +64,5 @@ suspend fun Stage.startStorybook(storyLocation: StoryLocation = platformStoryLoc
     val localizationApi = LocalizationApi(eventBus)
     localizationApi.init()
 
-    sceneContainer.changeTo { StorybookScene(localizationApi, storyLocation) }
+    sceneContainer.changeTo { StorybookScene(localizationApi, storyLocation, storybookPage) }
 }

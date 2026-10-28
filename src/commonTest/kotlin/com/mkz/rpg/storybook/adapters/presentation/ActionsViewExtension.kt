@@ -9,6 +9,9 @@ import korlibs.korge.tests.ViewsForTesting
 /** The title, with how many actions there are, e.g.: `Actions (3)`. */
 fun ActionsView.titleText(): String = title.text
 
+/** The hint telling where the actions come from, shown only while there is none. */
+fun ActionsView.emptyHintText(): String? = emptyHint.text.takeIf { emptyHint.visible }
+
 /** The actions listed, the newest first, e.g.: `shopSlotSelected(3)`. */
 fun ActionsView.actionTexts(): List<String> = actionTexts.map { text -> text.text }
 

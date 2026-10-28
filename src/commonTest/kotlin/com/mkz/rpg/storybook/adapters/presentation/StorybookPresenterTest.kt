@@ -6,6 +6,7 @@ import com.mkz.rpg.screen.adapters.presentation.TextsMother
 import com.mkz.rpg.screen.adapters.presentation.UiText
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.labelText
+import com.mkz.rpg.storybook.adapters.page.FakeStorybookPage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.StorybookMother.location
@@ -25,13 +26,14 @@ class StorybookPresenterTest {
     private val controlsView = FakeControlsView()
     private val actionsView = FakeActionsView()
     private val phoneFrameView = FakePhoneFrameView()
+    private val storybookPage = FakeStorybookPage()
 
     // The health bar needs no image, so the resources are not loaded.
     private val storyContext = StoryContext(BattleSceneResourcesLoader(), TextsMother.texts())
 
     private fun startStorybook(storyLocation: FakeStoryLocation = FakeStoryLocation()): StorybookApi {
         val storybookApi = StorybookApi(eventBus, storyLocation, storyBindings = listOf(HealthBarViewStories))
-        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, eventBus)
+        StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, storybookPage, eventBus)
         storybookApi.init(storyContext)
         eventBus.dispatch()
         return storybookApi
@@ -65,6 +67,7 @@ class StorybookPresenterTest {
         phoneFrameView.displayedViews.size shouldBe 1
         displayedHealthBarLabel() shouldBe "15 / 30"
         actionsView.displayedActions shouldBe listOf(emptyList())
+        storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--half")
     }
 
     @Test
@@ -89,6 +92,7 @@ class StorybookPresenterTest {
         sidebarView.selectedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--empty")
         displayedHealthBarLabel() shouldBe "0 / 30"
         storyLocation.keptStoryIds.shouldContainExactly("screen-health-bar--empty")
+        storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--empty")
     }
 
     @Test
@@ -102,6 +106,7 @@ class StorybookPresenterTest {
         // Then
         displayedHealthBarLabel() shouldBe "7 / 30"
         controlsView.displayedArgs.last() shouldBe mapOf("remaining" to ArgDto.int(7), "maximum" to ArgDto.int(30))
+        storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--full")
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "7")))
     }
 
@@ -141,6 +146,7 @@ class StorybookPresenterTest {
         // Then
         actionsView.displayedActions.last().shouldContainExactly(ActionDto(name = "barTapped", arguments = listOf("3")))
         phoneFrameView.displayedViews.size shouldBe 1
+        storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full")
     }
 
     @Test

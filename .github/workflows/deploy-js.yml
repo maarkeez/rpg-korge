@@ -32,14 +32,9 @@ jobs:
       - { name: Prepare Gradle, uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 } # v3.1.0
       #- { name: Buid JS bundle, run: ./gradlew browserReleaseEsbuild }
       - { name: Buid JS bundle, run: ./gradlew browserReleaseWebpack } # available after 6.0.0-beta3
-      # Served at /storybook/: the same bundle, which starts the Storybook from that folder. KorGE reads the resources
-      # relative to the page URL, ignoring a <base>, so the files of the game are copied instead of shared
-      - name: Add Storybook
-        run: |
-          mkdir -p build/www/storybook
-          find build/www -maxdepth 1 -type f -exec cp {} build/www/storybook/ \;
-          test -f build/www/storybook/resources.zip
-          grep -q 'hello-world.js' build/www/storybook/index.html
+      # Served at /storybook/: the same bundle, which starts the Storybook from that folder. The storybook skill runs the
+      # same script, so what Claude screenshots is what is deployed
+      - { name: Add Storybook, run: bash tools/storybook/add-storybook.sh }
       # Served at /dependencies/. Its links to the source files are relative to the repository, so they point to GitHub instead
       - name: Add dependency report
         run: |
