@@ -225,9 +225,9 @@ const DATA = {
     {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
     {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 42, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 22, "importsOut": 186},
+    {"name": "screen", "files": 70, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 26, "importsOut": 186},
     {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 416, "importsOut": 0},
-    {"name": "storybook", "files": 54, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 39},
+    {"name": "storybook", "files": 58, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 43},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 15}
   ],
@@ -1294,14 +1294,18 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 22, "files": 17, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 26, "files": 21, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BagButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BagButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattlefieldHealthBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattlefieldHealthBarPreviewView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattlefieldHealthBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattlefieldHealthBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattlefieldView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/CancelAndConfirmViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.CancelAndConfirmView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/CancelButtonStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.CancelButton"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/ConfirmButtonStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.ConfirmButton"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/EffectViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.EffectView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/EffectsViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.EffectsView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/FinishTurnViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.FinishTurnView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/HealthBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.HealthBarPreviewView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/HealthBarViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.HealthBarView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/InventorySlotViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.InventorySlotView"},

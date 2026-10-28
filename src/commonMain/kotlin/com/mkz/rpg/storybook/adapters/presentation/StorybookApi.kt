@@ -48,6 +48,10 @@ class StorybookApi(
                 EffectsViewStories,
                 AbilityButtonViewStories,
                 BagButtonViewStories,
+                FinishTurnViewStories,
+                CancelButtonStories,
+                ConfirmButtonStories,
+                CancelAndConfirmViewStories,
                 InventorySlotViewStories,
                 ShopViewStories,
             )
