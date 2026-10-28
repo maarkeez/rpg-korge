@@ -23,6 +23,8 @@ class StoryContext(
 
     private companion object {
         const val ITEMS_DIRECTORY = "lootableItem"
+        const val UNITS_DIRECTORY = "unit"
+        const val PORTRAIT_SUFFIX = "_portrait"
         const val IMAGE_EXTENSION = ".png"
     }
 
@@ -33,9 +35,14 @@ class StoryContext(
     }
 
     /** Every lootable item that has an icon, in alphabetical order, e.g.: the options of a pick control of an item. */
-    fun lootableItemIds(): List<String> =
+    fun lootableItemIds(): List<String> = imageIds(ITEMS_DIRECTORY)
+
+    /** Every unit that has a portrait, in alphabetical order, e.g.: the options of a pick control of a unit. */
+    fun unitIds(): List<String> = imageIds(UNITS_DIRECTORY).filter { id -> id.endsWith(PORTRAIT_SUFFIX) }.map { id -> id.removeSuffix(PORTRAIT_SUFFIX) }
+
+    private fun imageIds(directory: String): List<String> =
         resourcesLoader
-            .bitmaps(ITEMS_DIRECTORY)
+            .bitmaps(directory)
             .keys
             .filter { name -> name.endsWith(IMAGE_EXTENSION) }
             .map { name -> name.removeSuffix(IMAGE_EXTENSION) }

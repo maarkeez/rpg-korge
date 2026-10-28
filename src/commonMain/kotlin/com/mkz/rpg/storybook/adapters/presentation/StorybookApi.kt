@@ -40,6 +40,10 @@ class StorybookApi(
                 HealthBarPreviewViewStories,
                 ManaBarPreviewViewStories,
                 BattlefieldHealthBarPreviewViewStories,
+                UnitPortraitViewStories,
+                UnitNameViewStories,
+                RemainingTurnsViewStories,
+                PointsViewStories,
                 InventorySlotViewStories,
                 ShopViewStories,
             )

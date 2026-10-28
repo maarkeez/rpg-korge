@@ -47,11 +47,7 @@ class StoryCoverageArchitectureTest {
             "MenuView",
             "NpcDialogView",
             "PlayerCallToActionView",
-            "PointsView",
             "ReceiverPreviewView",
-            "RemainingTurnsView",
-            "UnitNameView",
-            "UnitPortraitView",
             "VirtualPadView",
         )
 
