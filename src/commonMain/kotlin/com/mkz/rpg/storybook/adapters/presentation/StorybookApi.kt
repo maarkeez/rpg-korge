@@ -53,6 +53,10 @@ class StorybookApi(
                 ConfirmButtonStories,
                 CancelAndConfirmViewStories,
                 InventorySlotViewStories,
+                InventoryViewStories,
+                ItemActionsViewStories,
+                GiveItemViewStories,
+                InventoryFullViewStories,
                 ShopViewStories,
             )
 
