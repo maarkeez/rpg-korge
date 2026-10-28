@@ -95,6 +95,17 @@ the dependency rule in M1) and regenerates the [dependency report](../architectu
    presenter, smoke and end-to-end tests, and the dependency report.
 2. **The plan.** These commits, and the Reference updated to what was built.
 
+### M4 commits
+
+1. **The skill, the readiness signal and the docs.** `StorybookPage`, in a new `storybook.adapters.page` package,
+   told by the presenter once the story on show has rendered, which `BrowserStorybookPage` turns into the page title,
+   `Storybook – <story id>`; the `storybook` skill and `tools/storybook` (`add-storybook.sh`, now also run by
+   `Deploy JS`, and `screenshot.cjs`); [Storybook](../architecture/storybook.md) and
+   [How to add a story](../testing/how-to-add-a-story.md), linked from the README, Package structure, Subdomain
+   dependencies and How to add a new test; a hint in the empty Actions, and clearer shop and inventory slot
+   descriptions. With the unit, presenter, view and end-to-end tests.
+2. **The plan.** These commits, and the Reference updated to what was built.
+
 ## Reference
 
 Detailed technical notes for whoever implements the plan. The names are proposals: keep them unless an architecture test
@@ -119,9 +130,11 @@ com.mkz.rpg.storybook
     │                       PhoneFrameView, StoryInfoView, StorybookButton; ToolbarView and ControlsView in M2;
     │                       ActionsView in M3), StoryBinding, StoryContext, Args, and one <View>Stories object per component
     ├── storage             InMemoryStorybookRepository
-    └── location            isStorybookRequested() and platformStoryLocation() (expect, in commonMain),
-                            NoStoryLocation (commonMain, used on the JVM), LocationQuery (commonMain, M2),
-                            BrowserStoryLocation (jsMain)
+    ├── location            isStorybookRequested() and platformStoryLocation() (expect, in commonMain),
+    │                       NoStoryLocation (commonMain, used on the JVM), LocationQuery (commonMain, M2),
+    │                       BrowserStoryLocation (jsMain)
+    └── page                StorybookPage and platformStorybookPage() (expect), NoStorybookPage (commonMain, used on
+                            the JVM), BrowserStorybookPage (jsMain), M4
 ```
 
 - The domain package only allows the aggregate root, its repository, events and errors, named after the subdomain
@@ -247,7 +260,8 @@ object ShopViewStories : StoryBinding {
   empty slot, as in the game; `shopBuyerStepped` sets `buyerIndex` within the party; `shopActionSelected` and
   `shopBackSelected` are only logged.
 - The Actions panel (`ActionsView`, M3) lists `name(arguments)`, e.g.: `shopSlotSelected(3)`, the newest on top, the
-  five that fit, and how many there are in its title, e.g.: `Actions (12)`, with a `Clear` button.
+  five that fit, and how many there are in its title, e.g.: `Actions (12)`, with a `Clear` button. Built in M4: while
+  it is empty, a hint tells to tap the view in the phone.
 
 ### Startup flag and hosting
 
@@ -269,7 +283,8 @@ object ShopViewStories : StoryBinding {
   `entrypoint("storybook", "com.mkz.rpg.MainKt")` in `build.gradle.kts`, which also sets the system property on both.
   `.run/runJvmStorybookAutoreload.run.xml` runs the second one, as `.run/runJvmAutoreload.run.xml` does the game.
 - `/storybook/`: the `Add Storybook` step of `Deploy JS`, after the bundle is built, copies the files of `build/www`
-  (the page, the JS and `resources.zip`) into `build/www/storybook`, guarded by a `test` and a `grep`. A copy of the
+  (the page, the JS and `resources.zip`) into `build/www/storybook`, guarded by a `test` and a `grep`. From M4 the step
+  runs `tools/storybook/add-storybook.sh`, which the skill runs too, so what Claude screenshots is what is deployed. A copy of the
   page with `<base href="../">` does not work: KorGE's JS loader reads the resources relative to
   `document.location.href`, ignoring the base, so `resources.zip` is not found.
 
@@ -323,25 +338,39 @@ object ShopViewStories : StoryBinding {
 - In M3, `ActionsViewTest` (with `ActionsViewExtension`), `FakeActionsView` in `StorybookPresenterTest`, which calls
   `StoryContext.action` directly with the health bar, and the use case tests of `RecordAction`, `ClearActions` and
   `SearchActions`.
+- In M4, `StorybookPageTest` (the title), `FakeStorybookPage` in `StorybookPresenterTest` (told once per render, not
+  for an action only logged), an end-to-end test starting on a link and waiting for the page to be told, and the empty
+  hint in `ActionsViewTest`. `BrowserStorybookPage` is only checked through the skill, as there is no `jsTest` source
+  set of its own.
 - In M2, `ControlsViewTest` and `ToolbarViewTest` (with `ControlsViewExtension` and `ToolbarViewExtension`),
   `LocationQueryTest`, and the smoke test also opens the catalogue of every binding, so a default arg its control does
   not accept (e.g.: an item with no image) fails there.
 
 ### Claude skill
 
-- `.claude/skills/storybook/SKILL.md`: build the bundle (`./gradlew browserReleaseWebpack`, as `Deploy JS`), add the
-  `/storybook/` page the same way, serve `build/www` (e.g.: `python3 -m http.server -d build/www`), open
-  `http://localhost:8000/storybook/?story=…` with Playwright, wait for the readiness signal, and save a screenshot under
-  the scratchpad, or `build/storybook`, to read it.
-- **Readiness signal**: once the selected story has rendered, the Storybook sets a value Playwright can wait for, e.g.:
-  `document.title = "Storybook – <story id>"` or a `window.storybookRenderedStory` set through the `jsMain` adapter.
-  Without it, a screenshot may be taken before the resources bundle is loaded: in M1, waiting about 8 seconds was
-  enough locally.
-- In a cloud session, Chromium and Playwright are already installed: do not install them. Headless Chromium renders
-  WebGL in software, so check in M4 that KorGE renders there, and that it also does on the CI runners, as visual
-  regression would need it. Locally, `playwright-core` driving the installed Chrome with
-  `--use-angle=swiftshader --enable-unsafe-swiftshader` rendered the Storybook and its clicks (a click needs the mouse
-  moved over the row first, and a short press).
+Built in M4:
+
+- [`.claude/skills/storybook/SKILL.md`](../../.claude/skills/storybook/SKILL.md): list the story ids (from
+  `StorySmokeTest`), build the bundle (`./gradlew browserReleaseWebpack`, as `Deploy JS`), add `/storybook/` with
+  `tools/storybook/add-storybook.sh`, serve `build/www` (`python3 -m http.server 8765 -d build/www`), and run
+  `node tools/storybook/screenshot.cjs '<query>'`, which saves `build/storybook/<story id>.png` (or `--out`) to read.
+- [`tools/storybook/screenshot.cjs`](../../tools/storybook/screenshot.cjs): opens
+  `http://localhost:8765/storybook/?<query>` at 1280x900, waits for the readiness signal (up to 60 seconds), warns
+  when the story rendered is not the one asked for, prints the page errors, runs the steps (`--click x,y`, `--type`,
+  `--replace`, `--press`, `--wait`, `--shot`), each one waiting briefly for the story to render again, and prints the
+  final URL. A click moves the mouse first, then presses it for 80ms. KorGE's text inputs have no select all, so
+  `--replace` deletes their text a character at a time.
+- **Readiness signal**: once the presenter has displayed the story in the phone, it tells `StorybookPage`, whose
+  `BrowserStorybookPage` titles the page `Storybook – <story id>` (`StorybookPage.renderedTitle`). The script clears the
+  title before each step, so it also tells whether the step rendered the story again. Loading takes about 9 seconds
+  locally.
+- **Playwright**: the script takes `playwright` when it is installed (a cloud session, also from the global
+  `node_modules`), with its own Chromium, or else `playwright-core` from `tools/storybook` (`npm install`, its
+  `node_modules` ignored by git), driving the installed Chrome (or `CHROME`). Always headless, with
+  `--use-angle=swiftshader --enable-unsafe-swiftshader`, so it draws WebGL in software. The text then shows small
+  artifacts around some letters.
+- Checked on macOS with `playwright-core` and the installed Chrome: the screenshots, a story tapped in the sidebar, a
+  slot of the shop, a text control replaced, and `Clear`. Not checked yet in a cloud session, nor on the CI runners.
 
 ### Technical risks checked in M1
 
