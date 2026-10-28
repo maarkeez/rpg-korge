@@ -61,7 +61,7 @@ class ExplorationPresenter(
     // The last arrow, A or B pressed, until it is acted on.
     private sealed interface Press {
         data class Arrow(
-            val direction: DirectionDto,
+            val direction: VirtualPadView.Direction,
         ) : Press
 
         data object A : Press
@@ -177,11 +177,19 @@ class ExplorationPresenter(
     // The party only walks once the scene shows where it is, so a held arrow can not walk ahead of the animation, nor
     // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed). Walking towards the pressed
     // arrow acts on its press, so it is not walked again.
-    private fun walkParty(direction: DirectionDto) {
+    private fun walkParty(direction: VirtualPadView.Direction) {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.Arrow(direction)) pendingPress = null
-        partyApi.walkParty(direction)
+        partyApi.walkParty(directionDto(direction))
     }
+
+    private fun directionDto(direction: VirtualPadView.Direction): DirectionDto =
+        when (direction) {
+            VirtualPadView.Direction.NORTH -> DirectionDto.NORTH
+            VirtualPadView.Direction.EAST -> DirectionDto.EAST
+            VirtualPadView.Direction.SOUTH -> DirectionDto.SOUTH
+            VirtualPadView.Direction.WEST -> DirectionDto.WEST
+        }
 
     // As walking: once the scene shows where the party is, and while the pad is displayed.
     private fun talkToAdjacentNpc() {
@@ -255,7 +263,10 @@ class ExplorationPresenter(
             } else {
                 emptyList()
             }
-        npcDialogView.display(npc, choices)
+        npcDialogView.display(
+            npc = NpcDialog(npcId = npc.id, unitId = npc.unitId, name = texts.npcName(npc.id), line = texts.npcLine(npc.id)),
+            choices = choices,
+        )
         virtualPadView.visible = false
         npcDialogView.visible = true
     }

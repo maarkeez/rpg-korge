@@ -1,6 +1,6 @@
 package com.mkz.rpg.shared.adapters.e2e
 
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
@@ -51,7 +51,7 @@ suspend fun ViewsForTesting.startNewGame(random: Random = FixedDoublesRandom(0.0
 
 /** A leader step of the route to the battle: the arrow pressed, and the tile the leader walks to. */
 private data class RouteStep(
-    val direction: DirectionDto,
+    val direction: Direction,
     val row: Int,
     val column: Int,
 )
@@ -67,12 +67,12 @@ const val KNIGHT_START_COLUMN = 1
  */
 private val ROUTE_TO_BATTLE =
     listOf(
-        RouteStep(DirectionDto.EAST, row = 2, column = 2),
-        RouteStep(DirectionDto.EAST, row = 2, column = 3),
-        RouteStep(DirectionDto.EAST, row = 2, column = 4),
-        RouteStep(DirectionDto.EAST, row = 2, column = 5),
-        RouteStep(DirectionDto.EAST, row = 2, column = 6),
-        RouteStep(DirectionDto.EAST, row = 2, column = 7),
+        RouteStep(Direction.EAST, row = 2, column = 2),
+        RouteStep(Direction.EAST, row = 2, column = 3),
+        RouteStep(Direction.EAST, row = 2, column = 4),
+        RouteStep(Direction.EAST, row = 2, column = 5),
+        RouteStep(Direction.EAST, row = 2, column = 6),
+        RouteStep(Direction.EAST, row = 2, column = 7),
     )
 
 /** Where the knight is once [startNewBattle] has walked it to the battle. */

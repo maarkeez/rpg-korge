@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -15,8 +15,8 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class VirtualPadViewTest : ViewsForTesting() {
-    private val pressedDirections = mutableListOf<DirectionDto>()
-    private val heldDirections = mutableListOf<DirectionDto>()
+    private val pressedDirections = mutableListOf<Direction>()
+    private val heldDirections = mutableListOf<Direction>()
     private var aPresses = 0
     private var bPresses = 0
 
@@ -34,12 +34,12 @@ class VirtualPadViewTest : ViewsForTesting() {
             // When
             val pad = newVirtualPadView()
             // Then
-            pad.arrow(DirectionDto.NORTH).y shouldBeLessThan pad.arrow(DirectionDto.WEST).y
-            pad.arrow(DirectionDto.SOUTH).y shouldBeGreaterThan pad.arrow(DirectionDto.EAST).y
-            pad.arrow(DirectionDto.WEST).x shouldBeLessThan pad.arrow(DirectionDto.NORTH).x
-            pad.arrow(DirectionDto.EAST).x shouldBeGreaterThan pad.arrow(DirectionDto.SOUTH).x
-            pad.arrow(DirectionDto.NORTH).x shouldBe pad.arrow(DirectionDto.SOUTH).x
-            pad.arrow(DirectionDto.WEST).y shouldBe pad.arrow(DirectionDto.EAST).y
+            pad.arrow(Direction.NORTH).y shouldBeLessThan pad.arrow(Direction.WEST).y
+            pad.arrow(Direction.SOUTH).y shouldBeGreaterThan pad.arrow(Direction.EAST).y
+            pad.arrow(Direction.WEST).x shouldBeLessThan pad.arrow(Direction.NORTH).x
+            pad.arrow(Direction.EAST).x shouldBeGreaterThan pad.arrow(Direction.SOUTH).x
+            pad.arrow(Direction.NORTH).x shouldBe pad.arrow(Direction.SOUTH).x
+            pad.arrow(Direction.WEST).y shouldBe pad.arrow(Direction.EAST).y
         }
 
     @Test
@@ -48,7 +48,7 @@ class VirtualPadViewTest : ViewsForTesting() {
             // When
             val pad = newVirtualPadView()
             // Then
-            pad.arrow(DirectionDto.EAST).let { east -> east.x + east.width } shouldBeLessThan pad.bButton().x
+            pad.arrow(Direction.EAST).let { east -> east.x + east.width } shouldBeLessThan pad.bButton().x
             pad.aButton().x shouldBeGreaterThan pad.bButton().x
             pad.aButton().y shouldBeLessThan pad.bButton().y
             pad.aButton().let { a -> a.x + a.width } shouldBeLessThan pad.width
@@ -90,10 +90,10 @@ class VirtualPadViewTest : ViewsForTesting() {
             val pad = newVirtualPadView()
             addChild(pad)
             // When
-            clickArrow(pad, DirectionDto.WEST)
+            clickArrow(pad, Direction.WEST)
             // Then
             heldDirections.shouldNotBeEmpty()
-            heldDirections.toSet().shouldContainExactly(DirectionDto.WEST)
+            heldDirections.toSet().shouldContainExactly(Direction.WEST)
             pad.heldDirection().shouldBeNull()
         }
 
@@ -104,11 +104,11 @@ class VirtualPadViewTest : ViewsForTesting() {
             val pad = newVirtualPadView()
             addChild(pad)
             // When
-            pad.holdArrow(DirectionDto.NORTH)
+            pad.holdArrow(Direction.NORTH)
             repeat(3) { nextFrame() }
             // Then
             heldDirections.shouldHaveSize(4)
-            heldDirections.toSet().shouldContainExactly(DirectionDto.NORTH)
+            heldDirections.toSet().shouldContainExactly(Direction.NORTH)
         }
 
     @Test
@@ -118,10 +118,10 @@ class VirtualPadViewTest : ViewsForTesting() {
             val pad = newVirtualPadView()
             addChild(pad)
             // When
-            pad.holdArrow(DirectionDto.EAST)
+            pad.holdArrow(Direction.EAST)
             repeat(3) { nextFrame() }
             // Then
-            pressedDirections.shouldContainExactly(DirectionDto.EAST)
+            pressedDirections.shouldContainExactly(Direction.EAST)
             heldDirections.shouldHaveSize(4)
         }
 
@@ -131,11 +131,11 @@ class VirtualPadViewTest : ViewsForTesting() {
             // Given
             val pad = newVirtualPadView()
             addChild(pad)
-            pad.holdArrow(DirectionDto.SOUTH)
+            pad.holdArrow(Direction.SOUTH)
             // When
             pad.releaseArrow()
             repeat(3) { nextFrame() }
             // Then
-            heldDirections.shouldContainExactly(DirectionDto.SOUTH)
+            heldDirections.shouldContainExactly(Direction.SOUTH)
         }
 }

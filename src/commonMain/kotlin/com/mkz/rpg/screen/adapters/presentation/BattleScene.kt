@@ -55,7 +55,7 @@ class BattleScene(
         )
     val playerCallToActionView = PlayerCallToActionView(texts, resourcesLoader)
     val virtualPadView = VirtualPadView(Size(390, 300))
-    val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader, texts)
+    val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
     val shopView = ShopView(resourcesLoader, texts)
     val formationView = FormationView(resourcesLoader, texts)
 

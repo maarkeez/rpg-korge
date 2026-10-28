@@ -10,13 +10,13 @@ import com.mkz.rpg.inventory.domain.InventoryEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.domain.NpcMother.npc
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
@@ -58,7 +58,7 @@ class ExplorationPresenterTest {
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
-    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader(), TextsMother.texts())
+    private val npcDialogView = NpcDialogView(Size(390, 300), BattleSceneResourcesLoader())
     private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val battlefieldView = FakeBattlefieldView()
     private val battleHudView = FakeBattleHudView()
@@ -175,10 +175,31 @@ class ExplorationPresenterTest {
         createPresenter()
         startExploring()
         // When
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.holdArrow(Direction.NORTH)
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 1)
+    }
+
+    @Test
+    fun `WalkParty should walk the party one tile towards each arrow when it is held`() {
+        // Given
+        createPresenter()
+        startExploring()
+        val walks =
+            listOf(
+                Direction.NORTH to PositionDto(row = 0, column = 1),
+                Direction.SOUTH to PositionDto(row = 1, column = 1),
+                Direction.EAST to PositionDto(row = 1, column = 2),
+                Direction.WEST to PositionDto(row = 1, column = 1),
+            )
+        walks.forEach { (direction, expectedPosition) ->
+            // When
+            tapArrow(direction)
+            eventBus.dispatch()
+            // Then
+            apis.battlefieldApi.searchPosition("knight-1") shouldBe expectedPosition
+        }
     }
 
     @Test
@@ -188,7 +209,7 @@ class ExplorationPresenterTest {
         startExploring()
         val longStep = timeline.playLongStep()
         // When
-        tapArrow(DirectionDto.NORTH)
+        tapArrow(Direction.NORTH)
         presenter.tick(1.milliseconds)
         eventBus.dispatch()
         // Then
@@ -207,8 +228,8 @@ class ExplorationPresenterTest {
         val presenter = createPresenter()
         startExploring()
         val longStep = timeline.playLongStep()
-        tapArrow(DirectionDto.NORTH)
-        tapArrow(DirectionDto.EAST)
+        tapArrow(Direction.NORTH)
+        tapArrow(Direction.EAST)
         // When
         longStep.complete(Unit)
         presenter.tick(1.milliseconds)
@@ -225,7 +246,7 @@ class ExplorationPresenterTest {
         val presenter = createPresenter()
         startExploring()
         val longStep = timeline.playLongStep()
-        tapArrow(DirectionDto.NORTH)
+        tapArrow(Direction.NORTH)
         eventBus.publish(knightSelected)
         eventBus.dispatch()
         longStep.complete(Unit)
@@ -240,7 +261,7 @@ class ExplorationPresenterTest {
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
     }
 
-    private fun tapArrow(direction: DirectionDto) {
+    private fun tapArrow(direction: Direction) {
         virtualPadView.holdArrow(direction)
         virtualPadView.releaseArrow()
     }
@@ -265,7 +286,7 @@ class ExplorationPresenterTest {
         }
         require(battlefieldView.flashedBattleUnits.size == 9) { "The three members flash every second" }
         // When
-        tapArrow(DirectionDto.NORTH)
+        tapArrow(Direction.NORTH)
         presenter.tick(1.milliseconds)
         apis.eventBus.dispatch()
         // Then
@@ -438,7 +459,7 @@ class ExplorationPresenterTest {
         eventBus.publish(knightSelected)
         eventBus.dispatch()
         // When
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.holdArrow(Direction.NORTH)
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
@@ -490,7 +511,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.holdArrow(Direction.NORTH)
         virtualPadView.releaseArrow()
         eventBus.dispatch()
         // When
@@ -521,7 +542,7 @@ class ExplorationPresenterTest {
         startExploring()
         talk()
         // When
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.holdArrow(Direction.NORTH)
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)
@@ -561,7 +582,7 @@ class ExplorationPresenterTest {
 
     // The leader walks east to (1,2), next to the merchant, south of it, and talks to it.
     private fun talkToTheMerchant() {
-        virtualPadView.holdArrow(DirectionDto.EAST)
+        virtualPadView.holdArrow(Direction.EAST)
         virtualPadView.releaseArrow()
         eventBus.dispatch()
         talk()
@@ -800,7 +821,7 @@ class ExplorationPresenterTest {
         startExploring()
         openFormation()
         // When
-        virtualPadView.holdArrow(DirectionDto.NORTH)
+        virtualPadView.holdArrow(Direction.NORTH)
         eventBus.dispatch()
         // Then
         apis.battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 1, column = 1)

@@ -222,10 +222,10 @@ const DATA = {
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 14},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
-    {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 25},
-    {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 42, "importsOut": 67},
+    {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 25},
+    {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 41, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 72, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 46, "importsOut": 179},
+    {"name": "screen", "files": 73, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 46, "importsOut": 177},
     {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 416, "importsOut": 0},
     {"name": "storybook", "files": 71, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 63},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
@@ -1191,15 +1191,14 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "mapBuilder.domain.MapBuilderEvent.MapImportRejected.Reason"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderScene.kt", "layer": "adapters", "name": "mapBuilder.adapters.presentation.MapBuilderApi"}
     ]},
-    {"from": "screen", "to": "npc", "weight": 6, "files": 5, "imports": [
+    {"from": "screen", "to": "npc", "weight": 5, "files": 4, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "npc.domain.NpcEvent"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "npc.domain.Npc"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt", "layer": "adapters", "name": "npc.domain.Npc"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "npc.domain.Npc"}
     ]},
-    {"from": "screen", "to": "party", "weight": 19, "files": 8, "imports": [
+    {"from": "screen", "to": "party", "weight": 18, "files": 7, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "party.domain.PartyEvent.ExplorationResumed"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "party.domain.PartyEvent.ExplorationStarted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
@@ -1217,8 +1216,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/FormationPresenter.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "party.domain.PartyEvent.ExplorationPaused"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt", "layer": "adapters", "name": "party.domain.Party.Dto.DirectionDto"}
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"}
     ]},
     {"from": "screen", "to": "player", "weight": 12, "files": 7, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},

@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
@@ -54,20 +53,31 @@ open class VirtualPadView(
         private const val BUTTON_OFFSET_Y = 24.0
     }
 
-    private var onDirectionPressed: ((DirectionDto) -> Unit)? = null
-    private var onDirectionHeld: ((DirectionDto) -> Unit)? = null
+    /** An arrow of the pad, with the tile offsets of the direction it points to. */
+    enum class Direction(
+        val rowOffset: Int,
+        val columnOffset: Int,
+    ) {
+        NORTH(rowOffset = -1, columnOffset = 0),
+        EAST(rowOffset = 0, columnOffset = 1),
+        SOUTH(rowOffset = 1, columnOffset = 0),
+        WEST(rowOffset = 0, columnOffset = -1),
+    }
+
+    private var onDirectionPressed: ((Direction) -> Unit)? = null
+    private var onDirectionHeld: ((Direction) -> Unit)? = null
     private var onAPressed: (() -> Unit)? = null
     private var onBPressed: (() -> Unit)? = null
-    internal var heldDirection: DirectionDto? = null
+    internal var heldDirection: Direction? = null
         private set
 
     // The arrows form a cross, centred on the left part of the pad.
     private val centerX = size.width * ARROWS_CENTER_RATIO - ARROW_SIZE / 2
     private val centerY = (size.height - ARROW_SIZE) / 2
-    internal val northArrow = arrow(DirectionDto.NORTH, x = centerX, y = centerY - ARROW_SIZE)
-    internal val eastArrow = arrow(DirectionDto.EAST, x = centerX + ARROW_SIZE, y = centerY)
-    internal val southArrow = arrow(DirectionDto.SOUTH, x = centerX, y = centerY + ARROW_SIZE)
-    internal val westArrow = arrow(DirectionDto.WEST, x = centerX - ARROW_SIZE, y = centerY)
+    internal val northArrow = arrow(Direction.NORTH, x = centerX, y = centerY - ARROW_SIZE)
+    internal val eastArrow = arrow(Direction.EAST, x = centerX + ARROW_SIZE, y = centerY)
+    internal val southArrow = arrow(Direction.SOUTH, x = centerX, y = centerY + ARROW_SIZE)
+    internal val westArrow = arrow(Direction.WEST, x = centerX - ARROW_SIZE, y = centerY)
 
     private val buttonsCenterX = size.width * BUTTONS_CENTER_RATIO
     private val buttonsCenterY = size.height / 2
@@ -78,11 +88,11 @@ open class VirtualPadView(
         addUpdater { heldDirection?.let { direction -> onDirectionHeld?.invoke(direction) } }
     }
 
-    open fun setOnDirectionPressed(listener: (DirectionDto) -> Unit) {
+    open fun setOnDirectionPressed(listener: (Direction) -> Unit) {
         onDirectionPressed = listener
     }
 
-    open fun setOnDirectionHeld(listener: (DirectionDto) -> Unit) {
+    open fun setOnDirectionHeld(listener: (Direction) -> Unit) {
         onDirectionHeld = listener
     }
 
@@ -102,7 +112,7 @@ open class VirtualPadView(
         onBPressed?.invoke()
     }
 
-    internal fun hold(direction: DirectionDto) {
+    internal fun hold(direction: Direction) {
         heldDirection = direction
         onDirectionPressed?.invoke(direction)
         onDirectionHeld?.invoke(direction)
@@ -113,7 +123,7 @@ open class VirtualPadView(
     }
 
     private fun arrow(
-        direction: DirectionDto,
+        direction: Direction,
         x: Double,
         y: Double,
     ): UIButton =
@@ -154,7 +164,7 @@ open class VirtualPadView(
         }
 
     // The tip of the triangle points towards the direction, from the centre of the arrow.
-    private fun triangle(direction: DirectionDto): Triple<Point, Point, Point> {
+    private fun triangle(direction: Direction): Triple<Point, Point, Point> {
         val center = ARROW_SIZE / 2
         val tip = Point(center + direction.columnOffset * ARROW_HALF_SIDE, center + direction.rowOffset * ARROW_HALF_SIDE)
         val baseX = center - direction.columnOffset * ARROW_HALF_SIDE

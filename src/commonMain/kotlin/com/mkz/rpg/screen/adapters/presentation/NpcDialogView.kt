@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.npc.domain.Npc
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.font.DefaultTtfFontAsBitmap
@@ -27,7 +26,6 @@ import korlibs.math.geom.Size
 open class NpcDialogView(
     size: Size,
     private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
 ) : UIContainer(size) {
     companion object {
         const val PORTRAIT_SCALE = 3.0
@@ -94,20 +92,20 @@ open class NpcDialogView(
      * left out when it has none. The [choices] share the width of the dialog, in their order.
      */
     open fun display(
-        npc: Npc.Dto,
+        npc: NpcDialog,
         choices: List<Choice> = emptyList(),
     ) {
         portrait?.removeFromParent()
         portrait =
-            resourcesLoader.bitmapOrNull(npc.unitId?.let { unitId -> "unit/${unitId}_portrait.png" } ?: "npc/${npc.id}_portrait.png")?.let { portraitBitmap ->
+            resourcesLoader.bitmapOrNull(npc.unitId?.let { unitId -> "unit/${unitId}_portrait.png" } ?: "npc/${npc.npcId}_portrait.png")?.let { portraitBitmap ->
                 image(portraitBitmap) {
                     smoothing = false
                     scale = PORTRAIT_SCALE
                     position(PADDING, PADDING)
                 }
             }
-        nameText.text = text(texts.npcName(npc.id), textSize = NAME_TEXT_SIZE, color = NAME_COLOR)
-        lineText.text = text(texts.npcLine(npc.id), textSize = LINE_TEXT_SIZE, color = LINE_COLOR)
+        nameText.text = text(npc.name, textSize = NAME_TEXT_SIZE, color = NAME_COLOR)
+        lineText.text = text(npc.line, textSize = LINE_TEXT_SIZE, color = LINE_COLOR)
         displayChoices(choices)
     }
 

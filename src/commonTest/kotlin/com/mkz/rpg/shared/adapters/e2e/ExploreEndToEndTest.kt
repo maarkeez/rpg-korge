@@ -1,7 +1,7 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battleHudView
 import com.mkz.rpg.screen.adapters.presentation.battleInfoView
 import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
@@ -59,7 +59,7 @@ class ExploreEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { virtualPadView()?.isPadShown() == true && battlefieldView()?.hasBattleUnitAt(knightRow, knightColumn) == true }
             val battlefieldView = requireNotNull(battlefieldView()) { "The battlefield is not displayed" }
             // When
-            clickArrow(requireNotNull(virtualPadView()), DirectionDto.EAST)
+            clickArrow(requireNotNull(virtualPadView()), Direction.EAST)
             // Then
             waitUntil { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn) && !battlefieldView.hasBattleUnitAt(knightRow, knightColumn) }
             withClue("Expected the knight to walk to ($knightRow,$nextTileColumn)") { battlefieldView.hasBattleUnitAt(knightRow, nextTileColumn).shouldBeTrue() }

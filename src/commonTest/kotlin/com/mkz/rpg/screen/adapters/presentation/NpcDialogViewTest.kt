@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -14,9 +13,9 @@ import kotlin.test.Test
 
 class NpcDialogViewTest : ViewsForTesting() {
     private var taps = 0
-    private val elder = npc(id = "elder").toDto()
+    private val elder = NpcDialog(npcId = "elder", unitId = null, name = "Elder", line = "Long ago a goat chewed up a wizard's spellbook and swallowed its magic.")
 
-    private suspend fun newNpcDialogView() = NpcDialogView(Size(390, 300), loadedResourcesLoader(), TextsMother.texts()).also { dialog -> dialog.setOnTapped { taps++ } }
+    private suspend fun newNpcDialogView() = NpcDialogView(Size(390, 300), loadedResourcesLoader()).also { dialog -> dialog.setOnTapped { taps++ } }
 
     @Test
     fun `NpcDialogView should be hidden when is created`() =
@@ -36,8 +35,7 @@ class NpcDialogViewTest : ViewsForTesting() {
             dialog.display(elder)
             // Then
             dialog.displayedName() shouldBe "Elder"
-            dialog.displayedLine() shouldBe
-                "Long ago a goat chewed up a wizard's spellbook and swallowed its magic. The Goat Wizard now rules the lair down south. Beat it, and its bees may answer your call."
+            dialog.displayedLine() shouldBe "Long ago a goat chewed up a wizard's spellbook and swallowed its magic."
             dialog.isNameAboveLine().shouldBeTrue()
             dialog.isPortraitLeftOfText().shouldBeTrue()
             dialog.portraitSize() shouldBe (96.0 to 96.0)
@@ -49,7 +47,7 @@ class NpcDialogViewTest : ViewsForTesting() {
             // Given
             val dialog = newNpcDialogView()
             // When
-            dialog.display(npc(id = "a-knight-to-recruit", unitId = "knight").toDto())
+            dialog.display(NpcDialog(npcId = "a-knight-to-recruit", unitId = "knight", name = "Knight", line = "Take me with you."))
             // Then
             dialog.portraitSize() shouldBe (96.0 to 96.0)
         }
@@ -60,7 +58,7 @@ class NpcDialogViewTest : ViewsForTesting() {
             // Given
             val dialog = newNpcDialogView()
             // When
-            dialog.display(npc(id = "the-ghost").toDto())
+            dialog.display(NpcDialog(npcId = "the-ghost", unitId = null, name = "Ghost", line = "Boo."))
             // Then
             dialog.hasPortrait().shouldBeFalse()
         }
@@ -72,10 +70,10 @@ class NpcDialogViewTest : ViewsForTesting() {
             val dialog = newNpcDialogView()
             dialog.display(elder)
             // When
-            dialog.display(npc(id = "herbalist").toDto())
+            dialog.display(NpcDialog(npcId = "herbalist", unitId = null, name = "Herbalist", line = "Herbs to heal, venom to kill."))
             // Then
             dialog.displayedName() shouldBe "Herbalist"
-            dialog.displayedLine() shouldBe "Herbs to heal, venom to kill: I know them both. Take me with you, and let's face that goat together!"
+            dialog.displayedLine() shouldBe "Herbs to heal, venom to kill."
             dialog.hasPortrait().shouldBeFalse()
         }
 

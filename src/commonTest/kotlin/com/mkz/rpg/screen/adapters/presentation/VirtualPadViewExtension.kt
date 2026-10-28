@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
+import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.isShown
 import korlibs.korge.tests.ViewsForTesting
@@ -10,14 +10,14 @@ import korlibs.korge.ui.UIButton
 
 fun VirtualPadView.isPadShown(): Boolean = isShown()
 
-fun VirtualPadView.heldDirection(): DirectionDto? = heldDirection
+fun VirtualPadView.heldDirection(): Direction? = heldDirection
 
-fun VirtualPadView.arrow(direction: DirectionDto): UIButton =
+fun VirtualPadView.arrow(direction: Direction): UIButton =
     when (direction) {
-        DirectionDto.NORTH -> northArrow
-        DirectionDto.EAST -> eastArrow
-        DirectionDto.SOUTH -> southArrow
-        DirectionDto.WEST -> westArrow
+        Direction.NORTH -> northArrow
+        Direction.EAST -> eastArrow
+        Direction.SOUTH -> southArrow
+        Direction.WEST -> westArrow
     }
 
 fun VirtualPadView.aButton(): UIButton = aButton
@@ -42,11 +42,11 @@ suspend fun ViewsForTesting.clickB(virtualPadView: VirtualPadView) = clickOn(vir
 /** Presses and releases the arrow, as a tap of the player. */
 suspend fun ViewsForTesting.clickArrow(
     virtualPadView: VirtualPadView,
-    direction: DirectionDto,
+    direction: Direction,
 ) = clickOn(virtualPadView.arrow(direction))
 
 /** Holds the arrow, as the player keeping it pressed. */
-fun VirtualPadView.holdArrow(direction: DirectionDto) = hold(direction)
+fun VirtualPadView.holdArrow(direction: Direction) = hold(direction)
 
 /** Releases the held arrow. */
 fun VirtualPadView.releaseArrow() = release()
