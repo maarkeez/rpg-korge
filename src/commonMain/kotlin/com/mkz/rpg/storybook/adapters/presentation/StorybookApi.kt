@@ -57,6 +57,11 @@ class StorybookApi(
                 ItemActionsViewStories,
                 GiveItemViewStories,
                 InventoryFullViewStories,
+                PlayerCallToActionViewStories,
+                FormationRowViewStories,
+                FormationViewStories,
+                BattleInfoViewStories,
+                MenuViewStories,
                 ShopViewStories,
             )
 

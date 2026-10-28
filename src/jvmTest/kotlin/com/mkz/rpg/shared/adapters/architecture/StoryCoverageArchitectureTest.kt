@@ -23,18 +23,13 @@ class StoryCoverageArchitectureTest {
         setOf(
             "AttackPreviewView",
             "BattleHudView",
-            "BattleInfoView",
             "BattleUnitInfoView",
             "BattlefieldView",
-            "FormationRowView",
-            "FormationView",
             "MapBuilderCallToActionView",
             "MapBuilderHudView",
             "MapBuilderInfoView",
             "MapBuilderMenuView",
-            "MenuView",
             "NpcDialogView",
-            "PlayerCallToActionView",
             "ReceiverPreviewView",
             "VirtualPadView",
         )
