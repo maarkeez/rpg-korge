@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
@@ -57,7 +56,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             addChild(battlefieldView)
             // When
             clickTile(battlefieldView, row = 0, column = 0)
@@ -71,7 +70,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             addChild(battlefieldView)
             // When
             dragBattlefield(battlefieldView, -48.0 to -48.0, -96.0 to -96.0)
@@ -84,7 +83,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayPotentialCast(row = 0, column = 0)
             // When
             battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.TWO_OUT_OF_THREE)
@@ -98,7 +97,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.FULL)
             // Then
@@ -111,7 +110,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE)
             val previousBlinks = battlefieldView.healthPreviewBlinksAt(row = 0, column = 0)
             // When
@@ -126,7 +125,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayHealthPreview(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE)
             val blinks = battlefieldView.healthPreviewBlinksAt(row = 0, column = 0)
             // When
@@ -142,7 +141,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val battlefield = battlefield(rows = 2, columns = 3).toDto()
+            val battlefield = battlefield(rows = 2, columns = 3).toTerrain()
             // When
             battlefieldView.displayBattlefield(battlefield)
             // Then
@@ -154,7 +153,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val battlefield = battlefield(rows = 1, columns = 1).toDto()
+            val battlefield = battlefield(rows = 1, columns = 1).toTerrain()
             // When
             battlefieldView.displayBattlefield(battlefield)
             // Then
@@ -166,7 +165,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val battlefield = battlefield(rows = 2, columns = 2).toDto()
+            val battlefield = battlefield(rows = 2, columns = 2).toTerrain()
             // When
             battlefieldView.displayBattlefield(battlefield)
             // Then
@@ -189,7 +188,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                     columns = 2,
                     tiles = tiles,
                     terrainTransitionRules = setOf(BattlefieldMother.terrainTransitionRule(fromTerrainId = "sand", toTerrainId = "void")),
-                ).toDto()
+                ).toTerrain()
             // When
             battlefieldView.displayBattlefield(battlefield)
             // Then
@@ -233,7 +232,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView
                     .terrainTileBitmap(
                         terrainId = "sand",
-                        terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
+                        terrainTransition = TerrainTransition(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
                     )
             // Then
             tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
@@ -252,7 +251,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                 battlefieldView
                     .terrainTileBitmap(
                         terrainId = "sand",
-                        terrainTransition = Battlefield.Dto.TerrainTransitionDto(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
+                        terrainTransition = TerrainTransition(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
                     )
             // Then
             matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
@@ -274,7 +273,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             // Then
@@ -286,7 +285,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "rat")
             // Then
@@ -298,7 +297,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "dragon")
             // Then
@@ -310,7 +309,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 6, columns = 6).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 6, columns = 6).toTerrain())
             // When
             battlefieldView.displayBuilding(row = 1, column = 1, buildingId = "fortress")
             // Then
@@ -329,7 +328,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toTerrain())
             addChild(battlefieldView)
             battlefieldView.displayBuilding(row = 1, column = 1, buildingId = "fortress")
             // When
@@ -345,7 +344,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayBuilding(row = 0, column = 0, buildingId = "castle-in-the-air")
             // Then
@@ -357,7 +356,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy", unitId = null)
             // Then
@@ -370,7 +369,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy", unitId = null)
             // Then
@@ -383,7 +382,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "princess", unitId = null)
             // Then
@@ -396,7 +395,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             // Then
@@ -410,7 +409,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "a-knight-to-recruit", unitId = "knight")
             // Then
@@ -422,7 +421,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-guy", unitId = null)
             // When
             battlefieldView.removeNpc(row = 0, column = 0)
@@ -435,7 +434,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayNpc(row = 0, column = 0, npcId = "the-ghost", unitId = null)
             // Then
@@ -447,7 +446,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayPotentialMovement(row = 0, column = 0)
             // Then
@@ -459,7 +458,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayPotentialCast(row = 0, column = 0)
             // Then
@@ -471,7 +470,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayPotentialCast(row = 0, column = 0)
             // When
             battlefieldView.displayPotentialCast(row = 0, column = 0)
@@ -485,7 +484,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             // When
             battlefieldView.displayTileSelection(row = 0, column = 0)
             // Then
@@ -497,7 +496,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayPotentialCast(row = 0, column = 0)
             // When
             battlefieldView.displayTileSelection(row = 0, column = 0)
@@ -511,7 +510,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
             battlefieldView.displayPotentialMovement(row = 0, column = 0)
             battlefieldView.displayTileSelection(row = 0, column = 1)
             // When
@@ -525,9 +524,9 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toTerrain())
             // When
-            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0), Battlefield.Dto.PositionDto(row = 1, column = 1)))
+            battlefieldView.dimTilesExcept(setOf(TilePosition(row = 0, column = 0), TilePosition(row = 1, column = 1)))
             // Then
             battlefieldView.isDimmedAt(row = 0, column = 0).shouldBeFalse()
             battlefieldView.isDimmedAt(row = 1, column = 1).shouldBeFalse()
@@ -540,10 +539,10 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
             // When
-            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            battlefieldView.dimTilesExcept(setOf(TilePosition(row = 0, column = 0)))
             // Then
             battlefieldView.isBattleUnitDimmedAt(row = 0, column = 1).shouldBeTrue()
         }
@@ -553,10 +552,10 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
-            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
+            battlefieldView.dimTilesExcept(setOf(TilePosition(row = 0, column = 0)))
             // When
-            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(row = 0, column = 0)))
+            battlefieldView.dimTilesExcept(setOf(TilePosition(row = 0, column = 0)))
             battlefieldView.resetTiles()
             // Then
             battlefieldView.isDimmedAt(row = 0, column = 1).shouldBeFalse()
@@ -567,7 +566,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toTerrain())
             battlefieldView.dimTilesExcept(emptySet())
             // When
             battlefieldView.resetTiles()
@@ -580,7 +579,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             // When
             battlefieldView.removeBattleUnit(row = 0, column = 0)
@@ -593,9 +592,9 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             // When
-            battlefieldView.displayBattlefield(battlefield(rows = 4, columns = 6).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 4, columns = 6).toTerrain())
             // Then
             battlefieldView.displayedBattlefieldCount() shouldBe 1
             battlefieldView.tileCount() shouldBe 24
@@ -606,11 +605,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             addChild(battlefieldView)
             dragBattlefield(battlefieldView, -48.0 to -620.0)
             // When
-            battlefieldView.displayBattlefield(battlefield(rows = 15, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 15, columns = 16).toTerrain())
             // Then
             battlefieldView.scrollOffset() shouldBe (-48.0 to -576.0)
         }
@@ -620,8 +619,8 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             addChild(battlefieldView)
             // When
             dragBattlefield(battlefieldView, -48.0 to -96.0)
@@ -635,7 +634,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
             // When
-            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toTerrain())
             // Then
             battlefieldView.tileCount() shouldBe 128 * 128
             battlefieldView.createdTileCount() shouldBe WINDOW_TILES * WINDOW_TILES
@@ -647,7 +646,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 128, columns = 128).toTerrain())
             addChild(battlefieldView)
             // When
             dragBattlefield(battlefieldView, -1600.0 to -1600.0)
@@ -663,7 +662,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
             battlefieldView.displayBattleUnit(row = 1, column = 1, unitId = "knight")
             addChild(battlefieldView)
             dragBattlefield(battlefieldView, -1200.0 to -1200.0)
@@ -680,9 +679,9 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
             addChild(battlefieldView)
-            battlefieldView.dimTilesExcept(setOf(Battlefield.Dto.PositionDto(30, 31)))
+            battlefieldView.dimTilesExcept(setOf(TilePosition(30, 31)))
             // When
             dragBattlefield(battlefieldView, -1300.0 to -1300.0)
             // Then
@@ -695,11 +694,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
             addChild(battlefieldView)
             val paintedTiles = List(64) { row -> List(64) { column -> if (row == 30 && column == 30) "void" else "sand" } }
-            val paintedBattlefield = battlefield(64, 64, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toDto()
-            battlefieldView.updateTerrain(paintedBattlefield, listOf(Battlefield.Dto.PositionDto(30, 30)))
+            val paintedBattlefield = battlefield(64, 64, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toTerrain()
+            battlefieldView.updateTerrain(paintedBattlefield, listOf(TilePosition(30, 30)))
             // When
             dragBattlefield(battlefieldView, -1300.0 to -1300.0)
             // Then
@@ -711,7 +710,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
             addChild(battlefieldView)
             val pickingUp = startAnimation { battlefieldView.pickUpLoot(row = 0, column = 0, lootableItemId = "health-potion", remainingLootableItemIds = emptyList()) }
             // When
@@ -727,16 +726,16 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(map = ". . .").toDto())
+            battlefieldView.displayBattlefield(battlefield(map = ". . .").toTerrain())
             // As in the game, only sand has a transition to void.
             val paintedTiles = listOf(listOf("sand", "void", "sand"))
-            val paintedBattlefield = battlefield(1, 3, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toDto()
+            val paintedBattlefield = battlefield(1, 3, paintedTiles, setOf(BattlefieldMother.terrainTransitionRule("sand", "void"))).toTerrain()
             // When
-            battlefieldView.updateTerrain(paintedBattlefield, listOf(Battlefield.Dto.PositionDto(0, 0), Battlefield.Dto.PositionDto(0, 1)))
+            battlefieldView.updateTerrain(paintedBattlefield, listOf(TilePosition(0, 0), TilePosition(0, 1)))
             // Then
             val tileBitmap = { column: Int ->
-                val tile = paintedBattlefield.tiles.getValue(Battlefield.Dto.PositionDto(0, column))
-                battlefieldView.terrainTileBitmap(tile.terrainId, tile.terrainTransition)
+                val tile = paintedBattlefield.tiles.getValue(TilePosition(0, column))
+                battlefieldView.terrainTileBitmap(tile.terrainId, tile.transition)
             }
             battlefieldView.terrainBitmapAt(row = 0, column = 0) shouldBe tileBitmap(0)
             battlefieldView.terrainBitmapAt(row = 0, column = 1) shouldBe tileBitmap(1)
@@ -749,7 +748,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             // When
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
@@ -765,7 +764,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             // When
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
@@ -778,7 +777,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
             // When
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = emptyList())
@@ -792,7 +791,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
@@ -819,7 +818,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion"))
             addChild(battlefieldView)
             // When
@@ -836,7 +835,7 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             val battlefieldView = BattlefieldView(resourcesLoader)
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "hammer"))
             addChild(battlefieldView)
             // When
@@ -852,7 +851,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayLoot(row = 12, column = 13, lootableItemIds = listOf("health-potion"))
             addChild(battlefieldView)
             require(!battlefieldView.isTileVisible(row = 12, column = 13))
@@ -868,7 +867,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayLoot(row = 0, column = 0, lootableItemIds = listOf("health-potion", "crown"))
             addChild(battlefieldView)
             // When
@@ -890,14 +889,14 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.pickUpLoot(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
         }
 
-    private val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
+    private val path = listOf(TilePosition(row = 0, column = 1), TilePosition(row = 0, column = 2))
 
     @Test
     fun `MoveBattleUnit should glide the battle unit image along its path, off the tiles, when it moves`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -916,7 +915,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -931,7 +930,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -946,7 +945,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -960,11 +959,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
-            val moving = startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 0, column = 2)))
+            val moving = startMoving(battlefieldView, listOf(TilePosition(row = 0, column = 2)))
             val glidingXs = sampleUntilCompletion(moving) { battlefieldView.glidingBattleUnits().map { glidingUnit -> glidingUnit.x } }
             // Then
             glidingXs.shouldNotBeEmpty()
@@ -977,10 +976,10 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 24).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 24).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 3, unitId = "rat")
             addChild(battlefieldView)
-            val pathOutOfTheViewport = (4..7).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+            val pathOutOfTheViewport = (4..7).map { column -> TilePosition(row = 0, column = column) }
             require(!battlefieldView.isTileVisible(row = 0, column = 7))
             // When
             awaitCompletion(startMoving(battlefieldView, pathOutOfTheViewport))
@@ -994,10 +993,10 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 24).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 24).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 3, unitId = "rat")
             addChild(battlefieldView)
-            val pathOutOfTheViewport = (4..7).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
+            val pathOutOfTheViewport = (4..7).map { column -> TilePosition(row = 0, column = column) }
             // When
             val scrollXs = sampleUntilCompletion(startMoving(battlefieldView, pathOutOfTheViewport)) { battlefieldView.scrollOffset().first }
             // Then
@@ -1010,7 +1009,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -1024,11 +1023,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 3, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 4, column = 0))))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 4, column = 0))))
             // Then
             battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
         }
@@ -1038,11 +1037,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 24).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 24).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 4, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 5))))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 5))))
             // Then
             battlefieldView.scrollOffset() shouldBe (-160.0 to 0.0)
         }
@@ -1052,11 +1051,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 2, unitId = "knight")
             addChild(battlefieldView)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 3)), TRAIL))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 3)), TRAIL))
             nextFrame()
             // Then
             battlefieldView.scrollOffset() shouldBe (0.0 to 0.0)
@@ -1067,11 +1066,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 3, unitId = "knight")
             addChild(battlefieldView)
             // When
-            val moving = startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 4)), TRAIL)
+            val moving = startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 4)), TRAIL)
             val frames = sampleUntilCompletion(moving) { battlefieldView.glidingBattleUnits().single().x to battlefieldView.scrollOffset().first }
             nextFrame()
             // Then
@@ -1085,11 +1084,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 3, unitId = "knight")
             addChild(battlefieldView)
             // When
-            val moving = startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 4)), TRAIL)
+            val moving = startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 4)), TRAIL)
             val scrollXs = sampleUntilCompletion(moving) { battlefieldView.scrollOffset().first }
             // Then
             scrollXs.shouldNotBeEmpty()
@@ -1101,11 +1100,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 3, column = 7, unitId = "knight")
             addChild(battlefieldView)
             // When
-            val frames = sampleUntilCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 3, column = 8)), TRAIL)) { }
+            val frames = sampleUntilCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 3, column = 8)), TRAIL)) { }
             // Then
             frames.size shouldBeInRange (MOVE_STEP_FRAMES - 1)..(MOVE_STEP_FRAMES + 1)
         }
@@ -1115,14 +1114,14 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 3, unitId = "knight")
             addChild(battlefieldView)
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 4)), TRAIL))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 4)), TRAIL))
             nextFrame()
             require(battlefieldView.scrollOffset() == (-64.0 to 0.0))
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 2, column = 3)), TRAIL))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 2, column = 3)), TRAIL))
             nextFrame()
             // Then
             battlefieldView.scrollOffset() shouldBe (-64.0 to 0.0)
@@ -1133,11 +1132,11 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 7).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 7).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 3, unitId = "knight")
             addChild(battlefieldView)
             // When
-            val path = listOf(Battlefield.Dto.PositionDto(row = 2, column = 4), Battlefield.Dto.PositionDto(row = 2, column = 5))
+            val path = listOf(TilePosition(row = 2, column = 4), TilePosition(row = 2, column = 5))
             awaitCompletion(startMoving(battlefieldView, path, TRAIL))
             nextFrame()
             // Then
@@ -1149,7 +1148,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 24, columns = 24).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 24, columns = 24).toTerrain())
             battlefieldView.displayBattleUnit(row = 12, column = 12, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -1167,7 +1166,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 24, columns = 24).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 24, columns = 24).toTerrain())
             battlefieldView.displayBattleUnit(row = 12, column = 12, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -1189,7 +1188,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 10, column = 10, unitId = "knight")
             addChild(battlefieldView)
             battlefieldView.trail(row = 10, column = 10)
@@ -1205,7 +1204,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
             addChild(battlefieldView)
             battlefieldView.trail(row = 3, column = 3)
@@ -1221,13 +1220,13 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 6, column = 6, unitId = "knight")
             addChild(battlefieldView)
             battlefieldView.trail(row = 6, column = 6)
             dragBattlefield(battlefieldView, -96.0 to -96.0)
             // When
-            awaitCompletion(startMoving(battlefieldView, listOf(Battlefield.Dto.PositionDto(row = 6, column = 7)), TRAIL))
+            awaitCompletion(startMoving(battlefieldView, listOf(TilePosition(row = 6, column = 7)), TRAIL))
             repeat(CATCH_UP_FRAMES) { nextFrame() }
             // Then: the camera caught up while the battle unit glided, until the battle unit was inside the deadzone.
             val (scrollX, scrollY) = battlefieldView.scrollOffset()
@@ -1315,7 +1314,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 2, column = 3, unitId = "knight")
             battlefieldView.displayBattleUnit(row = 2, column = 4, unitId = "rat")
             addChild(battlefieldView)
@@ -1336,7 +1335,7 @@ class BattlefieldViewTest : ViewsForTesting() {
     // The leader, a knight, stands at (0,0), and the member, a rat, on its east at (0,1).
     private fun swappingBattlefieldView(resourcesLoader: BattleSceneResourcesLoader): BattlefieldView {
         val battlefieldView = BattlefieldView(resourcesLoader)
-        battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+        battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
         battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
         battlefieldView.displayBattleUnit(row = 0, column = 1, unitId = "rat")
         return battlefieldView
@@ -1349,7 +1348,7 @@ class BattlefieldViewTest : ViewsForTesting() {
 
     private suspend fun startMoving(
         battlefieldView: BattlefieldView,
-        path: List<Battlefield.Dto.PositionDto>,
+        path: List<TilePosition>,
         following: BattlefieldView.Following = BattlefieldView.Following.CENTER,
     ): Job {
         val origin = battlefieldView.battleUnitPositions().single()
@@ -1363,7 +1362,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -1381,14 +1380,14 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "knight")
             nextFrame()
             require(battlefieldView.isFlashingAt(row = 0, column = 0))
             // When
-            val moving = startMoving(battlefieldView, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1)))
+            val moving = startMoving(battlefieldView, path = listOf(TilePosition(row = 0, column = 1)))
             val flashingFrames = sampleUntilCompletion(moving) { battlefieldView.isFlashingAt(row = 0, column = 0) }
             // Then
             withClue("The tile it left never blinks") { flashingFrames.shouldNotContain(true) }
@@ -1401,7 +1400,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             // When
@@ -1419,7 +1418,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
             addChild(battlefieldView)
             require(!battlefieldView.isTileVisible(row = 12, column = 13))
@@ -1434,7 +1433,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             battlefieldView.displayBattleUnit(row = 3, column = 3, unitId = "knight")
             battlefieldView.displayBattleUnit(row = 12, column = 13, unitId = "rat")
             addChild(battlefieldView)
@@ -1450,7 +1449,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             addChild(battlefieldView)
             // When
             val flashing = startFlashing(battlefieldView, row = 0, column = 0, unitId = "dragon")
@@ -1464,7 +1463,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             battlefieldView.displayTileSelection(row = 0, column = 0)
             addChild(battlefieldView)
@@ -1483,7 +1482,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             startFlashingHealth(battlefieldView, previewOption = PreviewOption.ONE_OUT_OF_THREE)
@@ -1500,7 +1499,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
             addChild(battlefieldView)
             val firstFlashing = startFlashingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
@@ -1537,7 +1536,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             addChild(battlefieldView)
             // When
             val tinting = startAnimation { battlefieldView.tint(BattleInfoView.CPU_TURN_COLOR) }
@@ -1553,7 +1552,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
             addChild(battlefieldView)
             // When
             awaitCompletion(startAnimation { battlefieldView.tint(BattleInfoView.HUMAN_TURN_COLOR) })
@@ -1577,7 +1576,7 @@ class BattlefieldViewTest : ViewsForTesting() {
                     }
                 },
             )
-            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toDto())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
             addChild(battlefieldView)
             // When
             clickTile(battlefieldView, row = 0, column = 0)

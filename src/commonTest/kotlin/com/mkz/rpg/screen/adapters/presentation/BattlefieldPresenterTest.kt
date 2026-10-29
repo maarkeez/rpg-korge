@@ -143,7 +143,14 @@ class BattlefieldPresenterTest {
     private fun position(
         row: Int,
         column: Int,
+    ) = TilePosition(row = row, column = column)
+
+    private fun domainPosition(
+        row: Int,
+        column: Int,
     ) = PositionDto(row = row, column = column)
+
+    private fun domainPosition(position: TilePosition) = domainPosition(position.row, position.column)
 
     private fun publish(event: DomainEvent) {
         eventBus.publish(event)
@@ -156,7 +163,7 @@ class BattlefieldPresenterTest {
         // When
         battlefieldPresenter.displayBattlefield()
         // Then
-        battlefieldView.displayedBattlefields.shouldContainExactly(apis.battlefieldApi.searchBattlefield()!!)
+        battlefieldView.displayedBattlefields.shouldContainExactly(BattlefieldMapper.terrain(apis.battlefieldApi.searchBattlefield()!!))
     }
 
     @Test
@@ -166,7 +173,7 @@ class BattlefieldPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.displayedBattlefields.shouldContainExactly(apis.battlefieldApi.searchBattlefield()!!)
+        battlefieldView.displayedBattlefields.shouldContainExactly(BattlefieldMapper.terrain(apis.battlefieldApi.searchBattlefield()!!))
     }
 
     @Test
@@ -265,7 +272,7 @@ class BattlefieldPresenterTest {
     fun `MoveUnit should move the battle unit along its path on view when the battle unit is moved`() {
         // Given
         val path = listOf(position(2, 3), position(3, 3))
-        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 3, toColumn = 3, path = path))
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 3, toColumn = 3, path = path.map(::domainPosition)))
         // When
         eventBus.dispatch()
         // Then
@@ -275,7 +282,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `MoveUnit should move the battle unit at the battle pace when battling`() {
         // Given
-        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(domainPosition(2, 3))))
         // When
         eventBus.dispatch()
         // Then
@@ -285,7 +292,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `MoveUnit should center the battle unit when it moves in a battle`() {
         // Given
-        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(domainPosition(2, 3))))
         // When
         eventBus.dispatch()
         // Then
@@ -333,7 +340,7 @@ class BattlefieldPresenterTest {
         val exploringApis = exploringApis()
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
-        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = listOf(position(0, 1))))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = listOf(domainPosition(0, 1))))
         // When
         exploringApis.eventBus.dispatch()
         // Then
@@ -349,7 +356,7 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.eventBus.dispatch()
         val path = listOf(position(0, 1))
-        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = path))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 0, toColumn = 1, path = path.map(::domainPosition)))
         // When
         exploringApis.eventBus.dispatch()
         // Then
@@ -366,7 +373,7 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.eventBus.dispatch()
         val path = listOf(position(2, 0))
-        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path.map(::domainPosition)))
         // When
         exploringApis.eventBus.dispatch()
         // Then
@@ -385,7 +392,7 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         val leaderStep = timeline.playLongStep()
         val path = listOf(position(2, 0))
-        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 2, toColumn = 0, path = path.map(::domainPosition)))
         // When
         exploringApis.eventBus.dispatch()
         // Then
@@ -397,7 +404,7 @@ class BattlefieldPresenterTest {
     fun `MoveUnit should wait for the step being played to move a battle unit in a battle`() {
         // Given
         val previousStep = timeline.playLongStep()
-        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(position(2, 3))))
+        eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 1, fromColumn = 3, toRow = 2, toColumn = 3, path = listOf(domainPosition(2, 3))))
         // When
         eventBus.dispatch()
         // Then
@@ -473,10 +480,10 @@ class BattlefieldPresenterTest {
         exploringApis.partyApi.startExploration()
         exploringApis.eventBus.dispatch()
         exploringApis.eventBus.publish(
-            BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 1, toColumn = 1, path = listOf(position(1, 1)), swappedWithBattleUnitId = "knight-1"),
+            BattleUnitMoved(battleUnitId = "knight-2", fromRow = 2, fromColumn = 1, toRow = 1, toColumn = 1, path = listOf(domainPosition(1, 1)), swappedWithBattleUnitId = "knight-1"),
         )
         exploringApis.eventBus.publish(
-            BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 2, toColumn = 1, path = listOf(position(2, 1)), swappedWithBattleUnitId = "knight-2"),
+            BattleUnitMoved(battleUnitId = "knight-1", fromRow = 1, fromColumn = 1, toRow = 2, toColumn = 1, path = listOf(domainPosition(2, 1)), swappedWithBattleUnitId = "knight-2"),
         )
         // When
         exploringApis.eventBus.dispatch()
@@ -509,7 +516,7 @@ class BattlefieldPresenterTest {
         exploringPresenter(exploringApis, exploringBattlefieldView, timeline)
         timeline.playLongStep()
         val path = listOf(position(3, 2))
-        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
+        exploringApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-1", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path.map(::domainPosition)))
         exploringApis.eventBus.publish(BattlefieldEvent.RequestMoveOccupant(occupantId = "rat-1", toRow = 3, toColumn = 2))
         val resetTilesCount = exploringBattlefieldView.resetTilesCount
         // When
@@ -540,7 +547,7 @@ class BattlefieldPresenterTest {
         exploringPresenter(battlingApis, battlingBattlefieldView, timeline)
         val previousStep = timeline.playLongStep()
         val path = listOf(position(3, 2))
-        battlingApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-2", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path))
+        battlingApis.eventBus.publish(BattleUnitMoved(battleUnitId = "rat-2", fromRow = 3, fromColumn = 3, toRow = 3, toColumn = 2, path = path.map(::domainPosition)))
         battlingApis.eventBus.dispatch()
         battlingBattlefieldView.movedBattleUnits.shouldBeEmpty()
         // When
@@ -568,7 +575,7 @@ class BattlefieldPresenterTest {
     fun `MoveUnit should not move the battle unit on view when the battle unit is not found`() {
         // Given
         val path = listOf(position(3, 0))
-        eventBus.publish(BattleUnitMoved(battleUnitId = "unknown-battle-unit", fromRow = 2, fromColumn = 0, toRow = 3, toColumn = 0, path = path))
+        eventBus.publish(BattleUnitMoved(battleUnitId = "unknown-battle-unit", fromRow = 2, fromColumn = 0, toRow = 3, toColumn = 0, path = path.map(::domainPosition)))
         // When
         eventBus.dispatch()
         // Then
@@ -675,7 +682,7 @@ class BattlefieldPresenterTest {
         // When
         previousStep.complete(Unit)
         // Then
-        battlefieldView.removedNpcs.shouldContainExactly(PositionDto(2, 2))
+        battlefieldView.removedNpcs.shouldContainExactly(TilePosition(2, 2))
     }
 
     @Test

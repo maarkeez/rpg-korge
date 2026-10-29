@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
 import com.mkz.rpg.mapBuilder.domain.MapBuilder
 import com.mkz.rpg.mapBuilder.domain.MapBuilderEvent
@@ -67,7 +66,7 @@ class MapBuilderPresenter(
 
     private fun displayMap() {
         val map = mapBuilderApi.searchMap() ?: return
-        battlefieldView.displayBattlefield(battlefieldApi.previewBattlefield(map.tiles))
+        battlefieldView.displayBattlefield(BattlefieldMapper.terrain(battlefieldApi.previewBattlefield(map.tiles)))
         infoView.displaySize(rows = map.rows, columns = map.columns)
         hudView.displaySize(rows = map.rows, columns = map.columns)
     }
@@ -90,8 +89,8 @@ class MapBuilderPresenter(
         val positions =
             listOf(row to column, row - 1 to column, row to column + 1, row + 1 to column, row to column - 1)
                 .filter { (tileRow, tileColumn) -> tileRow in 0 until map.rows && tileColumn in 0 until map.columns }
-                .map { (tileRow, tileColumn) -> PositionDto(tileRow, tileColumn) }
-        battlefieldView.updateTerrain(battlefieldApi.previewBattlefield(map.tiles), positions)
+                .map { (tileRow, tileColumn) -> TilePosition(tileRow, tileColumn) }
+        battlefieldView.updateTerrain(BattlefieldMapper.terrain(battlefieldApi.previewBattlefield(map.tiles)), positions)
     }
 
     private fun displayExportAndBack() {

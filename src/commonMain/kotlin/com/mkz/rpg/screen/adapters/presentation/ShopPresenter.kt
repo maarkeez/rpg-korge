@@ -2,7 +2,6 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
@@ -131,7 +130,7 @@ class ShopPresenter(
         val merchant = merchant ?: return
         val buyerPosition = buyerId()?.let { buyerId -> battlefieldApi.searchPosition(buyerId) } ?: return
         battlefieldView.resetTiles()
-        battlefieldView.dimTilesExcept(setOf(buyerPosition, PositionDto(row = merchant.row, column = merchant.column)))
+        battlefieldView.dimTilesExcept(setOf(BattlefieldMapper.position(buyerPosition), TilePosition(row = merchant.row, column = merchant.column)))
         battlefieldView.scrollToTile(buyerPosition.row, buyerPosition.column)
     }
 

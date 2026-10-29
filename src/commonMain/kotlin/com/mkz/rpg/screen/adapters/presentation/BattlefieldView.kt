@@ -1,8 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.bitmap.slice
@@ -167,7 +164,7 @@ open class BattlefieldView(
     private val flashBitMaps = mutableMapOf<String, Bitmap>()
 
     // The flashes blinking or waiting on each tile, stopped once its battle unit leaves it.
-    private val flashes = mutableMapOf<PositionDto, MutableList<Job>>()
+    private val flashes = mutableMapOf<TilePosition, MutableList<Job>>()
 
     // The picked up items rising from their tile, drawn at whole pixels like the other views moving on the battlefield.
     private val risingLoot = mutableSetOf<View>()
@@ -194,7 +191,7 @@ open class BattlefieldView(
 
     // While exploring, the camera trails the leader: its tile, or the image it glides with meanwhile. `null` when the
     // camera does not trail.
-    private var trailedTile: PositionDto? = null
+    private var trailedTile: TilePosition? = null
     private var trailedView: View? = null
 
     // The trailing is paused by a drag, until the leader moves again.
@@ -207,15 +204,15 @@ open class BattlefieldView(
         get() = trailedTile != null
 
     // The displayed battlefield, which the tiles are created from.
-    private lateinit var battlefield: Battlefield.Dto
+    private lateinit var battlefield: BattlefieldTerrain
     internal val rows: Int get() = battlefield.rows
     internal val columns: Int get() = battlefield.columns
 
     // The tiles created so far, on the screen or kept out of the window.
-    private val createdTiles = mutableMapOf<PositionDto, UIButton>()
+    private val createdTiles = mutableMapOf<TilePosition, UIButton>()
 
     // The tiles left undimmed while the others are dimmed, or `null` when no tile is dimmed.
-    private var undimmedTiles: Set<PositionDto>? = null
+    private var undimmedTiles: Set<TilePosition>? = null
 
     // The scroll the tiles on the screen were chosen for.
     private var windowScroll: Pair<Double, Double>? = null
@@ -244,7 +241,7 @@ open class BattlefieldView(
      * Displays the battlefield terrain. When a battlefield is already displayed (e.g.: a map resized while it is designed),
      * it is replaced, keeping how far it was scrolled as far as the new size allows.
      */
-    open fun displayBattlefield(battlefield: Battlefield.Dto) {
+    open fun displayBattlefield(battlefield: BattlefieldTerrain) {
         val mapHeight = TILE_SIZE * battlefield.rows
         val mapWidth = TILE_SIZE * battlefield.columns
         val previousScroll = if (isDisplayed) battlefieldGrid.x to battlefieldGrid.y else 0.0 to 0.0
@@ -291,7 +288,7 @@ open class BattlefieldView(
         return firstRow.coerceAtLeast(0)..lastRow.coerceAtMost(rows - 1) to firstColumn.coerceAtLeast(0)..lastColumn.coerceAtMost(columns - 1)
     }
 
-    private fun isInTileWindow(position: PositionDto): Boolean {
+    private fun isInTileWindow(position: TilePosition): Boolean {
         val (windowRows, windowColumns) = tileWindow()
         return position.row in windowRows && position.column in windowColumns
     }
@@ -323,7 +320,7 @@ open class BattlefieldView(
 
     private fun UIButton.hasLayerIn(layers: Set<String>): Boolean = children.any { child -> child.name in layers }
 
-    private fun createTile(position: PositionDto): UIButton {
+    private fun createTile(position: TilePosition): UIButton {
         val tileButton = UIButton(size = Size(TILE_SIZE, TILE_SIZE), text = "")
         tileButton.bgColorOut = Colors.TRANSPARENT
         tileButton.bgColorOver = Colors.TRANSPARENT
@@ -334,8 +331,8 @@ open class BattlefieldView(
         tileButton.name = tileName(position.row, position.column)
         tileButton.x = position.column * TILE_SIZE.toDouble()
         tileButton.y = position.row * TILE_SIZE.toDouble()
-        val tileDto = battlefield.tiles.getValue(position)
-        tileButton.addImage(terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition), TERRAIN)
+        val terrainTile = battlefield.tiles.getValue(position)
+        tileButton.addImage(terrainTileBitmap(terrainTile.terrainId, terrainTile.transition), TERRAIN)
         if (undimmedTiles?.contains(position) == false) tileButton.dim()
         tileButton.onClick {
             delegate?.tileSelected(position.row, position.column)
@@ -348,20 +345,20 @@ open class BattlefieldView(
      * The tiles not created yet will be created with it.
      */
     open fun updateTerrain(
-        battlefield: Battlefield.Dto,
-        positions: Collection<PositionDto>,
+        battlefield: BattlefieldTerrain,
+        positions: Collection<TilePosition>,
     ) {
         this.battlefield = battlefield
         positions.forEach { position ->
-            val tileDto = battlefield.tiles[position] ?: return@forEach
+            val terrainTile = battlefield.tiles[position] ?: return@forEach
             val terrainImage = createdTiles[position]?.findViewByName(TERRAIN) as? Image ?: return@forEach
-            terrainImage.bitmap = terrainTileBitmap(tileDto.terrainId, tileDto.terrainTransition).slice()
+            terrainImage.bitmap = terrainTileBitmap(terrainTile.terrainId, terrainTile.transition).slice()
         }
     }
 
     open fun terrainTileBitmap(
         terrainId: String,
-        terrainTransition: TerrainTransitionDto?,
+        terrainTransition: TerrainTransition?,
     ): Bitmap {
         val transition = terrainTransition
         return if (transition != null) {
@@ -384,7 +381,7 @@ open class BattlefieldView(
         row: Int,
         column: Int,
     ): UIButton {
-        val position = PositionDto(row, column)
+        val position = TilePosition(row, column)
         createdTiles[position]?.let { tileButton -> return tileButton }
         val tileButton = createTile(position)
         createdTiles[position] = tileButton
@@ -399,7 +396,7 @@ open class BattlefieldView(
     internal fun tileOrNull(
         row: Int,
         column: Int,
-    ): UIButton? = createdTiles[PositionDto(row, column)]
+    ): UIButton? = createdTiles[TilePosition(row, column)]
 
     private fun tileName(
         row: Int,
@@ -611,7 +608,7 @@ open class BattlefieldView(
      * Darkens every tile but the given ones, including the battle units on them, so the tiles that can be selected
      * stand out. Removed when the tiles are reset.
      */
-    open fun dimTilesExcept(tiles: Set<PositionDto>) {
+    open fun dimTilesExcept(tiles: Set<TilePosition>) {
         // The tiles not created yet are dimmed when they are created.
         val undimmed = undimmedTiles?.intersect(tiles) ?: tiles
         undimmedTiles = undimmed
@@ -641,7 +638,7 @@ open class BattlefieldView(
     ) {
         val tileButton = tile(row, column)
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
-        flashes.remove(PositionDto(row, column))?.forEach(Job::cancel)
+        flashes.remove(TilePosition(row, column))?.forEach(Job::cancel)
         tileButton.findViewByName(FLASH)?.removeFromParent()
         tileButton.removeHealthBar(HEALTH_FLASH)
     }
@@ -666,13 +663,13 @@ open class BattlefieldView(
     open suspend fun moveBattleUnit(
         fromRow: Int,
         fromColumn: Int,
-        path: List<PositionDto>,
+        path: List<TilePosition>,
         unitId: String,
         stepDuration: Duration = MOVE_STEP_DURATION,
         following: Following = Following.CENTER,
     ) {
         val destination = path.lastOrNull() ?: return
-        val origin = PositionDto(fromRow, fromColumn)
+        val origin = TilePosition(fromRow, fromColumn)
         removeBattleUnit(fromRow, fromColumn)
         val glidingUnit =
             resourcesLoader.bitmapOrNull("unit/$unitId.png")?.let { unitBitmap ->
@@ -693,8 +690,8 @@ open class BattlefieldView(
     // Glides the image of the battle unit to the next tile of its path, or jumps to it when it is not next to the previous one.
     private suspend fun glide(
         glidingUnit: View?,
-        from: PositionDto,
-        to: PositionDto,
+        from: TilePosition,
+        to: TilePosition,
         stepDuration: Duration,
     ) {
         if (glidingUnit == null) return delay(stepDuration)
@@ -721,12 +718,12 @@ open class BattlefieldView(
         memberColumn: Int,
         memberUnitId: String,
     ) {
-        trailFrom(PositionDto(leaderRow, leaderColumn), glidingUnit = null)
+        trailFrom(TilePosition(leaderRow, leaderColumn), glidingUnit = null)
         removeBattleUnit(leaderRow, leaderColumn)
         removeBattleUnit(memberRow, memberColumn)
         glideSwap(leaderRow, leaderColumn, leaderUnitId, memberRow, memberColumn, memberUnitId)
         // The leader glided with the image `glideSwap` trails, which is only known there.
-        trailOn(PositionDto(memberRow, memberColumn), glidingUnit = trailedView)
+        trailOn(TilePosition(memberRow, memberColumn), glidingUnit = trailedView)
         displayBattleUnit(memberRow, memberColumn, leaderUnitId)
         displayBattleUnit(leaderRow, leaderColumn, memberUnitId)
     }
@@ -811,7 +808,7 @@ open class BattlefieldView(
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val flashBitmap = flashBitMaps.getOrPut(unitId) { unitBitmap.whiteSilhouette() }
         followTile(row, column)
-        val position = PositionDto(row, column)
+        val position = TilePosition(row, column)
         val tileButton = tile(row, column)
         val previousFlashes = flashes[position].orEmpty().toList()
         coroutineScope {
@@ -848,7 +845,7 @@ open class BattlefieldView(
         row: Int,
         column: Int,
     ) {
-        trailedTile = PositionDto(row, column)
+        trailedTile = TilePosition(row, column)
         trailedView = null
         isTrailingPaused = false
         isCatchingUp = true
@@ -863,7 +860,7 @@ open class BattlefieldView(
 
     // The leader steps from the tile, gliding with the image: the trailing starts, or resumes after a drag.
     private fun trailFrom(
-        position: PositionDto,
+        position: TilePosition,
         glidingUnit: View?,
     ) {
         if (!isTrailing || isTrailingPaused) trail(position.row, position.column) else trailedTile = position
@@ -872,7 +869,7 @@ open class BattlefieldView(
 
     // The leader stands on the tile once it has glided there, unless the trailing stopped meanwhile.
     private fun trailOn(
-        position: PositionDto,
+        position: TilePosition,
         glidingUnit: View?,
     ) {
         if (!isTrailing || trailedView !== glidingUnit) return

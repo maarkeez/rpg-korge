@@ -330,7 +330,7 @@ class InventoryPresenter(
         timeline.play {
             giving = Giving(giverBattleUnitId = giverBattleUnitId, slotIndex = slotIndex, lootableItemId = lootableItemId, receivers = receivers)
             battlefieldView.resetTiles()
-            battlefieldView.dimTilesExcept(receivers.keys)
+            battlefieldView.dimTilesExcept(BattlefieldMapper.positions(receivers.keys))
             playerCallToActionView.displayGiveItem(itemName = itemName, onCancelled = { if (!timeline.isPlaying) cancelGiving() })
         }
     }
@@ -360,7 +360,7 @@ class InventoryPresenter(
         battlefieldView.resetTiles()
         if (giverPosition == null) return
         battlefieldView.displayTileSelection(row = giverPosition.row, column = giverPosition.column)
-        battlefieldView.dimTilesExcept(setOf(giverPosition))
+        battlefieldView.dimTilesExcept(setOf(BattlefieldMapper.position(giverPosition)))
     }
 
     private fun abandonGiving() {

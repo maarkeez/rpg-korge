@@ -82,7 +82,7 @@ class FormationPresenter(
             },
         )
         battlefieldView.resetTiles()
-        battlefieldView.dimTilesExcept(order.mapNotNull(battlefieldApi.searchPosition::invoke).toSet())
+        battlefieldView.dimTilesExcept(BattlefieldMapper.positions(order.mapNotNull(battlefieldApi.searchPosition::invoke)))
         selectedId?.let(battlefieldApi.searchPosition::invoke)?.let { position -> battlefieldView.displayTileSelection(position.row, position.column) }
     }
 

@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
@@ -68,9 +67,9 @@ class ShopPresenterTest {
             eventBus,
         )
 
-    private val knightTile = PositionDto(row = 1, column = 1)
-    private val vikingTile = PositionDto(row = 2, column = 1)
-    private val merchantTile = PositionDto(row = 0, column = 1)
+    private val knightTile = TilePosition(row = 1, column = 1)
+    private val vikingTile = TilePosition(row = 2, column = 1)
+    private val merchantTile = TilePosition(row = 0, column = 1)
 
     // The party talks to the merchant, and its shop opens to buy, or to sell.
     private fun openTheShop(mode: Mode = Mode.BUY) {

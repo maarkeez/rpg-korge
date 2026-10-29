@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
@@ -87,9 +86,9 @@ class InventoryPresenterGiveTest {
             eventBus = eventBus,
         )
 
-    private val knightTile = PositionDto(row = 1, column = 1)
-    private val vikingTile = PositionDto(row = 1, column = 2)
-    private val mageTile = PositionDto(row = 2, column = 1)
+    private val knightTile = TilePosition(row = 1, column = 1)
+    private val vikingTile = TilePosition(row = 1, column = 2)
+    private val mageTile = TilePosition(row = 2, column = 1)
 
     // The battle unit loots the item, as if it was lying on its tile.
     private fun loot(
@@ -129,7 +128,7 @@ class InventoryPresenterGiveTest {
         eventBus.dispatch()
     }
 
-    private fun tapTile(tile: PositionDto): Boolean {
+    private fun tapTile(tile: TilePosition): Boolean {
         val isTaken = inventoryPresenter.tileSelected(row = tile.row, column = tile.column)
         eventBus.dispatch()
         return isTaken
@@ -224,7 +223,7 @@ class InventoryPresenterGiveTest {
         selectKnightFirstItem()
         clickGive()
         // When
-        val takenTaps = listOf(knightTile, mageTile, PositionDto(row = 0, column = 0), PositionDto(row = 3, column = 3)).map(::tapTile)
+        val takenTaps = listOf(knightTile, mageTile, TilePosition(row = 0, column = 0), TilePosition(row = 3, column = 3)).map(::tapTile)
         // Then
         takenTaps.shouldContainExactly(true, true, true, true)
         storedItems("knight-1").shouldContainExactly("hammer")

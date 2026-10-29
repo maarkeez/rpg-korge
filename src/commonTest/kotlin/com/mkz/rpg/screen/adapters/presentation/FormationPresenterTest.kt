@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
@@ -40,9 +39,9 @@ class FormationPresenterTest {
     private val timeline = battleSceneTimeline()
     private val presenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
 
-    private val knightTile = PositionDto(row = 1, column = 1)
-    private val vikingTile = PositionDto(row = 2, column = 1)
-    private val herbalistTile = PositionDto(row = 2, column = 2)
+    private val knightTile = TilePosition(row = 1, column = 1)
+    private val vikingTile = TilePosition(row = 2, column = 1)
+    private val herbalistTile = TilePosition(row = 2, column = 2)
 
     // The party explores, and the formation opens, as when B is pressed.
     private fun openTheFormation() {

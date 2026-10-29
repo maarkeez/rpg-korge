@@ -164,7 +164,7 @@ class BattlefieldPresenter(
 
     fun displayBattlefield() {
         val battlefield = battlefieldApi.searchBattlefield()!!
-        timeline.play { battlefieldView.displayBattlefield(battlefield) }
+        timeline.play { battlefieldView.displayBattlefield(BattlefieldMapper.terrain(battlefield)) }
     }
 
     fun displayUnit(
@@ -221,7 +221,7 @@ class BattlefieldPresenter(
             battlefieldView.moveBattleUnit(
                 fromRow = event.fromRow,
                 fromColumn = event.fromColumn,
-                path = event.path,
+                path = event.path.map(BattlefieldMapper::position),
                 unitId = battleUnit.unitId,
                 stepDuration = stepDuration,
                 following = following,
@@ -285,7 +285,7 @@ class BattlefieldPresenter(
             battlefieldView.moveBattleUnit(
                 fromRow = event.fromRow,
                 fromColumn = event.fromColumn,
-                path = event.path,
+                path = event.path.map(BattlefieldMapper::position),
                 unitId = unitId,
                 stepDuration = stepDuration,
                 following = BattlefieldView.Following.NONE,
@@ -362,7 +362,7 @@ class BattlefieldPresenter(
                 column = selectedBattleUnitEvent.tile.column,
             )
             val selectableTiles = selectedBattleUnitEvent.tilesWhereCanBeMoved + selectedBattleUnitEvent.tile
-            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> PositionDto(tile.row, tile.column) }.toSet())
+            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> TilePosition(tile.row, tile.column) }.toSet())
         }
     }
 
@@ -395,7 +395,7 @@ class BattlefieldPresenter(
                 }
             }
             val selectableTiles = event.castGroupsWhereCanCast.flatMap { castGroup -> castGroup.tiles } + event.casterTile
-            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> PositionDto(tile.row, tile.column) }.toSet())
+            battlefieldView.dimTilesExcept(selectableTiles.map { tile -> TilePosition(tile.row, tile.column) }.toSet())
         }
     }
 

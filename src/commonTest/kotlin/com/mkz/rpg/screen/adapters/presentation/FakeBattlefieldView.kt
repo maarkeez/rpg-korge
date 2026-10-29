@@ -1,7 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.bitmap.Bitmap32
 import korlibs.image.color.RGBA
@@ -30,8 +28,8 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     )
 
     data class UpdatedTerrain(
-        val battlefield: Battlefield.Dto,
-        val positions: Set<PositionDto>,
+        val battlefield: BattlefieldTerrain,
+        val positions: Set<TilePosition>,
     )
 
     data class PickedUpLoot(
@@ -43,7 +41,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     data class MovedBattleUnit(
         val fromRow: Int,
         val fromColumn: Int,
-        val path: List<PositionDto>,
+        val path: List<TilePosition>,
         val unitId: String,
     )
 
@@ -54,22 +52,22 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
 
     var delegate: Delegate? = null
         private set
-    val displayedBattlefields = mutableListOf<Battlefield.Dto>()
+    val displayedBattlefields = mutableListOf<BattlefieldTerrain>()
     val displayedBattleUnits = mutableListOf<BattleUnitAt>()
     val displayedNpcs = mutableListOf<NpcAt>()
     val displayedBuildings = mutableListOf<BuildingAt>()
-    val potentialMovements = mutableListOf<PositionDto>()
-    val potentialCasts = mutableListOf<PositionDto>()
-    val tileSelections = mutableListOf<PositionDto>()
+    val potentialMovements = mutableListOf<TilePosition>()
+    val potentialCasts = mutableListOf<TilePosition>()
+    val tileSelections = mutableListOf<TilePosition>()
 
     // The health preview last displayed on each tile.
-    val healthPreviews = mutableMapOf<PositionDto, BattlefieldHealthBarPreviewView.PreviewOption>()
+    val healthPreviews = mutableMapOf<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>()
     var resetTilesCount = 0
         private set
-    val tilesNotDimmed = mutableListOf<Set<PositionDto>>()
-    val scrolledToTiles = mutableListOf<PositionDto>()
-    val removedBattleUnits = mutableListOf<PositionDto>()
-    val removedNpcs = mutableListOf<PositionDto>()
+    val tilesNotDimmed = mutableListOf<Set<TilePosition>>()
+    val scrolledToTiles = mutableListOf<TilePosition>()
+    val removedBattleUnits = mutableListOf<TilePosition>()
+    val removedNpcs = mutableListOf<TilePosition>()
     val movedBattleUnits = mutableListOf<MovedBattleUnit>()
     val moveStepDurations = mutableListOf<Duration>()
 
@@ -78,20 +76,20 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val swappedBattleUnits = mutableListOf<SwappedBattleUnits>()
 
     // The tiles the battlefield started trailing the battle unit on, and how many times it stopped trailing.
-    val trailedTiles = mutableListOf<PositionDto>()
+    val trailedTiles = mutableListOf<TilePosition>()
     var stopTrailingCount = 0
         private set
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
     // The health flashed on each tile, in order.
-    val flashedHealth = mutableListOf<Pair<PositionDto, BattlefieldHealthBarPreviewView.PreviewOption>>()
+    val flashedHealth = mutableListOf<Pair<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>>()
 
     // When set, every flash lasts until it is completed, e.g.: to keep the timeline playing while it flashes.
     var flashing: CompletableDeferred<Unit>? = null
 
     // The loot last displayed on each tile.
-    val displayedLoot = mutableMapOf<PositionDto, List<String>>()
+    val displayedLoot = mutableMapOf<TilePosition, List<String>>()
     val pickedUpLoot = mutableListOf<PickedUpLoot>()
     val updatedTerrains = mutableListOf<UpdatedTerrain>()
 
@@ -102,7 +100,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         this.delegate = delegate
     }
 
-    override fun displayBattlefield(battlefield: Battlefield.Dto) {
+    override fun displayBattlefield(battlefield: BattlefieldTerrain) {
         displayedBattlefields += battlefield
     }
 
@@ -135,21 +133,21 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         row: Int,
         column: Int,
     ) {
-        potentialMovements += PositionDto(row, column)
+        potentialMovements += TilePosition(row, column)
     }
 
     override fun displayPotentialCast(
         row: Int,
         column: Int,
     ) {
-        potentialCasts += PositionDto(row, column)
+        potentialCasts += TilePosition(row, column)
     }
 
     override fun displayTileSelection(
         row: Int,
         column: Int,
     ) {
-        tileSelections += PositionDto(row, column)
+        tileSelections += TilePosition(row, column)
     }
 
     override fun displayHealthPreview(
@@ -157,14 +155,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         column: Int,
         previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
     ) {
-        healthPreviews[PositionDto(row, column)] = previewOption
+        healthPreviews[TilePosition(row, column)] = previewOption
     }
 
     override fun resetTiles() {
         resetTilesCount++
     }
 
-    override fun dimTilesExcept(tiles: Set<PositionDto>) {
+    override fun dimTilesExcept(tiles: Set<TilePosition>) {
         tilesNotDimmed += tiles
     }
 
@@ -172,14 +170,14 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         row: Int,
         column: Int,
     ) {
-        scrolledToTiles += PositionDto(row, column)
+        scrolledToTiles += TilePosition(row, column)
     }
 
     override fun trail(
         row: Int,
         column: Int,
     ) {
-        trailedTiles += PositionDto(row, column)
+        trailedTiles += TilePosition(row, column)
     }
 
     override fun stopTrailing() {
@@ -190,20 +188,20 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         row: Int,
         column: Int,
     ) {
-        removedNpcs += PositionDto(row, column)
+        removedNpcs += TilePosition(row, column)
     }
 
     override fun removeBattleUnit(
         row: Int,
         column: Int,
     ) {
-        removedBattleUnits += PositionDto(row, column)
+        removedBattleUnits += TilePosition(row, column)
     }
 
     override suspend fun moveBattleUnit(
         fromRow: Int,
         fromColumn: Int,
-        path: List<PositionDto>,
+        path: List<TilePosition>,
         unitId: String,
         stepDuration: Duration,
         following: BattlefieldView.Following,
@@ -229,19 +227,19 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         column: Int,
         lootableItemIds: List<String>,
     ) {
-        displayedLoot[PositionDto(row, column)] = lootableItemIds
+        displayedLoot[TilePosition(row, column)] = lootableItemIds
     }
 
     override fun updateTerrain(
-        battlefield: Battlefield.Dto,
-        positions: Collection<PositionDto>,
+        battlefield: BattlefieldTerrain,
+        positions: Collection<TilePosition>,
     ) {
         updatedTerrains += UpdatedTerrain(battlefield, positions.toSet())
     }
 
     override fun terrainTileBitmap(
         terrainId: String,
-        terrainTransition: Battlefield.Dto.TerrainTransitionDto?,
+        terrainTransition: TerrainTransition?,
     ): Bitmap = terrainBitmaps.getOrPut(terrainId) { Bitmap32(1, 1) }
 
     override suspend fun pickUpLoot(
@@ -251,7 +249,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         remainingLootableItemIds: List<String>,
     ) {
         pickedUpLoot += PickedUpLoot(row, column, lootableItemId)
-        displayedLoot[PositionDto(row, column)] = remainingLootableItemIds
+        displayedLoot[TilePosition(row, column)] = remainingLootableItemIds
     }
 
     override suspend fun tint(color: RGBA) {
@@ -272,7 +270,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         column: Int,
         previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
     ) {
-        flashedHealth += PositionDto(row, column) to previewOption
+        flashedHealth += TilePosition(row, column) to previewOption
         flashing?.await()
     }
 }

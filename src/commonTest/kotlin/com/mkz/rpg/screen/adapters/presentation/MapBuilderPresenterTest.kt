@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
 import com.mkz.rpg.screen.adapters.presentation.FakeMapBuilderCallToActionView.Actions
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
@@ -81,7 +80,7 @@ class MapBuilderPresenterTest {
         // When
         givenMapCreated()
         // Then
-        battlefieldView.displayedBattlefields.shouldContainExactly(apis.battlefieldApi.previewBattlefield(List(16) { List(16) { "sand" } }))
+        battlefieldView.displayedBattlefields.shouldContainExactly(BattlefieldMapper.terrain(apis.battlefieldApi.previewBattlefield(List(16) { List(16) { "sand" } })))
         infoView.displayedSize shouldBe (16 to 16)
         hudView.displayedSize shouldBe (16 to 16)
     }
@@ -122,9 +121,9 @@ class MapBuilderPresenterTest {
         // Then
         val updatedTerrain = battlefieldView.updatedTerrains.single()
         updatedTerrain.battlefield.tiles
-            .getValue(PositionDto(2, 3))
+            .getValue(TilePosition(2, 3))
             .terrainId shouldBe "lava"
-        updatedTerrain.positions shouldBe setOf(PositionDto(2, 3), PositionDto(1, 3), PositionDto(2, 4), PositionDto(3, 3), PositionDto(2, 2))
+        updatedTerrain.positions shouldBe setOf(TilePosition(2, 3), TilePosition(1, 3), TilePosition(2, 4), TilePosition(3, 3), TilePosition(2, 2))
     }
 
     @Test
@@ -135,7 +134,7 @@ class MapBuilderPresenterTest {
         // When
         selectTile(row = 0, column = 0)
         // Then
-        battlefieldView.updatedTerrains.single().positions shouldBe setOf(PositionDto(0, 0), PositionDto(0, 1), PositionDto(1, 0))
+        battlefieldView.updatedTerrains.single().positions shouldBe setOf(TilePosition(0, 0), TilePosition(0, 1), TilePosition(1, 0))
     }
 
     @Test
@@ -160,7 +159,7 @@ class MapBuilderPresenterTest {
         hudView.delegate!!.sizeChanged(rows = 24, columns = 8)
         eventBus.dispatch()
         // Then
-        battlefieldView.displayedBattlefields.last() shouldBe apis.battlefieldApi.previewBattlefield(List(24) { List(8) { "sand" } })
+        battlefieldView.displayedBattlefields.last() shouldBe BattlefieldMapper.terrain(apis.battlefieldApi.previewBattlefield(List(24) { List(8) { "sand" } }))
         infoView.displayedSize shouldBe (24 to 8)
         hudView.displayedSize shouldBe (24 to 8)
     }
@@ -244,7 +243,7 @@ class MapBuilderPresenterTest {
         // When
         importFile(apis.battlefieldApi.exportBattlefield(tiles))
         // Then
-        battlefieldView.displayedBattlefields.last() shouldBe apis.battlefieldApi.previewBattlefield(tiles)
+        battlefieldView.displayedBattlefields.last() shouldBe BattlefieldMapper.terrain(apis.battlefieldApi.previewBattlefield(tiles))
         infoView.displayedSize shouldBe (2 to 3)
         hudView.displayedSize shouldBe (2 to 3)
         infoView.infos.shouldContainExactly("Map imported")
