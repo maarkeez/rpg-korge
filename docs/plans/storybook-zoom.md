@@ -1,6 +1,6 @@
 # Plan: Storybook zoom
 
-> **Status:** in progress: M1, M2 and M3 are done.
+> **Status:** done.
 >
 > **Summary:** Let the person zoom in and out of the [Storybook](../architecture/storybook.md) and move around it, mostly
 > on a phone, where the whole 1280x900 Storybook is shrunk to the width of the screen today. The Storybook keeps its
@@ -43,7 +43,7 @@ that completes each milestone to **Done in**.
 | M1 | The whole screen and the bar    | The Storybook draws on the whole screen, looks the same at Fit, and the bar zooms in and out, to Fit and to the phone, kept across stories and when the screen changes size. | ✅      | a4d6e39, 90c5fc6 |
 | M2 | Panning                         | Dragging the background, the bezel or a panel moves the Storybook within its limits; the sidebar and the phone screen keep their drags, and a pan is never a tap.             | ✅      | 86b3b64 |
 | M3 | Pinch, the trackpad and the wheel | Two fingers zoom and pan on a touch screen, the Mac trackpad zooms in the desktop app, and the wheel with Ctrl zooms everywhere.                                             | ✅      | 7d17e68 |
-| M4 | The docs and the skill          | The Storybook docs describe the zoom, and the `storybook` skill screenshots a story on a phone, at Fit and at Phone.                                                         | ⬜      |         |
+| M4 | The docs and the skill          | The Storybook docs describe the zoom, and the `storybook` skill screenshots a story on a phone, at Fit and at Phone.                                                         | ✅      | 4eee026, ef37453 |
 
 Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Storybook with the
 [`storybook` skill](../../.claude/skills/storybook/SKILL.md) at 1280x900, so Fit is checked to be unchanged.
@@ -148,6 +148,22 @@ The pinch and the wheel are one commit, as they share most of `ZoomView`, plus t
 1. **The docs.** [Storybook](../architecture/storybook.md) (what it shows, and how it is built) describes the zoom.
 2. **The skill.** The `storybook` skill takes a screen size and the zoom buttons to tap.
 3. **The plan.** These commits, and the status set to done.
+
+### M4 as built
+
+The two commits are as listed, plus these decisions:
+
+- **The script** takes `--screen <width>x<height>`, `--touch` for a touch screen (three pixels a point, and every
+  `--click` a tap of a finger, as KorGE ignores the mouse there) and a `--zoom <out|in|fit|phone>` step. The temporary
+  copy of the script used to check M1 to M3 on a phone is gone; its drags and pinches did not make it into the skill,
+  which only needs to show a story, zoomed or not.
+- **Where the bar is** is worked out by the script, as the bar keeps its size on the screen: 324x52 at 12 from the
+  bottom right, on any screen up to the window, and larger with the Storybook on a larger one.
+- **Checked**: `--screen 390x844 --touch` shows Fit, a strip across the phone, and `--zoom phone` 309%; at the
+  default 1280x900, `--zoom in` twice shows 156%.
+- **The docs**: the [Storybook](../architecture/storybook.md) says what the zoom shows and how it is built, and that a
+  real pinch is only checked by hand. The [skill](../../.claude/skills/storybook/SKILL.md) says how to screenshot on a
+  phone, and where a point of the game is with the phone filling it.
 
 ## Reference
 
