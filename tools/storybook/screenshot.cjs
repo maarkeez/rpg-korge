@@ -2,12 +2,15 @@
 // screenshot. The Storybook must be served first, e.g.: python3 -m http.server 8765 -d build/www.
 // See .claude/skills/storybook/SKILL.md.
 //
-// Usage: node tools/storybook/screenshot.cjs '<query>' [--out <png>] [--port <port>] [steps...]
-//   <query>         What to open, as in a link: 'story=screen-shop--buy&args=gold:0&globals=language:es'.
-//   --out <png>     Where to save the last screenshot. Default: build/storybook/<story id>.png.
-//   --port <port>   Where the Storybook is served. Default: 8765.
+// Usage: node tools/storybook/screenshot.cjs '<query>' [--out <png>] [--port <port>] [--screen <w>x<h>] [--touch] [steps...]
+//   <query>          What to open, as in a link: 'story=screen-shop--buy&args=gold:0&globals=language:es'.
+//   --out <png>      Where to save the last screenshot. Default: build/storybook/<story id>.png.
+//   --port <port>    Where the Storybook is served. Default: 8765.
+//   --screen <w>x<h> The size of the screen, e.g.: 390x844, a portrait phone. Default: 1280x900, the Storybook window.
+//   --touch          A touch screen, as a phone's: three pixels a point, and the clicks are taps.
 // Steps, run in order, each one followed by a short wait for the story to render again:
-//   --click <x>,<y>  Clicks the window, e.g.: a story in the sidebar, a control button, a slot of the shop.
+//   --click <x>,<y>  Clicks the screen, or taps it with --touch, e.g.: a story in the sidebar, a control button.
+//   --zoom <button>  Taps a button of the zoom bar: out, in, fit or phone.
 //   --type <text>    Types the text and presses Enter, e.g.: into a text input clicked before, after its text.
 //   --replace <text> Deletes the text of the input clicked before, then types the text and presses Enter.
 //   --press <key>    Presses a key, e.g.: Backspace, or Meta+A (Control+A on Linux) to select the text of an input.
@@ -18,7 +21,12 @@ const path = require('node:path');
 const { execSync } = require('node:child_process');
 
 // The Storybook window: the page is scaled to fit, so at this size the coordinates of the page are those of the window.
-const VIEWPORT = { width: 1280, height: 900 };
+const WINDOW = { width: 1280, height: 900 };
+// A touch screen has three pixels a point, as most phones.
+const TOUCH_SCALE_FACTOR = 3;
+// The zoom bar (ZoomBarView): 324x52 at 12 from the bottom right of the screen, at that size on a screen up to the
+// window, and larger on a larger one, as the Storybook. The middle of its buttons, from its left.
+const ZOOM_BAR = { width: 324, height: 52, margin: 12, buttons: { out: 26, in: 142, fit: 204, phone: 282 } };
 // The Storybook titles the page with this and the story id once the story has rendered (see StorybookPage).
 const RENDERED_TITLE_PREFIX = 'Storybook – ';
 // Loading the bundle and its resources takes about 9 seconds locally, with a software renderer.
@@ -34,7 +42,7 @@ const CHROME_ARGS = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '
 const repository = path.resolve(__dirname, '../..');
 
 function parseArguments(argv) {
-  const options = { query: null, out: null, port: 8765, steps: [] };
+  const options = { query: null, out: null, port: 8765, screen: WINDOW, touch: false, steps: [] };
   for (let i = 0; i < argv.length; i++) {
     const argument = argv[i];
     const value = () => {
@@ -43,6 +51,9 @@ function parseArguments(argv) {
     };
     if (argument === '--out') options.out = value();
     else if (argument === '--port') options.port = Number(value());
+    else if (argument === '--screen') options.screen = parseScreen(value());
+    else if (argument === '--touch') options.touch = true;
+    else if (argument === '--zoom') options.steps.push({ kind: 'zoom', value: zoomButton(value()) });
     else if (['--click', '--type', '--replace', '--press', '--wait', '--shot'].includes(argument)) options.steps.push({ kind: argument.slice(2), value: value() });
     else if (argument.startsWith('--')) fail(`Unknown option ${argument}`);
     else if (options.query === null) options.query = argument.replace(/^\?/, '');
@@ -50,6 +61,25 @@ function parseArguments(argv) {
   }
   if (options.query === null) fail("Missing the query, e.g.: 'story=screen-shop--buy'");
   return options;
+}
+
+function parseScreen(value) {
+  const [width, height] = value.split('x').map(Number);
+  if (!(width > 0) || !(height > 0)) fail(`--screen needs <width>x<height>, e.g.: 390x844, not ${value}`);
+  return { width, height };
+}
+
+function zoomButton(value) {
+  if (!(value in ZOOM_BAR.buttons)) fail(`--zoom needs one of ${Object.keys(ZOOM_BAR.buttons).join(', ')}, not ${value}`);
+  return value;
+}
+
+// Where a button of the zoom bar is on the screen.
+function zoomButtonPosition(screen, button) {
+  const scale = Math.max(1, Math.min(screen.width / WINDOW.width, screen.height / WINDOW.height));
+  const left = screen.width - (ZOOM_BAR.width + ZOOM_BAR.margin) * scale;
+  const top = screen.height - (ZOOM_BAR.height + ZOOM_BAR.margin) * scale;
+  return `${Math.round(left + ZOOM_BAR.buttons[button] * scale)},${Math.round(top + (ZOOM_BAR.height / 2) * scale)}`;
 }
 
 function fail(message) {
@@ -115,9 +145,17 @@ async function screenshot(page, file) {
 }
 
 // KorGE reads a click from the mouse moving over the view, then a press, so the mouse is moved first and held briefly.
-async function click(page, value) {
+// On a touch screen KorGE ignores the mouse, so it is a tap of a finger, also held briefly.
+async function click(page, value, touch) {
   const [x, y] = value.split(',').map(Number);
   if (Number.isNaN(x) || Number.isNaN(y)) fail(`--click needs <x>,<y>, e.g.: 400,300, not ${value}`);
+  if (touch) {
+    const session = await page.context().newCDPSession(page);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y, id: 1 }] });
+    await page.waitForTimeout(80);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    return;
+  }
   await page.mouse.move(x, y);
   await page.waitForTimeout(100);
   await page.mouse.down();
@@ -125,7 +163,7 @@ async function click(page, value) {
   await page.mouse.up();
 }
 
-async function runStep(page, step) {
+async function runStep(page, step, options) {
   if (step.kind === 'shot') return screenshot(page, path.resolve(step.value));
   if (step.kind === 'wait') return page.waitForTimeout(Number(step.value));
   // The title is cleared, so it shows whether the step rendered the story again.
@@ -133,7 +171,8 @@ async function runStep(page, step) {
   await page.evaluate(() => {
     document.title = '';
   });
-  if (step.kind === 'click') await click(page, step.value);
+  if (step.kind === 'click') await click(page, step.value, options.touch);
+  else if (step.kind === 'zoom') await click(page, zoomButtonPosition(options.screen, step.value), options.touch);
   else if (step.kind === 'type' || step.kind === 'replace') {
     if (step.kind === 'replace') {
       await page.keyboard.press('End');
@@ -158,7 +197,11 @@ async function runStep(page, step) {
 
   const browser = await launch(loadPlaywright());
   try {
-    const page = await browser.newPage({ viewport: VIEWPORT });
+    const page = await browser.newPage(
+      options.touch
+        ? { viewport: options.screen, deviceScaleFactor: TOUCH_SCALE_FACTOR, hasTouch: true, isMobile: true }
+        : { viewport: options.screen },
+    );
     page.on('console', (message) => {
       if (message.type() === 'error') console.log(`Console error: ${message.text()}`);
     });
@@ -180,7 +223,7 @@ async function runStep(page, step) {
     if (requestedStoryId && storyId !== requestedStoryId) {
       console.log(`Warning: ${requestedStoryId} is not a story, so the first story is shown. List them in StorySmokeTest.`);
     }
-    for (const step of options.steps) await runStep(page, step);
+    for (const step of options.steps) await runStep(page, step, options);
     await screenshot(page, out);
     console.log(`URL: ${page.url()}`);
   } finally {

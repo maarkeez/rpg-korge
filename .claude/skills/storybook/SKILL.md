@@ -73,6 +73,10 @@ node tools/storybook/screenshot.cjs 'story=screen-shop--sell&globals=language:es
   screenshot: the URL keeps what was asked for until a control changes.
 - `Console error:` and `Page error:` lines are the page's own errors: a story that fails to render shows them.
 - `--port <port>` when it is served elsewhere than 8765.
+- `--screen <width>x<height>` opens it on another screen, e.g.: `--screen 390x844`, a portrait phone; add `--touch` for
+  a touch screen, as a phone's (three pixels a point), where every `--click` is a tap: KorGE ignores the mouse on a
+  touch screen. By default it is the 1280x900 window, with a mouse. The Storybook is drawn on the whole screen, at Fit:
+  on a portrait phone, a strip across its middle.
 
 ## 5. Click and type
 
@@ -87,6 +91,7 @@ Steps run in order after the story has rendered, each one waiting briefly for th
 | `--press <key>`   | Presses a key, e.g.: `Backspace`, `ArrowLeft`.                                              |
 | `--wait <ms>`     | Waits, e.g.: for an animation to finish.                                                    |
 | `--shot <png>`    | Saves a screenshot now, besides the last one.                                              |
+| `--zoom <button>` | Taps a button of the zoom bar, at the bottom right of the screen: `out` (`-`), `in` (`+`), `fit` or `phone`, which fills the screen with the phone. |
 
 For example, selecting the second slot of the shop, renaming the buyer, and clearing the actions:
 
@@ -110,7 +115,16 @@ The page is 1280x900, the Storybook window, so a coordinate of the page is one o
 | Controls                             | Title and `Reset` (1180, 357), then a row every 38 from y ≈ 401: names from x 738, editors from x 888. An int has `-` at x 900 and `+` at x 993, a pick `<` at x 900 and `>` at x 1129, a text input from x 888 to 1188. |
 | Actions                              | Title at y ≈ 754, `Clear` (1180, 757), the actions from y ≈ 791, the newest on top.                          |
 
-The rows depend on the component: take a first screenshot and read the coordinates off it before clicking.
+The rows depend on the component: take a first screenshot and read the coordinates off it before clicking. The table
+is the window at Fit: once zoomed, or on another `--screen`, read them off a screenshot too, e.g.: on a 390x844 phone
+zoomed to `phone`, the phone fills its width: a point (x, y) of the game is at about (11 + 0.94 x, 24 + 0.94 y).
+
+For example, the shop on a phone, at Fit and with the phone filling the screen:
+
+```shell
+node tools/storybook/screenshot.cjs 'story=screen-shop--sell' --screen 390x844 --touch \
+  --shot build/storybook/shop-phone-fit.png --zoom phone --out build/storybook/shop-phone.png
+```
 
 ## When it does not work
 
