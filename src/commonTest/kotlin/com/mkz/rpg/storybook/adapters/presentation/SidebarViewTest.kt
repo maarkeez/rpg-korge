@@ -1,5 +1,6 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.addChildScaled
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.storybook.domain.StorybookMother.component
 import com.mkz.rpg.storybook.domain.StorybookMother.story
@@ -180,6 +181,19 @@ class SidebarViewTest : ViewsForTesting() {
             // Then
             sidebarView.scrollOffset() shouldBe 0.0
             selectedStoryIds.shouldBeEmpty()
+        }
+
+    @Test
+    fun `Drag should move the list with the finger when the Storybook is zoomed`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChildScaled(sidebarView, scale = 2.0)
+            sidebarView.display(manyComponents)
+            // When
+            dragSidebar(sidebarView, -150.0)
+            // Then the list, drawn twice its size, moves half as many of its units as the finger.
+            sidebarView.scrollOffset() shouldBe -75.0
         }
 
     @Test

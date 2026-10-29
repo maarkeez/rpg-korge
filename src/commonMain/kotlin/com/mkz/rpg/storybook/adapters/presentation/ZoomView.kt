@@ -1,9 +1,12 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.STORYBOOK_BACKGROUND_COLOR
+import korlibs.korge.input.onMouseDrag
 import korlibs.korge.view.Container
+import korlibs.korge.view.View
 import korlibs.korge.view.addTo
 import korlibs.korge.view.container
+import korlibs.korge.view.hasAncestor
 import korlibs.korge.view.onStageResized
 import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
@@ -15,7 +18,8 @@ import korlibs.math.geom.Size
  * The Storybook, zoomed and placed on the screen as its [Viewport] says, framed by the background, and the [ZoomBarView]
  * floating at the bottom right of the screen, not zoomed with it, as large on a phone as on a 1280x900 window. Fit is the
  * whole Storybook, as KorGE shows it; Phone zooms so the [phoneArea] fills the screen. The zoom is kept until the screen
- * changes size, which it follows. It is placed at the origin of the stage, so the screen is KorGE's `actualVirtualBounds`.
+ * changes size, which it follows. Zoomed in, a drag that does not start on one of the [dragOwners] moves it. It is placed
+ * at the origin of the stage, so the screen is KorGE's `actualVirtualBounds`.
  */
 class ZoomView(
     storybookSize: Size,
@@ -31,6 +35,9 @@ class ZoomView(
         private const val DESKTOP_PIXELS_PER_INCH = 96.0
     }
 
+    // Behind the Storybook, so a drag between its panels starts on a view, and pans.
+    internal val backdrop = solidRect(storybookSize, STORYBOOK_BACKGROUND_COLOR)
+
     /** Holds the views of the Storybook, laid out in its own units. */
     val storybook: Container = container()
 
@@ -39,6 +46,9 @@ class ZoomView(
     internal val frame: Container = container()
     internal val zoomBarView = ZoomBarView()
     internal val viewport = Viewport(storybookSize, Rectangle(Point.ZERO, storybookSize))
+
+    /** The views that handle their own drags, e.g.: the sidebar: a drag that starts on them does not pan. */
+    var dragOwners: List<View> = emptyList()
 
     /** The area of the Storybook the Phone preset fills the screen with: the phone frame. */
     var phoneArea: Rectangle = Rectangle(Point.ZERO, storybookSize)
@@ -53,6 +63,22 @@ class ZoomView(
         frame.solidRect(Size(FRAME_WIDTH, storybookSize.height), STORYBOOK_BACKGROUND_COLOR).position(storybookSize.width, 0.0)
         zoomBarView.addTo(this)
         zoomBarView.setDelegate(this)
+        // A drag pans by how far it moved since its last event. The drag is in the units of the stage, as the view.
+        var isPanning = false
+        var lastDrag = Point.ZERO
+        onMouseDrag { event ->
+            if (event.start) {
+                // In the Storybook only: KorGE hit tests a container by its bounds, and the frame's hold the Storybook.
+                val startView = storybook.hitTest(Point(event.sx, event.sy))
+                isPanning = dragOwners.none { owner -> startView?.hasAncestor(owner) == true }
+                lastDrag = Point.ZERO
+            }
+            if (!isPanning) return@onMouseDrag
+            val drag = Point(event.dx, event.dy)
+            viewport.panBy(drag - lastDrag)
+            lastDrag = drag
+            show()
+        }
         onStageResized { _, _ ->
             barScale = (virtualPixelsPerInch / DESKTOP_PIXELS_PER_INCH).coerceAtLeast(1.0)
             resize(actualVirtualBounds)
@@ -87,7 +113,7 @@ class ZoomView(
     }
 
     private fun show() {
-        for (view in listOf(storybook, frame)) {
+        for (view in listOf(backdrop, storybook, frame)) {
             view.scale = viewport.zoom
             view.position(viewport.position)
         }

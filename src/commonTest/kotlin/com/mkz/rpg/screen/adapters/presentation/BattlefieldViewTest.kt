@@ -5,6 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldView.Following.TRAIL
+import com.mkz.rpg.shared.adapters.presentation.addChildScaled
 import com.mkz.rpg.shared.adapters.presentation.awaitCompletion
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
@@ -72,6 +73,19 @@ class BattlefieldViewTest : ViewsForTesting() {
             dragBattlefield(battlefieldView, -48.0 to -48.0, -96.0 to -96.0)
             // Then
             battlefieldView.scrollOffset() shouldBe (-96.0 to -96.0)
+        }
+
+    @Test
+    fun `DisplayBattlefield should scroll the battlefield with the finger when it is dragged in a scaled parent`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 16, columns = 16).toTerrain())
+            addChildScaled(battlefieldView, scale = 2.0)
+            // When
+            dragBattlefield(battlefieldView, -96.0 to -96.0)
+            // Then the battlefield, drawn twice its size, moves half as many of its units as the finger.
+            battlefieldView.scrollOffset() shouldBe (-48.0 to -48.0)
         }
 
     @Test

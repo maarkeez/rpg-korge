@@ -1,7 +1,9 @@
 package com.mkz.rpg.shared.adapters.presentation
 
 import korlibs.korge.tests.ViewsForTesting
+import korlibs.korge.view.Container
 import korlibs.korge.view.View
+import korlibs.korge.view.container
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -15,6 +17,14 @@ import kotlinx.coroutines.yield
 suspend fun ViewsForTesting.clickOn(view: View) {
     val center = view.getGlobalBounds().center
     mouseMoveAndClickTo(center.x, center.y)
+}
+
+/** Adds the [view] in a container drawn [scale] times its size, e.g.: as the Storybook zoomed in draws it. */
+fun Container.addChildScaled(
+    view: View,
+    scale: Double,
+) {
+    container().also { scaled -> scaled.scale = scale }.addChild(view)
 }
 
 /** Whether the [View] and all its parents are visible. */

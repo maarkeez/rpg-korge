@@ -53,6 +53,8 @@ class StorybookScene(
         storybook.addChild(sidebarView)
         storybook.addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
         zoomView.phoneArea = Rectangle(phoneFrameView.pos, PhoneFrameView.SIZE)
+        // The sidebar scrolls by dragging, and the view on show handles its own taps and drags, e.g.: the battlefield.
+        zoomView.dragOwners = listOf(sidebarView, phoneFrameView.screen)
         // On the right of the phone: the globals on top, then what the story is, its controls, and its actions under the
         // most the controls may take, which fit in the window.
         val panelsX = SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width

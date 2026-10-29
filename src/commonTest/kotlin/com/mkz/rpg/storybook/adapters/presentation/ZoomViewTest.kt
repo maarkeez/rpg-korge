@@ -1,12 +1,14 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.STORYBOOK_WINDOW_SIZE
+import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
+import korlibs.math.geom.Point
 import korlibs.math.geom.Rectangle
 import kotlin.test.Test
 
@@ -139,5 +141,76 @@ class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
             phone.width shouldBe (views.actualVirtualBounds.width plusOrMinus 0.01)
             phone.center.x shouldBe (views.actualVirtualBounds.center.x plusOrMinus 0.01)
             zoomView.zoomBar().zoomText() shouldBe "309%"
+        }
+
+    @Test
+    fun `Drag should move the Storybook with the finger when it is zoomed in`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            clickZoomIn(zoomView.zoomBar())
+            // When
+            dragZoom(from = Point(640, 450), by = Point(100, 50))
+            // Then
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-60.0, -62.5, 1600.0, 1125.0))
+        }
+
+    @Test
+    fun `Drag should not move the Storybook at Fit`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            dragZoom(from = Point(640, 450), by = Point(100, 50))
+            // Then
+            zoomView.storybookArea().shouldBeAbout(window)
+        }
+
+    @Test
+    fun `Drag should stop at the edges of the Storybook`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            clickZoomIn(zoomView.zoomBar())
+            // When
+            dragZoom(from = Point(640, 450), by = Point(-1000, 1000))
+            // Then
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-320.0, 0.0, 1600.0, 1125.0))
+        }
+
+    @Test
+    fun `Drag should not move the Storybook when it starts on a view that drags itself`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            zoomView.addViewThatDragsItself(Rectangle(0, 0, 260, 900))
+            clickZoomIn(zoomView.zoomBar())
+            // When
+            dragZoom(from = Point(100, 450), by = Point(100, 50))
+            // Then
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-160.0, -112.5, 1600.0, 1125.0))
+        }
+
+    @Test
+    fun `Drag should not tap the view it starts on, which a tap still taps`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            var taps = 0
+            val button = zoomView.addTappableView(Rectangle(540, 350, 200, 200)) { taps++ }
+            clickZoomIn(zoomView.zoomBar())
+            // When
+            dragZoom(from = button.getGlobalBounds().center, by = Point(100, 50))
+            // Then
+            taps shouldBe 0
+            // When
+            clickOn(button)
+            // Then
+            taps shouldBe 1
         }
 }

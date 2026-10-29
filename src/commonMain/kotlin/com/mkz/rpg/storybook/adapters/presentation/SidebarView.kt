@@ -79,11 +79,12 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         solidRect(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height), BACKGROUND_COLOR)
         list = clipContainer(Size(WIDTH, LIST_HEIGHT)).position(0.0, TITLE_HEIGHT)
         catalogue = list.container()
-        // The scroll is relative to where the drag started, not to the previous drag event.
+        // The scroll is relative to where the drag started, not to the previous drag event, in the units of the list, so
+        // it follows the finger also when the Storybook is zoomed.
         var dragStartY = 0.0
         onMouseDrag { event ->
             if (event.start) dragStartY = catalogue.y
-            scrollTo(dragStartY + event.dy)
+            scrollTo(dragStartY + event.localDXY(catalogue).y)
         }
         onScroll { event -> scrollTo(catalogue.y - event.scrollDeltaYPixels) }
         // Over the list, as the rounded rectangles of the stories are not clipped: they would show over the title.

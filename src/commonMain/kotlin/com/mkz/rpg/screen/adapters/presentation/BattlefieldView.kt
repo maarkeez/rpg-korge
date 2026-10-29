@@ -205,7 +205,9 @@ open class BattlefieldView(
                 dragStartX = battlefieldGrid.x
                 dragStartY = battlefieldGrid.y
             }
-            scrollTo(x = dragStartX + event.dx, y = dragStartY + event.dy)
+            // In the units of the grid, so it follows the finger also when a parent is scaled, e.g.: the Storybook zoomed.
+            val drag = event.localDXY(battlefieldGrid)
+            scrollTo(x = dragStartX + drag.x, y = dragStartY + drag.y)
         }
     }
 
