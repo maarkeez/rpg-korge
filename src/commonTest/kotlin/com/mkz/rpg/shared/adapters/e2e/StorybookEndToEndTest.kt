@@ -24,12 +24,14 @@ import com.mkz.rpg.storybook.adapters.presentation.displayedValue
 import com.mkz.rpg.storybook.adapters.presentation.displayedView
 import com.mkz.rpg.storybook.adapters.presentation.isViewCenteredOnScreen
 import com.mkz.rpg.storybook.adapters.presentation.phoneFrameView
+import com.mkz.rpg.storybook.adapters.presentation.searchText
 import com.mkz.rpg.storybook.adapters.presentation.selectedLanguageNames
 import com.mkz.rpg.storybook.adapters.presentation.selectedStoryNames
 import com.mkz.rpg.storybook.adapters.presentation.sidebarView
 import com.mkz.rpg.storybook.adapters.presentation.storyInfoView
 import com.mkz.rpg.storybook.adapters.presentation.storyName
 import com.mkz.rpg.storybook.adapters.presentation.toolbarView
+import com.mkz.rpg.storybook.adapters.presentation.typeSearch
 import com.mkz.rpg.storybook.adapters.presentation.zoom
 import com.mkz.rpg.storybook.adapters.presentation.zoomBar
 import com.mkz.rpg.storybook.adapters.presentation.zoomText
@@ -89,6 +91,23 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             displayedHealthBarLabel() shouldBe "0 / 30"
             sidebarView.selectedStoryNames().shouldContainExactly("Empty")
             storyLocation.keptStoryIds.shouldContainExactly("screen-health-bar--empty")
+        }
+
+    @Test
+    fun `should show a story found by typing in the search of the sidebar, and keep the search`() =
+        sharedViewsTest {
+            // Given
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--full"))
+            waitUntil { displayedHealthBarLabel() != null }
+            val sidebarView = requireNotNull(stage.sidebarView()) { "The sidebar is not displayed" }
+            sidebarView.typeSearch("health half")
+            // When
+            clickStoryId(sidebarView, "screen-health-bar--half")
+            // Then
+            waitUntil { displayedHealthBarLabel() == "15 / 30" }
+            displayedHealthBarLabel() shouldBe "15 / 30"
+            sidebarView.selectedStoryNames().shouldContainExactly("Half")
+            sidebarView.searchText() shouldBe "health half"
         }
 
     @Test

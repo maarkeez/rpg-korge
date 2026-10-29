@@ -22,12 +22,32 @@ fun SidebarView.storyNames(): List<String> = storyRows.map { row -> row.label.te
 /** The names of the stories highlighted as on show. */
 fun SidebarView.selectedStoryNames(): List<String> = storyRows.filter { row -> row.background.color == SidebarView.SELECTED_COLOR }.map { row -> row.label.text }
 
-/** Whether the title is on top, and the groups, components and stories are listed top down, each in its order, all of them shown. */
+/** Whether the title and the search are on top, and the groups, components and stories are listed top down under them, each in its order, all of them shown. */
 fun SidebarView.isListedTopDown(): Boolean {
     val lists = listOf(groupTexts, componentTexts, storyRows)
-    return lists.all { views -> views.zipWithNext().all { (above, below) -> above.globalPos.y < below.globalPos.y } } &&
-        lists.flatten().all { view -> view.isShown() && view.globalPos.y > title.globalPos.y }
+    return title.globalPos.y < searchInput.globalPos.y &&
+        lists.all { views -> views.zipWithNext().all { (above, below) -> above.globalPos.y < below.globalPos.y } } &&
+        lists.flatten().all { view -> view.isShown() && view.globalPos.y > searchInput.globalPos.y + searchInput.height }
 }
+
+/** The text typed in the search. */
+fun SidebarView.searchText(): String = searchInput.text
+
+/** The placeholder of the search, e.g.: `Search stories`, or `null` while it is not shown. */
+fun SidebarView.searchPlaceholderText(): String? = searchPlaceholder.takeIf { text -> text.isShown() }?.text
+
+/** Types the text in the search, replacing what was typed, as each key typed does. */
+fun SidebarView.typeSearch(text: String) {
+    searchInput.text = text
+}
+
+/** Whether the `×` that empties the search is shown. */
+fun SidebarView.isClearSearchShown(): Boolean = clearSearchButton.isShown()
+
+suspend fun ViewsForTesting.clickClearSearch(sidebarView: SidebarView) = clickOn(sidebarView.clearSearchButton)
+
+/** The message listed when no story matches the search, e.g.: `No stories match`, or `null` while there is none. */
+fun SidebarView.noStoriesMessage(): String? = noStoriesText?.takeIf { text -> text.isShown() }?.text
 
 suspend fun ViewsForTesting.clickStory(
     sidebarView: SidebarView,

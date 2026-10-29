@@ -4,12 +4,14 @@ import com.mkz.rpg.shared.adapters.presentation.addChildScaled
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.storybook.domain.StorybookMother.component
 import com.mkz.rpg.storybook.domain.StorybookMother.story
+import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.doubles.shouldBeLessThan
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
@@ -45,6 +47,10 @@ class SidebarViewTest : ViewsForTesting() {
             // Then
             sidebarView.titleText() shouldBe "Storybook"
             sidebarView.storyNames().shouldBeEmpty()
+            sidebarView.searchText() shouldBe ""
+            sidebarView.searchPlaceholderText() shouldBe "Search stories"
+            sidebarView.isClearSearchShown().shouldBeFalse()
+            sidebarView.noStoriesMessage().shouldBeNull()
         }
 
     @Test
@@ -283,5 +289,167 @@ class SidebarViewTest : ViewsForTesting() {
             // Then
             sidebarView.scrollOffset() shouldBe 0.0
             sidebarView.visibleStoryNames().shouldContainExactly("Full", "Empty", "Full mana")
+        }
+
+    @Test
+    fun `TypeSearch should list only the stories that match, under their group and component`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            // When
+            sidebarView.typeSearch("full")
+            // Then
+            sidebarView.groupNames().shouldContainExactly("SCREEN")
+            sidebarView.componentTitles().shouldContainExactly("Health bar", "Mana bar")
+            sidebarView.storyNames().shouldContainExactly("Full", "Full mana")
+            sidebarView.isListedTopDown().shouldBeTrue()
+            sidebarView.searchPlaceholderText().shouldBeNull()
+            sidebarView.isClearSearchShown().shouldBeTrue()
+            sidebarView.noStoriesMessage().shouldBeNull()
+        }
+
+    @Test
+    fun `TypeSearch should list the stories that hold every word, in any order and ignoring case`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            // When
+            sidebarView.typeSearch("MANA screen")
+            // Then
+            sidebarView.storyNames().shouldContainExactly("Full mana")
+        }
+
+    @Test
+    fun `TypeSearch should say no stories match when none does`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            // When
+            sidebarView.typeSearch("dragon")
+            // Then
+            sidebarView.groupNames().shouldBeEmpty()
+            sidebarView.componentTitles().shouldBeEmpty()
+            sidebarView.storyNames().shouldBeEmpty()
+            sidebarView.noStoriesMessage() shouldBe "No stories match"
+        }
+
+    @Test
+    fun `ClickClearSearch should empty the search and list every story again`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            sidebarView.typeSearch("dragon")
+            // When
+            clickClearSearch(sidebarView)
+            // Then
+            sidebarView.searchText() shouldBe ""
+            sidebarView.storyNames().shouldContainExactly("Full", "Empty", "Full mana", "Half")
+            sidebarView.searchPlaceholderText() shouldBe "Search stories"
+            sidebarView.isClearSearchShown().shouldBeFalse()
+            sidebarView.noStoriesMessage().shouldBeNull()
+            selectedStoryIds.shouldBeEmpty()
+        }
+
+    @Test
+    fun `ClickStory should select a story listed by the search, and keep the search`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            sidebarView.typeSearch("full")
+            // When
+            clickStory(sidebarView, "Full mana")
+            sidebarView.selectStory("screen-mana-bar--full")
+            // Then
+            selectedStoryIds.shouldContainExactly("screen-mana-bar--full")
+            sidebarView.selectedStoryNames().shouldContainExactly("Full mana")
+            sidebarView.searchText() shouldBe "full"
+            sidebarView.storyNames().shouldContainExactly("Full", "Full mana")
+        }
+
+    @Test
+    fun `TypeSearch should keep the story on show, highlighted again once it is listed`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            sidebarView.selectStory("screen-health-bar--empty")
+            // When
+            sidebarView.typeSearch("half")
+            // Then
+            sidebarView.selectedStoryNames().shouldBeEmpty()
+            // When
+            clickClearSearch(sidebarView)
+            // Then
+            sidebarView.selectedStoryNames().shouldContainExactly("Empty")
+            selectedStoryIds.shouldBeEmpty()
+        }
+
+    @Test
+    fun `Display should list only the stories that match the search when it is displayed again`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            sidebarView.display(listOf(healthBar, manaBar))
+            sidebarView.typeSearch("half")
+            // When
+            sidebarView.display(listOf(healthBar, manaBar, barView))
+            // Then
+            sidebarView.storyNames().shouldContainExactly("Half")
+        }
+
+    @Test
+    fun `TypeSearch should scroll the list back to the top`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(manyComponents)
+            scrollSidebar(sidebarView, 10_000.0)
+            // When
+            sidebarView.typeSearch("story")
+            // Then
+            sidebarView.scrollOffset() shouldBe 0.0
+            sidebarView.visibleStoryNames().first() shouldBe "Story 1.1"
+        }
+
+    @Test
+    fun `ClickClearSearch should scroll the list to the story on show when it is not in sight`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(manyComponents)
+            sidebarView.selectStory("screen-component-9--story-2")
+            sidebarView.typeSearch("component 12")
+            // When
+            clickClearSearch(sidebarView)
+            // Then
+            sidebarView.visibleStoryNames() shouldContain "Story 9.2"
+            sidebarView.selectedStoryNames().shouldContainExactly("Story 9.2")
+        }
+
+    @Test
+    fun `ClickClearSearch should keep the list at the top when the story on show is in sight`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(manyComponents)
+            sidebarView.selectStory("screen-component-1--story-1")
+            sidebarView.typeSearch("component 12")
+            // When
+            clickClearSearch(sidebarView)
+            // Then
+            sidebarView.scrollOffset() shouldBe 0.0
         }
 }
