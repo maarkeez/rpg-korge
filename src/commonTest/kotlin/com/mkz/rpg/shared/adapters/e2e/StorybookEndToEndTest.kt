@@ -14,8 +14,11 @@ import com.mkz.rpg.storybook.adapters.page.FakeStorybookPage
 import com.mkz.rpg.storybook.adapters.presentation.actionTexts
 import com.mkz.rpg.storybook.adapters.presentation.actionsView
 import com.mkz.rpg.storybook.adapters.presentation.clickControlButton
+import com.mkz.rpg.storybook.adapters.presentation.clickFit
 import com.mkz.rpg.storybook.adapters.presentation.clickLanguage
+import com.mkz.rpg.storybook.adapters.presentation.clickPhone
 import com.mkz.rpg.storybook.adapters.presentation.clickStoryId
+import com.mkz.rpg.storybook.adapters.presentation.clickZoomIn
 import com.mkz.rpg.storybook.adapters.presentation.controlsView
 import com.mkz.rpg.storybook.adapters.presentation.displayedValue
 import com.mkz.rpg.storybook.adapters.presentation.displayedView
@@ -27,6 +30,10 @@ import com.mkz.rpg.storybook.adapters.presentation.sidebarView
 import com.mkz.rpg.storybook.adapters.presentation.storyInfoView
 import com.mkz.rpg.storybook.adapters.presentation.storyName
 import com.mkz.rpg.storybook.adapters.presentation.toolbarView
+import com.mkz.rpg.storybook.adapters.presentation.zoom
+import com.mkz.rpg.storybook.adapters.presentation.zoomBar
+import com.mkz.rpg.storybook.adapters.presentation.zoomText
+import com.mkz.rpg.storybook.adapters.presentation.zoomView
 import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -162,5 +169,31 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             waitUntil { stage.actionsView()?.actionTexts()?.size == 2 }
             stage.actionsView()?.actionTexts().shouldContainExactly("shopBackSelected()", "shopSlotSelected(1)")
             displayedShopView()?.selectedSlotIndexes()?.shouldBeEmpty()
+        }
+
+    @Test
+    fun `should zoom the Storybook, and keep the zoom when the story changes, when the zoom bar is tapped`() =
+        sharedViewsTest {
+            // Given
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--full"))
+            waitUntil { displayedHealthBarLabel() != null }
+            val zoomView = requireNotNull(stage.zoomView()) { "The zoom is not displayed" }
+            val controlsView = requireNotNull(stage.controlsView()) { "The controls are not displayed" }
+            // When
+            clickZoomIn(zoomView.zoomBar())
+            clickControlButton(controlsView, "remaining", "decrease")
+            // Then
+            waitUntil { displayedHealthBarLabel() == "29 / 30" }
+            zoomView.zoom() shouldBe 1.25
+            zoomView.zoomBar().zoomText() shouldBe "125%"
+            // When
+            clickPhone(zoomView.zoomBar())
+            // Then
+            zoomView.zoomBar().zoomText() shouldBe "104%"
+            // When
+            clickFit(zoomView.zoomBar())
+            // Then
+            zoomView.zoom() shouldBe 1.0
+            zoomView.zoomBar().zoomText() shouldBe "100%"
         }
 }

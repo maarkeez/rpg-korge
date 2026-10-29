@@ -11,10 +11,12 @@ import korlibs.korge.scene.Scene
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.korge.view.position
+import korlibs.math.geom.Rectangle
 
 /**
  * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and on the right
- * the globals, what the story is, its controls and its actions. Localization: the texts of the views on show, in the language global.
+ * the globals, what the story is, its controls and its actions, all of them in a [ZoomView] that zooms and places them
+ * on the screen. Localization: the texts of the views on show, in the language global.
  * Location: where what is on show is kept, e.g.: the page URL. Page: told when the story on show has rendered.
  */
 class StorybookScene(
@@ -33,6 +35,7 @@ class StorybookScene(
     val toolbarView = ToolbarView()
     val controlsView = ControlsView()
     val actionsView = ActionsView()
+    val zoomView = ZoomView(STORYBOOK_WINDOW_SIZE)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -45,15 +48,18 @@ class StorybookScene(
 
         // The phone is as far from the sidebar as from the top, so its frame fits the window height.
         val margin = (STORYBOOK_WINDOW_SIZE.height - PhoneFrameView.SIZE.height) / 2
-        addChild(sidebarView)
-        addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
+        addChild(zoomView)
+        val storybook = zoomView.storybook
+        storybook.addChild(sidebarView)
+        storybook.addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
+        zoomView.phoneArea = Rectangle(phoneFrameView.pos, PhoneFrameView.SIZE)
         // On the right of the phone: the globals on top, then what the story is, its controls, and its actions under the
         // most the controls may take, which fit in the window.
         val panelsX = SidebarView.WIDTH + margin * 4 + PhoneFrameView.SIZE.width
-        addChild(toolbarView.position(panelsX, margin * 2))
-        addChild(storyInfoView.position(panelsX, toolbarView.y + ToolbarView.HEIGHT + margin * 2))
-        addChild(controlsView.position(panelsX, storyInfoView.y + StoryInfoView.HEIGHT + margin))
-        addChild(actionsView.position(panelsX, controlsView.y + ControlsView.MAXIMUM_HEIGHT + margin))
+        storybook.addChild(toolbarView.position(panelsX, margin * 2))
+        storybook.addChild(storyInfoView.position(panelsX, toolbarView.y + ToolbarView.HEIGHT + margin * 2))
+        storybook.addChild(controlsView.position(panelsX, storyInfoView.y + StoryInfoView.HEIGHT + margin))
+        storybook.addChild(actionsView.position(panelsX, controlsView.y + ControlsView.MAXIMUM_HEIGHT + margin))
 
         val storyContext = StoryContext(resourcesLoader, texts)
         StorybookPresenter(sidebarView, toolbarView, storyInfoView, controlsView, actionsView, phoneFrameView, storybookApi, storyContext, storybookPage, eventBus)

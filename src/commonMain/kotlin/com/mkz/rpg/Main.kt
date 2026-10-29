@@ -12,6 +12,7 @@ import com.mkz.rpg.storybook.adapters.presentation.StorybookScene
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import korlibs.image.color.Colors
 import korlibs.korge.Korge
+import korlibs.korge.KorgeDisplayMode
 import korlibs.korge.scene.sceneContainer
 import korlibs.korge.view.Stage
 import korlibs.korge.view.addUpdater
@@ -22,11 +23,13 @@ val GAME_WINDOW_SIZE = Size(390, 844)
 
 // Landscape, so the sidebar and the story info fit on both sides of a phone as large as the game window.
 val STORYBOOK_WINDOW_SIZE = Size(1280, 900)
+val STORYBOOK_BACKGROUND_COLOR = Colors["#202020"]
 
 // The same bundle starts the game, or the Storybook when it is asked for: see docs/plans/storybook.md.
 suspend fun main() =
     if (isStorybookRequested()) {
-        Korge(windowSize = STORYBOOK_WINDOW_SIZE, backgroundColor = Colors["#202020"]) {
+        // Drawn on the whole screen, around the Storybook fitted in it, so it can be zoomed in to fill a portrait phone.
+        Korge(windowSize = STORYBOOK_WINDOW_SIZE, backgroundColor = STORYBOOK_BACKGROUND_COLOR, displayMode = KorgeDisplayMode.CENTER_NO_CLIP) {
             startStorybook()
         }
     } else {
