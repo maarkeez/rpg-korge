@@ -108,7 +108,7 @@ The page is 1280x900, the Storybook window, so a coordinate of the page is one o
 
 | Area                                 | Coordinates                                                                                                 |
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| Sidebar                              | x 0 to 260. The stories are rows 28 high under their component, their names from x ≈ 37, e.g.: `Shop / Sell` at (48, 507). |
+| Sidebar                              | x 0 to 260. The search at (114, 70), its `×` at (229, 70). The stories are rows 28 high under their component, their names from x ≈ 37, e.g.: `Shop / Sell` at (48, 789) with it on show. Searching puts the first story listed at (48, 159), e.g.: `--click 114,70 --type 'shop sell' --click 48,159`. |
 | Phone screen, the view on show       | From (304, 28), 390x844, the game window: a point (x, y) of the game is at (304 + x, 28 + y).              |
 | Toolbar, the language                | `Language` at y ≈ 46; the languages from x ≈ 835, e.g.: `English` (880, 46), `Español` (979, 46).          |
 | Story info                           | From (738, 90): the component and its description, then the story and its description.                     |

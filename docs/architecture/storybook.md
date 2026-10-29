@@ -19,8 +19,14 @@ To add a story, see [How to add a story](../testing/how-to-add-a-story.md). The 
 ## What it shows
 
 - **The sidebar**, on the left, lists the components by their group, and the stories of each one. Tapping a story
-  shows it. The list scrolls under the title, with the mouse wheel or by dragging it, and scrolls to the story on show
-  when it is out of sight, e.g.: when opened from a link.
+  shows it. The list scrolls under the title and the search, with the mouse wheel or by dragging it, and scrolls to the
+  story on show when it is out of sight, e.g.: when opened from a link.
+- **The search**, under the title of the sidebar, lists only the stories that match what is typed, as it is typed:
+  every word, ignoring case and in any order, must be in the group, the title of the component or the name of the
+  story, e.g.: `shop sell` lists the **Sell** stories of **Screen / Shop**, and `shop` all of its stories. The `×`
+  empties it, listing every story again, scrolled to the story on show. It never changes the story on show, is kept
+  while stories are tapped, and is not in the [link](#links). See [the plan](../plans/storybook-search.md) for its
+  decisions.
 - **The phone**, in the middle, shows the story: the real view, at its real size, in a 390x844 screen, the game window,
   with the game background. What does not fit the screen is cropped, as in the game.
 - **The toolbar**, on the top right, holds the globals: the language of the views on show.
@@ -141,7 +147,9 @@ deterministic, though its animations restart.
 `StorybookScene` lays out the window, 1280x900, landscape: the `SidebarView`, the `PhoneFrameView`, and on its right
 the `ToolbarView`, the `StoryInfoView`, the `ControlsView` and the `ActionsView`. The Controls may take at most
 `ControlsView.MAXIMUM_HEIGHT`, so the Actions always fit under them. `StorybookPresenter` shows the catalogue and the
-story on show, and turns what is tapped into the use cases, as any presenter of the game. `StoryContext` gives the
+story on show, and turns what is tapped into the use cases, as any presenter of the game. The search is the sidebar's
+alone: it keeps the catalogue the presenter displays, and lists what `CatalogueSearch`, plain Kotlin, finds in it as the
+text changes, so neither the presenter nor the domain know of it. `StoryContext` gives the
 bindings the images, loaded once, and the texts, in the language global.
 
 The zoom is the presentation's alone, out of the domain and of the link, as a setting of the screen:
@@ -196,7 +204,8 @@ Besides the rules of every subdomain, three architecture tests keep the Storyboo
 
 ## Tests
 
-- **Unit tests** of the `Storybook` aggregate and of every use case, with `FakeStoryLocation`, and of the `Viewport`.
+- **Unit tests** of the `Storybook` aggregate and of every use case, with `FakeStoryLocation`, and of the `Viewport`
+  and the `CatalogueSearch`.
 - **View tests** of the Storybook's own views, through their page objects (e.g.: `ControlsViewExtension`), and
   `StorybookPresenterTest`, with fake views and `FakeStorybookPage`. The zoom's fake the fingers, the trackpad and the
   wheel (`pinch`, `magnify`, `scrollZoom` in `ZoomViewExtension`).
@@ -205,7 +214,7 @@ Besides the rules of every subdomain, three architecture tests keep the Storyboo
   every binding (so an invalid default arg fails), checks the controls of every component fit
   `ControlsView.MAXIMUM_HEIGHT`, and lists every component and story id, so changing one is deliberate.
 - **The end-to-end test**, `StorybookEndToEndTest`: starts the Storybook on a link, and taps a story, a control, a
-  language, the shop and the zoom bar, as a person would.
+  language, the shop and the zoom bar, and types a search, as a person would.
 - **The page**, with the [`storybook` skill](../../.claude/skills/storybook/SKILL.md): the JS bundle in a headless
   browser, which no automated test covers yet, also on a phone (`--screen 390x844 --touch`) and zoomed (`--zoom`).
   Visual regression is left for later. A real pinch, on a phone or the trackpad of a Mac, is only checked by hand.
