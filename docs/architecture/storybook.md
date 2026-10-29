@@ -27,6 +27,17 @@ To add a story, see [How to add a story](../testing/how-to-add-a-story.md). The 
 - **The story info** names the component and the story, each with its description.
 - **The Controls** edit the args the view is displayed with, one row per arg. `Reset` brings back the story's own.
 - **The Actions** list the callbacks the view made when it was tapped, the newest on top. `Clear` empties them.
+- **The zoom bar**, floating at the bottom right of the screen, zooms the whole Storybook: `-` and `+` by 1.25, `Fit`
+  back to the whole Storybook (`100%`), and `Phone`, which fills the screen with the phone, at its real size on a
+  portrait phone. It goes from Fit to 4×, and is as large on a phone as on the window.
+
+The Storybook is drawn on the whole screen of the device: at Fit it looks as on the 1280x900 window, in the middle of
+the screen, e.g.: a strip across a portrait phone, and zoomed in it fills it. Besides the bar, it zooms with two fingers
+on a touch screen, with the trackpad of a Mac in the desktop app, and with the mouse wheel and Ctrl, which is also how a
+desktop browser sends a pinch of its trackpad; each around the fingers or the pointer. Zoomed in, dragging anything but
+the sidebar and the screen of the phone, which keep their own drags, moves it, never past its edges. The zoom is kept
+when the story, an arg or a global changes, until the page is reloaded, and is not in the [link](#links): it depends on
+the screen, not on what is on show. See [the plan](../plans/storybook-zoom.md) for its decisions.
 
 The labels and descriptions of the Storybook itself are in English only: they are not in the translation catalogs, as
 the translators only translate what the players see. The views on show follow the language global.
@@ -133,6 +144,19 @@ the `ToolbarView`, the `StoryInfoView`, the `ControlsView` and the `ActionsView`
 story on show, and turns what is tapped into the use cases, as any presenter of the game. `StoryContext` gives the
 bindings the images, loaded once, and the texts, in the language global.
 
+The zoom is the presentation's alone, out of the domain and of the link, as a setting of the screen:
+
+- `Viewport`, plain Kotlin, holds the zoom and where the Storybook is on the screen, and their rules: from Fit to 4×,
+  zooming around a point, onto an area (the phone), panning within the edges, and following a new size of the screen.
+- `ZoomView` holds the views the scene lays out, scaled and moved as its `Viewport` says, and the `ZoomBarView` above
+  them, not zoomed. It turns the drags, the fingers, the trackpad and the wheel into the `Viewport`, and follows the
+  size of the screen. Around the Storybook, it draws a frame of the background: KorGE's clip does not crop the rounded
+  rectangles of the sidebar scrolled above its list, which the window used to crop.
+- `Main.kt` starts the Storybook with `KorgeDisplayMode.CENTER_NO_CLIP`, so the stage fits 1280x900 in the middle of
+  the screen and draws around it; `actualVirtualBounds` is the screen. The game keeps its letterbox.
+- A view of the game that drags reads the drag in its own units (`localDXY`), so it follows the finger when zoomed,
+  e.g.: the battlefield.
+
 ### Platforms and startup
 
 The same bundle, and the same `main`, start the game or the Storybook. `isStorybookRequested()` chooses:
@@ -172,14 +196,16 @@ Besides the rules of every subdomain, three architecture tests keep the Storyboo
 
 ## Tests
 
-- **Unit tests** of the `Storybook` aggregate and of every use case, with `FakeStoryLocation`.
+- **Unit tests** of the `Storybook` aggregate and of every use case, with `FakeStoryLocation`, and of the `Viewport`.
 - **View tests** of the Storybook's own views, through their page objects (e.g.: `ControlsViewExtension`), and
-  `StorybookPresenterTest`, with fake views and `FakeStorybookPage`.
+  `StorybookPresenterTest`, with fake views and `FakeStorybookPage`. The zoom's fake the fingers, the trackpad and the
+  wheel (`pinch`, `magnify`, `scrollZoom` in `ZoomViewExtension`).
 - **The smoke test**, [`StorySmokeTest`](../../src/commonTest/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorySmokeTest.kt),
   on the JVM and JS: it renders every story of every binding with the game resources and texts, opens the catalogue of
   every binding (so an invalid default arg fails), checks the controls of every component fit
   `ControlsView.MAXIMUM_HEIGHT`, and lists every component and story id, so changing one is deliberate.
 - **The end-to-end test**, `StorybookEndToEndTest`: starts the Storybook on a link, and taps a story, a control, a
-  language and the shop, as a person would.
+  language, the shop and the zoom bar, as a person would.
 - **The page**, with the [`storybook` skill](../../.claude/skills/storybook/SKILL.md): the JS bundle in a headless
-  browser, which no automated test covers yet. Visual regression is left for later.
+  browser, which no automated test covers yet, also on a phone (`--screen 390x844 --touch`) and zoomed (`--zoom`).
+  Visual regression is left for later. A real pinch, on a phone or the trackpad of a Mac, is only checked by hand.
