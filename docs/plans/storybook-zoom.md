@@ -1,6 +1,6 @@
 # Plan: Storybook zoom
 
-> **Status:** to do.
+> **Status:** in progress: M1 is done.
 >
 > **Summary:** Let the person zoom in and out of the [Storybook](../architecture/storybook.md) and move around it, mostly
 > on a phone, where the whole 1280x900 Storybook is shrunk to the width of the screen today. The Storybook keeps its
@@ -40,7 +40,7 @@ that completes each milestone to **Done in**.
 
 | #  | Milestone                       | Done when                                                                                                                                                                  | Status | Done in |
 |----|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The whole screen and the bar    | The Storybook draws on the whole screen, looks the same at Fit, and the bar zooms in and out, to Fit and to the phone, kept across stories and when the screen changes size. | ⬜      |         |
+| M1 | The whole screen and the bar    | The Storybook draws on the whole screen, looks the same at Fit, and the bar zooms in and out, to Fit and to the phone, kept across stories and when the screen changes size. | ✅      | a4d6e39, 90c5fc6 |
 | M2 | Panning                         | Dragging the background, the bezel or a panel moves the Storybook within its limits; the sidebar and the phone screen keep their drags, and a pan is never a tap.             | ⬜      |         |
 | M3 | Pinch, the trackpad and the wheel | Two fingers zoom and pan on a touch screen, the Mac trackpad zooms in the desktop app, and the wheel with Ctrl zooms everywhere.                                             | ⬜      |         |
 | M4 | The docs and the skill          | The Storybook docs describe the zoom, and the `storybook` skill screenshots a story on a phone, at Fit and at Phone.                                                         | ⬜      |         |
@@ -57,6 +57,32 @@ Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Story
    `ZoomBarView` above it, at the bottom right of the screen. With view tests of both, and `StorybookEndToEndTest`
    tapping the bar.
 3. **The plan.** These commits, as built.
+
+### M1 as built
+
+The two commits are as listed, plus these decisions:
+
+- **A frame, not a clip**: drawn on the whole screen, the Storybook showed what the window used to crop, e.g.: the
+  stories of the sidebar scrolled above its list, above the Storybook on a portrait phone. A `ClipContainer` did not
+  hide them, as KorGE's clip does not crop their rounded rectangles (found in M2 of the
+  [story coverage](story-coverage.md#m2-as-built) already). `ZoomView` covers everything out of the 1280x900 Storybook
+  with four rectangles of the background, `STORYBOOK_BACKGROUND_COLOR` (in `Main.kt`, next to the window size), zoomed
+  and moved with it.
+- **The bar's size**: drawn `virtualPixelsPerInch / 96` times its size, at least once: 1 on a 1280x900 window, about 3.3
+  on a 390x844 phone, where it is about 340 points wide, its buttons 40 high.
+- **`-`, not `−`**: the font of the Storybook has no `−` (U+2212), which drew an empty button.
+- **Phone on a desktop window** is about 104%, and the phone is not in its middle: the Storybook can not be moved further
+  right than the left of the window. On a 390x844 portrait phone, it is 309%, the phone at its real size, in its middle.
+- **KorGE rounds the screen** to whole units, so at Fit the Storybook may be a fraction of a unit from the middle; the
+  tests allow half a unit.
+- **Taps on a phone are touches**: on a touch device KorGE ignores the mouse, so the bar did nothing when Playwright
+  clicked it on an emulated phone, and worked when tapped with touch events (`Input.dispatchTouchEvent`). The skill in
+  M4 has to tap with touches on a phone.
+- **The end-to-end test** zooms in, changes an arg, and checks the zoom is kept, then taps Phone and Fit. The pre-commit
+  hook regenerates the [dependency report](../architecture/dependencies.md), whose file count changed.
+- **The bar hides a corner**: at Fit on a 1280x900 window, it covers the bottom right of the Actions, where a long list
+  of actions ends; at Phone, the bottom of the phone screen. Noted, not changed: zooming in, or Phone, moves it away from
+  what is under it, except the very bottom of the phone.
 
 ### M2 commits
 
