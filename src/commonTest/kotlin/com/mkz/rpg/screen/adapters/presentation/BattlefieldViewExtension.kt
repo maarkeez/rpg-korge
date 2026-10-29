@@ -7,6 +7,7 @@ import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.ui.UIButton
 import korlibs.korge.view.Container
 import korlibs.korge.view.Image
+import korlibs.korge.view.View
 import korlibs.math.geom.Point
 
 // Page object of [BattlefieldView].
@@ -48,7 +49,12 @@ fun BattlefieldView.hasBattleUnitAt(
 fun BattlefieldView.battleUnitBitmapAt(
     row: Int,
     column: Int,
-): Bitmap? = (tileOrNull(row, column)?.findViewByName(BattlefieldView.BATTLE_UNIT) as? Image)?.bitmap?.base
+): Bitmap? =
+    tileOrNull(row, column)
+        ?.findViewByName(BattlefieldView.BATTLE_UNIT)
+        .layerImage()
+        ?.bitmap
+        ?.base
 
 /** A battle unit gliding between tiles: its name (e.g.: the swapping leader), and where its image is drawn, as a tile. */
 data class GlidingBattleUnit(
@@ -63,11 +69,11 @@ fun BattlefieldView.glidingBattleUnits(): List<GlidingBattleUnit> =
         emptyList()
     } else {
         movingBattleUnits.children.map { glidingUnit ->
-            val image = (glidingUnit as Container).firstChild!!
+            val sprite = (glidingUnit as Container).firstChild!!
             GlidingBattleUnit(
                 name = glidingUnit.name!!,
-                x = glidingUnit.x + image.x - BattlefieldView.TILE_SIZE / 2.0,
-                y = glidingUnit.y + image.y - BattlefieldView.TILE_SIZE / 2.0,
+                x = glidingUnit.x + sprite.x,
+                y = glidingUnit.y + sprite.y,
             )
         }
     }
@@ -100,7 +106,7 @@ private fun BattlefieldView.imagePlacementAt(
     column: Int,
     layerName: String,
 ): TilePlacement? =
-    (tileOrNull(row, column)?.findViewByName(layerName) as? Image)?.let { image ->
+    tileOrNull(row, column)?.findViewByName(layerName).layerImage()?.let { image ->
         TilePlacement(image.x, image.y, image.scaledWidth, image.scaledHeight)
     }
 
@@ -185,7 +191,12 @@ fun BattlefieldView.isTileVisible(
 fun BattlefieldView.terrainBitmapAt(
     row: Int,
     column: Int,
-): Bitmap? = (tile(row, column).findViewByName(BattlefieldView.TERRAIN) as? Image)?.bitmap?.base
+): Bitmap? =
+    tile(row, column)
+        .findViewByName(BattlefieldView.TERRAIN)
+        .layerImage()
+        ?.bitmap
+        ?.base
 
 /** How many battlefields are displayed in the viewport: one once a battlefield is displayed, however many times. */
 fun BattlefieldView.displayedBattlefieldCount(): Int = if (!isDisplayed) 0 else battlefieldGrid.parent!!.children.count { child -> child.name == BattlefieldView.BATTLEFIELD }
@@ -259,6 +270,16 @@ suspend fun ViewsForTesting.clickTile(
     row: Int,
     column: Int,
 ) = clickOn(battlefieldView.tile(row, column))
+
+// The image a layer of a tile draws: the layer itself when it is one, or the image of the view that draws it.
+private fun View?.layerImage(): Image? =
+    when (this) {
+        is Image -> this
+        is TerrainTileView -> terrainImage
+        is UnitSpriteView -> spriteImage
+        is TileHighlightView -> frameImage
+        else -> null
+    }
 
 private fun UIButton.hasLayer(layerName: String): Boolean = layerCount(layerName) > 0
 

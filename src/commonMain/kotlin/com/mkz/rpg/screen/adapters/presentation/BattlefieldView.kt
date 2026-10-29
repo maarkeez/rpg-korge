@@ -1,8 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import korlibs.image.bitmap.Bitmap
-import korlibs.image.bitmap.Bitmap32
-import korlibs.image.bitmap.slice
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.io.async.launchImmediately
@@ -18,7 +16,6 @@ import korlibs.korge.time.delay
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.view.Container
-import korlibs.korge.view.Image
 import korlibs.korge.view.SolidRect
 import korlibs.korge.view.View
 import korlibs.korge.view.addUpdater
@@ -132,36 +129,15 @@ open class BattlefieldView(
         const val TINT_ALPHA = 0.4
         val TINT_DURATION = 500.milliseconds
 
-        private const val TRANSITION_NAME_SEPARATOR = "_to_"
+        /** The scale at which the bitmap fills a tile, whatever the size of its art (16x16 or 32x32). */
+        internal fun tileFillingScale(bitmap: Bitmap): Double = TILE_SIZE.toDouble() / bitmap.width
     }
 
     private var delegate: Delegate? = null
 
-    // Each transition strip is split into its terrain tiles, being the first and last ones the pure terrain tiles.
-    private val transitionBitMaps: Map<String, List<Bitmap>> by lazy {
-        resourcesLoader
-            .bitmaps("terrain/transitions")
-            .filterKeys { fileName -> fileName.endsWith(".png") }
-            .map { (fileName, transitionBitmap) ->
-                fileName.removeSuffix(".png") to
-                    List(transitionBitmap.width / TILE_PIXEL_SIZE) { index ->
-                        transitionBitmap.crop(index * TILE_PIXEL_SIZE, 0, TILE_PIXEL_SIZE, TILE_PIXEL_SIZE)
-                    }
-            }.toMap()
-    }
-    private val terrainBitMaps: Map<String, Bitmap> by lazy {
-        buildMap {
-            transitionBitMaps.forEach { (transitionName, transitionTiles) ->
-                val (fromTerrainId, toTerrainId) = transitionName.split(TRANSITION_NAME_SEPARATOR)
-                put(fromTerrainId, transitionTiles.first())
-                put(toTerrainId, transitionTiles.last())
-            }
-        }
-    }
+    // The art of the terrain tiles, shared by all the tiles.
+    private val terrainBitmaps = TerrainBitmaps(resourcesLoader)
     internal lateinit var battlefieldAnimator: Animator
-
-    // White silhouette of each unit image, keyed by unit id.
-    private val flashBitMaps = mutableMapOf<String, Bitmap>()
 
     // The flashes blinking or waiting on each tile, stopped once its battle unit leaves it.
     private val flashes = mutableMapOf<TilePosition, MutableList<Job>>()
@@ -332,7 +308,12 @@ open class BattlefieldView(
         tileButton.x = position.column * TILE_SIZE.toDouble()
         tileButton.y = position.row * TILE_SIZE.toDouble()
         val terrainTile = battlefield.tiles.getValue(position)
-        tileButton.addImage(terrainTileBitmap(terrainTile.terrainId, terrainTile.transition), TERRAIN)
+        tileButton.addChild(
+            TerrainTileView(terrainBitmaps).apply {
+                name = TERRAIN
+                display(terrainTile.terrainId, terrainTile.transition)
+            },
+        )
         if (undimmedTiles?.contains(position) == false) tileButton.dim()
         tileButton.onClick {
             delegate?.tileSelected(position.row, position.column)
@@ -351,23 +332,16 @@ open class BattlefieldView(
         this.battlefield = battlefield
         positions.forEach { position ->
             val terrainTile = battlefield.tiles[position] ?: return@forEach
-            val terrainImage = createdTiles[position]?.findViewByName(TERRAIN) as? Image ?: return@forEach
-            terrainImage.bitmap = terrainTileBitmap(terrainTile.terrainId, terrainTile.transition).slice()
+            val terrainTileView = createdTiles[position]?.findViewByName(TERRAIN) as? TerrainTileView ?: return@forEach
+            terrainTileView.display(terrainTile.terrainId, terrainTile.transition)
         }
     }
 
+    /** The tile of the terrain, or of its transition to another terrain: what its [TerrainTileView] draws. */
     open fun terrainTileBitmap(
         terrainId: String,
         terrainTransition: TerrainTransition?,
-    ): Bitmap {
-        val transition = terrainTransition
-        return if (transition != null) {
-            val transitionName = "${transition.fromTerrainId}$TRANSITION_NAME_SEPARATOR${transition.toTerrainId}"
-            transitionBitMaps.getValue(transitionName)[transition.wangIndex]
-        } else {
-            terrainBitMaps[terrainId] ?: throw IllegalStateException("Terrain $terrainId bitmap not found")
-        }
-    }
+    ): Bitmap = terrainBitmaps.bitmap(terrainId, terrainTransition)
 
     internal val isDisplayed: Boolean
         get() = ::battlefieldGrid.isInitialized
@@ -410,7 +384,7 @@ open class BattlefieldView(
     ) {
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
         val tileButton = tile(row, column)
-        tileButton.addImage(unitBitmap, BATTLE_UNIT)
+        tileButton.addChild(UnitSpriteView(unitBitmap).apply { name = BATTLE_UNIT })
     }
 
     /** Displays the npc standing on the tile, as a battle unit. Unit: a recruitable npc is displayed as its unit. */
@@ -421,7 +395,7 @@ open class BattlefieldView(
         unitId: String?,
     ) {
         val npcBitmap = resourcesLoader.bitmapOrNull(unitId?.let { "unit/$it.png" } ?: "npc/$npcId.png") ?: return
-        tile(row, column).addImage(npcBitmap, NPC)
+        tile(row, column).addChild(UnitSpriteView(npcBitmap).apply { name = NPC })
     }
 
     /**
@@ -524,7 +498,7 @@ open class BattlefieldView(
         column: Int,
     ) {
         val tileButton = tile(row, column)
-        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_3.png"), SELECTION)
+        tileButton.addHighlight(TileHighlightView.Kind.MOVE_RANGE)
     }
 
     open fun displayPotentialCast(
@@ -533,7 +507,7 @@ open class BattlefieldView(
     ) {
         val tileButton = tile(row, column)
         if (tileButton.findViewByName(SELECTION) != null) return
-        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_2.png"), SELECTION)
+        tileButton.addHighlight(TileHighlightView.Kind.CAST_RANGE)
     }
 
     open fun displayTileSelection(
@@ -542,7 +516,7 @@ open class BattlefieldView(
     ) {
         val tileButton = tile(row, column)
         tileButton.findViewByName(SELECTION)?.removeFromParent()
-        tileButton.addImage(resourcesLoader.bitmap("battlefield/tile_selection_4.png"), SELECTION)
+        tileButton.addHighlight(TileHighlightView.Kind.SELECTED)
     }
 
     /**
@@ -617,10 +591,11 @@ open class BattlefieldView(
 
     private fun UIButton.dim() {
         if (findViewByName(DIM) != null) return
-        solidRect(Size(TILE_SIZE, TILE_SIZE), Colors.BLACK) {
-            name = DIM
-            alpha = DIM_ALPHA
-        }
+        addChild(TileDimView().apply { name = DIM })
+    }
+
+    private fun UIButton.addHighlight(kind: TileHighlightView.Kind) {
+        addChild(TileHighlightView(resourcesLoader, kind).apply { name = SELECTION })
     }
 
     /** Removes the npc standing on the tile, e.g.: once recruited. */
@@ -761,7 +736,7 @@ open class BattlefieldView(
         leader.removeFromParent()
     }
 
-    // A battle unit gliding from the tile at the position, drawn as on its tile: its image fills the tile, centered on it.
+    // A battle unit gliding from the tile at the position, drawn as on its tile: its image fills the tile.
     private fun Container.movingBattleUnit(
         bitmap: Bitmap,
         viewName: String,
@@ -772,13 +747,7 @@ open class BattlefieldView(
             name = viewName
             this.x = x
             this.y = y
-            image(bitmap) {
-                scale = tileFillingScale(bitmap)
-                smoothing = false
-                anchor(Anchor.CENTER)
-                this.x = TILE_SIZE / 2.0
-                this.y = TILE_SIZE / 2.0
-            }
+            addChild(UnitSpriteView(bitmap))
         }
 
     /** Tints the visible battlefield with the colour, fading it in and out, e.g.: when a turn starts. */
@@ -806,7 +775,6 @@ open class BattlefieldView(
         unitId: String,
     ) {
         val unitBitmap = resourcesLoader.bitmapOrNull("unit/$unitId.png") ?: return
-        val flashBitmap = flashBitMaps.getOrPut(unitId) { unitBitmap.whiteSilhouette() }
         followTile(row, column)
         val position = TilePosition(row, column)
         val tileButton = tile(row, column)
@@ -816,7 +784,7 @@ open class BattlefieldView(
                 launchImmediately {
                     previousFlashes.joinAll()
                     repeat(FLASH_COUNT) {
-                        tileButton.addImage(flashBitmap, FLASH)
+                        tileButton.addChild(TileFlashView(unitBitmap).apply { name = FLASH })
                         delay(FLASH_DURATION)
                         tileButton.findViewByName(FLASH)?.removeFromParent()
                         delay(FLASH_DURATION)
@@ -1011,32 +979,5 @@ open class BattlefieldView(
             smoothing = false
             centerOn(button)
         }
-    }
-
-    private fun tileFillingScale(bitmap: Bitmap): Double = TILE_SIZE.toDouble() / bitmap.width
-
-    private fun Bitmap.whiteSilhouette(): Bitmap {
-        val silhouette = Bitmap32(width, height, premultiplied = premultiplied)
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                if (getRgba(x, y).a > 0) silhouette.setRgba(x, y, Colors.WHITE)
-            }
-        }
-        return silhouette
-    }
-
-    private fun Bitmap.crop(
-        x: Int,
-        y: Int,
-        width: Int,
-        height: Int,
-    ): Bitmap {
-        val croppedBitmap = Bitmap32(width, height, premultiplied = premultiplied)
-        for (cropY in 0 until height) {
-            for (cropX in 0 until width) {
-                croppedBitmap.setRgba(cropX, cropY, getRgba(x + cropX, y + cropY))
-            }
-        }
-        return croppedBitmap
     }
 }

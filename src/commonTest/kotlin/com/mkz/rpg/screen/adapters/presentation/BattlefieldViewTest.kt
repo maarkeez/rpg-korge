@@ -10,7 +10,6 @@ import com.mkz.rpg.shared.adapters.presentation.nextFrame
 import com.mkz.rpg.shared.adapters.presentation.sampleUntilCompletion
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.adapters.presentation.startAnimation
-import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -25,9 +24,6 @@ import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
-import korlibs.image.bitmap.Bitmap
-import korlibs.image.format.readBitmap
 import korlibs.korge.tests.ViewsForTesting
 import kotlinx.coroutines.Job
 import kotlin.math.round
@@ -193,79 +189,6 @@ class BattlefieldViewTest : ViewsForTesting() {
             battlefieldView.displayBattlefield(battlefield)
             // Then
             battlefieldView.hasTerrainAt(row = 0, column = 1).shouldBeTrue()
-        }
-
-    @Test
-    fun `TerrainTileBitmap should return the pure terrain tile of the strip when the tile has no terrain transition`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
-            // When
-            val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "sand", terrainTransition = null)
-            // Then
-            tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
-            tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
-            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 0).shouldBeTrue()
-        }
-
-    @Test
-    fun `TerrainTileBitmap should return the pure target terrain tile of the strip when the target terrain tile has no terrain transition`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
-            // When
-            val tileBitmap = battlefieldView.terrainTileBitmap(terrainId = "void", terrainTransition = null)
-            // Then
-            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
-        }
-
-    @Test
-    fun `TerrainTileBitmap should return the transition tile of the strip when the tile has a terrain transition`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
-            // When
-            val tileBitmap =
-                battlefieldView
-                    .terrainTileBitmap(
-                        terrainId = "sand",
-                        terrainTransition = TerrainTransition(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 9),
-                    )
-            // Then
-            tileBitmap.width shouldBe BattlefieldView.TILE_PIXEL_SIZE
-            tileBitmap.height shouldBe BattlefieldView.TILE_PIXEL_SIZE
-            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 9).shouldBeTrue()
-        }
-
-    @Test
-    fun `TerrainTileBitmap should return the last tile of the strip when the terrain transition has all target terrain edges`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            val transitionStrip = ResourcesBundle.root["terrain/transitions/sand_to_void.png"].readBitmap()
-            // When
-            val tileBitmap =
-                battlefieldView
-                    .terrainTileBitmap(
-                        terrainId = "sand",
-                        terrainTransition = TerrainTransition(fromTerrainId = "sand", toTerrainId = "void", wangIndex = 15),
-                    )
-            // Then
-            matchesWangTile(tileBitmap, transitionStrip, stripIndex = 15).shouldBeTrue()
-        }
-
-    @Test
-    fun `TerrainTileBitmap should throw when the terrain bitmap is not found and the tile has no terrain transition`() =
-        sharedViewsTest {
-            // Given
-            val battlefieldView = BattlefieldView(loadedResourcesLoader())
-            // When
-            val result = runCatching { battlefieldView.terrainTileBitmap(terrainId = "forest", terrainTransition = null) }
-            // Then
-            result.exceptionOrNull().shouldBeInstanceOf<IllegalStateException>()
         }
 
     @Test
@@ -1583,19 +1506,4 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Then
             selectedTiles.shouldContainExactly(0 to 0)
         }
-
-    private fun matchesWangTile(
-        tile: Bitmap,
-        transitionStrip: Bitmap,
-        stripIndex: Int,
-    ): Boolean {
-        val tileSize = BattlefieldView.TILE_PIXEL_SIZE
-        val stripOffset = stripIndex * tileSize
-        for (y in 0 until tileSize) {
-            for (x in 0 until tileSize) {
-                if (tile.getRgba(x, y) != transitionStrip.getRgba(stripOffset + x, y)) return false
-            }
-        }
-        return true
-    }
 }

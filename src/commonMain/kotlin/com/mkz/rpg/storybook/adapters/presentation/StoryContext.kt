@@ -57,10 +57,13 @@ class StoryContext(
 
     /** Every terrain that has a tile, in alphabetical order, e.g.: the options of a pick control of a terrain. */
     fun terrainIds(): List<String> =
-        imageIds(TERRAIN_TRANSITIONS_DIRECTORY)
+        terrainTransitionIds()
             .flatMap { transition -> transition.split(TRANSITION_NAME_SEPARATOR) }
             .distinct()
             .sorted()
+
+    /** Every transition between two terrains that has a strip of tiles, e.g.: `sand_to_grass`, in alphabetical order. */
+    fun terrainTransitionIds(): List<String> = imageIds(TERRAIN_TRANSITIONS_DIRECTORY)
 
     private fun imageIds(directory: String): List<String> =
         resourcesLoader
