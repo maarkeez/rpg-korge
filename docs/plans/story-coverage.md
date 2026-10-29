@@ -1,13 +1,14 @@
 # Plan: Story coverage
 
-> **Status:** in progress: M1, M2, M3, M4 and M5 are done.
+> **Status:** done: M1 to M6 are done. See [Storybook](../architecture/storybook.md#architecture-rules) and [How to add a story](../testing/how-to-add-a-story.md).
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
 > allows to have none leave its list, one area at a time, and the list is then removed: the rule becomes "every view
 > has its stories", with no exception. The views that take domain data are moved to view data first, and
 > `BattlefieldView` is split by layer, so every story feeds its view plain data, as the Storybook requires. A new
-> architecture test then keeps the views free of the domain.
+> architecture test, [`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt),
+> then keeps the views free of the domain and the use cases.
 
 ## Decisions
 
@@ -38,7 +39,7 @@ that completes each milestone to **Done in**.
 | M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ✅      | 2ad229d |
 | M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ✅      | 89f3c61, 32dd3ae, fec7a21 |
 | M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ✅      | 9a24220, b9c3f9c, 1370cc7 |
-| M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ⬜      |         |
+| M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ✅      | 5d1c8e1 |
 
 Each milestone also adds its component and story ids to `StorySmokeTest`, registers its bindings in
 `StorybookApi.STORY_BINDINGS` (grouped as the sidebar should list them), regenerates the
@@ -311,6 +312,34 @@ The four commits are as listed, plus these decisions:
    `.domain` or `.usecases` package; the docs updated.
 2. **The plan.** These commits, and the status set to done.
 
+### M6 as built
+
+The two commits are as listed, plus these decisions:
+
+- **`ViewArchitectureTest`** is a new test class next to the other architecture tests, with Konsist as them, and one
+  rule: no view of the game imports a name matching `com.mkz.rpg.<subdomain>.domain.*` or `.usecases.*` (the imports of
+  the file the view is declared in). It has no allowlist, and fails naming each import and its view.
+- **`GameViews`** (internal, in the architecture tests) holds how the views are found, moved out of
+  `StoryCoverageArchitectureTest` so both tests share it instead of copying it: the top-level classes of an
+  `adapters.presentation` package, but the presenters and the Storybook's own views, extending a KorGE view directly or
+  through another class of the project. `StoryCoverageArchitectureTest` keeps the story bindings and the registry rule.
+- **`viewsWithoutStories`** and `should only allow the views that have no stories yet...` are deleted, with the
+  `- viewsWithoutStories` of the coverage test: the rule is "every view has its stories". The Storybook, package structure
+  and how-to docs say so, with the new rule, and step 5 of the how-to no longer asks to take the view out of a list.
+  [Plan: Storybook](storybook.md), done, keeps its allowlist as built, with a pointer here.
+- **The guard found one violation**: `MapBuilderHudView` imported `MapBuilder` for `DEFAULT_SIZE`, `MINIMUM_SIZE` and
+  `MAXIMUM_SIZE`, which M3 to M5 missed because only the Storybook's imports and the views taking domain Dtos were
+  looked at. It is fixed as M4 and M5 did: `displaySize` takes the `allowedSizes` (an `IntRange`), which
+  `MapBuilderPresenter` passes from the domain's sizes, and the view starts with no size, drawing nothing until the
+  presenter displays one (it showed `16` before the presenter did). The view test has a case with other sizes (4 to 20),
+  and the presenter test checks the sizes it passes. The story still writes its own 1 to 128 (M3 decision).
+- **Verified by breaking it**: a `com.mkz.rpg.battle.domain.Battle` import added to `ManaBarView`, which extends
+  `BarView`, makes the test fail with `com.mkz.rpg.battle.domain.Battle (ManaBarView)`, and it is reverted. The test also
+  failed on the real `MapBuilderHudView` import above before its fix.
+- **`dependencies.html`** was regenerated: one import of `mapBuilder.domain` fewer from the screen (the view's), the presenter keeps its own.
+- **Not changed**: `StorySmokeTest`, the bindings and the story ids. The scenes (`BattleScene`, `MapBuilderScene`,
+  `MenuScene`) and the presenters are not views, and keep importing the domain.
+
 ## Reference
 
 The names are proposals: keep them unless an architecture test or a better name found while building asks otherwise,
@@ -338,4 +367,4 @@ and update this section when they change.
 The views are found as `StoryCoverageArchitectureTest` finds them: the top-level classes of an
 `adapters.presentation` package extending a KorGE view, directly or through another view of the game, but the
 presenters. None of them MUST import a `com.mkz.rpg.<subdomain>.domain` or `.usecases` package. The presenters keep
-mapping the domain to the view data. With no view importing the domain by M6, the rule needs no allowlist.
+mapping the domain to the view data. With no view importing the domain from M6 on, the rule has no allowlist.
