@@ -1,6 +1,6 @@
 # Plan: Storybook zoom
 
-> **Status:** in progress: M1 and M2 are done.
+> **Status:** in progress: M1, M2 and M3 are done.
 >
 > **Summary:** Let the person zoom in and out of the [Storybook](../architecture/storybook.md) and move around it, mostly
 > on a phone, where the whole 1280x900 Storybook is shrunk to the width of the screen today. The Storybook keeps its
@@ -42,7 +42,7 @@ that completes each milestone to **Done in**.
 |----|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The whole screen and the bar    | The Storybook draws on the whole screen, looks the same at Fit, and the bar zooms in and out, to Fit and to the phone, kept across stories and when the screen changes size. | ✅      | a4d6e39, 90c5fc6 |
 | M2 | Panning                         | Dragging the background, the bezel or a panel moves the Storybook within its limits; the sidebar and the phone screen keep their drags, and a pan is never a tap.             | ✅      | 86b3b64 |
-| M3 | Pinch, the trackpad and the wheel | Two fingers zoom and pan on a touch screen, the Mac trackpad zooms in the desktop app, and the wheel with Ctrl zooms everywhere.                                             | ⬜      |         |
+| M3 | Pinch, the trackpad and the wheel | Two fingers zoom and pan on a touch screen, the Mac trackpad zooms in the desktop app, and the wheel with Ctrl zooms everywhere.                                             | ✅      | 7d17e68 |
 | M4 | The docs and the skill          | The Storybook docs describe the zoom, and the `storybook` skill screenshots a story on a phone, at Fit and at Phone.                                                         | ⬜      |         |
 
 Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Storybook with the
@@ -118,6 +118,30 @@ The commit is as listed, plus these decisions:
 2. **Ctrl and the wheel.** The wheel with Ctrl zooms around the pointer; without Ctrl it scrolls the sidebar as before.
    With view tests.
 3. **The plan.** These commits, as built, and what the pinch looked like on a phone and on a Mac.
+
+### M3 as built
+
+The pinch and the wheel are one commit, as they share most of `ZoomView`, plus these decisions:
+
+- **Two fingers** are read from KorGE's touch events (`touch { updateAll }`), anywhere on the screen, also on the screen
+  of the phone. Each event zooms by how much further apart they are than at the last one, around where their middle
+  was, then pans by how far it moved: zooming first, as the Storybook can not be panned at Fit, keeps the point between
+  the fingers between them.
+- **A pinch ends the drag's pan**: KorGE turns the first finger into a drag only while it is the only one, and sends no
+  drag while two pinch; the finger left once the other one is lifted would make the drag jump. A pinch since the drag
+  started stops it panning.
+- **The trackpad of a Mac** zooms by `1 + amount` of each `onMagnify`, around the pointer.
+- **A notch of the wheel** is 5 pixels with Ctrl: a browser scales the wheel by 0.05, so a notch of Chrome (100) zooms as
+  much as `+`. The desktop app scrolls 1 per notch, 0.25 on a Mac, which zooms about 5% and 1%: KorGE's units of the
+  wheel differ between the platforms. Without Ctrl, the wheel scrolls the sidebar as before; with it, the sidebar does
+  not scroll.
+- **Checked** in a headless Chrome: a pinch of two touches (`Input.dispatchTouchEvent`) spreading three times zoomed to
+  300% around them on a 390x844 phone, and Ctrl with a notch of the wheel to 125% on a 1280x900 window, without the
+  browser zooming the page. A real pinch on a phone and the trackpad of a Mac are left to check by hand: neither can be
+  done from a headless browser.
+- **A quick pinch may tap**: in a pinch shorter than KorGE's 400ms to tap, the first finger's drag ends where it
+  started, as KorGE does not move it while two fingers are down, so it taps the view under it, e.g.: a button of the
+  shop. Noted, not fixed: a person's pinch is usually longer, and it would need to cancel KorGE's tap.
 
 ### M4 commits
 
