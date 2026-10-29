@@ -1,7 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.STORYBOOK_BACKGROUND_COLOR
+import korlibs.korge.input.onMagnify
 import korlibs.korge.input.onMouseDrag
+import korlibs.korge.input.onScroll
+import korlibs.korge.input.touch
 import korlibs.korge.view.Container
 import korlibs.korge.view.View
 import korlibs.korge.view.addTo
@@ -13,13 +16,15 @@ import korlibs.korge.view.solidRect
 import korlibs.math.geom.Point
 import korlibs.math.geom.Rectangle
 import korlibs.math.geom.Size
+import kotlin.math.pow
 
 /**
  * The Storybook, zoomed and placed on the screen as its [Viewport] says, framed by the background, and the [ZoomBarView]
  * floating at the bottom right of the screen, not zoomed with it, as large on a phone as on a 1280x900 window. Fit is the
  * whole Storybook, as KorGE shows it; Phone zooms so the [phoneArea] fills the screen. The zoom is kept until the screen
- * changes size, which it follows. Zoomed in, a drag that does not start on one of the [dragOwners] moves it. It is placed
- * at the origin of the stage, so the screen is KorGE's `actualVirtualBounds`.
+ * changes size, which it follows. Zoomed in, a drag that does not start on one of the [dragOwners] moves it. Two fingers,
+ * the trackpad of a Mac and the wheel with Ctrl zoom it too. It is placed at the origin of the stage, so the screen is
+ * KorGE's `actualVirtualBounds`.
  */
 class ZoomView(
     storybookSize: Size,
@@ -30,6 +35,10 @@ class ZoomView(
 
         // As wide as the tallest screen the Storybook could be fitted in, in its units.
         private const val FRAME_WIDTH = 100_000.0
+
+        // How far a notch of a mouse wheel scrolls in a browser, which KorGE scales by 0.05: with Ctrl, it zooms as much as
+        // - or +. The desktop app scrolls 1 per notch, 0.25 on a Mac, which zooms less: a Mac pinches its trackpad instead.
+        private const val WHEEL_NOTCH_PIXELS = 5.0
 
         // The pixels per inch of a desktop screen, where the bar is drawn at its size.
         private const val DESKTOP_PIXELS_PER_INCH = 96.0
@@ -56,6 +65,12 @@ class ZoomView(
     // How much larger than its size the bar is drawn, so it keeps its size on the screen.
     private var barScale = 1.0
 
+    // While two fingers are down: their middle and how far apart they were at the last touch event.
+    private var pinch: Pair<Point, Double>? = null
+
+    // Whether two fingers pinched since the drag started.
+    private var hasPinched = false
+
     init {
         frame.solidRect(Size(storybookSize.width + 2 * FRAME_WIDTH, FRAME_WIDTH), STORYBOOK_BACKGROUND_COLOR).position(-FRAME_WIDTH, -FRAME_WIDTH)
         frame.solidRect(Size(storybookSize.width + 2 * FRAME_WIDTH, FRAME_WIDTH), STORYBOOK_BACKGROUND_COLOR).position(-FRAME_WIDTH, storybookSize.height)
@@ -64,6 +79,8 @@ class ZoomView(
         zoomBarView.addTo(this)
         zoomBarView.setDelegate(this)
         // A drag pans by how far it moved since its last event. The drag is in the units of the stage, as the view.
+        // KorGE drags with the first finger only while it is the only one, so once two fingers pinch, the drag no longer
+        // pans: the finger left when the other one is lifted would make it jump. KorGE sends no drag while they pinch.
         var isPanning = false
         var lastDrag = Point.ZERO
         onMouseDrag { event ->
@@ -72,11 +89,44 @@ class ZoomView(
                 val startView = storybook.hitTest(Point(event.sx, event.sy))
                 isPanning = dragOwners.none { owner -> startView?.hasAncestor(owner) == true }
                 lastDrag = Point.ZERO
+                hasPinched = false
             }
+            if (hasPinched) isPanning = false
             if (!isPanning) return@onMouseDrag
             val drag = Point(event.dx, event.dy)
             viewport.panBy(drag - lastDrag)
             lastDrag = drag
+            show()
+        }
+        // Two fingers zoom by how much further apart they are, around their middle, and pan as it moves, anywhere.
+        touch {
+            updateAll { touches ->
+                val fingers = touches.infos
+                if (fingers.size < 2) {
+                    pinch = null
+                    return@updateAll
+                }
+                val middle = (fingers[0].global + fingers[1].global) / 2.0
+                val distance = Point.distance(fingers[0].global, fingers[1].global)
+                // Zoomed first, as the Storybook can not be panned at Fit.
+                pinch?.let { (lastMiddle, lastDistance) ->
+                    if (lastDistance > 0) viewport.zoomTo(viewport.zoom * distance / lastDistance, around = lastMiddle)
+                    viewport.panBy(middle - lastMiddle)
+                    show()
+                }
+                pinch = middle to distance
+                hasPinched = true
+            }
+        }
+        // The trackpad of a Mac, in the desktop app: a pinch zooms around the pointer, by how much it magnified.
+        onMagnify { gesture ->
+            viewport.zoomTo(viewport.zoom * (1 + gesture.amount), around = gesture.views.globalMousePos)
+            show()
+        }
+        // The wheel with Ctrl, which is also how a desktop browser sends a pinch of the trackpad, zooms around the pointer.
+        onScroll { event ->
+            if (!event.isCtrlDown) return@onScroll
+            viewport.zoomTo(viewport.zoom * Viewport.ZOOM_STEP.pow(-event.scrollDeltaYPixels / WHEEL_NOTCH_PIXELS), around = event.currentPosGlobal)
             show()
         }
         onStageResized { _, _ ->

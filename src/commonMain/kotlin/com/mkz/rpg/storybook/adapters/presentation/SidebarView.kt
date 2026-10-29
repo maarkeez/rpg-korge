@@ -86,7 +86,8 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
             if (event.start) dragStartY = catalogue.y
             scrollTo(dragStartY + event.localDXY(catalogue).y)
         }
-        onScroll { event -> scrollTo(catalogue.y - event.scrollDeltaYPixels) }
+        // With Ctrl, the wheel zooms the Storybook instead.
+        onScroll { event -> if (!event.isCtrlDown) scrollTo(catalogue.y - event.scrollDeltaYPixels) }
         // Over the list, as the rounded rectangles of the stories are not clipped: they would show over the title.
         solidRect(Size(WIDTH, TITLE_HEIGHT), BACKGROUND_COLOR)
         title = text("Storybook", textSize = 24.0, color = Colors.WHITE).position(PADDING, PADDING)

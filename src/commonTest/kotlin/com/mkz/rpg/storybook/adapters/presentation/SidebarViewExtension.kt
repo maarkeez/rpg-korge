@@ -49,11 +49,15 @@ fun SidebarView.visibleStoryNames(): List<String> {
     return storyRows.filter { row -> row.getGlobalBounds().let { rowBounds -> rowBounds.top >= bounds.top && rowBounds.bottom <= bounds.bottom } }.map { row -> row.label.text }
 }
 
-/** Turns the mouse wheel by [pixels] over the sidebar, positive to scroll down. The sidebar must be on the stage. */
+/**
+ * Turns the mouse wheel by [pixels] over the sidebar, positive to scroll down, holding Ctrl when [ctrl]. The sidebar must
+ * be on the stage.
+ */
 @Suppress("DEPRECATION")
 suspend fun ViewsForTesting.scrollSidebar(
     sidebarView: SidebarView,
     pixels: Double,
+    ctrl: Boolean = false,
 ) {
     val center = sidebarView.getGlobalBounds().center
     mouseMoveTo(center.x, center.y)
@@ -65,6 +69,7 @@ suspend fun ViewsForTesting.scrollSidebar(
             y = mousePosition.y.toInt(),
             scrollDeltaY = pixels.toFloat(),
             scrollDeltaMode = MouseEvent.ScrollDeltaMode.PIXEL,
+            isCtrlDown = ctrl,
         ),
     )
     nextFrame()

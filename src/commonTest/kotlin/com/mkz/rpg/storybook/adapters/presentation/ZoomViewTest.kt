@@ -213,4 +213,90 @@ class ZoomViewTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE) {
             // Then
             taps shouldBe 1
         }
+
+    @Test
+    fun `Pinch should zoom the Storybook around the fingers by how much further apart they are`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            pinch(from = Point(540, 450) to Point(740, 450), to = Point(440, 450) to Point(840, 450))
+            // Then
+            zoomView.zoom() shouldBe (2.0 plusOrMinus 0.000001)
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-640.0, -450.0, 2560.0, 1800.0))
+            zoomView.zoomBar().zoomText() shouldBe "200%"
+        }
+
+    @Test
+    fun `Pinch should keep the point between the fingers between them when they move apart and aside`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            pinch(from = Point(540, 450) to Point(740, 450), to = Point(540, 450) to Point(940, 450))
+            // Then the middle of the Storybook, between the fingers, is still between them.
+            zoomView.zoom() shouldBe (2.0 plusOrMinus 0.000001)
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-540.0, -450.0, 2560.0, 1800.0))
+        }
+
+    @Test
+    fun `Pinch should not pan when a drag goes on with one finger after it`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            clickZoomIn(zoomView.zoomBar())
+            mouseMoveTo(640.0, 450.0)
+            mouseDown()
+            pinch(from = Point(640, 450) to Point(740, 450), to = Point(640, 450) to Point(740, 450))
+            // When
+            mouseMoveTo(740.0, 500.0)
+            mouseUp()
+            // Then
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-160.0, -112.5, 1600.0, 1125.0))
+        }
+
+    @Test
+    fun `Magnify should zoom the Storybook around the pointer when the trackpad of a Mac is pinched`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            magnify(at = Point(100, 100), amount = 1.0)
+            // Then
+            zoomView.zoom() shouldBe 2.0
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-100.0, -100.0, 2560.0, 1800.0))
+        }
+
+    @Test
+    fun `Scroll should zoom the Storybook around the pointer as much as + for a notch of the wheel when Ctrl is held`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            scrollZoom(at = Point(100, 100), pixels = -5.0, ctrl = true)
+            // Then
+            zoomView.zoom() shouldBe (1.25 plusOrMinus 0.000001)
+            zoomView.storybookArea().shouldBeAbout(Rectangle(-25.0, -25.0, 1600.0, 1125.0))
+            // When
+            scrollZoom(at = Point(100, 100), pixels = 5.0, ctrl = true)
+            // Then
+            zoomView.zoom() shouldBe (1.0 plusOrMinus 0.000001)
+        }
+
+    @Test
+    fun `Scroll should not zoom the Storybook when Ctrl is not held`() =
+        sharedViewsTest {
+            // Given
+            val zoomView = newZoomView()
+            addChild(zoomView)
+            // When
+            scrollZoom(at = Point(100, 100), pixels = -5.0, ctrl = false)
+            // Then
+            zoomView.zoom() shouldBe 1.0
+        }
 }

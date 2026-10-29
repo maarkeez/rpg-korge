@@ -184,6 +184,19 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Scroll should not move the list when Ctrl is held, which zooms the Storybook instead`() =
+        sharedViewsTest {
+            // Given
+            val sidebarView = newSidebarView()
+            addChild(sidebarView)
+            sidebarView.display(manyComponents)
+            // When
+            scrollSidebar(sidebarView, 300.0, ctrl = true)
+            // Then
+            sidebarView.scrollOffset() shouldBe 0.0
+        }
+
+    @Test
     fun `Drag should move the list with the finger when the Storybook is zoomed`() =
         sharedViewsTest {
             // Given

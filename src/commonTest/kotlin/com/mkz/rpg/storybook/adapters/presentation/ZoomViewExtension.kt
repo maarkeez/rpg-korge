@@ -4,6 +4,11 @@ import com.mkz.rpg.STORYBOOK_WINDOW_SIZE
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.descendants
 import com.mkz.rpg.shared.adapters.presentation.isShown
+import com.mkz.rpg.shared.adapters.presentation.nextFrame
+import korlibs.event.GestureEvent
+import korlibs.event.MouseEvent
+import korlibs.event.Touch
+import korlibs.event.TouchEvent
 import korlibs.korge.input.onClick
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
@@ -71,3 +76,67 @@ fun ZoomView.addTappableView(
     area: Rectangle,
     onTapped: () -> Unit,
 ): View = storybook.solidRect(area.size).position(area.topLeft).also { view -> view.onClick { onTapped() } }
+
+/**
+ * Pinches with two fingers, from the points of [from] to those of [to], on the stage, in a few moves, as a person does,
+ * then lifts them both.
+ */
+suspend fun ViewsForTesting.pinch(
+    from: Pair<Point, Point>,
+    to: Pair<Point, Point>,
+    moves: Int = 4,
+) {
+    gameWindow.dispatch(touchEvent(TouchEvent.Type.START, from, Touch.Status.ADD))
+    nextFrame()
+    for (move in 1..moves) {
+        val ratio = move.toDouble() / moves
+        val fingers = from.first + (to.first - from.first) * ratio to from.second + (to.second - from.second) * ratio
+        gameWindow.dispatch(touchEvent(TouchEvent.Type.MOVE, fingers, Touch.Status.KEEP))
+        nextFrame()
+    }
+    gameWindow.dispatch(touchEvent(TouchEvent.Type.END, to, Touch.Status.REMOVE))
+    nextFrame()
+}
+
+private fun touchEvent(
+    type: TouchEvent.Type,
+    fingers: Pair<Point, Point>,
+    status: Touch.Status,
+) = TouchEvent(type).apply {
+    startFrame(type)
+    touch(0, fingers.first, status)
+    touch(1, fingers.second, status)
+    endFrame()
+}
+
+/** Pinches the trackpad of a Mac with the pointer [at] a point of the stage, magnifying by [amount], e.g.: 1 to double. */
+suspend fun ViewsForTesting.magnify(
+    at: Point,
+    amount: Double,
+) {
+    mouseMoveTo(at.x, at.y)
+    gameWindow.dispatch(GestureEvent(type = GestureEvent.Type.MAGNIFY, amountX = amount.toFloat(), amountY = amount.toFloat()))
+    nextFrame()
+}
+
+/** Turns the mouse wheel [at] a point of the stage by [pixels], positive to scroll down, holding Ctrl when [ctrl]. */
+@Suppress("DEPRECATION")
+suspend fun ViewsForTesting.scrollZoom(
+    at: Point,
+    pixels: Double,
+    ctrl: Boolean,
+) {
+    mouseMoveTo(at.x, at.y)
+    val mousePosition = views.windowMousePos
+    gameWindow.dispatch(
+        MouseEvent(
+            type = MouseEvent.Type.SCROLL,
+            x = mousePosition.x.toInt(),
+            y = mousePosition.y.toInt(),
+            scrollDeltaY = pixels.toFloat(),
+            scrollDeltaMode = MouseEvent.ScrollDeltaMode.PIXEL,
+            isCtrlDown = ctrl,
+        ),
+    )
+    nextFrame()
+}
