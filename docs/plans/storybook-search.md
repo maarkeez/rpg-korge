@@ -1,6 +1,6 @@
 # Plan: Storybook search
 
-> **Status:** in progress.
+> **Status:** done.
 >
 > **Summary:** Let the person find a story of the [Storybook](../architecture/storybook.md) by typing, instead of
 > scrolling the whole sidebar and reading every name: about 46 components and 178 stories today. A search box under the
@@ -37,7 +37,7 @@ that completes each milestone to **Done in**.
 | #  | Milestone              | Done when                                                                                                                                                                                       | Status | Done in |
 |----|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The search             | Typing in the box under the title lists only the stories that match, `×` empties it, `No stories match` shows when none does, and the story on show is kept. Unit, view and end-to-end tested. | ✅      | 07f1c8b, 068e102 |
-| M2 | The docs and the check | The Storybook docs describe the search, and the page is checked with the `storybook` skill, typing a search.                                                                                    | ⬜      |         |
+| M2 | The docs and the check | The Storybook docs describe the search, and the page is checked with the `storybook` skill, typing a search.                                                                                    | ✅      | 56d13f1 |
 
 Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Storybook with the
 [`storybook` skill](../../.claude/skills/storybook/SKILL.md).
@@ -76,6 +76,17 @@ The commits are as listed, plus these decisions:
 
 1. **The docs.** [Storybook](../architecture/storybook.md) (what it shows, and how it is built) describes the search.
 2. **The plan.** The check with the `storybook` skill, and the status set to done.
+
+### M2 as built
+
+The docs are one commit, which also changes the [`storybook` skill](../../.claude/skills/storybook/SKILL.md), though the
+plan left it as it was:
+
+- **The skill** pointed to `Shop / Sell` at (48, 507), no longer right since the list starts under the search: it is at
+  (48, 789) with it on show. The skill now says where the search and its `×` are, and that the first story listed after
+  a search is always at (48, 159), so a script finds a story by typing its name, wherever it is in the list.
+- **Checked** with the skill: `--click 114,70 --type 'shop sell' --click 48,159` shows **Screen / Shop › Sell**,
+  highlighted, with the search kept.
 
 ## Reference
 
