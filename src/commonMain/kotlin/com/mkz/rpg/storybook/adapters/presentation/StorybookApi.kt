@@ -57,6 +57,7 @@ class StorybookApi(
                 GiveItemViewStories,
                 InventoryFullViewStories,
                 PlayerCallToActionViewStories,
+                BattlefieldViewStories,
                 TerrainTileViewStories,
                 TileHighlightViewStories,
                 TileDimViewStories,

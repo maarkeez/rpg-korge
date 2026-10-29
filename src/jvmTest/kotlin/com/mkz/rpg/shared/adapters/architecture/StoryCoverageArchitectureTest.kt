@@ -18,11 +18,8 @@ class StoryCoverageArchitectureTest {
     // extends `BarView`, which extends `UIContainer`). Konsist only knows the parents declared in the project.
     private val korgeViews = setOf("View", "Container", "FixedSizeContainer", "UIView", "UIContainer", "UIButton", "Image", "SolidRect", "RoundRect", "Text", "UIText")
 
-    // The views that have no stories yet. Remove a view once it has its stories.
-    private val viewsWithoutStories =
-        setOf(
-            "BattlefieldView",
-        )
+    // The views that have no stories yet: none, every view has its stories. Remove a view once it has its stories.
+    private val viewsWithoutStories = emptySet<String>()
 
     private val classes = Konsist.scopeFromProduction().classes()
     private val parentsByClass: Map<String, List<String>> = classes.associate { declaration -> declaration.name to declaration.parents.map { parent -> parent.name } }
