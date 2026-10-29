@@ -1,6 +1,6 @@
 # Plan: Storybook search
 
-> **Status:** to do.
+> **Status:** in progress.
 >
 > **Summary:** Let the person find a story of the [Storybook](../architecture/storybook.md) by typing, instead of
 > scrolling the whole sidebar and reading every name: about 46 components and 178 stories today. A search box under the
@@ -36,7 +36,7 @@ that completes each milestone to **Done in**.
 
 | #  | Milestone              | Done when                                                                                                                                                                                       | Status | Done in |
 |----|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The search             | Typing in the box under the title lists only the stories that match, `×` empties it, `No stories match` shows when none does, and the story on show is kept. Unit, view and end-to-end tested. | ⬜      |         |
+| M1 | The search             | Typing in the box under the title lists only the stories that match, `×` empties it, `No stories match` shows when none does, and the story on show is kept. Unit, view and end-to-end tested. | ✅      | 07f1c8b, 068e102 |
 | M2 | The docs and the check | The Storybook docs describe the search, and the page is checked with the `storybook` skill, typing a search.                                                                                    | ⬜      |         |
 
 Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Storybook with the
@@ -51,6 +51,26 @@ Each milestone runs `jvmTest`, `jsTest` and `lintKotlin`, and looks at the Story
    `CatalogueSearch` finds as the text changes, or `No stories match`. With view tests through `SidebarViewExtension`,
    and `StorybookEndToEndTest` typing a search and tapping a story listed.
 3. **The plan.** These commits, as built.
+
+### M1 as built
+
+The commits are as listed, plus these decisions:
+
+- **`CatalogueSearch` is an object**, `search(components, text)`, as it keeps nothing: `SidebarView` keeps the
+  components displayed, and searches them again on every change of the text and when they are displayed again.
+- **The box** is a `UITextInput`, as the text controls, 196 wide and `StorybookButton.HEIGHT` high, at the top of what
+  was the list, with the `×`, a `StorybookButton`, on its right: the box keeps its width whether the `×` shows or not.
+  The list starts 40 lower, under them, and the background over the list covers the title and the search, as it did
+  the title. `Search stories` is a grey `Text` inside the input, which taps do not hit, so tapping it focuses the input.
+- **The story on show** is highlighted again whenever the list is listed again, as `display` no longer forgets it: the
+  sidebar keeps the story selected last.
+- **A tap scrolled the list back**: the list scrolled by how far the finger was from where the drag started, so the end
+  of a tap, which KorGE also sends as a drag, put it back where the tap started, undoing the scroll of the `×` to the
+  story on show. The list now scrolls by how far the finger moved since the previous drag event, so a tap does not move
+  it; dragging past an end and back moves it as soon as the finger turns, instead of once it is back.
+- **Checked** with the [`storybook` skill](../../.claude/skills/storybook/SKILL.md) at 1280x900: typing `shop sell`
+  lists the four **Sell** stories of **Screen / Shop**, `dragon` says `No stories match`, and the `×` lists them all
+  again, scrolled to the story on show. Typing on a phone is left to check by hand.
 
 ### M2 commits
 
