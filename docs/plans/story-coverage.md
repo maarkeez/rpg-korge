@@ -1,6 +1,6 @@
 # Plan: Story coverage
 
-> **Status:** in progress: M1, M2, M3 and M4 are done.
+> **Status:** in progress: M1, M2, M3, M4 and M5 are done.
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
@@ -37,7 +37,7 @@ that completes each milestone to **Done in**.
 | M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ✅      | 56aeba0, 343b4c8, 9d48c7d, 9c5bd59 |
 | M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ✅      | 2ad229d |
 | M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ✅      | 89f3c61, 32dd3ae, fec7a21 |
-| M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ⬜      |         |
+| M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ✅      | 9a24220, b9c3f9c, 1370cc7 |
 | M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ⬜      |         |
 
 Each milestone also adds its component and story ids to `StorySmokeTest`, registers its bindings in
@@ -218,17 +218,91 @@ The four commits are as listed, plus these decisions:
 
 ### M5 commits
 
-The split is grilled again when M5 starts, with `BattlefieldView` as it is then. A starting point:
+The split was grilled again when M5 started, with `BattlefieldView` as it was then. As built:
 
-1. **The battlefield on view data.** What `displayBattlefield` needs of `Battlefield.Dto` (the tiles, their terrain and
-   transitions) as view data in `screen.adapters.presentation`, mapped by `BattlefieldPresenter`, and a view
-   `Position` for the tiles. No change to what the game shows.
-2. **The split.** The terrain tile, the tile overlays and the unit sprite out of `BattlefieldView`, as views of their
-   own, with view tests. `BattlefieldView` keeps the tile window, the camera, the trail and the input.
-3. **Their stories.** One binding per view split, and `BattlefieldView` with a tiny fixed map (a few tiles of each
-   terrain, a battle unit, an NPC, a building and loot), with stories for a move range, a cast range, a selected tile
-   and a health preview, logging `tileSelected`.
+1. **The battlefield on view data.** `BattlefieldTerrain` (the size and the terrain, with its transition, of each tile),
+   `TerrainTransition` and `TilePosition` in `screen.adapters.presentation`, mapped from the domain by
+   `BattlefieldMapper`, which the battlefield, shop, formation, inventory and map builder presenters use. With the
+   presenter and view tests updated, and no change to what the game shows.
+2. **The split, with its stories.** `TerrainTileView` (with `TerrainBitmaps`), `TileHighlightView`, `TileDimView`,
+   `TileFlashView` and `UnitSpriteView`, each with view tests and its stories. Their stories are in this commit, and not
+   in the next one as planned, as the coverage rule would fail without them, and the split views never enter the list of
+   views allowed to have none.
+3. **The battlefield stories.** `BattlefieldView` with a tiny fixed map, the list of views allowed to have no stories
+   emptied (not deleted: that is M6).
 4. **The plan.** These commits.
+
+### M5 as built
+
+The four commits are as listed, plus these decisions:
+
+- **`BattlefieldView` takes no domain type**: `displayBattlefield` and `updateTerrain` take a `BattlefieldTerrain`
+  (`rows`, `columns`, and a `Tile` with the `terrainId` and a `TerrainTransition?` for each `TilePosition`), and
+  `dimTilesExcept` and `moveBattleUnit` take `TilePosition`s. `BattlefieldMapper` (internal, as `BattleUnitInfoMapper`)
+  maps the battlefield and the positions; `ShopPresenter`, `FormationPresenter`, `InventoryPresenter` and
+  `MapBuilderPresenter` map the positions they dim or update, and `BattlefieldPresenter` the path of a move. The domain
+  keeps its `PositionDto`s where the presenters talk to it (e.g.: the cast group, the loot displayed). The tests have a
+  `BattlefieldTerrainMother` (`Battlefield.toTerrain()`) and the fake view records `TilePosition`s.
+- **The split follows the layers of a tile**: the tile is still a `UIButton` holding named layers (`TERRAIN`, `BUILDING`,
+  `LOOT`, `BATTLE_UNIT`, `NPC`, `SELECTION`, `FLASH`, `DIM`, `HEALTH_PREVIEW`...), in the order they are added, so the
+  layer names, the order, and what the game shows are the same. Each layer that has a state of its own is a view:
+  - **`TerrainTileView`** draws the terrain, or its transition, at a whole scale to fill the tile, with `display(terrainId,
+    transition)`, which `updateTerrain` calls again when a tile is painted. The art of the terrain is in
+    **`TerrainBitmaps`** (not a view), which splits each strip of transitions into its tiles the first time it is asked, and
+    which every tile of the battlefield shares: a view per tile can not each split the strips. `BattlefieldView.terrainTileBitmap`
+    stays, for `MapBuilderPresenter`, and reads from the same `TerrainBitmaps`.
+  - **`TileHighlightView`** is the frame of a tile, of a `Kind`: `MOVE_RANGE`, `CAST_RANGE` or `SELECTED`.
+  - **`TileDimView`** is the black mask, at `DIM_ALPHA`.
+  - **`TileFlashView`** is the white silhouette of a battle unit, built by the view from its image. It is a
+    **`UnitSpriteView`**, the image of a battle unit or an npc filling its tile, which also draws the battle units gliding
+    between tiles. `BattlefieldView` draws and removes the flash to make it blink, as before: the timing stays in the
+    composition.
+  - The health preview was already a view (`BattlefieldHealthBarPreviewView`), with its stories.
+  - These views are `Container`s holding an image (`Image` and `SolidRect` can not be extended), so a layer is no longer
+    an `Image` itself: the page object of `BattlefieldView` reads the image of a layer through the view.
+- **What stays in `BattlefieldView`**: the tile window, the camera (scrolling, following and trailing), the input, the
+  battle units gliding and swapping, the flash blinks, the tint, and the loot and building pieces, which are bare images
+  with no state of their own (the loot at its own scale, a building cut into the pieces of its tiles). The picked up item
+  rising from its tile is an animation of a bare image too. They are shown in the stories of `BattlefieldView`.
+- **The gliding battle unit changed how it is placed**: its image was anchored on its center, in a container, and is now a
+  `UnitSpriteView` at the corner of the container. It draws the same pixels, and the swap still hops it by moving it; the
+  page object of the gliding units follows.
+- **The flash no longer caches its silhouette per unit**: each `TileFlashView` builds it, a 16x16 or 32x32 image, when it
+  blinks (three times per flash).
+- **`StoryTiles`** (internal to the Storybook, not named `...Stories`, as the coverage rule would take it for a binding)
+  builds a terrain tile with the layers over it, as the stories of the layers draw them: a highlight, dim or flash over
+  the terrain tile, which a `terrain` pick changes, and a unit sprite under them. **`StoryContext.terrainTransitionIds()`**
+  lists the strips of transitions, e.g.: `sand_to_grass`, for the `transition` pick of the terrain tile.
+- **`MapBuilderHudViewStories`** still takes each tile from a `BattlefieldView`'s `terrainTileBitmap`, as the presenter
+  does: it is unchanged, as `terrainTileBitmap` stayed on `BattlefieldView`.
+- **The stories of the split views**: `TerrainTileViewStories` (sand, water, and the transitions sand to grass and sand
+  to void, with a `wangIndex` from 0 to 15), `TileHighlightViewStories` (the three kinds, over sand and over water),
+  `TileDimViewStories` (over a terrain, a battle unit and lava), `TileFlashViewStories` (the two frames of the blink, with
+  a `flashing` flag, and a small unit) and `UnitSpriteViewStories` (a 32x32 and a 16x16 unit, an npc, on lava). They are
+  64 pixels, the real size of a tile, so small in the 390x844 phone.
+- **`BattlefieldViewStories`** feeds the view a 6x6 map, as big as its viewport, so it does not scroll: sand with a patch
+  of grass, of water, of lava and of void, a fortress (4x4 tiles), a battle unit (`unit` pick) and another one, an npc
+  (`npc` pick, with `none`), and loot (`loot` pick): an item and a chest. The transitions of the tiles are worked out
+  by the binding from the strips of the resources, the way the battlefield domain does (north 1, east 2, south 4, west
+  8 for the sides touching the target terrain), as the Storybook can not import it. A `layer` enum draws over the tiles
+  what the battle draws for the selected battle unit: the move range (the unit's tile selected, the tiles it can
+  move to framed, the others dimmed), the cast range, or a cast previewed (a `healthPreview` pick on the battle unit
+  of the cast group, the vacant tiles selected). The tiles of each range are written in the binding, as the domain
+  works them out. `selectedTile` is a text, `row,column` or `none`, which tapping a tile sets, logging
+  `tileSelected(row, column)`; anything else, or a tile out of the map, selects none. Stories: Map, Move range, Cast
+  range, Selected tile, Health preview and Health preview, defeated.
+- **The sidebar** lists the battlefield first, then its layers (the terrain tile, the highlight, the dim, the flash and the
+  unit sprite) and the health bar preview, which moved from the bars of M1 to be with them, and then the battle unit info.
+  With them the Storybook has 224 ids (46 components, 178 stories).
+- **`dependencies.html`** was regenerated by each commit, as the imports of the screen and of the Storybook grew:
+  `dependencies.md` does not change.
+- **`viewsWithoutStories`** is `emptySet<String>()`, with its test, until M6. `BattlefieldView` imports no `.domain` or
+  `.usecases` package any more.
+- **Design issues noted, not fixed**: the loot, the building pieces and the picked up item are bare images in
+  `BattlefieldView`, not views of their own: a view for them is for when they get a state to show. `TileFlashView` and the
+  tile dim could be one view each with their timing (`BattlefieldView` still blinks the flash with a coroutine per tile).
+  The `layer` control wraps to two rows of the Controls. The rat, drawn in black, hardly stands out over the void of the
+  map; the transitions of the map follow the art of the strips.
 
 ### M6 commits
 
@@ -256,7 +330,8 @@ and update this section when they change.
 | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` | Screen | M3     |                                                                       |
 | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`        | Screen  | M4        | On view data first.                                                   |
 | `NpcDialogView`, `VirtualPadView`                                                        | Screen  | M4        | On view data first; the pad's own `Direction`.                        |
-| `BattlefieldView`, and the views split from it                                           | Screen  | M5        | Split by layer, on view data first.                                   |
+| `BattlefieldView`                                                                        | Screen  | M5        | On view data first (`BattlefieldTerrain`, `TilePosition`); a tiny map. |
+| `TerrainTileView`, `TileHighlightView`, `TileDimView`, `TileFlashView`, `UnitSpriteView` | Screen  | M5        | Split from `BattlefieldView` by layer; `TerrainBitmaps` is not a view. |
 
 ### The guard rule
 
