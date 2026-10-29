@@ -1,6 +1,6 @@
 # Plan: Story coverage
 
-> **Status:** in progress: M1, M2 and M3 are done.
+> **Status:** in progress: M1, M2, M3 and M4 are done.
 >
 > **Summary:** Give every view of the game its stories in the [Storybook](../architecture/storybook.md), so the 38
 > views [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
@@ -36,7 +36,7 @@ that completes each milestone to **Done in**.
 | M1 | Bars, icons and badges    | `BarView`, `PreviewBarView`, `ManaBarView`, `HealthBarPreviewView`, `ManaBarPreviewView`, `BattlefieldHealthBarPreviewView`, `PointsView`, `UnitNameView`, `UnitPortraitView`, `RemainingTurnsView`, `EffectView`, `EffectsView`, `AbilityButtonView`, `BagButtonView` (14) | The 14 views have stories, the list holds 24 views, and `jvmTest`, `jsTest` and `lintKotlin` pass.                                 | ✅      | c4b8d2d, 12c8421, feea986 |
 | M2 | Buttons, dialogs and menus | `CancelButton`, `ConfirmButton`, `CancelAndConfirmView`, `FinishTurnView`, `GiveItemView`, `ItemActionsView`, `InventoryFullView`, `InventoryView`, `FormationRowView`, `FormationView`, `MenuView`, `BattleInfoView`, `PlayerCallToActionView` (13) | The 13 views have stories, with their callbacks in the Actions, and the list holds 11 views.                                      | ✅      | 56aeba0, 343b4c8, 9d48c7d, 9c5bd59 |
 | M3 | Map builder               | `MapBuilderCallToActionView`, `MapBuilderHudView`, `MapBuilderInfoView`, `MapBuilderMenuView` (4)                                                                                                      | The 4 views have stories, and the list holds 7 views.                                                                             | ✅      | 2ad229d |
-| M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ⬜      |         |
+| M4 | Battle HUD on view data   | `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView`, `NpcDialogView`, `VirtualPadView` (6)                                                                               | The 5 views take view data instead of domain Dtos, the 6 views have stories, the game plays as before, and the list holds `BattlefieldView` only. | ✅      | 89f3c61, 32dd3ae, fec7a21 |
 | M5 | Battlefield split         | `BattlefieldView` (1), and the views split from it, which never enter the list                                                                                                                          | `BattlefieldView` is split by layer and takes view data, every view split from it and `BattlefieldView` have stories, and the list is empty. | ⬜      |         |
 | M6 | No more allowlist         | None: the list is deleted                                                                                                                                                                               | `viewsWithoutStories` and its test are gone, the guard rule passes, and the docs say every view has its stories, with no exception. | ⬜      |         |
 
@@ -169,6 +169,52 @@ The two commits are as listed, plus these decisions:
 3. **Their stories.** `BattleUnitInfoView`, `AttackPreviewView`, `ReceiverPreviewView`, `BattleHudView` (building its
    real children), `NpcDialogView` and `VirtualPadView`, logging the directions pressed and held.
 4. **The plan.** These commits.
+
+### M4 as built
+
+The four commits are as listed, plus these decisions:
+
+- **`BattleUnitInfo`** (`unitId`, health and mana points with their maximums, and `effectIds`: the ones applied when each
+  turn starts, followed by the ones applied when it is defeated) is what the three battle unit views draw of a battle unit.
+  The name of the unit is read from its `unitId`, so the views no longer take a `Unit.Dto` beside the `BattleUnit.Dto`,
+  and `BattlefieldPresenter` and `InventoryPresenter` no longer need the `UnitApi` (nor does `BattleScene` pass it).
+  `AttackPreviewView.Receiver` holds a `BattleUnitInfo`, the health it would have left and the new effects.
+- **`BattleUnitInfoView` takes what the HUD shows of the turn**: `TurnActions` (steps and casts, left and maximum),
+  `remainingTurns` (`null` but for a summon) and a list of `Ability` (the id, the cooldown turns left and whether the
+  battle unit has the mana), all nested in the view. `BattleUnitInfoMapper`, internal to `screen.adapters.presentation`,
+  maps them from `BattleUnit.Dto` and `AbilityAvailability` for both presenters. The tests have a `BattleUnitInfoMother`.
+- **`NpcDialog`** (`npcId`, `unitId`, `name`, `line`): the name and the line are translated by the presenter, so
+  `NpcDialogView` no longer takes the `Texts`. The portrait is still the one of the unit when there is one (a recruitable
+  npc), or else the npc's own, from the resources.
+- **`VirtualPadView.Direction`** (`NORTH`, `EAST`, `SOUTH`, `WEST`): the pad calls its callbacks with it, and
+  `ExplorationPresenter` keeps its pending press with it and maps it to `Party.Dto.DirectionDto` when it walks the party.
+  The pad is no exception of the dependency rule.
+- **`StoryContext.npcIds()`** lists the npcs that have a portrait, next to `unitIds()`, for the pick of the NPC dialog.
+- **`BattleUnitInfoViewStories`, `AttackPreviewViewStories` and `ReceiverPreviewViewStories`** feed the views a fixed
+  battle unit (30 health points, 20 mana points, 3 steps and 1 cast), and the controls change what the stories show: the
+  health, mana, steps, casts, remaining turns, number of effects and of abilities, and for the cast the receivers, the
+  mana cost and the health after it. The values are written in the bindings, as the Storybook can not import the
+  domain: their maximums are the ones of the stories, not the game's. The effects and abilities go round the ones with an
+  icon (`effectIds()` and `abilityIds()`); the abilities alternate ready, in cooldown and without mana. `ReceiverPreviewView`
+  has a `position` and a `count`, the first never past the second, as the counter shows only with several receivers.
+- **`BattleHudViewStories`** builds its real children with a `display` enum (`BATTLE_UNIT_INFO`, `ATTACK_PREVIEW`,
+  `INVENTORY`, `HIDDEN`): the bag logs `onBagSelected` and shows the inventory, closing it logs `inventoryClosed` and
+  shows the info, as in the game. The abilities, slots and owner arrows only log themselves.
+- **`NpcDialogViewStories`** has the name, the line, an `npc` pick, a `unit` pick (each with a `none` option) and a
+  `merchant` flag. The merchant stories build Buy, Sell and Leave from the translated `UiText`, logging `onSelected`
+  with the label, and tapping the dialog logs `onTapped`. The name and the line are plain texts, not the translations
+  of the npc.
+- **`VirtualPadViewStories`** has no control: it logs `onDirectionPressed`, `onAPressed` and `onBPressed`, and
+  `onDirectionHeld` only the first frame it is held, as the game calls it on every frame and would fill the Actions.
+- **The sidebar** lists them after the player call to action, in the order of the battle screen: the battle unit info, the
+  attack preview, its receiver, the HUD, the NPC dialog and the pad. With them the Storybook has 194 ids (40 components,
+  154 stories).
+- **`dependencies.html`** was regenerated by each commit, as the imports of the screen and of the Storybook grew: the
+  Storybook depends on no new subdomain, so `dependencies.md` does not change.
+- **Design issues noted, not fixed**: the attack preview draws a thin line across the bars of some rows (the receiver's
+  in the stories, the caster's in the HUD one), which the receiver preview alone does not: probably the software
+  renderer of the headless browser drawing the clipped viewport, to be checked on a GPU. The attack preview stories
+  show the receiver with 10 of 10 mana points, while the receiver preview shows 10 of 20: the stories should agree.
 
 ### M5 commits
 
