@@ -21,13 +21,7 @@ class StoryCoverageArchitectureTest {
     // The views that have no stories yet. Remove a view once it has its stories.
     private val viewsWithoutStories =
         setOf(
-            "AttackPreviewView",
-            "BattleHudView",
-            "BattleUnitInfoView",
             "BattlefieldView",
-            "NpcDialogView",
-            "ReceiverPreviewView",
-            "VirtualPadView",
         )
 
     private val classes = Konsist.scopeFromProduction().classes()
