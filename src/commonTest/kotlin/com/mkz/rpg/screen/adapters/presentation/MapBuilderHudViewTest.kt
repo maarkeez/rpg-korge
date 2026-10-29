@@ -37,7 +37,7 @@ class MapBuilderHudViewTest : ViewsForTesting() {
             // Given
             val hudView = hudView()
             // When
-            hudView.displaySize(rows = 12, columns = 40)
+            hudView.displaySize(rows = 12, columns = 40, allowedSizes = 1..128)
             // Then
             hudView.rowsText() shouldBe "12"
             hudView.columnsText() shouldBe "40"
@@ -49,7 +49,19 @@ class MapBuilderHudViewTest : ViewsForTesting() {
             // Given
             val hudView = hudView()
             // When
-            hudView.displaySize(rows = 5, columns = 124)
+            hudView.displaySize(rows = 5, columns = 124, allowedSizes = 1..128)
+            // Then
+            hudView.enabledRowsSteps().shouldContainExactly(-1, 1, 8)
+            hudView.enabledColumnsSteps().shouldContainExactly(-8, -1, 1)
+        }
+
+    @Test
+    fun `DisplaySize should disable the steps out of the allowed sizes when the allowed sizes are 4 to 20`() =
+        sharedViewsTest {
+            // Given
+            val hudView = hudView()
+            // When
+            hudView.displaySize(rows = 11, columns = 18, allowedSizes = 4..20)
             // Then
             hudView.enabledRowsSteps().shouldContainExactly(-1, 1, 8)
             hudView.enabledColumnsSteps().shouldContainExactly(-8, -1, 1)
@@ -60,7 +72,7 @@ class MapBuilderHudViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val hudView = hudView()
-            hudView.displaySize(rows = 16, columns = 20)
+            hudView.displaySize(rows = 16, columns = 20, allowedSizes = 1..128)
             addChild(hudView)
             // When
             clickRowsStep(hudView, step = 8)
@@ -73,7 +85,7 @@ class MapBuilderHudViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val hudView = hudView()
-            hudView.displaySize(rows = 16, columns = 20)
+            hudView.displaySize(rows = 16, columns = 20, allowedSizes = 1..128)
             addChild(hudView)
             // When
             clickColumnsStep(hudView, step = -1)

@@ -1,8 +1,8 @@
 # How to add a story
 
 > **Summary:** Show a view of the game in the [Storybook](../architecture/storybook.md), in each of its states, e.g.:
-> after adding a view, or to take it out of the views allowed to have no stories. A view gets one `<View>Stories`
-> binding, with its controls and stories, registered in `StorybookApi`.
+> after adding a view: every view has its stories, with no exception. A view gets one `<View>Stories` binding, with its
+> controls and stories, registered in `StorybookApi`.
 
 ## Prerequisites
 
@@ -114,9 +114,10 @@ sidebar should list it.
 - Add the component id and its story ids to the list of `StoryBindings should keep the ids...` in
   [`StorySmokeTest`](../../src/commonTest/kotlin/com/mkz/rpg/storybook/adapters/presentation/StorySmokeTest.kt), in the
   order of the bindings.
-- Remove the view from the views allowed to have no stories, in
-  [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt).
-  The test fails while it is still there.
+- Nothing to allow: [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)
+  fails for every view with no story, and there is no list to put it in. A view MUST NOT import the domain nor the use
+  cases ([`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt)):
+  it takes view data, which its presenter maps from the domain, so a story can feed it plain data.
 - Run them:
 
   ```shell
@@ -145,6 +146,8 @@ view lists its actions.
   id with no image, an int outside its range, or an arg without a control. The message names it.
 - **`ControlsView should fit the controls`** lists the component: it has too many controls, see step 2.
 - **`StoryCoverageArchitectureTest` fails**: the binding is not named `<View>Stories` after a view of the game, it is
-  not in `StorybookApi.kt`, or the view is still allowed to have no stories.
+  not in `StorybookApi.kt`, or the view has no story: every view needs one.
+- **`ViewArchitectureTest` fails**: the view imports a `.domain` or `.usecases` package. Take a data class of
+  `adapters.presentation` holding what the view draws instead, and map the domain to it in the presenter.
 - **A tap on the view logs nothing**: the callback is not handed to `context.action(...)`, or the view needs to be
   added to the stage to be tapped, which the phone does.

@@ -157,15 +157,18 @@ and `src/jvmMain`:
 
 ### Architecture rules
 
-Besides the rules of every subdomain, two architecture tests keep the Storybook in place:
+Besides the rules of every subdomain, three architecture tests keep the Storybook in place:
 
 - **Dependencies**: `storybook` only depends on `shared`, `localization`, and the `adapters.presentation` package of
   the other subdomains, and nothing depends on it but `Main.kt`
   ([`StorybookDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StorybookDependencyArchitectureTest.kt)).
 - **Coverage**: every view of an `adapters.presentation` package has a `<View>Stories` binding, listed in
-  `StorybookApi`, unless it is allowed to have none yet. A view leaves the allowed views once it has its stories, so
-  the list only shrinks
+  `StorybookApi`, with no exception
   ([`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt)).
+- **Views**: so every view can have its stories, which feed it plain data, no view of the game imports the domain nor
+  the use cases of a subdomain (`com.mkz.rpg.<subdomain>.domain` or `.usecases`). The presenters map the domain to the
+  view data the view draws
+  ([`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt)).
 
 ## Tests
 

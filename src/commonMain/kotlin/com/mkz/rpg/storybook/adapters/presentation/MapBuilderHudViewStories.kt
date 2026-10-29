@@ -85,7 +85,7 @@ object MapBuilderHudViewStories : StoryBinding {
                     override fun terrainSelected(terrainId: String) = context.action("terrainSelected", terrainId, setArg = SELECTED_TERRAIN to ArgDto.text(terrainId))
                 },
             )
-            displaySize(rows = rows, columns = columns)
+            displaySize(rows = rows, columns = columns, allowedSizes = MINIMUM_SIZE..MAXIMUM_SIZE)
             displayTerrains(terrains, selectedTerrainId = args.text(SELECTED_TERRAIN))
         }
     }

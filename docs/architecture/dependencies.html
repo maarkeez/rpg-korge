@@ -221,11 +221,11 @@ const DATA = {
     {"name": "lootDrop", "files": 18, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 26},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 23, "importsOut": 14},
-    {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 6, "importsOut": 15},
+    {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15},
     {"name": "npc", "files": 16, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 25},
     {"name": "party", "files": 36, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 41, "importsOut": 67},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 32, "importsOut": 12},
-    {"name": "screen", "files": 83, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 79, "importsOut": 173},
+    {"name": "screen", "files": 83, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 79, "importsOut": 172},
     {"name": "shared", "files": 13, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 416, "importsOut": 0},
     {"name": "storybook", "files": 84, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 96},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
@@ -1179,8 +1179,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt", "layer": "adapters", "name": "lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.EQUIPPABLE"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "lootableItem.adapters.presentation.LootableItemApi"}
     ]},
-    {"from": "screen", "to": "mapBuilder", "weight": 6, "files": 3, "imports": [
-      {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderHudView.kt", "layer": "adapters", "name": "mapBuilder.domain.MapBuilder"},
+    {"from": "screen", "to": "mapBuilder", "weight": 5, "files": 2, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "mapBuilder.adapters.presentation.MapBuilderApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "mapBuilder.domain.MapBuilder"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "mapBuilder.domain.MapBuilderEvent"},

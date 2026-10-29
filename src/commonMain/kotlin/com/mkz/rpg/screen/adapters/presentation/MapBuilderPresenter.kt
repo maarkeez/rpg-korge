@@ -68,7 +68,7 @@ class MapBuilderPresenter(
         val map = mapBuilderApi.searchMap() ?: return
         battlefieldView.displayBattlefield(BattlefieldMapper.terrain(battlefieldApi.previewBattlefield(map.tiles)))
         infoView.displaySize(rows = map.rows, columns = map.columns)
-        hudView.displaySize(rows = map.rows, columns = map.columns)
+        hudView.displaySize(rows = map.rows, columns = map.columns, allowedSizes = MapBuilder.MINIMUM_SIZE..MapBuilder.MAXIMUM_SIZE)
     }
 
     private fun displayTerrains() {

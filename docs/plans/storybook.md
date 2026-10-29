@@ -313,7 +313,8 @@ object ShopViewStories : StoryBinding {
   [Package structure](../architecture/package-structure.md#dependencies-between-subdomains).
 - **Coverage rule**: `StoryCoverageArchitectureTest`. Every top-level class of an `adapters.presentation` package that
   extends a KorGE view, directly or through another class of the project (e.g.: `HealthBarView` → `BarView` →
-  `UIContainer`), has a `<View>Stories` binding, unless it is in the allowlist. Konsist 0.13 only gives the direct
+  `UIContainer`), has a `<View>Stories` binding, unless it is in the allowlist (emptied, then deleted, by the
+  [story coverage plan](story-coverage.md): there is no exception any more). Konsist 0.13 only gives the direct
   parents, so the test walks them through the classes of the project up to a list of KorGE view classes. Presenters,
   scenes and the views of `storybook` itself are left out. An allowlisted view that has a story fails the test, and so
   does an allowlisted name that is no view, so the allowlist can only shrink.

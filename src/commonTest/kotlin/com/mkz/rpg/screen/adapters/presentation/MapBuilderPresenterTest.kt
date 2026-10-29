@@ -83,6 +83,7 @@ class MapBuilderPresenterTest {
         battlefieldView.displayedBattlefields.shouldContainExactly(BattlefieldMapper.terrain(apis.battlefieldApi.previewBattlefield(List(16) { List(16) { "sand" } })))
         infoView.displayedSize shouldBe (16 to 16)
         hudView.displayedSize shouldBe (16 to 16)
+        hudView.displayedAllowedSizes shouldBe (1..128)
     }
 
     @Test

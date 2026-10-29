@@ -1,6 +1,5 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.mapBuilder.domain.MapBuilder
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.Colors
 import korlibs.image.text.TextAlignment
@@ -54,8 +53,9 @@ open class MapBuilderHudView(
     }
 
     private var delegate: Delegate? = null
-    private var rows = MapBuilder.DEFAULT_SIZE
-    private var columns = MapBuilder.DEFAULT_SIZE
+    private var rows = 0
+    private var columns = 0
+    private var allowedSizes = IntRange.EMPTY
 
     internal val rowsValue: UIText
     internal val columnsValue: UIText
@@ -78,20 +78,21 @@ open class MapBuilderHudView(
         rowsStepButtons = rowsStepper.second
         columnsValue = columnsStepper.first
         columnsStepButtons = columnsStepper.second
-        displaySize(rows, columns)
     }
 
     open fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
     }
 
-    /** Displays the map size, disabling the steps that would take it out of the allowed sizes. */
+    /** Displays the map size, disabling the steps that would take it out of the [allowedSizes]. */
     open fun displaySize(
         rows: Int,
         columns: Int,
+        allowedSizes: IntRange,
     ) {
         this.rows = rows
         this.columns = columns
+        this.allowedSizes = allowedSizes
         rowsValue.text = "$rows"
         columnsValue.text = "$columns"
         rowsStepButtons.forEach { (step, button) -> button.enabled = isAllowedSize(rows + step) }
@@ -140,7 +141,7 @@ open class MapBuilderHudView(
         terrainPalette.sendChildToBack(selectionBorder!!)
     }
 
-    private fun isAllowedSize(size: Int): Boolean = size in MapBuilder.MINIMUM_SIZE..MapBuilder.MAXIMUM_SIZE
+    private fun isAllowedSize(size: Int): Boolean = size in allowedSizes
 
     // A label, the buttons stepping the size down, the size, and the buttons stepping it up.
     private fun Container.stepper(
