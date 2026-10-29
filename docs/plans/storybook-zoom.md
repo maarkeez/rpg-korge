@@ -1,6 +1,6 @@
 # Plan: Storybook zoom
 
-> **Status:** in progress: M1 is done.
+> **Status:** in progress: M1 and M2 are done.
 >
 > **Summary:** Let the person zoom in and out of the [Storybook](../architecture/storybook.md) and move around it, mostly
 > on a phone, where the whole 1280x900 Storybook is shrunk to the width of the screen today. The Storybook keeps its
@@ -41,7 +41,7 @@ that completes each milestone to **Done in**.
 | #  | Milestone                       | Done when                                                                                                                                                                  | Status | Done in |
 |----|---------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The whole screen and the bar    | The Storybook draws on the whole screen, looks the same at Fit, and the bar zooms in and out, to Fit and to the phone, kept across stories and when the screen changes size. | ✅      | a4d6e39, 90c5fc6 |
-| M2 | Panning                         | Dragging the background, the bezel or a panel moves the Storybook within its limits; the sidebar and the phone screen keep their drags, and a pan is never a tap.             | ⬜      |         |
+| M2 | Panning                         | Dragging the background, the bezel or a panel moves the Storybook within its limits; the sidebar and the phone screen keep their drags, and a pan is never a tap.             | ✅      | 86b3b64 |
 | M3 | Pinch, the trackpad and the wheel | Two fingers zoom and pan on a touch screen, the Mac trackpad zooms in the desktop app, and the wheel with Ctrl zooms everywhere.                                             | ⬜      |         |
 | M4 | The docs and the skill          | The Storybook docs describe the zoom, and the `storybook` skill screenshots a story on a phone, at Fit and at Phone.                                                         | ⬜      |         |
 
@@ -89,6 +89,27 @@ The two commits are as listed, plus these decisions:
 1. **Panning.** `ZoomView` pans with a drag that starts outside the sidebar list and the screen of the phone, and keeps
    a drag that panned from tapping. With view tests.
 2. **The plan.** These commits, as built.
+
+### M2 as built
+
+The commit is as listed, plus these decisions:
+
+- **The views that drag themselves** are `ZoomView.dragOwners`, which the scene sets to the whole `SidebarView`, as its
+  title drags the list too, and the screen of the phone. A drag pans when the view it starts on is in none of them.
+- **Where a drag starts** is hit tested in the Storybook only, at the first point of the drag: KorGE hit tests a
+  container by its bounds, and the frame's hold the whole Storybook, so a hit test of the stage always found the frame.
+  `MouseEvents.hitTest` did not help either: it skips the views with no listener, e.g.: a panel's background.
+- **A backdrop** of the background, behind the Storybook and zoomed with it, so a drag between the panels starts on a
+  view of the zoom and pans.
+- **Drags follow the finger when zoomed**: KorGE gives a drag in the units of the stage, so the sidebar's list and the
+  battlefield's grid moved by the zoom times the finger. Both now read the drag in their own units
+  (`localDXY`, as `AttackPreviewView` already did); nothing is scaled in the game, which moves as before. With a view
+  test each, in a parent drawn twice its size.
+- **A pan is not a tap** with no code for it: KorGE only taps when the pointer is up close to where it went down.
+- **On a phone**, checked with touch drags (`Input.dispatchTouchEvent`): dragging the Controls at 156% moves the
+  Storybook to its right edge, and dragging the screen of the phone at Phone does not move it.
+- **`addChildScaled`** in the shared page object helpers, and `addViewThatDragsItself` and `addTappableView` in the
+  zoom's: the view tests may not build views themselves (`ViewTestPageObjectArchitectureTest`).
 
 ### M3 commits
 
