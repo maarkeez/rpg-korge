@@ -25,7 +25,7 @@ val GAME_WINDOW_SIZE = Size(390, 844)
 val STORYBOOK_WINDOW_SIZE = Size(1280, 900)
 val STORYBOOK_BACKGROUND_COLOR = Colors["#202020"]
 
-// The same bundle starts the game, or the Storybook when it is asked for: see docs/plans/storybook.md.
+// The same bundle starts the game, or the Storybook when it is asked for.
 suspend fun main() =
     if (isStorybookRequested()) {
         // Drawn on the whole screen, around the Storybook fitted in it, so it can be zoomed in to fill a portrait phone.

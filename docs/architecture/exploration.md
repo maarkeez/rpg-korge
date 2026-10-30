@@ -29,12 +29,12 @@ The party walks one tile at a time, towards the arrow held on the virtual pad (n
 
 ### Swapping with a party member
 
-A party member never blocks the leader, so the party can always turn around, e.g.: at the end of a dead-end corridor (see [the plan](../plans/party-member-swap.md)).
+A party member never blocks the leader, so the party can always turn around, e.g.: at the end of a dead-end corridor.
 
 1. When any party member stands on the leader's next tile, the leader swaps tiles with it, as its single step: the other followers stay where they are. [`Party.swapLeader`](../../src/commonMain/kotlin/com/mkz/rpg/party/domain/Party.kt) awaits the leader's step onto the member's tile, and `WalkParty` requests the swap (`RequestSwapBattleUnits`).
 2. [`SwapBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/SwapBattleUnits.kt) walks both battle units onto each other's tile: each publishes its `BattleUnitMoved`, naming the battle unit it swapped with (`swappedWithBattleUnitId`), so both count as moved and find the loot on their tiles, as after any step. It requests the battlefield to swap both occupants at once (`RequestSwapOccupants`, see [`SwapOccupants`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/commands/SwapOccupants.kt)), so a tile never holds two of them, and the battlefield announces both occupied tiles.
 3. The leader's occupied tile resolves its step, so the party has walked (`PartyWalked`), and the CPU battle units may engage it.
-4. The screen animates the swap ([`BattlefieldView.swapBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldView.kt), see [the animation plan](../plans/party-swap-animation.md)): both battle units glide to each other's tile at once, for `SWAP_DURATION` (150ms), while the camera trails the leader. The leader hops over the member, drawn over it, and the member slides straight underneath. The presenter names the party leader, whichever of the two `BattleUnitMoved` came first.
+4. The screen animates the swap ([`BattlefieldView.swapBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldView.kt)): both battle units glide to each other's tile at once, for `SWAP_DURATION` (150ms), while the camera trails the leader. The leader hops over the member, drawn over it, and the member slides straight underneath. The presenter names the party leader, whichever of the two `BattleUnitMoved` came first.
 
 The followers walk in **line order**, which is kept apart from the party order (the next leader, the shop's buyer). It starts in party order, and is rebuilt after each swap: from the leader, the closest remaining member, in rows plus columns, follows next, ties broken by party order. So each follower follows the member closest to it, and none is trapped behind another one in a corridor. The line goes back to the party order when the exploration starts or resumes, a recruited member joins the end of the line, and a defeated one leaves it.
 
@@ -42,13 +42,13 @@ In a battle, an ally still blocks its tile: only the exploring party swaps.
 
 Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) asks to walk on every frame the arrow is held, and [`ExplorationPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt) only walks once the [presentation timeline](presentation-timeline.md) is idle, so the party can not walk ahead of its animation. The battle units glide from tile to tile. The steps of one walk glide at the same time, the followers together with the leader (`BattleSceneTimeline.playTogether`), so the party walks a tile in `EXPLORING_STEP_DURATION` (250ms) whatever its size, and a held arrow walks it smoothly.
 
-A tap is never lost while the timeline plays (e.g.: the party still gliding, or a recruit flashing), see [the plan](../plans/responsive-virtual-pad.md):
+A tap is never lost while the timeline plays (e.g.: the party still gliding, or a recruit flashing):
 
 - The pad reports each press once, before holding it. The presenter keeps the last arrow or A pressed, a newer press replacing it, so tapping several times while the timeline plays walks one step, towards the last arrow.
 - On the first frame the timeline is idle, the presenter acts on it: it walks the party, or talks to the npc next to the leader. It is acted on once, even when nothing happens (e.g.: a blocked tile), and a held arrow walking towards it acts on it.
 - It is forgotten when the pad is hidden meanwhile (e.g.: a battle starts, or a battle unit of the party is selected).
 
-The camera trails the leader, as in A Link to the Past, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt), see [the plan](../plans/trailing-camera.md)):
+The camera trails the leader, as in A Link to the Past, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)):
 
 - It moves on every frame, outside the presentation timeline, so the party never waits for it.
 - The leader moves freely in the 2x2 tiles at the center of the viewport (the deadzone). Once it walks past them, the camera moves with it, pixel for pixel, so it sees 3 tiles ahead. Clamped to the battlefield, so walking along its border does not scroll it.
@@ -98,7 +98,7 @@ A battle starting while shopping abandons the shop, as it abandons the dialog. S
 ## Choosing the leader
 
 The leader walks in front, so it is usually the first battle unit of the party within reach of a CPU battle unit, and
-the first one hit, as the CPU plays first once it engages (see [the plan](../plans/party-formation.md)). The CPU battle
+the first one hit, as the CPU plays first once it engages. The CPU battle
 brain does not target the leader as such. While exploring, B opens the party formation, where the player sets the party
 order, and so who leads:
 
@@ -125,10 +125,10 @@ inventory's arrows. A recruited member still joins last.
 
 There are no turns while exploring, so the inventory of the party can always be used:
 
-- Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag in place of the virtual pad, and the call to action below it the item actions once an item is tapped. There is no finish turn, as there are no turns: the call to action is empty otherwise (see [the plan](../plans/hide-finish-turn-while-exploring.md)). It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
+- Tapping a battle unit of the party selects it: the battle HUD displays its info and its bag in place of the virtual pad, and the call to action below it the item actions once an item is tapped. There is no finish turn, as there are no turns: the call to action is empty otherwise. It has no movement range, so tapping a tile does not move it, and its abilities can not be cast.
 - The selection stays as it is while the CPU battle units wander, so the inventory stays open until the player closes it: a tile occupied or vacated only displays the selected battle unit again when its own tile changes ([`RefreshMovementRange`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt)).
 - Tapping an empty tile, a CPU battle unit or the selected battle unit again clears the selection, and the virtual pad is displayed again. Tapping another battle unit of the party selects it instead.
-- The inventory's title line names the party member between two arrows, its gold before the next one: `< Knight ........ 20 G >`. The arrows, or swiping the inventory left or right (at least 40 px), switch it to the previous or next party member, in party order, and are disabled at the ends. The member switched to is selected on the battlefield, as if its tile was tapped, so Close displays its info. The selected item is cleared, and switching waits while giving an item or choosing what to do with a found one (see [the plan](../plans/switch-inventory-between-party-members.md)).
+- The inventory's title line names the party member between two arrows, its gold before the next one: `< Knight ........ 20 G >`. The arrows, or swiping the inventory left or right (at least 40 px), switch it to the previous or next party member, in party order, and are disabled at the ends. The member switched to is selected on the battlefield, as if its tile was tapped, so Close displays its info. The selected item is cleared, and switching waits while giving an item or choosing what to do with a found one.
 - The item actions also offer Give (see [Giving](inventory.md#giving)). Give dims every tile but the ones of the party members that can receive the item, and the call to action reads `Tap a party member to give the Hammer` with Cancel ([`InventoryPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryPresenter.kt), which takes the tapped tiles before the battlefield HUD meanwhile). Tapping a receiver's tile gives the item: the giver's bag stays open with nothing selected, and the receiver flashes. Any other tap is ignored (dimmed tiles, the giver's tile, the bag's slots and Close), and Cancel displays the item's actions again. Give is disabled for the only copy of an equipped item, and reads why when no one can receive it: `No one` or `Bags full`. Time goes on meanwhile, and a battle starting abandons the giving.
 - When an item found on the way does not fit in the inventory (`InventoryFull`), the battle HUD and the call to action are displayed straight away, so the player can choose what to do with it. Tapping a tile once chosen displays the virtual pad again.
 - The party does not walk while the virtual pad is hidden, even when an arrow is still held.
@@ -142,7 +142,7 @@ Every second while exploring, the battle units that stood still during that seco
 - The effects are requested to the battlefield (`BattlefieldEvent.RequestEffectApplicationToOccupants`) for the battle units standing still, as they are for the battle units in the battle when a round starts. The battlefield announces each effect of a terrain (`TerrainEffectTriggered`, see [`TriggerTerrainEffects`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt)), and the battle units apply it.
 - Nothing is applied while battling: the battle applies the terrain effects when its rounds start instead.
 - A battle unit receiving an effect flashes, and when its health changes, its health bar is displayed over its tile meanwhile, so the player sees the lava hurting and the water healing (see [Applying effects](presentation-timeline.md#applying-effects)).
-- The battle units flash alongside the timeline, so the party walks meanwhile, whatever the number of battle units flashing. A flash stops once its battle unit walks away (see [the plan](../plans/flash-alongside-while-exploring.md)).
+- The battle units flash alongside the timeline, so the party walks meanwhile, whatever the number of battle units flashing. A flash stops once its battle unit walks away.
 - Then, the next second starts (`ExplorationSecondStarted`), and the CPU battle units wander (see [CPU battle brain](cpu-battle-brain.md#wandering)). They wander after the effects, so a battle unit that steps counts as moved during the new second.
 
 A battle unit defeated by its terrain while exploring leaves the party. A player whose last battle units are defeated while exploring loses the game, as in a battle (`PlayerVictory` for their enemy, see [`DefeatPlayer`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt)). Once the game is over, the virtual pad is hidden and the seconds are no longer counted.
@@ -161,7 +161,7 @@ While exploring, the battle info displays "Exploring".
 
 ## Back to exploring
 
-The battle finishes without a winner (`BattleFinished`) once only one player is left with battle units in it, e.g.: every CPU battle unit in it was defeated or left behind. It is checked as soon as it happens, without waiting for the round to finish (see [the plan](../plans/finish-battle-on-last-enemy-defeated.md)):
+The battle finishes without a winner (`BattleFinished`) once only one player is left with battle units in it, e.g.: every CPU battle unit in it was defeated or left behind. It is checked as soon as it happens, without waiting for the round to finish:
 
 - When a battle unit leaves the battle during a round (e.g.: the last CPU battle unit engaged is defeated, during any turn), [`LeaveBattle`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/LeaveBattle.kt) disengages the battle (`BattleDisengaged`). The CPU battle brain [`ReengageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/ReengageEnemies.kt) has the CPU battle units out of the battle with an enemy within reach join it, without wandering first, so the battle goes on, and they play from the next round. [`FinishDisengagedBattle`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/FinishDisengagedBattle.kt) finishes it when none joins. A CPU summon left in the battle keeps it going, until it is defeated or vanishes.
 - When the engagement is updated after a round, and the CPU battle units in it left it (e.g.: left behind), [`StartNextRound`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/StartNextRound.kt) finishes it instead of starting the next round.

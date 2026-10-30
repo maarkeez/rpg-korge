@@ -72,5 +72,3 @@ It also samples where the time goes while walking, and writes it to `frame-times
 
 - **The game did not start exploring**: the script clicks the play button and the arrows at their position on the game window, and checks that the up arrow is displayed (blue). After a layout change, update `PLAY_BUTTON`, `ARROWS` and `PAD_CORNER` in [`measure.mjs`](../../tools/frame-times/measure.mjs).
 - **A battle started while walking**: a CPU battle unit wandered within reach of the party. It is random, so measure again. After a change of the demo battlefield, check that the walk still keeps the party away from the CPU battle units.
-
-See [the plan](../plans/exploring-without-freezes.md) for the freezes it was written for.

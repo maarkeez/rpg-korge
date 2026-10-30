@@ -13,8 +13,7 @@ It serves three purposes:
 - **Claude seeing a view**: the [`storybook` skill](../../.claude/skills/storybook/SKILL.md) opens a story with
   Playwright and saves a screenshot to look at.
 
-To add a story, see [How to add a story](../testing/how-to-add-a-story.md). The decisions behind it are in
-[the plan](../plans/storybook.md).
+To add a story, see [How to add a story](../testing/how-to-add-a-story.md).
 
 ## What it shows
 
@@ -25,8 +24,7 @@ To add a story, see [How to add a story](../testing/how-to-add-a-story.md). The 
   every word, ignoring case and in any order, must be in the group, the title of the component or the name of the
   story, e.g.: `shop sell` lists the **Sell** stories of **Screen / Shop**, and `shop` all of its stories. The `×`
   empties it, listing every story again, scrolled to the story on show. It never changes the story on show, is kept
-  while stories are tapped, and is not in the [link](#links). See [the plan](../plans/storybook-search.md) for its
-  decisions.
+  while stories are tapped, and is not in the [link](#links).
 - **The phone**, in the middle, shows the story: the real view, at its real size, in a 390x844 screen, the game window,
   with the game background. What does not fit the screen is cropped, as in the game.
 - **The toolbar**, on the top right, holds the globals: the language of the views on show.
@@ -43,7 +41,7 @@ on a touch screen, with the trackpad of a Mac in the desktop app, and with the m
 desktop browser sends a pinch of its trackpad; each around the fingers or the pointer. Zoomed in, dragging anything but
 the sidebar and the screen of the phone, which keep their own drags, moves it, never past its edges. The zoom is kept
 when the story, an arg or a global changes, until the page is reloaded, and is not in the [link](#links): it depends on
-the screen, not on what is on show. See [the plan](../plans/storybook-zoom.md) for its decisions.
+the screen, not on what is on show.
 
 The labels and descriptions of the Storybook itself are in English only: they are not in the translation catalogs, as
 the translators only translate what the players see. The views on show follow the language global.

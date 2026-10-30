@@ -90,7 +90,7 @@ A battle unit trades as a party member, while the party talks to a merchant ([`T
 
 ## Giving
 
-While exploring, only the leader walks where the player says, so the other party members hardly ever loot. A battle unit gives a stored item to another member of its party instead (see [the plan](../plans/give-items.md)), through [`GiveRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/GiveRule.kt):
+While exploring, only the leader walks where the player says, so the other party members hardly ever loot. A battle unit gives a stored item to another member of its party instead, through [`GiveRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/GiveRule.kt):
 
 - Only while the party explores: not in a battle, and not while talking to an npc, the merchants included. Otherwise `giveItem` fails (`NotExploringTheParty`). The receiver is another member of the party (`NotAPartyMember`), wherever it stands.
 - One item at a time. The giver removes a stored copy that is not equipped, announcing `ItemGiven`, and the receiver stores it last, not equipped, announcing `ItemReceived`. Both inventories are saved together, so nothing changes when either side fails.

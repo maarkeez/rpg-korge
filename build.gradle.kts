@@ -79,7 +79,7 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
-// The Storybook starts from the same `main` as the game, which reads this system property. See docs/plans/storybook.md.
+// The Storybook starts from the same `main` as the game, which reads this system property.
 tasks.matching { it.name in setOf("runJvmStorybook", "runJvmStorybookAutoreload") }.configureEach {
     (this as JavaExec).systemProperty("rpg.entry", "storybook")
 }

@@ -97,8 +97,7 @@ exported.
 
 `pixel import some.png art/x.aseprite --layer sketch` imports a PNG into a layer (creating the sprite when needed). A
 PNG of a free asset pack fails when it uses other colours, listing each one with its closest FamiCube colour:
-`--snap` replaces them. Prefer choosing the replacements of the main colours yourself (as the fortress did, see
-[buildings](../../../docs/plans/buildings.md)), then `pixel replace` the rest.
+`--snap` replaces them. Prefer choosing the replacements of the main colours yourself (as the fortress did), then `pixel replace` the rest.
 
 ## What the tool does not support
 

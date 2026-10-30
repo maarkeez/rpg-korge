@@ -1,12 +1,12 @@
 ---
 name: to-plan
-description: Turns the current conversation into a plan in docs/plans/, following the template of the plans already there (Status and Summary, a Decisions table, a section per subdomain or class, Storybook, Docs, Tests, and Milestones when the work spans several steps). Only run when the user types /to-plan.
+description: Turns the current conversation into a plan in docs/plans/, following its template (Status and Summary, a Decisions table, a section per subdomain or class, Storybook, Docs, Tests, and Milestones when the work spans several steps). Only run when the user types /to-plan.
 disable-model-invocation: true
 ---
 
 # To plan
 
-Writes what was settled in this conversation as a new plan in `docs/plans/`, in the shape of the plans already there.
+Writes what was settled in this conversation as a new plan in `docs/plans/`, following its template.
 It only creates new plans: it never updates an existing plan as built.
 
 The game is an RPG battle sim in Kotlin and KorGE. The player controls a team of battle units against the CPU's battle
@@ -15,8 +15,7 @@ units. The code is split into subdomains, each with `domain`, `usecases` and `ad
 ## 1. Read before asking
 
 - The [template](template.md).
-- Two or three recent plans in `docs/plans/` (`git log -- docs/plans`), for the voice and the level of detail. Also any
-  plan the topic builds on or replaces.
+- Any plan in `docs/plans/` the topic builds on or replaces.
 - The docs in `docs/architecture/` the topic touches.
 - The code the plan touches: the subdomains, classes, functions, events, views, stories and tests involved. The plan
   names real ones (e.g. `BattlefieldView.moveBattleUnit`, `BattlefieldPresenterTest`), never made-up ones.
@@ -47,10 +46,9 @@ Skip this step when nothing is open.
 ## 4. Pick the shape
 
 - **Small** (the default): Decisions, then a section per subdomain or class, Storybook, Docs, Tests and Known
-  limitations. E.g. [lingering-health-flash.md](../../../docs/plans/lingering-health-flash.md).
+  limitations.
 - **Milestones**: only when the work spans several deliverable steps, each green on CI. Use Decisions, a Milestones
-  table, the commits of each milestone, and a Reference section holding the per-component detail. E.g.
-  [storybook-search.md](../../../docs/plans/storybook-search.md). Every milestone starts as `⬜` with an empty `Done in`.
+  table, the commits of each milestone, and a Reference section holding the per-component detail. Every milestone starts as `⬜` with an empty `Done in`.
 
 Leave out any section with nothing to say (e.g. no Storybook section when no view changes).
 
@@ -80,7 +78,7 @@ Ask whether to commit the plan. On a yes:
 
 ## Style
 
-How the plans are written, to keep each new one sounding like the others:
+How the plans are written, to keep each one sounding like the others:
 
 - Plain English, in the present tense, as if the change were already built: "`hold()` stops the blinks".
 - Concrete: the actual units, terrains, items, numbers, durations, colors and constants (e.g. `HEALTH_FLASH_DURATION`,
@@ -91,4 +89,4 @@ How the plans are written, to keep each new one sounding like the others:
   **Group / Component › Story**.
 - Test names follow the house style: `<Subject> should <outcome> when <condition>`, grouped under their test class.
 - Link the plans and the architecture docs it builds on with relative links (`../architecture/<doc>.md`).
-- Tables are aligned, as in the existing plans.
+- Tables are aligned.

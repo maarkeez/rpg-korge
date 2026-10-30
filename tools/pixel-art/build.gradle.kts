@@ -1,4 +1,4 @@
-// A standalone build, not included by the game's: see docs/plans/pixel-art-tool.md.
+// A standalone build, not included by the game's.
 
 // As in the game's build: kotlinter brings kotlin-compiler-embeddable 2.0.21, whose stale copy of the build tools API
 // breaks the classpath snapshots of the Kotlin 2.2.21 plugin.

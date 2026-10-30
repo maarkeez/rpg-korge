@@ -43,7 +43,7 @@ class PackageStructureArchitectureTest {
         withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
     }
 
-    // The tools under `tools` are standalone builds, with their own packages (see docs/plans/pixel-art-tool.md).
+    // The tools under `tools` are standalone builds, with their own packages.
     private fun KoFileDeclaration.isTool(): Boolean = path.contains("/tools/")
 
     private fun KoFileDeclaration.isEntryPoint(): Boolean = packagee?.fullyQualifiedName == "com.mkz.rpg" && nameWithExtension == "Main.kt"

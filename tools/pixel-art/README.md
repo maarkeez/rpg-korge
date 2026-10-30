@@ -3,7 +3,7 @@
 `pixel` draws the game's low resolution art in Aseprite files, for coding agents. It reads and writes the layers of a
 sprite pixel by pixel, shows them as grids of characters, and imports from and exports to PNG. It follows the
 [Aseprite file format](https://github.com/aseprite/aseprite/blob/main/docs/ase-file-specs.md) but does not need
-Aseprite. See [the plan](../../docs/plans/pixel-art-tool.md) for its decisions.
+Aseprite.
 
 ## Running it
 
