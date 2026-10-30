@@ -19,6 +19,7 @@ class VirtualPadViewTest : ViewsForTesting() {
     private val heldDirections = mutableListOf<Direction>()
     private var aPresses = 0
     private var bPresses = 0
+    private var startPresses = 0
 
     private fun newVirtualPadView() =
         VirtualPadView().also { pad ->
@@ -26,6 +27,7 @@ class VirtualPadViewTest : ViewsForTesting() {
             pad.setOnDirectionHeld { direction -> heldDirections += direction }
             pad.setOnAPressed { aPresses++ }
             pad.setOnBPressed { bPresses++ }
+            pad.setOnStartPressed { startPresses++ }
         }
 
     @Test
@@ -80,6 +82,34 @@ class VirtualPadViewTest : ViewsForTesting() {
             // Then
             bPresses shouldBe 1
             aPresses shouldBe 0
+            heldDirections.shouldBeEmpty()
+        }
+
+    @Test
+    fun `VirtualPadView should lay Start out at the bottom, between the arrows and the B and A buttons`() =
+        sharedViewsTest {
+            // When
+            val pad = newVirtualPadView()
+            // Then
+            val start = pad.startButton()
+            start.label() shouldBe "START"
+            start.x shouldBeGreaterThan pad.arrow(Direction.SOUTH).let { south -> south.x + south.width }
+            start.y shouldBeGreaterThan pad.bButton().let { b -> b.y + b.height }
+            (start.y + start.height) shouldBeLessThan pad.height
+        }
+
+    @Test
+    fun `ClickStart should call the Start listener once when Start is tapped`() =
+        sharedViewsTest {
+            // Given
+            val pad = newVirtualPadView()
+            addChild(pad)
+            // When
+            clickStart(pad)
+            // Then
+            startPresses shouldBe 1
+            aPresses shouldBe 0
+            bPresses shouldBe 0
             heldDirections.shouldBeEmpty()
         }
 

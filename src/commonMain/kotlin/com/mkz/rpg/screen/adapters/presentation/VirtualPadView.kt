@@ -18,11 +18,13 @@ import korlibs.math.interpolation.Ratio
 
 /**
  * The pad the player explores with, laid out as a Game Boy Color: the north, east, south and west arrows on the left,
- * and the round B and A buttons on the right, A higher and further right than B.
+ * the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom,
+ * between both.
  *
  * Holding an arrow keeps walking the party towards it: the held listener is called when the arrow is pressed, and on
  * every frame while it is held. The pressed listener is called once before, so a tap is known even when it is released
- * before it can be walked. Tapping A or B calls its listener once (e.g.: to talk, or to open the party formation).
+ * before it can be walked. Tapping A, B or Start calls its listener once (e.g.: to talk, to open the party formation, or
+ * to pause the game).
  */
 open class VirtualPadView(
     size: Size = Size(390, 300),
@@ -51,6 +53,16 @@ open class VirtualPadView(
         // How far each button is from the centre of the buttons, A up and to the right, B down and to the left.
         private const val BUTTON_OFFSET_X = 38.0
         private const val BUTTON_OFFSET_Y = 24.0
+
+        const val START_WIDTH = 72.0
+        const val START_HEIGHT = 22.0
+        private const val START_TEXT_SIZE = 12.0
+
+        // Start is centred between the arrows and the buttons, at the bottom of the pad.
+        private const val START_CENTER_RATIO = 0.55
+        private const val START_BOTTOM_MARGIN = 10.0
+        private val START_COLOR = RGBA(76, 76, 76)
+        private val START_PRESSED_COLOR = RGBA(110, 110, 110)
     }
 
     /** An arrow of the pad, with the tile offsets of the direction it points to. */
@@ -68,6 +80,7 @@ open class VirtualPadView(
     private var onDirectionHeld: ((Direction) -> Unit)? = null
     private var onAPressed: (() -> Unit)? = null
     private var onBPressed: (() -> Unit)? = null
+    private var onStartPressed: (() -> Unit)? = null
     internal var heldDirection: Direction? = null
         private set
 
@@ -83,6 +96,18 @@ open class VirtualPadView(
     private val buttonsCenterY = size.height / 2
     internal val bButton = button("B", centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) { pressB() }
     internal val aButton = button("A", centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
+
+    internal val startButton =
+        uiButton(size = Size(START_WIDTH, START_HEIGHT), label = "START") {
+            position(size.width * START_CENTER_RATIO - START_WIDTH / 2, size.height - START_BOTTOM_MARGIN - START_HEIGHT)
+            radiusRatio = Ratio.ONE
+            bgColorOut = START_COLOR
+            bgColorOver = START_PRESSED_COLOR
+            background.borderColor = Colors.LIGHTGRAY
+            textColor = BUTTON_LABEL_COLOR
+            textSize = START_TEXT_SIZE
+            onClick { pressStart() }
+        }
 
     init {
         addUpdater { heldDirection?.let { direction -> onDirectionHeld?.invoke(direction) } }
@@ -104,12 +129,20 @@ open class VirtualPadView(
         onBPressed = listener
     }
 
+    open fun setOnStartPressed(listener: () -> Unit) {
+        onStartPressed = listener
+    }
+
     internal fun pressA() {
         onAPressed?.invoke()
     }
 
     internal fun pressB() {
         onBPressed?.invoke()
+    }
+
+    internal fun pressStart() {
+        onStartPressed?.invoke()
     }
 
     internal fun hold(direction: Direction) {

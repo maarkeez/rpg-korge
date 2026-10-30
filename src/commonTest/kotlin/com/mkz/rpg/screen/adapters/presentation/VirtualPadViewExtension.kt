@@ -24,6 +24,8 @@ fun VirtualPadView.aButton(): UIButton = aButton
 
 fun VirtualPadView.bButton(): UIButton = bButton
 
+fun VirtualPadView.startButton(): UIButton = startButton
+
 /** The label written on the button, e.g.: `A`. */
 fun UIButton.label(): String = text
 
@@ -33,11 +35,17 @@ fun VirtualPadView.pressAButton() = pressA()
 /** Presses B, as the player tapping it. */
 fun VirtualPadView.pressBButton() = pressB()
 
+/** Presses Start, as the player tapping it. */
+fun VirtualPadView.pressStartButton() = pressStart()
+
 /** Taps the A button, as the player. */
 suspend fun ViewsForTesting.clickA(virtualPadView: VirtualPadView) = clickOn(virtualPadView.aButton)
 
 /** Taps the B button, as the player. */
 suspend fun ViewsForTesting.clickB(virtualPadView: VirtualPadView) = clickOn(virtualPadView.bButton)
+
+/** Taps the Start button, as the player. */
+suspend fun ViewsForTesting.clickStart(virtualPadView: VirtualPadView) = clickOn(virtualPadView.startButton)
 
 /** Presses and releases the arrow, as a tap of the player. */
 suspend fun ViewsForTesting.clickArrow(

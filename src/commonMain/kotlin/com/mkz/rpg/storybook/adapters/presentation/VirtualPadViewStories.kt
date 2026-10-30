@@ -18,7 +18,7 @@ object VirtualPadViewStories : StoryBinding {
         StoryDto(
             id = "screen-virtual-pad--pad",
             name = "Pad",
-            description = "The four arrows on the left, and the round B and A buttons on the right. Tap them to see what they call.",
+            description = "The four arrows on the left, the round B and A buttons on the right, and Start at the bottom. Tap them to see what they call.",
             args = emptyMap(),
         )
 
@@ -27,7 +27,9 @@ object VirtualPadViewStories : StoryBinding {
             id = "screen-virtual-pad",
             group = "Screen",
             title = "Virtual pad",
-            description = "The pad the player explores with, in the place of the battle HUD: the arrows walk the party, A talks to the npc next to the leader and B opens the formation.",
+            description =
+                "The pad the player explores with, in the place of the battle HUD: the arrows walk the party, A talks to the npc next to the leader, " +
+                    "B opens the formation and Start pauses the game.",
             controls = emptyList(),
             args = emptyMap(),
             stories = listOf(pad),
@@ -49,5 +51,6 @@ object VirtualPadViewStories : StoryBinding {
             }
             setOnAPressed { context.action("onAPressed") }
             setOnBPressed { context.action("onBPressed") }
+            setOnStartPressed { context.action("onStartPressed") }
         }
 }
