@@ -9,11 +9,15 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import korlibs.io.async.launchImmediately
 import korlibs.korge.view.View
+import korlibs.korge.view.addUpdater
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * The stories of [BattlefieldView]: a tiny fixed map, as big as its viewport, with a few tiles of each terrain, a battle
- * unit and another, an npc, a building and loot. Tapping a tile logs `tileSelected` and selects it.
+ * unit and another, an npc, a building and loot. Tapping a tile logs `tileSelected` and selects it. The health flash plays
+ * once the battlefield is on the screen, and again whenever an arg changes, e.g.: `replay`.
  */
 object BattlefieldViewStories : StoryBinding {
     // Each tile is a terrain: sand, grass, water, lava or void. The fortress stands over the sand on its right.
@@ -64,6 +68,8 @@ object BattlefieldViewStories : StoryBinding {
     private const val UNIT = "unit"
     private const val NPC = "npc"
     private const val LOOT = "loot"
+    private const val REPLAY = "replay"
+    private const val REPLAY_MAXIMUM = 9
 
     /** What is drawn over the tiles, as the battle does for the battle unit selected. */
     private enum class Layer {
@@ -71,6 +77,7 @@ object BattlefieldViewStories : StoryBinding {
         MOVE_RANGE,
         CAST_RANGE,
         HEALTH_PREVIEW,
+        HEALTH_FLASH,
     }
 
     private val map =
@@ -111,6 +118,16 @@ object BattlefieldViewStories : StoryBinding {
             args = mapOf(LAYER to ArgDto.text(Layer.HEALTH_PREVIEW.name), HEALTH_PREVIEW to ArgDto.text(PreviewOption.EMPTY.name)),
         )
 
+    private val healthFlash =
+        StoryDto(
+            id = "screen-battlefield--health-flash",
+            name = "Health flash",
+            description =
+                "The health of the battle unit changed while exploring, e.g.: standing on lava: it flashes, and the health it has left " +
+                    "blinks over it as long as it flashes, stays still, and fades out. Change replay to play it again.",
+            args = mapOf(LAYER to ArgDto.text(Layer.HEALTH_FLASH.name), HEALTH_PREVIEW to ArgDto.text(PreviewOption.TWO_OUT_OF_THREE.name)),
+        )
+
     override fun component(context: StoryContext) =
         ComponentDto(
             id = "screen-battlefield",
@@ -118,7 +135,8 @@ object BattlefieldViewStories : StoryBinding {
             title = "Battlefield",
             description =
                 "The map of the game, dragged to scroll, with its battle units, npcs, buildings and loot. " +
-                    "layer: what is drawn over the tiles. selectedTile: `row,column`, or none. healthPreview: what a cast leaves.",
+                    "layer: what is drawn over the tiles. selectedTile: `row,column`, or none. healthPreview: what a cast leaves, " +
+                    "or the health left flashed. replay: changed to play the health flash again.",
             controls =
                 listOf(
                     ControlDto.enum(LAYER, Layer.entries.map { layer -> layer.name }),
@@ -127,6 +145,7 @@ object BattlefieldViewStories : StoryBinding {
                     ControlDto.pick(UNIT, context.unitIds()),
                     ControlDto.pick(NPC, listOf(NONE) + context.npcIds()),
                     ControlDto.pick(LOOT, context.lootableItemIds()),
+                    ControlDto.int(REPLAY, minimum = 0, maximum = REPLAY_MAXIMUM),
                 ),
             args =
                 mapOf(
@@ -136,8 +155,9 @@ object BattlefieldViewStories : StoryBinding {
                     UNIT to ArgDto.text(DEFAULT_UNIT),
                     NPC to ArgDto.text(DEFAULT_NPC),
                     LOOT to ArgDto.text(DEFAULT_LOOT),
+                    REPLAY to ArgDto.int(0),
                 ),
-            stories = listOf(map, moveRange, castRange, selectedTile, healthPreview, defeatedPreview),
+            stories = listOf(map, moveRange, castRange, selectedTile, healthPreview, defeatedPreview, healthFlash),
         )
 
     override fun render(
@@ -181,9 +201,27 @@ object BattlefieldViewStories : StoryBinding {
                     }
                     dimTilesExcept((CAST_GROUP + BATTLE_UNIT_TILE).toSet())
                 }
+                Layer.HEALTH_FLASH -> flashHealthOnScreen(args.text(UNIT), PreviewOption.valueOf(args.text(HEALTH_PREVIEW)))
             }
             selected?.let { tile -> displayTileSelection(tile.row, tile.column) }
         }
+
+    // Flashes the battle unit with the health it has left, as exploring does, once the battlefield is on the screen, as
+    // its animations only play there.
+    private fun BattlefieldView.flashHealthOnScreen(
+        unitId: String,
+        previewOption: PreviewOption,
+    ) {
+        var isFlashed = false
+        addUpdater {
+            val views = stage?.views ?: return@addUpdater
+            if (isFlashed) return@addUpdater
+            isFlashed = true
+            val scope = CoroutineScope(views.coroutineContext)
+            scope.launchImmediately { flashBattleUnit(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, unitId) }
+            scope.launchImmediately { flashHealth(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, previewOption) }
+        }
+    }
 
     // The tile of `row,column`, or none when there is none, or it is not on the map.
     private fun selectedTile(selectedTile: String): TilePosition? {

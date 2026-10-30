@@ -49,6 +49,34 @@ class BattlefieldHealthBarPreviewViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Hold should stop the blinks and draw the third left when the health is held`() =
+        sharedViewsTest {
+            // Given
+            val healthBarPreviewView = BattlefieldHealthBarPreviewView(size)
+            healthBarPreviewView.display(PreviewOption.TWO_OUT_OF_THREE)
+            val blinks = healthBarPreviewView.blinks()
+            // When
+            healthBarPreviewView.hold()
+            // Then
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+            healthBarPreviewView.blinkedThirdAlphas() shouldBe listOf(1.0)
+        }
+
+    @Test
+    fun `Hold should stop the blinks and not draw the third when the empty health is held`() =
+        sharedViewsTest {
+            // Given
+            val healthBarPreviewView = BattlefieldHealthBarPreviewView(size)
+            healthBarPreviewView.display(PreviewOption.EMPTY)
+            val blinks = healthBarPreviewView.blinks()
+            // When
+            healthBarPreviewView.hold()
+            // Then
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+            healthBarPreviewView.blinkedThirdAlphas() shouldBe listOf(0.0)
+        }
+
+    @Test
     fun `Of should be empty when no health would be left`() {
         PreviewOption.of(remaining = 0, maximum = 30) shouldBe PreviewOption.EMPTY
     }

@@ -1,6 +1,6 @@
 # Plan: Keep the health bar of a battle unit on the screen a bit longer while exploring
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** While exploring, the health bar displayed over a battle unit whose health changes (see
 > [the health bar while exploring](health-bar-on-effects-while-exploring.md)) lasts as long as a flash, 480ms, and is

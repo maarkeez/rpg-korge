@@ -164,6 +164,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-battlefield--selected-tile",
                     "screen-battlefield--health-preview",
                     "screen-battlefield--health-preview-defeated",
+                    "screen-battlefield--health-flash",
                     "screen-terrain-tile",
                     "screen-terrain-tile--sand",
                     "screen-terrain-tile--water",

@@ -472,6 +472,19 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `ExplorationPaused should remove the health flashes`() {
+        // Given
+        val exploringApis = exploringApis(deployments = partyOfTwoKnights)
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        exploringApis.eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        // When
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.removeHealthFlashesCount shouldBe 1
+    }
+
+    @Test
     fun `MoveUnit should swap the leader over the member whichever battle unit moved first`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)

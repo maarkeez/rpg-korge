@@ -21,11 +21,18 @@ class BattlefieldHealthBarPreviewView(
     // The blinks of the previous preview are cancelled, as removing their views does not stop them.
     internal val blinkAnimators = mutableListOf<Animator>()
 
+    // The thirds blinking, and their alpha once the health is held.
+    private val heldAlphas = mutableMapOf<View, Double>()
+
+    internal val blinkingThirds: List<View>
+        get() = heldAlphas.keys.toList()
+
     internal var previewOption: PreviewOption? = null
         private set
 
     fun display(previewOption: PreviewOption) {
         stop()
+        heldAlphas.clear()
         removeChildren()
         this.previewOption = previewOption
 
@@ -85,12 +92,23 @@ class BattlefieldHealthBarPreviewView(
         blinkAnimators.clear()
     }
 
+    /**
+     * Stops blinking, leaving the health as it is after the change: the third that blinked is drawn when it is health
+     * left, and not drawn when no health is left, e.g.: once a battle unit has flashed while exploring.
+     */
+    fun hold() {
+        stop()
+        heldAlphas.forEach { (third, alpha) -> third.alpha = alpha }
+    }
+
     private fun blinkEmpty(view: View) {
         blinkAnimators += view.blink(firstAlpha = 0.5, secondAlpha = 0.0)
+        heldAlphas[view] = 0.0
     }
 
     private fun blinkFull(view: View) {
         blinkAnimators += view.blink(firstAlpha = 0.5, secondAlpha = 1.0)
+        heldAlphas[view] = 1.0
     }
 
     enum class PreviewOption {

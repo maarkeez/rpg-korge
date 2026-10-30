@@ -125,6 +125,11 @@ open class BattlefieldView(
         const val FLASH_COUNT = 3
         val FLASH_DURATION = 80.milliseconds
 
+        // While exploring, the health of a battle unit whose health changes stays this long over it, blinking as long as
+        // it flashes, and fading out at the end.
+        val HEALTH_FLASH_DURATION = 1500.milliseconds
+        val HEALTH_FLASH_FADE_DURATION = 200.milliseconds
+
         // When a turn starts, the battlefield is tinted with the turn colour up to this opacity and back.
         const val TINT_ALPHA = 0.4
         val TINT_DURATION = 500.milliseconds
@@ -141,6 +146,9 @@ open class BattlefieldView(
 
     // The flashes blinking or waiting on each tile, stopped once its battle unit leaves it.
     private val flashes = mutableMapOf<TilePosition, MutableList<Job>>()
+
+    // The health flashed while exploring, wherever it is (e.g.: gliding with its battle unit), until it is removed.
+    private val healthFlashes = mutableSetOf<BattlefieldHealthBarPreviewView>()
 
     // The picked up items rising from their tile, drawn at whole pixels like the other views moving on the battlefield.
     private val risingLoot = mutableSetOf<View>()
@@ -226,6 +234,7 @@ open class BattlefieldView(
         if (isDisplayed) {
             battlefieldAnimator.cancel()
             createdTiles.values.forEach(::removeHealthPreview)
+            removeHealthFlashes()
             battlefieldGrid.removeFromParent()
             movingBattleUnits.removeFromParent()
             camera.removeFromParent()
@@ -548,18 +557,17 @@ open class BattlefieldView(
         }
     }
 
-    private fun removeHealthPreview(tileButton: UIButton) = tileButton.removeHealthBar(HEALTH_PREVIEW)
-
-    private fun UIButton.removeHealthBar(layer: String) {
-        val healthBar = findViewByName(layer) as? BattlefieldHealthBarPreviewView ?: return
-        healthBar.stop()
-        healthBar.removeFromParent()
+    private fun removeHealthPreview(tileButton: UIButton) {
+        val healthPreview = tileButton.findViewByName(HEALTH_PREVIEW) as? BattlefieldHealthBarPreviewView ?: return
+        healthPreview.stop()
+        healthPreview.removeFromParent()
     }
 
     /**
-     * Displays the health the battle unit on the tile has left at the top of the tile, as long as a flash blinks, e.g.:
-     * when standing on lava while exploring. It keeps the selection of the tile, replaces the health already flashed on
-     * it, and is removed once the battle unit leaves its tile.
+     * Displays the health the battle unit on the tile has left at the top of the tile, e.g.: when standing on lava while
+     * exploring, for [HEALTH_FLASH_DURATION]: blinking as long as a flash, then still, and fading out at the end. It
+     * keeps the selection of the tile, replaces the health already flashed on it, and follows its battle unit when it
+     * moves, until it is removed from its tile (e.g.: defeated).
      */
     open suspend fun flashHealth(
         row: Int,
@@ -567,17 +575,57 @@ open class BattlefieldView(
         previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
     ) {
         val tileButton = tile(row, column)
-        tileButton.removeHealthBar(HEALTH_FLASH)
+        tileButton.removeHealthFlash()
         val healthBar = BattlefieldHealthBarPreviewView(Size(TILE_SIZE, TILE_SIZE / 5.0))
         healthBar.name = HEALTH_FLASH
         healthBar.display(previewOption)
         tileButton.addChild(healthBar)
-        delay(FLASH_DURATION * FLASH_COUNT * 2)
-        // Unless it was replaced or its battle unit left the tile meanwhile.
-        if (healthBar.parent == tileButton) {
-            healthBar.stop()
-            healthBar.removeFromParent()
-        }
+        healthFlashes += healthBar
+        val blinkDuration = FLASH_DURATION * FLASH_COUNT * 2
+        delay(blinkDuration)
+        // Unless it was replaced or removed meanwhile, wherever it is.
+        if (healthBar !in healthFlashes) return
+        healthBar.hold()
+        delay(HEALTH_FLASH_DURATION - blinkDuration - HEALTH_FLASH_FADE_DURATION)
+        if (healthBar !in healthFlashes) return
+        // Animated by the battlefield, which stays on the screen, so the fade ends also when the health is removed meanwhile.
+        animator { alpha(healthBar, 0.0, time = HEALTH_FLASH_FADE_DURATION) }.awaitComplete()
+        if (healthBar in healthFlashes) removeHealthFlash(healthBar)
+    }
+
+    /** Removes the health flashed on every tile, e.g.: when a battle starts. */
+    open fun removeHealthFlashes() {
+        healthFlashes.toList().forEach(::removeHealthFlash)
+    }
+
+    private fun UIButton.removeHealthFlash() {
+        val healthBar = findViewByName(HEALTH_FLASH) as? BattlefieldHealthBarPreviewView ?: return
+        removeHealthFlash(healthBar)
+    }
+
+    private fun removeHealthFlash(healthBar: BattlefieldHealthBarPreviewView) {
+        healthFlashes -= healthBar
+        healthBar.stop()
+        healthBar.removeFromParent()
+    }
+
+    // Takes the health flashed off the tile, so it moves with its battle unit, which is about to leave it.
+    private fun takeHealthFlash(position: TilePosition): BattlefieldHealthBarPreviewView? {
+        val healthBar = tileOrNull(position.row, position.column)?.findViewByName(HEALTH_FLASH) as? BattlefieldHealthBarPreviewView ?: return null
+        healthBar.removeFromParent()
+        return healthBar
+    }
+
+    // Puts the health flashed that moved with its battle unit on its destination tile, unless it is over meanwhile, or the
+    // tile displays a newer one, e.g.: the terrain of the destination changed its health while it moved there.
+    private fun putHealthFlash(
+        healthBar: BattlefieldHealthBarPreviewView,
+        position: TilePosition,
+    ) {
+        if (healthBar !in healthFlashes) return
+        val tileButton = tile(position.row, position.column)
+        if (tileButton.findViewByName(HEALTH_FLASH) != null) return removeHealthFlash(healthBar)
+        tileButton.addChild(healthBar)
     }
 
     /**
@@ -608,7 +656,7 @@ open class BattlefieldView(
         tile(row, column).findViewByName(NPC)?.removeFromParent()
     }
 
-    /** Removes the battle unit standing on the tile, stopping its flashes, e.g.: once it walks away. */
+    /** Removes the battle unit standing on the tile, stopping its flashes and its health flashed, e.g.: once defeated. */
     open fun removeBattleUnit(
         row: Int,
         column: Int,
@@ -617,7 +665,7 @@ open class BattlefieldView(
         tileButton.findViewByName(BATTLE_UNIT)?.removeFromParent()
         flashes.remove(TilePosition(row, column))?.forEach(Job::cancel)
         tileButton.findViewByName(FLASH)?.removeFromParent()
-        tileButton.removeHealthBar(HEALTH_FLASH)
+        tileButton.removeHealthFlash()
     }
 
     /** How the battlefield scrolls to follow a moving battle unit. */
@@ -635,7 +683,8 @@ open class BattlefieldView(
     /**
      * Glides the battle unit tile by tile along the path, then displays it on its destination tile, and scrolls the
      * battlefield so the battle unit stays visible, as following says. A step to a tile that is not next to the previous
-     * one (e.g.: a teleport) jumps to it. Path: the tiles walked from the origin (excluded) to the destination (included).
+     * one (e.g.: a teleport) jumps to it. The health flashed over the battle unit moves with it. Path: the tiles walked
+     * from the origin (excluded) to the destination (included).
      */
     open suspend fun moveBattleUnit(
         fromRow: Int,
@@ -647,11 +696,13 @@ open class BattlefieldView(
     ) {
         val destination = path.lastOrNull() ?: return
         val origin = TilePosition(fromRow, fromColumn)
+        val healthFlash = takeHealthFlash(origin)
         removeBattleUnit(fromRow, fromColumn)
         val glidingUnit =
             resourcesLoader.bitmapOrNull("unit/$unitId.png")?.let { unitBitmap ->
                 movingBattleUnits.movingBattleUnit(unitBitmap, GLIDING_BATTLE_UNIT, origin.column * TILE_SIZE.toDouble(), origin.row * TILE_SIZE.toDouble())
             }
+        healthFlash?.let { healthBar -> glidingUnit?.addChild(healthBar) }
         if (following == Following.TRAIL) trailFrom(origin, glidingUnit)
         var previousPosition = origin
         path.forEach { position ->
@@ -662,6 +713,7 @@ open class BattlefieldView(
         if (following == Following.TRAIL) trailOn(destination, glidingUnit)
         glidingUnit?.removeFromParent()
         displayBattleUnit(destination.row, destination.column, unitId)
+        healthFlash?.let { healthBar -> putHealthFlash(healthBar, destination) }
     }
 
     // Glides the image of the battle unit to the next tile of its path, or jumps to it when it is not next to the previous one.
@@ -685,7 +737,7 @@ open class BattlefieldView(
     /**
      * Swaps the tiles of the leader of the party and the party member on its next tile, trailing the leader as it
      * explores: both glide to each other's tile at once, the leader hops over the member, which slides straight
-     * underneath.
+     * underneath. The health flashed over each of them moves with it.
      */
     open suspend fun swapBattleUnits(
         leaderRow: Int,
@@ -695,14 +747,20 @@ open class BattlefieldView(
         memberColumn: Int,
         memberUnitId: String,
     ) {
-        trailFrom(TilePosition(leaderRow, leaderColumn), glidingUnit = null)
+        val leaderPosition = TilePosition(leaderRow, leaderColumn)
+        val memberPosition = TilePosition(memberRow, memberColumn)
+        trailFrom(leaderPosition, glidingUnit = null)
+        val leaderHealthFlash = takeHealthFlash(leaderPosition)
+        val memberHealthFlash = takeHealthFlash(memberPosition)
         removeBattleUnit(leaderRow, leaderColumn)
         removeBattleUnit(memberRow, memberColumn)
-        glideSwap(leaderRow, leaderColumn, leaderUnitId, memberRow, memberColumn, memberUnitId)
+        glideSwap(leaderRow, leaderColumn, leaderUnitId, memberRow, memberColumn, memberUnitId, leaderHealthFlash, memberHealthFlash)
         // The leader glided with the image `glideSwap` trails, which is only known there.
-        trailOn(TilePosition(memberRow, memberColumn), glidingUnit = trailedView)
+        trailOn(memberPosition, glidingUnit = trailedView)
         displayBattleUnit(memberRow, memberColumn, leaderUnitId)
         displayBattleUnit(leaderRow, leaderColumn, memberUnitId)
+        leaderHealthFlash?.let { healthBar -> putHealthFlash(healthBar, memberPosition) }
+        memberHealthFlash?.let { healthBar -> putHealthFlash(healthBar, leaderPosition) }
     }
 
     private suspend fun glideSwap(
@@ -712,6 +770,8 @@ open class BattlefieldView(
         memberRow: Int,
         memberColumn: Int,
         memberUnitId: String,
+        leaderHealthFlash: View?,
+        memberHealthFlash: View?,
     ) {
         val leaderBitmap = resourcesLoader.bitmapOrNull("unit/$leaderUnitId.png")
         val memberBitmap = resourcesLoader.bitmapOrNull("unit/$memberUnitId.png")
@@ -725,6 +785,9 @@ open class BattlefieldView(
         val leader = movingBattleUnits.movingBattleUnit(leaderBitmap, SWAPPING_LEADER, leaderX, leaderY)
         if (isTrailing) trailedView = leader
         val leaderImage = leader.firstChild!!
+        // Added after the images, so they glide over them, without hopping.
+        memberHealthFlash?.let(member::addChild)
+        leaderHealthFlash?.let(leader::addChild)
         movingBattleUnits
             .animator(parallel = true) {
                 moveTo(member, x = leaderX, y = leaderY, time = SWAP_DURATION, easing = Easing.LINEAR)

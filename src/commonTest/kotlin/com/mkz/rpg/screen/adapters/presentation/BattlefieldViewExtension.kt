@@ -315,6 +315,28 @@ fun BattlefieldView.flashedHealthAt(
     column: Int,
 ): BattlefieldHealthBarPreviewView.PreviewOption? = (tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.previewOption
 
+/** The health bar flashed on the tile, or `null` when there is none. */
+fun BattlefieldView.flashedHealthBarAt(
+    row: Int,
+    column: Int,
+): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView
+
+/** How many health bars are flashed on the tile, e.g.: to check one never piles up over another. */
+fun BattlefieldView.flashedHealthCountAt(
+    row: Int,
+    column: Int,
+): Int = tile(row, column).children.count { child -> child.name == BattlefieldView.HEALTH_FLASH }
+
+/** The health flashed over each battle unit gliding between tiles, `null` for the ones without it. */
+fun BattlefieldView.glidingFlashedHealth(): List<BattlefieldHealthBarPreviewView.PreviewOption?> =
+    if (!isDisplayed) {
+        emptyList()
+    } else {
+        movingBattleUnits.children.map { glidingUnit ->
+            ((glidingUnit as Container).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.previewOption
+        }
+    }
+
 /** The blinks of the health flashed on the tile, to check later whether they are still blinking. */
 fun BattlefieldView.flashedHealthBlinksAt(
     row: Int,

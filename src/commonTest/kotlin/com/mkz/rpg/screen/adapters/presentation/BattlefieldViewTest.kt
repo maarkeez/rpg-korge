@@ -21,6 +21,7 @@ import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.doubles.plusOrMinus
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.doubles.shouldBeLessThan
+import io.kotest.matchers.doubles.shouldBeLessThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.ints.shouldBeInRange
 import io.kotest.matchers.nulls.shouldBeNull
@@ -43,6 +44,11 @@ class BattlefieldViewTest : ViewsForTesting() {
 
         // A swap lasts 150ms and each test frame 10ms.
         const val SWAP_FRAMES = 15
+
+        // A flash blinks for 480ms, and the health flashed lasts 1.5s, fading out in its last 200ms, each test frame 10ms.
+        const val FLASH_FRAMES = 48
+        const val HEALTH_FLASH_FRAMES = 150
+        const val HEALTH_FLASH_FADE_FRAMES = 20
 
         // The tiles on the screen in each direction when the battlefield is not scrolled: the 6 in the viewport and 1 more.
         const val WINDOW_TILES = BattlefieldView.VISIBLE_TILES + BattlefieldView.TILE_WINDOW_MARGIN
@@ -1396,7 +1402,7 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `FlashHealth should display the health over the tile, keeping its selection, and remove it once a flash has blinked`() =
+    fun `FlashHealth should display the health over the tile, keeping its selection, and remove it once its time is over`() =
         sharedViewsTest {
             // Given
             val battlefieldView = BattlefieldView(loadedResourcesLoader())
@@ -1409,9 +1415,143 @@ class BattlefieldViewTest : ViewsForTesting() {
             // Then
             battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
             battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
-            awaitCompletion(flashingHealth)
+            val frames = sampleUntilCompletion(flashingHealth) { battlefieldView.flashedHealthAt(row = 0, column = 0) }
+            frames.size shouldBeInRange HEALTH_FLASH_FRAMES - 2..HEALTH_FLASH_FRAMES + 2
+            frames.forEach { flashed -> flashed shouldBe PreviewOption.TWO_OUT_OF_THREE }
             battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
             battlefieldView.hasSelectionAt(row = 0, column = 0).shouldBeTrue()
+        }
+
+    @Test
+    fun `FlashHealth should stop blinking once a flash has blinked and keep displaying the health`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            startFlashingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)
+            val blinks = battlefieldView.flashedHealthBlinksAt(row = 0, column = 0)
+            // When
+            repeat(FLASH_FRAMES + 2) { nextFrame() }
+            // Then
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
+            val healthBar = battlefieldView.flashedHealthBarAt(row = 0, column = 0)!!
+            healthBar.previewOption shouldBe PreviewOption.TWO_OUT_OF_THREE
+            healthBar.blinkedThirdAlphas() shouldBe listOf(1.0)
+            healthBar.alpha shouldBe 1.0
+        }
+
+    @Test
+    fun `FlashHealth should fade out the health before removing it`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            // When
+            val flashingHealth = startFlashingHealth(battlefieldView, previewOption = PreviewOption.ONE_OUT_OF_THREE)
+            val alphas = sampleUntilCompletion(flashingHealth) { battlefieldView.flashedHealthBarAt(row = 0, column = 0)?.alpha }.filterNotNull()
+            // Then
+            alphas.zipWithNext().forEach { (previous, next) -> next shouldBeLessThanOrEqual previous }
+            alphas.count { alpha -> alpha < 1.0 } shouldBeInRange HEALTH_FLASH_FADE_FRAMES - 2..HEALTH_FLASH_FADE_FRAMES + 2
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+        }
+
+    @Test
+    fun `FlashHealth should display the health again for its whole time when it is flashed again`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 1).toTerrain())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            val firstFlashing = startFlashingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
+            // A second later, as standing on lava.
+            repeat(HEALTH_FLASH_FRAMES * 2 / 3) { nextFrame() }
+            // When
+            val secondFlashing = startFlashingHealth(battlefieldView, previewOption = PreviewOption.TWO_OUT_OF_THREE)
+            awaitCompletion(firstFlashing)
+            repeat(HEALTH_FLASH_FRAMES * 2 / 3) { nextFrame() }
+            // Then
+            withClue("The second flash lasts its whole time, not what the first one had left") {
+                battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            }
+            awaitCompletion(secondFlashing)
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+        }
+
+    @Test
+    fun `FlashHealth should glide the health with the battle unit and keep it on its destination tile when it moves`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 3).toTerrain())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            val flashingHealth = startFlashingHealth(battlefieldView, previewOption = PreviewOption.ONE_OUT_OF_THREE)
+            // When
+            val frames = sampleUntilCompletion(startMoving(battlefieldView, path)) { battlefieldView.glidingFlashedHealth() }
+            // Then
+            frames.shouldNotBeEmpty()
+            frames.forEach { glidingHealth -> glidingHealth shouldBe listOf(PreviewOption.ONE_OUT_OF_THREE) }
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+            battlefieldView.flashedHealthAt(row = 0, column = 2) shouldBe PreviewOption.ONE_OUT_OF_THREE
+            awaitCompletion(flashingHealth)
+            battlefieldView.flashedHealthAt(row = 0, column = 2).shouldBeNull()
+        }
+
+    @Test
+    fun `FlashHealth should keep the health of the destination tile when the battle unit arrives carrying its own`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 1, columns = 2).toTerrain())
+            battlefieldView.displayBattleUnit(row = 0, column = 0, unitId = "knight")
+            addChild(battlefieldView)
+            startFlashingHealth(battlefieldView, previewOption = PreviewOption.THREE_OUT_OF_THREE)
+            val moving = startMoving(battlefieldView, listOf(TilePosition(row = 0, column = 1)))
+            // When
+            startAnimation { battlefieldView.flashHealth(row = 0, column = 1, previewOption = PreviewOption.TWO_OUT_OF_THREE) }
+            awaitCompletion(moving)
+            // Then
+            battlefieldView.flashedHealthAt(row = 0, column = 1) shouldBe PreviewOption.TWO_OUT_OF_THREE
+            battlefieldView.flashedHealthCountAt(row = 0, column = 1) shouldBe 1
+        }
+
+    @Test
+    fun `FlashHealth should swap the health of the battle units with them when they swap`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = swappingBattlefieldView(loadedResourcesLoader())
+            addChild(battlefieldView)
+            startAnimation { battlefieldView.flashHealth(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE) }
+            startAnimation { battlefieldView.flashHealth(row = 0, column = 1, previewOption = PreviewOption.FULL) }
+            // When
+            val frames = sampleUntilCompletion(startSwapping(battlefieldView)) { battlefieldView.glidingFlashedHealth() }
+            // Then
+            frames.shouldNotBeEmpty()
+            frames.forEach { glidingHealth -> glidingHealth shouldBe listOf(PreviewOption.FULL, PreviewOption.ONE_OUT_OF_THREE) }
+            battlefieldView.flashedHealthAt(row = 0, column = 0) shouldBe PreviewOption.FULL
+            battlefieldView.flashedHealthAt(row = 0, column = 1) shouldBe PreviewOption.ONE_OUT_OF_THREE
+        }
+
+    @Test
+    fun `RemoveHealthFlashes should remove the health displayed on every tile`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = swappingBattlefieldView(loadedResourcesLoader())
+            addChild(battlefieldView)
+            startAnimation { battlefieldView.flashHealth(row = 0, column = 0, previewOption = PreviewOption.ONE_OUT_OF_THREE) }
+            startAnimation { battlefieldView.flashHealth(row = 0, column = 1, previewOption = PreviewOption.TWO_OUT_OF_THREE) }
+            val blinks = battlefieldView.flashedHealthBlinksAt(row = 0, column = 0) + battlefieldView.flashedHealthBlinksAt(row = 0, column = 1)
+            // When
+            battlefieldView.removeHealthFlashes()
+            // Then
+            battlefieldView.flashedHealthAt(row = 0, column = 0).shouldBeNull()
+            battlefieldView.flashedHealthAt(row = 0, column = 1).shouldBeNull()
+            blinks.none { blink -> blink.isBlinking() }.shouldBeTrue()
         }
 
     @Test

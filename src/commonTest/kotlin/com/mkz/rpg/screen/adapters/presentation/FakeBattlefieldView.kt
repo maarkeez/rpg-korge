@@ -79,6 +79,8 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val trailedTiles = mutableListOf<TilePosition>()
     var stopTrailingCount = 0
         private set
+    var removeHealthFlashesCount = 0
+        private set
     val tints = mutableListOf<RGBA>()
     val flashedBattleUnits = mutableListOf<BattleUnitAt>()
 
@@ -182,6 +184,10 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
 
     override fun stopTrailing() {
         stopTrailingCount++
+    }
+
+    override fun removeHealthFlashes() {
+        removeHealthFlashesCount++
     }
 
     override fun removeNpc(

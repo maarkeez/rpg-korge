@@ -11,3 +11,6 @@ fun Animator.isBlinking(): Boolean = isActive
 
 /** How many health preview segments are blinking. */
 fun BattlefieldHealthBarPreviewView.blinkingCount(): Int = blinkAnimators.count { animator -> animator.isBlinking() }
+
+/** The alpha of each third that blinked, e.g.: once the health is held. */
+fun BattlefieldHealthBarPreviewView.blinkedThirdAlphas(): List<Double> = blinkingThirds.map { third -> third.alpha }
