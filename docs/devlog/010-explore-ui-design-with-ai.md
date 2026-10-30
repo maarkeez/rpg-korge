@@ -3,18 +3,6 @@ date: 9th October 2026
 commit: 63dc3d3a9168f49c19c8200cc47f2f624e52bb8e
 ---
 
-- [[Plan - Reflect about existing design]]
-- [[Plan - Design tools]]
-- [[Design brief]]
-- Chat gpt conversation to write down product brief [link](https://chatgpt.com/share/6ac9209d-aa80-83ed-b820-92a44872fab5)
-- [[Prompt - create ui redesign plan]]
-- [[Plan - UI Implementation]]
-- [[Prompt - Game Asset Redesign]]
-
-Point of view: I once again used AI to prototype the UI improvements and assets quality fast which lead to the following learnings
-- We need to define a design brief . That way we can make coherent decisions in the future.
-- We were missing basic UI information
----
 # 010 — Explore UI Design with AI
 
 ## Hook (1 minute)
