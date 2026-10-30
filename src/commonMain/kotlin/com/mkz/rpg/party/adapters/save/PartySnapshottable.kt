@@ -6,6 +6,8 @@ import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The party exploring: its members and its line. What it was doing (e.g.: walking) is not saved, as the game is only

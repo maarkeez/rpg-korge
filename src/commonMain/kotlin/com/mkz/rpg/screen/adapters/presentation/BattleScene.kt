@@ -17,11 +17,14 @@ import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
+import korlibs.korge.service.storage.IStorage
+import korlibs.korge.service.storage.storage
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
@@ -30,10 +33,11 @@ import korlibs.korge.view.container
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
-// Localization: the texts of the selected language. Random: the rolls of the CPU battle brain, e.g.: whether a CPU
-// battle unit rests while wandering. The tests choose them.
+// Localization: the texts of the selected language. Storage: where the games are saved, `views.storage` by default.
+// Random: the rolls of the CPU battle brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
 class BattleScene(
     private val localizationApi: LocalizationApi,
+    private val storage: IStorage? = null,
     private val random: Random = Random.Default,
 ) : Scene() {
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
@@ -60,6 +64,7 @@ class BattleScene(
     val shopView = ShopView(resourcesLoader, texts)
     val formationView = FormationView(resourcesLoader, texts)
     val pauseView = PauseView(texts)
+    val saveSlotsView = SaveSlotsView(texts)
     val confirmDialogView = ConfirmDialogView()
 
     override suspend fun SContainer.sceneInit() {
@@ -92,6 +97,31 @@ class BattleScene(
         val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus)
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
+        // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
+        val saveApi =
+            SaveApi(
+                storage = storage ?: views.storage,
+                eventBus = eventBus,
+                snapshottables =
+                    listOf(
+                        battleUnitApi.snapshottable,
+                        battlefieldApi.snapshottable,
+                        npcApi.snapshottable,
+                        lootDropApi.snapshottable,
+                        inventoryApi.snapshottable,
+                        partyApi.snapshottable,
+                        cpuWanderBrainApi.snapshottable,
+                    ),
+                canSave = { partyApi.searchParty()?.isPaused == true },
+                leaderUnitId = {
+                    partyApi
+                        .searchParty()
+                        ?.leaderBattleUnitId
+                        ?.let(battleUnitApi.searchBattleUnitById::invoke)
+                        ?.unitId
+                },
+                partySize = { partyApi.searchParty()?.battleUnitIds?.size ?: 0 },
+            )
 
         // Resources: each subdomain loads its data before the battle is set up
         terrainApi.init()
@@ -174,6 +204,7 @@ class BattleScene(
                     addChild(shopView)
                     addChild(formationView)
                     addChild(pauseView)
+                    addChild(saveSlotsView)
                     addChild(confirmDialogView)
                 }
                 uiSpacing(Size(0, 5))
@@ -197,8 +228,8 @@ class BattleScene(
                     )
                 val formationPresenter = FormationPresenter(formationView, battlefieldView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
                 val pausePresenter =
-                    PausePresenter(pauseView, confirmDialogView, partyApi, texts, timeline) {
-                        launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, random) } }
+                    PausePresenter(pauseView, saveSlotsView, confirmDialogView, partyApi, saveApi, texts, timeline) {
+                        launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }
                     }
                 val explorationPresenter =
                     ExplorationPresenter(

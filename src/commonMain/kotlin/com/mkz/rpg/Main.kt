@@ -14,6 +14,7 @@ import korlibs.image.color.Colors
 import korlibs.korge.Korge
 import korlibs.korge.KorgeDisplayMode
 import korlibs.korge.scene.sceneContainer
+import korlibs.korge.service.storage.IStorage
 import korlibs.korge.view.Stage
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
@@ -38,8 +39,12 @@ suspend fun main() =
         }
     }
 
-// Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU battle brain.
-suspend fun Stage.startGame(random: Random = Random.Default) {
+// Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU
+// battle brain, and where the games are saved (`views.storage` by default, a file on the JVM).
+suspend fun Stage.startGame(
+    random: Random = Random.Default,
+    storage: IStorage? = null,
+) {
     // The resources are downloaded while the menu is displayed, so a new game does not wait as long for them.
     ResourcesBundle.prefetch(views)
     val sceneContainer = sceneContainer()
@@ -50,7 +55,7 @@ suspend fun Stage.startGame(random: Random = Random.Default) {
     val localizationApi = LocalizationApi(eventBus)
     localizationApi.init()
 
-    sceneContainer.changeTo { MenuScene(localizationApi, random) }
+    sceneContainer.changeTo { MenuScene(localizationApi, storage, random) }
 }
 
 // Shared by `main` and the end-to-end tests, so both boot the Storybook the same way. The tests choose the story asked for,

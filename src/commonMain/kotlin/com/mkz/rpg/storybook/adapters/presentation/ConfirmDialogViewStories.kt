@@ -19,7 +19,16 @@ object ConfirmDialogViewStories : StoryBinding {
         val confirm: UiText,
     ) {
         QUIT(message = UiText.PAUSE_QUIT_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.PAUSE_QUIT),
+        OVERWRITE(message = UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.SAVE_SLOTS_OVERWRITE),
     }
+
+    private val overwrite =
+        StoryDto(
+            id = "screen-confirm-dialog--overwrite",
+            name = "Overwrite",
+            description = "Asked before saving into slot 2, which holds a game, as that game is lost.",
+            args = mapOf(QUESTION to ArgDto.text(Question.OVERWRITE.name.lowercase())),
+        )
 
     private val quit =
         StoryDto(
@@ -37,7 +46,7 @@ object ConfirmDialogViewStories : StoryBinding {
             description = "A question displayed in place of the pad before an action that can not be undone, over a secondary and a primary choice.",
             controls = listOf(ControlDto.pick(QUESTION, Question.entries.map { question -> question.name.lowercase() })),
             args = mapOf(QUESTION to ArgDto.text(Question.QUIT.name.lowercase())),
-            stories = listOf(quit),
+            stories = listOf(overwrite, quit),
         )
 
     override fun render(
@@ -47,7 +56,7 @@ object ConfirmDialogViewStories : StoryBinding {
         val question = Question.valueOf(args.text(QUESTION).uppercase())
         return ConfirmDialogView().apply {
             display(
-                message = context.texts[question.message],
+                message = context.texts[question.message, "slot" to 2],
                 cancelLabel = context.texts[question.cancel],
                 confirmLabel = context.texts[question.confirm],
                 onCancelled = { context.action("onCancelled") },

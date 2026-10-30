@@ -6,6 +6,8 @@ import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The npcs left on the battlefield, with their tiles and stocks: a recruited npc is gone, as it joined the party.

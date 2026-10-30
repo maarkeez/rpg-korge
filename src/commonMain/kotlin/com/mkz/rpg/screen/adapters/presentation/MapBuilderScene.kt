@@ -8,15 +8,20 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
+import korlibs.korge.service.storage.IStorage
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.math.geom.Size
 
-/** Designs a battlefield map, laid out like the battle: the title, the battlefield, the HUD and the calls to action. */
+/**
+ * Designs a battlefield map, laid out like the battle: the title, the battlefield, the HUD and the calls to action.
+ * Storage: where the games are saved, handed back to the menu.
+ */
 class MapBuilderScene(
     private val localizationApi: LocalizationApi,
+    private val storage: IStorage? = null,
 ) : Scene() {
     private companion object {
         const val MENU_MARGIN = 6.0
@@ -64,7 +69,7 @@ class MapBuilderScene(
             clipboard = GameWindowClipboard(views.gameWindow),
             mapFilePicker = GameWindowMapFilePicker(views.gameWindow, texts),
             coroutineScope = this@MapBuilderScene,
-            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi) } } },
+            onLeft = { launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage) } } },
             eventBus = eventBus,
         )
 

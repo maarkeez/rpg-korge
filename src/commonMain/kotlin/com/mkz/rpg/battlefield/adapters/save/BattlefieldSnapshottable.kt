@@ -5,6 +5,8 @@ import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The occupant of each tile: the battle units, the npcs and the buildings. The map itself is not saved, as it is read

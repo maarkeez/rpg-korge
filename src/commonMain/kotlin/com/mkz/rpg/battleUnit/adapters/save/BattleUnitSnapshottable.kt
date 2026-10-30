@@ -12,6 +12,8 @@ import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * Every battle unit as it is, the defeated ones left out, as they are deleted. Restoring fails when a battle unit names

@@ -14,6 +14,7 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
@@ -28,6 +29,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.math.geom.Size
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
@@ -81,9 +83,10 @@ class ExplorationPresenterTest {
     private val formationView = FormationView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
     private val pauseView = PauseView(TextsMother.texts())
+    private val saveSlotsView = SaveSlotsView(TextsMother.texts())
     private val confirmDialogView = ConfirmDialogView()
-    private var quits = 0
-    private val pausePresenter = PausePresenter(pauseView, confirmDialogView, apis.partyApi, TextsMother.texts(), timeline) { quits++ }
+    private val pausePresenter =
+        PausePresenter(pauseView, saveSlotsView, confirmDialogView, apis.partyApi, SaveApi(InmemoryStorage(), eventBus), TextsMother.texts(), timeline) {}
 
     private fun createPresenter() =
         ExplorationPresenter(
@@ -344,7 +347,7 @@ class ExplorationPresenterTest {
                 apis.eventBus,
             )
         val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
-        val pausePresenter = PausePresenter(pauseView, confirmDialogView, apis.partyApi, TextsMother.texts(), timeline) {}
+        val pausePresenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, apis.partyApi, SaveApi(InmemoryStorage(), apis.eventBus), TextsMother.texts(), timeline) {}
         return ExplorationPresenter(
             virtualPadView,
             npcDialogView,

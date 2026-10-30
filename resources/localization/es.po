@@ -256,6 +256,51 @@ msgctxt "ui.pause.quitConfirmation"
 msgid "Quit to the menu? The progress since the last save is lost."
 msgstr "¿Salir al menú? Se perderá lo jugado desde que guardaste."
 
+#. Displayed under the options of the pause screen once the game is saved.
+msgctxt "ui.pause.saved"
+msgid "Saved"
+msgstr "Guardada"
+
+#. The title of the save slots, when saving the game into one.
+msgctxt "ui.saveSlots.saveTitle"
+msgid "Save the game"
+msgstr "Guardar partida"
+
+#. A save slot with no game saved in it.
+msgctxt "ui.saveSlots.empty"
+msgid "Empty"
+msgstr "Vacía"
+
+#. A save slot whose game was saved by another version of the game: it can only be deleted.
+msgctxt "ui.saveSlots.incompatible"
+msgid "Incompatible save"
+msgstr "Partida incompatible"
+
+#. A save slot with a game saved in it. {date}: when it was saved, {leader}: the party leader's name, {members}: the party size.
+msgctxt "ui.saveSlots.saved"
+msgid "{date} · {leader} · party of {members}"
+msgstr "{date} · {leader} · grupo de {members}"
+
+#. Deletes the game saved in the slot, once confirmed.
+msgctxt "ui.saveSlots.delete"
+msgid "Delete"
+msgstr "Borrar"
+
+#. Goes back from the save slots.
+msgctxt "ui.saveSlots.back"
+msgid "Back"
+msgstr "Volver"
+
+#. Saves the game in place of the one saved in the slot.
+msgctxt "ui.saveSlots.overwrite"
+msgid "Overwrite"
+msgstr "Sobrescribir"
+
+#. Asked before saving into a slot holding a game. {slot}: its number.
+msgctxt "ui.saveSlots.overwriteConfirmation"
+msgid "Overwrite the game saved in slot {slot}?"
+msgstr "¿Sobrescribir la partida guardada en la ranura {slot}?"
+
 msgctxt "ui.mapBuilderInfo.title"
 msgid "Map Builder"
 msgstr "Constructor de mapas"

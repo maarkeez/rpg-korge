@@ -6,6 +6,8 @@ import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError.IncompatibleSave
 import com.mkz.rpg.save.domain.SaveRepository
 import korlibs.korge.service.storage.IStorage
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The saves in KorGE's storage, which keeps them across sessions on every target: the game gives it `views.storage`, a

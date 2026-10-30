@@ -5,6 +5,8 @@ import com.mkz.rpg.lootDrop.domain.LootDropRepository
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The items lying on the battlefield, by the unit that dropped them. The loot tables of each unit are not saved, as they

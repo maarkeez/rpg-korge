@@ -13,6 +13,11 @@ fun Stage.pauseView(): PauseView? = descendants().filterIsInstance<PauseView>().
 /** The labels of the options, from the top, e.g.: `Resume`. */
 fun PauseView.optionLabels(): List<String> = listOf(resumeButton.confirmButton.text, saveButton.cancelButton.text, quitButton.cancelButton.text)
 
+/** Whether Saved is displayed under the options. */
+fun PauseView.isSavedShown(): Boolean = savedText.visible
+
+fun PauseView.savedLabel(): String = savedText.text
+
 suspend fun ViewsForTesting.clickResume(pauseView: PauseView) = clickOn(pauseView.resumeButton.confirmButton)
 
 suspend fun ViewsForTesting.clickSave(pauseView: PauseView) = clickOn(pauseView.saveButton.cancelButton)

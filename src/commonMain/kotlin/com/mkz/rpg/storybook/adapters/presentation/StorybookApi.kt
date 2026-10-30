@@ -74,6 +74,7 @@ class StorybookApi(
                 FormationRowViewStories,
                 FormationViewStories,
                 PauseViewStories,
+                SaveSlotsViewStories,
                 ConfirmDialogViewStories,
                 BattleInfoViewStories,
                 MenuViewStories,

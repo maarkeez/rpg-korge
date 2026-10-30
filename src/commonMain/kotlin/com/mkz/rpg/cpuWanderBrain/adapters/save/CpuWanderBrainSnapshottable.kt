@@ -5,6 +5,8 @@ import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * The home of each CPU battle unit, the ones returning home, and the party steps each defeated one has counted until it
