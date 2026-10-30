@@ -43,4 +43,23 @@ class SetupBattleTest {
             PartyEvent.RequestStartExploration,
         )
     }
+
+    @Test
+    fun `should stop after the buildings, which the saved game is restored on, when a saved game is loaded`() {
+        // When
+        setupBattle(isLoadingASavedGame = true)
+        // Then
+        eventBus.shouldHavePublishedEvents(
+            TerrainEvent.RequestInitialiseTerrains,
+            EffectEvent.RequestInitialiseEffects,
+            LootableItemEvent.RequestInitialiseLootableItems,
+            LootTableEvent.RequestInitialiseLootTables,
+            AbilityEvent.RequestInitialiseAbilities,
+            UnitEvent.RequestInitialiseUnits,
+            LootDropEvent.RequestInitialiseLootDrops,
+            PlayerEvent.RequestInitialisePlayers,
+            BattlefieldEvent.RequestInitialiseBattlefield,
+            BuildingEvent.RequestInitialiseBuildings,
+        )
+    }
 }

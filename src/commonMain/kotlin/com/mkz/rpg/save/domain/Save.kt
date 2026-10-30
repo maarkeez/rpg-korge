@@ -4,7 +4,6 @@ import com.mkz.rpg.save.domain.SaveError.IncompatibleSave
 import com.mkz.rpg.save.domain.SaveError.SlotOutOfRange
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.save.domain.SaveEvent.GameSaved
-import com.mkz.rpg.save.domain.SaveEvent.SaveSlotDeleted
 import kotlin.jvm.JvmInline
 
 /**
@@ -86,9 +85,6 @@ data class Save private constructor(
         if (version.value != SAVE_VERSION) throw IncompatibleSave(slot.value)
         return snapshots.value to copy(events = events + GameRestored(slot = slot.value))
     }
-
-    /** Deletes the game, so the slot is empty. */
-    fun delete(): Save = copy(events = events + SaveSlotDeleted(slot = slot.value))
 
     fun pullEvents() = events to copy(events = emptySet())
 

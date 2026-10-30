@@ -225,9 +225,9 @@ const DATA = {
     {"name": "npc", "files": 17, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 29},
     {"name": "party", "files": 39, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 33, "importsOut": 12},
-    {"name": "save", "files": 9, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 4, "importsOut": 5},
+    {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 4, "importsOut": 8},
     {"name": "screen", "files": 88, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 190},
-    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 456, "importsOut": 0},
+    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 459, "importsOut": 0},
     {"name": "storybook", "files": 92, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 102},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 13, "importsOut": 15}
@@ -1094,10 +1094,13 @@ const DATA = {
       {"file": "com/mkz/rpg/player/usecases/commands/InitialisePlayers.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/player/usecases/commands/RequestPlayerCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
-    {"from": "save", "to": "shared", "weight": 5, "files": 3, "imports": [
+    {"from": "save", "to": "shared", "weight": 8, "files": 5, "imports": [
       {"file": "com/mkz/rpg/save/adapters/presentation/SaveApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/save/adapters/presentation/SaveApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/save/domain/SaveEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/save/usecases/commands/DeleteSaveSlot.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/save/usecases/commands/LoadGame.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/save/usecases/commands/LoadGame.kt", "layer": "usecases", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/save/usecases/commands/SaveGame.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/save/usecases/commands/SaveGame.kt", "layer": "usecases", "name": "shared.domain.Snapshottable"}
     ]},
