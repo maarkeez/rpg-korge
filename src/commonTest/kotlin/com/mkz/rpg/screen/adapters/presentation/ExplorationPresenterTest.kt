@@ -80,6 +80,10 @@ class ExplorationPresenterTest {
 
     private val formationView = FormationView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+    private val pauseView = PauseView(TextsMother.texts())
+    private val confirmDialogView = ConfirmDialogView()
+    private var quits = 0
+    private val pausePresenter = PausePresenter(pauseView, confirmDialogView, apis.partyApi, TextsMother.texts(), timeline) { quits++ }
 
     private fun createPresenter() =
         ExplorationPresenter(
@@ -91,6 +95,7 @@ class ExplorationPresenterTest {
             apis.npcApi,
             shopPresenter,
             formationPresenter,
+            pausePresenter,
             TextsMother.texts(),
             timeline,
             eventBus,
@@ -339,6 +344,7 @@ class ExplorationPresenterTest {
                 apis.eventBus,
             )
         val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+        val pausePresenter = PausePresenter(pauseView, confirmDialogView, apis.partyApi, TextsMother.texts(), timeline) {}
         return ExplorationPresenter(
             virtualPadView,
             npcDialogView,
@@ -348,6 +354,7 @@ class ExplorationPresenterTest {
             apis.npcApi,
             shopPresenter,
             formationPresenter,
+            pausePresenter,
             TextsMother.texts(),
             timeline,
             apis.eventBus,
@@ -838,6 +845,61 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         formationView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
+    }
+
+    private fun openPause() {
+        virtualPadView.pressStartButton()
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `OpenPause should display the pause screen in place of the pad when Start is pressed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        openPause()
+        // Then
+        pauseView.visible.shouldBeTrue()
+        virtualPadView.visible.shouldBeFalse()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
+        apis.partyApi
+            .searchParty()!!
+            .isPaused
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `Tick should not apply the terrain effects while paused`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        openPause()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(3.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+    }
+
+    @Test
+    fun `ClosePause should display the pad again and explore when Resume is tapped`() {
+        // Given
+        createPresenter()
+        startExploring()
+        openPause()
+        // When
+        pausePresenter.pauseResumeSelected()
+        eventBus.dispatch()
+        // Then
+        pauseView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
         apis.partyApi
             .searchParty()!!

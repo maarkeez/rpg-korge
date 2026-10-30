@@ -73,6 +73,8 @@ class StorybookApi(
                 VirtualPadViewStories,
                 FormationRowViewStories,
                 FormationViewStories,
+                PauseViewStories,
+                ConfirmDialogViewStories,
                 BattleInfoViewStories,
                 MenuViewStories,
                 MapBuilderInfoViewStories,

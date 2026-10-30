@@ -14,6 +14,8 @@ import com.mkz.rpg.party.domain.PartyEvent.FormationClosed
 import com.mkz.rpg.party.domain.PartyEvent.FormationOpened
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
+import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
+import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.domain.EventBus
@@ -39,6 +41,9 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Pressing B opens the party formation in place of the pad (see [FormationPresenter]), where the player sets the party
  * order, and who leads. Time stops meanwhile too, until Close displays the pad again.
+ *
+ * Pressing Start pauses the game: the pause screen takes the place of the pad (see [PausePresenter]), and time stops
+ * until Resume displays the pad again.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
@@ -49,6 +54,7 @@ class ExplorationPresenter(
     private val npcApi: NpcApi,
     private val shopPresenter: ShopPresenter,
     private val formationPresenter: FormationPresenter,
+    private val pausePresenter: PausePresenter,
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
@@ -58,7 +64,7 @@ class ExplorationPresenter(
         val STANDING_TERRAIN_EFFECT_INTERVAL = 1.seconds
     }
 
-    // The last arrow, A or B pressed, until it is acted on.
+    // The last arrow, A, B or Start pressed, until it is acted on.
     private sealed interface Press {
         data class Arrow(
             val direction: VirtualPadView.Direction,
@@ -67,6 +73,8 @@ class ExplorationPresenter(
         data object A : Press
 
         data object B : Press
+
+        data object Start : Press
     }
 
     private var elapsedSinceTerrainEffects = Duration.ZERO
@@ -117,6 +125,15 @@ class ExplorationPresenter(
             eventBus.subscribe<FormationClosed> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
+            eventBus.subscribe<PauseOpened> {
+                timeline.play {
+                    virtualPadView.visible = false
+                    pausePresenter.open()
+                }
+            },
+            eventBus.subscribe<PauseClosed> {
+                timeline.play { displayVirtualPad(isDisplayed = true) }
+            },
             eventBus.subscribe<PlayerVictory> {
                 isGameOver = true
                 timeline.play {
@@ -124,6 +141,7 @@ class ExplorationPresenter(
                     npcDialogView.visible = false
                     shopPresenter.close()
                     formationPresenter.close()
+                    pausePresenter.close()
                 }
             },
         )
@@ -140,6 +158,10 @@ class ExplorationPresenter(
         virtualPadView.setOnBPressed {
             pendingPress = Press.B
             openFormation()
+        }
+        virtualPadView.setOnStartPressed {
+            pendingPress = Press.Start
+            openPause()
         }
         npcDialogView.setOnTapped { dialogTapped() }
         shopPresenter.setOnBack { shopBackSelected() }
@@ -170,6 +192,7 @@ class ExplorationPresenter(
             is Press.Arrow -> walkParty(press.direction)
             Press.A -> talkToAdjacentNpc()
             Press.B -> openFormation()
+            Press.Start -> openPause()
             null -> Unit
         }
     }
@@ -203,6 +226,13 @@ class ExplorationPresenter(
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.B) pendingPress = null
         partyApi.openFormation()
+    }
+
+    // As walking: once the scene shows where the party is, and while the pad is displayed.
+    private fun openPause() {
+        if (timeline.isPlaying || !virtualPadView.visible) return
+        if (pendingPress == Press.Start) pendingPress = null
+        partyApi.openPause()
     }
 
     // Finishes the talk, but with a merchant, which is left with its Leave choice.
@@ -241,11 +271,12 @@ class ExplorationPresenter(
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
     // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog,
-    // the shop and the formation.
+    // the shop, the formation and the pause screen.
     private fun displayVirtualPad(isDisplayed: Boolean) {
         npcDialogView.visible = false
         shopPresenter.close()
         formationPresenter.close()
+        pausePresenter.close()
         virtualPadView.visible = isDisplayed
         battleHudView.visible = !isDisplayed
         playerCallToActionView.visible = !isDisplayed

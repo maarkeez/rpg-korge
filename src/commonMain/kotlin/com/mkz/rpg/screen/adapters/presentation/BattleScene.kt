@@ -20,6 +20,7 @@ import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
@@ -32,7 +33,7 @@ import kotlin.random.Random
 // Localization: the texts of the selected language. Random: the rolls of the CPU battle brain, e.g.: whether a CPU
 // battle unit rests while wandering. The tests choose them.
 class BattleScene(
-    localizationApi: LocalizationApi,
+    private val localizationApi: LocalizationApi,
     private val random: Random = Random.Default,
 ) : Scene() {
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
@@ -58,6 +59,8 @@ class BattleScene(
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
     val shopView = ShopView(resourcesLoader, texts)
     val formationView = FormationView(resourcesLoader, texts)
+    val pauseView = PauseView(texts)
+    val confirmDialogView = ConfirmDialogView()
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -163,13 +166,15 @@ class BattleScene(
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
                 // While exploring, the virtual pad takes the place of the battle HUD, an npc dialog the place of the pad, and a
-                // merchant's shop the place of its dialog. The party formation also takes the place of the pad.
+                // merchant's shop the place of its dialog. The party formation and the pause screen also take the place of the pad.
                 container {
                     addChild(battleHudView)
                     addChild(virtualPadView)
                     addChild(npcDialogView)
                     addChild(shopView)
                     addChild(formationView)
+                    addChild(pauseView)
+                    addChild(confirmDialogView)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
@@ -191,6 +196,10 @@ class BattleScene(
                         eventBus,
                     )
                 val formationPresenter = FormationPresenter(formationView, battlefieldView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
+                val pausePresenter =
+                    PausePresenter(pauseView, confirmDialogView, partyApi, texts, timeline) {
+                        launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, random) } }
+                    }
                 val explorationPresenter =
                     ExplorationPresenter(
                         virtualPadView,
@@ -201,6 +210,7 @@ class BattleScene(
                         npcApi,
                         shopPresenter,
                         formationPresenter,
+                        pausePresenter,
                         texts,
                         timeline,
                         eventBus,

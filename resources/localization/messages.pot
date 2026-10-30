@@ -236,6 +236,26 @@ msgctxt "ui.formation.close"
 msgid "Close"
 msgstr ""
 
+#. The primary action of the pause screen: closes it, so the party explores again.
+msgctxt "ui.pause.resume"
+msgid "Resume"
+msgstr ""
+
+#. Opens the save slots, to save the game into one.
+msgctxt "ui.pause.save"
+msgid "Save"
+msgstr ""
+
+#. Goes back to the main menu, once confirmed.
+msgctxt "ui.pause.quit"
+msgid "Quit to menu"
+msgstr ""
+
+#. Asked before quitting to the main menu.
+msgctxt "ui.pause.quitConfirmation"
+msgid "Quit to the menu? The progress since the last save is lost."
+msgstr ""
+
 msgctxt "ui.mapBuilderInfo.title"
 msgid "Map Builder"
 msgstr ""
