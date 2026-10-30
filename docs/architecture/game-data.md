@@ -25,6 +25,9 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
+To load a saved game, `SetupBattle` stops after step 10 (`isLoadingASavedGame`): the battle units, the npcs and the
+party are restored from the save instead, once the first 10 steps are dispatched. See [Save and load](save-and-load.md#loading).
+
 The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsNotVacant`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc can not be occupied (e.g.: void, out of the battlefield).
 
 Each subdomain follows the same structure:

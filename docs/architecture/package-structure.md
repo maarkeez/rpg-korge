@@ -13,7 +13,7 @@ A subdomain MUST only contain the following packages:
 ```
 <subdomain>
 ├── adapters
-│   └── <any name>      e.g.: events, presentation, storage, resources
+│   └── <any name>      e.g.: events, presentation, storage, resources, save
 ├── domain
 └── usecases
     ├── commands
@@ -54,6 +54,14 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
 - Every view of an `adapters.presentation` package (a top-level class extending a KorGE view, directly or through another view, e.g.: `HealthBarView` → `BarView` → `UIContainer`) MUST have its stories: a `<View>Stories` binding in `storybook.adapters.presentation` (e.g.: `HealthBarViewStories`), listed in `StorybookApi.STORY_BINDINGS`, as JS has no reflection to find it. There is no exception: no view is allowed to have none. The presenters, the scenes and the Storybook's own views are left out. This is enforced by [`StoryCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/StoryCoverageArchitectureTest.kt).
 - The views of the game (the same classes) MUST NOT import a `com.mkz.rpg.<subdomain>.domain` or `.usecases` package, so the stories can feed them plain data: they take view data (a data class of the `adapters.presentation` package holding what they draw), which their presenter maps from the domain. This is enforced by [`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt).
 - Reading the page URL and titling the page once a story has rendered are the only platform specific code: `storybook.adapters.location` and `storybook.adapters.page` declare it in `src/commonMain`, and implement it in `src/jsMain` (the page) and `src/jvmMain` (a system property, no page), in the same packages, so the architecture tests check them too.
+
+## Saving
+
+- Every subdomain with a repository MUST either save its runtime state, with a `<Subdomain>Snapshottable` in its
+  `adapters.save` package implementing `shared.domain.Snapshottable` (e.g.: `battleUnit.adapters.save.BattleUnitSnapshottable`),
+  or be listed as not saved, with why (e.g.: read from the resources). The `@Serializable` snapshot classes live in that
+  package too, never in the domain. This is enforced by [`SnapshotCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SnapshotCoverageArchitectureTest.kt).
+  See [Save and load](save-and-load.md#snapshots).
 
 ## Dependencies between subdomains
 

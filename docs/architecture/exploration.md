@@ -11,11 +11,12 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 ## The virtual pad
 
-[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, and the round B and A buttons on the right, A higher and further right than B.
+[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both.
 
 - The arrows walk the party (see [Walking](#walking)).
 - A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
 - B opens the party formation, where the player chooses who leads (see [Choosing the leader](#choosing-the-leader)).
+- Start pauses the game, to save it or quit to the menu (see [Pausing](#pausing)).
 
 ## Walking
 
@@ -120,6 +121,23 @@ same. On its next walk, the leader reaches the front by swapping with the member
 new leader, and the CPU battle units in sight, the npc A talks to and the battle unit selected when a human turn starts
 follow it. The party order also decides who leads next when the leader is defeated, and the order of the shop's and the
 inventory's arrows. A recruited member still joins last.
+
+## Pausing
+
+While exploring, Start opens the pause screen in place of the pad:
+
+1. Start is handled as B: once the timeline is idle, and while the pad is displayed. [`OpenPause`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/OpenPause.kt)
+   only pauses when the party can walk (`PauseOpened`). Time stops meanwhile, as in the formation: the party is
+   `PAUSED`, so it does not walk, no second starts, the CPU battle units do not wander, no terrain effect is applied,
+   and tapping the battlefield does nothing.
+2. [`PausePresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt) displays
+   [`PauseView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PauseView.kt) in place of the pad:
+   Resume, Save and Quit to menu.
+3. Resume explores again ([`ClosePause`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ClosePause.kt),
+   `PauseClosed`), and the pad is displayed again.
+4. Save lists the save slots, and saves the game into one (see [Save and load](save-and-load.md#saving)).
+5. Quit to menu asks to confirm, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt),
+   as the progress since the last save is lost, and goes back to the menu.
 
 ## Inventory
 
