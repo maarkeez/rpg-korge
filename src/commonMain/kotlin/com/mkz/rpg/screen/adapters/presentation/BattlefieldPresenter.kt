@@ -11,12 +11,15 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.building.domain.BuildingEvent
+import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
+import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.presentation.BattlefieldHudApi
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -36,6 +39,8 @@ class BattlefieldPresenter(
     private val abilityApi: AbilityApi,
     private val battleApi: BattleApi,
     private val partyApi: PartyApi,
+    private val npcApi: NpcApi,
+    private val lootDropApi: LootDropApi,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : BattlefieldView.Delegate,
@@ -78,6 +83,11 @@ class BattlefieldPresenter(
             },
             // While exploring, the camera trails the leader, e.g.: once a battle finishes, and stops when a battle starts.
             eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
+            // A saved game is restored without announcing what it holds: it is all drawn at once, then the camera trails the leader.
+            eventBus.subscribe<SaveEvent.GameRestored> {
+                displayRestoredGame()
+                trailPartyLeader()
+            },
             eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
             // The camera eases to the new leader once the formation is closed.
             eventBus.subscribe<PartyEvent.FormationClosed> { trailPartyLeader() },
@@ -178,6 +188,21 @@ class BattlefieldPresenter(
     ) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         timeline.play { battlefieldView.displayBattleUnit(row, column, battleUnit.unitId) }
+    }
+
+    // Every battle unit and npc on its tile, and every dropped item, as the game was saved. The buildings are already
+    // displayed, as they are placed when the scene is set up.
+    private fun displayRestoredGame() {
+        val battlefield = battlefieldApi.searchBattlefield() ?: return
+        val occupants = battlefield.tiles.mapNotNull { (position, tile) -> tile.occupantId?.let { occupantId -> position to occupantId } }
+        val battleUnits = occupants.mapNotNull { (position, occupantId) -> battleUnitApi.searchBattleUnitById(occupantId)?.let { battleUnit -> position to battleUnit } }
+        val npcs = occupants.mapNotNull { (position, occupantId) -> npcApi.searchNpcById(occupantId)?.let { npc -> position to npc } }
+        val droppedItems = lootDropApi.searchDroppedItems()
+        timeline.play {
+            battleUnits.forEach { (position, battleUnit) -> battlefieldView.displayBattleUnit(position.row, position.column, battleUnit.unitId) }
+            npcs.forEach { (position, npc) -> battlefieldView.displayNpc(position.row, position.column, npc.id, npc.unitId) }
+            droppedItems.forEach { (position, lootableItemIds) -> lootableItemIds.forEach { lootableItemId -> dropLoot(position.row, position.column, lootableItemId) } }
+        }
     }
 
     fun removeUnit(

@@ -43,6 +43,7 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldHealthBarPreviewView.PreviewOption
@@ -66,6 +67,7 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.ints.shouldBeGreaterThan
@@ -136,6 +138,8 @@ class BattlefieldPresenterTest {
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,
+            npcApi = apis.npcApi,
+            lootDropApi = apis.lootDropApi,
             timeline = timeline,
             eventBus = eventBus,
         )
@@ -330,6 +334,8 @@ class BattlefieldPresenterTest {
         abilityApi = apis.abilityApi,
         battleApi = apis.battleApi,
         partyApi = apis.partyApi,
+        npcApi = apis.npcApi,
+        lootDropApi = apis.lootDropApi,
         timeline = timeline,
         eventBus = apis.eventBus,
     )
@@ -1334,5 +1340,36 @@ class BattlefieldPresenterTest {
         // Then
         battlefieldView.tileSelections.shouldContainExactly(position(1, 2))
         battlefieldView.healthPreviews.shouldBeEmpty()
+    }
+
+    @Test
+    fun `GameRestored should display every battle unit, npc and dropped item when a saved game is restored`() {
+        // Given: a health potion was dropped at (2,2) by a rat, as the saved game holds it.
+        apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":2,"column":2,"lootableItemIds":["health-potion"]}]}]""")
+        // When
+        eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        eventBus.dispatch()
+        // Then
+        battlefieldView.displayedBattleUnits.shouldContainExactlyInAnyOrder(
+            FakeBattlefieldView.BattleUnitAt(1, 1, "knight"),
+            FakeBattlefieldView.BattleUnitAt(1, 3, "rat"),
+            FakeBattlefieldView.BattleUnitAt(0, 3, "rat"),
+        )
+        battlefieldView.displayedLoot shouldBe mapOf(TilePosition(2, 2) to listOf("health-potion"))
+    }
+
+    @Test
+    fun `GameRestored should display the npcs left and trail the leader of the party when a saved game is restored while exploring`() {
+        // Given
+        val exploringApis = exploringApis(npcs = listOf(npc(id = "elder", row = 2, column = 0).toDto()))
+        exploringApis.partyApi.startExploration()
+        val exploringBattlefieldView = FakeBattlefieldView()
+        exploringPresenter(exploringApis, exploringBattlefieldView)
+        // When
+        exploringApis.eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattlefieldView.displayedNpcs.shouldContainExactly(FakeBattlefieldView.NpcAt(2, 0, "elder"))
+        exploringBattlefieldView.trailedTiles.last() shouldBe TilePosition(1, 1)
     }
 }

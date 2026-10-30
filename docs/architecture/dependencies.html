@@ -218,15 +218,15 @@ const DATA = {
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 63, "importsOut": 13},
     {"name": "inventory", "files": 30, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 58},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
-    {"name": "lootDrop", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 5, "importsOut": 29},
+    {"name": "lootDrop", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 6, "importsOut": 29},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 26, "importsOut": 14},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15},
-    {"name": "npc", "files": 17, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 29},
+    {"name": "npc", "files": 17, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 29},
     {"name": "party", "files": 39, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 33, "importsOut": 12},
-    {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 4, "importsOut": 8},
-    {"name": "screen", "files": 88, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 190},
+    {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 8, "importsOut": 8},
+    {"name": "screen", "files": 88, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 196},
     {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 459, "importsOut": 0},
     {"name": "storybook", "files": 92, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 102},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
@@ -1207,8 +1207,9 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/Texts.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/Texts.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "screen", "to": "lootDrop", "weight": 2, "files": 2, "imports": [
+    {"from": "screen", "to": "lootDrop", "weight": 3, "files": 2, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "lootDrop.adapters.presentation.LootDropApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "lootDrop.adapters.presentation.LootDropApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent"}
     ]},
     {"from": "screen", "to": "lootTable", "weight": 1, "files": 1, "imports": [
@@ -1228,8 +1229,9 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "mapBuilder.domain.MapBuilderEvent.MapImportRejected.Reason"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderScene.kt", "layer": "adapters", "name": "mapBuilder.adapters.presentation.MapBuilderApi"}
     ]},
-    {"from": "screen", "to": "npc", "weight": 5, "files": 4, "imports": [
+    {"from": "screen", "to": "npc", "weight": 6, "files": 4, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "npc.domain.NpcEvent"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "npc.adapters.presentation.NpcApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "npc.domain.Npc"},
@@ -1272,8 +1274,12 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
-    {"from": "screen", "to": "save", "weight": 4, "files": 3, "imports": [
+    {"from": "screen", "to": "save", "weight": 8, "files": 6, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "save.domain.SaveError"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "save.domain.Save"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsMapper.kt", "layer": "adapters", "name": "save.domain.Save"}

@@ -18,6 +18,7 @@ import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.save.adapters.presentation.SaveApi
+import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
@@ -35,10 +36,12 @@ import kotlin.random.Random
 
 // Localization: the texts of the selected language. Storage: where the games are saved, `views.storage` by default.
 // Random: the rolls of the CPU battle brain, e.g.: whether a CPU battle unit rests while wandering. The tests choose them.
+// Slot: the save slot to load the game from, or `null` to play a new game.
 class BattleScene(
     private val localizationApi: LocalizationApi,
     private val storage: IStorage? = null,
     private val random: Random = Random.Default,
+    private val slot: Int? = null,
 ) : Scene() {
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
     // the views are only changed from that loop. KorGE adds it to the views coroutine context when running the game,
@@ -152,6 +155,8 @@ class BattleScene(
                 abilityApi,
                 battleApi,
                 partyApi,
+                npcApi,
+                lootDropApi,
                 timeline,
                 eventBus,
             )
@@ -250,7 +255,18 @@ class BattleScene(
             }
         }
 
-        // Start game
-        battleSetupApi.setupBattle()
+        // Start game: a new one, or the one saved in the slot, restored once the content read from the resources is set
+        // up. A save that can not be loaded goes back to the menu.
+        if (slot == null) {
+            battleSetupApi.setupBattle()
+        } else {
+            battleSetupApi.setupBattle(isLoadingASavedGame = true)
+            eventBus.dispatch()
+            try {
+                saveApi.loadGame(slot)
+            } catch (_: SaveError) {
+                launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }
+            }
+        }
     }
 }

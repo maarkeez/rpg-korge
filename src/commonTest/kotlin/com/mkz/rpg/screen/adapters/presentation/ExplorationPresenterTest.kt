@@ -15,6 +15,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.save.adapters.presentation.SaveApi
+import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
@@ -330,6 +331,8 @@ class ExplorationPresenterTest {
             abilityApi = apis.abilityApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,
+            npcApi = apis.npcApi,
+            lootDropApi = apis.lootDropApi,
             timeline = timeline,
             eventBus = apis.eventBus,
         )
@@ -908,5 +911,18 @@ class ExplorationPresenterTest {
             .searchParty()!!
             .isExploring
             .shouldBeTrue()
+    }
+
+    @Test
+    fun `GameRestored should display the virtual pad in place of the battle HUD and the call to action when a saved game is restored`() {
+        // Given
+        createPresenter()
+        // When
+        eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        eventBus.dispatch()
+        // Then
+        virtualPadView.visible.shouldBeTrue()
+        battleHudView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeFalse()
     }
 }

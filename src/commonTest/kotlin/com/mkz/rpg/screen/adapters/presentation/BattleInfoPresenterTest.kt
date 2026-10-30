@@ -7,6 +7,7 @@ import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.FakeBattleInfoView.BattleInfo
@@ -103,6 +104,17 @@ class BattleInfoPresenterTest {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN)
         apis.eventBus.publish(PartyEvent.ExplorationStarted(playerId = "player-1", battleUnitIds = listOf("knight-1"), unitIds = listOf("knight")))
+        // When
+        apis.eventBus.dispatch()
+        // Then
+        battleInfoView.explorationDisplays shouldBe 1
+    }
+
+    @Test
+    fun `DisplayExploring should display that the player explores when a saved game is restored`() {
+        // Given
+        turnOf(Player.Dto.PlayerTypeDto.HUMAN)
+        apis.eventBus.publish(SaveEvent.GameRestored(slot = 1))
         // When
         apis.eventBus.dispatch()
         // Then

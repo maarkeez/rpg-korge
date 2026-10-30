@@ -16,6 +16,7 @@ import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
 import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
+import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.shared.domain.EventBus
@@ -84,6 +85,10 @@ class ExplorationPresenter(
     private val subscriptions =
         listOf(
             eventBus.subscribe<ExplorationStarted> {
+                timeline.play { displayVirtualPad(isDisplayed = true) }
+            },
+            // A saved game is restored exploring.
+            eventBus.subscribe<GameRestored> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
             // As soon as the leader lands on its last tile, before the battle is announced, so the party does not look
