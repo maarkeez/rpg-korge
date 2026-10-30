@@ -1,6 +1,7 @@
 ---
 name: to-plan
-description: Turns the current conversation into a plan in docs/plans/, following the template of the plans already there (Status and Summary, a Decisions table, a section per subdomain or class, Storybook, Docs, Tests, and Milestones when the work spans several steps). Use it when the user asks to write, save or turn the conversation into a plan, e.g. after a grilling session or a design discussion.
+description: Turns the current conversation into a plan in docs/plans/, following the template of the plans already there (Status and Summary, a Decisions table, a section per subdomain or class, Storybook, Docs, Tests, and Milestones when the work spans several steps). Only run when the user types /to-plan.
+disable-model-invocation: true
 ---
 
 # To plan
