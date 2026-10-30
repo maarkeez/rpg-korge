@@ -1,6 +1,6 @@
 # Plan: Save and load the game
 
-> **Status:** in progress: M1 done.
+> **Status:** in progress: M1 and M2 done.
 >
 > **Summary:** Today a game only lives in memory. E.g.: the player walks the knight's party across the battlefield,
 > recruits the elder, buys a health potion and wins two battles; closing the window, or going back to the menu, loses
@@ -49,7 +49,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone        | Done when                                                                                                       | Status | Done in |
 |----|------------------|-----------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Pause screen     | Start, shown only while exploring, opens the pause screen, which stops time; Resume and Quit to menu work.      | ✅      | `e4544e3`, `d0162ea`, `181c98f` |
-| M2 | Saving           | Save writes the game into one of 3 slots, confirming before overwriting, and the slots survive a restart.       | ⬜      |         |
+| M2 | Saving           | Save writes the game into one of 3 slots, confirming before overwriting, and the slots survive a restart.       | ✅      | `d6e2e90`, `cd3ae5f`, `3dcdf3a` |
 | M3 | Loading          | Load game in the menu lists the slots, loads one back to where it was saved, and deletes one.                  | ⬜      |         |
 | M4 | Fixtures and docs| The golden fixture tests guard `SAVE_VERSION`, and the architecture docs describe saving and loading.           | ⬜      |         |
 
