@@ -225,8 +225,9 @@ const DATA = {
     {"name": "npc", "files": 17, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 29},
     {"name": "party", "files": 39, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 33, "importsOut": 12},
+    {"name": "save", "files": 9, "fanIn": 0, "fanOut": 1, "instability": 1.0, "importsIn": 0, "importsOut": 5},
     {"name": "screen", "files": 86, "fanIn": 1, "fanOut": 21, "instability": 0.95, "importsIn": 82, "importsOut": 184},
-    {"name": "shared", "files": 16, "fanIn": 22, "fanOut": 0, "instability": 0.0, "importsIn": 449, "importsOut": 0},
+    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 454, "importsOut": 0},
     {"name": "storybook", "files": 91, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 100},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 13, "importsOut": 15}
@@ -1092,6 +1093,13 @@ const DATA = {
       {"file": "com/mkz/rpg/player/domain/PlayerEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/player/usecases/commands/InitialisePlayers.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/player/usecases/commands/RequestPlayerCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "save", "to": "shared", "weight": 5, "files": 3, "imports": [
+      {"file": "com/mkz/rpg/save/adapters/presentation/SaveApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/save/adapters/presentation/SaveApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
+      {"file": "com/mkz/rpg/save/domain/SaveEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/save/usecases/commands/SaveGame.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/save/usecases/commands/SaveGame.kt", "layer": "usecases", "name": "shared.domain.Snapshottable"}
     ]},
     {"from": "screen", "to": "ability", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "ability.adapters.presentation.AbilityApi"},
