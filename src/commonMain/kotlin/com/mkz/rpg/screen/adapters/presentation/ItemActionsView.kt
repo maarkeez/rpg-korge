@@ -1,11 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
+import com.mkz.rpg.shared.adapters.presentation.GameButton
+import com.mkz.rpg.shared.adapters.presentation.gameButton
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
-import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
@@ -26,7 +25,7 @@ class ItemActionsView(
         private const val SPACING = 10.0
     }
 
-    /** A disabled action is still displayed, greyed out, but can not be clicked. */
+    /** A disabled action is still displayed, faded, but can not be clicked. */
     data class Action(
         val label: String,
         val isEnabled: Boolean = true,
@@ -35,7 +34,7 @@ class ItemActionsView(
 
     internal val itemNameView = UnitNameView(Size(WIDTH, 16))
     internal val itemPriceView = UnitNameView(Size(WIDTH, 16))
-    internal var actionButtons: List<UIButton> = emptyList()
+    internal var actionButtons: List<GameButton> = emptyList()
 
     init {
         uiVerticalStack(padding = 4.0) {
@@ -50,11 +49,7 @@ class ItemActionsView(
                     val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
                     actionButtons =
                         actions.map { action ->
-                            uiButton(action.label) {
-                                width = buttonWidth
-                                bgColorOut = Colors.DIMGRAY
-                                bgColorOver = RGBA(85, 85, 85)
-                                background.borderColor = Colors.LIGHTGRAY
+                            gameButton(action.label, Size(buttonWidth, UIButton.DEFAULT_SIZE.height)) {
                                 enabled = action.isEnabled
                                 onClick { action.onSelected() }
                             }

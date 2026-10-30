@@ -173,6 +173,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             playerCallToActionView.itemPrice() shouldBe "50 G"
             playerCallToActionView.itemActionLabels().shouldContainExactly("Equip", "Discard", "Cancel")
             playerCallToActionView.enabledItemActionLabels().shouldContainExactly("Equip", "Cancel")
+            playerCallToActionView.fadedItemActionLabels().shouldContainExactly("Discard")
         }
 
     @Test

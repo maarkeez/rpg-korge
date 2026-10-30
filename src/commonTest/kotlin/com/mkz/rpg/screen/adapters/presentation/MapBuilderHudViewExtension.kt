@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import com.mkz.rpg.shared.adapters.presentation.isFaded
 import korlibs.image.bitmap.Bitmap
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Image
@@ -15,6 +16,11 @@ fun MapBuilderHudView.columnsText(): String = columnsValue.text
 fun MapBuilderHudView.enabledRowsSteps(): List<Int> = rowsStepButtons.filterValues { button -> button.enabled }.keys.sorted()
 
 fun MapBuilderHudView.enabledColumnsSteps(): List<Int> = columnsStepButtons.filterValues { button -> button.enabled }.keys.sorted()
+
+/** The steps of the rows displayed faded, as disabled ones. */
+fun MapBuilderHudView.fadedRowsSteps(): List<Int> = rowsStepButtons.filterValues { button -> button.isFaded() }.keys.sorted()
+
+fun MapBuilderHudView.fadedColumnsSteps(): List<Int> = columnsStepButtons.filterValues { button -> button.isFaded() }.keys.sorted()
 
 suspend fun ViewsForTesting.clickRowsStep(
     hudView: MapBuilderHudView,

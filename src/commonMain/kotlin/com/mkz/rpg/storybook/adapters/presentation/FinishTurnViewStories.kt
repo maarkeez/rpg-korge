@@ -16,7 +16,7 @@ object FinishTurnViewStories : StoryBinding {
         StoryDto(
             id = "screen-finish-turn--disabled",
             name = "Disabled",
-            description = "The button greyed out, as the player can not end the turn for now: tapping it does nothing.",
+            description = "The button faded, as the player can not end the turn for now: tapping it does nothing.",
             args = mapOf(ENABLED to ArgDto.boolean(false)),
         )
 

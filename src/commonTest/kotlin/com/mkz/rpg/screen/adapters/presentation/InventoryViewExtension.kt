@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import com.mkz.rpg.shared.adapters.presentation.isFaded
 import korlibs.image.bitmap.Bitmap
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Image
@@ -16,6 +17,9 @@ fun InventoryView.goldText(): String = goldView.nameText()
 fun InventoryView.arrowsVisible(): Boolean = previousOwnerButton.visible && nextOwnerButton.visible
 
 fun InventoryView.arrowsEnabled(): Pair<Boolean, Boolean> = previousOwnerButton.enabled to nextOwnerButton.enabled
+
+/** Whether each arrow is displayed faded, as a disabled one. */
+fun InventoryView.arrowsFaded(): Pair<Boolean, Boolean> = previousOwnerButton.isFaded() to nextOwnerButton.isFaded()
 
 /** Whether the arrows are on each side of the title and the gold, before Close. */
 fun InventoryView.isTitleLaidOut(): Boolean {

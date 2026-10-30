@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import com.mkz.rpg.shared.adapters.presentation.isFaded
 import korlibs.image.bitmap.Bitmap
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Image
@@ -30,6 +31,9 @@ fun ShopView.buyerText(): String = buyerText.text
 /** Whether the arrows to the previous and the next party member are enabled. */
 fun ShopView.arrowsEnabled(): Pair<Boolean, Boolean> = previousBuyerButton.enabled to nextBuyerButton.enabled
 
+/** Whether each arrow is displayed faded, as a disabled one. */
+fun ShopView.arrowsFaded(): Pair<Boolean, Boolean> = previousBuyerButton.isFaded() to nextBuyerButton.isFaded()
+
 /** What the footer displays next to Back: the hint, or the selected item's name, and its price. */
 fun ShopView.footerText(): String = itemNameText.text
 
@@ -37,6 +41,9 @@ fun ShopView.footerPrice(): String = itemPriceText.text
 
 /** The label of Buy or Sell, and whether it is enabled, or `null` while it is hidden. */
 fun ShopView.action(): Pair<String, Boolean>? = if (actionButton.visible) actionButton.text to actionButton.enabled else null
+
+/** Whether Buy or Sell is displayed faded, as a disabled one. */
+fun ShopView.isActionFaded(): Boolean = actionButton.isFaded()
 
 /** Whether the header, the slots and the footer are stacked in this order, the arrows on each side of the buyer. */
 fun ShopView.isLaidOut(): Boolean {

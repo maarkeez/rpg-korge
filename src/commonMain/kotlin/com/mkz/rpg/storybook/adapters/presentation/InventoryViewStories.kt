@@ -12,7 +12,7 @@ import korlibs.korge.view.View
  * slot selects it, and the arrows switch the party member, as the inventory presenter does.
  */
 object InventoryViewStories : StoryBinding {
-    private const val PARTY_SIZE = 3
+    private const val PARTY_LIMIT = 3
     private const val GOLD_LIMIT = 9999
 
     // The option of the slot controls when no slot is meant, which no slot index is.
@@ -25,6 +25,7 @@ object InventoryViewStories : StoryBinding {
     private const val EXPLORING = "exploring"
     private const val OWNER = "owner"
     private const val PARTY_INDEX = "partyIndex"
+    private const val PARTY_SIZE = "partySize"
 
     private val empty = StoryDto(id = "screen-inventory--empty", name = "Empty", description = "A party member who carries nothing.", args = mapOf(ITEMS to ArgDto.int(0), GOLD to ArgDto.int(0)))
     private val stored = StoryDto(id = "screen-inventory--stored", name = "Stored", description = "Some items stored, and the gold on the title line.", args = emptyMap())
@@ -44,7 +45,14 @@ object InventoryViewStories : StoryBinding {
             id = "screen-inventory--exploring-last-member",
             name = "Exploring, last member",
             description = "The last party member has no next one: its arrow is disabled.",
-            args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_INDEX to ArgDto.int(PARTY_SIZE - 1)),
+            args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_INDEX to ArgDto.int(PARTY_LIMIT - 1)),
+        )
+    private val exploringOnlyMember =
+        StoryDto(
+            id = "screen-inventory--exploring-only-member",
+            name = "Exploring, only member",
+            description = "A party of one has no other member to switch to: both arrows are disabled.",
+            args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_SIZE to ArgDto.int(1)),
         )
 
     override fun component(context: StoryContext) =
@@ -61,7 +69,8 @@ object InventoryViewStories : StoryBinding {
                     ControlDto.pick(SELECTED_SLOT, slots()),
                     ControlDto.boolean(EXPLORING),
                     ControlDto.text(OWNER),
-                    ControlDto.int(PARTY_INDEX, minimum = 0, maximum = PARTY_SIZE - 1),
+                    ControlDto.int(PARTY_INDEX, minimum = 0, maximum = PARTY_LIMIT - 1),
+                    ControlDto.int(PARTY_SIZE, minimum = 1, maximum = PARTY_LIMIT),
                 ),
             args =
                 mapOf(
@@ -72,8 +81,9 @@ object InventoryViewStories : StoryBinding {
                     EXPLORING to ArgDto.boolean(false),
                     OWNER to ArgDto.text("Knight"),
                     PARTY_INDEX to ArgDto.int(0),
+                    PARTY_SIZE to ArgDto.int(PARTY_LIMIT),
                 ),
-            stories = listOf(empty, stored, full, equipped, selected, exploring, exploringLastMember),
+            stories = listOf(empty, stored, full, equipped, selected, exploring, exploringLastMember, exploringOnlyMember),
         )
 
     override fun render(
@@ -85,7 +95,9 @@ object InventoryViewStories : StoryBinding {
         val items = args.int(ITEMS)
         // A slot with no item is neither equipped nor selected.
         val selectedSlot = args.text(SELECTED_SLOT).toIntOrNull()?.takeIf { index -> index < items }
-        val partyIndex = args.int(PARTY_INDEX)
+        val partySize = args.int(PARTY_SIZE)
+        // The party member is one of the party, however small.
+        val partyIndex = args.int(PARTY_INDEX).coerceAtMost(partySize - 1)
         return InventoryView(context.resourcesLoader, context.texts).apply {
             setDelegate(
                 object : InventoryView.Delegate {
@@ -97,7 +109,7 @@ object InventoryViewStories : StoryBinding {
 
                     // The party member stays at the ends of the party.
                     override fun inventoryOwnerStepped(step: Int) {
-                        val stepped = (partyIndex + step).takeIf { index -> index in 0 until PARTY_SIZE }
+                        val stepped = (partyIndex + step).takeIf { index -> index in 0 until partySize }
                         context.action("inventoryOwnerStepped", step, setArg = stepped?.let { index -> PARTY_INDEX to ArgDto.int(index) })
                     }
 
@@ -108,7 +120,7 @@ object InventoryViewStories : StoryBinding {
                 // The first lootable items, in alphabetical order, as many times as needed.
                 slots = List(items) { index -> InventoryView.Slot(itemIds[index % itemIds.size], isEquipped = index == equippedSlot) },
                 gold = args.int(GOLD),
-                owner = if (args.boolean(EXPLORING)) InventoryView.Owner(args.text(OWNER), partyIndex, PARTY_SIZE) else null,
+                owner = if (args.boolean(EXPLORING)) InventoryView.Owner(args.text(OWNER), partyIndex, partySize) else null,
             )
             selectSlot(selectedSlot)
         }

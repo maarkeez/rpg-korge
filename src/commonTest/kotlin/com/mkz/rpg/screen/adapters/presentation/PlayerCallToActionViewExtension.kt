@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import com.mkz.rpg.shared.adapters.presentation.isFaded
 import korlibs.korge.tests.ViewsForTesting
 
 // Page object of [PlayerCallToActionView]. Uses the page objects of the call to action it displays.
@@ -32,6 +33,9 @@ fun PlayerCallToActionView.itemPrice(): String = (callToAction as ItemActionsVie
 fun PlayerCallToActionView.itemActionLabels(): List<String> = (callToAction as ItemActionsView).actionButtons.map { button -> button.text }
 
 fun PlayerCallToActionView.enabledItemActionLabels(): List<String> = (callToAction as ItemActionsView).actionButtons.filter { button -> button.enabled }.map { button -> button.text }
+
+/** The actions displayed faded, as disabled ones, e.g.: No one. */
+fun PlayerCallToActionView.fadedItemActionLabels(): List<String> = (callToAction as ItemActionsView).actionButtons.filter { button -> button.isFaded() }.map { button -> button.text }
 
 suspend fun ViewsForTesting.clickItemAction(
     playerCallToActionView: PlayerCallToActionView,

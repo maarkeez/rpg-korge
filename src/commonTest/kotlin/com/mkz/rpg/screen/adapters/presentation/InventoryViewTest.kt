@@ -152,6 +152,7 @@ class InventoryViewTest : ViewsForTesting() {
             inventoryView.goldText() shouldBe "20 G"
             inventoryView.arrowsVisible().shouldBeTrue()
             inventoryView.arrowsEnabled() shouldBe (true to true)
+            inventoryView.arrowsFaded() shouldBe (false to false)
             inventoryView.isTitleLaidOut().shouldBeTrue()
         }
 
@@ -164,6 +165,7 @@ class InventoryViewTest : ViewsForTesting() {
             inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 1))
             // Then
             inventoryView.arrowsEnabled() shouldBe (false to false)
+            inventoryView.arrowsFaded() shouldBe (true to true)
         }
 
     @Test

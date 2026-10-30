@@ -53,6 +53,8 @@ class MapBuilderHudViewTest : ViewsForTesting() {
             // Then
             hudView.enabledRowsSteps().shouldContainExactly(-1, 1, 8)
             hudView.enabledColumnsSteps().shouldContainExactly(-8, -1, 1)
+            hudView.fadedRowsSteps().shouldContainExactly(-8)
+            hudView.fadedColumnsSteps().shouldContainExactly(8)
         }
 
     @Test

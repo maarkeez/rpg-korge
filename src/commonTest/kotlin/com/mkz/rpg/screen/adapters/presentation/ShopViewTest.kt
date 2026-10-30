@@ -123,10 +123,12 @@ class ShopViewTest : ViewsForTesting() {
             // Then
             shopView.buyerText() shouldBe "Knight · 20 G · Bag full"
             shopView.arrowsEnabled() shouldBe (false to true)
+            shopView.arrowsFaded() shouldBe (true to false)
             // When
             shopView.displayMerchant(buyer = knight.copy(partyIndex = 1, partySize = 2))
             // Then
             shopView.arrowsEnabled() shouldBe (true to false)
+            shopView.arrowsFaded() shouldBe (false to true)
         }
 
     @Test
@@ -157,6 +159,7 @@ class ShopViewTest : ViewsForTesting() {
             shopView.footerText() shouldBe "Hammer"
             shopView.footerPrice() shouldBe "50 G"
             shopView.action() shouldBe ("Not enough gold" to false)
+            shopView.isActionFaded().shouldBeTrue()
             // When
             shopView.displayHint("Tap an item to buy")
             // Then

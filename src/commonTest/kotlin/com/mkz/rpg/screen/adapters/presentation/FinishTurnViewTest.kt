@@ -64,5 +64,6 @@ class FinishTurnViewTest : ViewsForTesting() {
             finishTurnView.isEnabled = false
             // Then
             finishTurnView.isButtonEnabled().shouldBeFalse()
+            finishTurnView.isButtonFaded().shouldBeTrue()
         }
 }

@@ -1,5 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.GameButton
+import com.mkz.rpg.shared.adapters.presentation.gameButton
 import korlibs.image.bitmap.Bitmap
 import korlibs.image.color.Colors
 import korlibs.image.text.TextAlignment
@@ -59,15 +61,15 @@ open class MapBuilderHudView(
 
     internal val rowsValue: UIText
     internal val columnsValue: UIText
-    internal val rowsStepButtons: Map<Int, UIButton>
-    internal val columnsStepButtons: Map<Int, UIButton>
+    internal val rowsStepButtons: Map<Int, GameButton>
+    internal val columnsStepButtons: Map<Int, GameButton>
     internal lateinit var terrainPalette: Container
     internal val terrainButtons = mutableMapOf<String, UIButton>()
     internal var selectionBorder: SolidRect? = null
 
     init {
-        lateinit var rowsStepper: Pair<UIText, Map<Int, UIButton>>
-        lateinit var columnsStepper: Pair<UIText, Map<Int, UIButton>>
+        lateinit var rowsStepper: Pair<UIText, Map<Int, GameButton>>
+        lateinit var columnsStepper: Pair<UIText, Map<Int, GameButton>>
         uiVerticalStack(padding = 10.0) {
             rowsStepper = stepper(label = texts[UiText.MAP_BUILDER_HUD_ROWS]) { step -> delegate?.sizeChanged(rows = rows + step, columns = columns) }
             columnsStepper = stepper(label = texts[UiText.MAP_BUILDER_HUD_COLUMNS]) { step -> delegate?.sizeChanged(rows = rows, columns = columns + step) }
@@ -147,9 +149,9 @@ open class MapBuilderHudView(
     private fun Container.stepper(
         label: String,
         onStep: (Int) -> Unit,
-    ): Pair<UIText, Map<Int, UIButton>> {
+    ): Pair<UIText, Map<Int, GameButton>> {
         lateinit var value: UIText
-        val stepButtons = mutableMapOf<Int, UIButton>()
+        val stepButtons = mutableMapOf<Int, GameButton>()
         uiHorizontalStack(padding = 4.0) {
             uiText(text = label, size = Size(width = LABEL_WIDTH, height = 32)) {
                 styles.textSize = 15.0
@@ -169,10 +171,8 @@ open class MapBuilderHudView(
     private fun Container.stepButton(
         step: Int,
         onStep: (Int) -> Unit,
-    ): UIButton =
-        uiButton(label = if (step > 0) "+$step" else "$step", size = Size(STEP_BUTTON_WIDTH, 32.0)) {
-            bgColorOut = Colors.DIMGRAY
-            background.borderColor = Colors.LIGHTGRAY
+    ): GameButton =
+        gameButton(label = if (step > 0) "+$step" else "$step", size = Size(STEP_BUTTON_WIDTH, 32.0)) {
             onClick { onStep(step) }
         }
 }

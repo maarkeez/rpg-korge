@@ -32,7 +32,7 @@ object PlayerCallToActionViewStories : StoryBinding {
         StoryDto(
             id = "screen-player-call-to-action--finish-turn-disabled",
             name = "Finish turn, disabled",
-            description = "The turn can not be ended for now: the button is greyed out.",
+            description = "The turn can not be ended for now: the button is faded.",
             args = mapOf(FINISH_TURN_ENABLED to ArgDto.boolean(false)),
         )
     private val cancelAndConfirm =

@@ -35,6 +35,7 @@ class StorybookApi(
             listOf(
                 BarViewStories,
                 PreviewBarViewStories,
+                GameButtonStories,
                 HealthBarViewStories,
                 ManaBarViewStories,
                 HealthBarPreviewViewStories,

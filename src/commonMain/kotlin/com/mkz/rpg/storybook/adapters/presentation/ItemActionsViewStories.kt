@@ -44,7 +44,7 @@ object ItemActionsViewStories : StoryBinding {
         StoryDto(
             id = "screen-item-actions--can-not-consume",
             name = "Can not consume",
-            description = "An item teaching an ability the battle unit already knows: Consume is greyed out.",
+            description = "An item teaching an ability the battle unit already knows: Consume is faded.",
             args = mapOf(ACTIONS to ArgDto.text(Kind.CAN_NOT_CONSUME.name)),
         )
     private val equippable =
@@ -53,21 +53,21 @@ object ItemActionsViewStories : StoryBinding {
         StoryDto(
             id = "screen-item-actions--equipped",
             name = "Equipped",
-            description = "An item the battle unit wears: it can be unequipped, and Discard is greyed out.",
+            description = "An item the battle unit wears: it can be unequipped, and Discard is faded.",
             args = mapOf(ACTIONS to ArgDto.text(Kind.EQUIPPED.name)),
         )
     private val noOneToGiveTo =
         StoryDto(
             id = "screen-item-actions--no-one-to-give-to",
             name = "No one to give to",
-            description = "No other party member is in reach: Give reads No one, greyed out.",
+            description = "No other party member is in reach: Give reads No one, faded.",
             args = mapOf(ACTIONS to ArgDto.text(Kind.NO_ONE_TO_GIVE_TO.name)),
         )
     private val bagsFull =
         StoryDto(
             id = "screen-item-actions--bags-full",
             name = "Bags full",
-            description = "The bags of the other party members are full: Give reads Bags full, greyed out.",
+            description = "The bags of the other party members are full: Give reads Bags full, faded.",
             args = mapOf(ACTIONS to ArgDto.text(Kind.BAGS_FULL.name)),
         )
 

@@ -1,13 +1,12 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.GameButton
+import com.mkz.rpg.shared.adapters.presentation.gameButton
 import korlibs.image.color.Colors
-import korlibs.image.color.RGBA
 import korlibs.korge.input.SwipeDirection
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onSwipe
-import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
-import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
@@ -72,11 +71,11 @@ open class InventoryView(
     }
 
     private var delegate: Delegate? = null
-    internal lateinit var previousOwnerButton: UIButton
-    internal lateinit var nextOwnerButton: UIButton
+    internal lateinit var previousOwnerButton: GameButton
+    internal lateinit var nextOwnerButton: GameButton
     internal lateinit var titleView: UnitNameView
     internal lateinit var goldView: UnitNameView
-    internal lateinit var closeButton: UIButton
+    internal lateinit var closeButton: GameButton
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
 
     init {
@@ -164,11 +163,8 @@ open class InventoryView(
         label: String,
         width: Double,
         onSelected: () -> Unit,
-    ): UIButton =
-        uiButton(label, size = Size(width, BAR_HEIGHT)) {
-            bgColorOut = Colors.DIMGRAY
-            bgColorOver = RGBA(85, 85, 85)
-            background.borderColor = Colors.LIGHTGRAY
+    ): GameButton =
+        gameButton(label, Size(width, BAR_HEIGHT)) {
             onClick { onSelected() }
         }
 }
