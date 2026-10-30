@@ -17,6 +17,11 @@ msgctxt "ui.menu.playNewGame"
 msgid "Play new game"
 msgstr "Jugar partida nueva"
 
+#. Lists the save slots, to load the game saved in one.
+msgctxt "ui.menu.loadGame"
+msgid "Load game"
+msgstr "Cargar partida"
+
 msgctxt "ui.menu.buildMap"
 msgid "Build a map"
 msgstr "Construir un mapa"
@@ -266,6 +271,11 @@ msgctxt "ui.saveSlots.saveTitle"
 msgid "Save the game"
 msgstr "Guardar partida"
 
+#. The title of the save slots, when loading the game saved in one, from the main menu.
+msgctxt "ui.saveSlots.loadTitle"
+msgid "Load a game"
+msgstr "Cargar una partida"
+
 #. A save slot with no game saved in it.
 msgctxt "ui.saveSlots.empty"
 msgid "Empty"
@@ -300,6 +310,11 @@ msgstr "Sobrescribir"
 msgctxt "ui.saveSlots.overwriteConfirmation"
 msgid "Overwrite the game saved in slot {slot}?"
 msgstr "¿Sobrescribir la partida guardada en la ranura {slot}?"
+
+#. Asked before deleting the game saved in a slot. {slot}: its number.
+msgctxt "ui.saveSlots.deleteConfirmation"
+msgid "Delete the game saved in slot {slot}?"
+msgstr "¿Borrar la partida guardada en la ranura {slot}?"
 
 msgctxt "ui.mapBuilderInfo.title"
 msgid "Map Builder"

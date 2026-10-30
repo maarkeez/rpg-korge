@@ -256,7 +256,7 @@ class BattleScene(
         }
 
         // Start game: a new one, or the one saved in the slot, restored once the content read from the resources is set
-        // up. A save that can not be loaded goes back to the menu.
+        // up. A save that can not be loaded goes back to Load game, where it is shown as incompatible.
         if (slot == null) {
             battleSetupApi.setupBattle()
         } else {
@@ -265,7 +265,7 @@ class BattleScene(
             try {
                 saveApi.loadGame(slot)
             } catch (_: SaveError) {
-                launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }
+                launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random, incompatibleSlot = slot) } }
             }
         }
     }

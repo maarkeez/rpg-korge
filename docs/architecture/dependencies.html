@@ -225,9 +225,9 @@ const DATA = {
     {"name": "npc", "files": 17, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 9, "importsOut": 29},
     {"name": "party", "files": 39, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 33, "importsOut": 12},
-    {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 8, "importsOut": 8},
-    {"name": "screen", "files": 88, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 196},
-    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 459, "importsOut": 0},
+    {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 11, "importsOut": 8},
+    {"name": "screen", "files": 89, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 200},
+    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 460, "importsOut": 0},
     {"name": "storybook", "files": 92, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 102},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
     {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 13, "importsOut": 15}
@@ -1274,17 +1274,20 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
-    {"from": "screen", "to": "save", "weight": 8, "files": 6, "imports": [
+    {"from": "screen", "to": "save", "weight": 11, "files": 8, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "save.domain.SaveError"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ExplorationPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/LoadGamePresenter.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/LoadGamePresenter.kt", "layer": "adapters", "name": "save.domain.Save.Dto.SlotStateDto"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "save.adapters.presentation.SaveApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/PausePresenter.kt", "layer": "adapters", "name": "save.domain.Save"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsMapper.kt", "layer": "adapters", "name": "save.domain.Save"}
     ]},
-    {"from": "screen", "to": "shared", "weight": 50, "files": 31, "imports": [
+    {"from": "screen", "to": "shared", "weight": 51, "files": 32, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1319,6 +1322,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/MapBuilderScene.kt", "layer": "adapters", "name": "shared.adapters.events.InMemoryEventBus"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/MenuScene.kt", "layer": "adapters", "name": "shared.adapters.events.InMemoryEventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},

@@ -20,7 +20,16 @@ object ConfirmDialogViewStories : StoryBinding {
     ) {
         QUIT(message = UiText.PAUSE_QUIT_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.PAUSE_QUIT),
         OVERWRITE(message = UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.SAVE_SLOTS_OVERWRITE),
+        DELETE(message = UiText.SAVE_SLOTS_DELETE_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.SAVE_SLOTS_DELETE),
     }
+
+    private val delete =
+        StoryDto(
+            id = "screen-confirm-dialog--delete",
+            name = "Delete",
+            description = "Asked before deleting the game saved in slot 2, from Load game.",
+            args = mapOf(QUESTION to ArgDto.text(Question.DELETE.name.lowercase())),
+        )
 
     private val overwrite =
         StoryDto(
@@ -46,7 +55,7 @@ object ConfirmDialogViewStories : StoryBinding {
             description = "A question displayed in place of the pad before an action that can not be undone, over a secondary and a primary choice.",
             controls = listOf(ControlDto.pick(QUESTION, Question.entries.map { question -> question.name.lowercase() })),
             args = mapOf(QUESTION to ArgDto.text(Question.QUIT.name.lowercase())),
-            stories = listOf(overwrite, quit),
+            stories = listOf(overwrite, delete, quit),
         )
 
     override fun render(

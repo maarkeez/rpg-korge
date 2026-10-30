@@ -12,7 +12,8 @@ class MenuViewTest : ViewsForTesting() {
 
     private val texts = TextsMother.texts()
 
-    private fun newMenuView() = MenuView(texts, onNewGameSelected = { selections += "new game" }, onMapBuilderSelected = { selections += "map builder" })
+    private fun newMenuView() =
+        MenuView(texts, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onMapBuilderSelected = { selections += "map builder" })
 
     @Test
     fun `MenuView should display playing a new game, building a map and the language when it is displayed`() =
@@ -21,6 +22,7 @@ class MenuViewTest : ViewsForTesting() {
             val menuView = newMenuView()
             // Then
             menuView.playNewGameLabel() shouldBe "Play new game"
+            menuView.loadGameLabel() shouldBe "Load game"
             menuView.buildMapLabel() shouldBe "Build a map"
             menuView.languageLabel() shouldBe "Language"
             menuView.areLanguagesShown() shouldBe false
@@ -51,6 +53,7 @@ class MenuViewTest : ViewsForTesting() {
             pickLanguage(menuView, "Español")
             // Then
             menuView.playNewGameLabel() shouldBe "Jugar partida nueva"
+            menuView.loadGameLabel() shouldBe "Cargar partida"
             menuView.buildMapLabel() shouldBe "Construir un mapa"
             menuView.languageLabel() shouldBe "Idioma"
             menuView.areOptionsShown() shouldBe true
@@ -97,6 +100,19 @@ class MenuViewTest : ViewsForTesting() {
             clickPlayNewGame(menuView)
             // Then
             selections.shouldContainExactly("new game")
+        }
+
+    @Test
+    fun `LoadGame should list the save slots, hiding the options, when it is clicked`() =
+        sharedViewsTest {
+            // Given
+            val menuView = newMenuView()
+            addChild(menuView)
+            // When
+            clickLoadGame(menuView)
+            // Then
+            selections.shouldContainExactly("load game")
+            menuView.areOptionsShown() shouldBe false
         }
 
     @Test

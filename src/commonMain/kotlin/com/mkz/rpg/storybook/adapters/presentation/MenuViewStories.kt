@@ -14,7 +14,7 @@ object MenuViewStories : StoryBinding {
         StoryDto(
             id = "screen-menu--options",
             name = "Options",
-            description = "Play new game, Build map and Language. Tapping Language lists the languages in place of the options.",
+            description = "Play new game, Load game, Build map and Language. Tapping Language lists the languages in place of the options.",
             args = emptyMap(),
         )
 
@@ -23,7 +23,7 @@ object MenuViewStories : StoryBinding {
             id = "screen-menu",
             group = "Screen",
             title = "Menu",
-            description = "The first screen of the game: playing a new game, its primary action, building a map, or picking the language.",
+            description = "The first screen of the game: playing a new game, its primary action, loading a saved game, building a map, or picking the language.",
             controls = emptyList(),
             args = emptyMap(),
             stories = listOf(options),
@@ -36,6 +36,7 @@ object MenuViewStories : StoryBinding {
         MenuView(
             context.texts,
             onNewGameSelected = { context.action("onNewGameSelected") },
+            onLoadGameSelected = { context.action("onLoadGameSelected") },
             onMapBuilderSelected = { context.action("onMapBuilderSelected") },
         )
 }

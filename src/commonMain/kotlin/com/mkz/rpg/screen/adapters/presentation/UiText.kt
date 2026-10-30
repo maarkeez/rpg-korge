@@ -9,6 +9,7 @@ enum class UiText(
     val isPlural: Boolean = false,
 ) {
     MENU_PLAY_NEW_GAME("ui.menu.playNewGame"),
+    MENU_LOAD_GAME("ui.menu.loadGame"),
     MENU_BUILD_MAP("ui.menu.buildMap"),
     MENU_LANGUAGE("ui.menu.language"),
     BATTLE_INFO_EXPLORING("ui.battleInfo.exploring"),
@@ -62,6 +63,7 @@ enum class UiText(
     PAUSE_QUIT_CONFIRMATION("ui.pause.quitConfirmation"),
     PAUSE_SAVED("ui.pause.saved"),
     SAVE_SLOTS_SAVE_TITLE("ui.saveSlots.saveTitle"),
+    SAVE_SLOTS_LOAD_TITLE("ui.saveSlots.loadTitle"),
     SAVE_SLOTS_EMPTY("ui.saveSlots.empty"),
     SAVE_SLOTS_INCOMPATIBLE("ui.saveSlots.incompatible"),
     SAVE_SLOTS_SAVED("ui.saveSlots.saved"),
@@ -69,6 +71,7 @@ enum class UiText(
     SAVE_SLOTS_BACK("ui.saveSlots.back"),
     SAVE_SLOTS_OVERWRITE("ui.saveSlots.overwrite"),
     SAVE_SLOTS_OVERWRITE_CONFIRMATION("ui.saveSlots.overwriteConfirmation"),
+    SAVE_SLOTS_DELETE_CONFIRMATION("ui.saveSlots.deleteConfirmation"),
     MAP_BUILDER_INFO_TITLE("ui.mapBuilderInfo.title"),
     MAP_BUILDER_INFO_SIZE("ui.mapBuilderInfo.size"),
     MAP_BUILDER_HUD_ROWS("ui.mapBuilderHud.rows"),

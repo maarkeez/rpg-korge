@@ -13,9 +13,13 @@ fun Stage.menuView(): MenuView? = descendants().filterIsInstance<MenuView>().fir
 
 fun MenuView.playNewGameLabel(): String = playNewGameButton.confirmButton.text
 
+fun MenuView.loadGameLabel(): String = loadGameButton.cancelButton.text
+
 fun MenuView.buildMapLabel(): String = buildMapButton.cancelButton.text
 
 suspend fun ViewsForTesting.clickPlayNewGame(menuView: MenuView) = clickOn(menuView.playNewGameButton.confirmButton)
+
+suspend fun ViewsForTesting.clickLoadGame(menuView: MenuView) = clickOn(menuView.loadGameButton.cancelButton)
 
 suspend fun ViewsForTesting.clickBuildMap(menuView: MenuView) = clickOn(menuView.buildMapButton.cancelButton)
 
