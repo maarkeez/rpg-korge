@@ -81,6 +81,9 @@ data class LootDrop private constructor(
             events = events + DroppedItemPickedUp(lootableItemId = lootableItemId, row = row, column = column),
         )
 
+    /** Puts back the items dropped by the unit when the game was saved, in place of the ones lying now, publishing no events. */
+    fun restoreDroppedItems(droppedItems: Map<Dto.PositionDto, List<String>>): LootDrop = copy(droppedItems = DroppedItems.create(droppedItems))
+
     fun toDto() =
         Dto(
             unitId = unitId.value,

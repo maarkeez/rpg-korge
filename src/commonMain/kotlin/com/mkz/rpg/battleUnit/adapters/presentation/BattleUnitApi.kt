@@ -20,6 +20,7 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestSwapBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
 import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
+import com.mkz.rpg.battleUnit.adapters.save.BattleUnitSnapshottable
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
@@ -60,6 +61,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class BattleUnitApi(
@@ -73,6 +75,10 @@ class BattleUnitApi(
 ) {
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
+
+    // Save
+    val snapshottable: Snapshottable =
+        BattleUnitSnapshottable(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
 
     // Services
     private val distanceService = DistanceService()

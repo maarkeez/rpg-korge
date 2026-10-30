@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnRequestSwapOccupants
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
+import com.mkz.rpg.battlefield.adapters.save.BattlefieldSnapshottable
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.OccupyTiles
@@ -37,6 +38,7 @@ import com.mkz.rpg.battlefield.usecases.services.BattlefieldDecoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldEncoder
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldLoader
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 
 class BattlefieldApi(
@@ -48,6 +50,9 @@ class BattlefieldApi(
 ) {
     // Storage
     private val battlefieldRepository = InMemoryBattlefieldRepository()
+
+    // Save
+    val snapshottable: Snapshottable = BattlefieldSnapshottable(battlefieldRepository)
 
     // Services
     private val battlefieldCreation = BattlefieldCreation(battlefieldRepository, terrainApi.searchTerrainById)

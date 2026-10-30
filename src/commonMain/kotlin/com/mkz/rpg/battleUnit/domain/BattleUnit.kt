@@ -95,6 +95,28 @@ data class BattleUnit private constructor(
                         RequestOccupyTile(occupantId = id, row = deployAtRow, column = deployAtColumn),
                     ),
             )
+
+        /** Rebuilds the battle unit as it was when the game was saved, from its [toSnapshot], publishing no events. */
+        fun restore(snapshot: Dto.SnapshotDto): BattleUnit =
+            BattleUnit(
+                Id(snapshot.id),
+                UnitId(snapshot.unitId),
+                PlayerId(snapshot.playerId),
+                RemainingHealthPoints(snapshot.remainingHealthPoints),
+                RemainingManaPoints(snapshot.remainingManaPoints),
+                BaseMaximumHealthPoints(snapshot.baseMaximumHealthPoints),
+                BaseMaximumManaPoints(snapshot.baseMaximumManaPoints),
+                EquippedEffects.restore(snapshot.equippedEffects),
+                RemainingTurnActions(snapshot.remainingTurnActions.maximumSteps).restore(
+                    remainingSteps = snapshot.remainingTurnActions.remainingSteps,
+                    remainingCasts = snapshot.remainingTurnActions.remainingCasts,
+                ),
+                AbilityCooldowns.restore(snapshot.abilityCooldowns),
+                LearnedAbilities(snapshot.learnedAbilityIds),
+                OngoingEffects.restore(snapshot.ongoingEffects),
+                snapshot.remainingTurns?.let(::RemainingTurns),
+                events = emptySet(),
+            )
     }
 
     fun pullEvents() = events to copy(events = emptySet())
@@ -112,6 +134,24 @@ data class BattleUnit private constructor(
             abilityCooldowns = abilityCooldowns.toDto(),
             unitId = unitId.value,
             ongoingEffects = ongoingEffects.toDto(),
+            remainingTurns = remainingTurns?.value,
+        )
+
+    /** Its whole state, to save the game: [restore] rebuilds it as it is. */
+    fun toSnapshot() =
+        Dto.SnapshotDto(
+            id = id.value,
+            unitId = unitId.value,
+            playerId = playerId.value,
+            remainingHealthPoints = remainingHealthPoints.value,
+            remainingManaPoints = remainingManaPoints.value,
+            baseMaximumHealthPoints = baseMaximumHealthPoints.value,
+            baseMaximumManaPoints = baseMaximumManaPoints.value,
+            equippedEffects = equippedEffects.toSnapshot(),
+            remainingTurnActions = remainingTurnActions.toDto(),
+            abilityCooldowns = abilityCooldowns.toDto(),
+            learnedAbilityIds = learnedAbilities.value,
+            ongoingEffects = ongoingEffects.toSnapshot(),
             remainingTurns = remainingTurns?.value,
         )
 
@@ -570,6 +610,35 @@ data class BattleUnit private constructor(
     ) {
         constructor() : this(emptyList())
 
+        companion object {
+            fun restore(snapshots: List<Dto.EquippedEffectSnapshotDto>) =
+                EquippedEffects(
+                    snapshots.map { snapshot ->
+                        val bonus =
+                            when (snapshot.bonus) {
+                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH -> Bonus.MaximumHealth(snapshot.points)
+                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA -> Bonus.MaximumMana(snapshot.points)
+                            }
+                        EquippedEffect(LootableItemId(snapshot.lootableItemId), EffectId(snapshot.effectId), bonus)
+                    },
+                )
+        }
+
+        fun toSnapshot(): List<Dto.EquippedEffectSnapshotDto> =
+            value.map { equippedEffect ->
+                val (bonus, points) =
+                    when (val equippedBonus = equippedEffect.bonus) {
+                        is Bonus.MaximumHealth -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH to equippedBonus.healthPoints
+                        is Bonus.MaximumMana -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA to equippedBonus.manaPoints
+                    }
+                Dto.EquippedEffectSnapshotDto(
+                    lootableItemId = equippedEffect.lootableItemId.value,
+                    effectId = equippedEffect.effectId.value,
+                    bonus = bonus,
+                    points = points,
+                )
+            }
+
         fun apply(
             lootableItemId: String,
             effect: Effect.Dto,
@@ -675,6 +744,11 @@ data class BattleUnit private constructor(
         fun canCastAbility(): Boolean = remainingCasts.value > 0
 
         fun reduceRemainingCasts() = copy(remainingCasts = RemainingCasts(remainingCasts.value - 1))
+
+        fun restore(
+            remainingSteps: Int,
+            remainingCasts: Int,
+        ) = copy(remainingSteps = RemainingSteps(remainingSteps), remainingCasts = RemainingCasts(remainingCasts))
     }
 
     @JvmInline private value class AbilityCooldowns(
@@ -685,6 +759,10 @@ data class BattleUnit private constructor(
                 AbilityId(abilityId) to CooldownTurnsLeft(0)
             },
         )
+
+        companion object {
+            fun restore(cooldowns: Map<String, Int>) = AbilityCooldowns(cooldowns.entries.associate { (abilityId, turnsLeft) -> AbilityId(abilityId) to CooldownTurnsLeft(turnsLeft) })
+        }
 
         @JvmInline private value class AbilityId(
             val value: String,
@@ -801,6 +879,21 @@ data class BattleUnit private constructor(
 
         constructor() : this(emptyList())
 
+        companion object {
+            fun restore(snapshots: List<Dto.OngoingEffectSnapshotDto>) =
+                OngoingEffects(
+                    snapshots.map { snapshot ->
+                        when (snapshot.application) {
+                            Dto.OngoingEffectSnapshotDto.ApplicationDto.IMMEDIATE -> Effect.immediate(snapshot.effectId)
+                            Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_DEFEATED -> Effect.onDefeated(snapshot.effectId)
+                            Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_TURN_STARTED -> Effect.onTurnStarted(snapshot.effectId, requireNotNull(snapshot.turnsLeft))
+                        }
+                    },
+                )
+        }
+
+        fun toSnapshot(): List<Dto.OngoingEffectSnapshotDto> = value.map { effect -> effect.toSnapshot() }
+
         @ConsistentCopyVisibility
         private data class Effect private constructor(
             private val effectId: EffectId,
@@ -832,6 +925,14 @@ data class BattleUnit private constructor(
             fun hasEffectId(effectId: String) = effectId == this.effectId.value
 
             fun effectId() = effectId.value
+
+            fun toSnapshot() =
+                when (applicationStatus) {
+                    ApplicationStatus.Immediate -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.IMMEDIATE, turnsLeft = null)
+                    ApplicationStatus.OnDefeated -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_DEFEATED, turnsLeft = null)
+                    is ApplicationStatus.OnTurnStarted ->
+                        Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_TURN_STARTED, turnsLeft = applicationStatus.turnsLeft)
+                }
         }
 
         @JvmInline private value class EffectId(
@@ -893,5 +994,51 @@ data class BattleUnit private constructor(
             val onTurnStarted: List<String>,
             val onDefeatedEffects: List<String>,
         )
+
+        /**
+         * The whole state of a battle unit, to save the game. Base maximums: without the bonuses of the equipped items.
+         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the cooldowns.
+         */
+        data class SnapshotDto(
+            val id: String,
+            val unitId: String,
+            val playerId: String,
+            val remainingHealthPoints: Int,
+            val remainingManaPoints: Int,
+            val baseMaximumHealthPoints: Int,
+            val baseMaximumManaPoints: Int,
+            val equippedEffects: List<EquippedEffectSnapshotDto>,
+            val remainingTurnActions: RemainingTurnActionsDto,
+            val abilityCooldowns: Map<String, Int>,
+            val learnedAbilityIds: List<String>,
+            val ongoingEffects: List<OngoingEffectSnapshotDto>,
+            val remainingTurns: Int?,
+        )
+
+        /** An effect of an equipped item, with the points its bonus adds to the maximum health or mana. */
+        data class EquippedEffectSnapshotDto(
+            val lootableItemId: String,
+            val effectId: String,
+            val bonus: BonusDto,
+            val points: Int,
+        ) {
+            enum class BonusDto {
+                MAXIMUM_HEALTH,
+                MAXIMUM_MANA,
+            }
+        }
+
+        /** An effect received and not applied yet, with the turns it has left when it applies every turn. */
+        data class OngoingEffectSnapshotDto(
+            val effectId: String,
+            val application: ApplicationDto,
+            val turnsLeft: Int?,
+        ) {
+            enum class ApplicationDto {
+                IMMEDIATE,
+                ON_TURN_STARTED,
+                ON_DEFEATED,
+            }
+        }
     }
 }

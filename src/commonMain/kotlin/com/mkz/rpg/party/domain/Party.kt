@@ -70,6 +70,25 @@ data class Party private constructor(
                 events = setOf(ExplorationStarted(playerId = playerId, battleUnitIds = battleUnitIds, unitIds = unitIds)),
             )
         }
+
+        /**
+         * Rebuilds the party as it was when the game was saved, from its [toSnapshot], exploring, done walking, and with
+         * no battle unit moved in the current second. It publishes no events.
+         */
+        fun restore(snapshot: Dto.SnapshotDto): Party {
+            if (snapshot.battleUnitIds.isEmpty()) throw PartyRequired()
+            return Party(
+                playerId = PlayerId(snapshot.playerId),
+                members = Members(snapshot.battleUnitIds),
+                line = Line(snapshot.lineBattleUnitIds),
+                mode = Mode.EXPLORING,
+                pendingSteps = PendingSteps(emptyList()),
+                awaitedStep = null,
+                movedBattleUnits = MovedBattleUnits(emptySet()),
+                talkingNpcId = null,
+                events = emptySet(),
+            )
+        }
     }
 
     fun toDto() =
@@ -84,6 +103,9 @@ data class Party private constructor(
             isInFormation = mode == Mode.FORMATION,
             isPaused = mode == Mode.PAUSED,
         )
+
+    /** What is kept when the game is saved: the members and the line, as [restore] explores again. */
+    fun toSnapshot() = Dto.SnapshotDto(playerId = playerId.value, battleUnitIds = members.value, lineBattleUnitIds = line.value)
 
     /** Whether the party can walk: it is exploring and has finished walking. */
     fun canWalk(): Boolean = mode == Mode.EXPLORING && !isWalking()
@@ -370,6 +392,13 @@ data class Party private constructor(
             val battleUnitId: String,
             val row: Int,
             val column: Int,
+        )
+
+        /** The party as the game was saved. Battle units: the party, the leader first. Line: in walking order, as kept. */
+        data class SnapshotDto(
+            val playerId: String,
+            val battleUnitIds: List<String>,
+            val lineBattleUnitIds: List<String>,
         )
     }
 }

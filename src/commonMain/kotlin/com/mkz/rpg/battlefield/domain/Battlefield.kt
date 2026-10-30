@@ -114,6 +114,15 @@ data class Battlefield private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
+    /** The occupant of each occupied tile, to save the game. An occupant of several tiles (e.g.: a building) is on each. */
+    fun occupants(): List<Dto.OccupantDto> = tiles.occupants()
+
+    /**
+     * Puts back the occupants of a saved game, from its [occupants], every other tile vacant, publishing no events. Fails
+     * when a tile is not found, e.g.: the map is smaller now.
+     */
+    fun restoreOccupants(occupants: List<Dto.OccupantDto>): Battlefield = copy(tiles = tiles.restoreOccupants(occupants))
+
     fun canBeOccupied(
         row: Int,
         column: Int,
@@ -238,6 +247,20 @@ data class Battlefield private constructor(
                     }
                 }
             return Tiles(updatedTiles)
+        }
+
+        fun occupants(): List<Dto.OccupantDto> =
+            tiles.values.mapNotNull { tile -> tile.occupantId()?.let { occupantId -> Dto.OccupantDto(occupantId = occupantId, row = tile.row(), column = tile.column()) } }
+
+        fun restoreOccupants(occupants: List<Dto.OccupantDto>): Tiles {
+            val vacantTiles = tiles.mapValues { (_, tile) -> tile.removeOccupant() }
+            val occupiedTiles =
+                occupants.associate { occupant ->
+                    val position = Position(row = occupant.row, column = occupant.column)
+                    val tile = vacantTiles[position] ?: throw TileNotFound()
+                    position to tile.occupy(occupant.occupantId)
+                }
+            return Tiles(vacantTiles + occupiedTiles)
         }
 
         fun toDto(): Map<PositionDto, TileDto> =
@@ -547,6 +570,13 @@ data class Battlefield private constructor(
         data class TerrainTransitionRuleDto(
             val fromTerrainId: String,
             val toTerrainId: String,
+        )
+
+        /** An occupant on a tile, e.g.: to save the game. */
+        data class OccupantDto(
+            val occupantId: String,
+            val row: Int,
+            val column: Int,
         )
 
         data class EffectApplicationToOccupantDto(

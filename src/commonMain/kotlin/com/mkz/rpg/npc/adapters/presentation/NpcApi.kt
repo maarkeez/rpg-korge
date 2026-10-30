@@ -5,6 +5,7 @@ import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.events.OnNpcTalkFinished
 import com.mkz.rpg.npc.adapters.events.OnRequestInitialiseNpcs
 import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
+import com.mkz.rpg.npc.adapters.save.NpcSnapshottable
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
 import com.mkz.rpg.npc.usecases.commands.InitialiseNpcs
@@ -16,6 +17,7 @@ import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.npc.usecases.services.NpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 
 class NpcApi(
     battlefieldApi: BattlefieldApi,
@@ -26,6 +28,9 @@ class NpcApi(
 ) {
     // Storage
     private val npcRepository: NpcRepository = InMemoryNpcRepository()
+
+    // Save
+    val snapshottable: Snapshottable = NpcSnapshottable(npcRepository, lootableItemApi.searchLootableItemById)
 
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)

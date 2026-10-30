@@ -40,6 +40,16 @@ data class Npc private constructor(
                         RequestOccupyTile(occupantId = dto.id, row = dto.row, column = dto.column),
                     ),
             )
+
+        /** Rebuilds the npc as it was when the game was saved, from its [toDto], publishing no events. */
+        fun restore(dto: Dto): Npc =
+            Npc(
+                id = Id(dto.id),
+                tile = Tile(row = dto.row, column = dto.column),
+                unitId = dto.unitId?.let(::UnitId),
+                stock = Stock(dto.stock),
+                events = emptySet(),
+            )
     }
 
     fun pullEvents() = events to copy(events = emptySet())

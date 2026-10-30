@@ -5,6 +5,7 @@ import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.events.OnExplorationStarted
 import com.mkz.rpg.inventory.adapters.events.OnLootFound
 import com.mkz.rpg.inventory.adapters.events.OnPartyJoined
+import com.mkz.rpg.inventory.adapters.save.InventorySnapshottable
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.commands.BuyItem
@@ -31,6 +32,7 @@ import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class InventoryApi(
@@ -44,6 +46,9 @@ class InventoryApi(
 ) {
     // Storage
     private val inventoryRepository: InventoryRepository = InMemoryInventoryRepository()
+
+    // Save
+    val snapshottable: Snapshottable = InventorySnapshottable(inventoryRepository, lootableItemApi.searchLootableItemById)
 
     // Services
     private val playerTurnRule = PlayerTurnRule(partyApi.searchParty, battleApi.searchBattle)

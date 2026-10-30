@@ -10,6 +10,7 @@ import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitRespawned
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnExplorationSecondStarted
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnPartyWalked
+import com.mkz.rpg.cpuWanderBrain.adapters.save.CpuWanderBrainSnapshottable
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.AwaitRespawn
@@ -24,6 +25,7 @@ import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 
 class CpuWanderBrainApi(
     playerApi: PlayerApi,
@@ -35,6 +37,9 @@ class CpuWanderBrainApi(
 ) {
     // Storage
     private val cpuWanderBrainRepository: CpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
+
+    // Save
+    val snapshottable: Snapshottable = CpuWanderBrainSnapshottable(cpuWanderBrainRepository)
 
     // Queries
     val isInSight = IsInSight(partyApi.searchParty, battlefieldApi.searchPosition, battlefieldApi.searchBattlefieldSize)

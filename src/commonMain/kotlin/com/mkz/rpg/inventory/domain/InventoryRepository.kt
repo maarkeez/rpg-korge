@@ -4,4 +4,8 @@ interface InventoryRepository {
     fun create(inventory: Inventory)
 
     fun searchByBattleUnitId(battleUnitId: String): Inventory?
+
+    fun searchAll(): List<Inventory>
+
+    fun deleteAll()
 }

@@ -13,6 +13,7 @@ import com.mkz.rpg.party.adapters.events.OnRequestRecruitMember
 import com.mkz.rpg.party.adapters.events.OnRequestRemoveMemberEquippedEffects
 import com.mkz.rpg.party.adapters.events.OnRequestStartExploration
 import com.mkz.rpg.party.adapters.events.OnRequestStartTalk
+import com.mkz.rpg.party.adapters.save.PartySnapshottable
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.party.usecases.commands.ApplyMemberEffect
@@ -38,6 +39,7 @@ import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.party.usecases.services.PartyWalking
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
+import com.mkz.rpg.shared.domain.Snapshottable
 
 class PartyApi(
     playerApi: PlayerApi,
@@ -47,6 +49,9 @@ class PartyApi(
 ) {
     // Storage
     private val partyRepository: PartyRepository = InMemoryPartyRepository()
+
+    // Save
+    val snapshottable: Snapshottable = PartySnapshottable(partyRepository, battleUnitApi.searchBattleUnitById)
 
     // Services
     private val partyWalking = PartyWalking(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)

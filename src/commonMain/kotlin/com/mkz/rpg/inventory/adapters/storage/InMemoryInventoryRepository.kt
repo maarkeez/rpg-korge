@@ -11,4 +11,8 @@ class InMemoryInventoryRepository : InventoryRepository {
     }
 
     override fun searchByBattleUnitId(battleUnitId: String) = inventories[battleUnitId]
+
+    override fun searchAll(): List<Inventory> = inventories.values.toList()
+
+    override fun deleteAll() = inventories.clear()
 }

@@ -48,6 +48,31 @@ data class CpuWanderBrain private constructor(
                 purpose = null,
                 events = emptySet(),
             )
+
+        /**
+         * Rebuilds the homes, the battle units returning home and the respawns as they were when the game was saved,
+         * from its [toSnapshot], wandering no battle unit. It publishes no events.
+         */
+        fun restore(snapshot: Dto.SnapshotDto): CpuWanderBrain =
+            CpuWanderBrain(
+                homes =
+                    Homes(
+                        snapshot.homes.associate { home ->
+                            home.battleUnitId to
+                                Home(
+                                    row = home.row,
+                                    column = home.column,
+                                    distancesFromHome = home.distancesFromHome.associate { distance -> PositionDto(row = distance.row, column = distance.column) to distance.distance },
+                                )
+                        },
+                    ),
+                returningBattleUnits = ReturningBattleUnits(snapshot.returningBattleUnitIds),
+                respawns = Respawns(snapshot.respawns.associate { respawn -> respawn.battleUnitId to respawn.partySteps }),
+                pendingBattleUnits = PendingBattleUnits(emptyList()),
+                awaitedStep = null,
+                purpose = null,
+                events = emptySet(),
+            )
     }
 
     fun toDto() =
@@ -56,6 +81,22 @@ data class CpuWanderBrain private constructor(
             returningBattleUnitIds = returningBattleUnits.value,
             pendingBattleUnitIds = pendingBattleUnits.value,
             isWandering = isWandering(),
+            respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
+        )
+
+    /** What is kept when the game is saved: the homes, the battle units returning home and the respawns. */
+    fun toSnapshot() =
+        Dto.SnapshotDto(
+            homes =
+                homes.value.map { (battleUnitId, home) ->
+                    Dto.HomeSnapshotDto(
+                        battleUnitId = battleUnitId,
+                        row = home.row,
+                        column = home.column,
+                        distancesFromHome = home.distancesFromHome.map { (position, distance) -> Dto.DistanceDto(row = position.row, column = position.column, distance = distance) },
+                    )
+                },
+            returningBattleUnitIds = returningBattleUnits.value,
             respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
         )
 
@@ -254,6 +295,27 @@ data class CpuWanderBrain private constructor(
         data class RespawnDto(
             val battleUnitId: String,
             val partySteps: Int,
+        )
+
+        /** What is kept when the game is saved, in deployment order. */
+        data class SnapshotDto(
+            val homes: List<HomeSnapshotDto>,
+            val returningBattleUnitIds: Set<String>,
+            val respawns: List<RespawnDto>,
+        )
+
+        /** A home, with how far each tile is from it. */
+        data class HomeSnapshotDto(
+            val battleUnitId: String,
+            val row: Int,
+            val column: Int,
+            val distancesFromHome: List<DistanceDto>,
+        )
+
+        data class DistanceDto(
+            val row: Int,
+            val column: Int,
+            val distance: Int,
         )
     }
 }
