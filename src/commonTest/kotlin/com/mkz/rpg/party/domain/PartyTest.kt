@@ -31,6 +31,7 @@ class PartyTest {
                 isWalking = false,
                 talkingNpcId = null,
                 isInFormation = false,
+                isPaused = false,
             )
         party.pullEvents().first.shouldContainExactly(
             PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight")),
@@ -535,5 +536,68 @@ class PartyTest {
         // Then
         pausedParty.toDto().isInFormation.shouldBeFalse()
         pausedParty.canWalk().shouldBeTrue()
+    }
+
+    @Test
+    fun `OpenPause should pause when the party is exploring`() {
+        // When
+        val party = party().openPause()
+        // Then
+        party.toDto().isPaused.shouldBeTrue()
+        party.toDto().isExploring.shouldBeFalse()
+        party.canWalk().shouldBeFalse()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.PauseOpened(playerId = "human"))
+    }
+
+    @Test
+    fun `OpenPause should do nothing when the party is battling`() {
+        // Given
+        val battlingParty = party().pause().pullEvents().second
+        // When
+        val party = battlingParty.openPause()
+        // Then
+        party shouldBe battlingParty
+    }
+
+    @Test
+    fun `OpenPause should do nothing when the party is walking`() {
+        // Given
+        val walkingParty = party().walkParty(listOf(leaderStep))
+        // When
+        val party = walkingParty.openPause()
+        // Then
+        party shouldBe walkingParty
+    }
+
+    @Test
+    fun `ClosePause should explore when the party is paused`() {
+        // Given
+        val pausedParty = party().openPause().pullEvents().second
+        // When
+        val party = pausedParty.closePause()
+        // Then
+        party.toDto().isPaused.shouldBeFalse()
+        party.canWalk().shouldBeTrue()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.PauseClosed(playerId = "human"))
+    }
+
+    @Test
+    fun `ClosePause should do nothing when the party is not paused`() {
+        // Given
+        val exploringParty = party()
+        // When
+        val party = exploringParty.closePause()
+        // Then
+        party shouldBe exploringParty
+    }
+
+    @Test
+    fun `MarkMoved should not remember the battle units moving while paused`() {
+        // Given
+        val party = party().openPause()
+        // When
+        val movedParty = party.markMoved("knight-1")
+        // Then
+        movedParty.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
     }
 }

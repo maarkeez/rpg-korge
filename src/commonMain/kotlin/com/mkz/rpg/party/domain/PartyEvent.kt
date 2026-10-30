@@ -61,6 +61,16 @@ sealed interface PartyEvent : DomainEvent {
         val battleUnitIds: List<String>,
     ) : PartyEvent
 
+    /** The game is paused (e.g.: to save it): time stops until the pause is closed. */
+    data class PauseOpened(
+        val playerId: String,
+    ) : PartyEvent
+
+    /** The pause is closed, so the party explores again. */
+    data class PauseClosed(
+        val playerId: String,
+    ) : PartyEvent
+
     // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
     data class RequestRecruitMember(
         val battleUnitId: String,

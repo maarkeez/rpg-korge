@@ -16,6 +16,8 @@ import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PartyJoined
 import com.mkz.rpg.party.domain.PartyEvent.PartyWalked
+import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
+import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
 import kotlin.jvm.JvmInline
 import kotlin.math.abs
 
@@ -33,7 +35,8 @@ import kotlin.math.abs
  * remembers the battle units that moved during the current second.
  *
  * The party can talk to an npc while exploring. Time stops while talking: the party does not walk, and no second starts.
- * Time also stops while the player sets the party order in the formation, which decides who leads.
+ * Time also stops while the player sets the party order in the formation, which decides who leads, and while the game
+ * is paused (e.g.: to save it).
  */
 @ConsistentCopyVisibility
 data class Party private constructor(
@@ -79,6 +82,7 @@ data class Party private constructor(
             isWalking = isWalking(),
             talkingNpcId = talkingNpcId?.value,
             isInFormation = mode == Mode.FORMATION,
+            isPaused = mode == Mode.PAUSED,
         )
 
     /** Whether the party can walk: it is exploring and has finished walking. */
@@ -187,6 +191,18 @@ data class Party private constructor(
         )
     }
 
+    /** Pauses the game, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    fun openPause(): Party {
+        if (!canWalk()) return this
+        return copy(mode = Mode.PAUSED, events = events + PauseOpened(playerId = playerId.value))
+    }
+
+    /** Explores again once the pause is closed (e.g.: Resume). Nothing changes when it is not paused. */
+    fun closePause(): Party {
+        if (mode != Mode.PAUSED) return this
+        return copy(mode = Mode.EXPLORING, events = events + PauseClosed(playerId = playerId.value))
+    }
+
     /** Stops exploring, e.g.: when a battle starts. A walk, a talk or a formation in progress is abandoned. */
     fun pause(): Party =
         copy(
@@ -257,6 +273,7 @@ data class Party private constructor(
         EXPLORING,
         TALKING,
         FORMATION,
+        PAUSED,
         BATTLING,
     }
 
@@ -317,7 +334,8 @@ data class Party private constructor(
     /**
      * Leader: `null` once every battle unit of the party has been defeated. Line: the battle units in walking order, the
      * leader first. Exploring: `false` while battling, while talking and while in formation. Talking npc: the npc the
-     * party talks to, or `null` when it talks to none. In formation: whether the player sets the party order.
+     * party talks to, or `null` when it talks to none. In formation: whether the player sets the party order. Paused:
+     * whether the game is paused, e.g.: to save it.
      */
     data class Dto(
         val playerId: String,
@@ -328,6 +346,7 @@ data class Party private constructor(
         val isWalking: Boolean,
         val talkingNpcId: String?,
         val isInFormation: Boolean,
+        val isPaused: Boolean,
     ) {
         /** Where the leader walks to, one tile away. */
         enum class DirectionDto(
