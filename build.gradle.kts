@@ -14,6 +14,10 @@ import testcatalogs.TestCatalogsTask
 // so the kotlin-multiplatform and kotlinx-serialization plugins are applied from 2.2.21.
 // Note: the JS compiler cannot link a newer stdlib than itself, so the Kotlin version must be at least
 // the one the test libraries (e.g.: Kotest) are built with.
+// Every build prints a `NoSuchMethodError` for `NodeJsRootExtension.requireConfigured()`: korge 6.0.0
+// sets up its esbuild tasks with it, and 2.2.21 no longer has it. Korge catches the error and skips
+// them, so `browser*Esbuild`, `runJsDebug` and `runJsRelease` are missing. Nothing else is affected:
+// the deploy and the frame times use Webpack (`browserReleaseWebpack`, `runJsWebpack*`).
 buildscript {
     repositories { mavenCentral() }
     dependencies {
