@@ -81,6 +81,8 @@ dependencies {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    // Rewrites the golden save of the current version, e.g.: ./gradlew jvmTest -Drpg.updateSaveFixtures=true. See docs/architecture/save-and-load.md.
+    systemProperty("rpg.updateSaveFixtures", providers.systemProperty("rpg.updateSaveFixtures").getOrElse("false"))
 }
 
 // The Storybook starts from the same `main` as the game, which reads this system property.

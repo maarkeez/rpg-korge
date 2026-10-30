@@ -1,0 +1,17 @@
+{
+  "summary": {
+    "version": 0,
+    "savedAt": 1793385720000.0,
+    "leaderUnitId": "knight",
+    "partySize": 1
+  },
+  "snapshots": {
+    "battleUnits": [
+      {
+        "id": "knight-1",
+        "unitId": "knight",
+        "health": 30
+      }
+    ]
+  }
+}
