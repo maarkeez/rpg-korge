@@ -50,10 +50,10 @@ open class VirtualPadView(
         private val BUTTON_PRESSED_COLOR = RGBA(207, 60, 113)
         private val BUTTON_BORDER_COLOR = RGBA(79, 21, 7)
 
-        // The cross of arrows is centred on the left part of the pad, and the buttons on its right part, both this far
-        // above its bottom.
+        // The cross of arrows is this far from the left edge of the pad, as A from its right edge, and the buttons are
+        // centred on its right part. Both are centred this far above its bottom.
+        private const val ARROWS_LEFT_MARGIN = 8.0
         private const val CONTROLS_CENTER_FROM_BOTTOM = 150.0
-        private const val ARROWS_CENTER_RATIO = 0.3
         private const val BUTTONS_CENTER_RATIO = 0.8
 
         // How far each button is from the centre of the buttons, A up and to the right, B down and to the left.
@@ -89,8 +89,8 @@ open class VirtualPadView(
     internal var heldDirection: Direction? = null
         private set
 
-    // The arrows form a cross, centred on the left part of the pad.
-    private val centerX = size.width * ARROWS_CENTER_RATIO - ARROW_SIZE / 2
+    // The arrows form a cross, on the left part of the pad.
+    private val centerX = ARROWS_LEFT_MARGIN + ARROW_SIZE
     private val centerY = size.height - CONTROLS_CENTER_FROM_BOTTOM - ARROW_SIZE / 2
     internal val northArrow = arrow(Direction.NORTH, x = centerX, y = centerY - ARROW_SIZE)
     internal val eastArrow = arrow(Direction.EAST, x = centerX + ARROW_SIZE, y = centerY)
