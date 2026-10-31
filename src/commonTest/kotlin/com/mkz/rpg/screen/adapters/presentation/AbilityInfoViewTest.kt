@@ -16,8 +16,9 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class AbilityInfoViewTest : ViewsForTesting() {
-    // The height left under the ability buttons in the 300-high battle HUD.
-    private val heightUnderAbilityButtons = 135.0
+    // The height left under the ability buttons once the header of the battle unit info is collapsed, in the
+    // 300-high battle HUD.
+    private val heightUnderFocusedHeader = 178.0
 
     private val skull =
         AbilityInfo(
@@ -39,7 +40,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
     private suspend fun abilityInfoView() = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), TextsMother.texts())
 
     @Test
-    fun `AbilityInfoView should display the name, the mana cost and the cooldown when it displays an ability`() =
+    fun `AbilityInfoView should display the mana cost and cooldown as pills when it displays an ability`() =
         sharedViewsTest {
             // Given
             val abilityInfoView = abilityInfoView()
@@ -55,14 +56,15 @@ class AbilityInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `AbilityInfoView should display a dash when the ability has no cooldown`() =
+    fun `AbilityInfoView should display no cooldown pill when the ability has no cooldown`() =
         sharedViewsTest {
             // Given
             val abilityInfoView = abilityInfoView()
             // When
             abilityInfoView.display(skull)
             // Then
-            abilityInfoView.cooldown() shouldBe "-"
+            abilityInfoView.manaCost() shouldBe "10"
+            abilityInfoView.cooldown().shouldBeNull()
         }
 
     @Test
@@ -81,7 +83,18 @@ class AbilityInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `AbilityInfoView should display the turns left when the ability is in cooldown`() =
+    fun `AbilityInfoView should display the numbers of the effects in gold when it displays an ability`() =
+        sharedViewsTest {
+            // Given
+            val abilityInfoView = abilityInfoView()
+            // When
+            abilityInfoView.display(skull)
+            // Then
+            abilityInfoView.highlightedWords() shouldBe listOf("10", "(3", "5")
+        }
+
+    @Test
+    fun `AbilityInfoView should display the reason as a banner when the ability is in cooldown`() =
         sharedViewsTest {
             // Given
             val abilityInfoView = abilityInfoView()
@@ -89,6 +102,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             abilityInfoView.display(mending.copy(reason = Reason.Cooldown(turnsLeft = 1)))
             // Then
             abilityInfoView.reason() shouldBe "Ready in 1 turn"
+            abilityInfoView.isReasonInBanner().shouldBeTrue()
         }
 
     @Test
@@ -116,7 +130,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `AbilityInfoView should fit under the ability buttons when the ability has three effects`() =
+    fun `AbilityInfoView should fit under the focused header when the ability has three effects and a reason`() =
         sharedViewsTest {
             // Given
             val abilityInfoView = abilityInfoView()
@@ -128,7 +142,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
                 ),
             )
             // Then
-            abilityInfoView.height shouldBeLessThanOrEqual heightUnderAbilityButtons
+            abilityInfoView.height shouldBeLessThanOrEqual heightUnderFocusedHeader
         }
 
     @Test

@@ -38,7 +38,7 @@ object AbilityInfoViewStories : StoryBinding {
             AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_SELF, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
         ).associateBy(AbilityInfo::abilityId)
 
-    private val sword = StoryDto(id = "screen-ability-info--sword", name = "Sword", description = "One effect, free and with no cooldown.", args = emptyMap())
+    private val sword = StoryDto(id = "screen-ability-info--sword", name = "Sword", description = "One effect, free and with no cooldown: no cooldown pill.", args = emptyMap())
     private val skull =
         StoryDto(
             id = "screen-ability-info--skull",
@@ -58,14 +58,14 @@ object AbilityInfoViewStories : StoryBinding {
         StoryDto(
             id = "screen-ability-info--in-cooldown",
             name = "In cooldown",
-            description = "Mending, cast last turn: the turns left, in orange, under its name.",
+            description = "Mending, cast last turn: the turns left, in an orange banner under its header.",
             args = mapOf(ABILITY to ArgDto.text("mending"), COOLDOWN_TURNS_LEFT to ArgDto.int(2)),
         )
     private val notEnoughMana =
         StoryDto(
             id = "screen-ability-info--not-enough-mana",
             name = "Not enough mana",
-            description = "Bat, with 4 mana left: the mana missing, in blue, under its name.",
+            description = "Bat, with 4 mana left: the mana missing, in a blue banner under its header.",
             args = mapOf(ABILITY to ArgDto.text("bat"), REMAINING_MANA to ArgDto.int(4)),
         )
 
@@ -74,7 +74,7 @@ object AbilityInfoViewStories : StoryBinding {
             id = "screen-ability-info",
             group = "Screen",
             title = "Ability info",
-            description = "What the selected ability does, docked under the ability buttons. A cooldown wins over a lack of mana, as on the button.",
+            description = "What the selected ability does, as a card under the ability buttons: its costs as pills, why it can not be cast as a banner, its effects with their numbers in gold.",
             controls =
                 listOf(
                     ControlDto.pick(ABILITY, abilities.keys.toList()),

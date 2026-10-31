@@ -1,21 +1,26 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.view.Container
-import korlibs.korge.view.SolidRect
+import korlibs.korge.view.RoundRect
 import korlibs.korge.view.Text
 import korlibs.korge.view.container
 import korlibs.korge.view.image
+import korlibs.korge.view.roundRect
 import korlibs.korge.view.solidRect
 import korlibs.korge.view.text
 import korlibs.korge.view.xy
+import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
+import korlibs.math.geom.degrees
 
 /**
- * What a selected ability does: its icon and name, why it can not be cast now (if so), its mana cost and cooldown, who
- * it is cast on, as a sentence and a 3x3 diagram around the caster, and one sentence per effect, wrapped to the width.
- * In the diagram, the neighbours are filled when the ability reaches all of them, and outlined when it reaches one.
+ * What a selected ability does, as a card: its icon at 2x in a slot, its name and who it is cast on, and its costs as
+ * pills (its mana always, its cooldown only when it has one). Why it can not be cast now, if so, is a tinted banner under
+ * them. Then a sentence per effect, led by a gold diamond, its numbers in gold, wrapped beside a 3x3 diagram around the
+ * caster. In the diagram, the neighbours are filled when the ability reaches all of them, and outlined when it reaches one.
  */
 open class AbilityInfoView(
     private val panelWidth: Double,
@@ -25,34 +30,35 @@ open class AbilityInfoView(
     companion object {
         const val WIDTH = 380.0
 
-        internal val BACKGROUND_COLOR = RGBA(0x14, 0x14, 0x22)
-        internal val BORDER_COLOR = RGBA(0x9C, 0x9C, 0xB4)
-        internal val MUTED_COLOR = RGBA(0xB4, 0xB4, 0xC8)
-
         // The mana bar's blue, and the cast points' orange.
-        internal val MANA_COLOR = RGBA(0, 145, 255)
+        internal val MANA_COLOR = HudStyle.MANA
         internal val COOLDOWN_COLOR = BattleUnitInfoView.CAST_POINTS_COLOR
 
         // The diagram: the caster, an enemy, an ally, and a tile with no one.
         internal val CASTER_COLOR = Colors.WHITE
-        internal val ENEMY_COLOR = RGBA(255, 55, 95)
-        internal val ALLY_COLOR = RGBA(0x5A, 0xD2, 0x5A)
+        internal val ENEMY_COLOR = HudStyle.ENEMY
+        internal val ALLY_COLOR = HudStyle.ALLY
         internal val EMPTY_TILE_COLOR = Colors.WHITE
-        private val UNMARKED_COLOR = RGBA(0x3A, 0x3A, 0x4E)
+        private val UNMARKED_COLOR = RGBA(0x2A, 0x2A, 0x40)
 
-        private const val PADDING = 6.0
+        private const val PADDING = 10.0
+        private const val SPACING = 8.0
         private const val TEXT_SIZE = 12.0
-        private const val NAME_TEXT_SIZE = 15.0
+        private const val NAME_TEXT_SIZE = 16.0
         private const val LINE_SPACING = 3.0
-        private const val ICON_SCALE = 1.5
-        private const val ABILITY_ICON_SIZE = 16 * ICON_SCALE
-        private const val STAT_ICON_SIZE = 8 * ICON_SCALE
-        private const val STAT_SPACING = 12.0
-        private const val BULLET_SIZE = 3.0
-        private const val BULLET_INDENT = 8.0
-        private const val CELL_SIZE = 9.0
-        private const val CELL_GAP = 1.0
+        private const val EFFECT_SPACING = 4.0
+        private const val ICON_SCALE = 2.0
+        private const val ICON_SLOT_SIZE = 40.0
+        private const val NAME_X = PADDING + ICON_SLOT_SIZE + 8
+        private const val PILL_SPACING = 6.0
+        private const val BANNER_HEIGHT = 24.0
+        private const val BANNER_RADIUS = 6.0
+        private const val BULLET_SIZE = 5.0
+        private const val BULLET_INDENT = 14.0
+        private const val CELL_SIZE = 10.0
+        private const val CELL_GAP = 2.0
         private const val DIAGRAM_SIZE = 3 * CELL_SIZE + 2 * CELL_GAP
+        private const val DIAGRAM_MARGIN = 10.0
     }
 
     /** The plain data of an ability the view displays: numbers and ids, translated by the view. */
@@ -126,16 +132,18 @@ open class AbilityInfoView(
         EMPTY_TILE,
     }
 
-    private val border: SolidRect = solidRect(Size(panelWidth, 0.0), BORDER_COLOR)
-    private val background: SolidRect = solidRect(Size(panelWidth - 2, 0.0), BACKGROUND_COLOR) { xy(1.0, 1.0) }
+    private val background: RoundRect = panel(Size(panelWidth, ICON_SLOT_SIZE + 2 * PADDING))
     private val content: Container = container()
 
     internal lateinit var nameText: Text
+    internal lateinit var manaCostPill: PillView
+    internal var cooldownPill: PillView? = null
     internal var reasonText: Text? = null
-    internal lateinit var manaCostText: Text
-    internal lateinit var cooldownText: Text
-    internal lateinit var targetingLines: List<Text>
-    internal lateinit var effectLines: List<List<Text>>
+    internal var reasonBanner: RoundRect? = null
+    internal lateinit var targetingText: Text
+
+    // The words of each effect, the numbers among them in gold.
+    internal lateinit var effectWords: List<List<Text>>
 
     /** The diagram, row by row, the caster in the middle. */
     internal var marks: List<Mark> = emptyList()
@@ -143,50 +151,58 @@ open class AbilityInfoView(
     // When the ability reaches one of the neighbours marked, not all of them, they are outlined.
     internal var isOneOfTheNeighbours = false
 
-    // Where the next line goes.
-    private var cursorY = PADDING
-
     init {
         visible = false
     }
 
     open fun display(abilityInfo: AbilityInfo) {
         content.removeChildren()
-        cursorY = PADDING
 
-        // Icon, name, mana cost and cooldown, the diagram to their right
+        // The header: the icon in its slot, the name and who it is cast on, and the costs on the right
+        content.panel(Size(ICON_SLOT_SIZE, ICON_SLOT_SIZE), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).xy(PADDING, PADDING)
         resourcesLoader.bitmapOrNull("ability/${abilityInfo.abilityId}.png")?.let { bitmap ->
             content.image(bitmap) {
                 smoothing = false
                 scale = ICON_SCALE
-                xy(PADDING, cursorY)
+                xy(PADDING + (ICON_SLOT_SIZE - bitmap.width * ICON_SCALE) / 2, PADDING + (ICON_SLOT_SIZE - bitmap.height * ICON_SCALE) / 2)
             }
         }
-        nameText =
-            content.text(texts.abilityName(abilityInfo.abilityId), textSize = NAME_TEXT_SIZE, color = Colors.WHITE) {
-                xy(PADDING + ABILITY_ICON_SIZE + 4, cursorY + (ABILITY_ICON_SIZE - NAME_TEXT_SIZE) / 2)
-            }
-        displayStats(abilityInfo, startX = nameText.x + nameText.width + STAT_SPACING, y = cursorY + (ABILITY_ICON_SIZE - STAT_ICON_SIZE) / 2)
-        displayDiagram(abilityInfo)
-        cursorY += ABILITY_ICON_SIZE + LINE_SPACING
+        nameText = content.text(texts.abilityName(abilityInfo.abilityId), textSize = NAME_TEXT_SIZE, color = Colors.WHITE) { xy(NAME_X, PADDING + 2) }
+        targetingText = content.text(targeting(abilityInfo.targeting), textSize = TEXT_SIZE, color = HudStyle.MUTED) { xy(NAME_X, PADDING + 24) }
+        displayCosts(abilityInfo)
+        var cursorY = PADDING + ICON_SLOT_SIZE + SPACING
 
         // Why it can not be cast now
-        reasonText =
-            when (val reason = abilityInfo.reason) {
-                is AbilityInfo.Reason.Cooldown -> lines(texts.plural(UiText.ABILITY_INFO_READY_IN, reason.turnsLeft, "turns" to reason.turnsLeft), COOLDOWN_COLOR).first()
-                is AbilityInfo.Reason.NotEnoughMana -> lines(texts[UiText.ABILITY_INFO_NOT_ENOUGH_MANA, "cost" to reason.cost, "mana" to reason.remainingMana], MANA_COLOR).first()
-                null -> null
+        reasonText = null
+        reasonBanner = null
+        reason(abilityInfo.reason)?.let { (reason, color) ->
+            reasonBanner =
+                content.roundRect(Size(panelWidth - 2 * PADDING, BANNER_HEIGHT), RectCorners(BANNER_RADIUS), fill = color.withAd(0.16), stroke = color.withAd(0.6), strokeThickness = 1.0) {
+                    xy(PADDING, cursorY)
+                }
+            reasonText = content.text(reason, textSize = TEXT_SIZE, color = color) { xy(PADDING + 10, cursorY + (BANNER_HEIGHT - TEXT_SIZE) / 2 - 1) }
+            cursorY += BANNER_HEIGHT + SPACING
+        }
+
+        content.solidRect(Size(panelWidth - 2 * PADDING, 1.0), HudStyle.STROKE) { xy(PADDING, cursorY) }
+        cursorY += SPACING
+
+        // What it does, beside the diagram
+        val effectsTop = cursorY
+        displayDiagram(abilityInfo, top = effectsTop)
+        effectWords =
+            abilityInfo.effects.map { effect ->
+                content.solidRect(Size(BULLET_SIZE, BULLET_SIZE), HudStyle.SELECTION) {
+                    rotation = 45.degrees
+                    xy(PADDING + 4, cursorY + 3)
+                }
+                val (words, height) = wrappedWords(sentence(effect), top = cursorY)
+                cursorY += height + EFFECT_SPACING
+                words
             }
+        cursorY = maxOf(cursorY - EFFECT_SPACING, effectsTop + DIAGRAM_SIZE)
 
-        // Who it is cast on
-        targetingLines = lines(targeting(abilityInfo.targeting), MUTED_COLOR)
-
-        // What it does
-        effectLines = abilityInfo.effects.map { effect -> lines(sentence(effect), Colors.WHITE, indent = BULLET_INDENT, bullet = true) }
-
-        val height = cursorY + PADDING - LINE_SPACING
-        border.size = Size(panelWidth, height)
-        background.size = Size(panelWidth - 2, height - 2)
+        background.size = Size(panelWidth, cursorY + PADDING)
         visible = true
     }
 
@@ -194,29 +210,34 @@ open class AbilityInfoView(
         visible = false
     }
 
-    private fun displayStats(
-        abilityInfo: AbilityInfo,
-        startX: Double,
-        y: Double,
-    ) {
-        var x = startX
-        content.image(resourcesLoader.bitmap("ability/info/mana.png")) {
-            smoothing = false
-            scale = ICON_SCALE
-            xy(x, y)
-        }
-        x += STAT_ICON_SIZE + 3
-        manaCostText = content.text("${abilityInfo.manaCost}", textSize = TEXT_SIZE, color = Colors.WHITE) { xy(x, y) }
-        x += manaCostText.width + STAT_SPACING
-        content.image(resourcesLoader.bitmap("ability/info/cooldown.png")) {
-            smoothing = false
-            scale = ICON_SCALE
-            xy(x, y)
-        }
-        x += STAT_ICON_SIZE + 3
-        val cooldown = if (abilityInfo.cooldown == 0) "-" else "${abilityInfo.cooldown}"
-        cooldownText = content.text(cooldown, textSize = TEXT_SIZE, color = Colors.WHITE) { xy(x, y) }
+    // The mana pill always, the cooldown pill only when the ability has one, right aligned.
+    private fun displayCosts(abilityInfo: AbilityInfo) {
+        var right = panelWidth - PADDING
+        cooldownPill =
+            if (abilityInfo.cooldown > 0) {
+                PillView(color = COOLDOWN_COLOR, glyph = PillView.Glyph.COOLDOWN).also { pill ->
+                    pill.display("${abilityInfo.cooldown}")
+                    content.addChild(pill)
+                    pill.xy(right - pill.width, PADDING + 2)
+                    right -= pill.width + PILL_SPACING
+                }
+            } else {
+                null
+            }
+        manaCostPill =
+            PillView(color = MANA_COLOR, glyph = PillView.Glyph.MANA).also { pill ->
+                pill.display("${abilityInfo.manaCost}")
+                content.addChild(pill)
+                pill.xy(right - pill.width, PADDING + 2)
+            }
     }
+
+    private fun reason(reason: AbilityInfo.Reason?): Pair<String, RGBA>? =
+        when (reason) {
+            is AbilityInfo.Reason.Cooldown -> texts.plural(UiText.ABILITY_INFO_READY_IN, reason.turnsLeft, "turns" to reason.turnsLeft) to COOLDOWN_COLOR
+            is AbilityInfo.Reason.NotEnoughMana -> texts[UiText.ABILITY_INFO_NOT_ENOUGH_MANA, "cost" to reason.cost, "mana" to reason.remainingMana] to MANA_COLOR
+            null -> null
+        }
 
     private fun targeting(targeting: AbilityInfo.Targeting): String =
         texts[
@@ -242,48 +263,45 @@ open class AbilityInfoView(
                 texts.plural(UiText.ABILITY_INFO_ON_DEFEATED_POISON_ALLIES, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
         }
 
-    /** The text wrapped to the width, below the last line, clear of the diagram. Returns a text per line. */
-    private fun lines(
-        text: String,
-        color: RGBA,
-        indent: Double = 0.0,
-        bullet: Boolean = false,
-    ): List<Text> {
-        val left = PADDING + indent
-        if (bullet) {
-            content.solidRect(Size(BULLET_SIZE, BULLET_SIZE), color) { xy(PADDING + 1, cursorY + (TEXT_SIZE - BULLET_SIZE) / 2) }
-        }
-        val lines = mutableListOf<Text>()
-        var line: Text? = null
-        text.split(" ").forEach { word ->
-            val current = line
-            if (current != null) {
-                val previous = current.text
-                current.text = "$previous $word"
-                if (current.width <= maximumWidth(left)) return@forEach
-                current.text = previous
-                cursorY += TEXT_SIZE + LINE_SPACING
+    /**
+     * The sentence wrapped to the width left of the diagram, a text per word, the words with a number in gold. Returns
+     * the words and the height of the lines.
+     */
+    private fun wrappedWords(
+        sentence: String,
+        top: Double,
+    ): Pair<List<Text>, Double> {
+        val left = PADDING + BULLET_INDENT
+        val right = panelWidth - PADDING - DIAGRAM_SIZE - DIAGRAM_MARGIN
+        val space = Text(" ", textSize = TEXT_SIZE).width
+        var x = left
+        var y = top
+        val words =
+            sentence.split(" ").map { word ->
+                val isNumber = word.any(Char::isDigit)
+                content.text(word, textSize = TEXT_SIZE, color = if (isNumber) HudStyle.SELECTION else Colors.WHITE).also { text ->
+                    if (x > left && x + text.width > right) {
+                        x = left
+                        y += TEXT_SIZE + LINE_SPACING
+                    }
+                    text.xy(x, y)
+                    x += text.width + space
+                }
             }
-            line = content.text(word, textSize = TEXT_SIZE, color = color) { xy(left, cursorY) }.also(lines::add)
-        }
-        cursorY += TEXT_SIZE + LINE_SPACING
-        return lines
+        return words to (y + TEXT_SIZE - top)
     }
 
-    // The lines beside the diagram end before it.
-    private fun maximumWidth(left: Double): Double {
-        val isBesideDiagram = cursorY < PADDING + DIAGRAM_SIZE
-        val right = if (isBesideDiagram) panelWidth - PADDING - DIAGRAM_SIZE - PADDING else panelWidth - PADDING
-        return right - left
-    }
-
-    private fun displayDiagram(abilityInfo: AbilityInfo) {
+    private fun displayDiagram(
+        abilityInfo: AbilityInfo,
+        top: Double,
+    ) {
         marks = marks(abilityInfo)
         isOneOfTheNeighbours = abilityInfo.targeting != AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES && abilityInfo.targeting != AbilityInfo.Targeting.SELF
         val diagramX = panelWidth - PADDING - DIAGRAM_SIZE
+        val radius = CELL_SIZE * 0.22
         marks.forEachIndexed { index, mark ->
             val cellX = diagramX + (index % 3) * (CELL_SIZE + CELL_GAP)
-            val cellY = PADDING + (index / 3) * (CELL_SIZE + CELL_GAP)
+            val cellY = top + (index / 3) * (CELL_SIZE + CELL_GAP)
             val (color, isFilled) =
                 when (mark) {
                     Mark.NONE -> UNMARKED_COLOR to true
@@ -292,8 +310,15 @@ open class AbilityInfoView(
                     Mark.ALLY -> ALLY_COLOR to true
                     Mark.EMPTY_TILE -> EMPTY_TILE_COLOR to false
                 }
-            content.solidRect(Size(CELL_SIZE, CELL_SIZE), color) { xy(cellX, cellY) }
-            if (!isFilled) content.solidRect(Size(CELL_SIZE - 2, CELL_SIZE - 2), BACKGROUND_COLOR) { xy(cellX + 1, cellY + 1) }
+            // An outlined cell is inset by half its outline, as a stroke is drawn half outside its shape, which cuts it.
+            val inset = if (isFilled) 0.0 else 0.75
+            content.roundRect(
+                Size(CELL_SIZE - 2 * inset, CELL_SIZE - 2 * inset),
+                RectCorners(radius),
+                fill = if (isFilled) color else color.withAd(0.12),
+                stroke = color,
+                strokeThickness = if (isFilled) 0.0 else 1.5,
+            ) { xy(cellX + inset, cellY + inset) }
         }
     }
 
