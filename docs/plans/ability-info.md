@@ -47,7 +47,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone                     | Done when                                                                                                          | Status | Done in |
 |----|-------------------------------|--------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The ability info view         | **Screen / Ability info** shows every story in English and Spanish, with the new icons, and the prototypes are gone. | ⬜      |         |
+| M1 | The ability info view         | **Screen / Ability info** shows every story in English and Spanish, with the new icons, and the prototypes are gone. | ✅      | `ea5753b3` |
 | M2 | The panel for castable abilities | Selecting a castable ability of the human player in a battle shows its panel under the buttons, hidden during the attack preview. | ⬜      |         |
 | M3 | Reading blocked and enemy abilities | Selecting a blocked ability, or one of a CPU battle unit, shows its panel with its reason and no cast range.        | ⬜      |         |
 
@@ -57,7 +57,8 @@ Each milestone is a few commits straight on `main`, green on CI.
    and `cooldown.aseprite`, exported to `resources/ability/info/mana.png` and `cooldown.png`.
 2. Add the `ui.abilityInfo.*` texts to `UiText`, `messages.pot` and `es.po`, and `Texts.abilityName`.
 3. Add `AbilityInfoView`, with `AbilityInfoViewStories` and its tests.
-4. Delete `AbilityDetailsPrototypes.kt` and its ids from `StorySmokeTest`.
+4. Delete `AbilityDetailsPrototypes.kt` and its ids from `StorySmokeTest`. They were never committed to `main`, so
+   nothing is deleted.
 
 ### M2 commits
 
@@ -113,9 +114,9 @@ with turns are plurals.
   `Damage(damage)`, `DamageEachTurn(damage, turns)`, `HealSelf(healing)`, `HealNearbyAllies(healing)`,
   `Summon(unitId, turns, healthPoints)`, `Teleport` and `OnDefeatedPoisonAllies(damage, turns)`. `reason` is `null`,
   `Cooldown(turnsLeft)` or `NotEnoughMana(cost, remainingMana)`.
-- `display(abilityInfo)` draws, top to bottom: the ability icon at scale 1.5 and its name (`Texts.abilityName`), the
-  reason, the mana and cooldown icons with their numbers, the targeting sentence, and one line per effect, wrapped to
-  the width. The 3×3 diagram sits at the top right, 9-pixel cells with a 1-pixel gap.
+- `display(abilityInfo)` draws, top to bottom: the ability icon at scale 1.5, its name (`Texts.abilityName`) and,
+  after it, the mana and cooldown icons with their numbers, then the reason, the targeting sentence, and one bulleted
+  sentence per effect, wrapped to the width. The stats share the name's row, so three effects and a reason fit. The 3×3 diagram sits at the top right, 9-pixel cells with a 1-pixel gap.
 - The panel has a 1-pixel border `#9C9CB4` over `#141422`, text 12 high. With three effects it fits in the 135 pixels
   left under the ability buttons in the 300-high HUD.
 - `hide()` hides it.
@@ -165,7 +166,7 @@ with turns are plurals.
 ### Storybook
 
 - `AbilityInfoViewStories` (**Screen / Ability info**, `screen-ability-info`): its `ability` control (`pick`, sword,
-  skull, bat, mending, teleport, cleave), `cooldownTurnsLeft` (`int`, 0 to 9) and `remainingMana` (`int`, 0 to 20). The
+  skull, bat, mending, teleport, cleave, venom-strike), `cooldownTurnsLeft` (`int`, 0 to 9) and `remainingMana` (`int`, 0 to 20). The
   story feeds plain `AbilityInfo` data, as it can not read the game data. Stories:
   - **Sword** (`screen-ability-info--sword`): one effect, free, no cooldown.
   - **Skull** (`screen-ability-info--skull`): a nested effect.
