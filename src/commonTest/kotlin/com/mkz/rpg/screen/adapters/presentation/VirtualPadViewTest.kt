@@ -54,8 +54,6 @@ class VirtualPadViewTest : ViewsForTesting() {
             pad.aButton().x shouldBeGreaterThan pad.bButton().x
             pad.aButton().y shouldBeLessThan pad.bButton().y
             pad.aButton().let { a -> a.x + a.width } shouldBeLessThan pad.width
-            pad.aButton().label() shouldBe "A"
-            pad.bButton().label() shouldBe "B"
         }
 
     @Test
@@ -92,7 +90,6 @@ class VirtualPadViewTest : ViewsForTesting() {
             val pad = newVirtualPadView()
             // Then
             val start = pad.startButton()
-            start.label() shouldBe "START"
             start.x shouldBeGreaterThan pad.arrow(Direction.SOUTH).let { south -> south.x + south.width }
             start.y shouldBeGreaterThan pad.bButton().let { b -> b.y + b.height }
             (start.y + start.height) shouldBeLessThan pad.height

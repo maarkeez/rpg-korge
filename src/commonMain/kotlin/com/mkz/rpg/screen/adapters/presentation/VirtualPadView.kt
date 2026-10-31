@@ -38,13 +38,11 @@ open class VirtualPadView(
         private val ARROW_HELD_COLOR = RGBA(30, 110, 244)
 
         const val BUTTON_SIZE = 64.0
-        const val BUTTON_TEXT_SIZE = 28.0
 
         // From the FamiCube palette.
         private val BUTTON_COLOR = RGBA(135, 22, 70)
         private val BUTTON_PRESSED_COLOR = RGBA(207, 60, 113)
         private val BUTTON_BORDER_COLOR = RGBA(79, 21, 7)
-        private val BUTTON_LABEL_COLOR = RGBA(255, 255, 255)
 
         // The cross of arrows is centred on the left part of the pad, and the buttons on its right part.
         private const val ARROWS_CENTER_RATIO = 0.3
@@ -56,7 +54,6 @@ open class VirtualPadView(
 
         const val START_WIDTH = 72.0
         const val START_HEIGHT = 22.0
-        private const val START_TEXT_SIZE = 12.0
 
         // Start is centred between the arrows and the buttons, at the bottom of the pad.
         private const val START_CENTER_RATIO = 0.55
@@ -94,18 +91,16 @@ open class VirtualPadView(
 
     private val buttonsCenterX = size.width * BUTTONS_CENTER_RATIO
     private val buttonsCenterY = size.height / 2
-    internal val bButton = button("B", centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) { pressB() }
-    internal val aButton = button("A", centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
+    internal val bButton = button(centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) { pressB() }
+    internal val aButton = button(centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
 
     internal val startButton =
-        uiButton(size = Size(START_WIDTH, START_HEIGHT), label = "START") {
+        uiButton(size = Size(START_WIDTH, START_HEIGHT)) {
             position(size.width * START_CENTER_RATIO - START_WIDTH / 2, size.height - START_BOTTOM_MARGIN - START_HEIGHT)
             radiusRatio = Ratio.ONE
             bgColorOut = START_COLOR
             bgColorOver = START_PRESSED_COLOR
             background.borderColor = Colors.LIGHTGRAY
-            textColor = BUTTON_LABEL_COLOR
-            textSize = START_TEXT_SIZE
             onClick { pressStart() }
         }
 
@@ -180,19 +175,16 @@ open class VirtualPadView(
         }
 
     private fun button(
-        label: String,
         centerX: Double,
         centerY: Double,
         onPressed: () -> Unit,
     ): UIButton =
-        uiButton(size = Size(BUTTON_SIZE, BUTTON_SIZE), label = label) {
+        uiButton(size = Size(BUTTON_SIZE, BUTTON_SIZE)) {
             position(centerX - BUTTON_SIZE / 2, centerY - BUTTON_SIZE / 2)
             radiusRatio = Ratio.ONE
             bgColorOut = BUTTON_COLOR
             bgColorOver = BUTTON_PRESSED_COLOR
             background.borderColor = BUTTON_BORDER_COLOR
-            textColor = BUTTON_LABEL_COLOR
-            textSize = BUTTON_TEXT_SIZE
             onClick { onPressed() }
         }
 
