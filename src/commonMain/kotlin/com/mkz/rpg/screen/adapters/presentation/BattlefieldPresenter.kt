@@ -620,6 +620,6 @@ class BattlefieldPresenter(
         battlefieldHudApi.processTileSelected(row = row, column = column)
     }
 
-    // The abilities can only be cast in a battle.
-    override fun abilitySelected(abilityId: String) = whenIdle { if (isBattling()) battlefieldHudApi.processAbilitySelected(abilityId) }
+    // Out of the battles (e.g.: while exploring), an ability is only read, never cast.
+    override fun abilitySelected(abilityId: String) = whenIdle { battlefieldHudApi.processAbilitySelected(abilityId) }
 }

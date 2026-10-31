@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
@@ -310,15 +311,22 @@ class BattlefieldPresenterTest {
         battlefieldView.moveFollowings.shouldContainExactly(BattlefieldView.Following.CENTER)
     }
 
-    // The same battlefield, before any battle has started: the human player explores it.
+    // The same battlefield, before any battle has started: the human player explores it. The knight knows the given
+    // abilities, and has 4 mana.
     private fun exploringApis(
         deployments: List<Deployment> = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 1)),
         npcs: List<Npc.Dto> = emptyList(),
         effects: List<Effect.Dto> = emptyList(),
+        abilities: List<Ability.Dto> = emptyList(),
     ) = SubdomainApis(
         terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-        units = listOf(unit(id = "knight", movementRange = 3, healthPoints = 30).toDto(), unit(id = "rat", movementRange = 2).toDto()),
+        units =
+            listOf(
+                unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = abilities.map(Ability.Dto::id)).toDto(),
+                unit(id = "rat", movementRange = 2).toDto(),
+            ),
         effects = effects,
+        abilities = abilities,
         players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
         tiles = List(4) { List(4) { "sand" } },
         deployments = deployments,
@@ -329,9 +337,10 @@ class BattlefieldPresenterTest {
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,
         timeline: BattleSceneTimeline = battleSceneTimeline(),
+        battleUnitInfoView: FakeBattleUnitInfoView = FakeBattleUnitInfoView(),
     ) = BattlefieldPresenter(
         battlefieldView = battlefieldView,
-        battleUnitInfoView = FakeBattleUnitInfoView(),
+        battleUnitInfoView = battleUnitInfoView,
         attackPreviewView = FakeAttackPreviewView(),
         playerCallToActionView = FakePlayerCallToActionView(),
         battleHudView = FakeBattleHudView(),
@@ -955,6 +964,41 @@ class BattlefieldPresenterTest {
         // Then
         battleUnitInfoView.displayedAbilityInfos.single().reason shouldBe null
         battlefieldView.tilesNotDimmed.shouldContainExactly(listOf(setOf(position(1, 3))))
+    }
+
+    @Test
+    fun `AbilitySelected should display the ability info when exploring`() {
+        // Given
+        val exploringApis =
+            exploringApis(
+                effects = listOf(increaseHealthEffect(id = "cure", healing = 5).toDto()),
+                abilities = listOf(ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto()),
+            )
+        val exploringBattleUnitInfoView = FakeBattleUnitInfoView()
+        val exploringBattlefieldView = FakeBattlefieldView()
+        val presenter = exploringPresenter(exploringApis, exploringBattlefieldView, battleUnitInfoView = exploringBattleUnitInfoView)
+        exploringApis.partyApi.startExploration()
+        presenter.tileSelected(row = 1, column = 1)
+        exploringApis.eventBus.dispatch()
+        // When
+        presenter.abilitySelected("heal")
+        exploringApis.eventBus.dispatch()
+        // Then
+        exploringBattleUnitInfoView.selectedAbilities.shouldContainExactly(0)
+        exploringBattleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(cost = 10, remainingMana = 4)
+        exploringBattlefieldView.tilesNotDimmed.last() shouldBe setOf(position(1, 1))
+    }
+
+    @Test
+    fun `AbilitySelected should ignore the ability when the timeline is playing`() {
+        // Given
+        selectKnight()
+        timeline.playLongStep()
+        // When
+        battlefieldPresenter.abilitySelected("heal")
+        eventBus.dispatch()
+        // Then
+        battleUnitInfoView.displayedAbilityInfos.shouldBeEmpty()
     }
 
     @Test

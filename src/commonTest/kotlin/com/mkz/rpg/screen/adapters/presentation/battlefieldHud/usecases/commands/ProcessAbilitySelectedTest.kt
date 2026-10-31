@@ -44,18 +44,31 @@ class ProcessAbilitySelectedTest {
     /**
      * Stores the knight of the human player, that knows the given abilities and has 4 mana, at (0,0), with a rat of the CPU
      * on each side, in the battle in the [currentPlayer]'s turn: ability-1 hits one of them, ability-2 targets the knight,
-     * and ability-3 costs 10 mana.
+     * and ability-3 costs 10 mana. The battle is in progress, finished on that turn, or none at all, as [battleState] says.
      */
     private fun givenKnightBetweenRats(
         knightAbilities: List<String>,
         currentPlayer: String = "human",
+        battleState: BattleState = BattleState.IN_PROGRESS,
     ) {
         queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY))
         queries.abilityRepository.create(ability(id = "ability-2", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
         queries.abilityRepository.create(ability(id = "ability-3", cost = 10, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
         val human = player(id = "human", type = HUMAN).also(queries.playerRepository::create).toDto()
         val cpu = player(id = "cpu", type = CPU).also(queries.playerRepository::create).toDto()
-        queries.battleRepository.create(battle(players = listOf(currentPlayer) + (listOf("human", "cpu") - currentPlayer), battleUnitIds = setOf("battle-unit-1", "rat-1", "rat-2")))
+        val battle = battle(players = listOf(currentPlayer) + (listOf("human", "cpu") - currentPlayer), battleUnitIds = setOf("battle-unit-1", "rat-1", "rat-2"))
+        when (battleState) {
+            BattleState.IN_PROGRESS -> queries.battleRepository.create(battle)
+            BattleState.FINISHED ->
+                queries.battleRepository.create(
+                    battle
+                        .defeatPlayer("cpu")
+                        .finishBattle()
+                        .pullEvents()
+                        .second,
+                )
+            BattleState.NONE -> Unit
+        }
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(abilities = knightAbilities, manaPoints = 4).toDto(), player = human))
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = knightAbilities).toDto(), player = cpu))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu))
@@ -153,6 +166,30 @@ class ProcessAbilitySelectedTest {
         processAbilitySelected("ability-1")
         // Then
         (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-1"
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the ability info when there is no battle`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"), battleState = BattleState.NONE)
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-1"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1"))
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the ability info when the battle is finished on the human player's turn`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"), battleState = BattleState.FINISHED)
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-1"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1"))
     }
 
     @Test
@@ -299,4 +336,6 @@ class ProcessAbilitySelectedTest {
         // Then
         shouldThrow<BattlefieldHudError.BattlefieldHudNotFound> { processAbilitySelected("ability-1") }
     }
+
+    private enum class BattleState { IN_PROGRESS, FINISHED, NONE }
 }

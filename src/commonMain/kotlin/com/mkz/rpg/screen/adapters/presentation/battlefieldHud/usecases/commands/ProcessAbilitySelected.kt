@@ -19,9 +19,9 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Selects an ability of the selected battle unit. It is cast only when the battle unit belongs to the human player whose
- * turn it is and can cast it: its cast range is displayed. Otherwise (e.g.: in cooldown, or a CPU battle unit's), only
- * what it does is displayed. Selecting the ability on show again deselects it.
+ * Selects an ability of the selected battle unit. It is cast only in a battle in progress, when the battle unit belongs
+ * to the human player whose turn it is and can cast it: its cast range is displayed. Otherwise (e.g.: in cooldown, a CPU
+ * battle unit's, or while exploring), only what it does is displayed. Selecting the ability on show again deselects it.
  */
 class ProcessAbilitySelected(
     private val canCastAbility: CanCastAbility,
@@ -69,14 +69,15 @@ class ProcessAbilitySelected(
         eventBus.publish(events)
     }
 
-    // Only the human player casts, on its turn, with its own battle units.
+    // Only the human player casts, on its turn, with its own battle units. A finished battle keeps the turn it ended on,
+    // so it is no one's turn while exploring.
     private fun canCast(
         battleUnitId: String,
         abilityId: String,
     ): Boolean {
         val battleUnit = searchBattleUnitById(battleUnitId) ?: return false
         val isHuman = searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.HUMAN
-        val isItsTurn = searchBattle()?.currentPlayerTurn == battleUnit.playerId
+        val isItsTurn = searchBattle()?.takeIf { battle -> !battle.isFinished }?.currentPlayerTurn == battleUnit.playerId
         return isHuman && isItsTurn && canCastAbility(battleUnitId, abilityId)
     }
 
