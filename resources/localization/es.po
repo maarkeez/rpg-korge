@@ -401,6 +401,84 @@ msgctxt "ui.mapFilePicker.maps"
 msgid "Maps"
 msgstr "Mapas"
 
+#. Why an ability in cooldown can not be cast. {turns}: the turns left until it can be cast again.
+msgctxt "ui.abilityInfo.readyIn"
+msgid "Ready in {turns} turn"
+msgid_plural "Ready in {turns} turns"
+msgstr[0] "Disponible en {turns} turno"
+msgstr[1] "Disponible en {turns} turnos"
+
+#. Why an ability can not be cast. {cost}: the mana it costs. {mana}: the mana the battle unit has left.
+msgctxt "ui.abilityInfo.notEnoughMana"
+msgid "Needs {cost} mana, has {mana}"
+msgstr "Necesita {cost} de maná, tiene {mana}"
+
+#. Who an ability is cast on: the caster.
+msgctxt "ui.abilityInfo.targeting.self"
+msgid "Yourself"
+msgstr "Tú mismo"
+
+#. Who an ability is cast on: an enemy next to the caster.
+msgctxt "ui.abilityInfo.targeting.adjacentEnemy"
+msgid "One adjacent enemy"
+msgstr "Un enemigo adyacente"
+
+#. Who an ability is cast on: every enemy next to the caster.
+msgctxt "ui.abilityInfo.targeting.allAdjacentEnemies"
+msgid "All adjacent enemies"
+msgstr "Todos los enemigos adyacentes"
+
+#. Where an ability is cast: an empty tile next to the caster.
+msgctxt "ui.abilityInfo.targeting.tileNextToSelf"
+msgid "An empty tile next to you"
+msgstr "Una casilla vacía junto a ti"
+
+#. Where an ability is cast: an empty tile next to any battle unit.
+msgctxt "ui.abilityInfo.targeting.tileNextToUnit"
+msgid "An empty tile next to any unit"
+msgstr "Una casilla vacía junto a cualquier unidad"
+
+#. {damage}: the health points the target loses.
+msgctxt "ui.abilityInfo.effect.damage"
+msgid "Deals {damage} damage."
+msgstr "Inflige {damage} de daño."
+
+#. {damage}: the health points the target loses at the start of each of its turns. {turns}: how many turns.
+msgctxt "ui.abilityInfo.effect.damageEachTurn"
+msgid "Poisons: {damage} damage each turn for {turns} turn."
+msgid_plural "Poisons: {damage} damage each turn for {turns} turns."
+msgstr[0] "Envenena: {damage} de daño por turno durante {turns} turno."
+msgstr[1] "Envenena: {damage} de daño por turno durante {turns} turnos."
+
+#. {healing}: the health points the caster recovers.
+msgctxt "ui.abilityInfo.effect.healSelf"
+msgid "Heals you {healing} HP."
+msgstr "Te cura {healing} PV."
+
+#. {healing}: the health points each ally next to the caster recovers.
+msgctxt "ui.abilityInfo.effect.healNearbyAllies"
+msgid "Heals adjacent allies {healing} HP."
+msgstr "Cura {healing} PV a los aliados adyacentes."
+
+#. {unit}: the name of the summoned unit, e.g.: Bat. {turns}: the turns it stays. {health}: its health points.
+msgctxt "ui.abilityInfo.effect.summon"
+msgid "Summons {unit} for {turns} turn ({health} HP)."
+msgid_plural "Summons {unit} for {turns} turns ({health} HP)."
+msgstr[0] "Invoca {unit} durante {turns} turno ({health} PV)."
+msgstr[1] "Invoca {unit} durante {turns} turnos ({health} PV)."
+
+#. The caster moves to the tile the ability is cast on.
+msgctxt "ui.abilityInfo.effect.teleport"
+msgid "Teleports you there."
+msgstr "Te teletransporta allí."
+
+#. When the target is defeated, its allies next to it are poisoned. {damage}: the health points each loses at the start of each of its turns. {turns}: how many turns.
+msgctxt "ui.abilityInfo.effect.onDefeatedPoisonAllies"
+msgid "When defeated: poisons its adjacent allies ({damage} damage each turn for {turns} turn)."
+msgid_plural "When defeated: poisons its adjacent allies ({damage} damage each turn for {turns} turns)."
+msgstr[0] "Al ser derrotado: envenena a sus aliados adyacentes ({damage} de daño por turno durante {turns} turno)."
+msgstr[1] "Al ser derrotado: envenena a sus aliados adyacentes ({damage} de daño por turno durante {turns} turnos)."
+
 # Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
 
 msgctxt "ability.bat.name"
