@@ -79,12 +79,17 @@ import kotlin.test.Test
 class BattlefieldPresenterTest {
     // The battle has started with the human player turn. The human knight-1, with 30 health points, stands at (1,1) and can walk 3 tiles,
     // and the cpu rat-1 and rat-2, with 21 health points, stand at (1,3) and (0,3), on a 4x4 sand battlefield. The knight
-    // can cast the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat.
+    // knows the mushroom, dealing 7 damage and leaving a venom, the heal, healing itself 5, and the bee, deploying a rat,
+    // each costing 10 mana, and has 4 mana.
     // A health potion, healing 5, can be looted. The knight explored before the battle, so it has an inventory.
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            units = listOf(unit(id = "knight", movementRange = 3, healthPoints = 30).toDto(), unit(id = "rat", healthPoints = 21).toDto()),
+            units =
+                listOf(
+                    unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = listOf("mushroom", "heal", "bee")).toDto(),
+                    unit(id = "rat", healthPoints = 21).toDto(),
+                ),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             // The rats drop nothing, so the items lying on the battlefield are only the ones the test places, as dropped by a rat.
             lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(nothingEntry())).toDto()),
@@ -927,6 +932,29 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battleUnitInfoView.hideAbilityInfoCount shouldBe 1
+    }
+
+    @Test
+    fun `BattlefieldPresenter should display the reason and dim the battlefield when the ability info is displayed`() {
+        // Given
+        eventBus.publish(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 1), battleUnitId = "knight-1", abilityId = "mushroom"))
+        // When
+        eventBus.dispatch()
+        // Then
+        battleUnitInfoView.selectedAbilities.shouldContainExactly(0)
+        battleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(cost = 10, remainingMana = 4)
+        battlefieldView.tilesNotDimmed.shouldContainExactly(listOf(setOf(position(1, 1))))
+    }
+
+    @Test
+    fun `BattlefieldPresenter should display no reason when the ability info of a CPU battle unit is displayed`() {
+        // Given
+        eventBus.publish(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", abilityId = "mushroom"))
+        // When
+        eventBus.dispatch()
+        // Then
+        battleUnitInfoView.displayedAbilityInfos.single().reason shouldBe null
+        battlefieldView.tilesNotDimmed.shouldContainExactly(listOf(setOf(position(1, 3))))
     }
 
     @Test

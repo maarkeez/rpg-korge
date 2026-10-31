@@ -161,6 +161,9 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnitAbility> { event ->
                 timeline.play(displayAbilitySelected(event))
             },
+            eventBus.subscribe<BattlefieldHudEvent.AbilityInfoDisplayed> { event ->
+                timeline.play(displayAbilityInfo(event))
+            },
             eventBus.subscribe<BattlefieldHudEvent.AbilityDeselected> {
                 timeline.play { clearSelection() }
             },
@@ -432,6 +435,32 @@ class BattlefieldPresenter(
             }
             val selectableTiles = event.castGroupsWhereCanCast.flatMap { castGroup -> castGroup.tiles } + event.casterTile
             battlefieldView.dimTilesExcept(selectableTiles.map { tile -> TilePosition(tile.row, tile.column) }.toSet())
+        }
+    }
+
+    // An ability only read: framed, with why it can not be cast, and the battlefield dimmed but the caster.
+    private fun displayAbilityInfo(event: BattlefieldHudEvent.AbilityInfoDisplayed): suspend () -> Unit {
+        val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
+        val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
+        val ability = abilityApi.searchAbilityById(event.abilityId)!!
+        // The CPU's abilities are never the player's to cast, so they tell no reason.
+        val reason =
+            if (isCpuBattleUnit(battleUnit)) {
+                null
+            } else {
+                AbilityInfoMapper.reason(
+                    ability = ability,
+                    cooldownTurnsLeft = battleUnit.abilityCooldowns[event.abilityId] ?: 0,
+                    remainingMana = battleUnit.remainingManaPoints,
+                )
+            }
+        val abilityInfo = abilityInfo(event.abilityId, reason)
+        return {
+            battlefieldView.resetTiles()
+            battleUnitInfoView.displayAbilitySelected(abilityIndex)
+            battleUnitInfoView.displayAbilityInfo(abilityInfo)
+            battleHudView.displayBattleUnitInfoView()
+            battlefieldView.dimTilesExcept(setOf(TilePosition(event.casterTile.row, event.casterTile.column)))
         }
     }
 
