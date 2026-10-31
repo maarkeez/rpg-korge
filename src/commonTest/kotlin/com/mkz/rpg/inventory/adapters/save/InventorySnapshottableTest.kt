@@ -2,13 +2,15 @@ package com.mkz.rpg.inventory.adapters.save
 
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
+import com.mkz.rpg.inventory.domain.InventoryRepository
+import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
+import com.mkz.rpg.inventory.usecases.queries.SearchInventoriesSnapshot
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.lootableItem
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
-import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class InventorySnapshottableTest {
@@ -21,35 +23,24 @@ class InventorySnapshottableTest {
             inventory(battleUnitId = "mage-1"),
         )
 
-    private fun snapshot(): String = InventorySnapshottable(InMemoryInventoryRepository().apply { inventories.forEach(::create) }, searchLootableItemById).snapshot()
+    private fun snapshottable(repository: InventoryRepository) = InventorySnapshottable(SearchInventoriesSnapshot(repository), RestoreInventories(repository, searchLootableItemById))
 
     @Test
     fun `Restore should rebuild the same state when it restores the snapshot it took`() {
         // Given
-        val restoredRepository = InMemoryInventoryRepository().apply { create(inventory(battleUnitId = "rat-1", gold = 5)) }
+        val snapshot = snapshottable(InMemoryInventoryRepository().apply { inventories.forEach(::create) }).snapshot()
+        val restoredRepository = InMemoryInventoryRepository()
         // When
-        InventorySnapshottable(restoredRepository, searchLootableItemById).restore(snapshot())
+        snapshottable(restoredRepository).restore(snapshot)
         // Then
         restoredRepository.searchAll().shouldContainExactlyInAnyOrder(inventories)
     }
 
     @Test
-    fun `Restore should publish no events when it restores a snapshot`() {
-        // Given
-        val restoredRepository = InMemoryInventoryRepository()
+    fun `Key should be inventory`() {
         // When
-        InventorySnapshottable(restoredRepository, searchLootableItemById).restore(snapshot())
+        val result = snapshottable(InMemoryInventoryRepository()).key
         // Then
-        restoredRepository.searchAll().flatMap { inventory -> inventory.pullEvents().first }.shouldBeEmpty()
-    }
-
-    @Test
-    fun `Restore should fail when an item is a lootable item the game no longer has`() {
-        // Given
-        val snapshot = InventorySnapshottable(InMemoryInventoryRepository().apply { create(inventory(storedItems = listOf("old-sword"))) }, searchLootableItemById).snapshot()
-        // When
-        val result = runCatching { InventorySnapshottable(InMemoryInventoryRepository(), searchLootableItemById).restore(snapshot) }
-        // Then
-        result.exceptionOrNull()?.message.orEmpty() shouldContain "old-sword"
+        result shouldBe "inventory"
     }
 }

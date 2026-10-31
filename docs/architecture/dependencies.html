@@ -216,7 +216,7 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 24, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 64, "importsOut": 13},
-    {"name": "inventory", "files": 30, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 56},
+    {"name": "inventory", "files": 32, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 56},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 21, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 7, "importsOut": 29},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 7, "importsOut": 12},
@@ -796,15 +796,15 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent.LootFound"},
       {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem"}
     ]},
-    {"from": "inventory", "to": "lootableItem", "weight": 15, "files": 14, "imports": [
+    {"from": "inventory", "to": "lootableItem", "weight": 15, "files": 15, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "lootableItem.adapters.presentation.LootableItemApi"},
       {"file": "com/mkz/rpg/inventory/adapters/save/InventorySnapshottable.kt", "layer": "adapters", "name": "lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto"},
-      {"file": "com/mkz/rpg/inventory/adapters/save/InventorySnapshottable.kt", "layer": "adapters", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto"},
       {"file": "com/mkz/rpg/inventory/domain/InventoryEvent.kt", "layer": "domain", "name": "lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/BuyItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/ConsumeItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/EquipItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
+      {"file": "com/mkz/rpg/inventory/usecases/commands/RestoreInventories.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/SellItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchSellPrice"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/StoreLootedItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/UnequipItem.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
