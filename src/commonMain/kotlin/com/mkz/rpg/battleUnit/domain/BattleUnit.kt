@@ -41,7 +41,6 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCR
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.shared.domain.DomainEvent
-import com.mkz.rpg.shared.domain.KnownAbilities
 import com.mkz.rpg.unit.domain.Unit
 import kotlin.jvm.JvmInline
 import kotlin.math.max
@@ -60,6 +59,7 @@ data class BattleUnit private constructor(
     private val remainingTurnActions: RemainingTurnActions,
     private val abilityCooldowns: AbilityCooldowns,
     private val learnedAbilities: LearnedAbilities,
+    private val maximumAbilities: MaximumAbilities,
     private val ongoingEffects: OngoingEffects,
     private val remainingTurns: RemainingTurns?,
     // Its own events, each followed by the battlefield request it needs (e.g.: occupying the tile it was deployed on),
@@ -71,6 +71,7 @@ data class BattleUnit private constructor(
             id: String,
             unit: Unit.Dto,
             player: Player.Dto,
+            maximumAbilities: Int,
             deployAtRow: Int,
             deployAtColumn: Int,
             remainingTurns: Int? = null,
@@ -87,6 +88,7 @@ data class BattleUnit private constructor(
                 RemainingTurnActions(unit.movementRange),
                 AbilityCooldowns(unit.abilities),
                 LearnedAbilities(),
+                MaximumAbilities(maximumAbilities),
                 OngoingEffects(),
                 remainingTurns?.let(::RemainingTurns),
                 events =
@@ -113,6 +115,7 @@ data class BattleUnit private constructor(
                 ),
                 AbilityCooldowns.restore(snapshot.abilityCooldowns),
                 LearnedAbilities(snapshot.learnedAbilityIds),
+                MaximumAbilities(snapshot.maximumAbilities),
                 OngoingEffects.restore(snapshot.ongoingEffects),
                 snapshot.remainingTurns?.let(::RemainingTurns),
                 events = emptySet(),
@@ -151,6 +154,7 @@ data class BattleUnit private constructor(
             remainingTurnActions = remainingTurnActions.toDto(),
             abilityCooldowns = abilityCooldowns.toDto(),
             learnedAbilityIds = learnedAbilities.value,
+            maximumAbilities = maximumAbilities.value,
             ongoingEffects = ongoingEffects.toSnapshot(),
             remainingTurns = remainingTurns?.value,
         )
@@ -290,8 +294,8 @@ data class BattleUnit private constructor(
 
     /**
      * A defeated battle unit comes back on the tile as it was deployed with its unit: full health and mana, no equipped
-     * effects, no cooldowns, no ongoing effects. It keeps its id, its player and the abilities it learned, after the
-     * abilities of its unit. Nothing changes when it is not defeated.
+     * effects, no cooldowns, no ongoing effects. It keeps its id, its player, its maximum abilities and the abilities it
+     * learned, after the abilities of its unit. Nothing changes when it is not defeated.
      */
     fun respawn(
         unit: Unit.Dto,
@@ -382,7 +386,7 @@ data class BattleUnit private constructor(
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
 
     /** Whether it can learn the ability for good: it does not know it yet, and knows fewer abilities than the most it can. */
-    fun canLearnAbility(abilityId: String): Boolean = !abilityCooldowns.knows(abilityId) && abilityCooldowns.value.size < KnownAbilities.MAXIMUM
+    fun canLearnAbility(abilityId: String): Boolean = !abilityCooldowns.knows(abilityId) && abilityCooldowns.value.size < maximumAbilities.value
 
     fun canCastAbility(ability: Ability.Dto): Boolean =
         remainingTurnActions.canCastAbility() &&
@@ -601,6 +605,11 @@ data class BattleUnit private constructor(
     )
 
     @JvmInline private value class BaseMaximumManaPoints(
+        val value: Int,
+    )
+
+    // The most abilities it knows, those of its unit and those it learned, given by the unit when deployed.
+    @JvmInline private value class MaximumAbilities(
         val value: Int,
     )
 
@@ -997,7 +1006,8 @@ data class BattleUnit private constructor(
 
         /**
          * The whole state of a battle unit, to save the game. Base maximums: without the bonuses of the equipped items.
-         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the cooldowns.
+         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the cooldowns, up to its
+         * maximum abilities.
          */
         data class SnapshotDto(
             val id: String,
@@ -1011,6 +1021,7 @@ data class BattleUnit private constructor(
             val remainingTurnActions: RemainingTurnActionsDto,
             val abilityCooldowns: Map<String, Int>,
             val learnedAbilityIds: List<String>,
+            val maximumAbilities: Int,
             val ongoingEffects: List<OngoingEffectSnapshotDto>,
             val remainingTurns: Int?,
         )

@@ -1,6 +1,5 @@
 package com.mkz.rpg.unit.domain
 
-import com.mkz.rpg.shared.domain.KnownAbilities
 import com.mkz.rpg.unit.domain.UnitError.AbilitiesAboveLimit
 import com.mkz.rpg.unit.domain.UnitError.NegativeStartingGold
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
@@ -17,6 +16,11 @@ data class Unit private constructor(
     private val events: Set<UnitEvent>,
 ) {
     companion object {
+        private const val MAXIMUM_ABILITIES = 6
+
+        /** The most abilities a unit, and each of its battle units, knows: one per button of the ability bar. The same for every unit. */
+        fun maximumAbilities(): Int = MAXIMUM_ABILITIES
+
         fun create(unitDto: Dto): Unit =
             Unit(
                 id = Id(unitDto.id),
@@ -57,7 +61,7 @@ data class Unit private constructor(
         val value: List<String>,
     ) {
         init {
-            if (value.size > KnownAbilities.MAXIMUM) throw AbilitiesAboveLimit()
+            if (value.size > MAXIMUM_ABILITIES) throw AbilitiesAboveLimit()
         }
     }
 

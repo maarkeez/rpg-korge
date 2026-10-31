@@ -21,7 +21,14 @@ class DeployBattleUnitTest {
     private val eventBus = FakeEventBus()
     private val deployBattleUnit =
         DeployBattleUnit(
-            battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+            battleUnitDeployment =
+                BattleUnitDeployment(
+                    queries.battleUnitRepository,
+                    queries.searchUnitById,
+                    queries.searchMaximumAbilities,
+                    queries.searchPlayerById,
+                    queries.canBattlefieldTileBeOccupied,
+                ),
             eventBus = eventBus,
         )
 

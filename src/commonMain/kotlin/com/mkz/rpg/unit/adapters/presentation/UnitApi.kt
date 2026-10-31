@@ -8,6 +8,7 @@ import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitRepository
 import com.mkz.rpg.unit.usecases.commands.InitialiseUnits
 import com.mkz.rpg.unit.usecases.commands.RequestUnitCreation
+import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import com.mkz.rpg.unit.usecases.services.UnitLoader
 
@@ -24,6 +25,7 @@ class UnitApi(
 
     // Queries
     val searchUnitById: SearchUnitById = SearchUnitById(unitRepository)
+    val searchMaximumAbilities: SearchMaximumAbilities = SearchMaximumAbilities()
 
     // Events
     private val onRequestUnitCreation = OnRequestUnitCreation(requestUnitCreation, eventBus)

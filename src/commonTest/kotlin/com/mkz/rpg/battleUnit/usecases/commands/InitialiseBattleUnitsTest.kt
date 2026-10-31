@@ -24,7 +24,7 @@ class InitialiseBattleUnitsTest {
         InitialiseBattleUnits(
             FakeBattleUnitLoader(loadedDeployments),
             queries.battleUnitRepository,
-            BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+            BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchMaximumAbilities, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
             eventBus,
         )
 

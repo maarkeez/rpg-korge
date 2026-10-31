@@ -36,9 +36,9 @@ class BattleUnitSnapshottableTest {
         BattleUnitSnapshottable(repository, SearchUnitById(unitRepository), SearchPlayerById(playerRepository), SearchAbilityById(abilityRepository), SearchEffectById(effectRepository))
 
     // A knight at 18 of 30 health points, wearing an iron helmet (+10 maximum health), regenerating for 2 more turns,
-    // and with slash cooling down after casting it.
+    // with slash cooling down after casting it, and able to know 4 abilities.
     private fun hurtKnight(): BattleUnit =
-        battleUnit(id = "knight-1", unit = knight, player = human, remainingHealthPoints = 18)
+        battleUnit(id = "knight-1", unit = knight, player = human, maximumAbilities = 4, remainingHealthPoints = 18)
             .applyEquippedEffect("iron-helmet", effectRepository.searchById("iron-helmet")!!.toDto())
             .receiveOnTurnStartedEffect("regeneration", turnsLeft = 2)
             .castAbility(abilityId = "slash", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList())

@@ -1,0 +1,130 @@
+{
+    "summary": {
+        "version": 2,
+        "savedAt": 1.79338572E12,
+        "leaderUnitId": "knight",
+        "partySize": 1
+    },
+    "snapshots": {
+        "battleUnit": [
+            {
+                "id": "knight-1",
+                "unitId": "knight",
+                "playerId": "human",
+                "remainingHealthPoints": 30,
+                "remainingManaPoints": 10,
+                "baseMaximumHealthPoints": 30,
+                "baseMaximumManaPoints": 10,
+                "equippedEffects": [],
+                "movementRange": 3,
+                "remainingSteps": 3,
+                "remainingCasts": 1,
+                "abilityCooldowns": {},
+                "learnedAbilityIds": [],
+                "maximumAbilities": 6,
+                "ongoingEffects": [],
+                "remainingTurns": null
+            },
+            {
+                "id": "rat-1",
+                "unitId": "rat",
+                "playerId": "cpu",
+                "remainingHealthPoints": 8,
+                "remainingManaPoints": 0,
+                "baseMaximumHealthPoints": 8,
+                "baseMaximumManaPoints": 0,
+                "equippedEffects": [],
+                "movementRange": 1,
+                "remainingSteps": 1,
+                "remainingCasts": 1,
+                "abilityCooldowns": {},
+                "learnedAbilityIds": [],
+                "maximumAbilities": 6,
+                "ongoingEffects": [],
+                "remainingTurns": null
+            }
+        ],
+        "battlefield": [
+            {
+                "occupantId": "elder",
+                "row": 0,
+                "column": 3
+            },
+            {
+                "occupantId": "knight-1",
+                "row": 1,
+                "column": 1
+            },
+            {
+                "occupantId": "rat-1",
+                "row": 2,
+                "column": 5
+            }
+        ],
+        "npc": [
+            {
+                "id": "elder",
+                "row": 0,
+                "column": 3,
+                "unitId": null,
+                "stock": [
+                    "health-potion"
+                ]
+            }
+        ],
+        "lootDrop": [
+            {
+                "unitId": "rat",
+                "droppedItems": []
+            }
+        ],
+        "inventory": [
+            {
+                "battleUnitId": "knight-1",
+                "maximumStorageSpace": 12,
+                "storedItems": [
+                    "health-potion"
+                ],
+                "equippedItems": {},
+                "gold": 40
+            }
+        ],
+        "party": {
+            "playerId": "human",
+            "battleUnitIds": [
+                "knight-1"
+            ],
+            "lineBattleUnitIds": [
+                "knight-1"
+            ]
+        },
+        "cpuWanderBrain": {
+            "homes": [
+                {
+                    "battleUnitId": "rat-1",
+                    "row": 2,
+                    "column": 5,
+                    "distancesFromHome": [
+                        [
+                            2,
+                            5,
+                            0
+                        ],
+                        [
+                            1,
+                            5,
+                            1
+                        ],
+                        [
+                            0,
+                            5,
+                            2
+                        ]
+                    ]
+                }
+            ],
+            "returningBattleUnitIds": [],
+            "respawns": {}
+        }
+    }
+}

@@ -8,6 +8,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.shared.domain.DomainEvent
+import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 
 /**
@@ -17,6 +18,7 @@ import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 class BattleUnitDeployment(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchUnitById: SearchUnitById,
+    private val searchMaximumAbilities: SearchMaximumAbilities,
     private val searchPlayerById: SearchPlayerById,
     private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
 ) {
@@ -37,6 +39,7 @@ class BattleUnitDeployment(
                     id = battleUnitId,
                     unit = unit,
                     player = player,
+                    maximumAbilities = searchMaximumAbilities(),
                     deployAtRow = deployAtRow,
                     deployAtColumn = deployAtColumn,
                     remainingTurns = remainingTurns,

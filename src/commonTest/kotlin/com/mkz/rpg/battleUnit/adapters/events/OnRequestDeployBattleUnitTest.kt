@@ -17,7 +17,10 @@ class OnRequestDeployBattleUnitTest {
     private val queries = InMemoryQueries()
     private val onRequestDeployBattleUnit =
         OnRequestDeployBattleUnit(
-            DeployBattleUnit(BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied), eventBus),
+            DeployBattleUnit(
+                BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchMaximumAbilities, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+                eventBus,
+            ),
             eventBus,
         )
 

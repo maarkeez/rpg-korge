@@ -86,6 +86,7 @@ class BattleUnitApi(
         BattleUnitDeployment(
             battleUnitRepository,
             unitApi.searchUnitById,
+            unitApi.searchMaximumAbilities,
             playerApi.searchPlayerById,
             battlefieldApi.canBattlefieldTileBeOccupied,
         )

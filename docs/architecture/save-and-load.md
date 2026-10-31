@@ -72,7 +72,7 @@ tables, players, the map and its buildings) is read from the resources again. Sh
 
 | #  | Subdomain        | Saved                                                                 | Reset on load                                  |
 |----|------------------|-----------------------------------------------------------------------|------------------------------------------------|
-| 1  | `battleUnit`     | Every battle unit as it is: health, mana, equipped effects, cooldowns, learned abilities, ongoing effects, remaining turns | -                                              |
+| 1  | `battleUnit`     | Every battle unit as it is: health, mana, equipped effects, cooldowns, learned abilities, maximum abilities, ongoing effects, remaining turns | -                                              |
 | 2  | `battlefield`    | The occupant of each tile                                             | -                                              |
 | 3  | `npc`            | The npcs left (a recruited npc is gone), their tiles and stocks      | -                                              |
 | 4  | `lootDrop`       | The dropped items on each tile                                        | -                                              |

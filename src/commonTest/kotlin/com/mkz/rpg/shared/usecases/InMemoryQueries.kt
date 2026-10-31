@@ -57,6 +57,7 @@ import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
+import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.random.Random
 
@@ -84,6 +85,7 @@ class InMemoryQueries(
     // Effect, unit, player and terrain
     val searchEffectById = SearchEffectById(effectRepository)
     val searchUnitById = SearchUnitById(unitRepository)
+    val searchMaximumAbilities = SearchMaximumAbilities()
     val searchPlayerById = SearchPlayerById(playerRepository)
     val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)

@@ -23,7 +23,7 @@ data class Save private constructor(
 ) {
     companion object {
         /** The version of the saves written by this game. Bump it whenever a snapshot changes its shape. */
-        const val SAVE_VERSION = 1
+        const val SAVE_VERSION = 2
 
         const val SLOTS = 3
 

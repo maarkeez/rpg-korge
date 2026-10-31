@@ -54,6 +54,12 @@ class UnitTest {
     }
 
     @Test
+    fun `MaximumAbilities should be 6, one per button of the ability bar`() {
+        // Then
+        Unit.maximumAbilities() shouldBe 6
+    }
+
+    @Test
     fun `Create should publish the unit created event when the unit is created`() {
         // Given
         val unitDto =

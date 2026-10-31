@@ -61,6 +61,7 @@ private data class BattleUnitSnapshot(
     val remainingCasts: Int,
     val abilityCooldowns: Map<String, Int>,
     val learnedAbilityIds: List<String>,
+    val maximumAbilities: Int,
     val ongoingEffects: List<OngoingEffect>,
     val remainingTurns: Int?,
 ) {
@@ -80,6 +81,7 @@ private data class BattleUnitSnapshot(
                 remainingCasts = dto.remainingTurnActions.remainingCasts,
                 abilityCooldowns = dto.abilityCooldowns,
                 learnedAbilityIds = dto.learnedAbilityIds,
+                maximumAbilities = dto.maximumAbilities,
                 ongoingEffects = dto.ongoingEffects.map { effect -> OngoingEffect(effect.effectId, effect.application.name, effect.turnsLeft) },
                 remainingTurns = dto.remainingTurns,
             )
@@ -102,6 +104,7 @@ private data class BattleUnitSnapshot(
             remainingTurnActions = RemainingTurnActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = movementRange, maximumCasts = 1),
             abilityCooldowns = abilityCooldowns,
             learnedAbilityIds = learnedAbilityIds,
+            maximumAbilities = maximumAbilities,
             ongoingEffects = ongoingEffects.map { effect -> OngoingEffectSnapshotDto(effect.effectId, OngoingEffectSnapshotDto.ApplicationDto.valueOf(effect.application), effect.turnsLeft) },
             remainingTurns = remainingTurns,
         )

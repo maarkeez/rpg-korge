@@ -23,7 +23,14 @@ class ApplyEffectTest {
             eventBus = eventBus,
             searchEffectById = queries.searchEffectById,
             searchPosition = queries.searchPosition,
-            battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+            battleUnitDeployment =
+                BattleUnitDeployment(
+                    queries.battleUnitRepository,
+                    queries.searchUnitById,
+                    queries.searchMaximumAbilities,
+                    queries.searchPlayerById,
+                    queries.canBattlefieldTileBeOccupied,
+                ),
             searchAbilityById = queries.searchAbilityById,
         )
 

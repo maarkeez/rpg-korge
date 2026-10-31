@@ -24,7 +24,7 @@ class BattleUnitTest {
         val unit = UnitMother.unit(healthPoints = 10, manaPoints = 5, movementRange = 3).toDto()
         val player = PlayerMother.player().toDto()
         // When
-        val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, deployAtRow = 2, deployAtColumn = 3)
+        val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, maximumAbilities = 6, deployAtRow = 2, deployAtColumn = 3)
         // Then
         val battleUnitDto = deployedBattleUnit.toDto()
         battleUnitDto.id shouldBe battleUnitId
@@ -45,7 +45,7 @@ class BattleUnitTest {
         val unit = UnitMother.unit().toDto()
         val player = PlayerMother.player().toDto()
         // When
-        val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, deployAtRow = 2, deployAtColumn = 3)
+        val deployedBattleUnit = BattleUnit.deploy(id = battleUnitId, unit = unit, player = player, maximumAbilities = 6, deployAtRow = 2, deployAtColumn = 3)
         // Then
         val (events, _) = deployedBattleUnit.pullEvents()
         events.shouldContainExactly(
@@ -286,9 +286,9 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `CanLearnAbility should be true when the battle unit does not know the ability and knows fewer than 6`() {
+    fun `CanLearnAbility should be true when the battle unit does not know the ability and knows fewer than its maximum`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(5) { index -> "ability-$index" }).toDto())
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(2) { index -> "ability-$index" }).toDto(), maximumAbilities = 3)
         // When
         val result = battleUnit.canLearnAbility(abilityId = "teleport")
         // Then
@@ -306,9 +306,9 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `CanLearnAbility should be false when the battle unit already knows 6 abilities`() {
+    fun `CanLearnAbility should be false when the battle unit already knows its maximum abilities`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(6) { index -> "ability-$index" }).toDto())
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(3) { index -> "ability-$index" }).toDto(), maximumAbilities = 3)
         // When
         val result = battleUnit.canLearnAbility(abilityId = "teleport")
         // Then
@@ -596,9 +596,9 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should fail when the effect teaches an ability and the battle unit already knows 6`() {
+    fun `ApplyImmediateEffect should fail when the effect teaches an ability and the battle unit already knows its maximum`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(6) { index -> "ability-$index" }).toDto())
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(3) { index -> "ability-$index" }).toDto(), maximumAbilities = 3)
         val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
         // When
         val result = runCatching { battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
@@ -1013,7 +1013,15 @@ class BattleUnitTest {
     @Test
     fun `Deploy should deploy a battle unit that never vanishes when it has no remaining turns`() {
         // When
-        val deployedBattleUnit = BattleUnit.deploy(id = "battle-unit-1", unit = UnitMother.unit().toDto(), player = PlayerMother.player().toDto(), deployAtRow = 2, deployAtColumn = 3)
+        val deployedBattleUnit =
+            BattleUnit.deploy(
+                id = "battle-unit-1",
+                unit = UnitMother.unit().toDto(),
+                player = PlayerMother.player().toDto(),
+                maximumAbilities = 6,
+                deployAtRow = 2,
+                deployAtColumn = 3,
+            )
         // Then
         deployedBattleUnit.toDto().remainingTurns shouldBe null
     }
@@ -1022,7 +1030,15 @@ class BattleUnitTest {
     fun `Deploy should deploy a summon with its remaining turns`() {
         // When
         val deployedBattleUnit =
-            BattleUnit.deploy(id = "battle-unit-1", unit = UnitMother.unit().toDto(), player = PlayerMother.player().toDto(), deployAtRow = 2, deployAtColumn = 3, remainingTurns = 5)
+            BattleUnit.deploy(
+                id = "battle-unit-1",
+                unit = UnitMother.unit().toDto(),
+                player = PlayerMother.player().toDto(),
+                maximumAbilities = 6,
+                deployAtRow = 2,
+                deployAtColumn = 3,
+                remainingTurns = 5,
+            )
         // Then
         deployedBattleUnit.toDto().remainingTurns shouldBe 5
     }
@@ -1158,6 +1174,29 @@ class BattleUnitTest {
             .abilityCooldowns
             .toList()
             .shouldContainExactly("sword" to 0, "teleport" to 0)
+    }
+
+    @Test
+    fun `Respawn should keep the maximum abilities of the battle unit`() {
+        // Given: it knows sword, learned teleport, and can know 3 abilities.
+        val unit = UnitMother.unit(healthPoints = 20, abilities = listOf("sword")).toDto()
+        val defeatedBattleUnit =
+            BattleUnitMother
+                .battleUnit(unit = unit, maximumAbilities = 3)
+                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
+                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 20, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .pullEvents()
+                .second
+        require(defeatedBattleUnit.isDefeated())
+        // When
+        val (_, respawnedBattleUnit) = defeatedBattleUnit.respawn(unit = unit, row = 2, column = 3).pullEvents()
+        // Then
+        val withFireball =
+            respawnedBattleUnit
+                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "fireball").toDto(), currentRow = 2, currentColumn = 3)
+                .pullEvents()
+                .second
+        withFireball.canLearnAbility(abilityId = "heal").shouldBeFalse()
     }
 
     @Test

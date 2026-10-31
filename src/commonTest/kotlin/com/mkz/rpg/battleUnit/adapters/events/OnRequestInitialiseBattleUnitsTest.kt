@@ -21,7 +21,14 @@ class OnRequestInitialiseBattleUnitsTest {
             InitialiseBattleUnits(
                 battleUnitLoader = FakeBattleUnitLoader(deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 0, column = 0))),
                 battleUnitRepository = queries.battleUnitRepository,
-                battleUnitDeployment = BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+                battleUnitDeployment =
+                    BattleUnitDeployment(
+                        queries.battleUnitRepository,
+                        queries.searchUnitById,
+                        queries.searchMaximumAbilities,
+                        queries.searchPlayerById,
+                        queries.canBattlefieldTileBeOccupied,
+                    ),
                 eventBus = eventBus,
             ),
             eventBus,
