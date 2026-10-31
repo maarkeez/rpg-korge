@@ -27,7 +27,6 @@ class StoryContext(
         const val NPCS_DIRECTORY = "npc"
         const val EFFECTS_DIRECTORY = "effect"
         const val ABILITIES_DIRECTORY = "ability"
-        const val ABILITY_SELECTION = "ability_selection"
         const val TERRAIN_TRANSITIONS_DIRECTORY = "terrain/transitions"
         const val TRANSITION_NAME_SEPARATOR = "_to_"
         const val PORTRAIT_SUFFIX = "_portrait"
@@ -53,7 +52,7 @@ class StoryContext(
     fun effectIds(): List<String> = imageIds(EFFECTS_DIRECTORY)
 
     /** Every ability that has an icon, in alphabetical order, e.g.: the options of a pick control of an ability. */
-    fun abilityIds(): List<String> = imageIds(ABILITIES_DIRECTORY) - ABILITY_SELECTION
+    fun abilityIds(): List<String> = imageIds(ABILITIES_DIRECTORY)
 
     /** Every terrain that has a tile, in alphabetical order, e.g.: the options of a pick control of a terrain. */
     fun terrainIds(): List<String> =
