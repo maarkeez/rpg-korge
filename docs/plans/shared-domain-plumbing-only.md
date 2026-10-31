@@ -1,6 +1,6 @@
 # Plan: Keep only the plumbing in the shared domain
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** `shared.domain` holds the plumbing every subdomain needs (`DomainEvent`, `EventBus`, `Subscription`,
 > `Snapshottable`), and two game rules: `Gold.MAXIMUM` (99,999) and `KnownAbilities.MAXIMUM` (6). They are there only
@@ -48,11 +48,11 @@ throws `GoldAboveLimit`.
 
 Each milestone is a few commits straight on `main`, green on CI.
 
-| #  | Milestone                     | Done when                                                                                                     | Status | Done in |
-|----|-------------------------------|---------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | Gold owned by `inventory`     | `Gold.kt` is gone, the cap is private to `Inventory.kt`, and `InventoryUnitResourcesTest` checks every unit.   | ✅      | `e16c8f3` |
+| #  | Milestone                     | Done when                                                                                                               | Status | Done in   |
+|----|-------------------------------|-------------------------------------------------------------------------------------------------------------------------|--------|-----------|
+| M1 | Gold owned by `inventory`     | `Gold.kt` is gone, the cap is private to `Inventory.kt`, and `InventoryUnitResourcesTest` checks every unit.            | ✅      | `e16c8f3` |
 | M2 | Abilities cap owned by `unit` | `KnownAbilities.kt` is gone, `BattleUnit` gets its cap from `SearchMaximumAbilities` and saves it, `SAVE_VERSION` is 2. | ✅      | `8dbdc7e` |
-| M3 | Plumbing only in `shared`     | `SharedDomainArchitectureTest` pins `shared.domain`, and `package-structure.md` states the rule.               | ⬜      |         |
+| M3 | Plumbing only in `shared`     | `SharedDomainArchitectureTest` pins `shared.domain`, and `package-structure.md` states the rule.                        | ✅      | `fad3bee` |
 
 ### M1 commits
 
@@ -108,7 +108,8 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 ### shared
 
-- `shared.domain` declares only `DomainEvent`, `EventBus`, `Subscription` and `Snapshottable`.
+- `shared.domain` declares only `DomainEvent`, `EventBus` (and its `subscribe` extension), `Subscription` and
+  `Snapshottable`.
 
 ### Docs
 
