@@ -21,17 +21,16 @@ class UnitTest {
     }
 
     @Test
-    fun `Create should create a unit with its starting gold, from 0 to 99,999`() {
+    fun `Create should create a unit with its starting gold, from 0`() {
         // Then
         UnitMother.unit(startingGold = 0).toDto().startingGold shouldBe 0
-        UnitMother.unit(startingGold = 99_999).toDto().startingGold shouldBe 99_999
+        UnitMother.unit(startingGold = 100).toDto().startingGold shouldBe 100
     }
 
     @Test
-    fun `Create should fail when the starting gold is negative or above 99,999`() {
+    fun `Create should fail when the starting gold is negative`() {
         // Then
         runCatching { UnitMother.unit(startingGold = -1) }.exceptionOrNull().shouldBeTypeOf<UnitError.NegativeStartingGold>()
-        runCatching { UnitMother.unit(startingGold = 100_000) }.exceptionOrNull().shouldBeTypeOf<UnitError.StartingGoldAboveLimit>()
     }
 
     @Test

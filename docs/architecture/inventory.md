@@ -73,7 +73,7 @@ The price of an item is displayed in gold: on the line of its name, aligned to t
 
 ## Gold
 
-Each battle unit carries its own gold in its inventory: the party never shares it. It starts with the `startingGold` of its unit (e.g.: the knights 20 G, and the viking 100 G, see [Game data](game-data.md)), and goes from 0 to 99,999 G (`Gold.MAXIMUM`). The bag displays it on its title line, e.g.: `Inventory ........ 20 G`.
+Each battle unit carries its own gold in its inventory: the party never shares it. It starts with the `startingGold` of its unit (e.g.: the knights 20 G, and the viking 100 G, see [Game data](game-data.md)), and goes from 0 to 99,999 G, a cap private to `Inventory` (`MAXIMUM_GOLD`), checked against the `startingGold` of every unit in CI by `InventoryUnitResourcesTest`. The bag displays it on its title line, e.g.: `Inventory ........ 20 G`.
 
 ## Buying and selling
 

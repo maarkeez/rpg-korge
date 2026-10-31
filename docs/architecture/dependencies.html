@@ -216,7 +216,7 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 24, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 63, "importsOut": 13},
-    {"name": "inventory", "files": 30, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 58},
+    {"name": "inventory", "files": 30, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 56},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 6, "importsOut": 29},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 6, "importsOut": 12},
@@ -227,10 +227,10 @@ const DATA = {
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 33, "importsOut": 12},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 11, "importsOut": 8},
     {"name": "screen", "files": 89, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 84, "importsOut": 200},
-    {"name": "shared", "files": 16, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 460, "importsOut": 0},
+    {"name": "shared", "files": 15, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 456, "importsOut": 0},
     {"name": "storybook", "files": 92, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 102},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 13, "importsOut": 7},
-    {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 13, "importsOut": 15}
+    {"name": "unit", "files": 13, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 13, "importsOut": 13}
   ],
   "edges": [
     {"from": "ability", "to": "effect", "weight": 3, "files": 2, "imports": [
@@ -830,7 +830,7 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/services/PlayerTurnRule.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/inventory/usecases/services/TradeRule.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
-    {"from": "inventory", "to": "shared", "weight": 22, "files": 16, "imports": [
+    {"from": "inventory", "to": "shared", "weight": 20, "files": 15, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/events/OnExplorationStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/adapters/events/OnExplorationStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -842,8 +842,6 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/adapters/save/InventorySnapshottable.kt", "layer": "adapters", "name": "shared.adapters.save.SnapshotJson"},
       {"file": "com/mkz/rpg/inventory/adapters/save/InventorySnapshottable.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "shared.domain.Gold.MAXIMUM"},
-      {"file": "com/mkz/rpg/inventory/domain/InventoryError.kt", "layer": "domain", "name": "shared.domain.Gold"},
       {"file": "com/mkz/rpg/inventory/domain/InventoryEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/BuyItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/ConsumeItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
@@ -1465,7 +1463,7 @@ const DATA = {
       {"file": "com/mkz/rpg/terrain/domain/TerrainEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/terrain/usecases/commands/InitialiseTerrains.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
-    {"from": "unit", "to": "shared", "weight": 15, "files": 9, "imports": [
+    {"from": "unit", "to": "shared", "weight": 13, "files": 9, "imports": [
       {"file": "com/mkz/rpg/unit/adapters/events/OnRequestInitialiseUnits.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/unit/adapters/events/OnRequestInitialiseUnits.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/unit/adapters/events/OnRequestUnitCreation.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1474,9 +1472,7 @@ const DATA = {
       {"file": "com/mkz/rpg/unit/adapters/resources/ResourcesUnitLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
       {"file": "com/mkz/rpg/unit/adapters/resources/ResourcesUnitLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.fromResource"},
       {"file": "com/mkz/rpg/unit/adapters/resources/ResourcesUnitLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
-      {"file": "com/mkz/rpg/unit/domain/Unit.kt", "layer": "domain", "name": "shared.domain.Gold"},
       {"file": "com/mkz/rpg/unit/domain/Unit.kt", "layer": "domain", "name": "shared.domain.KnownAbilities"},
-      {"file": "com/mkz/rpg/unit/domain/UnitError.kt", "layer": "domain", "name": "shared.domain.Gold"},
       {"file": "com/mkz/rpg/unit/domain/UnitError.kt", "layer": "domain", "name": "shared.domain.KnownAbilities"},
       {"file": "com/mkz/rpg/unit/domain/UnitEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/unit/usecases/commands/InitialiseUnits.kt", "layer": "usecases", "name": "shared.domain.EventBus"},

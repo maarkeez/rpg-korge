@@ -1,7 +1,5 @@
 package com.mkz.rpg.inventory.domain
 
-import com.mkz.rpg.shared.domain.Gold
-
 sealed class InventoryError(
     message: String,
 ) : Throwable(message = message) {
@@ -23,7 +21,7 @@ sealed class InventoryError(
 
     class NegativeGold : InventoryError("The inventory gold is negative")
 
-    class GoldAboveLimit : InventoryError("The inventory gold can not be higher than ${Gold.MAXIMUM}")
+    class GoldAboveLimit : InventoryError("The inventory gold is above its limit")
 
     class NotEnoughGold : InventoryError("The inventory gold is not enough to buy the item")
 

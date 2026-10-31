@@ -25,7 +25,6 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.domain.DomainEvent
-import com.mkz.rpg.shared.domain.Gold.MAXIMUM
 import kotlin.jvm.JvmInline
 
 /**
@@ -46,6 +45,9 @@ data class Inventory private constructor(
 ) {
     companion object {
         private const val DEFAULT_MAXIMUM_STORAGE_SPACE = 12
+
+        // The most gold a battle unit can carry. Only the inventory reads it: the shop gets GOLD_FULL instead.
+        private const val MAXIMUM_GOLD = 99_999
 
         /** Creates the empty inventory of a battle unit, with its starting gold, once it is deployed. */
         fun create(
@@ -177,7 +179,7 @@ data class Inventory private constructor(
         return when {
             storedCopies == 0 -> TradeRefusalDto.NOT_STORED
             equippedItems.isEquipped(item) && storedCopies == 1 -> TradeRefusalDto.EQUIPPED
-            gold.value + price > MAXIMUM -> TradeRefusalDto.GOLD_FULL
+            gold.value + price > MAXIMUM_GOLD -> TradeRefusalDto.GOLD_FULL
             else -> null
         }
     }
@@ -271,7 +273,7 @@ data class Inventory private constructor(
     ) {
         init {
             if (value < 0) throw NegativeGold()
-            if (value > MAXIMUM) throw GoldAboveLimit()
+            if (value > MAXIMUM_GOLD) throw GoldAboveLimit()
         }
     }
 

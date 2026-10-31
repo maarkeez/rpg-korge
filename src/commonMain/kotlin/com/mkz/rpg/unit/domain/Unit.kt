@@ -1,10 +1,8 @@
 package com.mkz.rpg.unit.domain
 
-import com.mkz.rpg.shared.domain.Gold
 import com.mkz.rpg.shared.domain.KnownAbilities
 import com.mkz.rpg.unit.domain.UnitError.AbilitiesAboveLimit
 import com.mkz.rpg.unit.domain.UnitError.NegativeStartingGold
-import com.mkz.rpg.unit.domain.UnitError.StartingGoldAboveLimit
 import com.mkz.rpg.unit.domain.UnitEvent.UnitCreated
 import kotlin.jvm.JvmInline
 
@@ -67,13 +65,13 @@ data class Unit private constructor(
         val value: Int,
     )
 
-    // The gold each battle unit of the unit carries once deployed.
+    // The gold each battle unit of the unit carries once deployed. Its cap belongs to the inventory, checked against the unit resources by
+    // InventoryUnitResourcesTest.
     @JvmInline private value class StartingGold(
         val value: Int,
     ) {
         init {
             if (value < 0) throw NegativeStartingGold()
-            if (value > Gold.MAXIMUM) throw StartingGoldAboveLimit()
         }
     }
 
