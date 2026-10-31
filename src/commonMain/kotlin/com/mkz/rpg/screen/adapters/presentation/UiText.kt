@@ -105,4 +105,11 @@ enum class UiText(
     ABILITY_INFO_SUMMON("ui.abilityInfo.effect.summon", isPlural = true),
     ABILITY_INFO_TELEPORT("ui.abilityInfo.effect.teleport"),
     ABILITY_INFO_ON_DEFEATED_POISON_ALLIES("ui.abilityInfo.effect.onDefeatedPoisonAllies", isPlural = true),
+    HUD_MOVE("ui.hud.move"),
+    HUD_CAST("ui.hud.cast"),
+    HUD_HEALTH("ui.hud.health"),
+    HUD_MANA("ui.hud.mana"),
+    ATTACK_PREVIEW_KO("ui.attackPreview.ko"),
+    ATTACK_PREVIEW_BY("ui.attackPreview.by"),
+    ATTACK_PREVIEW_MANA("ui.attackPreview.mana"),
 }

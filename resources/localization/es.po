@@ -479,6 +479,41 @@ msgid_plural "When defeated: poisons its adjacent allies ({damage} damage each t
 msgstr[0] "Al ser derrotado: envenena a sus aliados adyacentes ({damage} de daño por turno durante {turns} turno)."
 msgstr[1] "Al ser derrotado: envenena a sus aliados adyacentes ({damage} de daño por turno durante {turns} turnos)."
 
+#. A caption of the steps a battle unit has left this turn, before its points.
+msgctxt "ui.hud.move"
+msgid "MOVE"
+msgstr "MOVER"
+
+#. A caption of the casts a battle unit has left this turn, before its points.
+msgctxt "ui.hud.cast"
+msgid "CAST"
+msgstr "LANZAR"
+
+#. A caption of the health of a battle unit, before its bar: health points.
+msgctxt "ui.hud.health"
+msgid "HP"
+msgstr "PV"
+
+#. A caption of the mana of a battle unit, before its bar: mana points.
+msgctxt "ui.hud.mana"
+msgid "MP"
+msgstr "PM"
+
+#. A battle unit the previewed cast would defeat: knocked out.
+msgctxt "ui.attackPreview.ko"
+msgid "KO"
+msgstr "KO"
+
+#. Who casts the previewed ability. {unit}: the name of the caster.
+msgctxt "ui.attackPreview.by"
+msgid "by {unit}"
+msgstr "de {unit}"
+
+#. The mana the previewed cast spends. {mana}: the mana it costs.
+msgctxt "ui.attackPreview.mana"
+msgid "-{mana} mana"
+msgstr "-{mana} de maná"
+
 # Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
 
 msgctxt "ability.bat.name"
