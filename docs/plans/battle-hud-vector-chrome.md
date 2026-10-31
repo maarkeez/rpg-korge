@@ -1,6 +1,6 @@
 # Plan: The battle HUD drawn as vectors around its pixel art
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The battle HUD mixes three things: the artist's pixel art, KorGE's default widgets, and pixel art drawn
 > at scales that break its grid. The mage's portrait sits on a white KorGE button, its venom icon is drawn at 1× beside
@@ -58,7 +58,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | M1 | The vector chrome      | The portraits, bars, points, effects and ability buttons are drawn with the new chrome, in the HUD and the formation, and `ability_selection.png` is gone. | ✅      | `f0de11bb` |
 | M2 | The ability info card  | Selecting an ability shows its info as a card, with its reason as a banner, and the 8×8 info icons are gone.                           | ✅      | `259b2252` |
 | M3 | The focused header     | Selecting an ability collapses the header to a strip, hiding the name, the effects and the bag, and closing it brings them back.       | ✅      | `f0193821` |
-| M4 | The forecast           | Previewing a cast shows the ability, its caster and a row per battle unit it changes, all in sight.                                    | ⬜      |         |
+| M4 | The forecast           | Previewing a cast shows the ability, its caster and a row per battle unit it changes, all in sight.                                    | ✅      | `58e01427` |
 
 ### M1 commits
 
@@ -100,6 +100,10 @@ Each milestone is a few commits straight on `main`, green on CI.
 2. Rework `AttackPreviewView` as the forecast, without the drag, taking the ability id, with its stories and tests.
 3. Pass the ability id from `BattlefieldPresenter`, and update
    [Presentation timeline](../architecture/presentation-timeline.md#casting-an-ability).
+
+Built as one commit, as the new signature of `AttackPreviewView.display` needs the presenter and the rows at once. It
+also restyles `PreviewBarView`, moved from M1: its value follows the bar, so the row draws `30 → 18` after its health
+bar rather than under the change. The rows keep the effects the battle unit has, before the new ones.
 
 ## Reference
 
