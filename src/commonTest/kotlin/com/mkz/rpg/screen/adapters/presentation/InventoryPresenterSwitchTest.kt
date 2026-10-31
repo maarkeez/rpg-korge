@@ -115,65 +115,11 @@ class InventoryPresenterSwitchTest {
         eventBus.dispatch()
     }
 
-    // The player taps the tile of the battle unit, then the given event displays one of its abilities.
-    private fun displayAbilityOf(
-        battleUnitId: String,
-        abilityEvent: (TileDto) -> BattlefieldHudEvent,
-    ) {
-        val position = apis.battlefieldApi.searchPosition(battleUnitId).shouldNotBeNull()
-        val tile = TileDto(position.row, position.column)
-        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = tile, battleUnitId = battleUnitId, tilesWhereCanBeMoved = emptySet()))
-        eventBus.publish(abilityEvent(tile))
-        eventBus.dispatch()
-    }
-
-    @Test
-    fun `OpenInventory should select the battle unit again before opening the inventory when its ability info is displayed`() {
-        // Given
-        displayAbilityOf("knight-1") { tile -> BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile, battleUnitId = "knight-1", abilityId = "sword") }
-        // When
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
-        eventBus.dispatch()
-        // Then
-        selectedBattleUnitIds.shouldContainExactly("knight-1")
-        inventoryView.displayedOwner shouldBe Owner(name = "Knight", partyIndex = 0, partySize = 3)
-        battleHudView.displays.last() shouldBe Display.INVENTORY
-    }
-
-    @Test
-    fun `OpenInventory should select the battle unit again before opening the inventory when its ability cast range is displayed`() {
-        // Given
-        displayAbilityOf("knight-1") { tile ->
-            BattlefieldHudEvent.SelectedBattleUnitAbility(casterTile = tile, battleUnitId = "knight-1", abilityId = "sword", castGroupsWhereCanCast = emptyList())
-        }
-        // When
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
-        eventBus.dispatch()
-        // Then
-        selectedBattleUnitIds.shouldContainExactly("knight-1")
-        battleHudView.displays.last() shouldBe Display.INVENTORY
-    }
-
     @Test
     fun `OpenInventory should open the inventory straight away when no ability is displayed`() {
         // Given
         // When
         openInventoryOf("knight-1")
-        // Then
-        selectedBattleUnitIds.shouldBeEmpty()
-        battleHudView.displays.last() shouldBe Display.INVENTORY
-    }
-
-    @Test
-    fun `OpenInventory should open the inventory straight away once the ability on show is closed`() {
-        // Given
-        displayAbilityOf("knight-1") { tile -> BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile, battleUnitId = "knight-1", abilityId = "sword") }
-        eventBus.publish(BattlefieldHudEvent.AbilityDeselected(abilityId = "sword"))
-        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(1, 1), battleUnitId = "knight-1", tilesWhereCanBeMoved = emptySet()))
-        eventBus.dispatch()
-        // When
-        battleUnitInfoView.onBagSelected.shouldNotBeNull().invoke()
-        eventBus.dispatch()
         // Then
         selectedBattleUnitIds.shouldBeEmpty()
         battleHudView.displays.last() shouldBe Display.INVENTORY

@@ -34,8 +34,8 @@ import kotlinx.coroutines.CompletableDeferred
  * While exploring, the arrows (or a swipe) switch the inventory to the previous or next party member, selecting it on the
  * battlefield through the selector set with [setBattleUnitSelector], so its inventory stays open meanwhile.
  *
- * The bag, while an ability of the battle unit is on show (read-only, or with its cast range), selects the battle unit
- * again through the same selector before opening its inventory, so the ability and the dimmed battlefield are gone.
+ * The bag opens the inventory straight away: it is hidden while an ability of the battle unit is on show, as the battle
+ * unit info collapses its header, so it is never tapped over a dimmed battlefield.
  */
 class InventoryPresenter(
     private val inventoryView: InventoryView,
@@ -70,9 +70,6 @@ class InventoryPresenter(
     private var switchingTo: String? = null
     private var battleUnitSelector: ((battleUnitId: String) -> Unit)? = null
 
-    // Whether an ability of the selected battle unit is on show, read-only or with its cast range, until it is selected again.
-    private var isAbilityOnShow = false
-
     /** The item of the slot being given, and the tile of each party member that can receive it. */
     private data class Giving(
         val giverBattleUnitId: String,
@@ -89,11 +86,10 @@ class InventoryPresenter(
                 val hasInventory = hasInventory(battleUnitId)
                 val isSwitchedTo = switchingTo == battleUnitId
                 switchingTo = null
-                isAbilityOnShow = false
                 timeline.play {
                     clearDisplayedInventory()
                     if (hasInventory) {
-                        battleUnitInfoView.displayBag(onBagSelected = { whenIdle { bagSelected(battleUnitId) } })
+                        battleUnitInfoView.displayBag(onBagSelected = { whenIdle { openInventory(battleUnitId) } })
                     } else {
                         battleUnitInfoView.hideBag()
                     }
@@ -101,14 +97,11 @@ class InventoryPresenter(
                 if (isSwitchedTo && hasInventory) openInventory(battleUnitId)
             },
             eventBus.subscribe<BattlefieldHudEvent.Idle> {
-                isAbilityOnShow = false
                 timeline.play {
                     clearDisplayedInventory()
                     battleUnitInfoView.hideBag()
                 }
             },
-            eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnitAbility> { isAbilityOnShow = true },
-            eventBus.subscribe<BattlefieldHudEvent.AbilityInfoDisplayed> { isAbilityOnShow = true },
             eventBus.subscribe<InventoryEvent.ItemStored> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemConsumed> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemDiscarded> { event -> refreshInventory(event.battleUnitId) },
@@ -164,17 +157,6 @@ class InventoryPresenter(
         val partyIndex = party.battleUnitIds.indexOf(battleUnitId).takeIf { index -> index >= 0 } ?: return null
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return null
         return InventoryView.Owner(name = texts.unitName(battleUnit.unitId), partyIndex = partyIndex, partySize = party.battleUnitIds.size)
-    }
-
-    // Opens the inventory, once the battle unit is selected again when one of its abilities is on show.
-    private fun bagSelected(battleUnitId: String) {
-        val selector = battleUnitSelector
-        if (isAbilityOnShow && selector != null) {
-            switchingTo = battleUnitId
-            selector(battleUnitId)
-        } else {
-            openInventory(battleUnitId)
-        }
     }
 
     private fun openInventory(battleUnitId: String) {
