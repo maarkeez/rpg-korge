@@ -32,6 +32,10 @@ object AbilityInfoViewStories : StoryBinding {
             AbilityInfo("teleport", manaCost = 5, cooldown = 1, Targeting.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, listOf(Effect.Teleport)),
             AbilityInfo("cleave", manaCost = 5, cooldown = 1, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.Damage(15))),
             AbilityInfo("venom-strike", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(5), Effect.DamageEachTurn(damage = 3, turns = 5))),
+            AbilityInfo("poisoned-sword", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
+            AbilityInfo("mushroom", manaCost = 10, cooldown = 0, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
+            AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.SELF, listOf(Effect.HealSelf(20))),
+            AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_SELF, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
         ).associateBy(AbilityInfo::abilityId)
 
     private val sword = StoryDto(id = "screen-ability-info--sword", name = "Sword", description = "One effect, free and with no cooldown.", args = emptyMap())
@@ -90,10 +94,15 @@ object AbilityInfoViewStories : StoryBinding {
         }
 
     /** The ability of the args, with the reason it can not be cast now, if any. */
-    internal fun abilityInfo(args: Args): AbilityInfo {
-        val ability = abilities.getValue(args.text(ABILITY))
-        val cooldownTurnsLeft = args.int(COOLDOWN_TURNS_LEFT)
-        val remainingMana = args.int(REMAINING_MANA)
+    private fun abilityInfo(args: Args): AbilityInfo = abilityInfo(args.text(ABILITY), cooldownTurnsLeft = args.int(COOLDOWN_TURNS_LEFT), remainingMana = args.int(REMAINING_MANA))
+
+    /** An ability of the game, with the reason it can not be cast now, if any, e.g.: for the battle unit info's stories. */
+    internal fun abilityInfo(
+        abilityId: String,
+        cooldownTurnsLeft: Int,
+        remainingMana: Int,
+    ): AbilityInfo {
+        val ability = abilities.getValue(abilityId)
         val reason =
             when {
                 cooldownTurnsLeft > 0 -> Reason.Cooldown(cooldownTurnsLeft)

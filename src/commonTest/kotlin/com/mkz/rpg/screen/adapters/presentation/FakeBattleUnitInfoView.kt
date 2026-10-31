@@ -13,6 +13,9 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), 
         private set
     val displayedBattleUnits = mutableListOf<DisplayedBattleUnit>()
     val selectedAbilities = mutableListOf<Int>()
+    val displayedAbilityInfos = mutableListOf<AbilityInfoView.AbilityInfo>()
+    var hideAbilityInfoCount = 0
+        private set
     var hideCount = 0
         private set
 
@@ -35,6 +38,14 @@ class FakeBattleUnitInfoView : BattleUnitInfoView(BattleSceneResourcesLoader(), 
 
     override fun displayAbilitySelected(index: Int) {
         selectedAbilities += index
+    }
+
+    override fun displayAbilityInfo(abilityInfo: AbilityInfoView.AbilityInfo) {
+        displayedAbilityInfos += abilityInfo
+    }
+
+    override fun hideAbilityInfo() {
+        hideAbilityInfoCount++
     }
 
     override fun displayBag(onBagSelected: () -> kotlin.Unit) {

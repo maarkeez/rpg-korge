@@ -50,6 +50,7 @@ open class BattleUnitInfoView(
     private lateinit var healthBarView: HealthBarView
     private lateinit var manaBarView: ManaBarView
     internal lateinit var unitPortraitView: UnitPortraitView
+    internal lateinit var abilityInfoView: AbilityInfoView
 
     private val battleUnitInfoLayout =
         uiVerticalStack(padding = 5.0) {
@@ -96,6 +97,9 @@ open class BattleUnitInfoView(
                 abilityButtons = Array(6) { AbilityButtonView(abilityButtonSize, resourcesLoader) }
                 abilityButtons.forEach(::addChild)
             }
+            uiSpacing(Size(0, ROWS_SPACING))
+            abilityInfoView = AbilityInfoView(AbilityInfoView.WIDTH, resourcesLoader, texts)
+            addChild(abilityInfoView)
         }
 
     init {
@@ -109,7 +113,7 @@ open class BattleUnitInfoView(
 
     /**
      * Displays the battle unit with the turn actions it has left, and the turns left before it vanishes if it is a
-     * summon (none for the others).
+     * summon (none for the others). No ability is selected, so no ability info is displayed.
      */
     open fun display(
         battleUnit: BattleUnitInfo,
@@ -118,6 +122,7 @@ open class BattleUnitInfoView(
         abilities: List<Ability>,
     ) {
         abilityButtons.forEach(AbilityButtonView::hide)
+        abilityInfoView.hide()
         // Avatar
         unitPortraitView.display(battleUnit.unitId)
         // Name
@@ -165,6 +170,15 @@ open class BattleUnitInfoView(
     open fun displayAbilitySelected(index: Int) {
         abilityButtons.forEach(AbilityButtonView::unselect)
         abilityButtons[index].select()
+    }
+
+    /** Displays what the selected ability does, under the ability buttons. */
+    open fun displayAbilityInfo(abilityInfo: AbilityInfoView.AbilityInfo) {
+        abilityInfoView.display(abilityInfo)
+    }
+
+    open fun hideAbilityInfo() {
+        abilityInfoView.hide()
     }
 
     open fun hide() {

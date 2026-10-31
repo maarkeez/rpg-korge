@@ -33,6 +33,7 @@ object BattleUnitInfoViewStories : StoryBinding {
     private const val REMAINING_TURNS = "remainingTurns"
     private const val EFFECTS = "effects"
     private const val ABILITIES = "abilities"
+    private const val SELECTED_ABILITY = "selectedAbility"
 
     private val ready =
         StoryDto(id = "screen-battle-unit-info--ready", name = "Ready", description = "A battle unit at the start of its turn: healthy, with all its steps and its cast.", args = emptyMap())
@@ -71,6 +72,13 @@ object BattleUnitInfoViewStories : StoryBinding {
             description = "All the ability buttons: ready, in cooldown and without the mana to be cast.",
             args = mapOf(ABILITIES to ArgDto.int(ABILITIES_LIMIT)),
         )
+    private val abilitySelected =
+        StoryDto(
+            id = "screen-battle-unit-info--ability-selected",
+            name = "Ability selected",
+            description = "The first ability, framed, and what it does docked under the ability buttons.",
+            args = mapOf(SELECTED_ABILITY to ArgDto.int(1)),
+        )
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -79,7 +87,8 @@ object BattleUnitInfoViewStories : StoryBinding {
             title = "Battle unit info",
             description =
                 "The selected battle unit in the HUD: its portrait and name, the steps and casts it has left, its health, mana and effects, " +
-                    "its abilities and its bag. remainingTurns: the turns a summon has left, none (0) for the others. abilities: how many it has.",
+                    "its abilities and its bag. remainingTurns: the turns a summon has left, none (0) for the others. abilities: how many it has. " +
+                    "selectedAbility: the ability selected, from 1, none (0) for no ability.",
             controls =
                 listOf(
                     ControlDto.pick(UNIT, context.unitIds()),
@@ -90,6 +99,7 @@ object BattleUnitInfoViewStories : StoryBinding {
                     ControlDto.int(REMAINING_TURNS, minimum = 0, maximum = REMAINING_TURNS_LIMIT),
                     ControlDto.int(EFFECTS, minimum = 0, maximum = EFFECTS_LIMIT),
                     ControlDto.int(ABILITIES, minimum = 0, maximum = ABILITIES_LIMIT),
+                    ControlDto.int(SELECTED_ABILITY, minimum = 0, maximum = ABILITIES_LIMIT),
                 ),
             args =
                 mapOf(
@@ -101,8 +111,9 @@ object BattleUnitInfoViewStories : StoryBinding {
                     REMAINING_TURNS to ArgDto.int(0),
                     EFFECTS to ArgDto.int(0),
                     ABILITIES to ArgDto.int(4),
+                    SELECTED_ABILITY to ArgDto.int(0),
                 ),
-            stories = listOf(ready, hurt, turnSpent, withEffects, summon, sixAbilities),
+            stories = listOf(ready, hurt, turnSpent, withEffects, summon, sixAbilities, abilitySelected),
         )
 
     override fun render(
@@ -132,7 +143,8 @@ object BattleUnitInfoViewStories : StoryBinding {
         return BattleUnitInfoView(context.resourcesLoader, context.texts).apply {
             setDelegate(
                 object : AbilityButtonView.Delegate {
-                    override fun abilitySelected(abilityId: String) = context.action("abilitySelected", abilityId)
+                    override fun abilitySelected(abilityId: String) =
+                        context.action("abilitySelected", abilityId, setArg = SELECTED_ABILITY to ArgDto.int(abilities.indexOfFirst { ability -> ability.abilityId == abilityId } + 1))
                 },
             )
             displayBag(onBagSelected = { context.action("onBagSelected") })
@@ -148,6 +160,13 @@ object BattleUnitInfoViewStories : StoryBinding {
                 remainingTurns = args.int(REMAINING_TURNS).takeIf { remainingTurns -> remainingTurns > 0 },
                 abilities = abilities,
             )
+            abilities.getOrNull(args.int(SELECTED_ABILITY) - 1)?.let { ability ->
+                displayAbilitySelected(abilities.indexOf(ability))
+                // Its reason as the button tells it: in cooldown, or one mana short.
+                val manaCost = AbilityInfoViewStories.abilityInfo(ability.abilityId, cooldownTurnsLeft = 0, remainingMana = Int.MAX_VALUE).manaCost
+                val remainingMana = if (ability.hasEnoughMana) Int.MAX_VALUE else minOf(args.int(MANA), manaCost - 1)
+                displayAbilityInfo(AbilityInfoViewStories.abilityInfo(ability.abilityId, ability.cooldownTurnsLeft, remainingMana))
+            }
         }
     }
 }

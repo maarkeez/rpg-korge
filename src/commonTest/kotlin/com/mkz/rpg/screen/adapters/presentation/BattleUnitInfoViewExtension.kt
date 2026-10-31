@@ -31,6 +31,14 @@ fun BattleUnitInfoView.castPointColors() = castPointsView.pointColors()
 
 fun BattleUnitInfoView.selectedAbilityIndexes(): List<Int> = abilityButtons.indices.filter { index -> abilityButtons[index].isSelected() }
 
+/** Whether what the selected ability does is displayed, under the ability buttons. */
+fun BattleUnitInfoView.isAbilityInfoDisplayed(): Boolean = visible && abilityInfoView.visible
+
+fun BattleUnitInfoView.displayedAbilityName(): String = abilityInfoView.abilityName()
+
+/** Whether the ability info starts below the bottom of the ability buttons. */
+fun BattleUnitInfoView.isAbilityInfoUnderAbilityButtons(): Boolean = abilityInfoView.getGlobalBounds().top >= abilityButtons.maxOf { button -> button.getGlobalBounds().bottom }
+
 /** Whether the bag, which opens the inventory, is displayed. */
 fun BattleUnitInfoView.isBagDisplayed(): Boolean = bagButton.visible && bagButton.findViewByName(BagButtonView.BAG) != null
 

@@ -12,6 +12,15 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class BattleUnitInfoViewTest : ViewsForTesting() {
+    private val sword =
+        AbilityInfoView.AbilityInfo(
+            abilityId = "sword",
+            manaCost = 0,
+            cooldown = 0,
+            targeting = AbilityInfoView.AbilityInfo.Targeting.ADJACENT_ENEMY,
+            effects = listOf(AbilityInfoView.AbilityInfo.Effect.Damage(10)),
+        )
+
     private fun BattleUnitInfoView.display(
         turnActions: BattleUnitInfoView.TurnActions = turnActions(),
         remainingTurns: Int? = null,
@@ -152,6 +161,47 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
                 val isSelected = index == selectedAbilityIndex
                 abilityButton.isSelected() shouldBe isSelected
             }
+        }
+
+    @Test
+    fun `BattleUnitInfoView should display the ability info under the ability buttons when an ability is selected`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            battleUnitInfoView.display()
+            // When
+            battleUnitInfoView.displayAbilitySelected(0)
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // Then
+            battleUnitInfoView.isAbilityInfoDisplayed().shouldBeTrue()
+            battleUnitInfoView.displayedAbilityName() shouldBe "Sword"
+            battleUnitInfoView.isAbilityInfoUnderAbilityButtons().shouldBeTrue()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should hide the ability info when it displays a battle unit`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            battleUnitInfoView.display()
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // When
+            battleUnitInfoView.display()
+            // Then
+            battleUnitInfoView.isAbilityInfoDisplayed().shouldBeFalse()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should hide the ability info when it hides the ability info`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            battleUnitInfoView.display()
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // When
+            battleUnitInfoView.hideAbilityInfo()
+            // Then
+            battleUnitInfoView.isAbilityInfoDisplayed().shouldBeFalse()
         }
 
     @Test
