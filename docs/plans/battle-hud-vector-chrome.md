@@ -56,7 +56,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone              | Done when                                                                                                                              | Status | Done in |
 |----|------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The vector chrome      | The portraits, bars, points, effects and ability buttons are drawn with the new chrome, in the HUD and the formation, and `ability_selection.png` is gone. | ✅      | `f0de11bb` |
-| M2 | The ability info card  | Selecting an ability shows its info as a card, with its reason as a banner, and the 8×8 info icons are gone.                           | ⬜      |         |
+| M2 | The ability info card  | Selecting an ability shows its info as a card, with its reason as a banner, and the 8×8 info icons are gone.                           | ✅      | `259b2252` |
 | M3 | The focused header     | Selecting an ability collapses the header to a strip, hiding the name, the effects and the bag, and closing it brings them back.       | ⬜      |         |
 | M4 | The forecast           | Previewing a cast shows the ability, its caster and a row per battle unit it changes, all in sight.                                    | ⬜      |         |
 
@@ -80,7 +80,8 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 1. Add the texts of the new words to `UiText`, `messages.pot` and `es.po`.
 2. Redraw `AbilityInfoView` as a card, updating its stories and tests.
-3. Delete `resources/ability/info/` and `art/ability/info/`, the 8×8 mana and cooldown icons.
+3. Delete `resources/ability/info/` and `art/ability/info/`, the 8×8 mana and cooldown icons. Built as one commit with the
+   second, as the pre-commit hook stages every tracked change.
 
 ### M3 commits
 
