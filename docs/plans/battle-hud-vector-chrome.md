@@ -57,7 +57,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The vector chrome      | The portraits, bars, points, effects and ability buttons are drawn with the new chrome, in the HUD and the formation, and `ability_selection.png` is gone. | ✅      | `f0de11bb` |
 | M2 | The ability info card  | Selecting an ability shows its info as a card, with its reason as a banner, and the 8×8 info icons are gone.                           | ✅      | `259b2252` |
-| M3 | The focused header     | Selecting an ability collapses the header to a strip, hiding the name, the effects and the bag, and closing it brings them back.       | ⬜      |         |
+| M3 | The focused header     | Selecting an ability collapses the header to a strip, hiding the name, the effects and the bag, and closing it brings them back.       | ✅      | `f0193821` |
 | M4 | The forecast           | Previewing a cast shows the ability, its caster and a row per battle unit it changes, all in sight.                                    | ⬜      |         |
 
 ### M1 commits
@@ -88,7 +88,9 @@ Each milestone is a few commits straight on `main`, green on CI.
 1. Lay out the header of `BattleUnitInfoView` as a panel, with the captions, the summon's turns left as a pill, and the
    bag in a slot.
 2. Collapse it on `displayAbilityInfo` and expand it on `hideAbilityInfo` and `display`, with the slide, and the
-   **Ability selected, blocked** story.
+   **Ability selected, blocked** story. Built as one commit with the first, as both lay out the same view. The team
+   ring and the selection ring are drawn as filled shapes under the art, the slot inset over them, as KorGE draws a
+   stroke thinner and fainter than its thickness.
 3. Drop the reselect from `InventoryPresenter`, with its tests, and update [Inventory](../architecture/inventory.md) and
    [Exploration](../architecture/exploration.md).
 
