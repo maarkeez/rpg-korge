@@ -46,7 +46,7 @@ class HealthBarViewTest : ViewsForTesting() {
             // When
             healthBarView.display(remaining = 50, maximum = 100)
             // Then
-            healthBarView.labelText() shouldBe "50 / 100"
+            healthBarView.labelText() shouldBe "50/100"
         }
 
     @Test

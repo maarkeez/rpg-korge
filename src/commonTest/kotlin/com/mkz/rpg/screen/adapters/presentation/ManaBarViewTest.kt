@@ -46,7 +46,7 @@ class ManaBarViewTest : ViewsForTesting() {
             // When
             manaBarView.display(remaining = 50, maximum = 100)
             // Then
-            manaBarView.labelText() shouldBe "50 / 100"
+            manaBarView.labelText() shouldBe "50/100"
         }
 
     @Test

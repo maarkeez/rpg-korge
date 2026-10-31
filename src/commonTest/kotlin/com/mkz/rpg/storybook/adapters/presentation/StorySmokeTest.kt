@@ -77,6 +77,8 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-unit-portrait",
                     "screen-unit-portrait--hero",
                     "screen-unit-portrait--goat-wizard",
+                    "screen-unit-portrait--ally",
+                    "screen-unit-portrait--enemy",
                     "screen-unit-name",
                     "screen-unit-name--short",
                     "screen-unit-name--aligned-to-right",

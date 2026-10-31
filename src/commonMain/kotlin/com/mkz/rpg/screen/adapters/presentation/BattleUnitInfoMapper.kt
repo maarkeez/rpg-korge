@@ -5,7 +5,10 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities.Abili
 
 /** Maps a battle unit to what the views of the battle unit draw, for the presenters displaying them. */
 internal object BattleUnitInfoMapper {
-    fun battleUnitInfo(battleUnit: BattleUnit.Dto): BattleUnitInfo =
+    fun battleUnitInfo(
+        battleUnit: BattleUnit.Dto,
+        isAlly: Boolean,
+    ): BattleUnitInfo =
         BattleUnitInfo(
             unitId = battleUnit.unitId,
             remainingHealthPoints = battleUnit.remainingHealthPoints,
@@ -13,6 +16,7 @@ internal object BattleUnitInfoMapper {
             remainingManaPoints = battleUnit.remainingManaPoints,
             maximumManaPoints = battleUnit.maximumManaPoints,
             effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
+            isAlly = isAlly,
         )
 
     fun turnActions(battleUnit: BattleUnit.Dto): BattleUnitInfoView.TurnActions =

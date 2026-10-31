@@ -18,9 +18,9 @@ fun FormationView.crownBitmap(): Bitmap? = rowViews.firstNotNullOfOrNull { rowVi
 
 /** The portrait displayed on each row, in party order. */
 fun FormationView.portraitBitmaps(): List<Bitmap?> =
-    rowViews.filter(FormationRowView::visible).map { rowView -> (rowView.portraitView.battleUnitPortrait.findViewByName(UnitPortraitView.PORTRAIT) as? Image)?.bitmap?.base }
+    rowViews.filter(FormationRowView::visible).map { rowView -> (rowView.portraitView.slot.findViewByName(UnitPortraitView.PORTRAIT) as? Image)?.bitmap?.base }
 
-/** The health and mana labels of each row, e.g.: `20 / 30` and `5 / 10`. */
+/** The health and mana labels of each row, e.g.: `20/30` and `5/10`. */
 fun FormationView.bars(): List<Pair<String, String>> = rowViews.filter(FormationRowView::visible).map { rowView -> rowView.healthBarView.label.text to rowView.manaBarView.label.text }
 
 fun FormationView.selectedRowIndexes(): List<Int> = rowViews.indices.filter { index -> rowViews[index].isSelected }

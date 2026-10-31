@@ -102,6 +102,7 @@ object ReceiverPreviewViewStories : StoryBinding {
                         remainingManaPoints = REMAINING_MANA,
                         maximumManaPoints = MAXIMUM_MANA,
                         effectIds = effects,
+                        isAlly = false,
                     ),
                 remainingHealthPoints = args.int(HEALTH_AFTER),
                 newEffectIds = newEffects,

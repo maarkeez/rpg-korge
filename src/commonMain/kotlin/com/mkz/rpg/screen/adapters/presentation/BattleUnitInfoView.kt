@@ -55,7 +55,8 @@ open class BattleUnitInfoView(
     private val battleUnitInfoLayout =
         uiVerticalStack(padding = 5.0) {
             uiHorizontalStack {
-                unitPortraitView = UnitPortraitView(Size(width = 97.5, height = 97.5), resourcesLoader)
+                // The portrait at 3x, 4 pixels in its slot.
+                unitPortraitView = UnitPortraitView(Size(width = 104, height = 104), resourcesLoader)
                 addChild(unitPortraitView)
 
                 uiSpacing(Size(10, 0))
@@ -123,8 +124,8 @@ open class BattleUnitInfoView(
     ) {
         abilityButtons.forEach(AbilityButtonView::hide)
         abilityInfoView.hide()
-        // Avatar
-        unitPortraitView.display(battleUnit.unitId)
+        // Avatar, ringed with the team's colour
+        unitPortraitView.display(battleUnit.unitId, ring = if (battleUnit.isAlly) HudStyle.ALLY else HudStyle.ENEMY)
         // Name
         unitNameView.display(unitName = texts.unitName(battleUnit.unitId))
         // Remaining turn actions, out of their maximum

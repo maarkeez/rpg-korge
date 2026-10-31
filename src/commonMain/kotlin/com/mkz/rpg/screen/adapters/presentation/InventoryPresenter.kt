@@ -467,7 +467,7 @@ class InventoryPresenter(
                 clearDisplayedInventory()
                 // The info is read again, as the items may have changed the battle unit, e.g.: healed it.
                 battleUnitInfoView.display(
-                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit),
+                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isAlly = true),
                     turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
                     remainingTurns = battleUnit.remainingTurns,
                     abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),

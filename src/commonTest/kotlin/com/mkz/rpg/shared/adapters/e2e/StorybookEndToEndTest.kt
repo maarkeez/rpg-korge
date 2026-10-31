@@ -57,7 +57,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--half"))
             // Then
             waitUntil { displayedHealthBarLabel() != null }
-            displayedHealthBarLabel() shouldBe "15 / 30"
+            displayedHealthBarLabel() shouldBe "15/30"
             stage.sidebarView()?.selectedStoryNames().shouldContainExactly("Half")
             stage.storyInfoView()?.storyName() shouldBe "Half"
             stage.phoneFrameView()?.isViewCenteredOnScreen()?.shouldBeTrue()
@@ -87,8 +87,8 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             // When
             clickStoryId(sidebarView, "screen-health-bar--empty")
             // Then
-            waitUntil { displayedHealthBarLabel() == "0 / 30" }
-            displayedHealthBarLabel() shouldBe "0 / 30"
+            waitUntil { displayedHealthBarLabel() == "0/30" }
+            displayedHealthBarLabel() shouldBe "0/30"
             sidebarView.selectedStoryNames().shouldContainExactly("Empty")
             storyLocation.keptStoryIds.shouldContainExactly("screen-health-bar--empty")
         }
@@ -104,8 +104,8 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             // When
             clickStoryId(sidebarView, "screen-health-bar--half")
             // Then
-            waitUntil { displayedHealthBarLabel() == "15 / 30" }
-            displayedHealthBarLabel() shouldBe "15 / 30"
+            waitUntil { displayedHealthBarLabel() == "15/30" }
+            displayedHealthBarLabel() shouldBe "15/30"
             sidebarView.selectedStoryNames().shouldContainExactly("Half")
             sidebarView.searchText() shouldBe "health half"
         }
@@ -117,7 +117,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--half", requestedArgs = mapOf("maximum" to "40"), requestedGlobals = mapOf("language" to "es")))
             // Then
             waitUntil { displayedHealthBarLabel() != null }
-            displayedHealthBarLabel() shouldBe "15 / 40"
+            displayedHealthBarLabel() shouldBe "15/40"
             stage.controlsView()?.displayedValue("maximum") shouldBe "40"
             stage.toolbarView()?.selectedLanguageNames().shouldContainExactly("Español")
         }
@@ -133,8 +133,8 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             // When
             clickControlButton(controlsView, "remaining", "decrease")
             // Then
-            waitUntil { displayedHealthBarLabel() == "29 / 30" }
-            displayedHealthBarLabel() shouldBe "29 / 30"
+            waitUntil { displayedHealthBarLabel() == "29/30" }
+            displayedHealthBarLabel() shouldBe "29/30"
             stage.controlsView()?.displayedValue("remaining") shouldBe "29"
             storyLocation.keptLocations.last().args shouldBe mapOf("remaining" to "29")
         }
@@ -202,7 +202,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             clickZoomIn(zoomView.zoomBar())
             clickControlButton(controlsView, "remaining", "decrease")
             // Then
-            waitUntil { displayedHealthBarLabel() == "29 / 30" }
+            waitUntil { displayedHealthBarLabel() == "29/30" }
             zoomView.zoom() shouldBe 1.25
             zoomView.zoomBar().zoomText() shouldBe "125%"
             // When

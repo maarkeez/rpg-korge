@@ -25,6 +25,9 @@ fun BattleUnitInfoView.remainingTurnsText(): String? = if (remainingTurnsView.vi
 /** Whether the turns left are told after the remaining casts, on their line. */
 fun BattleUnitInfoView.isRemainingTurnsAfterCasts(): Boolean = remainingTurnsView.x > castPointsView.x + castPointsView.width && remainingTurnsView.y == castPointsView.y
 
+/** The colour of the ring around the portrait, the team's, or null when it has none. */
+fun BattleUnitInfoView.portraitRingColor() = unitPortraitView.ringColor()
+
 fun BattleUnitInfoView.movementPointColors() = movementPointsView.pointColors()
 
 fun BattleUnitInfoView.castPointColors() = castPointsView.pointColors()

@@ -56,15 +56,14 @@ class PointsViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display hollow points as big as filled points when some have been spent`() =
+    fun `Display should display the spent points as tinted pips when some have been spent`() =
         sharedViewsTest {
             // Given
             val pointsView = PointsView(Colors.WHITE)
-            addChild(pointsView)
             // When
             pointsView.display(remaining = 1, maximum = 2)
             // Then
-            pointsView.pointSizes().shouldContainExactly(PointsView.POINT_RADIUS * 2 to PointsView.POINT_RADIUS * 2)
+            pointsView.spentPointFills().shouldContainExactly(Colors.WHITE.withAd(PointsView.SPENT_POINT_ALPHA))
         }
 
     @Test

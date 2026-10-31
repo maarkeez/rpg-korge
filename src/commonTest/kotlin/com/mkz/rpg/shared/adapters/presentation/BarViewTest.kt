@@ -42,7 +42,19 @@ class BarViewTest : ViewsForTesting() {
             // When
             barView.display(remaining = 50, maximum = 100)
             // Then
-            barView.labelText() shouldBe "50 / 100"
+            barView.labelText() shouldBe "50/100"
+        }
+
+    @Test
+    fun `Display should display the value after the bar when it is displayed`() =
+        sharedViewsTest {
+            // Given
+            val barView = BarView(Size(width = 200.00, height = 16.00), Colors.RED)
+            // When
+            barView.display(remaining = 18, maximum = 30)
+            // Then
+            barView.labelText() shouldBe "18/30"
+            barView.isLabelAfterBar().shouldBeTrue()
         }
 
     @Test

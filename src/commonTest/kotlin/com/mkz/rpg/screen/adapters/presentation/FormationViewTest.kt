@@ -53,7 +53,7 @@ class FormationViewTest : ViewsForTesting() {
                 resourcesLoader.bitmap("unit/knight_portrait.png"),
                 resourcesLoader.bitmap("unit/viking_portrait.png"),
             )
-            formationView.bars().shouldContainExactly("20 / 30" to "5 / 10", "40 / 40" to "0 / 0")
+            formationView.bars().shouldContainExactly("20/30" to "5/10", "40/40" to "0/0")
         }
 
     @Test

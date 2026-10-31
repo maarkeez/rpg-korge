@@ -384,7 +384,7 @@ class BattlefieldPresenter(
             if (isBattling) battlefieldView.scrollToTile(row = selectedBattleUnitEvent.tile.row, column = selectedBattleUnitEvent.tile.column)
             battlefieldView.resetTiles()
             battleUnitInfoView.display(
-                battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit),
+                battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isAlly = !isCpuBattleUnit(battleUnit)),
                 turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
                 remainingTurns = battleUnit.remainingTurns,
                 abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
@@ -483,7 +483,7 @@ class BattlefieldPresenter(
         val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         return {
             attackPreviewView.display(
-                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit),
+                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.cost,
                 receivers = emptyList(),
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
@@ -504,14 +504,14 @@ class BattlefieldPresenter(
             event.enemyBattleUnitIds.map { enemyBattleUnitId ->
                 val enemyBattleUnit = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
                 AttackPreviewView.Receiver(
-                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(enemyBattleUnit),
+                    battleUnit = BattleUnitInfoMapper.battleUnitInfo(enemyBattleUnit, isAlly = !isCpuBattleUnit(enemyBattleUnit)),
                     remainingHealthPoints = remainingHealth[enemyBattleUnitId] ?: enemyBattleUnit.remainingHealthPoints,
                     newEffectIds = newEffectIds[enemyBattleUnitId].orEmpty(),
                 )
             }
         return {
             attackPreviewView.display(
-                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit),
+                casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.cost,
                 receivers = receivers,
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,

@@ -2,58 +2,78 @@ package com.mkz.rpg.shared.adapters.presentation
 
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.korge.style.styles
 import korlibs.korge.ui.UIContainer
-import korlibs.korge.ui.UIProgressBar
-import korlibs.korge.ui.uiBackgroundColor
-import korlibs.korge.ui.uiProgressBar
-import korlibs.korge.ui.uiSelectedColor
-import korlibs.korge.view.align.centerXOn
-import korlibs.korge.view.setText
+import korlibs.korge.view.RoundRect
+import korlibs.korge.view.Text
+import korlibs.korge.view.roundRect
 import korlibs.korge.view.text
+import korlibs.korge.view.xy
+import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
+import kotlin.math.min
 
+/**
+ * A rounded bar of a value out of its maximum, with the value after it, e.g.: `18/30`. The bar is drawn as vectors, at
+ * most [BAR_HEIGHT] high, centered in the height of the view, and takes the width the value leaves. A bar without
+ * [showValue] takes the whole width, e.g.: a slim mana bar.
+ */
 open class BarView(
     size: Size,
-    color: RGBA,
+    private val color: RGBA,
+    private val showValue: Boolean = true,
 ) : UIContainer(size) {
-    internal val progressBar: UIProgressBar =
-        uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
-            progressBar.styles.uiSelectedColor = color
-            progressBar.styles.uiBackgroundColor = Colors.DIMGREY
-        }
-    internal val label =
-        text(
-            text = "",
-            textSize = 14.0,
-            color = Colors.WHITE,
-        )
+    companion object {
+        const val BAR_HEIGHT = 12.0
+        const val TEXT_SIZE = 12.0
+        private const val VALUE_SPACING = 6.0
+
+        // The empty part of the bar, and its border.
+        val TRACK = RGBA(0x0E, 0x0E, 0x18)
+        val TRACK_STROKE = RGBA(0x36, 0x36, 0x50)
+    }
+
+    internal var track: RoundRect? = null
+    internal var fill: RoundRect? = null
+    internal val label: Text = text(text = "", textSize = TEXT_SIZE, color = Colors.WHITE)
+
+    // The value of the bar, as the share of its maximum, e.g.: 0.6 for 18 out of 30.
+    internal var ratio: Double = 1.0
 
     init {
-        addChild(progressBar)
-        addChild(label)
-        visible(false)
+        visible = false
     }
 
     fun display(
         remaining: Int,
         maximum: Int,
     ) {
-        val percentage = (remaining.toDouble() / maximum.toDouble()) * 100
-        label.setText("$remaining / $maximum")
-        progressBar.current = percentage
-        label.centerXOn(progressBar)
-        label.y = (progressBar.height - label.height) / 2 + 1
-        visible(true)
+        ratio = if (maximum > 0) remaining.coerceIn(0, maximum).toDouble() / maximum else 0.0
+        track?.removeFromParent()
+        fill?.removeFromParent()
+        label.text = "$remaining/$maximum"
+        label.visible = showValue
+        // The width of the value is the one of its maximum, so the bars of the same maximum keep the same width.
+        val valueWidth = if (showValue) Text("$maximum/$maximum", textSize = TEXT_SIZE).width + VALUE_SPACING else 0.0
+        val barWidth = width - valueWidth
+        val barHeight = min(height, BAR_HEIGHT)
+        val barY = (height - barHeight) / 2
+        val radius = barHeight / 2
+        track =
+            roundRect(Size(barWidth, barHeight), RectCorners(radius), fill = TRACK, stroke = TRACK_STROKE, strokeThickness = 1.0) {
+                xy(0.0, barY)
+            }
+        val fillWidth = barWidth * ratio
+        fill =
+            roundRect(Size(fillWidth, barHeight), RectCorners(min(radius, fillWidth / 2)), fill = color) {
+                xy(0.0, barY)
+                visible = fillWidth > 0
+            }
+        label.xy(width - label.width, (height - label.height) / 2)
+        addChild(label)
+        visible = true
     }
 
     fun hide() {
-        visible(false)
-    }
-
-    private fun visible(value: Boolean) {
-        visible = value
-        progressBar.visible = value
-        label.visible = value
+        visible = false
     }
 }

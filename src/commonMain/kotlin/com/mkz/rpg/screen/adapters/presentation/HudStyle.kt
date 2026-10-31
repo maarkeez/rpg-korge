@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.shared.adapters.presentation.BarView
 import korlibs.image.color.RGBA
 import korlibs.korge.view.Container
 import korlibs.korge.view.RoundRect
@@ -23,7 +24,7 @@ object HudStyle {
     val STROKE = RGBA(0x36, 0x36, 0x50)
 
     // The empty part of the bars.
-    val TRACK = RGBA(0x0E, 0x0E, 0x18)
+    val TRACK = BarView.TRACK
 
     // The secondary texts, e.g.: the targeting of an ability.
     val MUTED = RGBA(0xA4, 0xA4, 0xBE)

@@ -868,6 +868,18 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `DisplayMovementRange should ring the portrait red when a CPU battle unit is selected`() {
+        // Given
+        eventBus.publish(BattlefieldHudEvent.SelectedBattleUnit(tile = TileDto(row = 1, column = 3), battleUnitId = "rat-1", tilesWhereCanBeMoved = emptySet()))
+        // When
+        eventBus.dispatch()
+        // Then
+        battleUnitInfoView.displayedBattleUnits
+            .last()
+            .battleUnit.isAlly shouldBe false
+    }
+
+    @Test
     fun `DimTiles should dim every tile but the movement range and the selected battle unit when a battle unit is selected`() {
         // Given
         eventBus.publish(
@@ -1098,6 +1110,7 @@ class BattlefieldPresenterTest {
                 remainingManaPoints = knight.remainingManaPoints,
                 maximumManaPoints = knight.maximumManaPoints,
                 effectIds = emptyList(),
+                isAlly = true,
             )
     }
 
@@ -1371,6 +1384,7 @@ class BattlefieldPresenterTest {
                 remainingManaPoints = knight.remainingManaPoints,
                 maximumManaPoints = knight.maximumManaPoints,
                 effectIds = emptyList(),
+                isAlly = true,
             )
         preview.receivers.map { receiver -> receiver.battleUnit }.shouldContainExactly(
             List(2) {
@@ -1381,6 +1395,7 @@ class BattlefieldPresenterTest {
                     remainingManaPoints = rat.remainingManaPoints,
                     maximumManaPoints = rat.maximumManaPoints,
                     effectIds = emptyList(),
+                    isAlly = false,
                 )
             },
         )

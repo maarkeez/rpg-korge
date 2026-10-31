@@ -65,7 +65,7 @@ class StorybookPresenterTest {
         toolbarView.displayedLanguages.map { language -> language.code } shouldBe storyContext.texts.languages().map { language -> language.code }
         toolbarView.selectedLanguageCodes.shouldContainExactly("en")
         phoneFrameView.displayedViews.size shouldBe 1
-        displayedHealthBarLabel() shouldBe "15 / 30"
+        displayedHealthBarLabel() shouldBe "15/30"
         actionsView.displayedActions shouldBe listOf(emptyList())
         storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--half")
     }
@@ -75,7 +75,7 @@ class StorybookPresenterTest {
         // When
         startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--half", requestedArgs = mapOf("maximum" to "40"), requestedGlobals = mapOf("language" to "es")))
         // Then
-        displayedHealthBarLabel() shouldBe "15 / 40"
+        displayedHealthBarLabel() shouldBe "15/40"
         toolbarView.selectedLanguageCodes.shouldContainExactly("es")
         storyContext.texts[UiText.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
     }
@@ -90,7 +90,7 @@ class StorybookPresenterTest {
         eventBus.dispatch()
         // Then
         sidebarView.selectedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--empty")
-        displayedHealthBarLabel() shouldBe "0 / 30"
+        displayedHealthBarLabel() shouldBe "0/30"
         storyLocation.keptStoryIds.shouldContainExactly("screen-health-bar--empty")
         storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--empty")
     }
@@ -104,7 +104,7 @@ class StorybookPresenterTest {
         controlsView.delegate.shouldNotBeNull().argChanged("remaining", ArgDto.int(7))
         eventBus.dispatch()
         // Then
-        displayedHealthBarLabel() shouldBe "7 / 30"
+        displayedHealthBarLabel() shouldBe "7/30"
         controlsView.displayedArgs.last() shouldBe mapOf("remaining" to ArgDto.int(7), "maximum" to ArgDto.int(30))
         storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--full")
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "7")))
@@ -118,7 +118,7 @@ class StorybookPresenterTest {
         controlsView.delegate.shouldNotBeNull().argsReset()
         eventBus.dispatch()
         // Then
-        displayedHealthBarLabel() shouldBe "30 / 30"
+        displayedHealthBarLabel() shouldBe "30/30"
     }
 
     @Test
@@ -159,7 +159,7 @@ class StorybookPresenterTest {
         eventBus.dispatch()
         // Then
         actionsView.displayedActions.last().shouldContainExactly(ActionDto(name = "barTapped", arguments = listOf("7")))
-        displayedHealthBarLabel() shouldBe "7 / 30"
+        displayedHealthBarLabel() shouldBe "7/30"
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "7")))
     }
 

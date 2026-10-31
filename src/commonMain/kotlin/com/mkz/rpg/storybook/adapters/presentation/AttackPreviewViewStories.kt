@@ -117,6 +117,7 @@ object AttackPreviewViewStories : StoryBinding {
                 remainingManaPoints = CASTER_MANA,
                 maximumManaPoints = CASTER_MANA,
                 effectIds = effects,
+                isAlly = true,
             )
         val receiver =
             AttackPreviewView.Receiver(
@@ -128,6 +129,7 @@ object AttackPreviewViewStories : StoryBinding {
                         remainingManaPoints = RECEIVER_MANA,
                         maximumManaPoints = RECEIVER_MANA,
                         effectIds = effects,
+                        isAlly = false,
                     ),
                 remainingHealthPoints = args.int(RECEIVER_HEALTH_AFTER),
                 newEffectIds = newEffects,

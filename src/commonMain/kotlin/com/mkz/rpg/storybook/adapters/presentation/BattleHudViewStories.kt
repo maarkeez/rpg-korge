@@ -82,6 +82,7 @@ object BattleHudViewStories : StoryBinding {
                 remainingManaPoints = MAXIMUM_MANA,
                 maximumManaPoints = MAXIMUM_MANA,
                 effectIds = emptyList(),
+                isAlly = true,
             )
         val battleUnitInfoView =
             BattleUnitInfoView(context.resourcesLoader, context.texts).apply {

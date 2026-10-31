@@ -8,6 +8,7 @@ object BattleUnitInfoMother {
         remainingManaPoints: Int = 10,
         maximumManaPoints: Int = 10,
         effectIds: List<String> = emptyList(),
+        isAlly: Boolean = true,
     ) = BattleUnitInfo(
         unitId = unitId,
         remainingHealthPoints = remainingHealthPoints,
@@ -15,6 +16,7 @@ object BattleUnitInfoMother {
         remainingManaPoints = remainingManaPoints,
         maximumManaPoints = maximumManaPoints,
         effectIds = effectIds,
+        isAlly = isAlly,
     )
 
     fun turnActions(

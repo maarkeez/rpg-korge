@@ -131,6 +131,7 @@ object BattleUnitInfoViewStories : StoryBinding {
                 maximumManaPoints = MAXIMUM_MANA,
                 // The effects with an icon, as many times as needed.
                 effectIds = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] },
+                isAlly = true,
             )
         val abilities =
             List(args.int(ABILITIES)) { index ->

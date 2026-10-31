@@ -49,6 +49,17 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `BattleUnitInfoView should ring the portrait green when the battle unit is an ally`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            battleUnitInfoView.display(battleUnit = battleUnitInfo(isAlly = true), turnActions = turnActions(), remainingTurns = null, abilities = emptyList())
+            // Then
+            battleUnitInfoView.portraitRingColor() shouldBe HudStyle.ALLY
+        }
+
+    @Test
     fun `Display should display the remaining steps and casts out of their maximum when is displayed`() =
         sharedViewsTest {
             // Given

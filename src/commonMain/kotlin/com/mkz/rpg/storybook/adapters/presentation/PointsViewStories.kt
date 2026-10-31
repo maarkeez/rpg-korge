@@ -22,8 +22,16 @@ object PointsViewStories : StoryBinding {
 
     private val full = StoryDto(id = "screen-points--full", name = "Full", description = "A battle unit that has spent no step: every point is filled.", args = emptyMap())
     private val partlySpent =
-        StoryDto(id = "screen-points--partly-spent", name = "Partly spent", description = "Two out of three points left: the spent one is hollow.", args = mapOf(REMAINING to ArgDto.int(2)))
-    private val spent = StoryDto(id = "screen-points--spent", name = "Spent", description = "Every point spent: all of them are hollow.", args = mapOf(REMAINING to ArgDto.int(0)))
+        StoryDto(
+            id = "screen-points--partly-spent",
+            name = "Partly spent",
+            description = "Two out of three points left: the spent one is tinted, with an outline.",
+            args =
+                mapOf(
+                    REMAINING to ArgDto.int(2),
+                ),
+        )
+    private val spent = StoryDto(id = "screen-points--spent", name = "Spent", description = "Every point spent: all of them are tinted, with an outline.", args = mapOf(REMAINING to ArgDto.int(0)))
     private val casts =
         StoryDto(
             id = "screen-points--casts",
@@ -42,7 +50,7 @@ object PointsViewStories : StoryBinding {
             id = "screen-points",
             group = "Screen",
             title = "Points",
-            description = "An amount out of a maximum without text, a circle per point: filled while it remains, hollow once spent. The battle unit info shows its steps and its casts with it.",
+            description = "An amount out of a maximum without text, a rounded pip per point: filled while it remains, tinted once spent. The battle unit info shows its steps and its casts with it.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = POINTS_LIMIT), ControlDto.int(MAXIMUM, minimum = 0, maximum = POINTS_LIMIT), ControlDto.color(COLOR)),
             args = mapOf(REMAINING to ArgDto.int(MAXIMUM_POINTS), MAXIMUM to ArgDto.int(MAXIMUM_POINTS), COLOR to ArgDto.text(MOVEMENT_COLOR)),
             stories = listOf(full, partlySpent, spent, casts),

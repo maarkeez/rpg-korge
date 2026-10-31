@@ -23,7 +23,7 @@ object BarViewStories : StoryBinding {
 
     private val full = StoryDto(id = "shared-bar--full", name = "Full", description = "A bar filled up to its maximum.", args = emptyMap())
     private val half = StoryDto(id = "shared-bar--half", name = "Half", description = "A bar filled up to half of its maximum.", args = mapOf(REMAINING to ArgDto.int(MAXIMUM_VALUE / 2)))
-    private val empty = StoryDto(id = "shared-bar--empty", name = "Empty", description = "A bar with nothing left, over its grey background.", args = mapOf(REMAINING to ArgDto.int(0)))
+    private val empty = StoryDto(id = "shared-bar--empty", name = "Empty", description = "A bar with nothing left, over its dark track.", args = mapOf(REMAINING to ArgDto.int(0)))
     private val otherColor =
         StoryDto(
             id = "shared-bar--other-color",
@@ -40,7 +40,7 @@ object BarViewStories : StoryBinding {
             id = "shared-bar",
             group = "Shared",
             title = "Bar",
-            description = "The base of the health and mana bars: the remaining value out of its maximum, filled with a color, and written over it.",
+            description = "The base of the health and mana bars: a rounded bar of the remaining value out of its maximum, filled with a color, and the value after it.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = VALUE_LIMIT), ControlDto.int(MAXIMUM, minimum = 1, maximum = VALUE_LIMIT), ControlDto.color(COLOR)),
             args = mapOf(REMAINING to ArgDto.int(MAXIMUM_VALUE), MAXIMUM to ArgDto.int(MAXIMUM_VALUE), COLOR to ArgDto.text(HEALTH_COLOR)),
             stories = listOf(full, half, empty, otherColor),
