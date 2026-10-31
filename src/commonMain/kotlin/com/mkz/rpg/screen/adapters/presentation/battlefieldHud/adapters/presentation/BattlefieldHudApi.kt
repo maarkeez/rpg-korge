@@ -51,6 +51,9 @@ class BattlefieldHudApi(
         ProcessAbilitySelected(
             canCastAbility = battleUnitApi.canCastAbility,
             whereCanCast = battleUnitApi.whereCanCast,
+            searchBattleUnitById = battleUnitApi.searchBattleUnitById,
+            searchPlayerById = playerApi.searchPlayerById,
+            searchBattle = battleApi.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )

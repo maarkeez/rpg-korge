@@ -4,6 +4,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudError
@@ -34,6 +35,7 @@ class ConfirmCast(
             }
 
             is DisplayAbilityCastRange,
+            is DisplayAbilityInfo,
             is DisplayMovementRange,
             is Idle,
             -> throw BattlefieldHudError.InvalidBattlefieldHudState()

@@ -9,6 +9,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
@@ -94,6 +95,21 @@ class SelectBattleUnitTest {
         // Given
         startBattle()
         battlefieldHudRepository.create(displayAbilityCastRange())
+        // When
+        selectBattleUnit("battle-unit-1")
+        // Then
+        battlefieldHudRepository.search() shouldBe displayMovementRange(tile = battleUnitTile, battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved)
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.Idle,
+            BattlefieldHudEvent.SelectedBattleUnit(tile = battleUnitTile, battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved),
+        )
+    }
+
+    @Test
+    fun `should replace the selection when the hud is displaying the ability info`() {
+        // Given
+        startBattle()
+        battlefieldHudRepository.create(displayAbilityInfo())
         // When
         selectBattleUnit("battle-unit-1")
         // Then

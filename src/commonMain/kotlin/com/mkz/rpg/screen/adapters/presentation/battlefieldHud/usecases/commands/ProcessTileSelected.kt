@@ -9,6 +9,7 @@ import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Idle
@@ -37,6 +38,12 @@ class ProcessTileSelected(
             is Idle -> if (isBattleInProgress) selectTileWhenIdle(battlefieldHud, tile) else selectTileWhileExploring(battlefieldHud, tile)
             is DisplayMovementRange -> if (isBattleInProgress) selectTileWhenDisplayingMovement(battlefieldHud, tile) else selectTileWhileExploring(battlefieldHud, tile)
             is DisplayAbilityCastRange -> selectTileWhenDisplayingAbilityCastRange(battlefieldHud, tile)
+            is DisplayAbilityInfo -> {
+                // Any tile only closes it, back to the battle unit.
+                val (events, updatedBattlefieldHud) = battlefieldHud.hideAbilityInfo().pullEvents()
+                battlefieldHudRepository.update(updatedBattlefieldHud)
+                eventBus.publish(events)
+            }
             is DisplayAbilityCastPreview -> {
                 // Do nothing
             }

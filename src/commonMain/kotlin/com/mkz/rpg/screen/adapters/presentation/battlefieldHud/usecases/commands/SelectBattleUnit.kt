@@ -4,6 +4,7 @@ import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Idle
@@ -32,6 +33,7 @@ class SelectBattleUnit(
                 is Idle -> battlefieldHud
                 is DisplayMovementRange -> battlefieldHud.idle()
                 is DisplayAbilityCastRange -> battlefieldHud.idle()
+                is DisplayAbilityInfo -> battlefieldHud.idle()
                 is DisplayAbilityCastPreview -> battlefieldHud.idle()
             }
         val position = searchPosition(battleUnitId)

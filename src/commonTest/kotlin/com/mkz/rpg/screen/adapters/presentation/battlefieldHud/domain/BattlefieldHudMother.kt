@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.CastGroupDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
@@ -36,6 +37,20 @@ object BattlefieldHudMother {
             abilityId = abilityId,
             tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             castGroupsWhereCanCast = castGroupsWhereCanCast,
+            events = emptySet(),
+        )
+
+    fun displayAbilityInfo(
+        casterTile: TileDto = tile(0, 0),
+        battleUnitId: String = battleUnitId(),
+        abilityId: String = abilityId(),
+        tilesWhereCanBeMoved: Set<TileDto> = setOf(tile(0, 1)),
+    ): DisplayAbilityInfo =
+        DisplayAbilityInfo(
+            casterTile = casterTile,
+            battleUnitId = battleUnitId,
+            abilityId = abilityId,
+            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
             events = emptySet(),
         )
 

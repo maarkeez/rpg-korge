@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.command
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudError.BattlefieldHudNotFound
@@ -20,6 +21,7 @@ class DeselectBattleUnit(
                 is Idle -> battlefieldHud.idle().pullEvents()
                 is DisplayMovementRange -> battlefieldHud.idle().pullEvents()
                 is DisplayAbilityCastRange -> battlefieldHud.idle().pullEvents()
+                is DisplayAbilityInfo -> battlefieldHud.idle().pullEvents()
                 is DisplayAbilityCastPreview -> battlefieldHud.idle().pullEvents()
             }
         battlefieldHudRepository.update(updatedBattlefieldHud)

@@ -9,6 +9,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
@@ -112,6 +113,18 @@ class RefreshMovementRangeTest {
     fun `should not refresh when the hud is displaying an ability cast range`() {
         // Given
         val hud = displayAbilityCastRange()
+        battlefieldHudRepository.create(hud)
+        // When
+        refreshMovementRange()
+        // Then
+        battlefieldHudRepository.search() shouldBe hud
+        eventBus.publishedEvents.shouldBeEmpty()
+    }
+
+    @Test
+    fun `should not refresh when the hud is displaying the ability info`() {
+        // Given
+        val hud = displayAbilityInfo()
         battlefieldHudRepository.create(hud)
         // When
         refreshMovementRange()

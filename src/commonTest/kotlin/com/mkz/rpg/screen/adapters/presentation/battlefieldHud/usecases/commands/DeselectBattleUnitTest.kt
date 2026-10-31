@@ -5,6 +5,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -48,6 +49,17 @@ class DeselectBattleUnitTest {
     fun `should go idle when the battle unit is deselected and the hud is displaying an ability cast range`() {
         // Given
         battlefieldHudRepository.create(displayAbilityCastRange())
+        // When
+        deselectBattleUnit()
+        // Then
+        battlefieldHudRepository.search() shouldBe idle()
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
+    fun `should go idle when the battle unit is deselected and the hud is displaying the ability info`() {
+        // Given
+        battlefieldHudRepository.create(displayAbilityInfo())
         // When
         deselectBattleUnit()
         // Then

@@ -6,6 +6,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -87,6 +88,18 @@ class CancelCastTest {
         battlefieldHudRepository.create(
             com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
                 .displayAbilityCastRange(),
+        )
+        // When
+        // Then
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { cancelCast() }
+    }
+
+    @Test
+    fun `should throw an invalid hud state error when the hud is displaying the ability info`() {
+        // Given
+        battlefieldHudRepository.create(
+            com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
+                .displayAbilityInfo(),
         )
         // When
         // Then

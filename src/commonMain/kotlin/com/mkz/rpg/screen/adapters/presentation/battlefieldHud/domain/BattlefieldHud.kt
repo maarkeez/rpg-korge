@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain
 
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent.AbilityDeselected
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent.AbilityInfoDisplayed
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnit
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent.SelectedBattleUnitAbility
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent.SelfAbilityCastPreviewed
@@ -64,6 +65,15 @@ sealed interface BattlefieldHud {
                     ),
         )
 
+        fun displayAbilityInfo(abilityId: String) =
+            DisplayAbilityInfo.of(
+                casterTile = tile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events = events,
+            )
+
         fun tilesWhereCanBeMoved(
             tile: Dto.TileDto,
             tilesWhereCanBeMoved: Set<Dto.TileDto>,
@@ -105,6 +115,15 @@ sealed interface BattlefieldHud {
                         castGroupsWhereCanCast = castGroupsWhereCanCast,
                     ),
         )
+
+        fun displayAbilityInfo(abilityId: String) =
+            DisplayAbilityInfo.of(
+                casterTile = casterTile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events = events,
+            )
 
         fun deselectAbility() =
             DisplayMovementRange(
@@ -161,6 +180,82 @@ sealed interface BattlefieldHud {
                         enemyBattleUnitIds = enemyBattleUnitIds,
                     ),
         )
+    }
+
+    /**
+     * An ability selected only to read what it does: one the battle unit can not cast now (e.g.: in cooldown), or one of
+     * a battle unit the human player can not cast with (e.g.: a CPU battle unit). It has no cast range.
+     */
+    data class DisplayAbilityInfo(
+        val casterTile: Dto.TileDto,
+        val battleUnitId: String,
+        val abilityId: String,
+        val tilesWhereCanBeMoved: Set<Dto.TileDto>,
+        private val events: Set<BattlefieldHudEvent>,
+    ) : BattlefieldHud {
+        companion object {
+            fun of(
+                casterTile: Dto.TileDto,
+                battleUnitId: String,
+                abilityId: String,
+                tilesWhereCanBeMoved: Set<Dto.TileDto>,
+                events: Set<BattlefieldHudEvent>,
+            ) = DisplayAbilityInfo(
+                casterTile = casterTile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events = events + AbilityInfoDisplayed(casterTile = casterTile, battleUnitId = battleUnitId, abilityId = abilityId),
+            )
+        }
+
+        fun pullEvents() = events to copy(events = emptySet())
+
+        fun idle() = Idle(events + BattlefieldHudEvent.Idle)
+
+        fun displayAbilityInfo(abilityId: String) =
+            of(
+                casterTile = casterTile,
+                battleUnitId = battleUnitId,
+                abilityId = abilityId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events = events,
+            )
+
+        fun selectAbility(
+            abilityId: String,
+            castGroupsWhereCanCast: List<Dto.CastGroupDto>,
+        ) = DisplayAbilityCastRange(
+            casterTile = casterTile,
+            battleUnitId = battleUnitId,
+            abilityId = abilityId,
+            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+            castGroupsWhereCanCast = castGroupsWhereCanCast,
+            events =
+                events +
+                    SelectedBattleUnitAbility(
+                        casterTile = casterTile,
+                        battleUnitId = battleUnitId,
+                        abilityId = abilityId,
+                        castGroupsWhereCanCast = castGroupsWhereCanCast,
+                    ),
+        )
+
+        // Goes back to the battle unit and its movement range, as deselecting an ability does.
+        fun hideAbilityInfo() =
+            DisplayMovementRange(
+                tile = casterTile,
+                battleUnitId = battleUnitId,
+                tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                events =
+                    events +
+                        AbilityDeselected(abilityId) +
+                        SelectedBattleUnit(
+                            tile = casterTile,
+                            battleUnitId = battleUnitId,
+                            tilesWhereCanBeMoved = tilesWhereCanBeMoved,
+                        ),
+            )
     }
 
     data class DisplayAbilityCastPreview(

@@ -16,6 +16,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.castGroup
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastPreview
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.idle
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
@@ -69,6 +70,22 @@ class ProcessTileSelectedTest {
             queries.battleUnitRepository.create(battleUnit(id = battleUnitId, unit = unit(movementRange = 1).toDto(), player = if (letter in "EF") enemyPlayer else player))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
+    }
+
+    @Test
+    fun `ProcessTileSelected should hide the ability info when a tile is selected while it is displayed`() {
+        // Given
+        val tilesWhereCanBeMoved = setOf(tile(0, 1))
+        battlefieldHudRepository.create(displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "skull", tilesWhereCanBeMoved = tilesWhereCanBeMoved))
+        givenBattle("K E")
+        // When
+        processTileSelected(0, 1)
+        // Then
+        battlefieldHudRepository.search().shouldBeInstanceOf<DisplayMovementRange>()
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.AbilityDeselected(abilityId = "skull"),
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved),
+        )
     }
 
     @Test

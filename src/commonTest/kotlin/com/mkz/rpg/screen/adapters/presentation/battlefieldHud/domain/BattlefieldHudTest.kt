@@ -223,6 +223,87 @@ class BattlefieldHudTest {
     }
 
     @Test
+    fun `DisplayMovementRange should display the ability info when it displays the info of an ability`() {
+        // Given
+        val hud = BattlefieldHudMother.displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1")
+        // When
+        val updatedHud = hud.displayAbilityInfo("skull")
+        // Then
+        updatedHud.abilityId shouldBe "skull"
+        updatedHud.tilesWhereCanBeMoved shouldBe hud.tilesWhereCanBeMoved
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "skull"))
+    }
+
+    @Test
+    fun `DisplayAbilityCastRange should display the ability info when it displays the info of another ability`() {
+        // Given
+        val hud = BattlefieldHudMother.displayAbilityCastRange(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "sword")
+        // When
+        val updatedHud = hud.displayAbilityInfo("mending")
+        // Then
+        updatedHud.abilityId shouldBe "mending"
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "mending"))
+    }
+
+    @Test
+    fun `DisplayAbilityInfo should go back to the movement range when it hides the ability info`() {
+        // Given
+        val tilesWhereCanBeMoved = setOf(tile(0, 1))
+        val hud = BattlefieldHudMother.displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "skull", tilesWhereCanBeMoved = tilesWhereCanBeMoved)
+        // When
+        val updatedHud = hud.hideAbilityInfo()
+        // Then
+        updatedHud.tile shouldBe tile(0, 0)
+        updatedHud.tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(
+            BattlefieldHudEvent.AbilityDeselected(abilityId = "skull"),
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved),
+        )
+    }
+
+    @Test
+    fun `DisplayAbilityInfo should display the cast range when it selects a castable ability`() {
+        // Given
+        val castGroups = listOf(castGroup(tile(0, 1)))
+        val hud = BattlefieldHudMother.displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "skull")
+        // When
+        val updatedHud = hud.selectAbility(abilityId = "sword", castGroupsWhereCanCast = castGroups)
+        // Then
+        updatedHud.abilityId shouldBe "sword"
+        updatedHud.castGroupsWhereCanCast shouldBe castGroups
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(
+            BattlefieldHudEvent.SelectedBattleUnitAbility(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "sword", castGroupsWhereCanCast = castGroups),
+        )
+    }
+
+    @Test
+    fun `DisplayAbilityInfo should display the info of another ability when it displays the info of another ability`() {
+        // Given
+        val hud = BattlefieldHudMother.displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "skull")
+        // When
+        val updatedHud = hud.displayAbilityInfo("bat")
+        // Then
+        updatedHud.abilityId shouldBe "bat"
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "bat"))
+    }
+
+    @Test
+    fun `DisplayAbilityInfo should return to idle and publish the idle event when idle is invoked`() {
+        // Given
+        val hud = BattlefieldHudMother.displayAbilityInfo()
+        // When
+        val updatedHud = hud.idle()
+        // Then
+        val (events, _) = updatedHud.pullEvents()
+        events.shouldContainExactly(BattlefieldHudEvent.Idle)
+    }
+
+    @Test
     fun `DisplayAbilityCastPreview should return to idle and publish the idle event when idle is invoked`() {
         // Given
         val hud = BattlefieldHudMother.displayAbilityCastPreview()

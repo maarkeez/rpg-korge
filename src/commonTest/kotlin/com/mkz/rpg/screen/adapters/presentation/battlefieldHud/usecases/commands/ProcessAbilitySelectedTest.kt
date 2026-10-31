@@ -2,15 +2,20 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.command
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.AbilityMother.ability
+import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
+import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.adapters.storage.InMemoryBattlefieldHudRepository
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.DisplayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudError
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityCastRange
+import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayAbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.displayMovementRange
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother.tile
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -18,7 +23,6 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -30,17 +34,31 @@ class ProcessAbilitySelectedTest {
         ProcessAbilitySelected(
             canCastAbility = queries.canCastAbility,
             whereCanCast = queries.whereCanCast,
+            searchBattleUnitById = queries.searchBattleUnitById,
+            searchPlayerById = queries.searchPlayerById,
+            searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
         )
 
-    // Stores the knight, that knows the given abilities, at (0,0), with a rat on each side: the sword hits one of them, the heal targets the knight.
-    private fun givenKnightBetweenRats(knightAbilities: List<String>) {
+    /**
+     * Stores the knight of the human player, that knows the given abilities and has 4 mana, at (0,0), with a rat of the CPU
+     * on each side, in the battle in the [currentPlayer]'s turn: ability-1 hits one of them, ability-2 targets the knight,
+     * and ability-3 costs 10 mana.
+     */
+    private fun givenKnightBetweenRats(
+        knightAbilities: List<String>,
+        currentPlayer: String = "human",
+    ) {
         queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY))
         queries.abilityRepository.create(ability(id = "ability-2", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
-        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(abilities = knightAbilities).toDto(), player = player(id = "human").toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto()))
-        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto()))
+        queries.abilityRepository.create(ability(id = "ability-3", cost = 10, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
+        val human = player(id = "human", type = HUMAN).also(queries.playerRepository::create).toDto()
+        val cpu = player(id = "cpu", type = CPU).also(queries.playerRepository::create).toDto()
+        queries.battleRepository.create(battle(players = listOf(currentPlayer) + (listOf("human", "cpu") - currentPlayer), battleUnitIds = setOf("battle-unit-1", "rat-1", "rat-2")))
+        queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1", unit = unit(abilities = knightAbilities, manaPoints = 4).toDto(), player = human))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-1", unit = unit(abilities = knightAbilities).toDto(), player = cpu))
+        queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = cpu))
         queries.battlefieldRepository.create(
             battlefield(
                 """
@@ -88,18 +106,79 @@ class ProcessAbilitySelectedTest {
     }
 
     @Test
-    fun `should not select the ability when the battle unit cannot cast`() {
+    fun `ProcessAbilitySelected should display the ability info when the ability is in cooldown`() {
         // Given
-        val hud =
-            displayMovementRange(battleUnitId = "battle-unit-1")
-        battlefieldHudRepository.create(hud)
-        // The knight does not know the ability.
-        givenKnightBetweenRats(knightAbilities = listOf("ability-2"))
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"))
+        val knight = queries.battleUnitRepository.searchById("battle-unit-1")!!
+        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList()))
         // When
         processAbilitySelected("ability-1")
         // Then
-        battlefieldHudRepository.search() shouldBe hud
-        eventBus.publishedEvents.shouldBeEmpty()
+        val storedHud = battlefieldHudRepository.search() as DisplayAbilityInfo
+        storedHud.abilityId shouldBe "ability-1"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1"))
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the ability info when the battle unit has not the mana`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-3"))
+        // When
+        processAbilitySelected("ability-3")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-3"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-3"))
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the ability info when the battle unit belongs to the CPU`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 1), battleUnitId = "rat-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"), currentPlayer = "cpu")
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-1"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 1), battleUnitId = "rat-1", abilityId = "ability-1"))
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the ability info when it is not the turn of the battle unit's player`() {
+        // Given
+        battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-1"), currentPlayer = "cpu")
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-1"
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should hide the ability info when the ability on show is selected again`() {
+        // Given
+        val tilesWhereCanBeMoved = setOf(tile(1, 1))
+        battlefieldHudRepository.create(displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved))
+        // When
+        processAbilitySelected("ability-1")
+        // Then
+        (battlefieldHudRepository.search() as DisplayMovementRange).tilesWhereCanBeMoved shouldBe tilesWhereCanBeMoved
+        eventBus.shouldHavePublishedEvents(
+            BattlefieldHudEvent.AbilityDeselected(abilityId = "ability-1"),
+            BattlefieldHudEvent.SelectedBattleUnit(tile = tile(0, 0), battleUnitId = "battle-unit-1", tilesWhereCanBeMoved = tilesWhereCanBeMoved),
+        )
+    }
+
+    @Test
+    fun `ProcessAbilitySelected should display the cast range when a castable ability is selected while displaying the ability info`() {
+        // Given
+        battlefieldHudRepository.create(displayAbilityInfo(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-3"))
+        givenKnightBetweenRats(knightAbilities = listOf("ability-2", "ability-3"))
+        // When
+        processAbilitySelected("ability-2")
+        // Then
+        (battlefieldHudRepository.search() as DisplayAbilityCastRange).abilityId shouldBe "ability-2"
     }
 
     @Test
@@ -170,7 +249,7 @@ class ProcessAbilitySelectedTest {
     }
 
     @Test
-    fun `should keep the selected ability when a different ability in cooldown is selected while displaying the ability cast range`() {
+    fun `should display the ability info when a different ability in cooldown is selected while displaying the ability cast range`() {
         // Given
         val hud =
             displayAbilityCastRange(
@@ -185,8 +264,8 @@ class ProcessAbilitySelectedTest {
         // When
         processAbilitySelected("ability-2")
         // Then
-        battlefieldHudRepository.search() shouldBe hud
-        eventBus.publishedEvents.shouldBeEmpty()
+        (battlefieldHudRepository.search() as DisplayAbilityInfo).abilityId shouldBe "ability-2"
+        eventBus.shouldHavePublishedEvents(BattlefieldHudEvent.AbilityInfoDisplayed(casterTile = tile(0, 0), battleUnitId = "battle-unit-1", abilityId = "ability-2"))
     }
 
     @Test

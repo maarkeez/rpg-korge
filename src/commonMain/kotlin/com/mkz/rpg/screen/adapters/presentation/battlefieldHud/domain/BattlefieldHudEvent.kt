@@ -20,6 +20,13 @@ sealed interface BattlefieldHudEvent : DomainEvent {
         val castGroupsWhereCanCast: List<CastGroupDto>,
     ) : BattlefieldHudEvent
 
+    /** An ability selected only to read what it does, with no cast range. */
+    data class AbilityInfoDisplayed(
+        val casterTile: TileDto,
+        val battleUnitId: String,
+        val abilityId: String,
+    ) : BattlefieldHudEvent
+
     data class AbilityDeselected(
         val abilityId: String,
     ) : BattlefieldHudEvent

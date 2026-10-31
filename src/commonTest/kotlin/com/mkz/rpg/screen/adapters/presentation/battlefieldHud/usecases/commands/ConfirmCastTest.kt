@@ -89,6 +89,18 @@ class ConfirmCastTest {
     }
 
     @Test
+    fun `should throw an invalid hud state error when the hud is displaying the ability info`() {
+        // Given
+        battlefieldHudRepository.create(
+            com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudMother
+                .displayAbilityInfo(),
+        )
+        // When
+        // Then
+        shouldThrow<BattlefieldHudError.InvalidBattlefieldHudState> { confirmCast() }
+    }
+
+    @Test
     fun `should throw a battlefield hud not found error when no battlefield hud exists`() {
         // Given
         // When
