@@ -15,12 +15,6 @@ import kotlin.test.Test
 class RepositoryAccessArchitectureTest {
     private val rootPackage = "com.mkz.rpg"
 
-    // The snapshottables still calling their repository, until they take their snapshot through use cases: the list can only shrink.
-    private val allowedSnapshottables =
-        setOf(
-            "$rootPackage.cpuWanderBrain.adapters.save",
-        )
-
     private val files = Konsist.scopeFromProduction().files
 
     // A repository is a `…Repository` declared in a domain package, e.g.: `party.domain.PartyRepository`.
@@ -82,7 +76,6 @@ class RepositoryAccessArchitectureTest {
         val packageName = import.packageName
         val root = import.moduleRoot
         return listOf("$root.domain", "$root.usecases", "$root.adapters.storage").any { allowed -> packageName == allowed || packageName.startsWith("$allowed.") } ||
-            (packageName == "$root.adapters.presentation" && import.fileName.endsWith("Api")) ||
-            packageName in allowedSnapshottables
+            (packageName == "$root.adapters.presentation" && import.fileName.endsWith("Api"))
     }
 }

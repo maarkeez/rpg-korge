@@ -3,7 +3,9 @@ package com.mkz.rpg.cpuWanderBrain.adapters.save
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
-import io.kotest.matchers.collections.shouldBeEmpty
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
+import com.mkz.rpg.cpuWanderBrain.usecases.commands.RestoreCpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.usecases.queries.SearchCpuWanderBrainSnapshot
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -17,29 +19,24 @@ class CpuWanderBrainSnapshottableTest {
             .pullEvents()
             .second
 
-    private fun snapshot(): String = CpuWanderBrainSnapshottable(InMemoryCpuWanderBrainRepository().apply { save(cpuWanderBrain) }).snapshot()
+    private fun snapshottable(repository: CpuWanderBrainRepository) = CpuWanderBrainSnapshottable(SearchCpuWanderBrainSnapshot(repository), RestoreCpuWanderBrain(repository))
 
     @Test
     fun `Restore should rebuild the same state when it restores the snapshot it took`() {
         // Given
-        val restoredRepository = InMemoryCpuWanderBrainRepository().apply { save(CpuWanderBrain.create()) }
+        val snapshot = snapshottable(InMemoryCpuWanderBrainRepository().apply { save(cpuWanderBrain) }).snapshot()
+        val restoredRepository = InMemoryCpuWanderBrainRepository()
         // When
-        CpuWanderBrainSnapshottable(restoredRepository).restore(snapshot())
+        snapshottable(restoredRepository).restore(snapshot)
         // Then
         restoredRepository.search() shouldBe cpuWanderBrain
     }
 
     @Test
-    fun `Restore should publish no events when it restores a snapshot`() {
-        // Given
-        val restoredRepository = InMemoryCpuWanderBrainRepository()
+    fun `Key should be cpuWanderBrain`() {
         // When
-        CpuWanderBrainSnapshottable(restoredRepository).restore(snapshot())
+        val result = snapshottable(InMemoryCpuWanderBrainRepository()).key
         // Then
-        restoredRepository
-            .search()!!
-            .pullEvents()
-            .first
-            .shouldBeEmpty()
+        result shouldBe "cpuWanderBrain"
     }
 }

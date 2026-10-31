@@ -1,7 +1,8 @@
 package com.mkz.rpg.cpuWanderBrain.adapters.save
 
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
-import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
+import com.mkz.rpg.cpuWanderBrain.usecases.commands.RestoreCpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.usecases.queries.SearchCpuWanderBrainSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
@@ -10,16 +11,17 @@ import kotlinx.serialization.encodeToString
 
 /**
  * The home of each CPU battle unit, the ones returning home, and the party steps each defeated one has counted until it
- * respawns. The wandering in progress is not saved: the battle units wander again on the next second.
+ * respawns, see [SearchCpuWanderBrainSnapshot] and [RestoreCpuWanderBrain].
  */
 class CpuWanderBrainSnapshottable(
-    private val cpuWanderBrainRepository: CpuWanderBrainRepository,
+    private val searchCpuWanderBrainSnapshot: SearchCpuWanderBrainSnapshot,
+    private val restoreCpuWanderBrain: RestoreCpuWanderBrain,
 ) : Snapshottable {
     override val key = "cpuWanderBrain"
 
     override fun snapshot(): String =
         SnapshotJson.encodeToString(
-            cpuWanderBrainRepository.search()?.toSnapshot()?.let { cpuWanderBrain ->
+            searchCpuWanderBrainSnapshot()?.let { cpuWanderBrain ->
                 CpuWanderBrainSnapshot(
                     homes =
                         cpuWanderBrain.homes.map { home ->
@@ -31,10 +33,9 @@ class CpuWanderBrainSnapshottable(
             },
         )
 
-    override fun restore(snapshot: String) {
-        val cpuWanderBrain = SnapshotJson.decodeFromString<CpuWanderBrainSnapshot?>(snapshot) ?: return
-        cpuWanderBrainRepository.save(
-            CpuWanderBrain.restore(
+    override fun restore(snapshot: String) =
+        restoreCpuWanderBrain(
+            SnapshotJson.decodeFromString<CpuWanderBrainSnapshot?>(snapshot)?.let { cpuWanderBrain ->
                 CpuWanderBrain.Dto.SnapshotDto(
                     homes =
                         cpuWanderBrain.homes.map { home ->
@@ -47,10 +48,9 @@ class CpuWanderBrainSnapshottable(
                         },
                     returningBattleUnitIds = cpuWanderBrain.returningBattleUnitIds.toSet(),
                     respawns = cpuWanderBrain.respawns.map { (battleUnitId, partySteps) -> CpuWanderBrain.Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
-                ),
-            ),
+                )
+            },
         )
-    }
 }
 
 // Respawns: the party steps counted by each defeated battle unit.
