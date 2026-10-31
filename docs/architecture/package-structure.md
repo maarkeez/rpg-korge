@@ -77,6 +77,7 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
   |---------------------------------------|--------------------------------------------------------------------------|
   | `shared`                              | nothing                                                                  |
   | `effect`, `player`, `terrain`, `unit` | `shared`                                                                 |
+  | `save`                                | `shared`, and only `screen` may import it, see [Save and load](save-and-load.md) |
   | `ability`, `lootableItem`             | `shared`, `effect`                                                       |
   | `battle`                              | `shared`, `player`                                                       |
   | `lootTable`                           | `shared`, `lootableItem`                                                 |
