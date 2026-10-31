@@ -136,6 +136,8 @@ class BattlefieldPresenterTest {
             battleUnitApi = apis.battleUnitApi,
             playerApi = apis.playerApi,
             abilityApi = apis.abilityApi,
+            effectApi = apis.effectApi,
+            unitApi = apis.unitApi,
             battleApi = apis.battleApi,
             partyApi = apis.partyApi,
             npcApi = apis.npcApi,
@@ -332,6 +334,8 @@ class BattlefieldPresenterTest {
         battleUnitApi = apis.battleUnitApi,
         playerApi = apis.playerApi,
         abilityApi = apis.abilityApi,
+        effectApi = apis.effectApi,
+        unitApi = apis.unitApi,
         battleApi = apis.battleApi,
         partyApi = apis.partyApi,
         npcApi = apis.npcApi,
@@ -872,7 +876,7 @@ class BattlefieldPresenterTest {
             BattlefieldHudEvent.SelectedBattleUnitAbility(
                 casterTile = TileDto(row = 1, column = 1),
                 battleUnitId = "knight-1",
-                abilityId = "sword",
+                abilityId = "mushroom",
                 castGroupsWhereCanCast =
                     listOf(
                         CastGroupDto(tiles = listOf(TileDto(row = 0, column = 1))),
@@ -884,6 +888,45 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battlefieldView.tilesNotDimmed.shouldContainExactly(listOf(setOf(position(0, 1), position(1, 0), position(1, 1))))
+    }
+
+    @Test
+    fun `BattlefieldPresenter should display the ability info when an ability is selected`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.SelectedBattleUnitAbility(
+                casterTile = TileDto(row = 1, column = 1),
+                battleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroupsWhereCanCast = listOf(CastGroupDto(tiles = listOf(TileDto(row = 1, column = 2)))),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        val abilityInfo = battleUnitInfoView.displayedAbilityInfos.single()
+        abilityInfo.abilityId shouldBe "mushroom"
+        abilityInfo.manaCost shouldBe 10
+        abilityInfo.targeting shouldBe AbilityInfoView.AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES
+        abilityInfo.effects.shouldContainExactly(AbilityInfoView.AbilityInfo.Effect.Damage(7), AbilityInfoView.AbilityInfo.Effect.DamageEachTurn(damage = 3, turns = 5))
+        abilityInfo.reason shouldBe null
+    }
+
+    @Test
+    fun `BattlefieldPresenter should hide the ability info when the attack preview is displayed`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        battleUnitInfoView.hideAbilityInfoCount shouldBe 1
     }
 
     @Test

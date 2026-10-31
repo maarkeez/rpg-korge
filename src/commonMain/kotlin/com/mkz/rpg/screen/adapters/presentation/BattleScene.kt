@@ -169,6 +169,8 @@ class BattleScene(
                 battleUnitApi,
                 playerApi,
                 abilityApi,
+                effectApi,
+                unitApi,
                 battleApi,
                 partyApi,
                 npcApi,

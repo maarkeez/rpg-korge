@@ -11,6 +11,7 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.building.domain.BuildingEvent
+import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.domain.LootDropEvent
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
@@ -26,6 +27,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.Battlefiel
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
+import com.mkz.rpg.unit.adapters.presentation.UnitApi
 
 class BattlefieldPresenter(
     private val battlefieldView: BattlefieldView,
@@ -37,6 +39,8 @@ class BattlefieldPresenter(
     private val battleUnitApi: BattleUnitApi,
     private val playerApi: PlayerApi,
     private val abilityApi: AbilityApi,
+    private val effectApi: EffectApi,
+    private val unitApi: UnitApi,
     private val battleApi: BattleApi,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
@@ -411,9 +415,12 @@ class BattlefieldPresenter(
     private fun displayAbilitySelected(event: BattlefieldHudEvent.SelectedBattleUnitAbility): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
         val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
+        // A castable ability: no reason to tell.
+        val abilityInfo = abilityInfo(event.abilityId)
         return {
             battlefieldView.resetTiles()
             battleUnitInfoView.displayAbilitySelected(abilityIndex)
+            battleUnitInfoView.displayAbilityInfo(abilityInfo)
             battleHudView.displayBattleUnitInfoView()
             event.castGroupsWhereCanCast.forEach { castGroup ->
                 castGroup.tiles.forEach { tilePosition ->
@@ -427,6 +434,17 @@ class BattlefieldPresenter(
             battlefieldView.dimTilesExcept(selectableTiles.map { tile -> TilePosition(tile.row, tile.column) }.toSet())
         }
     }
+
+    private fun abilityInfo(
+        abilityId: String,
+        reason: AbilityInfoView.AbilityInfo.Reason? = null,
+    ): AbilityInfoView.AbilityInfo =
+        AbilityInfoMapper.abilityInfo(
+            ability = abilityApi.searchAbilityById(abilityId)!!,
+            searchEffect = { effectId -> effectApi.searchEffectById(effectId) },
+            searchUnit = { unitId -> unitApi.searchUnitById(unitId) },
+            reason = reason,
+        )
 
     private fun displaySelfAbilityCastPreview(event: BattlefieldHudEvent.SelfAbilityCastPreviewed): suspend () -> Unit {
         val casterBattleUnit = battleUnitApi.searchBattleUnitById(event.casterBattleUnitId)!!
@@ -534,7 +552,9 @@ class BattlefieldPresenter(
             castGroup = castGroup.tiles.map { tile -> PositionDto(row = tile.row, column = tile.column) },
         )
 
+    // The preview takes the place of the battle unit info, its ability info included.
     private fun displayAttackPreview() {
+        battleUnitInfoView.hideAbilityInfo()
         battleHudView.displayAttackPreviewView()
         playerCallToActionView.displayCancelAndConfirm(
             onCancelled = { whenIdle { battlefieldHudApi.cancelCast() } },
