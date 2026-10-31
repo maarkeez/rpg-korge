@@ -215,6 +215,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-battle-unit-info--summon",
                     "screen-battle-unit-info--six-abilities",
                     "screen-battle-unit-info--ability-selected",
+                    "screen-battle-unit-info--ability-selected-blocked",
                     "screen-attack-preview",
                     "screen-attack-preview--one-enemy",
                     "screen-attack-preview--self-cast",

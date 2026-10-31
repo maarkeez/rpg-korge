@@ -12,6 +12,11 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class BattleUnitInfoViewTest : ViewsForTesting() {
+    private companion object {
+        // More frames than the 150ms slide takes.
+        const val FOCUS_ANIMATION_FRAMES = 20
+    }
+
     private val sword =
         AbilityInfoView.AbilityInfo(
             abilityId = "sword",
@@ -120,7 +125,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should tell how many turns a summon has left, after its remaining casts`() =
+    fun `Display should tell how many turns a summon has left, after its name`() =
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
@@ -128,7 +133,7 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             battleUnitInfoView.display(remainingTurns = 3)
             // Then
             battleUnitInfoView.remainingTurnsText() shouldBe "Vanishes in 3 turns"
-            battleUnitInfoView.isRemainingTurnsAfterCasts().shouldBeTrue()
+            battleUnitInfoView.isRemainingTurnsAfterName().shouldBeTrue()
         }
 
     @Test
@@ -213,6 +218,70 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             battleUnitInfoView.hideAbilityInfo()
             // Then
             battleUnitInfoView.isAbilityInfoDisplayed().shouldBeFalse()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should collapse the header when it displays the ability info`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            addChild(battleUnitInfoView)
+            battleUnitInfoView.display()
+            // When
+            battleUnitInfoView.displayAbilityInfo(sword)
+            repeat(FOCUS_ANIMATION_FRAMES) { delayFrame() }
+            // Then
+            battleUnitInfoView.isHeaderCollapsed().shouldBeTrue()
+            battleUnitInfoView.areAbilityButtonsUnderHeader().shouldBeTrue()
+            battleUnitInfoView.isAbilityInfoUnderAbilityButtons().shouldBeTrue()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should hide the name, the effects and the bag when it displays the ability info`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            battleUnitInfoView.display(battleUnit = battleUnitInfo(effectIds = listOf("venom-damage")), turnActions = turnActions(), remainingTurns = null, abilities = emptyList())
+            battleUnitInfoView.displayBag(onBagSelected = {})
+            // When
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // Then
+            battleUnitInfoView.isNameDisplayed().shouldBeFalse()
+            battleUnitInfoView.areEffectsDisplayed().shouldBeFalse()
+            battleUnitInfoView.isBagDisplayed().shouldBeFalse()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should expand the header and show the bag again when it hides the ability info`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            addChild(battleUnitInfoView)
+            battleUnitInfoView.display()
+            battleUnitInfoView.displayBag(onBagSelected = {})
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // When
+            battleUnitInfoView.hideAbilityInfo()
+            repeat(FOCUS_ANIMATION_FRAMES) { delayFrame() }
+            // Then
+            battleUnitInfoView.isHeaderCollapsed().shouldBeFalse()
+            battleUnitInfoView.isNameDisplayed().shouldBeTrue()
+            battleUnitInfoView.isBagDisplayed().shouldBeTrue()
+            battleUnitInfoView.areAbilityButtonsUnderHeader().shouldBeTrue()
+        }
+
+    @Test
+    fun `BattleUnitInfoView should expand the header when it displays a battle unit while focused`() =
+        sharedViewsTest {
+            // Given
+            val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
+            battleUnitInfoView.display()
+            battleUnitInfoView.displayAbilityInfo(sword)
+            // When
+            battleUnitInfoView.display()
+            // Then
+            battleUnitInfoView.isHeaderCollapsed().shouldBeFalse()
+            battleUnitInfoView.isNameDisplayed().shouldBeTrue()
         }
 
     @Test

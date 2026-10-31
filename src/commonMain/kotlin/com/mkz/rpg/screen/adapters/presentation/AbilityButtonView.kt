@@ -5,6 +5,7 @@ import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
+import korlibs.korge.view.Container
 import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.container
 import korlibs.korge.view.filter.ColorMatrixFilter
@@ -150,9 +151,14 @@ class AbilityButtonView(
         val abilityButton = this
         abilityButton.container {
             name = COOLDOWN
-            roundRect(abilityButton.size, RectCorners(HudStyle.SLOT_RADIUS), fill = COOLDOWN_OVERLAY_COLOR)
+            // Inside the selection ring, so it does not darken it.
+            roundRect(
+                Size(abilityButton.width - 2 * SELECTION_THICKNESS, abilityButton.height - 2 * SELECTION_THICKNESS),
+                RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS),
+                fill = COOLDOWN_OVERLAY_COLOR,
+            ) { xy(SELECTION_THICKNESS, SELECTION_THICKNESS) }
             text(text = "$cooldownTurnsLeft", textSize = COOLDOWN_TEXT_SIZE, color = Colors.WHITE) {
-                centerOn(this@container)
+                centerOn(abilityButton)
             }
         }
     }
@@ -166,28 +172,31 @@ class AbilityButtonView(
         badge.xy(abilityButton.width - badge.width - COST_MARGIN, abilityButton.height - badge.pillHeight - COST_MARGIN)
     }
 
-    /** Rings the ability in gold, with a faint glow around it. */
+    /**
+     * Rings the ability in gold, with a faint glow around it. Both are filled shapes under the icon, the slot drawn inset
+     * over them, as a stroke is drawn thinner and fainter than its thickness.
+     */
     fun select() {
         if (findViewByName(ABILITY_SELECTION) != null) return
         val abilityButton = this
-        abilityButton.container {
-            name = ABILITY_SELECTION
-            // Each ring is inset by half its thickness, as a stroke is drawn half outside its shape, which cuts it.
-            roundRect(
-                Size(abilityButton.width + GLOW_THICKNESS, abilityButton.height + GLOW_THICKNESS),
-                RectCorners(HudStyle.SLOT_RADIUS + GLOW_THICKNESS / 2),
-                fill = Colors.TRANSPARENT,
-                stroke = HudStyle.SELECTION.withAd(GLOW_ALPHA),
-                strokeThickness = GLOW_THICKNESS,
-            ) { xy(-GLOW_THICKNESS / 2, -GLOW_THICKNESS / 2) }
-            roundRect(
-                Size(abilityButton.width - SELECTION_THICKNESS, abilityButton.height - SELECTION_THICKNESS),
-                RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS / 2),
-                fill = Colors.TRANSPARENT,
-                stroke = HudStyle.SELECTION,
-                strokeThickness = SELECTION_THICKNESS,
-            ) { xy(SELECTION_THICKNESS / 2, SELECTION_THICKNESS / 2) }
-        }
+        val selection =
+            Container().apply {
+                name = ABILITY_SELECTION
+                roundRect(
+                    Size(abilityButton.width + 2 * GLOW_THICKNESS, abilityButton.height + 2 * GLOW_THICKNESS),
+                    RectCorners(HudStyle.SLOT_RADIUS + GLOW_THICKNESS),
+                    fill = HudStyle.SELECTION.withAd(GLOW_ALPHA),
+                ) { xy(-GLOW_THICKNESS, -GLOW_THICKNESS) }
+                roundRect(abilityButton.size, RectCorners(HudStyle.SLOT_RADIUS), fill = HudStyle.SELECTION)
+                roundRect(
+                    Size(abilityButton.width - 2 * SELECTION_THICKNESS, abilityButton.height - 2 * SELECTION_THICKNESS),
+                    RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS),
+                    fill = HudStyle.PANEL_RAISED,
+                ) { xy(SELECTION_THICKNESS, SELECTION_THICKNESS) }
+            }
+        // Right over the slot, under the icon.
+        val slot = findViewByName(SLOT)!!
+        addChildAt(selection, slot.index + 1)
     }
 
     fun unselect() {

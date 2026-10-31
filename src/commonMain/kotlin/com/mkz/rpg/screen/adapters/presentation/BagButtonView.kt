@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import korlibs.image.color.Colors
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
@@ -7,7 +8,7 @@ import korlibs.korge.view.align.centerOn
 import korlibs.korge.view.image
 import korlibs.math.geom.Size
 
-/** Opens the inventory of the selected battle unit. Displayed with the chest drawn on the tiles with several items. */
+/** Opens the inventory of the selected battle unit. Displayed with the chest drawn on the tiles with several items, at 2x in a slot. */
 class BagButtonView(
     size: Size,
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -24,6 +25,7 @@ class BagButtonView(
         background.borderColor = Colors.TRANSPARENT
         background.bgColor = Colors.TRANSPARENT
         background.shadowColor = Colors.TRANSPARENT
+        panel(size, fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
         visible = false
         onClick { onBagSelected?.invoke() }
     }
@@ -37,7 +39,7 @@ class BagButtonView(
                 bagButton.image(chestBitmap) {
                     name = BAG
                     smoothing = false
-                    scale = 3.0
+                    scale = 2.0
                     centerOn(bagButton)
                 }
             }

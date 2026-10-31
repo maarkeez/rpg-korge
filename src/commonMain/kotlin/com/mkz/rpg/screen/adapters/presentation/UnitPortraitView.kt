@@ -1,7 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.view.align.centerOn
@@ -43,26 +42,25 @@ class UnitPortraitView(
     ) {
         slot.findViewByName(PORTRAIT)?.removeFromParent()
         slot.findViewByName(RING)?.removeFromParent()
+        // The ring is a slot of its colour with the slot drawn inset over it, under the portrait: a stroke is drawn
+        // thinner and fainter than its thickness.
+        if (ring != null) {
+            slot.container {
+                name = RING
+                roundRect(this@UnitPortraitView.size, RectCorners(HudStyle.SLOT_RADIUS), fill = ring)
+                roundRect(
+                    Size(this@UnitPortraitView.width - 2 * RING_THICKNESS, this@UnitPortraitView.height - 2 * RING_THICKNESS),
+                    RectCorners(HudStyle.SLOT_RADIUS - RING_THICKNESS),
+                    fill = HudStyle.PANEL_RAISED,
+                ) { xy(RING_THICKNESS, RING_THICKNESS) }
+            }
+        }
         resourcesLoader.bitmapOrNull("unit/${unitId}_portrait.png")?.let { avatarBitmap ->
             slot.image(avatarBitmap) {
                 name = PORTRAIT
                 smoothing = false
                 scale = portraitScale
                 centerOn(slot)
-            }
-        }
-        if (ring != null) {
-            // Inset by half its thickness, as a stroke is drawn half outside its shape, which cuts it.
-            val inset = RING_THICKNESS / 2
-            slot.roundRect(
-                Size(width - RING_THICKNESS, height - RING_THICKNESS),
-                RectCorners(HudStyle.SLOT_RADIUS - inset),
-                fill = Colors.TRANSPARENT,
-                stroke = ring,
-                strokeThickness = RING_THICKNESS,
-            ) {
-                name = RING
-                xy(inset, inset)
             }
         }
         ringColor = ring

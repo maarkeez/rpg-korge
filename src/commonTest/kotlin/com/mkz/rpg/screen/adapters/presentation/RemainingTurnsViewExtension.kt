@@ -2,4 +2,4 @@ package com.mkz.rpg.screen.adapters.presentation
 
 // Page object of [RemainingTurnsView].
 
-fun RemainingTurnsView.remainingTurnsText(): String = remainingTurnsLabel.text
+fun RemainingTurnsView.remainingTurnsText(): String? = pill.labelText()

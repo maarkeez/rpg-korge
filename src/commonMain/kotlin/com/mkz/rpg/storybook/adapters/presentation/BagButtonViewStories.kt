@@ -8,7 +8,7 @@ import korlibs.math.geom.Size
 
 /** The stories of [BagButtonView], at the size the battle unit info displays it. */
 object BagButtonViewStories : StoryBinding {
-    private val SIZE = Size(29, 29)
+    private val SIZE = Size(40, 40)
 
     private val chest = StoryDto(id = "screen-bag-button--chest", name = "Chest", description = "The chest to tap to open the inventory of the selected battle unit.", args = emptyMap())
 

@@ -22,8 +22,8 @@ fun BattleUnitInfoView.maximumCasts(): Int = castPointsView.filledPoints() + cas
 /** The turns a summon has left before vanishing, as told, or null when none is told (e.g.: it never vanishes). */
 fun BattleUnitInfoView.remainingTurnsText(): String? = if (remainingTurnsView.visible) remainingTurnsView.remainingTurnsText() else null
 
-/** Whether the turns left are told after the remaining casts, on their line. */
-fun BattleUnitInfoView.isRemainingTurnsAfterCasts(): Boolean = remainingTurnsView.x > castPointsView.x + castPointsView.width && remainingTurnsView.y == castPointsView.y
+/** Whether the turns left are told after the name, on its line. */
+fun BattleUnitInfoView.isRemainingTurnsAfterName(): Boolean = remainingTurnsView.x > nameText.x + nameText.width && remainingTurnsView.y == nameText.y - 1
 
 /** The colour of the ring around the portrait, the team's, or null when it has none. */
 fun BattleUnitInfoView.portraitRingColor() = unitPortraitView.ringColor()
@@ -42,8 +42,18 @@ fun BattleUnitInfoView.displayedAbilityName(): String = abilityInfoView.abilityN
 /** Whether the ability info starts below the bottom of the ability buttons. */
 fun BattleUnitInfoView.isAbilityInfoUnderAbilityButtons(): Boolean = abilityInfoView.getGlobalBounds().top >= abilityButtons.maxOf { button -> button.getGlobalBounds().bottom }
 
-/** Whether the bag, which opens the inventory, is displayed. */
-fun BattleUnitInfoView.isBagDisplayed(): Boolean = bagButton.visible && bagButton.findViewByName(BagButtonView.BAG) != null
+/** Whether the bag, which opens the inventory, is displayed: never while the header is collapsed. */
+fun BattleUnitInfoView.isBagDisplayed(): Boolean = header.visible && bagButton.visible && bagButton.findViewByName(BagButtonView.BAG) != null
+
+/** Whether the header is collapsed to the strip of what a cast spends, as while the info of an ability is displayed. */
+fun BattleUnitInfoView.isHeaderCollapsed(): Boolean = isFocused && strip.visible && !header.visible
+
+fun BattleUnitInfoView.isNameDisplayed(): Boolean = header.visible && nameText.visible && nameText.text.isNotEmpty()
+
+fun BattleUnitInfoView.areEffectsDisplayed(): Boolean = header.visible && effectsView.visible
+
+/** Whether the ability buttons and the info have slid to their place under the header, collapsed or not. */
+fun BattleUnitInfoView.areAbilityButtonsUnderHeader(): Boolean = body.y == if (isFocused) BattleUnitInfoView.FOCUSED_ABILITIES_Y else BattleUnitInfoView.ABILITIES_Y
 
 suspend fun ViewsForTesting.clickBag(battleUnitInfoView: BattleUnitInfoView) = clickOn(battleUnitInfoView.bagButton)
 

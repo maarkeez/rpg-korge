@@ -51,7 +51,7 @@ object BattleUnitInfoViewStories : StoryBinding {
         StoryDto(
             id = "screen-battle-unit-info--turn-spent",
             name = "Turn spent",
-            description = "A battle unit that has walked and cast: its points are hollow.",
+            description = "A battle unit that has walked and cast: its points are tinted.",
             args = mapOf(STEPS to ArgDto.int(0), CASTS to ArgDto.int(0)),
         )
     private val withEffects =
@@ -65,7 +65,7 @@ object BattleUnitInfoViewStories : StoryBinding {
         StoryDto(
             id = "screen-battle-unit-info--summon",
             name = "Summon",
-            description = "A summoned battle unit tells the turns it has left before it vanishes, after its casts.",
+            description = "A summoned battle unit tells the turns it has left before it vanishes, in a pill after its name.",
             args = mapOf(REMAINING_TURNS to ArgDto.int(3)),
         )
     private val sixAbilities =
@@ -79,8 +79,15 @@ object BattleUnitInfoViewStories : StoryBinding {
         StoryDto(
             id = "screen-battle-unit-info--ability-selected",
             name = "Ability selected",
-            description = "The first ability, framed, and what it does docked under the ability buttons.",
+            description = "The first ability, ringed: the header collapses to a strip of what a cast spends, and what the ability does goes under the buttons.",
             args = mapOf(SELECTED_ABILITY to ArgDto.int(1)),
+        )
+    private val abilitySelectedBlocked =
+        StoryDto(
+            id = "screen-battle-unit-info--ability-selected-blocked",
+            name = "Ability selected, blocked",
+            description = "The second ability, in cooldown: the collapsed header leaves room for the turns left, in a banner, and its effects.",
+            args = mapOf(SELECTED_ABILITY to ArgDto.int(2)),
         )
 
     override fun component(context: StoryContext) =
@@ -90,7 +97,8 @@ object BattleUnitInfoViewStories : StoryBinding {
             title = "Battle unit info",
             description =
                 "The selected battle unit in the HUD: its portrait and name, the steps and casts it has left, its health, mana and effects, " +
-                    "its abilities and its bag. remainingTurns: the turns a summon has left, none (0) for the others. abilities: how many it has. " +
+                    "its abilities and its bag. Selecting an ability collapses the header, hiding the name, the effects and the bag. " +
+                    "remainingTurns: the turns a summon has left, none (0) for the others. abilities: how many it has. " +
                     "selectedAbility: the ability selected, from 1, none (0) for no ability.",
             controls =
                 listOf(
@@ -116,7 +124,7 @@ object BattleUnitInfoViewStories : StoryBinding {
                     ABILITIES to ArgDto.int(4),
                     SELECTED_ABILITY to ArgDto.int(0),
                 ),
-            stories = listOf(ready, hurt, turnSpent, withEffects, summon, sixAbilities, abilitySelected),
+            stories = listOf(ready, hurt, turnSpent, withEffects, summon, sixAbilities, abilitySelected, abilitySelectedBlocked),
         )
 
     override fun render(
