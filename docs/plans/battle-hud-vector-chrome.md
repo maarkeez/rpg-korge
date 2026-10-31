@@ -55,7 +55,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone              | Done when                                                                                                                              | Status | Done in |
 |----|------------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The vector chrome      | The portraits, bars, points, effects and ability buttons are drawn with the new chrome, in the HUD and the formation, and `ability_selection.png` is gone. | ⬜      |         |
+| M1 | The vector chrome      | The portraits, bars, points, effects and ability buttons are drawn with the new chrome, in the HUD and the formation, and `ability_selection.png` is gone. | ✅      | `f0de11bb` |
 | M2 | The ability info card  | Selecting an ability shows its info as a card, with its reason as a banner, and the 8×8 info icons are gone.                           | ⬜      |         |
 | M3 | The focused header     | Selecting an ability collapses the header to a strip, hiding the name, the effects and the bag, and closing it brings them back.       | ⬜      |         |
 | M4 | The forecast           | Previewing a cast shows the ability, its caster and a row per battle unit it changes, all in sight.                                    | ⬜      |         |
@@ -65,11 +65,16 @@ Each milestone is a few commits straight on `main`, green on CI.
 1. Add `HudStyle` and `PillView`, with `PillViewStories` and its tests.
 2. Restyle `UnitPortraitView` (the dark slot, the team ring), `BarView`, `PreviewBarView` and `PointsView`, updating
    their stories and tests. `BattleUnitInfo` gains `isAlly`, which `BattleUnitInfoMapper` takes from the presenters.
+   `PreviewBarView` is restyled with the forecast rows in M4 instead, as until then its rows are scrolled in a clip
+   container, which does not cut the round rects.
 3. Restyle `EffectView` as a chip, and `AbilityButtonView` with the ring, the cooldown overlay and the cost badge.
-   `BattleUnitInfoView.Ability` gains `manaCost`.
+   `BattleUnitInfoView.Ability` gains `manaCost`, taken from `SearchAbilityAvailabilities.AbilityAvailability`, which
+   gains it too, as `InventoryPresenter` has no `AbilityApi` to read the cost from.
 4. Delete `resources/ability/ability_selection.png` and `art/ability/ability_selection.aseprite`, and its exclusion in
    `StoryContext.abilityIds()`.
 5. Update [Assets](../architecture/assets.md) and [Presentation timeline](../architecture/presentation-timeline.md#remaining-turn-actions).
+   Until M3 lays out the header anew, the portrait's slot grows to 104 for its margin, and the name and the bars narrow
+   to fit.
 
 ### M2 commits
 
