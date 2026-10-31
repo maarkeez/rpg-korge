@@ -49,7 +49,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | `save` locked                          | `save` may only depend on `shared`, and only `screen` imports it.                                                                  | ✅      | `f1fa022` |
 | M2 | Repositories called by use cases only  | `RepositoryAccessArchitectureTest` passes, allowing the 6 snapshottables not yet migrated, and `party` takes and restores its snapshot through use cases. | ✅      | `6d347ab` |
-| M3 | Every snapshot through use cases       | The other 6 subdomains take and restore their snapshots through use cases, and the allowed snapshottables are gone.                |        |         |
+| M3 | Every snapshot through use cases       | The other 6 subdomains take and restore their snapshots through use cases, and the allowed snapshottables are gone.                | ✅      | `35faae9d` |
 | M4 | Docs                                   | [Package structure](../architecture/package-structure.md) and [Save and load](../architecture/save-and-load.md) describe it.       |        |         |
 
 ### M1 commits
