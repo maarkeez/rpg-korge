@@ -6,10 +6,10 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.PartyMother.party
-import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
+import com.mkz.rpg.party.domain.PartyRepository
+import com.mkz.rpg.party.usecases.commands.RestoreParty
+import com.mkz.rpg.party.usecases.queries.SearchPartySnapshot
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
 class PartySnapshottableTest {
@@ -23,41 +23,24 @@ class PartySnapshottableTest {
             .pullEvents()
             .second
 
-    private fun snapshot(): String = PartySnapshottable(InMemoryPartyRepository().apply { save(party) }, searchBattleUnitById).snapshot()
+    private fun snapshottable(partyRepository: PartyRepository) = PartySnapshottable(SearchPartySnapshot(partyRepository), RestoreParty(partyRepository, searchBattleUnitById))
 
     @Test
     fun `Restore should rebuild the same state when it restores the snapshot it took`() {
         // Given
-        val restoredRepository = InMemoryPartyRepository().apply { save(party(battleUnitIds = listOf("knight-2")).openPause().pullEvents().second) }
-        // When
-        PartySnapshottable(restoredRepository, searchBattleUnitById).restore(snapshot())
-        // Then
-        val restored = restoredRepository.search()!!
-        restored shouldBe party
-        restored.canWalk().shouldBeTrue()
-    }
-
-    @Test
-    fun `Restore should publish no events when it restores a snapshot`() {
-        // Given
+        val snapshot = snapshottable(InMemoryPartyRepository().apply { save(party) }).snapshot()
         val restoredRepository = InMemoryPartyRepository()
         // When
-        PartySnapshottable(restoredRepository, searchBattleUnitById).restore(snapshot())
+        snapshottable(restoredRepository).restore(snapshot)
         // Then
-        restoredRepository
-            .search()!!
-            .pullEvents()
-            .first
-            .shouldBeEmpty()
+        restoredRepository.search() shouldBe party
     }
 
     @Test
-    fun `Restore should fail when a member is not a battle unit`() {
-        // Given
-        val snapshot = PartySnapshottable(InMemoryPartyRepository().apply { save(party(battleUnitIds = listOf("knight-1", "ghost-1"))) }, searchBattleUnitById).snapshot()
+    fun `Key should be party`() {
         // When
-        val result = runCatching { PartySnapshottable(InMemoryPartyRepository(), searchBattleUnitById).restore(snapshot) }
+        val result = snapshottable(InMemoryPartyRepository()).key
         // Then
-        result.exceptionOrNull()?.message.orEmpty() shouldContain "ghost-1"
+        result shouldBe "party"
     }
 }

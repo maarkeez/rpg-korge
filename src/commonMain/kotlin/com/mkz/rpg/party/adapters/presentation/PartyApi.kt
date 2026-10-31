@@ -30,12 +30,14 @@ import com.mkz.rpg.party.usecases.commands.PauseExploration
 import com.mkz.rpg.party.usecases.commands.RecruitMember
 import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
+import com.mkz.rpg.party.usecases.commands.RestoreParty
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.party.usecases.commands.StartExploration
 import com.mkz.rpg.party.usecases.commands.StartTalk
 import com.mkz.rpg.party.usecases.commands.WalkParty
 import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 import com.mkz.rpg.party.usecases.queries.SearchParty
+import com.mkz.rpg.party.usecases.queries.SearchPartySnapshot
 import com.mkz.rpg.party.usecases.services.PartyWalking
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
@@ -51,7 +53,9 @@ class PartyApi(
     private val partyRepository: PartyRepository = InMemoryPartyRepository()
 
     // Save
-    val snapshottable: Snapshottable = PartySnapshottable(partyRepository, battleUnitApi.searchBattleUnitById)
+    private val searchPartySnapshot = SearchPartySnapshot(partyRepository)
+    private val restoreParty = RestoreParty(partyRepository, battleUnitApi.searchBattleUnitById)
+    val snapshottable: Snapshottable = PartySnapshottable(searchPartySnapshot, restoreParty)
 
     // Services
     private val partyWalking = PartyWalking(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)
