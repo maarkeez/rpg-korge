@@ -38,6 +38,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.RequestBattleLeave
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
+import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.SwapBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummonedBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnit
@@ -50,6 +51,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastRemainingHealth
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
+import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
@@ -76,8 +78,9 @@ class BattleUnitApi(
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()
 
     // Save
-    val snapshottable: Snapshottable =
-        BattleUnitSnapshottable(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
+    private val searchBattleUnitsSnapshot = SearchBattleUnitsSnapshot(battleUnitRepository)
+    private val restoreBattleUnits = RestoreBattleUnits(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
+    val snapshottable: Snapshottable = BattleUnitSnapshottable(searchBattleUnitsSnapshot, restoreBattleUnits)
 
     // Services
     private val distanceService = DistanceService()

@@ -1,49 +1,27 @@
 package com.mkz.rpg.battleUnit.adapters.save
 
-import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.EquippedEffectSnapshotDto
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.OngoingEffectSnapshotDto
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.RemainingTurnActionsDto
-import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
-import com.mkz.rpg.effect.usecases.queries.SearchEffectById
-import com.mkz.rpg.player.usecases.queries.SearchPlayerById
+import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
+import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
-import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/**
- * Every battle unit as it is, the defeated ones left out, as they are deleted. Restoring fails when a battle unit names
- * a unit, a player, an ability or an effect the game no longer has.
- */
+/** Every battle unit as it is, see [SearchBattleUnitsSnapshot] and [RestoreBattleUnits]. */
 class BattleUnitSnapshottable(
-    private val battleUnitRepository: BattleUnitRepository,
-    private val searchUnitById: SearchUnitById,
-    private val searchPlayerById: SearchPlayerById,
-    private val searchAbilityById: SearchAbilityById,
-    private val searchEffectById: SearchEffectById,
+    private val searchBattleUnitsSnapshot: SearchBattleUnitsSnapshot,
+    private val restoreBattleUnits: RestoreBattleUnits,
 ) : Snapshottable {
     override val key = "battleUnit"
 
-    override fun snapshot(): String = SnapshotJson.encodeToString(battleUnitRepository.searchAll().map { battleUnit -> BattleUnitSnapshot.from(battleUnit.toSnapshot()) })
+    override fun snapshot(): String = SnapshotJson.encodeToString(searchBattleUnitsSnapshot().map(BattleUnitSnapshot::from))
 
-    override fun restore(snapshot: String) {
-        val battleUnits = SnapshotJson.decodeFromString<List<BattleUnitSnapshot>>(snapshot).map { battleUnitSnapshot -> battleUnitSnapshot.toDto().also(::requireKnownIds) }
-        battleUnitRepository.searchAll().forEach { battleUnit -> battleUnitRepository.delete(battleUnit.toDto().id) }
-        battleUnits.forEach { battleUnit -> battleUnitRepository.create(BattleUnit.restore(battleUnit)) }
-    }
-
-    private fun requireKnownIds(battleUnit: BattleUnit.Dto.SnapshotDto) {
-        requireNotNull(searchUnitById(battleUnit.unitId)) { "Unknown unit ${battleUnit.unitId}" }
-        requireNotNull(searchPlayerById(battleUnit.playerId)) { "Unknown player ${battleUnit.playerId}" }
-        battleUnit.abilityCooldowns.keys.forEach { abilityId -> requireNotNull(searchAbilityById(abilityId)) { "Unknown ability $abilityId" } }
-        (battleUnit.equippedEffects.map(EquippedEffectSnapshotDto::effectId) + battleUnit.ongoingEffects.map(OngoingEffectSnapshotDto::effectId)).forEach { effectId ->
-            requireNotNull(searchEffectById(effectId)) { "Unknown effect $effectId" }
-        }
-    }
+    override fun restore(snapshot: String) = restoreBattleUnits(SnapshotJson.decodeFromString<List<BattleUnitSnapshot>>(snapshot).map(BattleUnitSnapshot::toDto))
 }
 
 @Serializable

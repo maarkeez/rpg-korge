@@ -209,7 +209,7 @@ const DATA = {
   "subdomains": [
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 26, "importsOut": 15},
     {"name": "battle", "files": 23, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 38, "importsOut": 27},
-    {"name": "battleUnit", "files": 60, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 66, "importsOut": 168},
+    {"name": "battleUnit", "files": 62, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 66, "importsOut": 168},
     {"name": "battlefield", "files": 42, "fanIn": 9, "fanOut": 4, "instability": 0.31, "importsIn": 107, "importsOut": 40},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 14, "instability": 0.93, "importsIn": 1, "importsOut": 15},
     {"name": "building", "files": 10, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 4, "importsOut": 12},
@@ -285,11 +285,11 @@ const DATA = {
     ]},
     {"from": "battleUnit", "to": "ability", "weight": 18, "files": 12, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "ability.adapters.presentation.AbilityApi"},
-      {"file": "com/mkz/rpg/battleUnit/adapters/save/BattleUnitSnapshottable.kt", "layer": "adapters", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "ability.domain.Ability"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyEffect.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/CastAbility.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/RequestEffectApplicationToCastTargets.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RestoreBattleUnits.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/CanCastAbility.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "ability.usecases.queries.SearchAbilityById"},
@@ -350,7 +350,6 @@ const DATA = {
     ]},
     {"from": "battleUnit", "to": "effect", "weight": 37, "files": 10, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
-      {"file": "com/mkz/rpg/battleUnit/adapters/save/BattleUnitSnapshottable.kt", "layer": "adapters", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "effect.domain.Effect"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH"},
@@ -377,6 +376,7 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnDefeatedEffectsToNearbyAllies.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnDefeatedEffectsToNearbyAllies.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/ApplyOnTurnStartedEffects.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RestoreBattleUnits.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastOngoingEffects.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto"},
@@ -389,8 +389,8 @@ const DATA = {
     ]},
     {"from": "battleUnit", "to": "player", "weight": 4, "files": 4, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "player.adapters.presentation.PlayerApi"},
-      {"file": "com/mkz/rpg/battleUnit/adapters/save/BattleUnitSnapshottable.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "player.domain.Player"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RestoreBattleUnits.kt", "layer": "usecases", "name": "player.usecases.queries.SearchPlayerById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
     {"from": "battleUnit", "to": "shared", "weight": 62, "files": 40, "imports": [
@@ -459,9 +459,9 @@ const DATA = {
     ]},
     {"from": "battleUnit", "to": "unit", "weight": 6, "files": 5, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "unit.adapters.presentation.UnitApi"},
-      {"file": "com/mkz/rpg/battleUnit/adapters/save/BattleUnitSnapshottable.kt", "layer": "adapters", "name": "unit.usecases.queries.SearchUnitById"},
       {"file": "com/mkz/rpg/battleUnit/domain/BattleUnit.kt", "layer": "domain", "name": "unit.domain.Unit"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/RespawnBattleUnit.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchUnitById"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RestoreBattleUnits.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchUnitById"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchMaximumAbilities"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "unit.usecases.queries.SearchUnitById"}
     ]},
