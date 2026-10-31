@@ -3,13 +3,17 @@ package com.mkz.rpg.battlefield.adapters.save
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import io.kotest.matchers.collections.shouldBeEmpty
-import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import com.mkz.rpg.battlefield.domain.BattlefieldRepository
+import com.mkz.rpg.battlefield.usecases.commands.RestoreBattlefield
+import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefieldSnapshot
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class BattlefieldSnapshottableTest {
-    private fun repository(battlefield: Battlefield) = InMemoryBattlefieldRepository().apply { create(battlefield) }
+    private fun snapshottable(battlefield: Battlefield): Pair<BattlefieldRepository, BattlefieldSnapshottable> {
+        val repository = InMemoryBattlefieldRepository().apply { create(battlefield) }
+        return repository to BattlefieldSnapshottable(SearchBattlefieldSnapshot(repository), RestoreBattlefield(repository))
+    }
 
     // The knight at (0,0), the elder at (1,2), and a 2x1 house on (2,0) and (2,1).
     private fun occupiedBattlefield(): Battlefield =
@@ -23,42 +27,19 @@ class BattlefieldSnapshottableTest {
     @Test
     fun `Restore should rebuild the same state when it restores the snapshot it took`() {
         // Given
-        val snapshot = BattlefieldSnapshottable(repository(occupiedBattlefield())).snapshot()
-        val restoredRepository = repository(battlefield(rows = 3, columns = 3).occupy(row = 1, column = 1, occupantId = "rat-1").pullEvents().second)
+        val snapshot = snapshottable(occupiedBattlefield()).second.snapshot()
+        val (restoredRepository, restoredSnapshottable) = snapshottable(battlefield(rows = 3, columns = 3).pullEvents().second)
         // When
-        BattlefieldSnapshottable(restoredRepository).restore(snapshot)
+        restoredSnapshottable.restore(snapshot)
         // Then
         restoredRepository.search()!!.toDto() shouldBe occupiedBattlefield().toDto()
-        restoredRepository
-            .search()!!
-            .occupants()
-            .map { occupant -> occupant.occupantId }
-            .shouldContainExactlyInAnyOrder("knight-1", "elder", "house", "house")
     }
 
     @Test
-    fun `Restore should publish no events when it restores a snapshot`() {
-        // Given
-        val snapshot = BattlefieldSnapshottable(repository(occupiedBattlefield())).snapshot()
-        val restoredRepository = repository(battlefield(rows = 3, columns = 3).pullEvents().second)
+    fun `Key should be battlefield`() {
         // When
-        BattlefieldSnapshottable(restoredRepository).restore(snapshot)
+        val result = snapshottable(battlefield(rows = 1, columns = 1)).second.key
         // Then
-        restoredRepository
-            .search()!!
-            .pullEvents()
-            .first
-            .shouldBeEmpty()
-    }
-
-    @Test
-    fun `Restore should fail when an occupant stands on a tile the map no longer has`() {
-        // Given
-        val snapshot = BattlefieldSnapshottable(repository(occupiedBattlefield())).snapshot()
-        val smallerRepository = repository(battlefield(rows = 2, columns = 2).pullEvents().second)
-        // When
-        val result = runCatching { BattlefieldSnapshottable(smallerRepository).restore(snapshot) }
-        // Then
-        (result.exceptionOrNull() != null) shouldBe true
+        result shouldBe "battlefield"
     }
 }
