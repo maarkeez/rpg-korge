@@ -74,3 +74,26 @@ Draw its source under `art` with the `pixel` tool, or drop the image in `resourc
 - Battle units, npcs, their portraits, lootable items, buildings and the chest MUST be outlined with `#151515`, the knight's outline. The outline is their silhouette: the opaque pixels next to a transparent pixel or to the edge of the image, diagonals included.
 - Only the dark silhouette pixels (luminance below 60) must be `#151515`. Light or saturated trims on the silhouette are allowed, e.g.: the goat's pink.
 - The rule is enforced by [`AssetOutlineArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/AssetOutlineArchitectureTest.kt). The rat portrait, drawn without a single outline colour, is excluded.
+
+## Pixel art and vector chrome
+
+The battle HUD keeps pixel art for what the artist draws, and draws the chrome around it as vectors, so the chrome needs
+no asset per size or state:
+
+| Drawn as  | What                                                                                                                                 |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|
+| Pixel art | The portraits, the ability icons, the effect icons and the chest                                                                     |
+| Vectors   | The panels and slots, the bars, the points, the pills, the selection ring, the cooldown overlay, the mana cost badge, the team rings |
+
+- Pixel art is only drawn at a whole scale (1x, 2x, 3x), so every pixel of the asset is the same square on screen: the
+  portraits at 3x in the battle unit info and 1x in the formation, the ability icons at 3x on their buttons, the effects
+  at 1x in their chips.
+- The palette and the panel of the chrome are
+  [`HudStyle`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/HudStyle.kt): dark rounded panels
+  (`#171725`) and slots (`#222236`) with a 1-pixel border (`#363650`). The FamiCube palette only binds the assets.
+- The portraits are ringed with their team's colour in a battle: green `#5AD25A` for the human player's battle units,
+  red `#FF375F` for the CPU's.
+- The selected ability is ringed in gold `#FFD84A`, with a faint glow. An ability in cooldown is darkened under a dark
+  overlay with the turns left in its middle; one short of mana is tinted blue, with its cost in a blue
+  [`PillView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PillView.kt).
+- A stroke is drawn half outside its shape, which cuts it, so the rings are inset by half their thickness.

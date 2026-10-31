@@ -87,14 +87,14 @@ The selected battle unit stays selected while the player casts an ability with i
 
 ## Remaining turn actions
 
-The selected battle unit info displays its remaining turn actions without text, with a [`PointsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PointsView.kt) per action: one circle per point, filled while it remains and hollow once it has been spent.
+The selected battle unit info displays its remaining turn actions without text, with a [`PointsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PointsView.kt) per action: one rounded pip per point, 14x7, filled while it remains and tinted with an outline once it has been spent.
 
 | Points | Colour (FamiCube palette) | Maximum                          |
 |--------|---------------------------|----------------------------------|
 | Steps  | White `#FFFFFF`           | The unit movement range          |
 | Casts  | Gold `#FFBB31`            | The casts per turn (currently 1) |
 
-For example, a knight that walked 1 of its 3 steps and has not cast yet displays ●●○ ●. Both maximums come from the battle unit (`RemainingTurnActionsDto`).
+For example, a knight that walked 1 of its 3 steps and has not cast yet displays ▬▬▭ ▬. Both maximums come from the battle unit (`RemainingTurnActionsDto`).
 
 ## Loot
 
