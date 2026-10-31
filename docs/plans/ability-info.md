@@ -48,7 +48,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone                     | Done when                                                                                                          | Status | Done in |
 |----|-------------------------------|--------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The ability info view         | **Screen / Ability info** shows every story in English and Spanish, with the new icons, and the prototypes are gone. | ✅      | `ea5753b3` |
-| M2 | The panel for castable abilities | Selecting a castable ability of the human player in a battle shows its panel under the buttons, hidden during the attack preview. | ⬜      |         |
+| M2 | The panel for castable abilities | Selecting a castable ability of the human player in a battle shows its panel under the buttons, hidden during the attack preview. | ✅      | `432fc02b` |
 | M3 | Reading blocked and enemy abilities | Selecting a blocked ability, or one of a CPU battle unit, shows its panel with its reason and no cast range.        | ⬜      |         |
 
 ### M1 commits
@@ -116,23 +116,26 @@ with turns are plurals.
   `Cooldown(turnsLeft)` or `NotEnoughMana(cost, remainingMana)`.
 - `display(abilityInfo)` draws, top to bottom: the ability icon at scale 1.5, its name (`Texts.abilityName`) and,
   after it, the mana and cooldown icons with their numbers, then the reason, the targeting sentence, and one bulleted
-  sentence per effect, wrapped to the width. The stats share the name's row, so three effects and a reason fit. The 3×3 diagram sits at the top right, 9-pixel cells with a 1-pixel gap.
+  sentence per effect, wrapped to the width. The stats share the name's row, so three effects and a reason fit. The
+  3×3 diagram sits at the top right, 9-pixel cells with a 1-pixel gap. Its neighbours are filled when the ability
+  reaches all of them (cleave, mending), and outlined when it reaches one of them (sword, bat).
 - The panel has a 1-pixel border `#9C9CB4` over `#141422`, text 12 high. With three effects it fits in the 135 pixels
   left under the ability buttons in the 300-high HUD.
 - `hide()` hides it.
 
 ### AbilityInfoMapper
 
-- `AbilityInfoMapper.abilityInfo(ability, effectsById, unitsById, cooldownTurnsLeft, remainingMana)` maps an
-  `Ability.Dto`, its `Effect.Dto`s and the summoned `Unit.Dto` to an `AbilityInfo`. E.g.: `skull`'s
+- `AbilityInfoMapper.abilityInfo(ability, searchEffect, searchUnit, reason)` maps an `Ability.Dto`, its `Effect.Dto`s
+  and the summoned `Unit.Dto`, looked up by id, to an `AbilityInfo`. E.g.: `skull`'s
   `low-physical-damage` (`DECREASE_HEALTH`, `IMMEDIATELY`) is `Damage(10)`, and its `venom-on-death`
   (`APPLY_EFFECT_ON_NEARBY_ALLIES` of `venom-damage`, `ON_DEFEATED`) is `OnDefeatedPoisonAllies(3, 5)`.
 - `INCREASE_HEALTH` is `HealSelf` on the `CASTER` target and `HealNearbyAllies` on `NEARBY_ALLIES`. `DEPLOY_BATTLE_UNIT`
   takes the turns from the ability's `turnsDuration` and the health from the unit's `healthPoints`.
 - An effect of no kind above (e.g.: `INCREASE_MAXIMUM_MANA`, `WHILE_EQUIPPED`) fails with an error naming the ability
   and the effect, which the resources test catches.
-- The reason is `Cooldown` when `cooldownTurnsLeft > 0`, else `NotEnoughMana` when `remainingMana < cost`, else `null`.
-  `BattlefieldPresenter` passes no reason for a CPU battle unit.
+- `AbilityInfoMapper.reason(ability, cooldownTurnsLeft, remainingMana)` is `Cooldown` when `cooldownTurnsLeft > 0`, else
+  `NotEnoughMana` when `remainingMana < cost`, else `null`. `BattlefieldPresenter` passes no reason for a castable
+  ability, nor for a CPU battle unit.
 
 ### BattleUnitInfoView
 
@@ -160,14 +163,16 @@ with turns are plurals.
 
 - Takes `EffectApi` and `UnitApi` besides `AbilityApi`, from `BattleScene`.
 - On `SelectedBattleUnitAbility`, it also displays the ability info, without a reason (the ability is castable).
+- Displaying the attack preview hides the ability info (`hideAbilityInfo`), besides swapping the battle unit info out.
 - On `AbilityInfoDisplayed`, it resets the tiles, frames the button (`displayAbilitySelected`), displays the info with
   its reason, and dims every tile but the caster's.
 
 ### Storybook
 
-- `AbilityInfoViewStories` (**Screen / Ability info**, `screen-ability-info`): its `ability` control (`pick`, sword,
-  skull, bat, mending, teleport, cleave, venom-strike), `cooldownTurnsLeft` (`int`, 0 to 9) and `remainingMana` (`int`, 0 to 20). The
-  story feeds plain `AbilityInfo` data, as it can not read the game data. Stories:
+- `AbilityInfoViewStories` (**Screen / Ability info**, `screen-ability-info`): its `ability` control (`pick`, every
+  ability of the game), `cooldownTurnsLeft` (`int`, 0 to 9) and `remainingMana` (`int`, 0 to 20). The story feeds plain
+  `AbilityInfo` data, as it can not read the game data, which the **Ability selected** story of the battle unit info
+  reuses. Stories:
   - **Sword** (`screen-ability-info--sword`): one effect, free, no cooldown.
   - **Skull** (`screen-ability-info--skull`): a nested effect.
   - **Bat** (`screen-ability-info--bat`): a summon.
