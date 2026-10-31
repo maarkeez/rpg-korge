@@ -1,6 +1,6 @@
 # Plan: The ability info while exploring
 
-> **Status:** planned.
+> **Status:** done.
 >
 > **Summary:** While exploring, tapping a party member displays its info, its bag and its ability buttons, but tapping
 > an ability does nothing: `BattlefieldPresenter.abilitySelected` only hands it to the battlefield HUD in a battle. The
@@ -29,15 +29,16 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone                          | Done when                                                                                                                                                   | Status | Done in |
 |----|------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The ability info while exploring   | Selecting a party member's ability while exploring shows its panel with its reason, and the bag closes any ability on show before opening the inventory.   | ⏳      |         |
+| M1 | The ability info while exploring   | Selecting a party member's ability while exploring shows its panel with its reason, and the bag closes any ability on show before opening the inventory.   | ✅      | `837e2332` |
 
 ### M1 commits
 
 1. Display the ability info of a party member while exploring: cast only in a battle in progress in
    `ProcessAbilitySelected`, and drop the guard in `BattlefieldPresenter.abilitySelected`, with their tests.
 2. Close the ability on show before opening the inventory from the bag, in `InventoryPresenter`, with its tests.
-3. Update [Exploration](../architecture/exploration.md#inventory), and the out of scope row of the
-   [ability info plan](ability-info.md).
+3. Update [Exploration](../architecture/exploration.md#inventory), [Inventory](../architecture/inventory.md#on-the-screen),
+   and the out of scope row of the [ability info plan](ability-info.md). Folded into the second commit by the pre-commit
+   hook.
 
 ## Reference
 
@@ -81,10 +82,11 @@ Each milestone is a few commits straight on `main`, green on CI.
 - `BattlefieldPresenterTest`
   - `AbilitySelected should display the ability info when exploring`
   - `AbilitySelected should ignore the ability when the timeline is playing`
-- `InventoryPresenterTest`
+- `InventoryPresenterSwitchTest`, which sets the battle unit selector
   - `OpenInventory should select the battle unit again before opening the inventory when its ability info is displayed`
   - `OpenInventory should select the battle unit again before opening the inventory when its ability cast range is displayed`
   - `OpenInventory should open the inventory straight away when no ability is displayed`
+  - `OpenInventory should open the inventory straight away once the ability on show is closed`
 
 ## Known limitations
 
