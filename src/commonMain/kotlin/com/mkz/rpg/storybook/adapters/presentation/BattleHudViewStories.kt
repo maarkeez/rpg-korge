@@ -96,7 +96,7 @@ object BattleHudViewStories : StoryBinding {
                     battleUnit = heroInfo,
                     turnActions = BattleUnitInfoView.TurnActions(remainingSteps = MAXIMUM_STEPS, maximumSteps = MAXIMUM_STEPS, remainingCasts = MAXIMUM_CASTS, maximumCasts = MAXIMUM_CASTS),
                     remainingTurns = null,
-                    abilities = context.abilityIds().take(ABILITIES).map { abilityId -> BattleUnitInfoView.Ability(abilityId = abilityId, cooldownTurnsLeft = 0, hasEnoughMana = true) },
+                    abilities = context.abilityIds().take(ABILITIES).map { abilityId -> BattleUnitInfoView.Ability(abilityId = abilityId, cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0) },
                 )
             }
         val attackPreviewView =

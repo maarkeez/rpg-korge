@@ -10,21 +10,21 @@ import korlibs.math.geom.Size
 
 /** The stories of [EffectView], at the size the effects of a battle unit are displayed. */
 object EffectViewStories : StoryBinding {
-    private val SIZE = Size(16, 16)
+    private val SIZE = Size(20, 20)
 
     private const val EFFECT = "effect"
     private const val IS_NEW = "isNew"
 
-    private val applied = StoryDto(id = "screen-effect--applied", name = "Applied", description = "An effect the battle unit has, as a small icon.", args = emptyMap())
+    private val applied = StoryDto(id = "screen-effect--applied", name = "Applied", description = "An effect the battle unit has, as a small icon in a chip.", args = emptyMap())
     private val new =
-        StoryDto(id = "screen-effect--new", name = "New", description = "An effect an ability cast would apply: its icon blinks.", args = mapOf(IS_NEW to ArgDto.boolean(true)))
+        StoryDto(id = "screen-effect--new", name = "New", description = "An effect an ability cast would apply: its chip is outlined in gold and blinks.", args = mapOf(IS_NEW to ArgDto.boolean(true)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
             id = "screen-effect",
             group = "Screen",
             title = "Effect",
-            description = "The icon of an effect a battle unit has, in its info and in the previews. An effect an ability would apply blinks.",
+            description = "The icon of an effect a battle unit has, at 1x in a rounded chip, in its info and in the previews. An effect an ability would apply is outlined in gold and blinks.",
             controls = listOf(ControlDto.pick(EFFECT, context.effectIds()), ControlDto.boolean(IS_NEW)),
             args = mapOf(EFFECT to ArgDto.text(context.effectIds().first()), IS_NEW to ArgDto.boolean(false)),
             stories = listOf(applied, new),

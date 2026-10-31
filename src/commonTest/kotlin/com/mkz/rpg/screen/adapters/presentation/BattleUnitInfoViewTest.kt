@@ -104,9 +104,9 @@ class BattleUnitInfoViewTest : ViewsForTesting() {
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val abilities =
                 listOf(
-                    BattleUnitInfoView.Ability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true),
-                    BattleUnitInfoView.Ability(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true),
-                    BattleUnitInfoView.Ability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false),
+                    BattleUnitInfoView.Ability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10),
+                    BattleUnitInfoView.Ability(abilityId = "mushroom", cooldownTurnsLeft = 2, hasEnoughMana = true, manaCost = 10),
+                    BattleUnitInfoView.Ability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 10),
                 )
             // When
             battleUnitInfoView.display(turnActions = turnActions(remainingCasts = 0, maximumCasts = 1), abilities = abilities)

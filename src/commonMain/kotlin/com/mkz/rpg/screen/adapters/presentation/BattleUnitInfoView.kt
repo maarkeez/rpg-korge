@@ -38,6 +38,8 @@ open class BattleUnitInfoView(
         // The turns left until it can be cast again, e.g.: 1 when it can be cast on the next turn.
         val cooldownTurnsLeft: Int,
         val hasEnoughMana: Boolean,
+        // Told on the button while there is not enough mana.
+        val manaCost: Int,
     )
 
     internal lateinit var unitNameView: UnitNameView
@@ -62,7 +64,7 @@ open class BattleUnitInfoView(
                 uiSpacing(Size(10, 0))
                 uiVerticalStack(padding = 1.0) {
                     uiHorizontalStack(padding = 1.0) {
-                        uiVerticalStack(width = 244.0) {
+                        uiVerticalStack(width = 237.5) {
                             unitNameView = UnitNameView(size = Size(width = this.width, height = 14))
                             addChild(unitNameView)
 
@@ -81,11 +83,11 @@ open class BattleUnitInfoView(
                     // Minus the space added above the remaining turn actions (the spacing and the stack padding),
                     // so the health bar stays where it was.
                     uiSpacing(Size(0, 15 - ROWS_SPACING - 1))
-                    healthBarView = HealthBarView(Size(281.5, 16))
+                    healthBarView = HealthBarView(Size(275, 16))
                     addChild(healthBarView)
 
                     uiSpacing(Size(0, ROWS_SPACING))
-                    manaBarView = ManaBarView(Size(281.5, 16))
+                    manaBarView = ManaBarView(Size(275, 16))
                     addChild(manaBarView)
 
                     uiSpacing(Size(0, ROWS_SPACING))
@@ -94,7 +96,7 @@ open class BattleUnitInfoView(
                 }
             }
             uiHorizontalStack(padding = 2.0) {
-                val abilityButtonSize = Size(width = 48.75, height = 48.75)
+                val abilityButtonSize = Size(width = 54, height = 54)
                 abilityButtons = Array(6) { AbilityButtonView(abilityButtonSize, resourcesLoader) }
                 abilityButtons.forEach(::addChild)
             }
@@ -152,6 +154,7 @@ open class BattleUnitInfoView(
                 abilityId = ability.abilityId,
                 cooldownTurnsLeft = ability.cooldownTurnsLeft,
                 hasEnoughMana = ability.hasEnoughMana,
+                manaCost = ability.manaCost,
             )
         }
         // Effects

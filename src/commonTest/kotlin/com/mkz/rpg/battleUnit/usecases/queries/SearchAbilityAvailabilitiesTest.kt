@@ -23,8 +23,8 @@ class SearchAbilityAvailabilitiesTest {
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
         result.shouldContainExactly(
-            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true),
-            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true),
+            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0),
+            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10),
         )
     }
 
@@ -39,8 +39,8 @@ class SearchAbilityAvailabilitiesTest {
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
         result.shouldContainExactly(
-            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true),
-            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 2, hasEnoughMana = true),
+            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0),
+            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 2, hasEnoughMana = true, manaCost = 0),
         )
     }
 
@@ -53,7 +53,7 @@ class SearchAbilityAvailabilitiesTest {
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
-        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true))
+        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0))
     }
 
     @Test
@@ -64,7 +64,7 @@ class SearchAbilityAvailabilitiesTest {
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
-        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false))
+        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 15))
     }
 
     @Test

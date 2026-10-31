@@ -33,6 +33,7 @@ internal object BattleUnitInfoMapper {
                 abilityId = abilityAvailability.abilityId,
                 cooldownTurnsLeft = abilityAvailability.cooldownTurnsLeft,
                 hasEnoughMana = abilityAvailability.hasEnoughMana,
+                manaCost = abilityAvailability.manaCost,
             )
         }
 }

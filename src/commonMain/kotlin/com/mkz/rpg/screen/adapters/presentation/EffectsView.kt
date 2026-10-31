@@ -17,7 +17,7 @@ class EffectsView(
 
     private val effectViewsLayout =
         uiHorizontalStack(padding = 2.0) {
-            val effectViewSize = Size(width = 16, height = 16)
+            val effectViewSize = Size(width = 20, height = 20)
             effectViews = Array(10) { EffectView(effectViewSize, resourcesLoader) }
             effectViews.forEach(::addChild)
             overflowLabel = text("+", textSize = 14.0, color = Colors.WHITE)

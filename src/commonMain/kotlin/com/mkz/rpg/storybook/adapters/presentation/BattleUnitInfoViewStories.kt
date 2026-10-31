@@ -25,6 +25,9 @@ object BattleUnitInfoViewStories : StoryBinding {
     private const val ABILITIES_LIMIT = 6
     private const val COOLDOWN_TURNS_LEFT = 2
 
+    // The cost of the abilities, told on those the battle unit has not enough mana for.
+    private const val MANA_COST = 10
+
     private const val UNIT = "unit"
     private const val HEALTH = "health"
     private const val MANA = "mana"
@@ -139,6 +142,7 @@ object BattleUnitInfoViewStories : StoryBinding {
                     abilityId = abilityIds[index % abilityIds.size],
                     cooldownTurnsLeft = if (index % 3 == 1) COOLDOWN_TURNS_LEFT else 0,
                     hasEnoughMana = index % 3 != 2,
+                    manaCost = MANA_COST,
                 )
             }
         return BattleUnitInfoView(context.resourcesLoader, context.texts).apply {

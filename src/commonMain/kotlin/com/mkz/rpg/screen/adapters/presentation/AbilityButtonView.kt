@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
@@ -9,9 +10,11 @@ import korlibs.korge.view.container
 import korlibs.korge.view.filter.ColorMatrixFilter
 import korlibs.korge.view.filter.filter
 import korlibs.korge.view.image
-import korlibs.korge.view.solidRect
+import korlibs.korge.view.roundRect
 import korlibs.korge.view.text
+import korlibs.korge.view.xy
 import korlibs.math.geom.Matrix4
+import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
 class AbilityButtonView(
@@ -65,9 +68,21 @@ class AbilityButtonView(
                 1f,
             )
 
-        private const val COOLDOWN_TEXT_SIZE = 14.0
-        private const val COOLDOWN_BADGE_SIZE = 16.0
-        private val COOLDOWN_BADGE_COLOR = RGBA(0, 0, 0, 0xB0)
+        const val SLOT = "SLOT"
+        const val COST = "COST"
+
+        // In cooldown: a dark overlay over the darkened icon, with the turns left large in its middle.
+        private const val COOLDOWN_TEXT_SIZE = 23.0
+        private val COOLDOWN_OVERLAY_COLOR = RGBA(0, 0, 0, 0x70)
+
+        // Selected: a gold ring, with a faint glow around it.
+        private const val SELECTION_THICKNESS = 2.0
+        private const val GLOW_THICKNESS = 3.0
+        private const val GLOW_ALPHA = 0.3
+
+        // The mana cost badge, at the bottom right corner, over the icon.
+        private const val COST_TEXT_SIZE = 10.0
+        private const val COST_MARGIN = 2.0
     }
 
     private var delegate: Delegate? = null
@@ -78,6 +93,7 @@ class AbilityButtonView(
         bgColorOver = Colors.TRANSPARENT
         background.borderColor = Colors.TRANSPARENT
         background.bgColor = Colors.TRANSPARENT
+        panel(size, fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).name = SLOT
 
         onClick {
             if (delegate == null) return@onClick
@@ -91,19 +107,22 @@ class AbilityButtonView(
     }
 
     /**
-     * Displays the ability, darkened with the turns left in a corner badge while in cooldown, else tinted blue when
-     * there is not enough mana to cast it. The cooldown wins, as it is the longer wait.
+     * Displays the ability at 3x in its slot, darkened under a dark overlay with the turns left in its middle while in
+     * cooldown, else tinted blue with its [manaCost] in a badge when there is not enough mana to cast it. The cooldown
+     * wins, as it is the longer wait.
      */
     fun display(
         abilityId: String,
         cooldownTurnsLeft: Int,
         hasEnoughMana: Boolean,
+        manaCost: Int,
     ) {
         val abilityButton = this
         this.abilityId = abilityId
         findViewByName(ABILITY)?.removeFromParent()
         findViewByName(ABILITY_SELECTION)?.removeFromParent()
         findViewByName(COOLDOWN)?.removeFromParent()
+        findViewByName(COST)?.removeFromParent()
         val isInCooldown = cooldownTurnsLeft > 0
         resourcesLoader.bitmapOrNull("ability/$abilityId.png")?.let { avatarBitmap ->
             abilityButton.image(avatarBitmap) {
@@ -119,31 +138,55 @@ class AbilityButtonView(
                     }
             }
         }
-        if (isInCooldown) displayCooldownBadge(cooldownTurnsLeft)
+        if (isInCooldown) {
+            displayCooldownOverlay(cooldownTurnsLeft)
+        } else if (!hasEnoughMana) {
+            displayCostBadge(manaCost)
+        }
         visible = true
     }
 
-    private fun displayCooldownBadge(cooldownTurnsLeft: Int) {
+    private fun displayCooldownOverlay(cooldownTurnsLeft: Int) {
         val abilityButton = this
         abilityButton.container {
             name = COOLDOWN
-            solidRect(Size(COOLDOWN_BADGE_SIZE, COOLDOWN_BADGE_SIZE), COOLDOWN_BADGE_COLOR)
+            roundRect(abilityButton.size, RectCorners(HudStyle.SLOT_RADIUS), fill = COOLDOWN_OVERLAY_COLOR)
             text(text = "$cooldownTurnsLeft", textSize = COOLDOWN_TEXT_SIZE, color = Colors.WHITE) {
                 centerOn(this@container)
             }
-            x = abilityButton.width - COOLDOWN_BADGE_SIZE
-            y = abilityButton.height - COOLDOWN_BADGE_SIZE
         }
     }
 
+    private fun displayCostBadge(manaCost: Int) {
+        val abilityButton = this
+        val badge = PillView(color = HudStyle.MANA, glyph = PillView.Glyph.MANA, solid = true, textSize = COST_TEXT_SIZE)
+        badge.name = COST
+        badge.display("$manaCost")
+        abilityButton.addChild(badge)
+        badge.xy(abilityButton.width - badge.width - COST_MARGIN, abilityButton.height - badge.pillHeight - COST_MARGIN)
+    }
+
+    /** Rings the ability in gold, with a faint glow around it. */
     fun select() {
         if (findViewByName(ABILITY_SELECTION) != null) return
         val abilityButton = this
-        abilityButton.image(resourcesLoader.bitmap("ability/ability_selection.png")) {
+        abilityButton.container {
             name = ABILITY_SELECTION
-            smoothing = false
-            scale = 3.0
-            centerOn(abilityButton)
+            // Each ring is inset by half its thickness, as a stroke is drawn half outside its shape, which cuts it.
+            roundRect(
+                Size(abilityButton.width + GLOW_THICKNESS, abilityButton.height + GLOW_THICKNESS),
+                RectCorners(HudStyle.SLOT_RADIUS + GLOW_THICKNESS / 2),
+                fill = Colors.TRANSPARENT,
+                stroke = HudStyle.SELECTION.withAd(GLOW_ALPHA),
+                strokeThickness = GLOW_THICKNESS,
+            ) { xy(-GLOW_THICKNESS / 2, -GLOW_THICKNESS / 2) }
+            roundRect(
+                Size(abilityButton.width - SELECTION_THICKNESS, abilityButton.height - SELECTION_THICKNESS),
+                RectCorners(HudStyle.SLOT_RADIUS - SELECTION_THICKNESS / 2),
+                fill = Colors.TRANSPARENT,
+                stroke = HudStyle.SELECTION,
+                strokeThickness = SELECTION_THICKNESS,
+            ) { xy(SELECTION_THICKNESS / 2, SELECTION_THICKNESS / 2) }
         }
     }
 

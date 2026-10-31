@@ -1086,7 +1086,12 @@ class BattlefieldPresenterTest {
         val displayed = battleUnitInfoView.displayedBattleUnits.last()
         displayed.abilities shouldBe
             apis.battleUnitApi.searchAbilityAvailabilities("knight-1").map { availability ->
-                BattleUnitInfoView.Ability(abilityId = availability.abilityId, cooldownTurnsLeft = availability.cooldownTurnsLeft, hasEnoughMana = availability.hasEnoughMana)
+                BattleUnitInfoView.Ability(
+                    abilityId = availability.abilityId,
+                    cooldownTurnsLeft = availability.cooldownTurnsLeft,
+                    hasEnoughMana = availability.hasEnoughMana,
+                    manaCost = availability.manaCost,
+                )
             }
         displayed.abilities.map { ability -> ability.abilityId } shouldBe
             apis.battleUnitApi

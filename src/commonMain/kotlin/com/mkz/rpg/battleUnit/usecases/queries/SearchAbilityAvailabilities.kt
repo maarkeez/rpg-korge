@@ -19,6 +19,7 @@ class SearchAbilityAvailabilities(
                 abilityId = abilityId,
                 cooldownTurnsLeft = cooldownTurnsLeft,
                 hasEnoughMana = battleUnit.remainingManaPoints >= cost,
+                manaCost = cost,
             )
         }
     }
@@ -28,5 +29,7 @@ class SearchAbilityAvailabilities(
         // The turns of its player left until it can be cast again, e.g.: 1 when it can be cast on its next turn.
         val cooldownTurnsLeft: Int,
         val hasEnoughMana: Boolean,
+        // The mana a cast costs, e.g.: told on the ability while there is not enough of it.
+        val manaCost: Int,
     )
 }
