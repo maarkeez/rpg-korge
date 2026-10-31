@@ -1,6 +1,6 @@
 # Plan: Take and restore the snapshots through use cases
 
-> **Status:** planned.
+> **Status:** in progress.
 >
 > **Summary:** the `save` subdomain depends on no other subdomain, and only `screen` uses it, through `SaveApi`, but
 > nothing enforces either. Each `<Subdomain>Snapshottable` in `adapters.save` reads and writes its repository, checks
@@ -47,7 +47,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone                              | Done when                                                                                                                          | Status | Done in |
 |----|----------------------------------------|------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | `save` locked                          | `save` may only depend on `shared`, and only `screen` imports it.                                                                  |        |         |
+| M1 | `save` locked                          | `save` may only depend on `shared`, and only `screen` imports it.                                                                  | ✅      | `f1fa022` |
 | M2 | Repositories called by use cases only  | `RepositoryAccessArchitectureTest` passes, allowing the 6 snapshottables not yet migrated, and `party` takes and restores its snapshot through use cases. |        |         |
 | M3 | Every snapshot through use cases       | The other 6 subdomains take and restore their snapshots through use cases, and the allowed snapshottables are gone.                |        |         |
 | M4 | Docs                                   | [Package structure](../architecture/package-structure.md) and [Save and load](../architecture/save-and-load.md) describe it.       |        |         |
