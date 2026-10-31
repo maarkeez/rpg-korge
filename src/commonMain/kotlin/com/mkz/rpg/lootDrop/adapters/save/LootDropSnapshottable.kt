@@ -1,45 +1,37 @@
 package com.mkz.rpg.lootDrop.adapters.save
 
 import com.mkz.rpg.lootDrop.domain.LootDrop
-import com.mkz.rpg.lootDrop.domain.LootDropRepository
+import com.mkz.rpg.lootDrop.usecases.commands.RestoreLootDrops
+import com.mkz.rpg.lootDrop.usecases.queries.SearchLootDropsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/**
- * The items lying on the battlefield, by the unit that dropped them. The loot tables of each unit are not saved, as they
- * are read from the resources again: restoring fails when a unit no longer drops loot.
- */
+/** The items lying on the battlefield, by the unit that dropped them, see [SearchLootDropsSnapshot] and [RestoreLootDrops]. */
 class LootDropSnapshottable(
-    private val lootDropRepository: LootDropRepository,
+    private val searchLootDropsSnapshot: SearchLootDropsSnapshot,
+    private val restoreLootDrops: RestoreLootDrops,
 ) : Snapshottable {
     override val key = "lootDrop"
 
     override fun snapshot(): String =
         SnapshotJson.encodeToString(
-            lootDropRepository.searchAll().map { lootDrop ->
-                val dto = lootDrop.toDto()
+            searchLootDropsSnapshot().map { lootDrop ->
                 LootDropSnapshot(
-                    unitId = dto.unitId,
-                    droppedItems = dto.droppedItems.map { (position, lootableItemIds) -> DroppedItemsSnapshot(position.row, position.column, lootableItemIds) },
+                    unitId = lootDrop.unitId,
+                    droppedItems = lootDrop.droppedItems.map { (position, lootableItemIds) -> DroppedItemsSnapshot(position.row, position.column, lootableItemIds) },
                 )
             },
         )
 
-    override fun restore(snapshot: String) {
-        val lootDrops = SnapshotJson.decodeFromString<List<LootDropSnapshot>>(snapshot).associateBy(LootDropSnapshot::unitId)
-        lootDrops.keys.forEach { unitId -> requireNotNull(lootDropRepository.searchByUnitId(unitId)) { "Unit $unitId drops no loot" } }
-        lootDropRepository.searchAll().forEach { lootDrop ->
-            val droppedItems =
-                lootDrops[lootDrop.toDto().unitId]
-                    ?.droppedItems
-                    .orEmpty()
-                    .associate { tile -> LootDrop.Dto.PositionDto(row = tile.row, column = tile.column) to tile.lootableItemIds }
-            lootDropRepository.update(lootDrop.restoreDroppedItems(droppedItems))
-        }
-    }
+    override fun restore(snapshot: String) =
+        restoreLootDrops(
+            SnapshotJson.decodeFromString<List<LootDropSnapshot>>(snapshot).associate { lootDrop ->
+                lootDrop.unitId to lootDrop.droppedItems.associate { tile -> LootDrop.Dto.PositionDto(row = tile.row, column = tile.column) to tile.lootableItemIds }
+            },
+        )
 }
 
 @Serializable

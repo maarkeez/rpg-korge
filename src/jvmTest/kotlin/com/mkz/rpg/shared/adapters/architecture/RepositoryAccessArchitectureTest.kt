@@ -18,7 +18,6 @@ class RepositoryAccessArchitectureTest {
     // The snapshottables still calling their repository, until they take their snapshot through use cases: the list can only shrink.
     private val allowedSnapshottables =
         setOf(
-            "$rootPackage.lootDrop.adapters.save",
             "$rootPackage.inventory.adapters.save",
             "$rootPackage.cpuWanderBrain.adapters.save",
         )

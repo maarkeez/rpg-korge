@@ -12,7 +12,9 @@ import com.mkz.rpg.lootDrop.usecases.commands.FindLoot
 import com.mkz.rpg.lootDrop.usecases.commands.InitialiseLootDrops
 import com.mkz.rpg.lootDrop.usecases.commands.PickUpDroppedItem
 import com.mkz.rpg.lootDrop.usecases.commands.PlaceDroppedItem
+import com.mkz.rpg.lootDrop.usecases.commands.RestoreLootDrops
 import com.mkz.rpg.lootDrop.usecases.queries.SearchDroppedItems
+import com.mkz.rpg.lootDrop.usecases.queries.SearchLootDropsSnapshot
 import com.mkz.rpg.lootDrop.usecases.services.LootDropLoader
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
 import com.mkz.rpg.shared.domain.EventBus
@@ -31,7 +33,9 @@ class LootDropApi(
     private val lootDropRepository: LootDropRepository = InMemoryLootDropRepository()
 
     // Save
-    val snapshottable: Snapshottable = LootDropSnapshottable(lootDropRepository)
+    private val searchLootDropsSnapshot = SearchLootDropsSnapshot(lootDropRepository)
+    private val restoreLootDrops = RestoreLootDrops(lootDropRepository)
+    val snapshottable: Snapshottable = LootDropSnapshottable(searchLootDropsSnapshot, restoreLootDrops)
 
     // Commands
     val initialiseLootDrops = InitialiseLootDrops(lootDropLoader, lootDropRepository, unitApi.searchUnitById, lootTableApi.searchLootTableById, eventBus)
