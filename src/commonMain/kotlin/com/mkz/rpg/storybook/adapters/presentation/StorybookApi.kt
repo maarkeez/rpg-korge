@@ -43,6 +43,7 @@ class StorybookApi(
                 UnitNameViewStories,
                 RemainingTurnsViewStories,
                 PointsViewStories,
+                PillViewStories,
                 EffectViewStories,
                 EffectsViewStories,
                 AbilityButtonViewStories,
