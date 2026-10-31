@@ -51,7 +51,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone                     | Done when                                                                                                     | Status | Done in |
 |----|-------------------------------|---------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | Gold owned by `inventory`     | `Gold.kt` is gone, the cap is private to `Inventory.kt`, and `InventoryUnitResourcesTest` checks every unit.   | ✅      | `e16c8f3` |
-| M2 | Abilities cap owned by `unit` | `KnownAbilities.kt` is gone, `BattleUnit` gets its cap from `SearchMaximumAbilities` and saves it, `SAVE_VERSION` is 2. | ⬜      |         |
+| M2 | Abilities cap owned by `unit` | `KnownAbilities.kt` is gone, `BattleUnit` gets its cap from `SearchMaximumAbilities` and saves it, `SAVE_VERSION` is 2. | ✅      | `8dbdc7e` |
 | M3 | Plumbing only in `shared`     | `SharedDomainArchitectureTest` pins `shared.domain`, and `package-structure.md` states the rule.               | ⬜      |         |
 
 ### M1 commits
