@@ -45,6 +45,7 @@ For example, given a subdomain called `tomatoes`:
 
 - The use cases of a subdomain (the classes of its `usecases.commands`, `usecases.queries` and `usecases.services`) MUST only be instantiated in its presentation Api, `<subdomain>.adapters.presentation.<Subdomain>Api` (e.g.: `BattlefieldCreation` only in `BattlefieldApi`). The Api builds each one once and injects it where it is needed: a use case that needs a service takes it in its constructor instead of building it (e.g.: `InitialiseBattlefield` takes the `BattlefieldCreation` of `BattlefieldApi`). This is enforced, for the production code only, by [`UseCaseInstantiationArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/UseCaseInstantiationArchitectureTest.kt). The tests build the use case under test themselves, with its fakes.
 - The nested `battlefieldHud` subdomain follows it too: its `BattlefieldHudApi` holds its use cases, and each `BattlefieldPresenter` builds its own, with its own selection.
+- Only the use cases MUST call a repository. The domain declares it (`<subdomain>.domain.<Name>Repository`), its `adapters.storage` class implements it, and the Api of its subdomain only builds it and hands it to the use cases, never calling it: no other adapter reads or writes an aggregate around the use cases (e.g.: a snapshottable takes its snapshot through a query, see [Saving](#saving)). So a repository MUST only be imported by the domain and the use cases of its subdomain, by its `adapters.storage` and by its Api. This is enforced, for the production code only, by [`RepositoryAccessArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/RepositoryAccessArchitectureTest.kt). The tests arrange their state through the repositories.
 - A presentation Api (a top-level `*Api` class of an `adapters.presentation` package) MUST take every collaborator from its caller: none of its constructor parameters has a default value, and its primary constructor is its only one. So each caller shows all of its wiring: the scenes and `Main.kt` hand it its production collaborators (e.g.: `TerrainApi(eventBus, ResourcesTerrainLoader())`, `Random.Default`, the clock of `SaveApi`), and the tests their fakes or, in the acceptance tests, the same resources. There is no exception. This is enforced, for the production code only, by [`ApiConstructorArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ApiConstructorArchitectureTest.kt).
 
 ## Storybook
@@ -65,7 +66,9 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
 - Every subdomain with a repository MUST either save its runtime state, with a `<Subdomain>Snapshottable` in its
   `adapters.save` package implementing `shared.domain.Snapshottable` (e.g.: `battleUnit.adapters.save.BattleUnitSnapshottable`),
   or be listed as not saved, with why (e.g.: read from the resources). The `@Serializable` snapshot classes live in that
-  package too, never in the domain. This is enforced by [`SnapshotCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SnapshotCoverageArchitectureTest.kt).
+  package too, never in the domain. The snapshottable only maps them to JSON: it takes the snapshot through a
+  `Search…Snapshot` query and restores it through a `Restore…` command (e.g.: `SearchPartySnapshot` and `RestoreParty`),
+  which the Api builds and keeps private. This is enforced by [`SnapshotCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SnapshotCoverageArchitectureTest.kt).
   See [Save and load](save-and-load.md#snapshots).
 
 ## Dependencies between subdomains

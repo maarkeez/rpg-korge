@@ -3,7 +3,11 @@
 The player saves the game from the pause screen, while exploring, into one of 3 save slots, and loads it back from the
 menu's Load game. The saves are JSON, kept in KorGE's `views.storage`, so it works on every target KorGE runs on with no
 platform-specific code. Saving and loading live in the [`save`](../../src/commonMain/kotlin/com/mkz/rpg/save) subdomain,
-which depends on no other subdomain, and the screen uses it through `SaveApi`.
+which depends on no other subdomain, and only the screen uses it, through `SaveApi`. Both are enforced:
+[`SubdomainDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SubdomainDependencyArchitectureTest.kt)
+only lets `save` depend on `shared`, and
+[`SaveDependencyArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SaveDependencyArchitectureTest.kt)
+only lets `screen` import it.
 
 ## The save slots
 
@@ -60,12 +64,18 @@ Each subdomain holding runtime state takes and restores its own snapshot, throug
 `key` (e.g.: `battleUnit`), `snapshot()` and `restore(snapshot)`. Each one writes its own JSON, so the `save` subdomain
 never knows their shapes:
 
-- `<subdomain>.adapters.save.<Subdomain>Snapshottable` holds the `@Serializable` classes, and maps them to the plain
-  snapshot of the aggregate, never annotating the domain.
-- The aggregate takes it (`toSnapshot()`, or `toDto()` when it already holds everything) and is rebuilt from it by a
-  `restore` factory that publishes no events, e.g.: `BattleUnit.restore(snapshot)`.
-- Restoring replaces the whole state of the subdomain, and fails when the snapshot names an id the game no longer has
-  (e.g.: a unit, a lootable item, a tile).
+- A `Search…Snapshot` query takes what is saved (e.g.: `SearchPartySnapshot`), as the plain snapshot of the aggregate:
+  its `Dto.SnapshotDto` (`toSnapshot()`) when its `Dto` does not hold all it needs to be rebuilt (`battleUnit`, `party`,
+  `cpuWanderBrain`), its `Dto` (or a part of it) elsewhere. A subdomain gets a `SnapshotDto` once its `Dto` holds
+  something its restore should not have to take.
+- A `Restore…` command takes it back (e.g.: `RestoreParty`): it checks the ids against the other subdomains, and
+  replaces the whole state of the subdomain through a `restore` factory of the aggregate, e.g.:
+  `BattleUnit.restore(snapshot)`. It takes no `EventBus`, so it publishes no events, and fails with `require` when the
+  snapshot names an id the game no longer has (e.g.: a unit, a lootable item, a tile).
+- `<subdomain>.adapters.save.<Subdomain>Snapshottable` only maps them to JSON: it holds its `key` and the
+  `@Serializable` classes, never annotating the domain, and takes the query and the command, which its Api builds and
+  keeps private. Like any adapter, it never calls the repository, see
+  [Package structure](package-structure.md#use-cases).
 
 Only runtime state is saved. What never changes while playing (terrains, effects, abilities, units, lootable items, loot
 tables, players, the map and its buildings) is read from the resources again. Short-lived state is reset.
