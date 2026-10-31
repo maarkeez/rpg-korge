@@ -1,8 +1,12 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -11,8 +15,8 @@ import kotlin.test.Test
 
 class BattlefieldTerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
-    private val terrainApi = TerrainApi(eventBus)
-    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
 
     private suspend fun setUp() {
         terrainApi.init()

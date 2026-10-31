@@ -2,7 +2,6 @@ package com.mkz.rpg.terrain.adapters.presentation
 
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.adapters.events.OnRequestInitialiseTerrains
-import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.TerrainRepository
 import com.mkz.rpg.terrain.usecases.commands.InitialiseTerrains
@@ -13,7 +12,7 @@ import com.mkz.rpg.terrain.usecases.services.TerrainLoader
 
 class TerrainApi(
     eventBus: EventBus,
-    terrainLoader: TerrainLoader = ResourcesTerrainLoader(),
+    terrainLoader: TerrainLoader,
 ) {
     // Storage
     private val terrainRepository: TerrainRepository = InMemoryTerrainRepository()

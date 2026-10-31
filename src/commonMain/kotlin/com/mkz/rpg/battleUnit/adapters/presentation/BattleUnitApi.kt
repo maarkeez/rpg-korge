@@ -19,7 +19,6 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestSwapBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
-import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.adapters.save.BattleUnitSnapshottable
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
@@ -71,7 +70,7 @@ class BattleUnitApi(
     playerApi: PlayerApi,
     battlefieldApi: BattlefieldApi,
     eventBus: EventBus,
-    private val battleUnitLoader: BattleUnitLoader = ResourcesBattleUnitLoader(),
+    private val battleUnitLoader: BattleUnitLoader,
 ) {
     // Storage
     private val battleUnitRepository: BattleUnitRepository = InMemoryBattleUnitRepository()

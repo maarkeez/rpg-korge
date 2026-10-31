@@ -3,13 +3,14 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
 class TerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
-    private val terrainApi = TerrainApi(eventBus)
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
     private val battleSetupApi = BattleSetupApi(eventBus)
 
     private suspend fun setUp() {

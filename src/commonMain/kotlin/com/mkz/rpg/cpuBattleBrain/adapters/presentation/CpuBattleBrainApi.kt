@@ -49,7 +49,7 @@ class CpuBattleBrainApi(
     effectApi: EffectApi,
     abilityApi: AbilityApi,
     eventBus: EventBus,
-    random: Random = Random.Default,
+    random: Random,
 ) {
     // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)

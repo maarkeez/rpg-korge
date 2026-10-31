@@ -11,12 +11,22 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
 import korlibs.korge.service.storage.InmemoryStorage
+import korlibs.time.DateTime
 import kotlin.test.Test
 
 class LoadGamePresenterTest {
     private val texts = TextsMother.texts()
     private val storage = InmemoryStorage()
-    private val saveApi = SaveApi(storage = storage, eventBus = InMemoryEventBus())
+    private val saveApi =
+        SaveApi(
+            storage = storage,
+            eventBus = InMemoryEventBus(),
+            snapshottables = emptyList(),
+            canSave = { false },
+            leaderUnitId = { null },
+            partySize = { 0 },
+            now = { DateTime.nowUnixMillis() },
+        )
     private val menuView = MenuView(texts, onNewGameSelected = {}, onLoadGameSelected = {}, onMapBuilderSelected = {})
     private val saveSlotsView = SaveSlotsView(texts)
     private val confirmDialogView = ConfirmDialogView()

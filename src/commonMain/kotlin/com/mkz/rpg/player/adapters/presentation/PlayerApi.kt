@@ -2,7 +2,6 @@ package com.mkz.rpg.player.adapters.presentation
 
 import com.mkz.rpg.player.adapters.events.OnRequestInitialisePlayers
 import com.mkz.rpg.player.adapters.events.OnRequestPlayerCreation
-import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerRepository
 import com.mkz.rpg.player.usecases.commands.InitialisePlayers
@@ -15,7 +14,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 class PlayerApi(
     eventBus: EventBus,
-    private val playerLoader: PlayerLoader = ResourcesPlayerLoader(),
+    private val playerLoader: PlayerLoader,
 ) {
     // Storage
     private val playerRepository: PlayerRepository = InMemoryPlayerRepository()

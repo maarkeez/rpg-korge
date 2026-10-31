@@ -9,6 +9,7 @@ import korlibs.korge.scene.Scene
 import korlibs.korge.service.storage.IStorage
 import korlibs.korge.service.storage.storage
 import korlibs.korge.view.SContainer
+import korlibs.time.DateTime
 import kotlin.random.Random
 
 /**
@@ -33,7 +34,16 @@ class MenuScene(
 
     override suspend fun SContainer.sceneMain() {
         val texts = Texts(localizationApi)
-        val saveApi = SaveApi(storage = storage ?: views.storage, eventBus = InMemoryEventBus())
+        val saveApi =
+            SaveApi(
+                storage = storage ?: views.storage,
+                eventBus = InMemoryEventBus(),
+                snapshottables = emptyList(),
+                canSave = { false },
+                leaderUnitId = { null },
+                partySize = { 0 },
+                now = { DateTime.nowUnixMillis() },
+            )
         lateinit var loadGamePresenter: LoadGamePresenter
         val menuView =
             MenuView(

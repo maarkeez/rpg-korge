@@ -9,6 +9,8 @@ import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battleUnit.usecases.services.FakeBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlefield.usecases.services.FakeBattlefieldLoader
 import com.mkz.rpg.building.adapters.presentation.BuildingApi
 import com.mkz.rpg.building.domain.Building
@@ -40,6 +42,7 @@ import com.mkz.rpg.terrain.usecases.services.FakeTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.domain.Unit
 import com.mkz.rpg.unit.usecases.services.FakeUnitLoader
+import kotlin.random.Random
 
 /**
  * The real subdomain APIs sharing one event bus, wired as the game does, which load the given data instead of the resources.
@@ -66,14 +69,14 @@ class SubdomainApis(
     val terrainApi = TerrainApi(eventBus, FakeTerrainLoader(terrains))
     val unitApi = UnitApi(eventBus, FakeUnitLoader(units))
     val playerApi = PlayerApi(eventBus, FakePlayerLoader(players))
-    val battlefieldApi = BattlefieldApi(terrainApi, eventBus, FakeBattlefieldLoader(tiles))
+    val battlefieldApi = BattlefieldApi(terrainApi, eventBus, FakeBattlefieldLoader(tiles), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
     val buildingApi = BuildingApi(battlefieldApi, eventBus, FakeBuildingLoader(buildings))
     val effectApi = EffectApi(eventBus, FakeEffectLoader(effects))
     val abilityApi = AbilityApi(effectApi, eventBus, FakeAbilityLoader(abilities))
     val lootableItemApi = LootableItemApi(effectApi, eventBus, FakeLootableItemLoader(lootableItems))
     val lootTableApi = LootTableApi(lootableItemApi, eventBus, FakeLootTableLoader(lootTables))
     val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, FakeBattleUnitLoader(deployments))
-    val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(lootDrops))
+    val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, FakeLootDropLoader(lootDrops), Random.Default)
     val battleApi = BattleApi(eventBus, playerApi)
     val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))

@@ -1,6 +1,5 @@
 package com.mkz.rpg.localization.adapters.presentation
 
-import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader
 import com.mkz.rpg.localization.adapters.storage.InMemoryLocalizationRepository
 import com.mkz.rpg.localization.domain.LocalizationRepository
 import com.mkz.rpg.localization.usecases.commands.InitialiseLocalization
@@ -14,7 +13,7 @@ import com.mkz.rpg.shared.domain.EventBus
 /** The text of the game in every language. Only the presentation layer may use it: the other layers hold ids, never text. */
 class LocalizationApi(
     eventBus: EventBus,
-    private val localizationLoader: LocalizationLoader = ResourcesLocalizationLoader(),
+    private val localizationLoader: LocalizationLoader,
 ) {
     // Storage
     private val localizationRepository: LocalizationRepository = InMemoryLocalizationRepository()

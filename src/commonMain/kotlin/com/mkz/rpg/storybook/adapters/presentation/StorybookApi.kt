@@ -1,7 +1,6 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.storybook.adapters.location.platformStoryLocation
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -26,8 +25,8 @@ import com.mkz.rpg.storybook.usecases.services.StoryLocation
  */
 class StorybookApi(
     eventBus: EventBus,
-    storyLocation: StoryLocation = platformStoryLocation(),
-    private val storyBindings: List<StoryBinding> = STORY_BINDINGS,
+    storyLocation: StoryLocation,
+    private val storyBindings: List<StoryBinding>,
 ) {
     companion object {
         /** Every story binding, in the order the sidebar lists them. They are listed by hand, as JS has no reflection. */

@@ -15,6 +15,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
 import korlibs.korge.service.storage.InmemoryStorage
+import korlibs.time.DateTime
 import kotlin.test.Test
 
 class PausePresenterTest {
@@ -36,6 +37,7 @@ class PausePresenterTest {
             canSave = { apis.partyApi.searchParty()?.isPaused == true },
             leaderUnitId = { "knight" },
             partySize = { 1 },
+            now = { DateTime.nowUnixMillis() },
         )
     private val pauseView = PauseView(TextsMother.texts())
     private val saveSlotsView = SaveSlotsView(TextsMother.texts())

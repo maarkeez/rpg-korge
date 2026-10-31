@@ -4,7 +4,6 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.events.OnNpcTalkFinished
 import com.mkz.rpg.npc.adapters.events.OnRequestInitialiseNpcs
-import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
 import com.mkz.rpg.npc.adapters.save.NpcSnapshottable
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
@@ -24,7 +23,7 @@ class NpcApi(
     lootableItemApi: LootableItemApi,
     partyApi: PartyApi,
     eventBus: EventBus,
-    private val npcLoader: NpcLoader = ResourcesNpcLoader(),
+    private val npcLoader: NpcLoader,
 ) {
     // Storage
     private val npcRepository: NpcRepository = InMemoryNpcRepository()

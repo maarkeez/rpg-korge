@@ -308,7 +308,7 @@ class StorySmokeTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val storyContext = StoryContext(BattleSceneResourcesLoaderMother.loadedResourcesLoader(), TextsMother.texts())
-            val storybookApi = StorybookApi(InMemoryEventBus(), FakeStoryLocation())
+            val storybookApi = StorybookApi(InMemoryEventBus(), FakeStoryLocation(), StorybookApi.STORY_BINDINGS)
             // When
             storybookApi.init(storyContext)
             // Then

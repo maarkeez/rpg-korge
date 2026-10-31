@@ -1,27 +1,36 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.EffectMother
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
 import com.mkz.rpg.player.domain.PlayerMother
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import com.mkz.rpg.unit.domain.UnitMother
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -29,13 +38,13 @@ import kotlin.test.Test
 
 class DeployBattleUnitEffectAcceptanceTest {
     private val eventBus = InMemoryEventBus()
-    private val terrainApi = TerrainApi(eventBus)
-    private val unitApi = UnitApi(eventBus)
-    private val playerApi = PlayerApi(eventBus)
-    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
-    private val effectApi = EffectApi(eventBus)
-    private val abilityApi = AbilityApi(effectApi, eventBus)
-    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+    private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+    private val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+    private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+    private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
 
     // The CPU battle units out of the battle rest when a round finishes, rather than wandering.

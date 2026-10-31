@@ -1,6 +1,7 @@
 package com.mkz.rpg
 
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
+import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader
 import com.mkz.rpg.screen.adapters.presentation.MenuScene
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
@@ -52,7 +53,7 @@ suspend fun Stage.startGame(
     // The texts of every scene, in the language picked for the session. The menu waits for the catalogs.
     val eventBus = InMemoryEventBus()
     addUpdater { eventBus.dispatch() }
-    val localizationApi = LocalizationApi(eventBus)
+    val localizationApi = LocalizationApi(eventBus, ResourcesLocalizationLoader())
     localizationApi.init()
 
     sceneContainer.changeTo { MenuScene(localizationApi, storage, random) }
@@ -69,7 +70,7 @@ suspend fun Stage.startStorybook(
     // The texts of the views on show, in English until the language global selects another one.
     val eventBus = InMemoryEventBus()
     addUpdater { eventBus.dispatch() }
-    val localizationApi = LocalizationApi(eventBus)
+    val localizationApi = LocalizationApi(eventBus, ResourcesLocalizationLoader())
     localizationApi.init()
 
     sceneContainer.changeTo { StorybookScene(localizationApi, storyLocation, storybookPage) }

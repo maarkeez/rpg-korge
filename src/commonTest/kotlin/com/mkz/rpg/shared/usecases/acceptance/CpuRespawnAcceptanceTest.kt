@@ -1,26 +1,35 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.cpuWanderBrain.domain.RESPAWN_STEPS
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.CPU
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation.PlayerType.HUMAN
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -28,13 +37,13 @@ import kotlin.test.Test
 // Uses the units and terrains defined in the resources: a human knight, and two CPU rats, on sand.
 class CpuRespawnAcceptanceTest {
     private val eventBus = InMemoryEventBus()
-    private val terrainApi = TerrainApi(eventBus)
-    private val unitApi = UnitApi(eventBus)
-    private val playerApi = PlayerApi(eventBus)
-    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
-    private val effectApi = EffectApi(eventBus)
-    private val abilityApi = AbilityApi(effectApi, eventBus)
-    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
+    private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+    private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+    private val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+    private val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+    private val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+    private val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+    private val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
     private val battleApi = BattleApi(eventBus, playerApi)
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)

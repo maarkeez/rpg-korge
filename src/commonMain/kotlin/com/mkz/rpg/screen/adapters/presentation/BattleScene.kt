@@ -1,27 +1,41 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
+import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
+import com.mkz.rpg.battleUnit.adapters.resources.ResourcesBattleUnitLoader
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.building.adapters.presentation.BuildingApi
+import com.mkz.rpg.building.adapters.resources.ResourcesBuildingLoader
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
+import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
+import com.mkz.rpg.lootTable.adapters.resources.ResourcesLootTableLoader
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
+import com.mkz.rpg.lootableItem.adapters.resources.ResourcesLootableItemLoader
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
+import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
+import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
 import korlibs.korge.service.storage.IStorage
@@ -32,6 +46,7 @@ import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.korge.view.fixedSizeContainer
 import korlibs.math.geom.Size
+import korlibs.time.DateTime
 import kotlin.random.Random
 
 // Localization: the texts of the selected language. Storage: where the games are saved, `views.storage` by default.
@@ -82,22 +97,22 @@ class BattleScene(
         }
 
         // Backend APIs
-        val terrainApi = TerrainApi(eventBus)
-        val unitApi = UnitApi(eventBus)
-        val playerApi = PlayerApi(eventBus)
-        val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
-        val buildingApi = BuildingApi(battlefieldApi, eventBus)
-        val effectApi = EffectApi(eventBus)
-        val abilityApi = AbilityApi(effectApi, eventBus)
-        val lootableItemApi = LootableItemApi(effectApi, eventBus)
-        val lootTableApi = LootTableApi(lootableItemApi, eventBus)
-        val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus)
-        val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus)
+        val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+        val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
+        val playerApi = PlayerApi(eventBus, ResourcesPlayerLoader())
+        val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
+        val buildingApi = BuildingApi(battlefieldApi, eventBus, ResourcesBuildingLoader())
+        val effectApi = EffectApi(eventBus, ResourcesEffectLoader())
+        val abilityApi = AbilityApi(effectApi, eventBus, ResourcesAbilityLoader())
+        val lootableItemApi = LootableItemApi(effectApi, eventBus, ResourcesLootableItemLoader())
+        val lootTableApi = LootTableApi(lootableItemApi, eventBus, ResourcesLootTableLoader())
+        val battleUnitApi = BattleUnitApi(effectApi, abilityApi, unitApi, playerApi, battlefieldApi, eventBus, ResourcesBattleUnitLoader())
+        val lootDropApi = LootDropApi(unitApi, lootTableApi, eventBus, ResourcesLootDropLoader(), Random.Default)
         val battleApi = BattleApi(eventBus, playerApi)
         val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, random)
         val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
-        val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus)
+        val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
         val battleSetupApi = BattleSetupApi(eventBus)
         // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
@@ -124,6 +139,7 @@ class BattleScene(
                         ?.unitId
                 },
                 partySize = { partyApi.searchParty()?.battleUnitIds?.size ?: 0 },
+                now = { DateTime.nowUnixMillis() },
             )
 
         // Resources: each subdomain loads its data before the battle is set up

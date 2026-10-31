@@ -2,10 +2,14 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
+import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
+import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.mapBuilder.adapters.presentation.MapBuilderApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
+import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
 import korlibs.io.async.launchImmediately
 import korlibs.korge.scene.Scene
 import korlibs.korge.service.storage.IStorage
@@ -50,8 +54,8 @@ class MapBuilderScene(
         }
 
         // Backend APIs: the map builder uses the terrains and the battlefield rules, but loads no battlefield
-        val terrainApi = TerrainApi(eventBus)
-        val battlefieldApi = BattlefieldApi(terrainApi, eventBus)
+        val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
+        val battlefieldApi = BattlefieldApi(terrainApi, eventBus, ResourcesBattlefieldLoader(), TomlBattlefieldEncoder(), TomlBattlefieldDecoder())
         val mapBuilderApi = MapBuilderApi(terrainApi, battlefieldApi, eventBus)
         terrainApi.init()
         terrainApi.initialiseTerrains()

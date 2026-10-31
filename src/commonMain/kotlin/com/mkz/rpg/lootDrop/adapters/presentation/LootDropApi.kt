@@ -4,7 +4,6 @@ import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestInitialiseLootDrops
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestPickUpDroppedItem
-import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
 import com.mkz.rpg.lootDrop.adapters.save.LootDropSnapshottable
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
 import com.mkz.rpg.lootDrop.domain.LootDropRepository
@@ -25,8 +24,8 @@ class LootDropApi(
     unitApi: UnitApi,
     lootTableApi: LootTableApi,
     eventBus: EventBus,
-    private val lootDropLoader: LootDropLoader = ResourcesLootDropLoader(),
-    random: Random = Random.Default,
+    private val lootDropLoader: LootDropLoader,
+    random: Random,
 ) {
     // Storage
     private val lootDropRepository: LootDropRepository = InMemoryLootDropRepository()

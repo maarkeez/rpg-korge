@@ -32,6 +32,7 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.math.geom.Size
+import korlibs.time.DateTime
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
@@ -87,7 +88,17 @@ class ExplorationPresenterTest {
     private val saveSlotsView = SaveSlotsView(TextsMother.texts())
     private val confirmDialogView = ConfirmDialogView()
     private val pausePresenter =
-        PausePresenter(pauseView, saveSlotsView, confirmDialogView, apis.partyApi, SaveApi(InmemoryStorage(), eventBus), TextsMother.texts(), timeline) {}
+        PausePresenter(
+            pauseView,
+            saveSlotsView,
+            confirmDialogView,
+            apis.partyApi,
+            SaveApi(InmemoryStorage(), eventBus, emptyList(), {
+                false
+            }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
+            TextsMother.texts(),
+            timeline,
+        ) {}
 
     private fun createPresenter() =
         ExplorationPresenter(
@@ -350,7 +361,18 @@ class ExplorationPresenterTest {
                 apis.eventBus,
             )
         val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
-        val pausePresenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, apis.partyApi, SaveApi(InmemoryStorage(), apis.eventBus), TextsMother.texts(), timeline) {}
+        val pausePresenter =
+            PausePresenter(
+                pauseView,
+                saveSlotsView,
+                confirmDialogView,
+                apis.partyApi,
+                SaveApi(InmemoryStorage(), apis.eventBus, emptyList(), {
+                    false
+                }, { null }, { 0 }, { DateTime.nowUnixMillis() }),
+                TextsMother.texts(),
+                timeline,
+            ) {}
         return ExplorationPresenter(
             virtualPadView,
             npcDialogView,

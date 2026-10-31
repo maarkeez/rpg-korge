@@ -2,7 +2,6 @@ package com.mkz.rpg.ability.adapters.presentation
 
 import com.mkz.rpg.ability.adapters.events.OnRequestAbilityCreation
 import com.mkz.rpg.ability.adapters.events.OnRequestInitialiseAbilities
-import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
 import com.mkz.rpg.ability.domain.AbilityRepository
 import com.mkz.rpg.ability.usecases.commands.InitialiseAbilities
@@ -16,7 +15,7 @@ import com.mkz.rpg.shared.domain.EventBus
 class AbilityApi(
     effectApi: EffectApi,
     eventBus: EventBus,
-    private val abilityLoader: AbilityLoader = ResourcesAbilityLoader(),
+    private val abilityLoader: AbilityLoader,
 ) {
     // Storage
     private val abilityRepository: AbilityRepository = InMemoryAbilityRepository()

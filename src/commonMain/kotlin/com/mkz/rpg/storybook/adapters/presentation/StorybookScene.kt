@@ -44,7 +44,7 @@ class StorybookScene(
     override suspend fun SContainer.sceneMain() {
         val eventBus = InMemoryEventBus()
         addUpdater { eventBus.dispatch() }
-        val storybookApi = StorybookApi(eventBus, storyLocation)
+        val storybookApi = StorybookApi(eventBus, storyLocation, StorybookApi.STORY_BINDINGS)
 
         // The phone is as far from the sidebar as from the top, so its frame fits the window height.
         val margin = (STORYBOOK_WINDOW_SIZE.height - PhoneFrameView.SIZE.height) / 2
