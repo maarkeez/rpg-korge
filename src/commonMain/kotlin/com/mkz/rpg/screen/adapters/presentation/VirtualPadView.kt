@@ -19,7 +19,10 @@ import korlibs.math.interpolation.Ratio
 /**
  * The pad the player explores with, laid out as a Game Boy Color: the north, east, south and west arrows on the left,
  * the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom,
- * between both.
+ * between both. The arrows are grey squares as big as A and B, of the same grey as Start.
+ *
+ * It is laid out from its bottom, which is lower than the bottom of the views it takes the place of (e.g.: the battle
+ * HUD): Start lines up with the bottom of Finish turn, the lowest button while battling.
  *
  * Holding an arrow keeps walking the party towards it: the held listener is called when the arrow is pressed, and on
  * every frame while it is held. The pressed listener is called once before, so a tap is known even when it is released
@@ -27,15 +30,18 @@ import korlibs.math.interpolation.Ratio
  * to pause the game).
  */
 open class VirtualPadView(
-    size: Size = Size(390, 300),
+    size: Size = SIZE,
 ) : UIContainer(size) {
     companion object {
-        const val ARROW_SIZE = 72.0
+        // 57 taller than the battle HUD, down to the bottom of Finish turn below it.
+        val SIZE = Size(390, 357)
+
+        const val ARROW_SIZE = 64.0
 
         // Half the side of the triangle drawn on each arrow.
         private const val ARROW_HALF_SIDE = 16.0
-        private val ARROW_COLOR = RGBA(0, 136, 255)
-        private val ARROW_HELD_COLOR = RGBA(30, 110, 244)
+        private val ARROW_COLOR = RGBA(76, 76, 76)
+        private val ARROW_HELD_COLOR = RGBA(110, 110, 110)
 
         const val BUTTON_SIZE = 64.0
 
@@ -44,7 +50,9 @@ open class VirtualPadView(
         private val BUTTON_PRESSED_COLOR = RGBA(207, 60, 113)
         private val BUTTON_BORDER_COLOR = RGBA(79, 21, 7)
 
-        // The cross of arrows is centred on the left part of the pad, and the buttons on its right part.
+        // The cross of arrows is centred on the left part of the pad, and the buttons on its right part, both this far
+        // above its bottom.
+        private const val CONTROLS_CENTER_FROM_BOTTOM = 150.0
         private const val ARROWS_CENTER_RATIO = 0.3
         private const val BUTTONS_CENTER_RATIO = 0.8
 
@@ -58,8 +66,8 @@ open class VirtualPadView(
         // Start is centred between the arrows and the buttons, at the bottom of the pad.
         private const val START_CENTER_RATIO = 0.55
         private const val START_BOTTOM_MARGIN = 10.0
-        private val START_COLOR = RGBA(76, 76, 76)
-        private val START_PRESSED_COLOR = RGBA(110, 110, 110)
+        private val START_COLOR = ARROW_COLOR
+        private val START_PRESSED_COLOR = ARROW_HELD_COLOR
     }
 
     /** An arrow of the pad, with the tile offsets of the direction it points to. */
@@ -83,14 +91,14 @@ open class VirtualPadView(
 
     // The arrows form a cross, centred on the left part of the pad.
     private val centerX = size.width * ARROWS_CENTER_RATIO - ARROW_SIZE / 2
-    private val centerY = (size.height - ARROW_SIZE) / 2
+    private val centerY = size.height - CONTROLS_CENTER_FROM_BOTTOM - ARROW_SIZE / 2
     internal val northArrow = arrow(Direction.NORTH, x = centerX, y = centerY - ARROW_SIZE)
     internal val eastArrow = arrow(Direction.EAST, x = centerX + ARROW_SIZE, y = centerY)
     internal val southArrow = arrow(Direction.SOUTH, x = centerX, y = centerY + ARROW_SIZE)
     internal val westArrow = arrow(Direction.WEST, x = centerX - ARROW_SIZE, y = centerY)
 
     private val buttonsCenterX = size.width * BUTTONS_CENTER_RATIO
-    private val buttonsCenterY = size.height / 2
+    private val buttonsCenterY = size.height - CONTROLS_CENTER_FROM_BOTTOM
     internal val bButton = button(centerX = buttonsCenterX - BUTTON_OFFSET_X, centerY = buttonsCenterY + BUTTON_OFFSET_Y) { pressB() }
     internal val aButton = button(centerX = buttonsCenterX + BUTTON_OFFSET_X, centerY = buttonsCenterY - BUTTON_OFFSET_Y) { pressA() }
 

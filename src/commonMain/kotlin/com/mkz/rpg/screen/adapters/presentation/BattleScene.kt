@@ -30,7 +30,7 @@ import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
-import korlibs.korge.view.container
+import korlibs.korge.view.fixedSizeContainer
 import korlibs.math.geom.Size
 import kotlin.random.Random
 
@@ -62,7 +62,7 @@ class BattleScene(
             inventoryView,
         )
     val playerCallToActionView = PlayerCallToActionView(texts, resourcesLoader)
-    val virtualPadView = VirtualPadView(Size(390, 300))
+    val virtualPadView = VirtualPadView(VirtualPadView.SIZE)
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
     val shopView = ShopView(resourcesLoader, texts)
     val formationView = FormationView(resourcesLoader, texts)
@@ -202,7 +202,9 @@ class BattleScene(
                 uiSpacing(Size(0, 10))
                 // While exploring, the virtual pad takes the place of the battle HUD, an npc dialog the place of the pad, and a
                 // merchant's shop the place of its dialog. The party formation and the pause screen also take the place of the pad.
-                container {
+                // It is as tall as the battle HUD: the taller pad reaches below it, over the empty call to action, without
+                // pushing the call to action down.
+                fixedSizeContainer(Size(390, 300)) {
                     addChild(battleHudView)
                     addChild(virtualPadView)
                     addChild(npcDialogView)

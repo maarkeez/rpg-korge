@@ -11,7 +11,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 
 ## The virtual pad
 
-[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both.
+[`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both. The arrows are grey squares as big as A and B, of the same grey as Start. The pad is laid out from its bottom, lower than the battle HUD it takes the place of: Start lines up with the bottom of Finish turn, so the lowest button is on the same line while exploring and battling.
 
 - The arrows walk the party (see [Walking](#walking)).
 - A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).

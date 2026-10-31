@@ -4,7 +4,6 @@ import com.mkz.rpg.screen.adapters.presentation.VirtualPadView
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
-import korlibs.math.geom.Size
 
 /**
  * The stories of [VirtualPadView], at the size the game displays it. Pressing an arrow logs `onDirectionPressed`, and the
@@ -12,8 +11,6 @@ import korlibs.math.geom.Size
  * Actions.
  */
 object VirtualPadViewStories : StoryBinding {
-    private val SIZE = Size(390, 300)
-
     private val pad =
         StoryDto(
             id = "screen-virtual-pad--pad",
@@ -39,7 +36,7 @@ object VirtualPadViewStories : StoryBinding {
         args: Args,
         context: StoryContext,
     ): View =
-        VirtualPadView(SIZE).apply {
+        VirtualPadView(VirtualPadView.SIZE).apply {
             var isHeldLogged = false
             setOnDirectionPressed { direction ->
                 isHeldLogged = false
