@@ -55,6 +55,10 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
 - The views of the game (the same classes) MUST NOT import a `com.mkz.rpg.<subdomain>.domain` or `.usecases` package, so the stories can feed them plain data: they take view data (a data class of the `adapters.presentation` package holding what they draw), which their presenter maps from the domain. This is enforced by [`ViewArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/ViewArchitectureTest.kt).
 - Reading the page URL and titling the page once a story has rendered are the only platform specific code: `storybook.adapters.location` and `storybook.adapters.page` declare it in `src/commonMain`, and implement it in `src/jsMain` (the page) and `src/jvmMain` (a system property, no page), in the same packages, so the architecture tests check them too.
 
+## Shared domain
+
+- `shared.domain` MUST only declare the plumbing of the event bus and the save: `DomainEvent`, `EventBus` (and its `subscribe` extension), `Subscription` and `Snapshottable`. Every subdomain may depend on `shared`, so a game rule there could be read by any of them: it belongs instead to the subdomain owning its concept, private to its aggregate when no one else needs it (e.g.: the gold cap, `MAXIMUM_GOLD` of `Inventory`), or handed to the others through a query (e.g.: `unit`'s `SearchMaximumAbilities`, read by `battleUnit`). This is enforced by [`SharedDomainArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SharedDomainArchitectureTest.kt).
+
 ## Saving
 
 - Every subdomain with a repository MUST either save its runtime state, with a `<Subdomain>Snapshottable` in its
