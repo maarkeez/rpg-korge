@@ -1,6 +1,6 @@
 # Plan: The ability info panel
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** In a battle, the selected battle unit shows up to 6 ability buttons, icons only. The player has to cast
 > an ability to learn what it does: nothing says that the skull deals 10 damage and, when its target is defeated,
@@ -49,7 +49,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|-------------------------------|--------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The ability info view         | **Screen / Ability info** shows every story in English and Spanish, with the new icons, and the prototypes are gone. | ✅      | `ea5753b3` |
 | M2 | The panel for castable abilities | Selecting a castable ability of the human player in a battle shows its panel under the buttons, hidden during the attack preview. | ✅      | `432fc02b` |
-| M3 | Reading blocked and enemy abilities | Selecting a blocked ability, or one of a CPU battle unit, shows its panel with its reason and no cast range.        | ⬜      |         |
+| M3 | Reading blocked and enemy abilities | Selecting a blocked ability, or one of a CPU battle unit, shows its panel with its reason and no cast range.        | ✅      | `684c8de9` |
 
 ### M1 commits
 
@@ -71,7 +71,8 @@ Each milestone is a few commits straight on `main`, green on CI.
 ### M3 commits
 
 1. Add the `DisplayAbilityInfo` state and the `AbilityInfoDisplayed` event to `BattlefieldHud`, with their tests.
-2. Enter it from `ProcessAbilitySelected` for blocked and CPU abilities, and handle it in the other commands.
+2. Enter it from `ProcessAbilitySelected` for blocked and CPU abilities, and handle it in the other commands. Built as
+   one commit with the first, as the commands' `when`s over the sealed `BattlefieldHud` must cover the new state.
 3. Display it from `BattlefieldPresenter`.
 
 ## Reference
