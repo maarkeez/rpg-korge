@@ -1,8 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.shared.adapters.presentation.filledWidth
+import com.mkz.rpg.shared.adapters.presentation.filledShare
 import com.mkz.rpg.shared.adapters.presentation.labelText
-import com.mkz.rpg.shared.adapters.presentation.previewWidth
+import com.mkz.rpg.shared.adapters.presentation.previewShare
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -34,18 +34,18 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should modify label when is displayed`() =
+    fun `Display should display the value before and after the change when it is displayed`() =
         sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             // When
             manaBarPreviewView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
             // Then
-            manaBarPreviewView.labelText() shouldBe "50 / 100"
+            manaBarPreviewView.labelText() shouldBe "100 → 50"
         }
 
     @Test
-    fun `Display should modify filled width when is displayed`() =
+    fun `Display should fill the bar up to the value after the change when is displayed`() =
         sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
@@ -55,11 +55,11 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
             // When
             manaBarPreviewView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
             // Then
-            manaBarPreviewView.filledWidth() shouldBe size.width * filledPercentage
+            manaBarPreviewView.filledShare() shouldBe filledPercentage
         }
 
     @Test
-    fun `Display should modify preview width when is displayed`() =
+    fun `Display should preview the bar up to the value before the change when it decreases`() =
         sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
@@ -69,19 +69,19 @@ class ManaBarPreviewViewTest : ViewsForTesting() {
             // When
             manaBarPreviewView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
             // Then
-            manaBarPreviewView.previewWidth() shouldBe size.width * previewPercentage
+            manaBarPreviewView.previewShare() shouldBe previewPercentage
         }
 
     @Test
-    fun `Display should set filled width to zero when remaining after is negative`() =
+    fun `Display should fill nothing when remaining after is negative`() =
         sharedViewsTest {
             // Given
             val manaBarPreviewView = ManaBarPreviewView(size)
             // When
             manaBarPreviewView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
             // Then
-            manaBarPreviewView.filledWidth() shouldBe 0.00
-            manaBarPreviewView.labelText() shouldBe "0 / 100"
+            manaBarPreviewView.filledShare() shouldBe 0.00
+            manaBarPreviewView.labelText() shouldBe "100 → 0"
         }
 
     @Test

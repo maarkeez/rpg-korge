@@ -10,19 +10,21 @@ import korlibs.korge.view.View
 
 /**
  * The stories of [AttackPreviewView], built with its real children. The caster has 20 of its 30 health points and all
- * its 20 mana points before the cast, and each receiver 30 of 30 health points and 10 mana points. Dragging the preview
- * up and down scrolls through the receivers, two rows at a time, as the game does.
+ * its 20 mana points before the cast, and each receiver 30 of 30 health points and 10 mana points. Every row is in
+ * sight, as the game shows them: at most the caster and its 4 adjacent tiles.
  */
 object AttackPreviewViewStories : StoryBinding {
+    private const val DEFAULT_ABILITY = "mushroom"
     private const val DEFAULT_CASTER = "hero"
     private const val DEFAULT_RECEIVER = "goat-wizard"
     private const val MAXIMUM_HEALTH = 30
     private const val CASTER_HEALTH = 20
     private const val CASTER_MANA = 20
     private const val RECEIVER_MANA = 10
-    private const val RECEIVERS_LIMIT = 6
+    private const val RECEIVERS_LIMIT = 4
     private const val EFFECTS_LIMIT = 4
 
+    private const val ABILITY = "ability"
     private const val CASTER = "caster"
     private const val RECEIVER = "receiver"
     private const val RECEIVERS = "receivers"
@@ -36,28 +38,28 @@ object AttackPreviewViewStories : StoryBinding {
         StoryDto(
             id = "screen-attack-preview--one-enemy",
             name = "One enemy",
-            description = "An ability cast on an enemy: the health it would have left, and the mana the caster would spend.",
+            description = "An ability cast on an enemy: the ability and its caster on a line with the mana it spends, then the enemy's row with the health it would lose.",
             args = emptyMap(),
         )
     private val selfCast =
         StoryDto(
             id = "screen-attack-preview--self-cast",
             name = "Self cast",
-            description = "An ability cast on the caster alone, e.g.: a heal: only its row, with the health it would have left.",
-            args = mapOf(RECEIVERS to ArgDto.int(0), CASTER_HEALTH_AFTER to ArgDto.int(25)),
+            description = "An ability cast on the caster alone, e.g.: a heal: only its row, with the health it would gain in green.",
+            args = mapOf(ABILITY to ArgDto.text("heal"), RECEIVERS to ArgDto.int(0), CASTER_HEALTH_AFTER to ArgDto.int(25)),
         )
     private val severalEnemies =
         StoryDto(
             id = "screen-attack-preview--several-enemies",
             name = "Several enemies",
-            description = "The caster and the first enemy are in sight, the others are scrolled to with a drag, each with its counter.",
+            description = "Three enemies, a row each, all in sight: there is no scroll.",
             args = mapOf(RECEIVERS to ArgDto.int(3)),
         )
     private val defeat =
         StoryDto(
             id = "screen-attack-preview--defeat",
             name = "Defeat",
-            description = "An enemy that the cast would leave with no health.",
+            description = "An enemy that the cast would leave with no health: KO, its portrait ringed grey.",
             args = mapOf(RECEIVER_HEALTH_AFTER to ArgDto.int(0)),
         )
     private val newEffects =
@@ -74,10 +76,11 @@ object AttackPreviewViewStories : StoryBinding {
             group = "Screen",
             title = "Attack preview",
             description =
-                "The cast waiting to be confirmed, in the HUD: the caster and a row per receiver, with the health, mana and effects they would have after it. " +
+                "The cast waiting to be confirmed, in the HUD, as a forecast: the ability and its caster, then a row per battle unit it changes. " +
                     "effects: the ones every battle unit has already. newEffects: the ones the cast would apply to each.",
             controls =
                 listOf(
+                    ControlDto.pick(ABILITY, context.abilityIds()),
                     ControlDto.pick(CASTER, context.unitIds()),
                     ControlDto.pick(RECEIVER, context.unitIds()),
                     ControlDto.int(RECEIVERS, minimum = 0, maximum = RECEIVERS_LIMIT),
@@ -89,6 +92,7 @@ object AttackPreviewViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
+                    ABILITY to ArgDto.text(DEFAULT_ABILITY),
                     CASTER to ArgDto.text(DEFAULT_CASTER),
                     RECEIVER to ArgDto.text(DEFAULT_RECEIVER),
                     RECEIVERS to ArgDto.int(1),
@@ -136,6 +140,7 @@ object AttackPreviewViewStories : StoryBinding {
             )
         return AttackPreviewView(context.resourcesLoader, context.texts).apply {
             display(
+                abilityId = args.text(ABILITY),
                 casterBattleUnit = caster,
                 manaCost = args.int(MANA_COST),
                 receivers = List(args.int(RECEIVERS)) { receiver },

@@ -82,6 +82,16 @@ When a turn starts, the selection is cleared (`DeselectBattleUnit`), so a select
 
 The selected battle unit stays selected while the player casts an ability with it:
 
+- Selecting an ability collapses the header of the battle unit info to a strip of what a cast spends (the portrait,
+  health, mana, steps and casts), and the ability buttons and the [ability info](../plans/ability-info.md) slide up
+  under it in 150ms (`BattleUnitInfoView.FOCUS_DURATION`), outside the timeline, as a view's own animation.
+- Choosing where to cast previews it as a forecast ([`AttackPreviewView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/AttackPreviewView.kt)):
+  the ability and its caster on a line, with the mana it spends (e.g.: `Mushroom`, `by Mage`, `-10 mana`), then a row
+  per battle unit the cast changes: the caster first, only when the cast changes its health or effects (e.g.: a heal),
+  then the receivers. Each row tells the change of health, large, red for a loss (`-12`) and green for a gain (`+5`),
+  the health from before to after (`30 → 18`), and `KO` when it would be left with no health. A cast reaches at most
+  the caster and its 4 adjacent tiles, so the rows are all in sight, with no scroll.
+
 - Confirming the cast keeps the preview displayed while the cast is played, e.g.: the target blinking. Once the cast has been resolved (`AbilityCastResolved`), the caster is displayed selected again, with its movement range read after the cast (e.g.: its mana spent, or its new tile when teleported).
 - Cancelling the cast goes back to choosing where to cast the same ability.
 

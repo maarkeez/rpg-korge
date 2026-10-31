@@ -1,37 +1,37 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.korge.animate.Animator
-import korlibs.korge.animate.animator
-import korlibs.korge.animate.moveTo
-import korlibs.korge.input.onMouseDrag
-import korlibs.korge.ui.uiHorizontalStack
-import korlibs.korge.ui.uiSpacing
-import korlibs.korge.ui.uiVerticalStack
+import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
+import korlibs.image.color.Colors
 import korlibs.korge.view.Container
-import korlibs.korge.view.clipContainer
+import korlibs.korge.view.Image
+import korlibs.korge.view.Text
 import korlibs.korge.view.container
-import korlibs.math.clamp
+import korlibs.korge.view.image
+import korlibs.korge.view.text
+import korlibs.korge.view.xy
 import korlibs.math.geom.Size
-import korlibs.math.interpolation.EASE_OUT_QUAD
-import korlibs.math.interpolation.Easing
-import korlibs.time.milliseconds
-import kotlin.math.roundToInt
 
 /**
- * The caster of the previewed cast, followed by a row per receiver. Displays two rows at a time, and the player drags
- * the preview vertically to scroll through the others.
+ * The forecast of a cast: the ability and its caster on a line, with the mana it spends, then a row per battle unit the
+ * cast changes, all in sight: the caster first, when the cast changes its health or its effects (e.g.: a heal), then
+ * the receivers. A cast reaches at most the caster and its 4 adjacent tiles, so the 5 rows fit in the battle HUD.
  */
 open class AttackPreviewView(
     private val resourcesLoader: BattleSceneResourcesLoader,
     private val texts: Texts,
 ) : Container() {
     companion object {
-        private const val WIDTH = 389.0
-        private const val ROW_HEIGHT = 97.5
-        private const val ROW_SPACING = 20.0
-        internal const val ROW_PITCH = ROW_HEIGHT + ROW_SPACING
-        private const val VIEWPORT_HEIGHT = 2 * ROW_HEIGHT + ROW_SPACING
-        private val SNAP_DURATION = 150.milliseconds
+        private const val WIDTH = 390.0
+        private const val MARGIN = 4.0
+        private const val HEADER_HEIGHT = 52.0
+        private const val ICON_SLOT_SIZE = 40.0
+        private const val ICON_SCALE = 2.0
+        private const val NAME_X = MARGIN + 54
+        private const val NAME_TEXT_SIZE = 15.0
+        private const val CASTER_TEXT_SIZE = 11.0
+        private const val MANA_TEXT_SIZE = 11.0
+        internal const val ROWS_Y = HEADER_HEIGHT + 8
+        internal const val ROW_PITCH = ReceiverPreviewView.HEIGHT + 4
     }
 
     /** A battle unit receiving the cast, the health it would have left and the effects that would stay on it. */
@@ -41,107 +41,58 @@ open class AttackPreviewView(
         val newEffectIds: List<String> = emptyList(),
     )
 
-    private lateinit var casterUnitNameView: UnitNameView
-    internal lateinit var casterUnitPortraitView: UnitPortraitView
-    private lateinit var casterHealthBarView: HealthBarPreviewView
-    private lateinit var casterManaBarView: ManaBarPreviewView
-    internal lateinit var casterEffectsView: EffectsView
+    private val header: Container =
+        container {
+            panel(Size(WIDTH - 2 * MARGIN, HEADER_HEIGHT)).xy(MARGIN, 0.0)
+            panel(Size(ICON_SLOT_SIZE, ICON_SLOT_SIZE), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).xy(MARGIN + 6, 6.0)
+        }
+    internal var abilityIcon: Image? = null
+    internal val abilityNameText: Text = header.text("", textSize = NAME_TEXT_SIZE, color = Colors.WHITE) { xy(NAME_X, 8.0) }
+    internal val casterText: Text = header.text("", textSize = CASTER_TEXT_SIZE, color = HudStyle.MUTED) { xy(NAME_X, 28.0) }
+    internal val manaPill = PillView(color = HudStyle.MANA, glyph = PillView.Glyph.MANA, textSize = MANA_TEXT_SIZE).also(header::addChild)
 
-    // Grows to the largest number of receivers displayed, the ones not needed are hidden.
-    internal val receiverViews = mutableListOf<ReceiverPreviewView>()
+    // A row per battle unit the cast changes. Grows to the largest number of rows displayed, the ones not needed are hidden.
+    internal val rowViews = mutableListOf<ReceiverPreviewView>()
 
-    // A preview shorter than the viewport can not be scrolled.
-    private var minScrollY = 0.0
-
-    private val viewport = clipContainer(Size(WIDTH, VIEWPORT_HEIGHT))
-    internal val content = viewport.container()
-    internal val scrollAnimator: Animator = content.animator(parallel = true)
+    // The row of the caster, or null when the cast does not change it.
+    internal var casterRowView: ReceiverPreviewView? = null
 
     init {
-        content.uiHorizontalStack {
-            casterUnitPortraitView = UnitPortraitView(Size(width = ROW_HEIGHT, height = ROW_HEIGHT), resourcesLoader)
-            addChild(casterUnitPortraitView)
-
-            uiSpacing(Size(10, 0))
-            uiVerticalStack(padding = 1.0) {
-                casterUnitNameView = UnitNameView(size = Size(width = 281.5, height = 14))
-                addChild(casterUnitNameView)
-
-                uiSpacing(Size(0, 15))
-                casterHealthBarView = HealthBarPreviewView(Size(281.5, 16))
-                addChild(casterHealthBarView)
-
-                uiSpacing(Size(0, 4))
-                casterManaBarView = ManaBarPreviewView(Size(281.5, 16))
-                addChild(casterManaBarView)
-
-                uiSpacing(Size(0, 4))
-                casterEffectsView = EffectsView(resourcesLoader)
-                addChild(casterEffectsView)
-            }
-        }
-        // The drag offsets are relative to where the drag started.
-        var dragStartY = 0.0
-        viewport.onMouseDrag { info ->
-            if (info.start) {
-                scrollAnimator.cancel()
-                dragStartY = content.y
-            }
-            content.y = (dragStartY + info.localDXY(content).y).clamp(minScrollY, 0.0)
-            if (info.end) snapToRow()
-        }
         visible = false
     }
 
     open fun display(
+        abilityId: String,
         casterBattleUnit: BattleUnitInfo,
         manaCost: Int,
         receivers: List<Receiver>,
         casterRemainingHealthPoints: Int = casterBattleUnit.remainingHealthPoints,
         casterNewEffectIds: List<String> = emptyList(),
     ) {
-        casterUnitPortraitView.display(casterBattleUnit.unitId)
-        casterUnitNameView.display(unitName = texts.unitName(casterBattleUnit.unitId))
-        casterHealthBarView.display(
-            remainingBefore = casterBattleUnit.remainingHealthPoints,
-            remainingAfter = casterRemainingHealthPoints,
-            maximum = casterBattleUnit.maximumHealthPoints,
-        )
-        casterManaBarView.display(
-            remainingBefore = casterBattleUnit.remainingManaPoints,
-            remainingAfter = casterBattleUnit.remainingManaPoints - manaCost,
-            maximum = casterBattleUnit.maximumManaPoints,
-        )
-        casterEffectsView.display(
-            effectIds = casterBattleUnit.effectIds,
-            newEffectIds = casterNewEffectIds,
-        )
+        displayHeader(abilityId, casterBattleUnit, manaCost)
 
-        while (receiverViews.size < receivers.size) {
-            val receiverView = ReceiverPreviewView(resourcesLoader, texts)
-            receiverView.y = (receiverViews.size + 1) * ROW_PITCH
-            content.addChild(receiverView)
-            receiverViews += receiverView
+        // The caster gets a row only when the cast changes it, e.g.: a heal.
+        val isCasterChanged = casterRemainingHealthPoints != casterBattleUnit.remainingHealthPoints || casterNewEffectIds.isNotEmpty()
+        val rows =
+            buildList {
+                if (isCasterChanged) add(Receiver(casterBattleUnit, casterRemainingHealthPoints, casterNewEffectIds))
+                addAll(receivers)
+            }
+        while (rowViews.size < rows.size) {
+            val rowView = ReceiverPreviewView(resourcesLoader, texts)
+            rowView.xy(MARGIN, ROWS_Y + rowViews.size * ROW_PITCH)
+            addChild(rowView)
+            rowViews += rowView
         }
-        receiverViews.forEachIndexed { index, receiverView ->
-            val receiver = receivers.getOrNull(index)
-            if (receiver == null) {
-                receiverView.hide()
+        rowViews.forEachIndexed { index, rowView ->
+            val row = rows.getOrNull(index)
+            if (row == null) {
+                rowView.hide()
             } else {
-                receiverView.display(
-                    battleUnit = receiver.battleUnit,
-                    remainingHealthPoints = receiver.remainingHealthPoints,
-                    newEffectIds = receiver.newEffectIds,
-                    position = index + 1,
-                    count = receivers.size,
-                )
+                rowView.display(battleUnit = row.battleUnit, remainingHealthPoints = row.remainingHealthPoints, newEffectIds = row.newEffectIds)
             }
         }
-
-        // Each preview starts showing the caster and the first receiver.
-        minScrollY = minOf(0.0, -(receivers.size - 1) * ROW_PITCH)
-        scrollAnimator.cancel()
-        content.y = 0.0
+        casterRowView = if (isCasterChanged) rowViews.first() else null
         visible = true
     }
 
@@ -149,17 +100,28 @@ open class AttackPreviewView(
         visible = false
     }
 
-    // Stops on the closest row, so the rows are never cut.
-    private fun snapToRow() {
-        val snappedY = ((content.y / ROW_PITCH).roundToInt() * ROW_PITCH).clamp(minScrollY, 0.0)
-        scrollAnimator
-            .cancel()
-            .moveTo(
-                view = content,
-                x = { 0.0 },
-                y = { snappedY },
-                time = SNAP_DURATION,
-                easing = Easing.EASE_OUT_QUAD,
-            )
+    // The ability's icon at 2x in its slot, its name, its caster, and the mana it spends, left out for a free ability.
+    private fun displayHeader(
+        abilityId: String,
+        casterBattleUnit: BattleUnitInfo,
+        manaCost: Int,
+    ) {
+        abilityIcon?.removeFromParent()
+        abilityIcon =
+            resourcesLoader.bitmapOrNull("ability/$abilityId.png")?.let { bitmap ->
+                header.image(bitmap) {
+                    smoothing = false
+                    scale = ICON_SCALE
+                    xy(MARGIN + 6 + (ICON_SLOT_SIZE - bitmap.width * ICON_SCALE) / 2, 6 + (ICON_SLOT_SIZE - bitmap.height * ICON_SCALE) / 2)
+                }
+            }
+        abilityNameText.text = texts.abilityName(abilityId)
+        casterText.text = texts[UiText.ATTACK_PREVIEW_BY, "unit" to texts.unitName(casterBattleUnit.unitId)]
+        if (manaCost > 0) {
+            manaPill.display(texts[UiText.ATTACK_PREVIEW_MANA, "mana" to manaCost])
+            manaPill.xy(WIDTH - MARGIN - 10 - manaPill.width, (HEADER_HEIGHT - manaPill.pillHeight) / 2)
+        } else {
+            manaPill.hide()
+        }
     }
 }

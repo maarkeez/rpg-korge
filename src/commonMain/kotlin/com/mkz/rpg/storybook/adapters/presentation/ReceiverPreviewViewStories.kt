@@ -14,15 +14,12 @@ object ReceiverPreviewViewStories : StoryBinding {
     private const val MAXIMUM_HEALTH = 30
     private const val MAXIMUM_MANA = 20
     private const val REMAINING_MANA = 10
-    private const val RECEIVERS_LIMIT = 6
     private const val EFFECTS_LIMIT = 4
 
     private const val UNIT = "unit"
     private const val HEALTH_AFTER = "healthAfter"
     private const val EFFECTS = "effects"
     private const val NEW_EFFECTS = "newEffects"
-    private const val POSITION = "position"
-    private const val COUNT = "count"
 
     private val hurt = StoryDto(id = "screen-receiver-preview--hurt", name = "Hurt", description = "A receiver that the cast would hurt: the health it would have left.", args = emptyMap())
     private val unharmed =
@@ -39,13 +36,6 @@ object ReceiverPreviewViewStories : StoryBinding {
             description = "A receiver that the cast would leave with no health.",
             args = mapOf(HEALTH_AFTER to ArgDto.int(0)),
         )
-    private val oneOfSeveral =
-        StoryDto(
-            id = "screen-receiver-preview--one-of-several",
-            name = "One of several",
-            description = "With several receivers, the counter on the name line tells which this is.",
-            args = mapOf(POSITION to ArgDto.int(2), COUNT to ArgDto.int(3)),
-        )
     private val newEffects =
         StoryDto(
             id = "screen-receiver-preview--new-effects",
@@ -60,16 +50,14 @@ object ReceiverPreviewViewStories : StoryBinding {
             group = "Screen",
             title = "Receiver preview",
             description =
-                "A row of the attack preview: a battle unit receiving the cast, with its portrait and name, the health it would have left, its mana and its effects. " +
-                    "position: the receiver out of count, which only tells when there are several (never past the count).",
+                "A row of the forecast: a battle unit receiving the cast, with its portrait and name, the health it would lose or gain, its mana and its effects, " +
+                    "the new ones blinking.",
             controls =
                 listOf(
                     ControlDto.pick(UNIT, context.unitIds()),
                     ControlDto.int(HEALTH_AFTER, minimum = 0, maximum = MAXIMUM_HEALTH),
                     ControlDto.int(EFFECTS, minimum = 0, maximum = EFFECTS_LIMIT),
                     ControlDto.int(NEW_EFFECTS, minimum = 0, maximum = EFFECTS_LIMIT),
-                    ControlDto.int(POSITION, minimum = 1, maximum = RECEIVERS_LIMIT),
-                    ControlDto.int(COUNT, minimum = 1, maximum = RECEIVERS_LIMIT),
                 ),
             args =
                 mapOf(
@@ -77,10 +65,8 @@ object ReceiverPreviewViewStories : StoryBinding {
                     HEALTH_AFTER to ArgDto.int(18),
                     EFFECTS to ArgDto.int(0),
                     NEW_EFFECTS to ArgDto.int(0),
-                    POSITION to ArgDto.int(1),
-                    COUNT to ArgDto.int(1),
                 ),
-            stories = listOf(hurt, unharmed, defeated, oneOfSeveral, newEffects),
+            stories = listOf(hurt, unharmed, defeated, newEffects),
         )
 
     override fun render(
@@ -91,7 +77,6 @@ object ReceiverPreviewViewStories : StoryBinding {
         // The effects with an icon, as many times as needed.
         val effects = List(args.int(EFFECTS)) { index -> effectIds[index % effectIds.size] }
         val newEffects = List(args.int(NEW_EFFECTS)) { index -> effectIds[index % effectIds.size] }
-        val count = args.int(COUNT)
         return ReceiverPreviewView(context.resourcesLoader, context.texts).apply {
             display(
                 battleUnit =
@@ -106,8 +91,6 @@ object ReceiverPreviewViewStories : StoryBinding {
                     ),
                 remainingHealthPoints = args.int(HEALTH_AFTER),
                 newEffectIds = newEffects,
-                position = args.int(POSITION).coerceAtMost(count),
-                count = count,
             )
         }
     }

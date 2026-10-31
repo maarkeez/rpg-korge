@@ -2,47 +2,57 @@ package com.mkz.rpg.shared.adapters.presentation
 
 import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
-import korlibs.korge.style.styles
 import korlibs.korge.ui.UIContainer
-import korlibs.korge.ui.UIProgressBar
-import korlibs.korge.ui.uiBackgroundColor
-import korlibs.korge.ui.uiProgressBar
-import korlibs.korge.ui.uiSelectedColor
-import korlibs.korge.view.align.centerOn
-import korlibs.korge.view.setText
+import korlibs.korge.view.Container
+import korlibs.korge.view.RoundRect
+import korlibs.korge.view.Text
+import korlibs.korge.view.container
+import korlibs.korge.view.roundRect
+import korlibs.korge.view.solidRect
 import korlibs.korge.view.text
+import korlibs.korge.view.xy
+import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
+import korlibs.math.geom.degrees
 import kotlin.math.max
+import kotlin.math.min
 
 /**
- * A bar filled up to the remaining value after a change, over the bar filled up to the value before it. Drawn with
- * progress bars, as they are cut by the clip containers (e.g.: when scrolled), unlike the round rect views.
+ * A rounded bar of the value a change would leave, e.g.: the health a cast would leave. The part lost is drawn in a
+ * lighter [previewColor], and a part gained in [gainColor]. The value before and after it follows the bar, e.g.:
+ * `30 → 18`, the arrow drawn as a vector, as the default font has no arrow.
  */
 open class PreviewBarView(
     size: Size,
-    filledColor: RGBA,
-    previewColor: RGBA,
+    private val filledColor: RGBA,
+    private val previewColor: RGBA,
+    private val gainColor: RGBA = GAIN,
+    private val showValue: Boolean = true,
 ) : UIContainer(size) {
-    internal val preview: UIProgressBar =
-        uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
-            progressBar.styles.uiSelectedColor = previewColor
-            progressBar.styles.uiBackgroundColor = Colors.DIMGRAY
-        }
+    companion object {
+        const val BAR_HEIGHT = 12.0
+        const val TEXT_SIZE = 10.0
+        private const val VALUE_SPACING = 6.0
+        private const val ARROW_LENGTH = 8.0
+        private const val ARROW_HEAD = 4.5
 
-    internal val filled: UIProgressBar =
-        uiProgressBar(size = size, current = 100f, maximum = 100f).also { progressBar ->
-            progressBar.styles.uiSelectedColor = filledColor
-            progressBar.styles.uiBackgroundColor = Colors.TRANSPARENT
-        }
+        // A value gained, as a heal.
+        val GAIN = RGBA(0x5A, 0xD2, 0x5A)
+    }
 
-    internal val label =
-        text(
-            text = "30 / 500",
-            textSize = 14.0,
-            color = Colors.WHITE,
-        ) {
-            centerOn(preview)
-        }
+    internal var track: RoundRect? = null
+    internal var filled: RoundRect? = null
+    internal var preview: RoundRect? = null
+    internal val value: Container = container()
+    internal var beforeText: Text? = null
+    internal var afterText: Text? = null
+
+    /** The width of the bar, without its value. */
+    val barWidth: Double get() = track?.width ?: width
+
+    // The shares of the bar filled and previewed, e.g.: 0.6 for 18 out of 30.
+    internal var filledRatio: Double = 1.0
+    internal var previewRatio: Double = 1.0
 
     fun display(
         remainingBefore: Int,
@@ -50,15 +60,59 @@ open class PreviewBarView(
         maximum: Int,
     ) {
         val remainingAfter = max(0, remainingAfter)
-        this.filled.maximum = maximum.toDouble()
-        this.filled.current = remainingAfter.toDouble()
-        this.preview.maximum = maximum.toDouble()
-        this.preview.current = remainingBefore.toDouble()
-        this.label.setText("$remainingAfter / $maximum")
+        track?.removeFromParent()
+        filled?.removeFromParent()
+        preview?.removeFromParent()
+        displayValue(remainingBefore, remainingAfter)
+        val barWidth = width - if (showValue) value.width + VALUE_SPACING else 0.0
+        val barHeight = min(height, BAR_HEIGHT)
+        val barY = (height - barHeight) / 2
+        val radius = barHeight / 2
+
+        fun ratio(value: Int) = if (maximum > 0) value.coerceIn(0, maximum).toDouble() / maximum else 0.0
+        track = roundRect(Size(barWidth, barHeight), RectCorners(radius), fill = BarView.TRACK, stroke = BarView.TRACK_STROKE, strokeThickness = 1.0) { xy(0.0, barY) }
+        // A loss previews the part lost under the part kept, a gain the part gained after the part kept.
+        filledRatio = ratio(min(remainingBefore, remainingAfter))
+        previewRatio = ratio(max(remainingBefore, remainingAfter))
+        val previewWidth = barWidth * previewRatio
+        val filledWidth = barWidth * filledRatio
+        preview =
+            roundRect(Size(previewWidth, barHeight), RectCorners(min(radius, previewWidth / 2)), fill = if (remainingAfter > remainingBefore) gainColor else previewColor) {
+                xy(0.0, barY)
+                visible = previewWidth > 0 && remainingAfter != remainingBefore
+            }
+        filled =
+            roundRect(Size(filledWidth, barHeight), RectCorners(min(radius, filledWidth / 2)), fill = filledColor) {
+                xy(0.0, barY)
+                visible = filledWidth > 0
+            }
+        addChild(value)
+        value.xy(width - value.width, (height - TEXT_SIZE) / 2 - 1)
         visible = true
     }
 
     fun hide() {
         visible = false
+    }
+
+    // The value before and after the change, e.g.: 30 -> 18, the arrow drawn as a vector.
+    private fun displayValue(
+        before: Int,
+        after: Int,
+    ) {
+        value.removeChildren()
+        value.visible = showValue
+        val color = Colors.WHITE
+        val from = value.text("$before", textSize = TEXT_SIZE, color = color.withAd(0.7))
+        val arrowX = from.width + 4
+        val middle = TEXT_SIZE * 0.62
+        value.solidRect(Size(ARROW_LENGTH, 1.5), color.withAd(0.7)) { xy(arrowX, middle - 0.75) }
+        value.solidRect(Size(ARROW_HEAD, ARROW_HEAD), color.withAd(0.7)) {
+            rotation = 45.degrees
+            xy(arrowX + ARROW_LENGTH, middle - 3.2)
+        }
+        val to = value.text("$after", textSize = TEXT_SIZE, color = color) { xy(arrowX + ARROW_LENGTH + 7, 0.0) }
+        beforeText = from
+        afterText = to
     }
 }

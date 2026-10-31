@@ -1365,6 +1365,23 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `DisplayEnemyAbilityCastPreview should display the ability previewed when an enemy ability cast is previewed`() {
+        // Given
+        eventBus.publish(
+            BattlefieldHudEvent.EnemyAbilityCastPreviewed(
+                casterBattleUnitId = "knight-1",
+                abilityId = "mushroom",
+                castGroup = CastGroupDto(tiles = listOf(TileDto(row = 1, column = 3))),
+                enemyBattleUnitIds = listOf("rat-1"),
+            ),
+        )
+        // When
+        eventBus.dispatch()
+        // Then
+        attackPreviewView.displayedAttackPreviews.single().abilityId shouldBe "mushroom"
+    }
+
+    @Test
     fun `DisplayEnemyAbilityCastPreview should preview the unit, health and mana of the caster and of each enemy when an enemy ability cast is previewed`() {
         // Given
         val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!

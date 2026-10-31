@@ -11,6 +11,9 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class AttackPreviewViewTest : ViewsForTesting() {
+    // The height of the battle HUD.
+    private val battleHudHeight = 300.0
+
     private val casterBattleUnit = battleUnitInfo(unitId = "knight")
 
     private fun receivers(count: Int): List<AttackPreviewView.Receiver> =
@@ -21,7 +24,7 @@ class AttackPreviewViewTest : ViewsForTesting() {
             )
         }
 
-    private fun AttackPreviewView.display(receivers: List<AttackPreviewView.Receiver>) = display(casterBattleUnit = casterBattleUnit, manaCost = 10, receivers = receivers)
+    private fun AttackPreviewView.display(receivers: List<AttackPreviewView.Receiver>) = display(abilityId = "mushroom", casterBattleUnit = casterBattleUnit, manaCost = 10, receivers = receivers)
 
     @Test
     fun `Display should be visible when is displayed`() =
@@ -35,43 +38,77 @@ class AttackPreviewViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should not display receivers when no receiver is provided`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            // When
-            attackPreviewView.display(receivers = emptyList())
-            // Then
-            attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
-            attackPreviewView.receiversCount() shouldBe 0
-        }
-
-    @Test
-    fun `Display should display the receiver without counter when one receiver is provided`() =
+    fun `Display should display the ability and its caster when it is displayed`() =
         sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
             attackPreviewView.display(receivers = receivers(1))
             // Then
-            attackPreviewView.isCasterPortraitVisible().shouldBeTrue()
-            attackPreviewView.receiversCount() shouldBe 1
-            attackPreviewView.isReceiverPortraitVisible(0).shouldBeTrue()
-            attackPreviewView.receiverCounter(0).shouldBeNull()
+            attackPreviewView.isAbilityIconDisplayed().shouldBeTrue()
+            attackPreviewView.abilityName() shouldBe "Mushroom"
+            attackPreviewView.caster() shouldBe "by Knight"
+            attackPreviewView.manaSpent() shouldBe "-10 mana"
         }
 
     @Test
-    fun `Display should display every receiver with its counter when several receivers are provided`() =
+    fun `Display should leave out the mana spent when the ability is free`() =
         sharedViewsTest {
             // Given
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
             // When
-            attackPreviewView.display(receivers = receivers(3))
+            attackPreviewView.display(abilityId = "sword", casterBattleUnit = casterBattleUnit, manaCost = 0, receivers = receivers(1))
             // Then
-            attackPreviewView.receiversCount() shouldBe 3
-            attackPreviewView.receiverCounter(0) shouldBe "1/3"
-            attackPreviewView.receiverCounter(1) shouldBe "2/3"
-            attackPreviewView.receiverCounter(2) shouldBe "3/3"
+            attackPreviewView.manaSpent().shouldBeNull()
+        }
+
+    @Test
+    fun `Display should display a row for the caster when the cast changes its health`() =
+        sharedViewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            attackPreviewView.display(
+                abilityId = "heal",
+                casterBattleUnit = battleUnitInfo(unitId = "knight", remainingHealthPoints = 10),
+                manaCost = 10,
+                receivers = emptyList(),
+                casterRemainingHealthPoints = 20,
+            )
+            // Then
+            attackPreviewView.isCasterRowDisplayed().shouldBeTrue()
+            attackPreviewView.rows().single().healthChange() shouldBe "+10"
+        }
+
+    @Test
+    fun `Display should display no row for the caster when the cast does not change it`() =
+        sharedViewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            attackPreviewView.display(receivers = receivers(1))
+            // Then
+            attackPreviewView.isCasterRowDisplayed().shouldBeFalse()
+            attackPreviewView.receiversCount() shouldBe 1
+            attackPreviewView.isReceiverPortraitVisible(0).shouldBeTrue()
+        }
+
+    @Test
+    fun `Display should display every receiver in sight when four receivers are provided`() =
+        sharedViewsTest {
+            // Given
+            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            attackPreviewView.display(
+                abilityId = "cleave",
+                casterBattleUnit = casterBattleUnit,
+                manaCost = 10,
+                receivers = receivers(4),
+                casterNewEffectIds = listOf("venom-damage"),
+            )
+            // Then
+            attackPreviewView.rows().size shouldBe 5
+            attackPreviewView.areRowsInSight(height = battleHudHeight).shouldBeTrue()
         }
 
     @Test
@@ -85,72 +122,6 @@ class AttackPreviewViewTest : ViewsForTesting() {
             // Then
             attackPreviewView.receiversCount() shouldBe 1
             attackPreviewView.isReceiverPortraitVisible(1).shouldBeFalse()
-        }
-
-    @Test
-    fun `Drag should scroll to the next receiver when several receivers are displayed`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            addChild(attackPreviewView)
-            attackPreviewView.display(receivers = receivers(3))
-            // When
-            dragVertically(attackPreviewView, dy = -100.0)
-            // Then
-            attackPreviewView.firstVisibleRow() shouldBe 1.0
-        }
-
-    @Test
-    fun `Drag should stop on the last receiver when dragged beyond it`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            addChild(attackPreviewView)
-            attackPreviewView.display(receivers = receivers(3))
-            // When
-            dragVertically(attackPreviewView, dy = -1000.0)
-            // Then
-            attackPreviewView.firstVisibleRow() shouldBe 2.0
-        }
-
-    @Test
-    fun `Drag should stop on the closest row when dragged less than half a row`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            addChild(attackPreviewView)
-            attackPreviewView.display(receivers = receivers(3))
-            // When
-            dragVertically(attackPreviewView, dy = -40.0)
-            // Then
-            attackPreviewView.firstVisibleRow() shouldBe 0.0
-        }
-
-    @Test
-    fun `Drag should not scroll when one receiver is displayed`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            addChild(attackPreviewView)
-            attackPreviewView.display(receivers = receivers(1))
-            // When
-            dragVertically(attackPreviewView, dy = -100.0)
-            // Then
-            attackPreviewView.firstVisibleRow() shouldBe 0.0
-        }
-
-    @Test
-    fun `Display should show the caster again when it was scrolled out of view`() =
-        sharedViewsTest {
-            // Given
-            val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            addChild(attackPreviewView)
-            attackPreviewView.display(receivers = receivers(3))
-            dragVertically(attackPreviewView, dy = -100.0)
-            // When
-            attackPreviewView.display(receivers = receivers(3))
-            // Then
-            attackPreviewView.firstVisibleRow() shouldBe 0.0
         }
 
     @Test

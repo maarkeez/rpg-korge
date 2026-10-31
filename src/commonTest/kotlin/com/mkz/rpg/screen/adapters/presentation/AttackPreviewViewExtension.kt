@@ -1,31 +1,27 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.korge.tests.ViewsForTesting
+// Page object of [AttackPreviewView]. Use `ReceiverPreviewViewExtension` to inspect each row.
 
-// Page object of [AttackPreviewView].
+/** The name of the ability previewed, on the header. */
+fun AttackPreviewView.abilityName(): String = abilityNameText.text
 
-fun AttackPreviewView.isCasterPortraitVisible(): Boolean = casterUnitPortraitView.visible
+/** Who casts the ability, e.g.: "by Mage". */
+fun AttackPreviewView.caster(): String = casterText.text
 
-/** The receivers displayed, scrolled into view or not. */
-fun AttackPreviewView.receiversCount(): Int = receiverViews.count { receiverView -> receiverView.visible }
+/** The mana the cast spends, e.g.: "-10 mana", or null when the ability is free. */
+fun AttackPreviewView.manaSpent(): String? = manaPill.takeIf { pill -> pill.visible }?.labelText()
 
-fun AttackPreviewView.isReceiverPortraitVisible(index: Int): Boolean = receiverViews.getOrNull(index)?.let { it.visible && it.unitPortraitView.visible } ?: false
+fun AttackPreviewView.isAbilityIconDisplayed(): Boolean = abilityIcon != null
 
-/** The counter of the receiver, e.g.: "2/3", or null when it is not displayed. */
-fun AttackPreviewView.receiverCounter(index: Int): String? = receiverViews[index].counterLabel.takeIf { it.visible }?.text
+/** The rows displayed: the caster's, when the cast changes it, then a row per receiver. */
+fun AttackPreviewView.rows(): List<ReceiverPreviewView> = rowViews.filter { rowView -> rowView.visible }
 
-/** The first row scrolled into view, being the caster row 0 and the receiver rows the next ones. */
-fun AttackPreviewView.firstVisibleRow(): Double = -content.y / AttackPreviewView.ROW_PITCH
+fun AttackPreviewView.isCasterRowDisplayed(): Boolean = casterRowView?.visible == true
 
-/** Drags the preview vertically by [dy], from its center, and waits until it stops on a row. The preview must be on the stage. */
-suspend fun ViewsForTesting.dragVertically(
-    attackPreviewView: AttackPreviewView,
-    dy: Double,
-) {
-    val center = attackPreviewView.getGlobalBounds().center
-    mouseMoveTo(center.x, center.y)
-    mouseDown()
-    mouseMoveTo(center.x, center.y + dy)
-    mouseUp()
-    attackPreviewView.scrollAnimator.awaitComplete()
-}
+/** The receivers displayed, the caster's row left out. */
+fun AttackPreviewView.receiversCount(): Int = rows().size - if (isCasterRowDisplayed()) 1 else 0
+
+fun AttackPreviewView.isReceiverPortraitVisible(index: Int): Boolean = rowViews.getOrNull(index)?.let { it.visible && it.unitPortraitView.visible } ?: false
+
+/** Whether every row displayed ends within the [height] of the battle HUD, so none has to be scrolled into view. */
+fun AttackPreviewView.areRowsInSight(height: Double): Boolean = rows().all { rowView -> rowView.y + ReceiverPreviewView.HEIGHT <= height }

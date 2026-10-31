@@ -226,7 +226,6 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-receiver-preview--hurt",
                     "screen-receiver-preview--unharmed",
                     "screen-receiver-preview--defeated",
-                    "screen-receiver-preview--one-of-several",
                     "screen-receiver-preview--new-effects",
                     "screen-battle-hud",
                     "screen-battle-hud--battle-unit-info",

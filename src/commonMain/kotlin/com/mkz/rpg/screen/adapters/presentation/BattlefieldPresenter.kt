@@ -483,6 +483,7 @@ class BattlefieldPresenter(
         val newEffectIds = previewCastOngoingEffects(event.casterBattleUnitId, event.abilityId, event.castGroup)
         return {
             attackPreviewView.display(
+                abilityId = event.abilityId,
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.cost,
                 receivers = emptyList(),
@@ -511,6 +512,7 @@ class BattlefieldPresenter(
             }
         return {
             attackPreviewView.display(
+                abilityId = event.abilityId,
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.cost,
                 receivers = receivers,

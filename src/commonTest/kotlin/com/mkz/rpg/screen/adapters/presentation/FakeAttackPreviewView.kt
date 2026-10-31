@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 // Records what the presenters ask the attack preview view to display, instead of drawing it.
 class FakeAttackPreviewView : AttackPreviewView(BattleSceneResourcesLoader(), TextsMother.texts()) {
     data class DisplayedAttackPreview(
+        val abilityId: String,
         val casterBattleUnit: BattleUnitInfo,
         val manaCost: Int,
         val receivers: List<Receiver>,
@@ -15,13 +16,14 @@ class FakeAttackPreviewView : AttackPreviewView(BattleSceneResourcesLoader(), Te
         private set
 
     override fun display(
+        abilityId: String,
         casterBattleUnit: BattleUnitInfo,
         manaCost: Int,
         receivers: List<Receiver>,
         casterRemainingHealthPoints: Int,
         casterNewEffectIds: List<String>,
     ) {
-        displayedAttackPreviews += DisplayedAttackPreview(casterBattleUnit, manaCost, receivers, casterRemainingHealthPoints, casterNewEffectIds)
+        displayedAttackPreviews += DisplayedAttackPreview(abilityId, casterBattleUnit, manaCost, receivers, casterRemainingHealthPoints, casterNewEffectIds)
     }
 
     override fun hide() {

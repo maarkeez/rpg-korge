@@ -6,4 +6,5 @@ import korlibs.math.geom.Size
 
 class ManaBarView(
     size: Size,
-) : BarView(size, RGBA(0, 145, 255))
+    showValue: Boolean = true,
+) : BarView(size, RGBA(0, 145, 255), showValue)

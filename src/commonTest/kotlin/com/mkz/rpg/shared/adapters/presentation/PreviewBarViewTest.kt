@@ -31,18 +31,18 @@ class PreviewBarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should modify label when is displayed`() =
+    fun `Display should display the value before and after the change when it is displayed`() =
         sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             // When
             previewBarView.display(remainingBefore = 100, remainingAfter = 50, maximum = 100)
             // Then
-            previewBarView.labelText() shouldBe "50 / 100"
+            previewBarView.labelText() shouldBe "100 → 50"
         }
 
     @Test
-    fun `Display should modify filled width when is displayed`() =
+    fun `Display should fill the bar up to the value after the change when is displayed`() =
         sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
@@ -52,11 +52,11 @@ class PreviewBarViewTest : ViewsForTesting() {
             // When
             previewBarView.display(remainingBefore = 100, remainingAfter = remainingAfter, maximum = maximum)
             // Then
-            previewBarView.filledWidth() shouldBe size.width * filledPercentage
+            previewBarView.filledShare() shouldBe filledPercentage
         }
 
     @Test
-    fun `Display should modify preview width when is displayed`() =
+    fun `Display should preview the bar up to the value before the change when it decreases`() =
         sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
@@ -66,19 +66,44 @@ class PreviewBarViewTest : ViewsForTesting() {
             // When
             previewBarView.display(remainingBefore = remainingBefore, remainingAfter = 50, maximum = maximum)
             // Then
-            previewBarView.previewWidth() shouldBe size.width * previewPercentage
+            previewBarView.previewShare() shouldBe previewPercentage
         }
 
     @Test
-    fun `Display should set filled width to zero when remaining after is negative`() =
+    fun `Display should fill nothing when remaining after is negative`() =
         sharedViewsTest {
             // Given
             val previewBarView = PreviewBarView(size, Colors.RED, Colors.GREEN)
             // When
             previewBarView.display(remainingBefore = 100, remainingAfter = -10, maximum = 100)
             // Then
-            previewBarView.filledWidth() shouldBe 0.00
-            previewBarView.labelText() shouldBe "0 / 100"
+            previewBarView.filledShare() shouldBe 0.00
+            previewBarView.labelText() shouldBe "100 → 0"
+        }
+
+    @Test
+    fun `Display should draw the lost part lighter when the value decreases`() =
+        sharedViewsTest {
+            // Given
+            val previewBarView = PreviewBarView(size, Colors.RED, Colors.PINK)
+            // When
+            previewBarView.display(remainingBefore = 30, remainingAfter = 18, maximum = 30)
+            // Then
+            previewBarView.previewColor() shouldBe Colors.PINK
+            previewBarView.filledShare() shouldBe 18.0 / 30
+        }
+
+    @Test
+    fun `Display should draw the gained part green when the value increases`() =
+        sharedViewsTest {
+            // Given
+            val previewBarView = PreviewBarView(size, Colors.RED, Colors.PINK)
+            // When
+            previewBarView.display(remainingBefore = 10, remainingAfter = 20, maximum = 30)
+            // Then
+            previewBarView.previewColor() shouldBe PreviewBarView.GAIN
+            previewBarView.filledShare() shouldBe 10.0 / 30
+            previewBarView.previewShare() shouldBe 20.0 / 30
         }
 
     @Test

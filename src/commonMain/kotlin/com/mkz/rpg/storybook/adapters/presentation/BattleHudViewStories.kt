@@ -102,6 +102,7 @@ object BattleHudViewStories : StoryBinding {
         val attackPreviewView =
             AttackPreviewView(context.resourcesLoader, context.texts).apply {
                 display(
+                    abilityId = "mushroom",
                     casterBattleUnit = heroInfo,
                     manaCost = 10,
                     receivers =
