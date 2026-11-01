@@ -36,6 +36,9 @@ fun Stage.questTrackerView(): QuestTrackerView? = descendants().filterIsInstance
 /** The detail of the main quest of the battle scene, or `null` while the battle scene is not on the stage yet. */
 fun Stage.questDetailView(): QuestDetailView? = descendants().filterIsInstance<QuestDetailView>().firstOrNull()
 
+/** The card announcing the main quest of the battle scene, or `null` while the battle scene is not on the stage yet. */
+fun Stage.questAnnouncementView(): QuestAnnouncementView? = descendants().filterIsInstance<QuestAnnouncementView>().firstOrNull()
+
 /**
  * Whether the start of the current turn has been announced: the header displays the turn and the battlefield is no
  * longer tinted. The player can not act on the battle scene until then.

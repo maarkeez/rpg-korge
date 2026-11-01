@@ -9,6 +9,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
@@ -16,6 +17,7 @@ import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
+import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -30,6 +32,8 @@ class QuestPresenterTest {
     private val questId = "defeat-the-goat-wizard"
     private val trackerView = FakeQuestTrackerView()
     private val detailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val announcementView = FakeQuestAnnouncementView()
+    private val timeline = battleSceneTimeline()
 
     // The knight explores the sand, alone, with the quests given.
     private fun apis(vararg quests: Quest) =
@@ -43,11 +47,19 @@ class QuestPresenterTest {
             explore = true,
         ).also(SubdomainApis::initialise)
 
-    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, questApi, partyApi, TextsMother.texts(), battleSceneTimeline(), eventBus)
+    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
         eventBus.dispatch()
+    }
+
+    // The quest under way, once its start card is gone.
+    private fun SubdomainApis.startedPresenter(): QuestPresenter {
+        val presenter = presenter()
+        startQuest()
+        presenter.questAnnouncementContinued()
+        return presenter
     }
 
     private fun SubdomainApis.defeatRat() {
@@ -56,10 +68,10 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should draw the tracker when the main quest starts`() {
+    fun `QuestPresenter should draw the tracker and wait for Continue when the main quest starts`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        apis.presenter()
+        val presenter = apis.presenter()
         // When
         apis.startQuest()
         // Then
@@ -67,6 +79,13 @@ class QuestPresenterTest {
             .single()
             .currentTask.text shouldBe "Defeat the Goat Wizard"
         trackerView.pops shouldBe 0
+        announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED)
+        timeline.isPlaying.shouldBeTrue()
+        // When
+        presenter.questAnnouncementContinued()
+        // Then
+        announcementView.isAnnouncing.shouldBeFalse()
+        timeline.isPlaying.shouldBeFalse()
     }
 
     @Test
@@ -76,17 +95,18 @@ class QuestPresenterTest {
         apis.presenter()
         // When
         apis.eventBus.publish(QuestStarted(questId = "side"))
+        apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
         // Then
         trackerView.displayedQuests.shouldBeEmpty()
+        announcementView.announcements.shouldBeEmpty()
     }
 
     @Test
     fun `QuestPresenter should pop the tracker when a defeat counts`() {
         // Given
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
-        apis.presenter()
-        apis.startQuest()
+        apis.startedPresenter()
         // When
         apis.defeatRat()
         // Then
@@ -94,14 +114,14 @@ class QuestPresenterTest {
             .last()
             .currentTask.progress shouldBe 1
         trackerView.pops shouldBe 1
+        timeline.isPlaying.shouldBeFalse()
     }
 
     @Test
     fun `QuestPresenter should pop the tracker once when a defeat completes a task with another one after it`() {
         // Given
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1), defeatUnits(unitId = "knight", count = 1))))
-        apis.presenter()
-        apis.startQuest()
+        apis.startedPresenter()
         // When
         apis.defeatRat()
         // Then
@@ -116,11 +136,10 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should tick the tracker once when the last defeat publishes three events`() {
+    fun `QuestPresenter should announce the completion once when the last defeat publishes three events`() {
         // Given
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
-        apis.presenter()
-        apis.startQuest()
+        apis.startedPresenter()
         // When
         apis.defeatRat()
         // Then
@@ -130,10 +149,14 @@ class QuestPresenterTest {
             .isCompleted
             .shouldBeTrue()
         trackerView.pops shouldBe 0
+        announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED, Moment.COMPLETED)
+        announcementView.announcements
+            .last()
+            .second.gold shouldBe 150
     }
 
     @Test
-    fun `QuestPresenter should draw the tracker without popping when a game is restored`() {
+    fun `QuestPresenter should draw the tracker without announcing when a game is restored`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         apis.presenter()
@@ -146,6 +169,24 @@ class QuestPresenterTest {
             .isCompleted
             .shouldBeFalse()
         trackerView.pops shouldBe 0
+        announcementView.announcements.shouldBeEmpty()
+        timeline.isPlaying.shouldBeFalse()
+    }
+
+    @Test
+    fun `QuestPresenter should be announcing until Continue is tapped`() {
+        // Given
+        val apis = apis(mainQuest(id = questId))
+        val presenter = apis.presenter()
+        presenter.isAnnouncing.shouldBeFalse()
+        // When
+        apis.startQuest()
+        // Then
+        presenter.isAnnouncing.shouldBeTrue()
+        // When
+        presenter.questAnnouncementContinued()
+        // Then
+        presenter.isAnnouncing.shouldBeFalse()
     }
 
     @Test
@@ -191,9 +232,9 @@ class QuestPresenterTest {
     fun `OpenDetail should display the quest in its completed state when it is completed`() {
         // Given
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
-        val presenter = apis.presenter()
-        apis.startQuest()
+        val presenter = apis.startedPresenter()
         apis.defeatRat()
+        presenter.questAnnouncementContinued()
         // When
         presenter.openDetail()
         // Then
@@ -222,8 +263,7 @@ class QuestPresenterTest {
     fun `QuestDetailBackSelected should do nothing when the timeline is playing`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        val timeline = battleSceneTimeline()
-        val presenter = QuestPresenter(trackerView, detailView, apis.questApi, apis.partyApi, TextsMother.texts(), timeline, apis.eventBus)
+        val presenter = apis.presenter()
         apis.partyApi.openQuest()
         apis.eventBus.dispatch()
         presenter.openDetail()

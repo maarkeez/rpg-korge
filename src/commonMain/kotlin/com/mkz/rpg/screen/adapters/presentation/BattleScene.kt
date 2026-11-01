@@ -94,6 +94,7 @@ class BattleScene(
     val confirmDialogView = ConfirmDialogView()
     val questTrackerView = QuestTrackerView(texts)
     val questDetailView = QuestDetailView(resourcesLoader, texts)
+    val questAnnouncementView = QuestAnnouncementView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -220,7 +221,7 @@ class BattleScene(
                 addChild(battleInfoView)
                 addChild(questTrackerView)
             }
-            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questApi, partyApi, texts, timeline, eventBus)
+            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questAnnouncementView, questApi, partyApi, texts, timeline, eventBus)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
@@ -295,6 +296,9 @@ class BattleScene(
                 addUpdater { elapsed -> explorationPresenter.tick(elapsed) }
             }
         }
+
+        // Over everything, taking no room in the stack.
+        addChild(questAnnouncementView)
 
         // Start game: a new one, or the one saved in the slot, restored once the content read from the resources is set
         // up. A save that can not be loaded goes back to Load game, where it is shown as incompatible.

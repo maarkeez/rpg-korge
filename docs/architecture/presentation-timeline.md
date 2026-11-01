@@ -27,6 +27,12 @@ The timeline plays its steps on the scene coroutines, which `BattleScene` runs o
 - The player MUST NOT act while the timeline is playing (`isPlaying`): selecting tiles or abilities, cancelling or confirming a cast, finishing the turn and walking the party while exploring are ignored. The scene still displays a past state of the battle meanwhile. The virtual pad is the exception: its last press is kept, and acted on once the timeline is idle (see [Exploration](exploration.md#walking)).
 - The finish turn button shows it: [`FinishTurnPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt) displays it during the battles only, from `BattleStarted` to `BattleFinished`, as there are no turns while exploring. It keeps it disabled (faded, see [Buttons](buttons.md)) unless the scene displays a human player turn and the timeline is idle. It listens to `onPlayingChanged` to enable it again as soon as the timeline stops playing, and disables it as soon as it is clicked.
 
+## Announcing the main quest
+
+`QuestPresenter` plays the start and the completion of the main quest as steps of the timeline: a step draws the tracker, shows the [card](quests.md#the-announcements), and **waits for Continue**, as a found item waits for the player's choice (see [Inventory full](#inventory-full)). So the timeline keeps playing and the player can not act meanwhile, and what follows, e.g.: the end of the battle, waits for the card.
+
+The tracker's pop when a task changes is the opposite: the step draws it and plays `pop` with `playAlongside`, so it never holds the party. A last defeat publishes `TaskProgressed`, `TaskCompleted` and `QuestCompleted` in one chain of events, each read when it arrives: the first two find the quest completed and draw nothing, as the third one announces it.
+
 ## Starting a turn
 
 When a player turn starts, two animations play together, in the colour of the player turn: blue (`HUMAN_TURN_COLOR`, `#0084FF`) for the human player and red (`CPU_TURN_COLOR`, `#E03C28`) for the CPU player. Both colours are part of the FamiCube palette.

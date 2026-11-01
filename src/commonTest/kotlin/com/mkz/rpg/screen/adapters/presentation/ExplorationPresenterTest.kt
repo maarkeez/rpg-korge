@@ -103,7 +103,7 @@ class ExplorationPresenterTest {
         ) {}
 
     private val questDetailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
-    private val questPresenter = QuestPresenter(FakeQuestTrackerView(), questDetailView, apis.questApi, apis.partyApi, TextsMother.texts(), timeline, eventBus)
+    private val questPresenter = QuestPresenter(FakeQuestTrackerView(), questDetailView, FakeQuestAnnouncementView(), apis.questApi, apis.partyApi, TextsMother.texts(), timeline, eventBus)
 
     private fun createPresenter() =
         ExplorationPresenter(
@@ -391,7 +391,16 @@ class ExplorationPresenterTest {
             shopPresenter,
             formationPresenter,
             pausePresenter,
-            QuestPresenter(FakeQuestTrackerView(), QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts()), apis.questApi, apis.partyApi, TextsMother.texts(), timeline, apis.eventBus),
+            QuestPresenter(
+                FakeQuestTrackerView(),
+                QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts()),
+                FakeQuestAnnouncementView(),
+                apis.questApi,
+                apis.partyApi,
+                TextsMother.texts(),
+                timeline,
+                apis.eventBus,
+            ),
             TextsMother.texts(),
             timeline,
             apis.eventBus,
@@ -1010,6 +1019,27 @@ class ExplorationPresenterTest {
         eventBus.dispatch()
         // Then
         requests.shouldBeEmpty()
+    }
+
+    @Test
+    fun `ExplorationPresenter should start no second while announcing`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        apis.questApi.startMainQuest()
+        eventBus.dispatch()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(3.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
+        // When
+        questPresenter.questAnnouncementContinued()
+        presenter.tick(1.seconds)
+        eventBus.dispatch()
+        // Then: the time it skipped was not counted.
+        requests.size shouldBe 1
     }
 
     @Test
