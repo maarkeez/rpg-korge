@@ -1,6 +1,8 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.npc.adapters.presentation.NpcApi
+import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
@@ -27,6 +29,9 @@ import com.mkz.rpg.shared.domain.subscribe
  * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
  * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed, and
  * Back steps out one level at a time. Abandon asks first, and returns to the journal, or to the pad when no side quest is left.
+ *
+ * While exploring, a quest marker over an npc's head says who to talk to. An npc can only be talked to then, so a battle
+ * removes them all until it finishes.
  */
 class QuestPresenter(
     private val questTrackerView: QuestTrackerView,
@@ -34,8 +39,10 @@ class QuestPresenter(
     private val questJournalView: QuestJournalView,
     private val confirmDialogView: ConfirmDialogView,
     private val questAnnouncementView: QuestAnnouncementView,
+    private val battlefieldView: BattlefieldView,
     private val questApi: QuestApi,
     private val partyApi: PartyApi,
+    private val npcApi: NpcApi,
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
@@ -64,12 +71,26 @@ class QuestPresenter(
     // Each quest as its last event read it, so a defeat publishing two events pops the tracker once.
     private val lastSeenQuests = mutableMapOf<String, QuestInfo>()
 
+    private var isInBattle = false
+
+    // What the battlefield displays, or will once the timeline gets to it.
+    private var displayedMarkers = emptyMap<TilePosition, QuestMarkerView.Sign>()
+
     private val subscriptions =
         listOf(
-            eventBus.subscribe<QuestStarted> { event -> announce(Moment.STARTED, event.questId) },
+            eventBus.subscribe<QuestStarted> { event ->
+                announce(Moment.STARTED, event.questId)
+                displayMarkers()
+            },
             eventBus.subscribe<TaskProgressed> { event -> taskChanged(event.questId) },
-            eventBus.subscribe<TaskCompleted> { event -> taskChanged(event.questId) },
-            eventBus.subscribe<QuestCompleted> { event -> announce(Moment.COMPLETED, event.questId) },
+            eventBus.subscribe<TaskCompleted> { event ->
+                taskChanged(event.questId)
+                displayMarkers()
+            },
+            eventBus.subscribe<QuestCompleted> { event ->
+                announce(Moment.COMPLETED, event.questId)
+                displayMarkers()
+            },
             eventBus.subscribe<QuestPinned> {
                 displayTracker()
                 val quests = listedQuests()
@@ -78,13 +99,22 @@ class QuestPresenter(
             eventBus.subscribe<QuestAbandoned> { event ->
                 lastSeenQuests.remove(event.questId)
                 displayTracker()
+                displayMarkers()
             },
-            eventBus.subscribe<GameRestored> { displayTracker() },
+            eventBus.subscribe<NpcRecruited> { displayMarkers() },
+            eventBus.subscribe<GameRestored> {
+                displayTracker()
+                displayMarkers()
+            },
             eventBus.subscribe<ExplorationPaused> {
+                isInBattle = true
                 timeline.play { questTrackerView.setTappable(false) }
+                moveMarkersTo(emptyMap())
             },
             eventBus.subscribe<ExplorationResumed> {
+                isInBattle = false
                 timeline.play { questTrackerView.setTappable(true) }
+                displayMarkers()
             },
             eventBus.subscribe<PlayerVictory> {
                 timeline.play {
@@ -263,6 +293,25 @@ class QuestPresenter(
         val quest = trackedQuest()?.takeIf { tracked -> tracked != displayedQuest } ?: return
         displayedQuest = quest
         timeline.play { questTrackerView.display(quest) }
+    }
+
+    // Each marker on the tile of its npc. An npc no longer on the battlefield, e.g.: once recruited, has none.
+    private fun displayMarkers() {
+        if (isInBattle) return
+        moveMarkersTo(
+            questApi.searchQuestMarkers().mapNotNull { marker -> npcApi.searchNpcById(marker.npcId)?.let { npc -> TilePosition(npc.row, npc.column) to QuestMapper.signOf(marker.sign) } }.toMap(),
+        )
+    }
+
+    private fun moveMarkersTo(markers: Map<TilePosition, QuestMarkerView.Sign>) {
+        val gone = displayedMarkers.keys - markers.keys
+        val changed = markers.filter { (position, sign) -> displayedMarkers[position] != sign }
+        if (gone.isEmpty() && changed.isEmpty()) return
+        displayedMarkers = markers
+        timeline.play {
+            gone.forEach { position -> battlefieldView.hideQuestMarker(position.row, position.column) }
+            changed.forEach { (position, sign) -> battlefieldView.displayQuestMarker(position.row, position.column, sign) }
+        }
     }
 
     private fun questInfos(): List<QuestInfo> = QuestMapper.questInfos(questApi.searchQuests(), texts)

@@ -106,6 +106,14 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 
 The detail view of an active side quest has Abandon on the right, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
 
+### The quest markers
+
+[`QuestMarkerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMarkerView.kt) is the sign over an npc's head, on the battlefield: gold with an exclamation mark for a quest to start, and green with a speech bubble for a talk task. [`SearchQuestMarkers`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/queries/SearchQuestMarkers.kt) lists one sign per npc, the talk task winning over a quest to start, as the talk does both.
+
+- `QuestPresenter` reads them on `QuestStarted`, `TaskCompleted`, `QuestCompleted`, `QuestAbandoned`, `NpcRecruited`, `GameRestored` and `ExplorationResumed`, and draws each on the tile of its npc, removing those gone. An npc no longer on the battlefield, e.g.: once recruited, has none.
+- They only show while exploring, as an npc can only be talked to then: `ExplorationPaused` removes them all.
+- A repeatable giver stays marked whenever its quest can start.
+
 ### The announcements
 
 [`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is a toast over the top of the battlefield, announcing every quest starting, with its goal, and completing, with the reward the quest defines, also when a repeatable quest runs again. It is held for 4 seconds and fades in 0.5 seconds. A count or a task done only pops the tracker.

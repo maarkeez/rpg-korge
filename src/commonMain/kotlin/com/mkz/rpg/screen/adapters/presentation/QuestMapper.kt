@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
@@ -48,6 +49,12 @@ internal object QuestMapper {
             isPinned = isPinned,
         )
     }
+
+    fun signOf(sign: QuestMarkerDto.SignDto): QuestMarkerView.Sign =
+        when (sign) {
+            QuestMarkerDto.SignDto.QUEST_TO_START -> QuestMarkerView.Sign.QUEST_TO_START
+            QuestMarkerDto.SignDto.TALK_TASK -> QuestMarkerView.Sign.TALK_TASK
+        }
 
     private fun kindOf(task: TaskDto): QuestInfo.Kind =
         when (task.type) {

@@ -601,6 +601,39 @@ class BattlefieldViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayQuestMarker should replace the marker when the tile has one`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 2, columns = 2).toTerrain())
+            battlefieldView.displayQuestMarker(row = 1, column = 1, sign = QuestMarkerView.Sign.QUEST_TO_START)
+            // When
+            battlefieldView.displayQuestMarker(row = 1, column = 1, sign = QuestMarkerView.Sign.TALK_TASK)
+            // Then
+            battlefieldView.questMarkerColorAt(row = 1, column = 1) shouldBe HudStyle.ALLY
+            // When
+            battlefieldView.hideQuestMarker(row = 1, column = 1)
+            // Then
+            battlefieldView.hasQuestMarkerAt(row = 1, column = 1).shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayQuestMarker should keep the marker when its tile leaves the window`() =
+        sharedViewsTest {
+            // Given
+            val battlefieldView = BattlefieldView(loadedResourcesLoader())
+            battlefieldView.displayBattlefield(battlefield(rows = 64, columns = 64).toTerrain())
+            battlefieldView.displayQuestMarker(row = 1, column = 1, sign = QuestMarkerView.Sign.QUEST_TO_START)
+            addChild(battlefieldView)
+            dragBattlefield(battlefieldView, -1200.0 to -1200.0)
+            require(!battlefieldView.isTileVisible(row = 1, column = 1))
+            // When
+            dragBattlefield(battlefieldView, 0.0 to 0.0, 1200.0 to 1200.0)
+            // Then
+            battlefieldView.hasQuestMarkerAt(row = 1, column = 1).shouldBeTrue()
+        }
+
+    @Test
     fun `DisplayBattlefield should keep the battle unit of a tile when the tile is scrolled out and back`() =
         sharedViewsTest {
             // Given

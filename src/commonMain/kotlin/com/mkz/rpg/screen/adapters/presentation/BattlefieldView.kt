@@ -53,6 +53,7 @@ open class BattlefieldView(
         const val PICKED_UP_LOOT = "PICKED_UP_LOOT"
         const val BATTLE_UNIT = "BATTLE_UNIT"
         const val NPC = "NPC"
+        const val QUEST_MARKER = "QUEST_MARKER"
         const val BUILDING = "BUILDING"
         const val SELECTION = "SELECTION"
         const val FLASH = "FLASH"
@@ -71,7 +72,7 @@ open class BattlefieldView(
 
         // A tile holding one of these layers keeps them while it is out of the window. The other tiles are created again
         // from the battlefield when they come back into it.
-        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, SELECTION, HEALTH_PREVIEW, FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
+        private val KEPT_LAYERS = setOf(BUILDING, LOOT, BATTLE_UNIT, NPC, QUEST_MARKER, SELECTION, HEALTH_PREVIEW, FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
 
         // A tile animating one of these layers stays on the screen until it is done, as its animation only plays there.
         private val ANIMATED_LAYERS = setOf(FLASH, HEALTH_FLASH, PICKED_UP_LOOT)
@@ -407,6 +408,24 @@ open class BattlefieldView(
     ) {
         val npcBitmap = resourcesLoader.bitmapOrNull(unitId?.let { "unit/$it.png" } ?: "npc/$npcId.png") ?: return
         tile(row, column).addChild(UnitSpriteView(npcBitmap).apply { name = NPC })
+    }
+
+    /** Displays the sign over the head of the npc standing on the tile, replacing any other. */
+    open fun displayQuestMarker(
+        row: Int,
+        column: Int,
+        sign: QuestMarkerView.Sign,
+    ) {
+        hideQuestMarker(row, column)
+        tile(row, column).addChild(QuestMarkerView(sign).apply { name = QUEST_MARKER })
+    }
+
+    /** Removes the sign of the tile, if any. */
+    open fun hideQuestMarker(
+        row: Int,
+        column: Int,
+    ) {
+        tile(row, column).findViewByName(QUEST_MARKER)?.removeFromParent()
     }
 
     /**

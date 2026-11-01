@@ -55,6 +55,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val displayedBattlefields = mutableListOf<BattlefieldTerrain>()
     val displayedBattleUnits = mutableListOf<BattleUnitAt>()
     val displayedNpcs = mutableListOf<NpcAt>()
+    val displayedQuestMarkers = mutableMapOf<TilePosition, QuestMarkerView.Sign>()
     val displayedBuildings = mutableListOf<BuildingAt>()
     val potentialMovements = mutableListOf<TilePosition>()
     val potentialCasts = mutableListOf<TilePosition>()
@@ -112,6 +113,21 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
         unitId: String,
     ) {
         displayedBattleUnits += BattleUnitAt(row, column, unitId)
+    }
+
+    override fun displayQuestMarker(
+        row: Int,
+        column: Int,
+        sign: QuestMarkerView.Sign,
+    ) {
+        displayedQuestMarkers[TilePosition(row, column)] = sign
+    }
+
+    override fun hideQuestMarker(
+        row: Int,
+        column: Int,
+    ) {
+        displayedQuestMarkers.remove(TilePosition(row, column))
     }
 
     override fun displayNpc(

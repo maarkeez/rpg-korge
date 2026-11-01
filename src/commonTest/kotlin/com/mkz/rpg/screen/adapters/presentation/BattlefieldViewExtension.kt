@@ -78,6 +78,17 @@ fun BattlefieldView.glidingBattleUnits(): List<GlidingBattleUnit> =
         }
     }
 
+fun BattlefieldView.hasQuestMarkerAt(
+    row: Int,
+    column: Int,
+): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.QUEST_MARKER) == true
+
+/** The colour of the sign of the tile, or `null` when it has none. */
+fun BattlefieldView.questMarkerColorAt(
+    row: Int,
+    column: Int,
+): RGBA? = (tileOrNull(row, column)?.findViewByName(BattlefieldView.QUEST_MARKER) as? QuestMarkerView)?.displayedColor()
+
 fun BattlefieldView.hasNpcAt(
     row: Int,
     column: Int,

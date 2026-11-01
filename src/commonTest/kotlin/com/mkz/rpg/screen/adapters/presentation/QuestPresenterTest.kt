@@ -3,6 +3,8 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
+import com.mkz.rpg.npc.domain.Npc
+import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
@@ -15,6 +17,7 @@ import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
+import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
@@ -26,6 +29,8 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.maps.shouldBeEmpty
+import io.kotest.matchers.maps.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
@@ -36,21 +41,26 @@ class QuestPresenterTest {
     private val journalView = QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val confirmDialogView = ConfirmDialogView()
     private val announcementView = FakeQuestAnnouncementView()
+    private val battlefieldView = FakeBattlefieldView()
     private val timeline = battleSceneTimeline()
 
     // The knight explores the sand, alone, with the quests given.
-    private fun apis(vararg quests: Quest) =
-        SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            units = listOf(unit(id = "knight").toDto(), unit(id = "rat").toDto()),
-            players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
-            tiles = List(2) { List(2) { "sand" } },
-            deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 0, column = 0)),
-            quests = quests.map(Quest::toDto),
-            explore = true,
-        ).also(SubdomainApis::initialise)
+    private fun apis(
+        vararg quests: Quest,
+        npcs: List<Npc.Dto> = emptyList(),
+    ) = SubdomainApis(
+        terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+        units = listOf(unit(id = "knight").toDto(), unit(id = "rat").toDto()),
+        players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
+        tiles = List(2) { List(2) { "sand" } },
+        deployments = listOf(Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 0, column = 0)),
+        quests = quests.map(Quest::toDto),
+        npcs = npcs,
+        explore = true,
+    ).also(SubdomainApis::initialise)
 
-    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, journalView, confirmDialogView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
+    private fun SubdomainApis.presenter() =
+        QuestPresenter(trackerView, detailView, journalView, confirmDialogView, announcementView, battlefieldView, questApi, partyApi, npcApi, TextsMother.texts(), timeline, eventBus)
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
@@ -589,5 +599,95 @@ class QuestPresenterTest {
         apis.eventBus.dispatch()
         // Then
         trackerView.displayedQuests.single().id shouldBe "side"
+    }
+
+    private val farmer = npc(id = "farmer", row = 0, column = 1).toDto()
+    private val farmerTile = TilePosition(0, 1)
+
+    private fun SubdomainApis.pauseExploration() {
+        eventBus.publish(ExplorationPaused(playerId = "human"))
+        eventBus.dispatch()
+    }
+
+    private fun SubdomainApis.resumeExploration() {
+        eventBus.publish(ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `QuestPresenter should draw the markers when the party explores, and remove them in a battle`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        apis.presenter()
+        // When
+        apis.startQuest()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))
+        // When
+        apis.pauseExploration()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldBeEmpty()
+        // When
+        apis.resumeExploration()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))
+    }
+
+    @Test
+    fun `QuestPresenter should draw no marker when a task is completed in a battle`() {
+        // Given
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1), talkToNpc("farmer"))), npcs = listOf(farmer))
+        apis.presenter()
+        apis.startQuest()
+        apis.pauseExploration()
+        // When
+        apis.defeatRat()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldBeEmpty()
+        // When
+        apis.resumeExploration()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.TALK_TASK))
+    }
+
+    @Test
+    fun `QuestPresenter should remove the marker when its quest starts, and put it back when it is abandoned`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        apis.presenter()
+        apis.startQuest()
+        // When
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldBeEmpty()
+        // When
+        apis.questApi.abandonQuest("side")
+        apis.eventBus.dispatch()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))
+    }
+
+    @Test
+    fun `QuestPresenter should draw the markers when a game is restored`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        apis.presenter()
+        // When
+        apis.eventBus.publish(GameRestored(slot = 1))
+        apis.eventBus.dispatch()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))
+    }
+
+    @Test
+    fun `QuestPresenter should draw no marker when the npc is not on the battlefield`() {
+        // Given: nobody stands for the farmer.
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"))
+        apis.presenter()
+        // When
+        apis.startQuest()
+        // Then
+        battlefieldView.displayedQuestMarkers.shouldBeEmpty()
     }
 }

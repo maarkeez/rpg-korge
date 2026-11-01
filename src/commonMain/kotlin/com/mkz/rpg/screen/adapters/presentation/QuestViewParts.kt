@@ -232,6 +232,17 @@ internal object QuestViewParts {
         solidRect(Size(side * 0.14, side * 0.4), color) { xy(x + side * 0.43, y + side * 0.6) }
     }
 
+    /** A bar and a dot, as rectangles: an npc can start a side quest. */
+    fun Container.exclamationGlyph(
+        x: Double,
+        y: Double,
+        side: Double,
+        color: RGBA,
+    ) {
+        solidRect(Size(side * 0.2, side * 0.58), color) { xy(x + side * 0.4, y) }
+        solidRect(Size(side * 0.2, side * 0.2), color) { xy(x + side * 0.4, y + side * 0.72) }
+    }
+
     /** The pill saying that a side quest can run again. */
     fun Container.repeatablePill(
         x: Double,

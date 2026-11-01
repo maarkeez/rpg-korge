@@ -62,6 +62,8 @@ When a battle starts (`ExplorationPaused`), the camera stops trailing, and the b
 
 ## Talking to an npc
 
+While exploring, a [quest marker](quests.md#the-quest-markers) over an npc's head says that it can start a side quest, or that a current task is to talk to it. A battle removes the markers until it finishes.
+
 An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands next to the leader.
 
 1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces ([`SearchNpcNextTo`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/queries/SearchNpcNextTo.kt)), and requests the party to talk to the first one (`RequestStartTalk`). The party talks to it ([`StartTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartTalk.kt), `NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
