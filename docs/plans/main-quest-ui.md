@@ -1,6 +1,6 @@
 # Plan: The main quest on the screen, with a tracker, a detail view and announcements
 
-> **Status:** in progress.
+> **Status:** done.
 >
 > **Summary:** The [quest system](quest-system.md) only exists behind the screen. A new game starts the main quest
 > without a word, nothing tells the player to defeat the goat wizard at row 36 of the 40 rows of the battlefield, and
@@ -76,7 +76,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The tracker       | Playing shows the current task on the top line, exploring and battling, ticked once completed, also in a loaded game. Tapping it does nothing yet. | ✅     | `5d6a91cd` |
 | M2 | The detail view   | Tapping the tracker while exploring opens the quest in full with time stopped, and Back closes it, also once completed.                            | ✅     | `1e0a0ebe` |
-| M3 | The announcements | A new game announces the quest and defeating the goat wizard announces its reward, each until Continue. The plan is marked as done.                | ⬜     |         |
+| M3 | The announcements | A new game announces the quest and defeating the goat wizard announces its reward, each until Continue. The plan is marked as done.                | ✅     | `a0ec8922` |
 
 ### M1 commits
 
