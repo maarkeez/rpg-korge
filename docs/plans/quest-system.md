@@ -76,7 +76,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The reward       | `inventory` grants a requested reward, capping the gold and dropping what does not fit, and the dropped items can be looted and saved. | ✅      | `4666980b` |
 | M2 | Quests and saves | A new game starts the main quest, and saving and loading keep its status. `SAVE_VERSION` is 3.                                         | ✅      | `a584e01e` |
-| M3 | Task progress    | Defeating the goat wizard completes the main quest, and the leader carries 150 more gold. The three kinds of task work.                | ⬜      |         |
+| M3 | Task progress    | Defeating the goat wizard completes the main quest, and the leader carries 150 more gold. The three kinds of task work.                | ✅      | `d17d3e37` |
 | M4 | Side quests      | Talking to a giver starts its side quests, which can be repeated and abandoned, played by the tests only.                              | ⬜      |         |
 
 ### M1 commits
@@ -92,7 +92,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 ### M3 commits
 
-1. Progress the tasks: `Quest.defeated`, `Quest.reached` and `Quest.talkedTo`, `PublishQuestProgress`, `ProgressDefeatTasks`, `ProgressReachTasks`, and their listeners, with the reward requested as the last task completes.
+1. Progress the tasks: `Quest.defeated`, `Quest.reached` and `Quest.talkedTo`, `PublishQuestProgress`, `ProgressDefeatTasks`, `ProgressReachTasks`, and their listeners, with `RequestQuestReward` requesting the reward on `QuestCompleted`.
 2. Talk tasks: `ResolveNpcTalk` and `OnNpcTalkFinished`, with `QuestAcceptanceTest`, and describe quests in the new Quests doc and Game data.
 
 ### M4 commits
@@ -134,7 +134,8 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 - `InitialiseQuests` creates every loaded quest, unless it already exists, failing with `MainQuestNotUnique` unless exactly one is `MAIN`, and with `QuestTileCanNotBeOccupied` through `CanBattlefieldTileBeOccupied`.
 - `StartMainQuest` starts the main quest.
-- `PublishQuestProgress` (a service) saves the quests an event changed and publishes their events. After each `QuestCompleted`, it reads `SearchParty` and `SearchPosition`, and publishes `RequestGrantReward` for the leader on its tile. With no leader, nobody receives it.
+- `PublishQuestProgress` (a service) saves the quest an event changed and publishes its events.
+- `RequestQuestReward(questId)`, on `QuestCompleted`, reads `SearchParty` and `SearchPosition`, and publishes `RequestGrantReward` for the leader on its tile. With no leader, nobody receives it. Built apart from `PublishQuestProgress`, where it was planned, as `BattleUnitMoved` is followed by `RequestMoveOccupant`: reading the tile while handling the move finds the tile a leader just left, so what does not fit would drop behind it.
 - `ProgressDefeatTasks(playerId, unitId)` calls `defeated` on every quest, unless `playerId` is the party's. Without a party, nothing counts.
 - `ProgressReachTasks(battleUnitId, path)` calls `reached` on every quest, when the battle unit is a party member. A summon is none.
 - `ResolveNpcTalk(npcId)` first lists the quests `canBeStartedBy` that npc, then calls `talkedTo` on every quest, and finally starts the listed ones. So the talk that starts a quest does not complete its first task, and the talk that completes a quest does not restart it.
@@ -143,7 +144,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 #### Adapters
 
 - `ResourcesQuestLoader`: `QuestLoader`, one quest per `quest/<quest id>.toml`, with `QuestDefinition`, built on `readTomlFiles`, `fromResource`, `enumOf` and `required`.
-- `OnRequestInitialiseQuests`, `OnRequestStartMainQuest`, `OnBattleUnitDefeated`, `OnBattleUnitMoved` and `OnNpcTalkFinished` only call their commands.
+- `OnRequestInitialiseQuests`, `OnRequestStartMainQuest`, `OnBattleUnitDefeated`, `OnBattleUnitMoved`, `OnNpcTalkFinished` and `OnQuestCompleted` only call their commands.
 - `QuestSnapshottable`, with `key = "quest"`, writes `questId`, `status`, `currentTaskIndex` and `currentTaskProgress`.
 - `QuestApi(battlefieldApi, partyApi, eventBus, questLoader)`, as every Api takes its collaborators from its caller, with `searchQuests`, `abandonQuest` and `snapshottable`.
 
@@ -247,10 +248,10 @@ lootableItemIds = ["health-potion"]
   - `InitialiseQuests should fail when a tile can not be occupied`
 - `StartMainQuestTest`
   - `StartMainQuest should start the main quest and no side quest`
-- `PublishQuestProgressTest`
-  - `PublishQuestProgress should request the reward for the leader on its tile when a quest completes`
-  - `PublishQuestProgress should request the reward for the next member when the leader was defeated`
-  - `PublishQuestProgress should request no reward when the whole party is gone`
+- `RequestQuestRewardTest`
+  - `RequestQuestReward should request the reward for the leader on its tile when a quest completes`
+  - `RequestQuestReward should request the reward for the next member when the leader was defeated`
+  - `RequestQuestReward should request no reward when the whole party is gone`
 - `ProgressDefeatTasksTest`
   - `ProgressDefeatTasks should count a defeat when the unit is of another player`
   - `ProgressDefeatTasks should not count a defeat when the unit is of the party's player`
@@ -279,6 +280,7 @@ lootableItemIds = ["health-potion"]
 - `QuestAcceptanceTest`
   - `The leader should carry the reward gold when the main quest's unit is defeated`
   - `A reward item should lie on the leader's tile and be stored when it walks back when the bag is full`
+  - `A reward item should lie on the tile the leader walked onto when reaching it completes the quest`
   - `A side quest should run through its tasks and pay its reward when it is started by talking to its giver`
 - `SetupBattleTest`
   - `should request each subdomain initialisation after the subdomains it refers to, then exploring, then the main quest, when the battle is set up` (replaces the current name)
@@ -291,5 +293,5 @@ lootableItemIds = ["health-potion"]
 - Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, no view abandons, and the main quest pays no items. Only the tests play them.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.
-- A leader defeated by an event still waiting on the bus when the last task completes receives the reward, as the reward is requested for whoever leads at that moment. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.
+- A leader defeated by an event still waiting on the bus when the reward is requested receives the reward, as it is requested for whoever leads at that moment. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.
 - Every earlier save becomes incompatible with `SAVE_VERSION` 3.
