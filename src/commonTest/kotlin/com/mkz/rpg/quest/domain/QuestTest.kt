@@ -8,12 +8,15 @@ import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestError.EmptyQuestReward
 import com.mkz.rpg.quest.domain.QuestError.EmptyTaskTiles
 import com.mkz.rpg.quest.domain.QuestError.InvalidTask
+import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithGiver
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
+import com.mkz.rpg.quest.domain.QuestError.QuestNotActive
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
+import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
@@ -258,6 +261,37 @@ class QuestTest {
         val quest = mainQuest()
         // When / Then
         quest.canBeStartedBy("farmer") shouldBe false
+    }
+
+    @Test
+    fun `Quest should reset its progress when it is abandoned`() {
+        // Given
+        val quest =
+            sideQuest(
+                id = "a-quest",
+                tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat", count = 5)),
+            ).start().reached(listOf(PositionDto(row = 1, column = 1))).defeated("rat").pullEvents().second
+        // When
+        val abandonedQuest = quest.abandon()
+        // Then
+        abandonedQuest.toDto().progress shouldBe ProgressDto.notStarted("a-quest")
+        abandonedQuest.pullEvents().first.shouldContainExactly(QuestAbandoned(questId = "a-quest"))
+    }
+
+    @Test
+    fun `Quest should fail when a main quest is abandoned`() {
+        // Given
+        val quest = mainQuest().start()
+        // When / Then
+        shouldThrow<MainQuestCanNotBeAbandoned> { quest.abandon() }
+    }
+
+    @Test
+    fun `Quest should fail when it is abandoned and not active`() {
+        // Given
+        val quest = sideQuest()
+        // When / Then
+        shouldThrow<QuestNotActive> { quest.abandon() }
     }
 
     @Test

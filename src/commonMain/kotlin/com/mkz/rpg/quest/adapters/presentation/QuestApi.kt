@@ -11,6 +11,7 @@ import com.mkz.rpg.quest.adapters.events.OnRequestStartMainQuest
 import com.mkz.rpg.quest.adapters.save.QuestSnapshottable
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.QuestRepository
+import com.mkz.rpg.quest.usecases.commands.AbandonQuest
 import com.mkz.rpg.quest.usecases.commands.InitialiseQuests
 import com.mkz.rpg.quest.usecases.commands.ProgressDefeatTasks
 import com.mkz.rpg.quest.usecases.commands.ProgressReachTasks
@@ -48,6 +49,7 @@ class QuestApi(
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressReachTasks = ProgressReachTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val resolveNpcTalk = ResolveNpcTalk(questRepository, publishQuestProgress)
+    val abandonQuest = AbandonQuest(questRepository, publishQuestProgress)
     val requestQuestReward = RequestQuestReward(questRepository, partyApi.searchParty, battlefieldApi.searchPosition, eventBus)
 
     // Queries

@@ -24,6 +24,11 @@ sealed interface QuestEvent : DomainEvent {
         val taskIndex: Int,
     ) : QuestEvent
 
+    /** The side quest went back to not started, with its progress reset. */
+    data class QuestAbandoned(
+        val questId: String,
+    ) : QuestEvent
+
     /** The last task was completed: the reward is requested for whoever leads the party. */
     data class QuestCompleted(
         val questId: String,

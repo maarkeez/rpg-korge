@@ -23,5 +23,11 @@ sealed class QuestError(
 
     class MainQuestNotUnique : QuestError("The game needs exactly one main quest")
 
+    class MainQuestCanNotBeAbandoned : QuestError("The main quest can not be abandoned")
+
+    class QuestNotActive : QuestError("Only an active quest can be abandoned")
+
+    class QuestNotFound : QuestError("The quest was not found")
+
     class QuestTileCanNotBeOccupied : QuestError("A tile of a task to reach tiles can not be occupied")
 }

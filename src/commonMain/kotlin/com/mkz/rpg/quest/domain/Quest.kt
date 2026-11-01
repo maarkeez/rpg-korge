@@ -9,12 +9,15 @@ import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestError.EmptyQuestReward
 import com.mkz.rpg.quest.domain.QuestError.EmptyTaskTiles
 import com.mkz.rpg.quest.domain.QuestError.InvalidTask
+import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithGiver
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
+import com.mkz.rpg.quest.domain.QuestError.QuestNotActive
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
+import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
@@ -92,6 +95,16 @@ data class Quest private constructor(
         val task = currentTask() as? Task.TalkToNpc
         if (progress.status != StatusDto.ACTIVE || task?.npcId != npcId) return this
         return completeCurrentTask()
+    }
+
+    /** Goes back to not started, with its progress reset, so its giver can start it again even when it is not repeatable. Only an active side quest can be abandoned. */
+    fun abandon(): Quest {
+        if (type == QuestTypeDto.MAIN) throw MainQuestCanNotBeAbandoned()
+        if (progress.status != StatusDto.ACTIVE) throw QuestNotActive()
+        return copy(
+            progress = Progress(status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0),
+            events = events + QuestAbandoned(questId = id.value),
+        )
     }
 
     /** Moves on to the next task, or completes the quest after the last one. */

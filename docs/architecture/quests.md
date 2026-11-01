@@ -28,6 +28,10 @@ A side quest with `repeatable = true` starts again on a later talk to its giver,
 
 [`ResolveNpcTalk`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/commands/ResolveNpcTalk.kt) lists the quests that npc can start, then counts the talk on every quest, and finally starts the listed ones. So the talk that starts a quest does not complete its first task, and the talk that completes a quest does not restart it.
 
+## Abandoning
+
+`QuestApi.abandonQuest`, with no view yet, abandons an active side quest: it goes back to `NOT_STARTED` with its progress reset, announcing `QuestAbandoned`, so its giver can start it again even when it is not repeatable. It fails with `MainQuestCanNotBeAbandoned` on the main quest, and with `QuestNotActive` on a quest that is not active.
+
 ## Tasks
 
 Each task maps to a fact the game already publishes. It only counts them from when it becomes the current task, so a rat defeated earlier does not count. One fact progresses every active quest, at most one task each.
@@ -44,6 +48,7 @@ Each task maps to a fact the game already publishes. It only counts them from wh
 | `TaskProgressed` | A defeat counts, each time, with its progress and its count. |
 | `TaskCompleted`  | The current task is done.                                    |
 | `QuestCompleted` | The last task is done.                                       |
+| `QuestAbandoned` | A side quest is abandoned.                                   |
 
 For example, a new game with the only quest of the game, defeating the goat wizard for 150 gold, while the hero leads carrying its 30 gold:
 
@@ -72,7 +77,7 @@ A reward is some gold and a list of lootable items, as the game has no experienc
 ## Known limitations
 
 - Nothing shows a quest: the only one in the game pays its gold silently, and the player has to open the inventory to notice.
-- Side quests, repeating them and dropping a reward can not happen in the game yet, as no side quest ships, and the main quest pays no items. Only the tests play them.
+- Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, no view abandons, and the main quest pays no items. Only the tests play them.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.
 - A leader defeated by an event still waiting on the bus when the reward is requested receives the reward. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.
