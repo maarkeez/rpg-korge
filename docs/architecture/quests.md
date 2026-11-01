@@ -1,6 +1,6 @@
 # Quests
 
-A quest is a line of tasks, completed one after the other, and completing the last one pays a reward to the party leader. It lives in the [`quest`](../../src/commonMain/kotlin/com/mkz/rpg/quest) subdomain, and it is only the backend so far: nothing shows a quest on the screen, and `QuestApi.searchQuests` is there for the view that will.
+A quest is a line of tasks, completed one after the other, and completing the last one pays a reward to the party leader. It lives in the [`quest`](../../src/commonMain/kotlin/com/mkz/rpg/quest) subdomain, and the screen shows the main quest (see [What the player sees](#what-the-player-sees)).
 
 ## Terms
 
@@ -66,6 +66,22 @@ For example, a new game with the only quest of the game, defeating the goat wiza
 
 A reward is some gold and a list of lootable items, as the game has no experience points. `inventory` pays it, capping the gold and dropping what does not fit on the leader's tile. See [Rewards](inventory.md#rewards).
 
+## What the player sees
+
+The screen only follows the main quest, in [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt): it reads `QuestApi.searchQuests`, and ignores an event naming any other quest. [`QuestMapper`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt) turns the quest into `QuestInfo`, the plain data the views draw, already translated, so they import no domain. The tasks after the current one are never mapped, so they can not be revealed.
+
+### The tracker
+
+[`QuestTrackerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestTrackerView.kt) is a capsule on the right of the top line, beside Exploring, naming the current task, with its count when it counts above 1, e.g.: `Defeat 5 Rats 3/5`. A talk, a reach or a single defeat has nothing to count.
+
+| Event                                     | The tracker                                                                                                     |
+|-------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `QuestStarted`, `GameRestored`            | Is drawn, without popping, so a loaded game draws it too, ticked when completed.                                |
+| `TaskProgressed`, `TaskCompleted`         | Pops alongside the timeline when what it reads differs from what it displays, so a defeat pops it once, even when it publishes both. Nothing when the quest is completed, as `QuestCompleted` follows. |
+| `QuestCompleted`                          | Reads Quest completed for good, with a tick.                                                                    |
+| `ExplorationPaused`, `ExplorationResumed` | Stays in the same place, read only in a battle: no chevron, and tapping it does nothing.                        |
+| `PlayerVictory`                           | Is hidden, as the winner is drawn centred across the whole top line.                                            |
+
 ## Saving
 
 `quest` is saved: each quest's status, current task and its progress. The rest is read from the resources again. See [Save and load](save-and-load.md#snapshots).
@@ -76,7 +92,9 @@ A reward is some gold and a list of lootable items, as the game has no experienc
 
 ## Known limitations
 
-- Nothing shows a quest: the only one in the game pays its gold silently, and the player has to open the inventory to notice.
+- A side quest is played and paid with nothing on the screen.
+- A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
+- The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.
 - Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, no view abandons, and the main quest pays no items. Only the tests play them.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.

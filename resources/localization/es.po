@@ -514,6 +514,11 @@ msgctxt "ui.attackPreview.mana"
 msgid "-{mana} mana"
 msgstr "-{mana} de maná"
 
+#. On the tracker of the main quest, once it is completed.
+msgctxt "ui.questTracker.completed"
+msgid "Quest completed"
+msgstr "Misión completada"
+
 # Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
 
 msgctxt "ability.bat.name"

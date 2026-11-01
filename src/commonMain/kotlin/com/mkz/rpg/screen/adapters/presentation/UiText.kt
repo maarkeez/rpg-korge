@@ -112,4 +112,5 @@ enum class UiText(
     ATTACK_PREVIEW_KO("ui.attackPreview.ko"),
     ATTACK_PREVIEW_BY("ui.attackPreview.by"),
     ATTACK_PREVIEW_MANA("ui.attackPreview.mana"),
+    QUEST_TRACKER_COMPLETED("ui.questTracker.completed"),
 }

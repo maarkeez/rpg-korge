@@ -86,6 +86,7 @@ class BattleScene(
     val pauseView = PauseView(texts)
     val saveSlotsView = SaveSlotsView(texts)
     val confirmDialogView = ConfirmDialogView()
+    val questTrackerView = QuestTrackerView(texts)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -206,9 +207,13 @@ class BattleScene(
 
         uiVerticalStack(padding = 2.0) {
             uiSpacing(Size(0, 10))
-            // Battle info
+            // Battle info, sharing the top line with the tracker of the main quest, so the stack does not move.
             val battleInfoView = BattleInfoView(texts)
-            addChild(battleInfoView)
+            fixedSizeContainer(Size(390, 33)) {
+                addChild(battleInfoView)
+                addChild(questTrackerView)
+            }
+            QuestPresenter(questTrackerView, questApi, texts, timeline, eventBus)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
