@@ -276,6 +276,8 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-quest-tracker--reach",
                     "screen-quest-tracker--long-text",
                     "screen-quest-tracker--completed",
+                    "screen-quest-tracker--pinned",
+                    "screen-quest-tracker--pinned-with-long-text",
                     "screen-quest-tracker--read-only",
                     "screen-quest-detail",
                     "screen-quest-detail--goat-wizard",

@@ -23,10 +23,19 @@ fun QuestJournalView.isRepeatablePillShown(questId: String): Boolean = rowOf(que
 
 fun QuestJournalView.isProgressBarShown(questId: String): Boolean = rowOf(questId).progressBarView != null
 
+fun QuestJournalView.isPinShown(questId: String): Boolean = rowOf(questId).pin != null
+
+fun QuestJournalView.isPinnedRow(questId: String): Boolean = rowOf(questId).isPinned
+
 suspend fun ViewsForTesting.clickRow(
     questJournalView: QuestJournalView,
     questId: String,
-) = clickOn(questJournalView.rowOf(questId).view)
+) = clickOn(questJournalView.rowOf(questId).nameText)
+
+suspend fun ViewsForTesting.clickPin(
+    questJournalView: QuestJournalView,
+    questId: String,
+) = clickOn(requireNotNull(questJournalView.rowOf(questId).pin) { "The row has no pin" })
 
 suspend fun ViewsForTesting.clickBack(questJournalView: QuestJournalView) = clickCancel(questJournalView.backButton)
 

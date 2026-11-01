@@ -40,6 +40,22 @@ class QuestTrackerViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `display should draw the pin when a side quest is pinned`() =
+        sharedViewsTest {
+            // Given
+            val trackerView = QuestTrackerView(TextsMother.texts())
+            // When
+            trackerView.display(questInfo(isMain = false, isPinned = true))
+            val rightEdge = trackerView.capsuleRightEdge()
+            val isPinShownOnASideQuest = trackerView.isPinShown()
+            trackerView.display(questInfo(isPinned = true))
+            // Then
+            isPinShownOnASideQuest.shouldBeTrue()
+            trackerView.isPinShown().shouldBeFalse()
+            trackerView.capsuleRightEdge() shouldBe (rightEdge plusOrMinus 0.01)
+        }
+
+    @Test
     fun `display should cut the task with an ellipsis when it is longer than 200`() =
         sharedViewsTest {
             // Given

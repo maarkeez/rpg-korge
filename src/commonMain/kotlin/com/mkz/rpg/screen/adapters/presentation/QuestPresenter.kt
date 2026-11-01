@@ -5,10 +5,10 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
-import com.mkz.rpg.quest.domain.Quest
-import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
+import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
+import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
@@ -19,10 +19,10 @@ import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 
 /**
- * Keeps the quests on the screen: the tracker always names the current task of the main quest, popping when it changes, and
- * stays ticked once completed, and a toast announces any quest starting or completing, one after the other, alongside the
- * timeline, so it holds nothing. The tracker is read only in a battle, and hidden once a player wins, as the winner is
- * drawn across the whole top line.
+ * Keeps the quests on the screen: the tracker names the current task of the pinned quest, or else of the main quest, popping
+ * when it changes, also when a quest it does not name progresses, and stays ticked once the main quest is completed. A toast
+ * announces any quest starting or completing, one after the other, alongside the timeline, so it holds nothing. The tracker
+ * is read only in a battle, and hidden once a player wins, as the winner is drawn across the whole top line.
  *
  * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
  * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed, and
@@ -58,8 +58,11 @@ class QuestPresenter(
 
     private var onTrackerSelected: (() -> Unit)? = null
 
-    // What the tracker displays, or will once the timeline gets to it, so an event with nothing new draws nothing.
+    // What the tracker displays, or will once the timeline gets to it, so nothing new draws nothing.
     private var displayedQuest: QuestInfo? = null
+
+    // Each quest as its last event read it, so a defeat publishing two events pops the tracker once.
+    private val lastSeenQuests = mutableMapOf<String, QuestInfo>()
 
     private val subscriptions =
         listOf(
@@ -67,9 +70,16 @@ class QuestPresenter(
             eventBus.subscribe<TaskProgressed> { event -> taskChanged(event.questId) },
             eventBus.subscribe<TaskCompleted> { event -> taskChanged(event.questId) },
             eventBus.subscribe<QuestCompleted> { event -> announce(Moment.COMPLETED, event.questId) },
-            eventBus.subscribe<GameRestored> {
-                mainQuest()?.let(::displayTracker)
+            eventBus.subscribe<QuestPinned> {
+                displayTracker()
+                val quests = listedQuests()
+                timeline.play { if (questJournalView.visible) questJournalView.display(quests) }
             },
+            eventBus.subscribe<QuestAbandoned> { event ->
+                lastSeenQuests.remove(event.questId)
+                displayTracker()
+            },
+            eventBus.subscribe<GameRestored> { displayTracker() },
             eventBus.subscribe<ExplorationPaused> {
                 timeline.play { questTrackerView.setTappable(false) }
             },
@@ -136,6 +146,10 @@ class QuestPresenter(
         displayDetail(quest)
     }
 
+    override fun questJournalPinSelected(questId: String) {
+        if (canAct()) questApi.pinQuest(questId)
+    }
+
     override fun questJournalBackSelected() {
         if (canAct()) partyApi.closeQuest()
     }
@@ -171,28 +185,30 @@ class QuestPresenter(
     // A last defeat publishes three events: nothing draws while the quest is completed, as QuestCompleted follows. And a
     // defeat completing a task publishes two, both reading the next task, so only the first one finds something new.
     private fun taskChanged(questId: String) {
-        val quest = mainQuestNamed(questId)?.let { mainQuest -> QuestMapper.questInfo(mainQuest, texts) } ?: return
-        if (quest.isCompleted || quest == displayedQuest) return
-        displayedQuest = quest
+        val quest = questInfos().firstOrNull { quest -> quest.id == questId } ?: return
+        val lastSeen = lastSeenQuests.put(questId, quest)
+        if (quest.isCompleted || quest == lastSeen) return
+        val isNamed = quest.id == trackedQuest()?.id
+        if (isNamed) displayedQuest = quest
         timeline.play {
-            questTrackerView.display(quest)
+            if (isNamed) questTrackerView.display(quest)
             timeline.playAlongside { questTrackerView.pop() }
         }
     }
 
     // The reward is the one the quest defines, read as it completes, as RewardGranted names no quest, and never comes when
-    // nobody is left to receive it. The tracker only follows the main quest.
+    // nobody is left to receive it. A side quest starting does not take the pin, so it leaves the tracker as it is.
     private fun announce(
         moment: Moment,
         questId: String,
     ) {
-        val quest = questApi.searchQuests().firstOrNull { quest -> quest.id == questId } ?: return
-        val questInfo = QuestMapper.questInfo(quest, texts)
-        val isMain = quest.type == QuestTypeDto.MAIN
-        if (isMain) displayedQuest = questInfo
+        val quest = questInfos().firstOrNull { quest -> quest.id == questId } ?: return
+        lastSeenQuests[questId] = quest
+        val trackedQuest = trackedQuest()?.takeIf { tracked -> tracked != displayedQuest && (quest.isMain || moment == Moment.COMPLETED) }
+        trackedQuest?.let { tracked -> displayedQuest = tracked }
         timeline.play {
-            if (isMain) questTrackerView.display(questInfo)
-            pendingToasts.addLast(moment to questInfo)
+            trackedQuest?.let(questTrackerView::display)
+            pendingToasts.addLast(moment to quest)
             if (!isPlayingToasts) {
                 isPlayingToasts = true
                 timeline.playAlongside { playToasts() }
@@ -235,22 +251,21 @@ class QuestPresenter(
     // The main quest first while active, then the active side quests, then the completed quests, each group in the order
     // the quests were created. The side quests not started are hidden, so nothing is spoiled.
     private fun listedQuests(): List<QuestInfo> {
+        val startedQuestIds = questApi.searchQuests().filter { quest -> quest.progress.status != StatusDto.NOT_STARTED }.map { quest -> quest.id }
         val (completed, active) =
-            questApi
-                .searchQuests()
-                .filter { quest -> quest.type == QuestTypeDto.MAIN || quest.progress.status != StatusDto.NOT_STARTED }
-                .map { quest -> QuestMapper.questInfo(quest, texts) }
+            questInfos()
+                .filter { quest -> quest.isMain || quest.id in startedQuestIds }
                 .partition { quest -> quest.isCompleted }
         return active.sortedByDescending { quest -> quest.isMain } + completed
     }
 
-    private fun displayTracker(mainQuest: Quest.Dto) {
-        val quest = QuestMapper.questInfo(mainQuest, texts)
+    private fun displayTracker() {
+        val quest = trackedQuest()?.takeIf { tracked -> tracked != displayedQuest } ?: return
         displayedQuest = quest
         timeline.play { questTrackerView.display(quest) }
     }
 
-    private fun mainQuestNamed(questId: String): Quest.Dto? = mainQuest()?.takeIf { quest -> quest.id == questId }
+    private fun questInfos(): List<QuestInfo> = QuestMapper.questInfos(questApi.searchQuests(), texts)
 
-    private fun mainQuest(): Quest.Dto? = questApi.searchQuests().firstOrNull { quest -> quest.type == QuestTypeDto.MAIN }
+    private fun trackedQuest(): QuestInfo? = questInfos().firstOrNull { quest -> quest.isPinned }
 }

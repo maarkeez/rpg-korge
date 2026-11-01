@@ -14,6 +14,7 @@ data class QuestInfo(
     val isCompleted: Boolean = false,
     val isMain: Boolean = false,
     val isRepeatable: Boolean = false,
+    val isPinned: Boolean = false,
 ) {
     enum class Kind { DEFEAT, TALK, REACH }
 

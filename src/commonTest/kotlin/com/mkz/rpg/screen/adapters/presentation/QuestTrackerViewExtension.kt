@@ -13,6 +13,8 @@ fun QuestTrackerView.displayedTaskWidth(): Double = taskText?.width ?: 0.0
 /** The count of the task, e.g.: `3/5`, or `null` when it has none. */
 fun QuestTrackerView.displayedCount(): String? = countText?.text
 
+fun QuestTrackerView.isPinShown(): Boolean = pin != null
+
 fun QuestTrackerView.isTaskGlyphShown(): Boolean = glyph != null
 
 fun QuestTrackerView.isTickShown(): Boolean = tick != null

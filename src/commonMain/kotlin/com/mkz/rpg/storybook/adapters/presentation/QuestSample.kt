@@ -20,6 +20,7 @@ private fun goatWizard(texts: Texts) =
         tasks = listOf(goatWizardTask(texts)),
         gold = 150,
         isMain = true,
+        isPinned = true,
     )
 
 private fun goatWizardTask(texts: Texts) = Task(Kind.DEFEAT, texts.questTask(GOAT_WIZARD_QUEST, 0), portraitPath = GOAT_WIZARD_PORTRAIT)
@@ -157,6 +158,12 @@ enum class QuestSample(
     ),
     SIDE_QUEST("Side quest", "An active side quest, with a count and a task to abandon.", { rats }),
     REPEATABLE("Repeatable", "An active side quest that can run again, with its pill.", { bees }),
+    PINNED("Pinned", "A side quest the player pinned, so the tracker names it.", { rats.copy(isPinned = true) }),
+    PINNED_WITH_LONG_TEXT(
+        "Pinned with long text",
+        "The longest task, with the pin, as a translation may be.",
+        { rats.copy(isPinned = true, tasks = listOf(Task(Kind.DEFEAT, "Derrota a las ratas de los campos del sur de una vez", progress = 12, count = 50, portraitPath = RAT_PORTRAIT))) },
+    ),
     COMPLETED_REPEATABLE("Completed, repeatable", "A completed side quest, whose giver can start it again.", { fields }),
     LONG_TEXT(
         "Long text",

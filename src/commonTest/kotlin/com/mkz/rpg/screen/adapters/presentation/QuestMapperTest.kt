@@ -28,7 +28,7 @@ class QuestMapperTest {
         currentTaskProgress: Int = 0,
     ): QuestInfo {
         val id = quest.toDto().id
-        return QuestMapper.questInfo(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskProgress, isPinned = false)).toDto(), TextsMother.texts())
+        return QuestMapper.questInfos(listOf(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskProgress, isPinned = false)).toDto()), TextsMother.texts()).single()
     }
 
     @Test
@@ -36,7 +36,7 @@ class QuestMapperTest {
         // Given
         val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(defeatUnits()))
         // When
-        val spanish = QuestMapper.questInfo(quest.toDto(), TextsMother.texts("es"))
+        val spanish = QuestMapper.questInfos(listOf(quest.toDto()), TextsMother.texts("es")).single()
         val english = questInfo(quest)
         // Then
         english.name shouldBe "The Goat Wizard's Lair"
@@ -121,5 +121,31 @@ class QuestMapperTest {
         // Then
         info.isMain.shouldBeFalse()
         info.isRepeatable.shouldBeTrue()
+    }
+
+    @Test
+    fun `QuestInfo should pin the main quest when no other quest is pinned`() {
+        // When
+        val infos = QuestMapper.questInfos(listOf(mainQuest().toDto(), sideQuest().start().toDto()), TextsMother.texts())
+        // Then
+        infos.map { info -> info.isPinned }.shouldContainExactly(true, false)
+    }
+
+    @Test
+    fun `QuestInfo should not pin the main quest when a side quest is pinned`() {
+        // When
+        val infos =
+            QuestMapper.questInfos(
+                listOf(
+                    mainQuest().toDto(),
+                    sideQuest()
+                        .start()
+                        .pin()
+                        .toDto(),
+                ),
+                TextsMother.texts(),
+            )
+        // Then
+        infos.map { info -> info.isPinned }.shouldContainExactly(false, true)
     }
 }

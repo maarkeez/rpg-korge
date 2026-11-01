@@ -7,7 +7,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row or Back logs itself. */
+/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row, a pin or Back logs itself. */
 object QuestJournalViewStories : StoryBinding {
     private const val COUNT = "count"
     private const val SCROLL = "scroll"
@@ -61,6 +61,8 @@ object QuestJournalViewStories : StoryBinding {
             setDelegate(
                 object : QuestJournalView.Delegate {
                     override fun questJournalSelected(questId: String) = context.action("questJournalSelected", questId)
+
+                    override fun questJournalPinSelected(questId: String) = context.action("questJournalPinSelected", questId)
 
                     override fun questJournalBackSelected() = context.action("questJournalBackSelected")
                 },

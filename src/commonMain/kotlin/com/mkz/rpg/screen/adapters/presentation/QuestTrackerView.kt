@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.chevron
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.fitted
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.pinGlyph
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.taskGlyph
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.tickDisc
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.widthOf
@@ -21,8 +22,8 @@ import korlibs.math.geom.Size
 import korlibs.time.milliseconds
 
 /**
- * The current task of the main quest, or that it is completed, as a capsule on the right of the top line, as wide as what
- * it holds. Only the capsule takes taps, so the left of the line stays free. Read only in a battle: no chevron, and
+ * The current task of the quest it is given, with a pin when it is a side quest, or that it is completed, as a capsule on
+ * the right of the top line, as wide as what it holds. Only the capsule takes taps, so the left of the line stays free. Read only in a battle: no chevron, and
  * tapping it does nothing.
  */
 open class QuestTrackerView(
@@ -40,6 +41,8 @@ open class QuestTrackerView(
         private const val HEIGHT = 30.0
         private const val TEXT_SIZE = 13.0
         private const val GLYPH_SIZE = 14.0
+        private const val PIN_SIZE = 13.0
+        private const val PIN_SPACING = 3.0
         private const val CHEVRON_SIZE = 10.0
         private const val LEFT_PADDING = 10.0
         private const val RIGHT_PADDING = 8.0
@@ -64,6 +67,7 @@ open class QuestTrackerView(
     internal var background: RoundRect? = null
     internal var taskText: Text? = null
     internal var countText: Text? = null
+    internal var pin: Container? = null
     internal var glyph: Container? = null
     internal var tick: Container? = null
     internal var chevronView: Container? = null
@@ -106,7 +110,9 @@ open class QuestTrackerView(
         val labelWidth = widthOf(label, TEXT_SIZE)
         val countWidth = count?.let { value -> TEXT_SPACING + widthOf(value, TEXT_SIZE) } ?: 0.0
         val chevronWidth = if (isTappable) CHEVRON_SPACING + CHEVRON_SIZE else 0.0
-        val textX = LEFT_PADDING + GLYPH_SIZE + TEXT_SPACING
+        val isPinShown = quest.isPinned && !quest.isMain
+        val glyphX = LEFT_PADDING + if (isPinShown) PIN_SIZE + PIN_SPACING else 0.0
+        val textX = glyphX + GLYPH_SIZE + TEXT_SPACING
         val capsuleWidth = textX + labelWidth + countWidth + chevronWidth + RIGHT_PADDING
         val glyphY = (HEIGHT - GLYPH_SIZE) / 2
         val textY = (HEIGHT - TEXT_SIZE) / 2 - 1
@@ -114,8 +120,9 @@ open class QuestTrackerView(
         capsule.container {
             xy(-capsuleWidth, -HEIGHT / 2)
             background = panel(Size(capsuleWidth, HEIGHT), radius = HEIGHT / 2)
-            glyph = if (quest.isCompleted) null else container { taskGlyph(task.kind, LEFT_PADDING, glyphY, GLYPH_SIZE, HudStyle.SELECTION) }
-            tick = if (quest.isCompleted) container { tickDisc(LEFT_PADDING, glyphY, GLYPH_SIZE) } else null
+            pin = if (isPinShown) container { pinGlyph(LEFT_PADDING, (HEIGHT - PIN_SIZE) / 2, PIN_SIZE, HudStyle.SELECTION) } else null
+            glyph = if (quest.isCompleted) null else container { taskGlyph(task.kind, glyphX, glyphY, GLYPH_SIZE, HudStyle.SELECTION) }
+            tick = if (quest.isCompleted) container { tickDisc(glyphX, glyphY, GLYPH_SIZE) } else null
             taskText = text(label, textSize = TEXT_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(textX, textY) }
             countText = count?.let { value -> text(value, textSize = TEXT_SIZE, color = HudStyle.SELECTION) { xy(textX + labelWidth + TEXT_SPACING, textY) } }
             chevronView = if (isTappable) container { chevron(capsuleWidth - RIGHT_PADDING - CHEVRON_SIZE, (HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED) } else null

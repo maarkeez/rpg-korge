@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.chevron
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.fitted
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.pinGlyph
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.progressBar
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.repeatablePill
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.ringOf
@@ -26,7 +27,7 @@ import kotlin.math.abs
 
 /**
  * Every quest started, in place of the pad, one row per quest, each naming its section. It is dragged to scroll, keeping its
- * place when it is displayed again. Tapping a row opens the quest, and Back steps out.
+ * place when it is displayed again. Tapping a row opens the quest, tapping its pin makes the tracker name it, and Back steps out.
  */
 class QuestJournalView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -66,6 +67,8 @@ class QuestJournalView(
         private const val CHEVRON_SIZE = 10.0
         private const val COUNT_SIZE = 13.0
         private const val PILL_HEIGHT = 18.0
+        private const val PIN_SIZE = 14.0
+        private const val PIN_TAP_WIDTH = 32.0
         private const val SCROLLBAR_X = 370.0
         private const val SCROLLBAR_WIDTH = 3.0
         private const val DRAG_THRESHOLD = 4.0
@@ -76,6 +79,8 @@ class QuestJournalView(
     interface Delegate {
         fun questJournalSelected(questId: String)
 
+        fun questJournalPinSelected(questId: String)
+
         fun questJournalBackSelected()
     }
 
@@ -83,6 +88,9 @@ class QuestJournalView(
     internal class Row(
         val questId: String,
         val view: Container,
+        val body: Container,
+        val pin: Container?,
+        val isPinned: Boolean,
         val sectionText: Text,
         val nameText: Text,
         val taskText: Text,
@@ -176,6 +184,8 @@ class QuestJournalView(
         }
     }
 
+    // The body takes the taps of the row. The pin takes its own, beside it and not inside it, as a tap reaches every view it
+    // is inside of.
     private fun Container.drawRow(
         quest: QuestInfo,
         rowY: Double,
@@ -185,41 +195,64 @@ class QuestJournalView(
         lateinit var row: Row
         container {
             xy(PADDING, rowY)
-            panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
-            targetSlot(task, resourcesLoader, TARGET_AT, TARGET_AT, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
-            if (quest.isCompleted) tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE)
-            // What ends the row, from the right, up to where the texts have to stop.
-            var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
-            chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)
-            val countText =
-                if (isCounted) {
-                    val count = "${task.progress}/${task.count}"
-                    right -= END_SPACING + widthOf(count, COUNT_SIZE)
-                    val countX = right
-                    text(count, textSize = COUNT_SIZE, color = HudStyle.SELECTION) { xy(countX, (ROW_HEIGHT - COUNT_SIZE) / 2 - 1) }
-                } else {
-                    null
-                }
-            val pill =
-                if (quest.isRepeatable) {
-                    repeatablePill(0.0, (ROW_HEIGHT - PILL_HEIGHT) / 2, texts).also { pill ->
-                        right -= END_SPACING + pill.width
-                        pill.x = right
+            val rowView = this
+            val body = container()
+            with(body) {
+                panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
+                targetSlot(task, resourcesLoader, TARGET_AT, TARGET_AT, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
+                if (quest.isCompleted) tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE)
+                // What ends the row, from the right, up to where the texts have to stop.
+                var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
+                chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)
+                val countText =
+                    if (isCounted) {
+                        val count = "${task.progress}/${task.count}"
+                        right -= END_SPACING + widthOf(count, COUNT_SIZE)
+                        val countX = right
+                        text(count, textSize = COUNT_SIZE, color = HudStyle.SELECTION) { xy(countX, (ROW_HEIGHT - COUNT_SIZE) / 2 - 1) }
+                    } else {
+                        null
                     }
-                } else {
-                    null
-                }
-            val textWidth = right - END_SPACING - TEXT_X
-            val sectionText = text(sectionOf(quest), textSize = SECTION_SIZE, color = HudStyle.FAINT) { xy(TEXT_X, SECTION_Y) }
-            val nameText = text(fitted(quest.name, NAME_SIZE, textWidth), textSize = NAME_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(TEXT_X, NAME_Y) }
-            val taskLine = if (quest.isCompleted) texts[UiText.QUEST_TRACKER_COMPLETED] else task.text
-            val taskText = text(fitted(taskLine, TASK_SIZE, textWidth), textSize = TASK_SIZE, color = HudStyle.MUTED) { xy(TEXT_X, TASK_Y) }
-            val bar = if (isCounted) container { progressBar(TEXT_X, BAR_Y, textWidth, BAR_HEIGHT, task.progress, task.count) } else null
-            onClick { if (!hasDragged) delegate?.questJournalSelected(quest.id) }
-            row = Row(quest.id, this, sectionText, nameText, taskText, countText, pill, bar)
+                val pill =
+                    if (quest.isRepeatable) {
+                        repeatablePill(0.0, (ROW_HEIGHT - PILL_HEIGHT) / 2, texts).also { pill ->
+                            right -= END_SPACING + pill.width
+                            pill.x = right
+                        }
+                    } else {
+                        null
+                    }
+                val pin =
+                    if (quest.isCompleted) {
+                        null
+                    } else {
+                        right -= END_SPACING + PIN_SIZE
+                        rowView.drawPin(quest, right)
+                    }
+                val textWidth = right - END_SPACING - TEXT_X
+                val sectionText = text(sectionOf(quest), textSize = SECTION_SIZE, color = HudStyle.FAINT) { xy(TEXT_X, SECTION_Y) }
+                val nameText = text(fitted(quest.name, NAME_SIZE, textWidth), textSize = NAME_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(TEXT_X, NAME_Y) }
+                val taskLine = if (quest.isCompleted) texts[UiText.QUEST_TRACKER_COMPLETED] else task.text
+                val taskText = text(fitted(taskLine, TASK_SIZE, textWidth), textSize = TASK_SIZE, color = HudStyle.MUTED) { xy(TEXT_X, TASK_Y) }
+                val bar = if (isCounted) container { progressBar(TEXT_X, BAR_Y, textWidth, BAR_HEIGHT, task.progress, task.count) } else null
+                onClick { if (!hasDragged) delegate?.questJournalSelected(quest.id) }
+                row = Row(quest.id, rowView, body, pin, quest.isPinned, sectionText, nameText, taskText, countText, pill, bar)
+            }
         }
         return row
     }
+
+    // The pin, with the 32 around it to tap, as a pin of 14 is hard to hit.
+    private fun Container.drawPin(
+        quest: QuestInfo,
+        pinX: Double,
+    ): Container =
+        container {
+            xy(pinX - (PIN_TAP_WIDTH - PIN_SIZE) / 2, 0.0)
+            solidRect(Size(PIN_TAP_WIDTH, ROW_HEIGHT), Colors.TRANSPARENT)
+            pinGlyph((PIN_TAP_WIDTH - PIN_SIZE) / 2, (ROW_HEIGHT - PIN_SIZE) / 2, PIN_SIZE, if (quest.isPinned) HudStyle.SELECTION else HudStyle.FAINT)
+            onClick { if (!hasDragged) delegate?.questJournalPinSelected(quest.id) }
+        }
 
     private fun sectionOf(quest: QuestInfo): String =
         texts[

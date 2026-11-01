@@ -30,7 +30,7 @@ object QuestTrackerViewStories : StoryBinding {
             id = "screen-quest-tracker",
             group = "Screen",
             title = "Quest tracker",
-            description = "A capsule on the right of the top line, naming the current task of the main quest, or that it is completed.",
+            description = "A capsule on the right of the top line, naming the current task of the pinned quest, or that the main quest is completed.",
             controls = listOf(ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name }), ControlDto.boolean(TAPPABLE)),
             args = mapOf(QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name), TAPPABLE to ArgDto.boolean(true)),
             stories =
@@ -41,6 +41,8 @@ object QuestTrackerViewStories : StoryBinding {
                     story("reach", QuestSample.REACH),
                     story("long-text", QuestSample.LONG_TEXT),
                     story("completed", QuestSample.COMPLETED),
+                    story("pinned", QuestSample.PINNED),
+                    story("pinned-with-long-text", QuestSample.PINNED_WITH_LONG_TEXT),
                     readOnly,
                 ),
         )

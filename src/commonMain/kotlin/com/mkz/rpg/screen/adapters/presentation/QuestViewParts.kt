@@ -220,6 +220,18 @@ internal object QuestViewParts {
         return cursor - x - REWARD_GAP
     }
 
+    /** A head, a bar and a point, as rectangles, as a circle blurs at this size. Gold when the quest is the pinned one. */
+    fun Container.pinGlyph(
+        x: Double,
+        y: Double,
+        side: Double,
+        color: RGBA,
+    ) {
+        solidRect(Size(side * 0.44, side * 0.46), color) { xy(x + side * 0.28, y) }
+        solidRect(Size(side * 0.8, side * 0.14), color) { xy(x + side * 0.1, y + side * 0.46) }
+        solidRect(Size(side * 0.14, side * 0.4), color) { xy(x + side * 0.43, y + side * 0.6) }
+    }
+
     /** The pill saying that a side quest can run again. */
     fun Container.repeatablePill(
         x: Double,

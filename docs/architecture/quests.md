@@ -76,13 +76,14 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 
 ### The tracker
 
-[`QuestTrackerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestTrackerView.kt) is a capsule on the right of the top line, beside Exploring, naming the current task, with its count when it counts above 1, e.g.: `Defeat 5 Rats 3/5`. A talk, a reach or a single defeat has nothing to count.
+[`QuestTrackerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestTrackerView.kt) is a capsule on the right of the top line, beside Exploring, naming the current task of the [pinned quest](#pinning), or else of the main quest, with a pin while a side quest is pinned, and its count when it counts above 1, e.g.: `Defeat 5 Rats 3/5`. A talk, a reach or a single defeat has nothing to count.
 
 | Event                                     | The tracker                                                                                                     |
 |-------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `QuestStarted`, `GameRestored`            | Is drawn, without popping, so a loaded game draws it too, ticked when completed.                                |
-| `TaskProgressed`, `TaskCompleted`         | Pops alongside the timeline when what it reads differs from what it displays, so a defeat pops it once, even when it publishes both. Nothing when the quest is completed, as `QuestCompleted` follows. |
-| `QuestCompleted`                          | Reads Quest completed for good, with a tick.                                                                    |
+| `QuestStarted` of the main quest, `GameRestored` | Is drawn, without popping, so a loaded game draws it too, ticked when completed.                         |
+| `TaskProgressed`, `TaskCompleted`         | Pops alongside the timeline when what it reads differs from what it displays, so a defeat pops it once, even when it publishes both. Nothing when the quest is completed, as `QuestCompleted` follows. Of a quest it does not name, it only pops, with no text change. |
+| `QuestPinned`, `QuestAbandoned`           | Is drawn, without popping, naming the quest now pinned, or the main quest.                                      |
+| `QuestCompleted`                          | Is drawn, without popping: a pinned quest returns to the main quest, and the main quest reads Quest completed for good, with a tick. |
 | `ExplorationPaused`, `ExplorationResumed` | Stays in the same place, read only in a battle: no chevron, and tapping it does nothing.                        |
 | `PlayerVictory`                           | Is hidden, as the winner is drawn centred across the whole top line.                                            |
 
@@ -95,7 +96,8 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestJournalView.kt) once a side quest is listed, and otherwise the detail view of the main quest, so there is no list of one row. It takes the place of the pad, in the 300 of its slot, so the battlefield stays in sight.
 
 - It lists the main quest first while active, then the active side quests, then the completed quests ticked, each group in the order the quests were created. Side quests not started are hidden, so nothing is spoiled.
-- Each row names its section (MAIN QUEST, SIDE QUEST, COMPLETED), and holds the target's portrait, the name, the current task, its count and bar only when it counts above 1, and the Repeatable pill.
+- Each row names its section (MAIN QUEST, SIDE QUEST, COMPLETED), and holds the target's portrait, the name, the current task, its count and bar only when it counts above 1, the Repeatable pill, and on an active quest its pin, gold when pinned.
+- Tapping a pin makes the tracker name that quest, and tapping the gold pin returns it to the main quest. See [Pinning](#pinning). The pin takes its own taps in the 32 around it, so the row does not open.
 - It holds any number of quests, dragged to scroll. A drag above 4 points does not select the row under it, and the list keeps its place when coming back from a detail view.
 - KorGE's `clipContainer` does not clip rounded rectangles, so the rows that would show out of the panel are hidden, and the header and the footer are drawn over the others.
 - Tapping a row opens its detail view, and Back steps out one level at a time.

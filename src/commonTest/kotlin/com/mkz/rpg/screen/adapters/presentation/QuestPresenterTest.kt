@@ -89,13 +89,14 @@ class QuestPresenterTest {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         apis.presenter()
+        apis.startQuest()
         // When
         apis.eventBus.publish(QuestStarted(questId = "side"))
         apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
-        // Then
-        announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED, Moment.COMPLETED)
-        trackerView.displayedQuests.shouldBeEmpty()
+        // Then: the tracker stays on the main quest, as it was.
+        announcementView.announcements.map { (moment, quest) -> moment to quest.id }.shouldContainExactly(Moment.STARTED to questId, Moment.STARTED to "side", Moment.COMPLETED to "side")
+        trackerView.displayedQuests.map { quest -> quest.id }.shouldContainExactly(questId)
     }
 
     @Test
@@ -454,5 +455,139 @@ class QuestPresenterTest {
             .searchParty()!!
             .isReadingQuest
             .shouldBeFalse()
+    }
+
+    private fun SubdomainApis.pin(questId: String) {
+        questApi.pinQuest(questId)
+        eventBus.dispatch()
+    }
+
+    @Test
+    fun `QuestPresenter should only pop the tracker when a quest it does not name progresses`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
+        apis.presenterWithASideQuestOpen()
+        val drawn = trackerView.displayedQuests.size
+        // When
+        apis.defeatRat()
+        // Then
+        trackerView.displayedQuests.size shouldBe drawn
+        trackerView.pops shouldBe 1
+    }
+
+    @Test
+    fun `QuestPresenter should pop the tracker once when a defeat completes a task of a quest it does not name`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1), defeatUnits(unitId = "knight", count = 1))))
+        apis.presenterWithASideQuestOpen()
+        // When
+        apis.defeatRat()
+        // Then
+        trackerView.pops shouldBe 1
+    }
+
+    @Test
+    fun `QuestPresenter should pop the tracker when a repeatable quest counts the same as its last run`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat", count = 2))))
+        apis.presenterWithASideQuestOpen()
+        apis.defeatRat()
+        apis.defeatRat()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        val pops = trackerView.pops
+        // When
+        apis.defeatRat()
+        // Then
+        trackerView.pops shouldBe pops + 1
+    }
+
+    @Test
+    fun `QuestPresenter should name the pinned quest and draw it without popping when it is pinned`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
+        apis.presenterWithASideQuestOpen()
+        // When
+        apis.pin("side")
+        // Then
+        trackerView.displayedQuests.last().id shouldBe "side"
+        trackerView.pops shouldBe 0
+        journalView.isPinnedRow("side").shouldBeTrue()
+        journalView.isPinnedRow(questId).shouldBeFalse()
+        // When
+        apis.defeatRat()
+        // Then
+        trackerView.displayedQuests
+            .last()
+            .currentTask.progress shouldBe 1
+        trackerView.pops shouldBe 1
+    }
+
+    @Test
+    fun `QuestPresenter should return to the main quest when the gold pin is tapped`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        apis.pin("side")
+        // When
+        presenter.questJournalPinSelected("side")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.displayedQuests.last().id shouldBe questId
+    }
+
+    @Test
+    fun `QuestPresenter should display the main quest when the pinned quest completes`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        apis.presenterWithASideQuestOpen()
+        apis.pin("side")
+        val pops = trackerView.pops
+        // When
+        apis.defeatRat()
+        // Then
+        trackerView.displayedQuests.last().id shouldBe questId
+        trackerView.pops shouldBe pops
+    }
+
+    @Test
+    fun `QuestPresenter should display the main quest when the pinned quest is abandoned`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        apis.presenterWithASideQuestOpen()
+        apis.pin("side")
+        // When
+        apis.questApi.abandonQuest("side")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.displayedQuests.last().id shouldBe questId
+    }
+
+    @Test
+    fun `QuestPresenter should not move the tracker when another quest starts`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "later", giverNpcId = "elder"))
+        apis.presenterWithASideQuestOpen()
+        apis.pin("side")
+        // When
+        apis.questApi.resolveNpcTalk("elder")
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.displayedQuests.last().id shouldBe "side"
+    }
+
+    @Test
+    fun `QuestPresenter should draw the pinned quest when a game is restored`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        apis.startQuest()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.pin("side")
+        apis.presenter()
+        // When
+        apis.eventBus.publish(GameRestored(slot = 1))
+        apis.eventBus.dispatch()
+        // Then
+        trackerView.displayedQuests.single().id shouldBe "side"
     }
 }

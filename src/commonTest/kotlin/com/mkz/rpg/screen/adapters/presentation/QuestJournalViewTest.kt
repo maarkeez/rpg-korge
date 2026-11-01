@@ -67,6 +67,36 @@ class QuestJournalViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Display should show no pin when the quest is completed`() =
+        sharedViewsTest {
+            // Given
+            val journalView = journalView()
+            // When
+            journalView.display(listOf(mainQuest.copy(isPinned = true), sideQuest, completedQuest))
+            // Then
+            journalView.isPinShown("main").shouldBeTrue()
+            journalView.isPinnedRow("main").shouldBeTrue()
+            journalView.isPinShown("side").shouldBeTrue()
+            journalView.isPinnedRow("side").shouldBeFalse()
+            journalView.isPinShown("done").shouldBeFalse()
+        }
+
+    @Test
+    fun `Tapping a pin should call its delegate and not select the row`() =
+        sharedViewsTest {
+            // Given
+            val selected = mutableListOf<String>()
+            val journalView = journalView()
+            journalView.setDelegate(delegate(selected))
+            addChild(journalView)
+            journalView.display(listOf(mainQuest, sideQuest))
+            // When
+            clickPin(journalView, "side")
+            // Then
+            selected.shouldContainExactly("pin side")
+        }
+
+    @Test
     fun `Display should hide the rows out of the list when they do not all fit`() =
         sharedViewsTest {
             // Given
@@ -167,6 +197,10 @@ class QuestJournalViewTest : ViewsForTesting() {
         object : QuestJournalView.Delegate {
             override fun questJournalSelected(questId: String) {
                 selected += questId
+            }
+
+            override fun questJournalPinSelected(questId: String) {
+                selected += "pin $questId"
             }
 
             override fun questJournalBackSelected() {

@@ -14,7 +14,19 @@ object QuestInfoMother {
         id: String = "defeat-the-goat-wizard",
         isMain: Boolean = true,
         isRepeatable: Boolean = false,
-    ) = QuestInfo(id = id, name = name, description = description, tasks = tasks, gold = gold, items = items, isCompleted = isCompleted, isMain = isMain, isRepeatable = isRepeatable)
+        isPinned: Boolean = false,
+    ) = QuestInfo(
+        id = id,
+        name = name,
+        description = description,
+        tasks = tasks,
+        gold = gold,
+        items = items,
+        isCompleted = isCompleted,
+        isMain = isMain,
+        isRepeatable = isRepeatable,
+        isPinned = isPinned,
+    )
 
     fun task(
         text: String = "Defeat the Goat Wizard",
