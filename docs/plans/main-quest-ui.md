@@ -75,7 +75,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone         | Done when                                                                                                                                          | Status | Done in |
 |----|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The tracker       | Playing shows the current task on the top line, exploring and battling, ticked once completed, also in a loaded game. Tapping it does nothing yet. | ✅     | `5d6a91cd` |
-| M2 | The detail view   | Tapping the tracker while exploring opens the quest in full with time stopped, and Back closes it, also once completed.                            | ⬜     |         |
+| M2 | The detail view   | Tapping the tracker while exploring opens the quest in full with time stopped, and Back closes it, also once completed.                            | ✅     | `1e0a0ebe` |
 | M3 | The announcements | A new game announces the quest and defeating the goat wizard announces its reward, each until Continue. The plan is marked as done.                | ⬜     |         |
 
 ### M1 commits
