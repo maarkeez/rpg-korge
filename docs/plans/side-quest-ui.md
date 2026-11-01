@@ -1,6 +1,6 @@
 # Plan: The side quests on the screen, with a journal, a pinned quest, quest markers and a toast
 
-> **Status:** in progress.
+> **Status:** done.
 >
 > **Summary:** The [quest system](quest-system.md) plays side quests with nothing on the screen, and the game ships none. `QuestPresenter` ignores any quest but the main one, so a talk with a quest giver would start a quest without a word, a defeated rat would count silently, and 40 gold would land in the leader's bag unannounced. `QuestApi.abandonQuest` has no way to be called. And nothing says which npc has something to give. Instead, the tracker names the quest the player pins, tapping it opens a journal of every quest started, each quest opens in a detail view with Abandon in red, a quest marker over an npc's head says who to talk to, and a toast announces every quest starting and completing, the main quest too, replacing its card. Three real side quests ship with it. Chosen among the Storybook prototypes of the local branch `prototype/side-quest-ui` (`03f55daf`): tracker C, journal B with scrolling instead of pages, detail view B with its buttons swapped, announcement B and marker A. It builds on [Quests](../architecture/quests.md), [Exploration](../architecture/exploration.md), the [Presentation timeline](../architecture/presentation-timeline.md), [Save and load](../architecture/save-and-load.md) and the [main quest on the screen](main-quest-ui.md), three of whose decisions it replaces.
 
@@ -79,7 +79,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | M3 | Abandoning        | Abandon in red asks first, and takes the side quest back to not started, returning to the journal or the pad.                                | ✅      | `51694f3f` |
 | M4 | The pinned quest  | Pinning a quest in the journal makes the tracker name it, also in a loaded game, with `SAVE_VERSION` 4.                                      | ✅      | `566a5cf3` |
 | M5 | The quest markers | An npc with a quest to start or a talk task has its sign while exploring, also in a loaded game.                                             | ✅      | `19020c2d` |
-| M6 | The side quests   | The three quests can be played from a new game, proved end to end. The plan is marked as done.                                               | ⬜      |         |
+| M6 | The side quests   | The three quests can be played from a new game, proved end to end. The plan is marked as done.                                               | ✅      | `2c887c46` |
 
 ### M1 commits
 
