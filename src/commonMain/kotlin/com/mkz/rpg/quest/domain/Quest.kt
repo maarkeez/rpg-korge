@@ -2,6 +2,7 @@ package com.mkz.rpg.quest.domain
 
 import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.RewardDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -63,6 +64,14 @@ data class Quest private constructor(
 
     /** Whether talking to the npc starts it: it is a side quest of that giver, not started, or completed and repeatable. */
     fun canBeStartedBy(npcId: String): Boolean = giverNpcId?.value == npcId && (progress.status == StatusDto.NOT_STARTED || (progress.status == StatusDto.COMPLETED && repeatable))
+
+    /** The sign the npc has because of this quest: a talk task when its current task is to talk to it, a quest to start when it can start it, or none. */
+    fun markerFor(npcId: String): QuestMarkerDto? =
+        when {
+            progress.status == StatusDto.ACTIVE && (currentTask() as? Task.TalkToNpc)?.npcId == npcId -> QuestMarkerDto(npcId = npcId, sign = QuestMarkerDto.SignDto.TALK_TASK)
+            canBeStartedBy(npcId) -> QuestMarkerDto(npcId = npcId, sign = QuestMarkerDto.SignDto.QUEST_TO_START)
+            else -> null
+        }
 
     /** Starts it from its first task. */
     fun start(): Quest =
@@ -239,6 +248,17 @@ data class Quest private constructor(
         enum class QuestTypeDto {
             MAIN,
             SIDE,
+        }
+
+        /** The sign over the npc's head. */
+        data class QuestMarkerDto(
+            val npcId: String,
+            val sign: SignDto,
+        ) {
+            enum class SignDto {
+                QUEST_TO_START,
+                TALK_TASK,
+            }
         }
 
         data class TaskDto(

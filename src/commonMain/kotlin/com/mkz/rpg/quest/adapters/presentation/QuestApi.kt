@@ -20,6 +20,7 @@ import com.mkz.rpg.quest.usecases.commands.RequestQuestReward
 import com.mkz.rpg.quest.usecases.commands.ResolveNpcTalk
 import com.mkz.rpg.quest.usecases.commands.RestoreQuests
 import com.mkz.rpg.quest.usecases.commands.StartMainQuest
+import com.mkz.rpg.quest.usecases.queries.SearchQuestMarkers
 import com.mkz.rpg.quest.usecases.queries.SearchQuests
 import com.mkz.rpg.quest.usecases.queries.SearchQuestsSnapshot
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
@@ -56,6 +57,7 @@ class QuestApi(
 
     // Queries
     val searchQuests = SearchQuests(questRepository)
+    val searchQuestMarkers = SearchQuestMarkers(questRepository)
 
     // Events
     private val onRequestInitialiseQuests = OnRequestInitialiseQuests(initialiseQuests, eventBus)

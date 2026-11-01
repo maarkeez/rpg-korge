@@ -2,6 +2,7 @@ package com.mkz.rpg.quest.domain
 
 import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestMarkerDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
@@ -364,5 +365,65 @@ class QuestTest {
         val progressed = pinned.defeated("rat")
         // Then
         progressed.toDto().progress.isPinned shouldBe true
+    }
+
+    @Test
+    fun `MarkerFor should be a talk task when the current task is to talk to the npc`() {
+        // Given
+        val quest = started(listOf(talkToNpc("elder")))
+        // When
+        val result = quest.markerFor("elder")
+        // Then
+        result?.sign shouldBe QuestMarkerDto.SignDto.TALK_TASK
+    }
+
+    @Test
+    fun `MarkerFor should be nothing when the talk is not the current task`() {
+        // Given
+        val quest = started(listOf(defeatUnits(), talkToNpc("elder")))
+        // When
+        val result = quest.markerFor("elder")
+        // Then
+        result shouldBe null
+    }
+
+    @Test
+    fun `MarkerFor should be a quest to start when the npc can start it`() {
+        // When
+        val result = sideQuest(giverNpcId = "farmer").markerFor("farmer")
+        // Then
+        result?.sign shouldBe QuestMarkerDto.SignDto.QUEST_TO_START
+    }
+
+    @Test
+    fun `MarkerFor should be nothing when the quest is under way or another npc is asked`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer")
+        // When
+        val underWay =
+            quest
+                .start()
+                .pullEvents()
+                .second
+                .markerFor("farmer")
+        val another = quest.markerFor("elder")
+        // Then
+        underWay shouldBe null
+        another shouldBe null
+    }
+
+    @Test
+    fun `MarkerFor should be a quest to start when a repeatable quest is completed`() {
+        // Given
+        val completed =
+            sideQuest(giverNpcId = "farmer", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat", count = 1)))
+                .start()
+                .defeated("rat")
+                .pullEvents()
+                .second
+        // When
+        val result = completed.markerFor("farmer")
+        // Then
+        result?.sign shouldBe QuestMarkerDto.SignDto.QUEST_TO_START
     }
 }
