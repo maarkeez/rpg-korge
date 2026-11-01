@@ -1,6 +1,6 @@
 # Plan: Quests of linear tasks, paying the party leader a reward
 
-> **Status:** to do.
+> **Status:** in progress.
 >
 > **Summary:** Exploring has no goal today. The hero walks from row 2 of the 40 rows of the battlefield, and defeating
 > the goat wizard at row 36 only drops its bee essence: nothing in the game asks for it, and nothing keeps count of it.
@@ -74,7 +74,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone        | Done when                                                                                                                              | Status | Done in |
 |----|------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The reward       | `inventory` grants a requested reward, capping the gold and dropping what does not fit, and the dropped items can be looted and saved. | ⬜      |         |
+| M1 | The reward       | `inventory` grants a requested reward, capping the gold and dropping what does not fit, and the dropped items can be looted and saved. | ✅      | `4666980b` |
 | M2 | Quests and saves | A new game starts the main quest, and saving and loading keep its status. `SAVE_VERSION` is 3.                                         | ⬜      |         |
 | M3 | Task progress    | Defeating the goat wizard completes the main quest, and the leader carries 150 more gold. The three kinds of task work.                | ⬜      |         |
 | M4 | Side quests      | Talking to a giver starts its side quests, which can be repeated and abandoned, played by the tests only.                              | ⬜      |         |
