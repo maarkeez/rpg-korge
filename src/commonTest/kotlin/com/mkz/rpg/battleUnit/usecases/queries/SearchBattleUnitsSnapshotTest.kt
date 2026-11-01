@@ -2,6 +2,7 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
+import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import kotlin.test.Test
@@ -13,7 +14,7 @@ class SearchBattleUnitsSnapshotTest {
     @Test
     fun `should return the snapshot of every battle unit`() {
         // Given
-        val battleUnits = listOf(battleUnit(id = "knight-1"), battleUnit(id = "knight-2", remainingHealthPoints = 3))
+        val battleUnits = listOf(battleUnit(id = "knight-1"), battleUnit(id = "knight-2", unit = unit(healthPoints = 10).toDto(), remainingHealthPoints = 3))
         battleUnits.forEach(battleUnitRepository::create)
         // When
         val result = searchBattleUnitsSnapshot()
