@@ -40,6 +40,16 @@ class Texts(
 
     fun terrainName(terrainId: String): String = localizationApi.translate("terrain.$terrainId.name")
 
+    fun questName(questId: String): String = localizationApi.translate("quest.$questId.name")
+
+    fun questDescription(questId: String): String = localizationApi.translate("quest.$questId.description")
+
+    /** A task of the quest, by its place in the line of tasks, as a whole sentence, e.g.: `Defeat the Goat Wizard`. */
+    fun questTask(
+        questId: String,
+        taskIndex: Int,
+    ): String = localizationApi.translate("quest.$questId.task.$taskIndex")
+
     /** The languages the game can be played in, English first, each named in its own language, e.g.: `Español`. */
     fun languages(): List<LanguageDto> = localizationApi.searchLanguages()
 

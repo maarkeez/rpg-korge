@@ -46,7 +46,7 @@ An invalid or missing file fails when the resources are read, with the file path
 
 Unless stated otherwise, there is one file per entity and **the file name is the entity id**. Enum values are written by name (e.g.: `"DECREASE_HEALTH"`).
 
-The files hold no text: the names of the abilities, lootable items, npcs, players, terrains and units, and the npc lines, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`), so they can be translated. See [Localization](localization.md).
+The files hold no text: the names of the abilities, lootable items, npcs, players, quests, terrains and units, the npc lines, and the description and tasks of each quest, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`, `quest.defeat-the-goat-wizard.task.0`), so they can be translated. See [Localization](localization.md).
 
 ### `effect/<effect id>.toml`
 
@@ -270,6 +270,7 @@ gold = 150                       # Optional, 0 by default
 
 1. Add the units, npcs and [lootable items](#how-to-add-a-lootable-item) it names, if they do not exist yet.
 2. Add `resources/quest/<quest id>.toml`. See [`quest/<quest id>.toml`](#quest-quest-idtoml).
+3. Add its texts to `resources/localization/messages.pot`: `quest.<quest id>.name`, `quest.<quest id>.description`, and `quest.<quest id>.task.<index>` for each task, from 0, as a whole sentence, e.g.: `Defeat the Goat Wizard`.
 
 ## How to add a lootable item
 

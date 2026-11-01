@@ -678,6 +678,21 @@ msgctxt "player.player-two.name"
 msgid "CPU"
 msgstr ""
 
+#. The name of a quest.
+msgctxt "quest.defeat-the-goat-wizard.name"
+msgid "The Goat Wizard's Lair"
+msgstr ""
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.defeat-the-goat-wizard.description"
+msgid "A goat swallowed a wizard's magic and now rules the lair down south."
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.defeat-the-goat-wizard.task.0"
+msgid "Defeat the Goat Wizard"
+msgstr ""
+
 #. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.grass.name"
 msgid "Grass"

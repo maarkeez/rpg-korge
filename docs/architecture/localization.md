@@ -29,10 +29,12 @@ The keys follow two conventions:
 | Text                 | Key                                    | E.g.                                       |
 |----------------------|----------------------------------------|--------------------------------------------|
 | UI                   | `ui.<view>.<message>`                  | `ui.shop.notEnoughGold`, `ui.menu.playNewGame` |
-| Game data            | `<subdomain>.<entity id>.<field>`      | `unit.bat.name`, `npc.elder.line`, `terrain.grass.name` |
+| Game data            | `<subdomain>.<entity id>.<field>`      | `unit.bat.name`, `npc.elder.line`, `quest.defeat-the-goat-wizard.task.0` |
 | The language's name  | `language.name`                        | `English`, `Español`                       |
 
-The game data text is the name of each ability, lootable item, npc, player, terrain and unit, and the line of each npc.
+The game data text is the name of each ability, lootable item, npc, player, quest, terrain and unit, the line of each
+npc, and the description and each task of each quest. A task is keyed by its place in the line of tasks of its quest, and
+is a whole sentence written by hand, as building it from the name of its unit would lose the article and the plural.
 The [game data files](game-data.md) hold no text, only ids.
 
 ### Messages
@@ -77,7 +79,7 @@ enforces. The other subdomains hold ids, never text, and their events and DTOs c
 fails the build when:
 
 - a catalog does not parse;
-- a `UiText` key, or a game data key (one per resource file), is missing from `messages.pot`, or a plural `UiText` is
+- a `UiText` key, or a game data key (one per resource file, and one per task of a quest), is missing from `messages.pot`, or a plural `UiText` is
   not a plural there;
 - `messages.pot` has an entry the screen does not translate;
 - a translation has an entry missing from `messages.pot`, other placeholders than its English text, or another number
