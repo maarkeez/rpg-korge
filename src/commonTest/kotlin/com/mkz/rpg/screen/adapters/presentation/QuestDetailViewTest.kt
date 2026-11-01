@@ -8,6 +8,7 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.doubles.shouldBeLessThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldEndWith
@@ -102,6 +103,43 @@ class QuestDetailViewTest : ViewsForTesting() {
             detailView.isTargetTicked().shouldBeTrue()
             detailView.displayedTask() shouldBe "Defeat the Goat Wizard"
             detailView.displayedCount().shouldBeNull()
+        }
+
+    @Test
+    fun `display should name a side quest in the caption when it is not the main quest`() =
+        sharedViewsTest {
+            // Given
+            val detailView = detailView()
+            // When
+            detailView.display(questInfo(isMain = false))
+            // Then
+            detailView.displayedCaption() shouldBe "SIDE QUEST"
+        }
+
+    @Test
+    fun `display should show the pill when it is repeatable`() =
+        sharedViewsTest {
+            // Given
+            val detailView = detailView()
+            // When
+            detailView.display(questInfo(isMain = false, isRepeatable = true))
+            val isPillShown = detailView.isRepeatablePillShown()
+            detailView.display(questInfo(isMain = false))
+            // Then
+            isPillShown.shouldBeTrue()
+            detailView.isRepeatablePillShown().shouldBeFalse()
+        }
+
+    @Test
+    fun `display should draw the reward above the buttons when it is a large reward`() =
+        sharedViewsTest {
+            // Given
+            val detailView = detailView()
+            val items = listOf("rune-hammer", "health-elixir", "bee-essence", "health-potion").map { id -> QuestInfo.RewardItem(id, id) }
+            // When
+            detailView.display(questInfo(gold = 99_999, items = items))
+            // Then
+            detailView.rewardBottom() shouldBeLessThan detailView.buttonsTop()
         }
 
     @Test

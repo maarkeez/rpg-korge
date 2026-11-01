@@ -15,6 +15,14 @@ fun QuestDetailView.displayedCaption(): String? = captionText?.text
 /** The lines of the name, from the top. */
 fun QuestDetailView.displayedName(): List<String> = linesOf(nameView)
 
+fun QuestDetailView.isRepeatablePillShown(): Boolean = repeatablePillView != null
+
+/** Where the reward row ends, within the view. */
+fun QuestDetailView.rewardBottom(): Double = requireNotNull(rewardView) { "It displays no quest" }.getBounds(this).bottom
+
+/** Where the buttons start, within the view. */
+fun QuestDetailView.buttonsTop(): Double = requireNotNull(backButton) { "It displays no quest" }.y
+
 /** The lines of the description, from the top. */
 fun QuestDetailView.displayedDescription(): List<String> = linesOf(descriptionView)
 

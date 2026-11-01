@@ -3,6 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.fitted
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.progressBar
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.repeatablePill
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.rewardRow
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.ringOf
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.targetSlot
@@ -20,9 +21,9 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
 /**
- * The main quest in full, in place of the pad, led by the portrait of who its current task is about: its name and
- * description beside it, the current task under them, the tasks done as a count, and the reward, with Back. Tapping the
- * tracker opens it, also once completed, so the story can be read again.
+ * A quest in full, in place of the pad, led by the portrait of who its current task is about: its name and description
+ * beside it, the current task under them, the tasks done as a count, and the reward, with a bottom row just for the
+ * buttons, so a large reward never slides under them. It stays open once completed, so the story can be read again.
  */
 class QuestDetailView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -44,25 +45,27 @@ class QuestDetailView(
         private const val NAME_MAXIMUM_LINES = 2
         private const val DESCRIPTION_SIZE = 13.0
         private const val DESCRIPTION_SPACING = 5.0
-        private const val BANNER_Y = 126.0
-        private const val BANNER_HEIGHT = 56.0
+        private const val PILL_SPACING = 8.0
+        private const val PILL_Y = 7.0
+        private const val BANNER_Y = 124.0
+        private const val BANNER_HEIGHT = 52.0
         private const val TASK_X = 24.0
         private const val TASK_TEXT_X = 48.0
         private const val TASK_RIGHT = WIDTH - 2 * PADDING
         private const val TASK_SIZE = 16.0
-        private const val SINGLE_TASK_Y = 146.0
-        private const val COUNTED_TASK_Y = 136.0
+        private const val SINGLE_TASK_Y = 142.0
+        private const val COUNTED_TASK_Y = 134.0
         private const val COUNT_SPACING = 8.0
-        private const val BAR_Y = 162.0
+        private const val BAR_Y = 158.0
         private const val BAR_WIDTH = 330.0
         private const val BAR_HEIGHT = 7.0
-        private const val TASKS_DONE_Y = 188.0
+        private const val TASKS_DONE_Y = 182.0
         private const val TASKS_DONE_SIZE = 14.0
-        private const val DIVIDER_Y = 248.0
-        private const val REWARD_ROW_Y = 258.0
-        private const val REWARD_CAPTION_Y = 265.0
+        private const val REWARD_ROW_Y = 208.0
+        private const val REWARD_CAPTION_Y = 215.0
         private const val REWARD_SPACING = 8.0
-        private const val BACK_X = 294.0
+        private const val DIVIDER_Y = 248.0
+        private const val BACK_X = PADDING
         private const val BACK_Y = 256.0
         private const val BACK_WIDTH = 72.0
     }
@@ -74,6 +77,7 @@ class QuestDetailView(
     private var delegate: Delegate? = null
 
     internal var captionText: Text? = null
+    internal var repeatablePillView: PillView? = null
     internal var nameView: Container? = null
     internal var descriptionView: Container? = null
     internal var targetTick: Container? = null
@@ -95,7 +99,8 @@ class QuestDetailView(
         drawLeader(quest)
         drawTask(quest)
         drawTasksDone(quest)
-        drawFooter(quest)
+        drawReward(quest)
+        drawButtons()
         visible = true
     }
 
@@ -108,12 +113,16 @@ class QuestDetailView(
         val task = quest.currentTask
         targetSlot(task, resourcesLoader, PADDING, PADDING, TARGET_SIZE, portraitScale = 3.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
         targetTick = if (quest.isCompleted) container { tickDisc(TARGET_BOTTOM - 20, TARGET_BOTTOM - 20, TARGET_TICK_SIZE) } else null
-        captionText =
-            text(
-                texts[if (quest.isCompleted) UiText.QUEST_DETAIL_COMPLETED else UiText.QUEST_DETAIL_MAIN_QUEST],
-                textSize = QuestViewParts.CAPTION_SIZE,
-                color = if (quest.isCompleted) HudStyle.ALLY else HudStyle.FAINT,
-            ) { xy(TEXT_X, PADDING - 2) }
+        val caption =
+            texts[
+                when {
+                    quest.isCompleted -> UiText.QUEST_DETAIL_COMPLETED
+                    quest.isMain -> UiText.QUEST_DETAIL_MAIN_QUEST
+                    else -> UiText.QUEST_DETAIL_SIDE_QUEST
+                },
+            ]
+        captionText = text(caption, textSize = QuestViewParts.CAPTION_SIZE, color = if (quest.isCompleted) HudStyle.ALLY else HudStyle.FAINT) { xy(TEXT_X, PADDING - 2) }
+        repeatablePillView = if (quest.isRepeatable) repeatablePill(TEXT_X + widthOf(caption, QuestViewParts.CAPTION_SIZE) + PILL_SPACING, PILL_Y, texts) else null
         var nameHeight = 0.0
         nameView = container { nameHeight = wrappedText(quest.name, TEXT_X, NAME_Y, TEXT_WIDTH, NAME_SIZE, Colors.WHITE, maximumLines = NAME_MAXIMUM_LINES) }
         val descriptionY = NAME_Y + nameHeight + DESCRIPTION_SPACING
@@ -146,11 +155,14 @@ class QuestDetailView(
         tasksDoneText = text(texts.plural(UiText.QUEST_DETAIL_TASKS_DONE, tasksDone, "tasks" to tasksDone), textSize = TASKS_DONE_SIZE, color = HudStyle.MUTED) { xy(PADDING + 20, TASKS_DONE_Y) }
     }
 
-    private fun drawFooter(quest: QuestInfo) {
-        solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, DIVIDER_Y) }
+    private fun drawReward(quest: QuestInfo) {
         val caption = texts[UiText.QUEST_DETAIL_REWARD]
         text(caption, textSize = QuestViewParts.CAPTION_SIZE, color = HudStyle.FAINT) { xy(PADDING, REWARD_CAPTION_Y) }
         rewardView = container { rewardRow(quest, PADDING + widthOf(caption, QuestViewParts.CAPTION_SIZE) + REWARD_SPACING, REWARD_ROW_Y, resourcesLoader, texts) }
+    }
+
+    private fun drawButtons() {
+        solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, DIVIDER_Y) }
         backButton =
             CancelButton(texts[UiText.QUEST_DETAIL_BACK], BACK_WIDTH) { delegate?.questDetailBackSelected() }.also { button ->
                 addChild(button)

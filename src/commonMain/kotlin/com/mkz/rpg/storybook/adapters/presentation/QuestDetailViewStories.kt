@@ -21,7 +21,7 @@ object QuestDetailViewStories : StoryBinding {
             id = "screen-quest-detail",
             group = "Screen",
             title = "Quest detail",
-            description = "The main quest in full, in place of the pad, once its tracker is tapped, led by who its current task is about.",
+            description = "A quest in full, in place of the pad, led by who its current task is about.",
             controls = listOf(ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name })),
             args = mapOf(QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name)),
             stories =
@@ -34,6 +34,10 @@ object QuestDetailViewStories : StoryBinding {
                     story("item-rewards", QuestSample.ITEM_REWARDS),
                     story("long-text", QuestSample.LONG_TEXT),
                     story("completed", QuestSample.COMPLETED),
+                    story("side-quest", QuestSample.SIDE_QUEST),
+                    story("repeatable", QuestSample.REPEATABLE),
+                    story("completed-repeatable", QuestSample.COMPLETED_REPEATABLE),
+                    story("large-reward", QuestSample.LARGE_REWARD),
                 ),
         )
 
