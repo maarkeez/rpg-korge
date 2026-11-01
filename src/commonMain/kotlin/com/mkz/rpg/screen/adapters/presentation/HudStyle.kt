@@ -40,6 +40,9 @@ object HudStyle {
     val ENEMY = RGBA(0xFF, 0x37, 0x5F)
     val DEFEATED = RGBA(0x8A, 0x8A, 0xA0)
 
+    // The middle of a gold coin.
+    val COIN_MIDDLE = RGBA(0xC7, 0x8A, 0x1E)
+
     val HEALTH = RGBA(255, 55, 95)
     val MANA = RGBA(0, 145, 255)
 

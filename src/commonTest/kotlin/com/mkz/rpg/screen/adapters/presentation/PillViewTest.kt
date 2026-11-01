@@ -36,6 +36,18 @@ class PillViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `PillView should draw the coin before the text when its glyph is gold`() =
+        sharedViewsTest {
+            // Given
+            val pillView = PillView(color = HudStyle.SELECTION, glyph = PillView.Glyph.GOLD)
+            // When
+            pillView.display("150 G")
+            // Then
+            pillView.isGlyphDisplayed().shouldBeTrue()
+            pillView.isGlyphBeforeLabel().shouldBeTrue()
+        }
+
+    @Test
     fun `PillView should display the text in white when it is solid`() =
         sharedViewsTest {
             // Given

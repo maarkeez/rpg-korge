@@ -45,6 +45,9 @@ class PillView(
 
         // A clock: a ring with two hands.
         COOLDOWN,
+
+        // A coin: a gold circle with a darker middle.
+        GOLD,
     }
 
     internal var capsule: RoundRect? = null
@@ -103,6 +106,10 @@ class PillView(
                 circle(radius = radius, fill = Colors.TRANSPARENT, stroke = ink, strokeThickness = 1.5) { xy(1.0, 1.0) }
                 solidRect(Size(1.5, side * 0.32), ink) { xy(side / 2 - 0.75, side / 2 - side * 0.3) }
                 solidRect(Size(side * 0.26, 1.5), ink) { xy(side / 2 - 0.75, side / 2 - 0.75) }
+            }
+            Glyph.GOLD -> {
+                circle(radius = radius, fill = HudStyle.SELECTION) { xy(1.0, 1.0) }
+                circle(radius = radius * 0.5, fill = HudStyle.COIN_MIDDLE) { xy(1.0 + radius * 0.5, 1.0 + radius * 0.5) }
             }
             Glyph.NONE -> Unit
         }

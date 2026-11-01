@@ -95,6 +95,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-pill--mana-cost",
                     "screen-pill--cooldown",
                     "screen-pill--ko",
+                    "screen-pill--gold",
                     "screen-effect",
                     "screen-effect--applied",
                     "screen-effect--new",
