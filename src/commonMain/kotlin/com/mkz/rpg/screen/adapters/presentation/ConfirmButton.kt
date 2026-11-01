@@ -8,18 +8,25 @@ import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.uiButton
 import korlibs.korge.view.Container
 
-/** A primary action button, e.g.: Confirm. */
+/** A primary action button, e.g.: Confirm, in blue unless it is told another colour. */
 class ConfirmButton(
     label: String,
     buttonWidth: Double = 190.0,
+    color: RGBA = COLOR,
+    pressedColor: RGBA = PRESSED_COLOR,
     val onConfirmed: () -> Unit,
 ) : Container() {
+    companion object {
+        val COLOR = RGBA(0, 136, 255)
+        val PRESSED_COLOR = RGBA(30, 110, 244)
+    }
+
     internal val confirmButton: UIButton =
         uiButton {
             text = label
             width = buttonWidth
-            bgColorOut = RGBA(0, 136, 255)
-            bgColorOver = RGBA(30, 110, 244)
+            bgColorOut = color
+            bgColorOver = pressedColor
             background.borderColor = Colors.LIGHTGRAY
             onClick {
                 onConfirmed()

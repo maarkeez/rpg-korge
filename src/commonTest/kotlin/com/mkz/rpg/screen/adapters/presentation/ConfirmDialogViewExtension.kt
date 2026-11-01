@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.descendants
+import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Stage
 
@@ -14,6 +15,9 @@ fun ConfirmDialogView.message(): String = messageText.plainText
 
 /** The labels of both choices, the secondary one first, e.g.: `Cancel` and `Quit to menu`. */
 fun ConfirmDialogView.choiceLabels(): List<String> = listOfNotNull(cancelAndConfirmView?.cancelButton?.buttonText(), cancelAndConfirmView?.confirmButton?.buttonText())
+
+/** The colour of the primary choice, not pressed. */
+fun ConfirmDialogView.actionColor(): RGBA = requireNotNull(cancelAndConfirmView) { "The dialog asks nothing" }.confirmButton.confirmButton.bgColorOut
 
 suspend fun ViewsForTesting.clickCancel(confirmDialogView: ConfirmDialogView) = clickCancel(requireNotNull(confirmDialogView.cancelAndConfirmView) { "The dialog asks nothing" })
 

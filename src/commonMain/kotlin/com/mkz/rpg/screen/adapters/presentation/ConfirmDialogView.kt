@@ -13,7 +13,7 @@ import korlibs.math.geom.Size
 /**
  * A question displayed in place of the pad before an action that can not be undone, e.g.: quitting to the menu, which
  * loses the progress since the last save. The message, centred and wrapping when long, over a secondary action that
- * goes back and a primary one that goes ahead.
+ * goes back and a primary one, in red, that goes ahead.
  */
 open class ConfirmDialogView : Container() {
     companion object {
@@ -44,7 +44,14 @@ open class ConfirmDialogView : Container() {
         messageText.text = RichTextData(message, font = DefaultTtfFontAsBitmap, textSize = MESSAGE_TEXT_SIZE, color = Colors.WHITE)
         cancelAndConfirmView?.removeFromParent()
         cancelAndConfirmView =
-            CancelAndConfirmView(onCancelled = onCancelled, onConfirmed = onConfirmed, cancelLabel = cancelLabel, confirmLabel = confirmLabel).also { view ->
+            CancelAndConfirmView(
+                onCancelled = onCancelled,
+                onConfirmed = onConfirmed,
+                cancelLabel = cancelLabel,
+                confirmLabel = confirmLabel,
+                confirmColor = HudStyle.DANGER,
+                confirmPressedColor = HudStyle.DANGER_PRESSED,
+            ).also { view ->
                 addChild(view)
                 view.position((WIDTH - view.width) / 2, ACTIONS_Y)
             }

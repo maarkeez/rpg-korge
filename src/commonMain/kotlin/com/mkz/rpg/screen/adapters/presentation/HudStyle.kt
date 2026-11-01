@@ -43,6 +43,10 @@ object HudStyle {
     // The middle of a gold coin.
     val COIN_MIDDLE = RGBA(0xC7, 0x8A, 0x1E)
 
+    // The action that can not be undone, e.g.: Abandon, and while it is pressed.
+    val DANGER = RGBA(211, 47, 47)
+    val DANGER_PRESSED = RGBA(183, 35, 35)
+
     val HEALTH = RGBA(255, 55, 95)
     val MANA = RGBA(0, 145, 255)
 

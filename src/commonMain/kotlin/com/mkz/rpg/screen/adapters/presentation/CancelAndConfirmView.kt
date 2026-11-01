@@ -1,5 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
+import korlibs.image.color.RGBA
 import korlibs.korge.ui.uiHorizontalStack
 import korlibs.korge.ui.uiSpacing
 import korlibs.korge.view.Container
@@ -11,9 +12,11 @@ class CancelAndConfirmView(
     val onConfirmed: () -> Unit,
     cancelLabel: String,
     confirmLabel: String,
+    confirmColor: RGBA = ConfirmButton.COLOR,
+    confirmPressedColor: RGBA = ConfirmButton.PRESSED_COLOR,
 ) : Container() {
     internal val cancelButton = CancelButton(label = cancelLabel, onCancelled = { onCancelled() })
-    internal val confirmButton = ConfirmButton(label = confirmLabel, onConfirmed = { onConfirmed() })
+    internal val confirmButton = ConfirmButton(label = confirmLabel, color = confirmColor, pressedColor = confirmPressedColor, onConfirmed = { onConfirmed() })
 
     init {
         val layout =

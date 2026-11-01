@@ -31,6 +31,15 @@ class ConfirmDialogViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Display should draw the action in danger`() =
+        sharedViewsTest {
+            // When
+            val confirmDialogView = newConfirmDialogView()
+            // Then
+            confirmDialogView.actionColor() shouldBe HudStyle.DANGER
+        }
+
+    @Test
     fun `ClickChoice should call the action of the choice tapped`() =
         sharedViewsTest {
             // Given
