@@ -65,7 +65,7 @@ For example, a new game: the hero, carrying its starting 30 gold, leads the part
 | The goat wizard respawns and is defeated | Nothing                                                                                              | The quest is completed, and a main quest runs once |
 
 And a side quest with `lootableItemIds = ["hammer", "health-potion"]`, completed by a leader with one space left in its
-bag: the hammer is stored, the health potion drops on the leader's tile (`RequestDropItem`, `LootDropped`), and walking
+bag: the hammer is stored, the health potion drops on the leader's tile (`RequestDropItems`, `LootDropped`), and walking
 back onto that tile stores it, or announces `InventoryFull` if the bag is still full.
 
 ## Milestones
@@ -81,7 +81,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 ### M1 commits
 
-1. Keep the dropped items no unit dropped: `LootDrop.ownerless()`, created by `InitialiseLootDrops`, `RequestDropItem`, `DropItem` and `OnRequestDropItem`, and the ownerless loot drop left out of `SearchLootDropsSnapshot` while it holds nothing, so a save's shape does not change.
+1. Keep the dropped items no unit dropped: `LootDrop.ownerless()`, created by `InitialiseLootDrops`, `RequestDropItems`, `DropItems` and `OnRequestDropItems`, and the ownerless loot drop left out of `SearchLootDropsSnapshot` while it holds nothing, so a save's shape does not change.
 2. Grant a reward: `Inventory.grantReward`, `GrantReward`, `OnRequestGrantReward`, `RequestGrantReward` and `RewardGranted`, and describe it in Inventory.
 
 ### M2 commits
@@ -106,14 +106,14 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 - `LootDrop.ownerless()` builds the loot drop of the items no unit dropped, with `OWNERLESS_UNIT_ID` as its `unitId` and no loot tables. `create` keeps failing with `EmptyLootDropLootTables` on any other loot drop, a check moved from `LootTableIds` to `create`. It records no `LootDropCreated`, and nothing rolls it, as no battle unit has that unit.
 - `InitialiseLootDrops` creates it along with the loaded ones, in the same step (7), so `RestoreLootDrops` finds it when a save names it.
-- `LootDropEvent.RequestDropItem(lootableItemId, row, column)`: requested by `inventory`. `OnRequestDropItem` calls the new `DropItem`, which places the item in the ownerless loot drop (`LootDrop.place`, `LootDropped`).
+- `LootDropEvent.RequestDropItems(lootableItemIds, row, column)`: requested by `inventory`. It carries a list, as `Inventory` records its events in a `Set`, where two identical requests for one item each would collapse and lose a copy. `OnRequestDropItems` calls the new `DropItems`, which places each item in the ownerless loot drop (`LootDrop.place`, `LootDropped`).
 - `FindLoot`, `PickUpDroppedItem` and `SearchDroppedItems` read `searchAll`, so a dropped reward is found, picked up and drawn as any other dropped item, with no change.
 - `SearchLootDropsSnapshot` leaves out the ownerless loot drop while it holds nothing, so M1 changes no save and needs no `SAVE_VERSION` of its own.
 
 ### inventory
 
 - `InventoryEvent.RequestGrantReward(battleUnitId, gold, lootableItemIds, row, column)`: `row` and `column` are the tile of the battle unit, where what does not fit drops, as `inventory` does not know it.
-- `Inventory.grantReward(gold, lootableItemIds, row, column)` adds the gold, up to `MAXIMUM_GOLD`, stores each item in order while `canStore()`, and records `RewardGranted(battleUnitId, gold, lootableItemIds)` with what it really received, then one `RequestDropItem` per item left. E.g.: a leader with 99,950 gold granted 150 receives 49, and `RewardGranted` says 49.
+- `Inventory.grantReward(gold, lootableItemIds, row, column)` adds the gold, up to `MAXIMUM_GOLD`, stores each item in order while `canStore()`, and records `RewardGranted(battleUnitId, gold, lootableItemIds)` with what it really received, then one `RequestDropItems` with the items left. E.g.: a leader with 99,950 gold granted 150 receives 49, and `RewardGranted` says 49.
 - `GrantReward` fails with `InventoryLootableItemDoesNotExist` on an item the game does not have, and does nothing for a battle unit with no inventory. As `StoreLootedItem`, it is not limited to the player's turn, since a task can complete in a battle.
 - `OnRequestGrantReward` calls it, and `InventoryApi` builds both.
 
@@ -199,9 +199,9 @@ lootableItemIds = ["health-potion"]
 |------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------|
 | The last task of a quest completes | `RequestGrantReward(battleUnitId, gold, lootableItemIds, row, column)` | Adds the gold, stores the items, and requests dropping the rest. |
 
-| When                       | `Inventory` records                            | `lootDrop`                                        |
-|----------------------------|------------------------------------------------|---------------------------------------------------|
-| A reward item does not fit | `RequestDropItem(lootableItemId, row, column)` | Keeps it on the tile, in the ownerless loot drop. |
+| When                       | `Inventory` records                              | `lootDrop`                                          |
+|----------------------------|--------------------------------------------------|-----------------------------------------------------|
+| A reward item does not fit | `RequestDropItems(lootableItemIds, row, column)` | Keeps them on the tile, in the ownerless loot drop. |
 
 ### Docs
 
@@ -216,8 +216,9 @@ lootableItemIds = ["health-potion"]
 - `LootDropTest`
   - `LootDrop should hold no loot tables when it is ownerless`
   - `LootDrop should fail when it is created with no loot tables and is not ownerless` (kept, through `create`)
-- `DropItemTest`
-  - `DropItem should place the item on the tile and announce it when requested`
+- `DropItemsTest`
+  - `DropItems should place the item on the tile and announce it when requested`
+  - `DropItems should place every copy and announce each when the same item is requested twice`
 - `InitialiseLootDropsTest`
   - `InitialiseLootDrops should create the ownerless loot drop when the loot drops are initialised`
 - `SearchLootDropsSnapshotTest`

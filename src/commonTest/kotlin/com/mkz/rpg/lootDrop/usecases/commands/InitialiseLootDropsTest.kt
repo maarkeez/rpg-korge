@@ -47,6 +47,34 @@ class InitialiseLootDropsTest {
     }
 
     @Test
+    fun `InitialiseLootDrops should create the ownerless loot drop when the loot drops are initialised`() {
+        // Given
+        val initialiseLootDrops = initialiseLootDrops(loadedLootDrops = emptyList())
+        // When
+        initialiseLootDrops()
+        // Then
+        lootDropRepository.searchByUnitId(LootDrop.OWNERLESS_UNIT_ID)?.toDto() shouldBe LootDrop.ownerless().toDto()
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
+    fun `InitialiseLootDrops should keep the items of the ownerless loot drop when it already exists`() {
+        // Given
+        val ownerless =
+            LootDrop
+                .ownerless()
+                .place(lootableItemId = "hammer", row = 0, column = 1)
+                .pullEvents()
+                .second
+        lootDropRepository.create(ownerless)
+        val initialiseLootDrops = initialiseLootDrops(loadedLootDrops = emptyList())
+        // When
+        initialiseLootDrops()
+        // Then
+        lootDropRepository.searchByUnitId(LootDrop.OWNERLESS_UNIT_ID)?.toDto() shouldBe ownerless.toDto()
+    }
+
+    @Test
     fun `should not create a loot drop again when the loot drop of the unit already exists`() {
         // Given
         val batLootDrop = lootDrop(unitId = "bat", lootTableIds = listOf("tier-1"))

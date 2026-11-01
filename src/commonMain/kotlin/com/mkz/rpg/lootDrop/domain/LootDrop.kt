@@ -23,12 +23,26 @@ data class LootDrop private constructor(
     private val events: Set<LootDropEvent>,
 ) {
     companion object {
-        fun create(dto: Dto): LootDrop =
-            LootDrop(
+        // No unit has this id, so no battle unit rolls the ownerless loot drop.
+        const val OWNERLESS_UNIT_ID = "ownerless"
+
+        fun create(dto: Dto): LootDrop {
+            if (dto.lootTableIds.isEmpty()) throw EmptyLootDropLootTables()
+            return LootDrop(
                 unitId = UnitId(dto.unitId),
                 lootTableIds = LootTableIds(dto.lootTableIds),
                 droppedItems = DroppedItems.create(dto.droppedItems),
                 events = setOf(LootDropCreated(unitId = dto.unitId)),
+            )
+        }
+
+        /** The loot drop of the items no unit dropped, e.g.: a reward that did not fit in a bag. It has no loot tables, so nothing rolls it. */
+        fun ownerless(): LootDrop =
+            LootDrop(
+                unitId = UnitId(OWNERLESS_UNIT_ID),
+                lootTableIds = LootTableIds(emptyList()),
+                droppedItems = DroppedItems(emptyMap()),
+                events = emptySet(),
             )
     }
 
@@ -84,6 +98,9 @@ data class LootDrop private constructor(
     /** Puts back the items dropped by the unit when the game was saved, in place of the ones lying now, publishing no events. */
     fun restoreDroppedItems(droppedItems: Map<Dto.PositionDto, List<String>>): LootDrop = copy(droppedItems = DroppedItems.create(droppedItems))
 
+    /** Whether it is the ownerless loot drop with no item lying, which a save leaves out. */
+    fun isOwnerlessAndEmpty(): Boolean = unitId.value == OWNERLESS_UNIT_ID && droppedItems.value.isEmpty()
+
     fun toDto() =
         Dto(
             unitId = unitId.value,
@@ -99,7 +116,6 @@ data class LootDrop private constructor(
         val value: List<String>,
     ) {
         init {
-            if (value.isEmpty()) throw EmptyLootDropLootTables()
             if (value.size != value.toSet().size) throw DuplicatedLootDropLootTable()
         }
     }

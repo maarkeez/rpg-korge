@@ -16,6 +16,13 @@ sealed interface LootDropEvent : DomainEvent {
         val column: Int,
     ) : LootDropEvent
 
+    // Requested for the items an inventory had no space for, which lie on the tile at row and column, in the given order, with no unit that dropped them.
+    data class RequestDropItems(
+        val lootableItemIds: List<String>,
+        val row: Int,
+        val column: Int,
+    ) : LootDropEvent
+
     /** An item was dropped on the tile at row and column, where it lies until an inventory stores it. */
     data class LootDropped(
         val lootableItemId: String,

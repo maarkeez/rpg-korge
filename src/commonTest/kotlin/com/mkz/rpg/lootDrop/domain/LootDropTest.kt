@@ -173,6 +173,25 @@ class LootDropTest {
     }
 
     @Test
+    fun `LootDrop should hold no loot tables when it is ownerless`() {
+        // When
+        val lootDrop = LootDrop.ownerless()
+        // Then
+        lootDrop.toDto() shouldBe LootDrop.Dto(unitId = LootDrop.OWNERLESS_UNIT_ID, lootTableIds = emptyList(), droppedItems = emptyMap())
+        lootDrop.pullEvents().first.shouldBeEmpty()
+    }
+
+    @Test
+    fun `IsOwnerlessAndEmpty should be true only while the ownerless loot drop holds nothing`() {
+        // Given
+        val ownerless = LootDrop.ownerless()
+        // When / Then
+        ownerless.isOwnerlessAndEmpty() shouldBe true
+        ownerless.place(lootableItemId = "hammer", row = 0, column = 1).isOwnerlessAndEmpty() shouldBe false
+        LootDropMother.lootDrop().isOwnerlessAndEmpty() shouldBe false
+    }
+
+    @Test
     fun `PullEvents should pull the created event when the loot drop has pending events`() {
         // Given
         val createdLootDrop = LootDrop.create(LootDropMother.lootDrop().toDto())
