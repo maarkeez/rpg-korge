@@ -16,13 +16,12 @@ import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
-import kotlinx.coroutines.CompletableDeferred
 
 /**
- * Keeps the main quest on the screen: the tracker always names its current task, popping when it changes, and stays ticked
- * once completed, and a card announces its start and its completion, holding the timeline until Continue is tapped, as a
- * found item does. An event naming any other quest is ignored. The tracker is read only in a battle, and hidden once a
- * player wins, as the winner is drawn across the whole top line.
+ * Keeps the quests on the screen: the tracker always names the current task of the main quest, popping when it changes, and
+ * stays ticked once completed, and a toast announces any quest starting or completing, one after the other, alongside the
+ * timeline, so it holds nothing. The tracker is read only in a battle, and hidden once a player wins, as the winner is
+ * drawn across the whole top line.
  *
  * The detail view displays the quest in full, in place of the pad, while the party reads it: [ExplorationPresenter] opens
  * it when the tracker is tapped, and Back closes it.
@@ -37,18 +36,14 @@ class QuestPresenter(
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : QuestTrackerView.Delegate,
-    QuestDetailView.Delegate,
-    QuestAnnouncementView.Delegate {
+    QuestDetailView.Delegate {
     /** Whether the scene displays the detail view. */
     var isDetailOpen = false
         private set
 
-    /** Whether a card is shown, from the moment it is until Continue. Time stops while exploring meanwhile. */
-    var isAnnouncing = false
-        private set
-
-    // The step holding the timeline, until Continue is tapped.
-    private var pendingContinue: CompletableDeferred<Unit>? = null
+    // The toasts still to play, and whether one is on its way out, so they never overlap.
+    private val pendingToasts = ArrayDeque<Pair<Moment, QuestInfo>>()
+    private var isPlayingToasts = false
 
     private var onTrackerSelected: (() -> Unit)? = null
 
@@ -57,14 +52,10 @@ class QuestPresenter(
 
     private val subscriptions =
         listOf(
-            eventBus.subscribe<QuestStarted> { event ->
-                mainQuestNamed(event.questId)?.let { mainQuest -> announce(Moment.STARTED, mainQuest) }
-            },
+            eventBus.subscribe<QuestStarted> { event -> announce(Moment.STARTED, event.questId) },
             eventBus.subscribe<TaskProgressed> { event -> taskChanged(event.questId) },
             eventBus.subscribe<TaskCompleted> { event -> taskChanged(event.questId) },
-            eventBus.subscribe<QuestCompleted> { event ->
-                mainQuestNamed(event.questId)?.let { mainQuest -> announce(Moment.COMPLETED, mainQuest) }
-            },
+            eventBus.subscribe<QuestCompleted> { event -> announce(Moment.COMPLETED, event.questId) },
             eventBus.subscribe<GameRestored> {
                 mainQuest()?.let(::displayTracker)
             },
@@ -86,7 +77,6 @@ class QuestPresenter(
         questDetailView.hide()
         questTrackerView.setDelegate(this)
         questDetailView.setDelegate(this)
-        questAnnouncementView.setDelegate(this)
     }
 
     /** Hands the taps on the tracker over, e.g.: to open the detail view when it can take the place of the pad. */
@@ -117,10 +107,6 @@ class QuestPresenter(
         if (isDetailOpen && !timeline.isPlaying) partyApi.closeQuest()
     }
 
-    override fun questAnnouncementContinued() {
-        pendingContinue?.complete(Unit)
-    }
-
     fun dispose() {
         subscriptions.forEach(Subscription::dispose)
     }
@@ -138,24 +124,31 @@ class QuestPresenter(
     }
 
     // The reward is the one the quest defines, read as it completes, as RewardGranted names no quest, and never comes when
-    // nobody is left to receive it.
+    // nobody is left to receive it. The tracker only follows the main quest.
     private fun announce(
         moment: Moment,
-        mainQuest: Quest.Dto,
+        questId: String,
     ) {
-        val quest = QuestMapper.questInfo(mainQuest, texts)
-        displayedQuest = quest
+        val quest = questApi.searchQuests().firstOrNull { quest -> quest.id == questId } ?: return
+        val questInfo = QuestMapper.questInfo(quest, texts)
+        val isMain = quest.type == QuestTypeDto.MAIN
+        if (isMain) displayedQuest = questInfo
         timeline.play {
-            questTrackerView.display(quest)
-            val continued = CompletableDeferred<Unit>()
-            pendingContinue = continued
-            isAnnouncing = true
-            questAnnouncementView.display(moment, quest)
-            continued.await()
-            questAnnouncementView.hide()
-            isAnnouncing = false
-            pendingContinue = null
+            if (isMain) questTrackerView.display(questInfo)
+            pendingToasts.addLast(moment to questInfo)
+            if (!isPlayingToasts) {
+                isPlayingToasts = true
+                timeline.playAlongside { playToasts() }
+            }
         }
+    }
+
+    private suspend fun playToasts() {
+        while (pendingToasts.isNotEmpty()) {
+            val (moment, quest) = pendingToasts.removeFirst()
+            questAnnouncementView.announce(moment, quest)
+        }
+        isPlayingToasts = false
     }
 
     private fun displayTracker(mainQuest: Quest.Dto) {

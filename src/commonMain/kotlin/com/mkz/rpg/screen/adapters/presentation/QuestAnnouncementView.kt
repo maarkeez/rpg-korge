@@ -2,27 +2,29 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.fitted
-import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.itemSlot
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.rewardRow
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.ringOf
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.targetSlot
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.taskGlyph
 import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.tickDisc
-import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.wrappedText
 import korlibs.image.color.Colors
+import korlibs.korge.animate.alpha
+import korlibs.korge.animate.animator
+import korlibs.korge.animate.wait
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.view.Container
 import korlibs.korge.view.RoundRect
 import korlibs.korge.view.Text
 import korlibs.korge.view.container
-import korlibs.korge.view.solidRect
 import korlibs.korge.view.text
 import korlibs.korge.view.xy
 import korlibs.math.geom.Size
+import korlibs.time.milliseconds
+import korlibs.time.seconds
 
 /**
- * A card over the dimmed screen, until Continue is tapped, announcing that the main quest started, with its goal, or
- * completed, with its reward. The dim takes every tap, so what is under it is not pressed.
+ * A toast over the top of the battlefield, announcing that a quest started, with its goal, or completed, with its reward.
+ * It fades by itself and takes no taps, so whatever is under it can be pressed.
  */
 open class QuestAnnouncementView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -32,149 +34,100 @@ open class QuestAnnouncementView(
         const val SCREEN_WIDTH = 390.0
         const val SCREEN_HEIGHT = 844.0
 
-        private const val DIM_ALPHA = 0.62
-        private const val CARD_WIDTH = 330.0
-        private const val CARD_RADIUS = 14.0
-        private const val PADDING = 16.0
-        private const val CONTENT_WIDTH = CARD_WIDTH - 2 * PADDING
-        private const val TARGET_SIZE = 72.0
-        private const val TARGET_TICK_SIZE = 22.0
-        private const val TITLE_SIZE = 12.0
-        private const val NAME_SIZE = 18.0
-        private const val DESCRIPTION_SIZE = 12.0
-        private const val TASK_ROW_HEIGHT = 34.0
-        private const val TASK_GLYPH_SIZE = 14.0
-        private const val TASK_TEXT_X = 32.0
-        private const val TEXT_SIZE = 13.0
-        private const val ITEM_SPACING = 4.0
-        private const val ITEM_NAME_SPACING = 8.0
-        private const val CONTINUE_HEIGHT = 32.0
+        val HOLD_DURATION = 4.seconds
+        val FADE_DURATION = 500.milliseconds
+
+        private const val TOAST_X = 12.0
+        private const val TOAST_Y = 54.0
+        private const val TOAST_WIDTH = 366.0
+        private const val TOAST_HEIGHT = 76.0
+        private const val TOAST_RADIUS = 12.0
+        private const val TARGET_X = 10.0
+        private const val TARGET_Y = 10.0
+        private const val TARGET_SIZE = 56.0
+        private const val TARGET_TICK_AT = 52.0
+        private const val TARGET_TICK_SIZE = 18.0
+        private const val TEXT_X = 76.0
+        private const val TITLE_Y = 8.0
+        private const val NAME_Y = 22.0
+        private const val NAME_SIZE = 15.0
+        private const val RIGHT_PADDING = 10.0
+        private const val GOAL_Y = 49.0
+        private const val GOAL_GLYPH_SIZE = 14.0
+        private const val GOAL_TEXT_X = 96.0
+        private const val GOAL_TEXT_SIZE = 13.0
+        private const val REWARD_Y = 42.0
     }
 
     enum class Moment { STARTED, COMPLETED }
 
-    interface Delegate {
-        fun questAnnouncementContinued()
-    }
-
-    private var delegate: Delegate? = null
-
-    internal var card: Container? = null
     internal var background: RoundRect? = null
-    internal var titleText: Container? = null
-    internal var nameView: Container? = null
-    internal var descriptionView: Container? = null
+    internal var titleText: Text? = null
+    internal var nameText: Text? = null
     internal var taskText: Text? = null
     internal var targetTick: Container? = null
     internal var rewardView: Container? = null
-    internal var itemNames: List<Text> = emptyList()
-    internal var continueButton: ConfirmButton? = null
 
     init {
         visible = false
     }
 
-    fun setDelegate(delegate: Delegate) {
-        this.delegate = delegate
+    /** Draws the toast, holds it and fades it, hiding it once it has faded. */
+    open suspend fun announce(
+        moment: Moment,
+        quest: QuestInfo,
+    ) {
+        display(moment, quest)
+        val fade =
+            animator {
+                wait(HOLD_DURATION)
+                alpha(this@QuestAnnouncementView, 0.0, time = FADE_DURATION)
+            }
+        fade.awaitComplete()
+        visible = false
     }
 
-    /** Draws the card and shows it. */
-    open fun display(
+    /** Draws the toast and shows it, held for as long as it is looked at. */
+    fun display(
         moment: Moment,
         quest: QuestInfo,
     ) {
         removeChildren()
-        // A view only takes the taps when it is mouse enabled, so the pad under it is not pressed.
-        solidRect(Size(SCREEN_WIDTH, SCREEN_HEIGHT), Colors.BLACK.withAd(DIM_ALPHA)) { mouseEnabled = true }
-        card =
-            container {
-                val cardBackground = panel(Size(CARD_WIDTH, CONTINUE_HEIGHT), radius = CARD_RADIUS)
-                background = cardBackground
-                var cursor = drawHeader(moment, quest)
-                cursor =
-                    when (moment) {
-                        Moment.STARTED -> drawGoal(quest, cursor)
-                        Moment.COMPLETED -> drawReward(quest, cursor)
-                    }
-                continueButton =
-                    ConfirmButton(texts[UiText.QUEST_ANNOUNCEMENT_CONTINUE], CONTENT_WIDTH) { delegate?.questAnnouncementContinued() }.also { button ->
-                        addChild(button)
-                        button.xy(PADDING, cursor)
-                    }
-                val cardHeight = cursor + CONTINUE_HEIGHT + PADDING
-                cardBackground.size = Size(CARD_WIDTH, cardHeight)
-                xy((SCREEN_WIDTH - CARD_WIDTH) / 2, (SCREEN_HEIGHT - cardHeight) / 2)
+        val isCompleted = moment == Moment.COMPLETED
+        container {
+            xy(TOAST_X, TOAST_Y)
+            background = panel(Size(TOAST_WIDTH, TOAST_HEIGHT), radius = TOAST_RADIUS, stroke = if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION)
+            drawHeader(isCompleted, quest)
+            when (moment) {
+                Moment.STARTED -> drawGoal(quest)
+                Moment.COMPLETED -> drawReward(quest)
             }
+        }
+        alpha = 1.0
         visible = true
     }
 
-    open fun hide() {
-        visible = false
-    }
-
-    // The target, the title and the name, all centred. Returns where what comes under them starts.
     private fun Container.drawHeader(
-        moment: Moment,
+        isCompleted: Boolean,
         quest: QuestInfo,
-    ): Double {
+    ) {
         val task = quest.currentTask
-        val isCompleted = moment == Moment.COMPLETED
-        val targetX = (CARD_WIDTH - TARGET_SIZE) / 2
-        targetSlot(task, resourcesLoader, targetX, PADDING, TARGET_SIZE, portraitScale = 2.0, ring = if (isCompleted) HudStyle.ALLY else ringOf(task))
-        targetTick = if (isCompleted) container { tickDisc(targetX + TARGET_SIZE - 16, PADDING + TARGET_SIZE - 16, TARGET_TICK_SIZE) } else null
-        var cursor = PADDING + TARGET_SIZE + 12
+        targetSlot(task, resourcesLoader, TARGET_X, TARGET_Y, TARGET_SIZE, portraitScale = 1.0, ring = if (isCompleted) HudStyle.ALLY else ringOf(task))
+        targetTick = if (isCompleted) container { tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE) } else null
         val title = texts[if (isCompleted) UiText.QUEST_ANNOUNCEMENT_COMPLETED else UiText.QUEST_ANNOUNCEMENT_STARTED]
-        var titleHeight = 0.0
-        val titleY = cursor
-        titleText = container { titleHeight = wrappedText(title, PADDING, titleY, CONTENT_WIDTH, TITLE_SIZE, if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION, isCentered = true) }
-        cursor += titleHeight + 6
-        var nameHeight = 0.0
-        val nameY = cursor
-        nameView = container { nameHeight = wrappedText(quest.name, PADDING, nameY, CONTENT_WIDTH, NAME_SIZE, Colors.WHITE, isCentered = true) }
-        return cursor + nameHeight + 10
+        titleText = text(title, textSize = QuestViewParts.CAPTION_SIZE, color = if (isCompleted) HudStyle.ALLY else HudStyle.SELECTION) { xy(TEXT_X, TITLE_Y) }
+        nameText = text(fitted(quest.name, NAME_SIZE, TOAST_WIDTH - TEXT_X - RIGHT_PADDING), textSize = NAME_SIZE, color = Colors.WHITE) { xy(TEXT_X, NAME_Y) }
     }
 
-    // The description and the current task. Returns where Continue goes.
-    private fun Container.drawGoal(
-        quest: QuestInfo,
-        top: Double,
-    ): Double {
+    private fun Container.drawGoal(quest: QuestInfo) {
         val task = quest.currentTask
-        var descriptionHeight = 0.0
-        descriptionView = container { descriptionHeight = wrappedText(quest.description, PADDING, top, CONTENT_WIDTH, DESCRIPTION_SIZE, HudStyle.MUTED, isCentered = true) }
-        val taskY = top + descriptionHeight + 12
-        panel(Size(CONTENT_WIDTH, TASK_ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS).xy(PADDING, taskY)
-        taskGlyph(task.kind, PADDING + 10, taskY + 10, TASK_GLYPH_SIZE, HudStyle.SELECTION)
-        taskText = text(fitted(task.text, TEXT_SIZE, CONTENT_WIDTH - TASK_TEXT_X - 10), textSize = TEXT_SIZE, color = Colors.WHITE) { xy(PADDING + TASK_TEXT_X, taskY + 9) }
+        taskGlyph(task.kind, TEXT_X, GOAL_Y, GOAL_GLYPH_SIZE, HudStyle.SELECTION)
+        taskText = text(fitted(task.text, GOAL_TEXT_SIZE, TOAST_WIDTH - GOAL_TEXT_X - RIGHT_PADDING), textSize = GOAL_TEXT_SIZE, color = HudStyle.MUTED) { xy(GOAL_TEXT_X, GOAL_Y - 1) }
         rewardView = null
-        itemNames = emptyList()
-        return taskY + TASK_ROW_HEIGHT + 14
     }
 
-    // The gold, and each item in a row with its name. Returns where Continue goes.
-    private fun Container.drawReward(
-        quest: QuestInfo,
-        top: Double,
-    ): Double {
-        solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, top) }
-        text(texts[UiText.QUEST_ANNOUNCEMENT_REWARD], textSize = QuestViewParts.CAPTION_SIZE, color = HudStyle.FAINT) { xy(PADDING, top + 10) }
-        var cursor = top + 28
-        if (quest.gold > 0) {
-            val goldY = cursor
-            rewardView = container { rewardRow(quest.copy(items = emptyList()), PADDING, goldY, resourcesLoader, texts) }
-            cursor += QuestViewParts.REWARD_ROW_HEIGHT + ITEM_SPACING
-        } else {
-            rewardView = null
-        }
-        itemNames =
-            quest.items.map { item ->
-                itemSlot(item, PADDING, cursor, resourcesLoader)
-                val nameY = cursor + (QuestViewParts.REWARD_ROW_HEIGHT - TEXT_SIZE) / 2 - 1
-                cursor += QuestViewParts.REWARD_ROW_HEIGHT + ITEM_SPACING
-                text(item.name, textSize = TEXT_SIZE, color = Colors.WHITE) { xy(PADDING + QuestViewParts.REWARD_ROW_HEIGHT + ITEM_NAME_SPACING, nameY) }
-            }
-        descriptionView = null
+    private fun Container.drawReward(quest: QuestInfo) {
+        rewardView = container { rewardRow(quest, TEXT_X, REWARD_Y, resourcesLoader, texts) }
         taskText = null
-        return cursor + 8
     }
 }

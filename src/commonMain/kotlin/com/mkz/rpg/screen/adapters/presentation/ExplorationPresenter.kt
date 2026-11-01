@@ -191,11 +191,10 @@ class ExplorationPresenter(
 
     /**
      * Acts on the press pending since the scene was playing, counts the time elapsed since the previous frame, and applies
-     * the standing terrain effects every second. While a card announces the main quest, time stops: the time skipped is
-     * not counted, so nothing wanders and no terrain effect applies.
+     * the standing terrain effects every second.
      */
     fun tick(elapsed: Duration) {
-        if (isGameOver || questPresenter.isAnnouncing) return
+        if (isGameOver) return
         actOnPendingPress()
         elapsedSinceTerrainEffects += elapsed
         while (elapsedSinceTerrainEffects >= STANDING_TERRAIN_EFFECT_INTERVAL) {

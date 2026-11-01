@@ -11,7 +11,6 @@ import com.mkz.rpg.screen.adapters.presentation.clickArrow
 import com.mkz.rpg.screen.adapters.presentation.clickBack
 import com.mkz.rpg.screen.adapters.presentation.clickCapsule
 import com.mkz.rpg.screen.adapters.presentation.clickConfirm
-import com.mkz.rpg.screen.adapters.presentation.clickContinue
 import com.mkz.rpg.screen.adapters.presentation.clickLoadGame
 import com.mkz.rpg.screen.adapters.presentation.clickQuit
 import com.mkz.rpg.screen.adapters.presentation.clickSave
@@ -54,7 +53,6 @@ import io.kotest.matchers.string.shouldContain
 import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
-import kotlin.time.Duration.Companion.seconds
 
 class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     private val swordAbilityIndex = 0
@@ -64,7 +62,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
 
     private val storage = InmemoryStorage()
 
-    // A new game, once the card is gone and the scene shows the party.
+    // A new game, once the scene shows the party.
     private suspend fun ViewsForTesting.startExploring() {
         startNewGame(storage = storage)
         waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN) == true }
@@ -100,41 +98,26 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     }
 
     @Test
-    fun `should announce the main quest and display the tracker when a new game starts`() =
+    fun `should announce the main quest with a toast and let the player walk when a new game starts`() =
         sharedViewsTest {
             // When
-            startNewGameUntilAnnounced(storage = storage)
+            startExploring()
             // Then
             val announcementView = requireNotNull(questAnnouncementView())
-            withClue("Expected the card to announce the quest") { announcementView.isAnnouncementShown().shouldBeTrue() }
+            withClue("Expected the toast to announce the quest") { announcementView.isAnnouncementShown().shouldBeTrue() }
             announcementView.displayedTitle() shouldBe "NEW QUEST"
             announcementView.displayedName() shouldBe "The Goat Wizard's Lair"
             announcementView.displayedTask() shouldBe "Defeat the Goat Wizard"
             requireNotNull(questTrackerView()).displayedTask() shouldBe "Defeat the Goat Wizard"
             // When
-            clickContinue(announcementView)
-            waitUntil { !announcementView.isAnnouncementShown() }
-            // Then
-            withClue("Expected the card to go") { announcementView.isAnnouncementShown().shouldBeFalse() }
-            withClue("Expected the virtual pad to be usable") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
-        }
-
-    @Test
-    fun `should not walk the party when an arrow is pressed under the card`() =
-        sharedViewsTest {
-            // Given
-            startNewGameUntilAnnounced(storage = storage)
-            val announcementView = requireNotNull(questAnnouncementView())
-            // When
             clickArrow(requireNotNull(virtualPadView()), Direction.EAST)
-            clickContinue(announcementView)
-            waitUntil { !announcementView.isAnnouncementShown() }
-            waitFor(1.seconds)
+            waitUntil { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN + 1) == true }
             // Then
-            withClue("Expected the press under the card not to be kept") {
-                battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN)?.shouldBeTrue()
-                battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN + 1)?.shouldBeFalse()
-            }
+            withClue("Expected the party to walk under the toast") { announcementView.isAnnouncementShown().shouldBeTrue() }
+            // When
+            waitUntil { !announcementView.isAnnouncementShown() }
+            // Then
+            withClue("Expected the toast to fade by itself") { announcementView.isAnnouncementShown().shouldBeFalse() }
         }
 
     @Test
@@ -185,13 +168,12 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             val announcementView = requireNotNull(questAnnouncementView())
             waitUntil { announcementView.isAnnouncementShown() }
             // Then
-            withClue("Expected the card to announce the completion") { announcementView.isAnnouncementShown().shouldBeTrue() }
+            withClue("Expected the toast to announce the completion") { announcementView.isAnnouncementShown().shouldBeTrue() }
             announcementView.displayedTitle() shouldBe "QUEST COMPLETED"
             announcementView.displayedGold().shouldContainExactly("150 G")
             trackerView.displayedTask() shouldBe "Quest completed"
             withClue("Expected a ticked tracker") { trackerView.isTickShown().shouldBeTrue() }
             // When: the battle ends.
-            clickContinue(announcementView)
             waitUntil { virtualPadView()?.isPadShown() == true && battleInfoView()?.roundText() == "Exploring" }
             // Then: the ticked tracker opens the completed detail.
             withClue("Expected the chevron back once exploring") { trackerView.isChevronShown().shouldBeTrue() }
@@ -210,6 +192,6 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             loadSlot()
             // Then
             requireNotNull(questTrackerView()).displayedTask() shouldBe "Defeat the Goat Wizard"
-            withClue("Expected no card in a loaded game") { questAnnouncementView()?.isAnnouncementShown()?.shouldBeFalse() }
+            withClue("Expected no toast in a loaded game") { questAnnouncementView()?.isAnnouncementShown()?.shouldBeFalse() }
         }
 }

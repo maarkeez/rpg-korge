@@ -5,7 +5,6 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
 import com.mkz.rpg.screen.adapters.presentation.clickBuildMap
-import com.mkz.rpg.screen.adapters.presentation.clickContinue
 import com.mkz.rpg.screen.adapters.presentation.clickPlayNewGame
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.isAnnouncementShown
@@ -47,19 +46,9 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
 /**
  * Starts the game as the player does, and plays a new game from the menu. By default, the CPU battle units always rest
  * instead of wandering, so they stand where the battle setup deploys them. The games are saved in the [storage], in
- * memory, so no test reads the games saved by another one. It taps Continue on the card announcing the main quest.
+ * memory, so no test reads the games saved by another one. It waits for the toast announcing the main quest, which fades by itself.
  */
 suspend fun ViewsForTesting.startNewGame(
-    random: Random = FixedDoublesRandom(0.0),
-    storage: IStorage = InmemoryStorage(),
-) {
-    startNewGameUntilAnnounced(random, storage)
-    clickContinue(requireNotNull(stage.questAnnouncementView()) { "The main quest is not announced" })
-    waitUntil { stage.questAnnouncementView()?.isAnnouncementShown() == false }
-}
-
-/** As [startNewGame], stopping at the card announcing the main quest, without tapping Continue. */
-suspend fun ViewsForTesting.startNewGameUntilAnnounced(
     random: Random = FixedDoublesRandom(0.0),
     storage: IStorage = InmemoryStorage(),
 ) {

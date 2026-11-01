@@ -54,11 +54,10 @@ class QuestPresenterTest {
         eventBus.dispatch()
     }
 
-    // The quest under way, once its start card is gone.
+    // The quest under way.
     private fun SubdomainApis.startedPresenter(): QuestPresenter {
         val presenter = presenter()
         startQuest()
-        presenter.questAnnouncementContinued()
         return presenter
     }
 
@@ -68,10 +67,10 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should draw the tracker and wait for Continue when the main quest starts`() {
+    fun `QuestPresenter should draw the tracker and announce when the main quest starts`() {
         // Given
         val apis = apis(mainQuest(id = questId))
-        val presenter = apis.presenter()
+        apis.presenter()
         // When
         apis.startQuest()
         // Then
@@ -80,16 +79,10 @@ class QuestPresenterTest {
             .currentTask.text shouldBe "Defeat the Goat Wizard"
         trackerView.pops shouldBe 0
         announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED)
-        timeline.isPlaying.shouldBeTrue()
-        // When
-        presenter.questAnnouncementContinued()
-        // Then
-        announcementView.isAnnouncing.shouldBeFalse()
-        timeline.isPlaying.shouldBeFalse()
     }
 
     @Test
-    fun `QuestPresenter should ignore an event when it names a side quest`() {
+    fun `QuestPresenter should announce a side quest when it starts and when it completes`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         apis.presenter()
@@ -98,8 +91,45 @@ class QuestPresenterTest {
         apis.eventBus.publish(QuestCompleted(questId = "side"))
         apis.eventBus.dispatch()
         // Then
+        announcementView.announcements.map { (moment, _) -> moment }.shouldContainExactly(Moment.STARTED, Moment.COMPLETED)
         trackerView.displayedQuests.shouldBeEmpty()
-        announcementView.announcements.shouldBeEmpty()
+    }
+
+    @Test
+    fun `QuestPresenter should play the toasts one after the other when a talk starts two quests`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
+        apis.presenter()
+        announcementView.isHolding = true
+        // When
+        apis.eventBus.publish(QuestStarted(questId = "side"))
+        apis.eventBus.publish(QuestStarted(questId = "other"))
+        apis.eventBus.dispatch()
+        // Then
+        announcementView.announcements.size shouldBe 1
+        // When
+        announcementView.fadeToast()
+        // Then
+        announcementView.announcements.size shouldBe 2
+        // When
+        announcementView.fadeToast()
+        apis.eventBus.publish(QuestCompleted(questId = "side"))
+        apis.eventBus.dispatch()
+        // Then: with none left, the next one plays straight away.
+        announcementView.announcements.size shouldBe 3
+    }
+
+    @Test
+    fun `QuestPresenter should not hold the timeline when it announces`() {
+        // Given
+        val apis = apis(mainQuest(id = questId))
+        apis.presenter()
+        announcementView.isHolding = true
+        // When
+        apis.startQuest()
+        // Then
+        announcementView.announcements.size shouldBe 1
+        timeline.isPlaying.shouldBeFalse()
     }
 
     @Test
@@ -174,22 +204,6 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should be announcing until Continue is tapped`() {
-        // Given
-        val apis = apis(mainQuest(id = questId))
-        val presenter = apis.presenter()
-        presenter.isAnnouncing.shouldBeFalse()
-        // When
-        apis.startQuest()
-        // Then
-        presenter.isAnnouncing.shouldBeTrue()
-        // When
-        presenter.questAnnouncementContinued()
-        // Then
-        presenter.isAnnouncing.shouldBeFalse()
-    }
-
-    @Test
     fun `QuestPresenter should make the tracker read only when a battle starts, and tappable again when it finishes`() {
         // Given
         val apis = apis(mainQuest(id = questId))
@@ -234,7 +248,6 @@ class QuestPresenterTest {
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
         val presenter = apis.startedPresenter()
         apis.defeatRat()
-        presenter.questAnnouncementContinued()
         // When
         presenter.openDetail()
         // Then

@@ -8,7 +8,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestAnnouncementView], at the start and the end of a quest. Continue logs itself. */
+/** The stories of [QuestAnnouncementView], at the start and the end of a quest, held so it can be looked at. */
 object QuestAnnouncementViewStories : StoryBinding {
     private const val MOMENT = "moment"
     private const val QUEST = "quest"
@@ -30,7 +30,7 @@ object QuestAnnouncementViewStories : StoryBinding {
             id = "screen-quest-announcement",
             group = "Screen",
             title = "Quest announcement",
-            description = "A card over the dimmed screen, until Continue is tapped, announcing that the main quest started, or completed with its reward.",
+            description = "A toast over the top of the battlefield, which fades by itself and takes no taps, announcing that a quest started, or completed with its reward.",
             controls = listOf(ControlDto.enum(MOMENT, Moment.entries.map { moment -> moment.name }), ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name })),
             args = mapOf(MOMENT to ArgDto.text(Moment.STARTED.name), QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name)),
             stories =
@@ -38,6 +38,7 @@ object QuestAnnouncementViewStories : StoryBinding {
                     story("started", "Started", Moment.STARTED, QuestSample.GOAT_WIZARD),
                     story("completed", "Completed", Moment.COMPLETED, QuestSample.COMPLETED),
                     story("completed-with-items", "Completed with items", Moment.COMPLETED, QuestSample.ITEM_REWARDS),
+                    story("large-reward", "Large reward", Moment.COMPLETED, QuestSample.LARGE_REWARD),
                     story("started-with-long-text", "Started with long text", Moment.STARTED, QuestSample.LONG_TEXT),
                     story("completed-with-long-text", "Completed with long text", Moment.COMPLETED, QuestSample.LONG_TEXT),
                 ),
@@ -48,11 +49,6 @@ object QuestAnnouncementViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         QuestAnnouncementView(context.resourcesLoader, context.texts).apply {
-            setDelegate(
-                object : QuestAnnouncementView.Delegate {
-                    override fun questAnnouncementContinued() = context.action("questAnnouncementContinued")
-                },
-            )
             display(Moment.valueOf(args.text(MOMENT)), QuestSample.valueOf(args.text(QUEST)).quest(context.texts))
         }
 }

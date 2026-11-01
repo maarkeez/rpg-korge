@@ -67,6 +67,16 @@ enum class QuestSample(
             )
         },
     ),
+    LARGE_REWARD(
+        "Large reward",
+        "A reward of gold and four items, the most a row has to hold.",
+        { texts ->
+            goatWizard(texts).copy(
+                gold = 250,
+                items = listOf("rune-hammer", "health-elixir", "bee-essence", "health-potion").map { lootableItemId -> RewardItem(lootableItemId, texts.lootableItemName(lootableItemId)) },
+            )
+        },
+    ),
     LONG_TEXT(
         "Long text",
         "The longest texts, as a translation may be: a long name, description and task, and the largest gold.",

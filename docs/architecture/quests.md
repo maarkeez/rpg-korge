@@ -68,7 +68,7 @@ A reward is some gold and a list of lootable items, as the game has no experienc
 
 ## What the player sees
 
-The screen only follows the main quest, in [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt): it reads `QuestApi.searchQuests`, and ignores an event naming any other quest. [`QuestMapper`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt) turns the quest into `QuestInfo`, the plain data the views draw, already translated, so they import no domain. The tasks after the current one are never mapped, so they can not be revealed.
+The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt), reading `QuestApi.searchQuests`: the tracker follows the main quest, and a toast announces any quest. [`QuestMapper`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt) turns the quest into `QuestInfo`, the plain data the views draw, already translated, so they import no domain. The tasks after the current one are never mapped, so they can not be revealed.
 
 ### The tracker
 
@@ -88,24 +88,22 @@ Tapping the tracker while exploring opens [`QuestDetailView`](../../src/commonMa
 
 ### The announcements
 
-[`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is a card over the dimmed screen, until Continue is tapped, announcing the two moments that happen once per game: the start, the only place that tells the goal without a tap, and the completion, with the reward the quest defines. A count or a task done only pops the tracker.
+[`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is a toast over the top of the battlefield, announcing every quest starting, with its goal, and completing, with the reward the quest defines, also when a repeatable quest runs again. It is held for 4 seconds and fades in 0.5 seconds. A count or a task done only pops the tracker.
 
-- The dim takes every tap, so the pad under it is not pressed.
-- The timeline waits for Continue, as it does for a found item, so the player can not act. See [Presentation timeline](presentation-timeline.md#announcing-the-main-quest).
-- Time stops while exploring: `ExplorationPresenter.tick` starts no second while `QuestPresenter.isAnnouncing`, so nothing wanders and no terrain effect applies.
+- It takes no taps, so whatever is under it can be pressed.
+- It holds nothing: time runs, and the player can act. Toasts play one after the other, so a talk starting two quests takes 9 seconds. See [Presentation timeline](presentation-timeline.md#announcing-a-quest).
 - A loaded game announces nothing, as `SetupBattle` only starts the main quest in a new game and `RestoreQuests` publishes nothing.
 
 For example, a new game, then defeating the goat wizard in a battle:
 
-| When                        | Published                                           | Displayed                                                                                               | Time     |
-|-----------------------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------|----------|
-| The new game is set up      | `QuestStarted`                                      | The tracker reads Defeat the Goat Wizard, and the start card dims over it                               | Stopped  |
-| Continue is tapped          | Nothing                                             | The card goes, and the pad can be used                                                                  | Runs     |
-| The tracker is tapped       | `QuestOpened`                                       | The detail view takes the place of the pad                                                              | Stopped  |
-| Back is tapped              | `QuestClosed`                                       | The pad is displayed again                                                                              | Runs     |
-| A battle starts             | `ExplorationPaused`                                 | The tracker stays, without its chevron                                                                  | In turns |
-| The goat wizard is defeated | `TaskProgressed`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and the completion card dims over it, with 150 G | Waits    |
-| The battle ends             | `ExplorationResumed`                                | The ticked tracker has its chevron back, and opens the completed detail                                 | Runs     |
+| When                        | Published                                           | Displayed                                                                                       | Time     |
+|-----------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------------------|----------|
+| The new game is set up      | `QuestStarted`                                      | The tracker reads Defeat the Goat Wizard, and a toast announces the quest for 4.5 seconds       | Runs     |
+| The tracker is tapped       | `QuestOpened`                                       | The detail view takes the place of the pad                                                      | Stopped  |
+| Back is tapped              | `QuestClosed`                                       | The pad is displayed again                                                                      | Runs     |
+| A battle starts             | `ExplorationPaused`                                 | The tracker stays, without its chevron                                                          | In turns |
+| The goat wizard is defeated | `TaskProgressed`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and a toast announces 150 G              | In turns |
+| The battle ends             | `ExplorationResumed`                                | The ticked tracker has its chevron back, and opens the completed detail                         | Runs     |
 
 ## Saving
 
@@ -117,8 +115,8 @@ For example, a new game, then defeating the goat wizard in a battle:
 
 ## Known limitations
 
-- A side quest is played and paid with nothing on the screen.
-- The card shows the reward the quest defines, so a leader near the cap of 99,999 gold reads 150 G and receives less, and an item that did not fit the bag drops on its tile without a word. The shipped quest pays gold, and only a leader past 99,849 gold would notice.
+- A side quest is played with nothing but its toasts on the screen.
+- The toast shows the reward the quest defines, so a leader near the cap of 99,999 gold reads 150 G and receives less, and an item that did not fit the bag drops on its tile without a word. The shipped quest pays gold, and only a leader past 99,849 gold would notice.
 - A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped description takes 2.
 - A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
 - The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.

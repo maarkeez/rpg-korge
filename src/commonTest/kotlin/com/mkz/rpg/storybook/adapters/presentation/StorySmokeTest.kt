@@ -289,6 +289,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-quest-announcement--started",
                     "screen-quest-announcement--completed",
                     "screen-quest-announcement--completed-with-items",
+                    "screen-quest-announcement--large-reward",
                     "screen-quest-announcement--started-with-long-text",
                     "screen-quest-announcement--completed-with-long-text",
                     "screen-menu",

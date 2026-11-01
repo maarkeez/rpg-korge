@@ -1022,27 +1022,6 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `ExplorationPresenter should start no second while announcing`() {
-        // Given
-        val presenter = createPresenter()
-        startExploring()
-        apis.questApi.startMainQuest()
-        eventBus.dispatch()
-        val requests = requestedTerrainEffects()
-        // When
-        presenter.tick(3.seconds)
-        eventBus.dispatch()
-        // Then
-        requests.shouldBeEmpty()
-        // When
-        questPresenter.questAnnouncementContinued()
-        presenter.tick(1.seconds)
-        eventBus.dispatch()
-        // Then: the time it skipped was not counted.
-        requests.size shouldBe 1
-    }
-
-    @Test
     fun `GameRestored should display the virtual pad in place of the battle HUD and the call to action when a saved game is restored`() {
         // Given
         createPresenter()

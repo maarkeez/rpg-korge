@@ -1,19 +1,25 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-// Records what the presenters ask the announcement to display, instead of drawing it.
+import kotlinx.coroutines.CompletableDeferred
+
+// Records what the presenters ask the announcement to announce, instead of drawing it. Each toast is over at once, unless it is told to hold them.
 class FakeQuestAnnouncementView : QuestAnnouncementView(BattleSceneResourcesLoader(), TextsMother.texts()) {
     val announcements = mutableListOf<Pair<Moment, QuestInfo>>()
-    var isAnnouncing = false
+    var isHolding = false
+    private var held = CompletableDeferred<Unit>()
 
-    override fun display(
+    override suspend fun announce(
         moment: Moment,
         quest: QuestInfo,
     ) {
         announcements += moment to quest
-        isAnnouncing = true
+        if (isHolding) held.await()
     }
 
-    override fun hide() {
-        isAnnouncing = false
+    /** Fades the toast being held, so the next one plays, holding it in turn. */
+    fun fadeToast() {
+        val faded = held
+        held = CompletableDeferred()
+        faded.complete(Unit)
     }
 }

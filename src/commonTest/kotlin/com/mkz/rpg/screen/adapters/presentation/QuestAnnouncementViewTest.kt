@@ -3,16 +3,17 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.screen.adapters.presentation.QuestInfoMother.completedQuestInfo
 import com.mkz.rpg.screen.adapters.presentation.QuestInfoMother.questInfo
+import com.mkz.rpg.shared.adapters.e2e.waitFor
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
-import io.kotest.matchers.doubles.plusOrMinus
-import io.kotest.matchers.doubles.shouldBeGreaterThan
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
+import korlibs.io.async.launchImmediately
 import korlibs.korge.tests.ViewsForTesting
+import korlibs.time.milliseconds
 import kotlin.test.Test
 
 class QuestAnnouncementViewTest : ViewsForTesting() {
@@ -28,7 +29,7 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `display should draw the description and the task when the quest started`() =
+    fun `display should draw the task when the quest started`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
@@ -38,14 +39,13 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
             announcementView.isAnnouncementShown().shouldBeTrue()
             announcementView.displayedTitle() shouldBe "NEW QUEST"
             announcementView.displayedName() shouldBe "The Goat Wizard's Lair"
-            announcementView.displayedDescription() shouldBe "A goat swallowed a wizard's magic and now rules the lair down south."
             announcementView.displayedTask() shouldBe "Defeat the Goat Wizard"
             announcementView.displayedGold().shouldBeEmpty()
             announcementView.isTargetTicked().shouldBeFalse()
         }
 
     @Test
-    fun `display should draw the gold and each item with its name when the quest completed`() =
+    fun `display should draw the gold and a slot per item when the quest completed`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
@@ -55,58 +55,69 @@ class QuestAnnouncementViewTest : ViewsForTesting() {
             // Then
             announcementView.displayedTitle() shouldBe "QUEST COMPLETED"
             announcementView.displayedGold().shouldContainExactly("150 G")
-            announcementView.displayedItems().shouldContainExactly("Hammer", "Health Potion")
+            announcementView.displayedItemSlots() shouldBe 2
             announcementView.isTargetTicked().shouldBeTrue()
             announcementView.displayedTask().shouldBeNull()
         }
 
     @Test
-    fun `display should centre the card when it is taller with long texts`() =
+    fun `display should cut the name when it does not fit the toast`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
-            announcementView.display(Moment.STARTED, questInfo())
-            val shortHeight = announcementView.cardHeight()
-            val longText = "Hace mucho tiempo una cabra se comió el libro de hechizos de un mago y se tragó toda su magia. Ahora gobierna la guarida del sur, y nadie se atreve a acercarse."
             // When
-            announcementView.display(Moment.STARTED, questInfo(name = "La guarida del mago cabra en las montañas del sur", description = longText))
+            announcementView.display(Moment.STARTED, questInfo(name = "La guarida del mago cabra en las montañas del sur, donde nadie se atreve a acercarse"))
             // Then
-            announcementView.cardHeight() shouldBeGreaterThan shortHeight
-            val (x, y) = announcementView.cardCentre()
-            x shouldBe (QuestAnnouncementView.SCREEN_WIDTH / 2 plusOrMinus 0.01)
-            y shouldBe (QuestAnnouncementView.SCREEN_HEIGHT / 2 plusOrMinus 0.01)
+            announcementView.displayedName()?.endsWith("…")?.shouldBeTrue()
         }
 
     @Test
-    fun `hide should not display it`() =
+    fun `Announce should hide the toast when it has been held and faded`() =
         sharedViewsTest {
             // Given
             val announcementView = announcementView()
-            announcementView.display(Moment.STARTED, questInfo())
+            addChild(announcementView)
             // When
-            announcementView.hide()
+            launchImmediately { announcementView.announce(Moment.STARTED, questInfo()) }
+            // Then
+            announcementView.isAnnouncementShown().shouldBeTrue()
+            // When
+            waitFor(QuestAnnouncementView.HOLD_DURATION - 100.milliseconds)
+            // Then
+            announcementView.isAnnouncementShown().shouldBeTrue()
+            announcementView.alpha shouldBe 1.0
+            // When
+            waitFor(QuestAnnouncementView.FADE_DURATION + 300.milliseconds)
             // Then
             announcementView.isAnnouncementShown().shouldBeFalse()
         }
 
     @Test
-    fun `QuestAnnouncementView should call its delegate when Continue is tapped`() =
+    fun `Announce should show the toast fully when it announces again after fading`() =
         sharedViewsTest {
             // Given
-            var continues = 0
             val announcementView = announcementView()
-            announcementView.setDelegate(
-                object : QuestAnnouncementView.Delegate {
-                    override fun questAnnouncementContinued() {
-                        continues++
-                    }
-                },
-            )
-            announcementView.display(Moment.STARTED, questInfo())
             addChild(announcementView)
+            announcementView.announce(Moment.STARTED, questInfo())
             // When
-            clickContinue(announcementView)
+            announcementView.display(Moment.STARTED, questInfo())
             // Then
-            continues shouldBe 1
+            announcementView.isAnnouncementShown().shouldBeTrue()
+            announcementView.alpha shouldBe 1.0
+        }
+
+    @Test
+    fun `Announce should take no taps when it is displayed`() =
+        sharedViewsTest {
+            // Given: a button under the toast.
+            var confirms = 0
+            val button = buttonUnderTheToast { confirms++ }
+            val announcementView = announcementView()
+            addChild(announcementView)
+            announcementView.display(Moment.COMPLETED, completedQuestInfo())
+            // When
+            clickConfirm(button)
+            // Then
+            confirms shouldBe 1
         }
 }
