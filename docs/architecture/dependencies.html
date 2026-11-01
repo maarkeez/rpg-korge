@@ -223,12 +223,12 @@ const DATA = {
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 28, "importsOut": 14},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15},
     {"name": "npc", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 10, "importsOut": 29},
-    {"name": "party", "files": 41, "fanIn": 7, "fanOut": 6, "instability": 0.46, "importsIn": 48, "importsOut": 73},
+    {"name": "party", "files": 41, "fanIn": 7, "fanOut": 6, "instability": 0.46, "importsIn": 49, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
-    {"name": "quest", "files": 23, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 3, "importsOut": 33},
+    {"name": "quest", "files": 25, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 3, "importsOut": 36},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 11, "importsOut": 8},
     {"name": "screen", "files": 93, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 91, "importsOut": 234},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 483, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 485, "importsOut": 0},
     {"name": "storybook", "files": 94, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 109},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
@@ -1116,17 +1116,20 @@ const DATA = {
     {"from": "quest", "to": "inventory", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "inventory.domain.InventoryEvent.RequestGrantReward"}
     ]},
-    {"from": "quest", "to": "party", "weight": 4, "files": 4, "imports": [
+    {"from": "quest", "to": "party", "weight": 5, "files": 5, "imports": [
+      {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "party.domain.PartyEvent.NpcTalkFinished"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
       {"file": "com/mkz/rpg/quest/usecases/commands/ProgressDefeatTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/quest/usecases/commands/ProgressReachTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
-    {"from": "quest", "to": "shared", "weight": 23, "files": 12, "imports": [
+    {"from": "quest", "to": "shared", "weight": 25, "files": 13, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},

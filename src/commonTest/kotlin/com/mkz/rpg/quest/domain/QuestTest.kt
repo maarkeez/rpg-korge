@@ -23,6 +23,7 @@ import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
+import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -179,6 +180,26 @@ class QuestTest {
         // Then
         updatedQuest.toDto().progress.status shouldBe StatusDto.COMPLETED
         updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0), QuestCompleted(questId = "a-quest"))
+    }
+
+    @Test
+    fun `Quest should complete the task when the talk is with its npc`() {
+        // Given
+        val quest = started(tasks = listOf(talkToNpc(npcId = "elder")))
+        // When
+        val updatedQuest = quest.talkedTo("elder")
+        // Then
+        updatedQuest.toDto().progress.status shouldBe StatusDto.COMPLETED
+    }
+
+    @Test
+    fun `Quest should not complete the task when the talk is with another npc`() {
+        // Given
+        val quest = started(tasks = listOf(talkToNpc(npcId = "elder")))
+        // When
+        val updatedQuest = quest.talkedTo("merchant")
+        // Then
+        updatedQuest shouldBe quest
     }
 
     @Test

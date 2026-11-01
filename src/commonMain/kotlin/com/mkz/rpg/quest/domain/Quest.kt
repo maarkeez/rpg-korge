@@ -84,6 +84,13 @@ data class Quest private constructor(
         return completeCurrentTask()
     }
 
+    /** Completes the current task, when it asks to talk to the npc. */
+    fun talkedTo(npcId: String): Quest {
+        val task = currentTask() as? Task.TalkToNpc
+        if (progress.status != StatusDto.ACTIVE || task?.npcId != npcId) return this
+        return completeCurrentTask()
+    }
+
     /** Moves on to the next task, or completes the quest after the last one. */
     private fun completeCurrentTask(): Quest {
         val taskCompleted = TaskCompleted(questId = id.value, taskIndex = progress.currentTaskIndex)

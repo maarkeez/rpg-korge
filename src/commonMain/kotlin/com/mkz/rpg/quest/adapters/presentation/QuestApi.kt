@@ -4,6 +4,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.quest.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.quest.adapters.events.OnBattleUnitMoved
+import com.mkz.rpg.quest.adapters.events.OnNpcTalkFinished
 import com.mkz.rpg.quest.adapters.events.OnQuestCompleted
 import com.mkz.rpg.quest.adapters.events.OnRequestInitialiseQuests
 import com.mkz.rpg.quest.adapters.events.OnRequestStartMainQuest
@@ -14,6 +15,7 @@ import com.mkz.rpg.quest.usecases.commands.InitialiseQuests
 import com.mkz.rpg.quest.usecases.commands.ProgressDefeatTasks
 import com.mkz.rpg.quest.usecases.commands.ProgressReachTasks
 import com.mkz.rpg.quest.usecases.commands.RequestQuestReward
+import com.mkz.rpg.quest.usecases.commands.ResolveNpcTalk
 import com.mkz.rpg.quest.usecases.commands.RestoreQuests
 import com.mkz.rpg.quest.usecases.commands.StartMainQuest
 import com.mkz.rpg.quest.usecases.queries.SearchQuests
@@ -45,6 +47,7 @@ class QuestApi(
     val startMainQuest = StartMainQuest(questRepository, eventBus)
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressReachTasks = ProgressReachTasks(questRepository, partyApi.searchParty, publishQuestProgress)
+    val resolveNpcTalk = ResolveNpcTalk(questRepository, publishQuestProgress)
     val requestQuestReward = RequestQuestReward(questRepository, partyApi.searchParty, battlefieldApi.searchPosition, eventBus)
 
     // Queries
@@ -55,6 +58,7 @@ class QuestApi(
     private val onRequestStartMainQuest = OnRequestStartMainQuest(startMainQuest, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(progressDefeatTasks, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(progressReachTasks, eventBus)
+    private val onNpcTalkFinished = OnNpcTalkFinished(resolveNpcTalk, eventBus)
     private val onQuestCompleted = OnQuestCompleted(requestQuestReward, eventBus)
 
     suspend fun init() {

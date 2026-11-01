@@ -222,6 +222,31 @@ column = 2
 stock = ["health-potion", "mana-potion", "hammer"]
 ```
 
+### `quest/<quest id>.toml`
+
+A line of tasks, completed one after the other, and the reward paid to the party leader. See [Quests](quests.md). The game needs exactly one `MAIN` quest, and fails to start on a quest with no tasks, an empty reward, negative gold, an empty tile group, a tile that can not be occupied or a `count` below 1, on a `SIDE` quest with no `giverNpcId`, and on a `MAIN` quest with a `giverNpcId` or `repeatable`. The units, npcs and lootable items it names are checked in CI by `QuestResourcesTest`, which also fails on a recruitable npc as a giver or a talk task, as recruiting deletes the npc.
+
+```toml
+type = "MAIN"                    # MAIN, SIDE
+
+[[tasks]]
+type = "DEFEAT_UNITS"            # DEFEAT_UNITS, TALK_TO_NPC, REACH_TILES
+unitId = "goat-wizard"           # Only for DEFEAT_UNITS
+count = 1                        # Only for DEFEAT_UNITS
+
+# [[tasks]]
+# type = "TALK_TO_NPC"
+# npcId = "farmer"               # Only for TALK_TO_NPC
+
+# [[tasks]]
+# type = "REACH_TILES"
+# tiles = [[17, 11], [18, 11]]   # Only for REACH_TILES: a list of [row, column], any of which completes it
+
+[reward]
+gold = 150                       # Optional, 0 by default
+# lootableItemIds = ["hammer"]   # Optional, none by default
+```
+
 ## How to add a unit
 
 1. Add `resources/unit/<unit id>.toml`, and its name to `resources/localization/messages.pot` as `unit.<unit id>.name`.
@@ -238,6 +263,11 @@ stock = ["health-potion", "mana-potion", "hammer"]
 1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied, where no battle unit is deployed and no building stands. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
 2. Add its name and line to `resources/localization/messages.pot`, as `npc.<npc id>.name` and `npc.<npc id>.line`.
 3. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
+
+## How to add a quest
+
+1. Add the units, npcs and [lootable items](#how-to-add-a-lootable-item) it names, if they do not exist yet.
+2. Add `resources/quest/<quest id>.toml`. See [`quest/<quest id>.toml`](#quest-quest-idtoml).
 
 ## How to add a lootable item
 
