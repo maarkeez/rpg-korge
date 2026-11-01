@@ -94,6 +94,7 @@ class BattleScene(
     val confirmDialogView = ConfirmDialogView()
     val questTrackerView = QuestTrackerView(texts)
     val questDetailView = QuestDetailView(resourcesLoader, texts)
+    val questJournalView = QuestJournalView(resourcesLoader, texts)
     val questAnnouncementView = QuestAnnouncementView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
@@ -221,7 +222,7 @@ class BattleScene(
                 addChild(battleInfoView)
                 addChild(questTrackerView)
             }
-            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questAnnouncementView, questApi, partyApi, texts, timeline, eventBus)
+            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questJournalView, questAnnouncementView, questApi, partyApi, texts, timeline, eventBus)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
@@ -252,6 +253,8 @@ class BattleScene(
                     addChild(confirmDialogView)
                     addChild(questDetailView)
                     questDetailView.xy(QUEST_DETAIL_X, 0.0)
+                    addChild(questJournalView)
+                    questJournalView.xy(QUEST_DETAIL_X, 0.0)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()

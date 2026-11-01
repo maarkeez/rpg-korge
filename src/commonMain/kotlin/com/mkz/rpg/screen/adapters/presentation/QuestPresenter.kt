@@ -7,6 +7,7 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
+import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
@@ -23,12 +24,14 @@ import com.mkz.rpg.shared.domain.subscribe
  * timeline, so it holds nothing. The tracker is read only in a battle, and hidden once a player wins, as the winner is
  * drawn across the whole top line.
  *
- * The detail view displays the quest in full, in place of the pad, while the party reads it: [ExplorationPresenter] opens
- * it when the tracker is tapped, and Back closes it.
+ * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
+ * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed, and
+ * Back steps out one level at a time.
  */
 class QuestPresenter(
     private val questTrackerView: QuestTrackerView,
     private val questDetailView: QuestDetailView,
+    private val questJournalView: QuestJournalView,
     private val questAnnouncementView: QuestAnnouncementView,
     private val questApi: QuestApi,
     private val partyApi: PartyApi,
@@ -36,10 +39,14 @@ class QuestPresenter(
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : QuestTrackerView.Delegate,
-    QuestDetailView.Delegate {
-    /** Whether the scene displays the detail view. */
-    var isDetailOpen = false
+    QuestDetailView.Delegate,
+    QuestJournalView.Delegate {
+    /** Whether the scene displays the journal or the detail view. */
+    var isQuestOpen = false
         private set
+
+    // Whether Back in the detail view returns to the journal.
+    private var isDetailFromJournal = false
 
     // The toasts still to play, and whether one is on its way out, so they never overlap.
     private val pendingToasts = ArrayDeque<Pair<Moment, QuestInfo>>()
@@ -68,43 +75,73 @@ class QuestPresenter(
             eventBus.subscribe<PlayerVictory> {
                 timeline.play {
                     questTrackerView.hide()
-                    closeDetail()
+                    closeQuest()
                 }
             },
         )
 
     init {
         questDetailView.hide()
+        questJournalView.hide()
         questTrackerView.setDelegate(this)
         questDetailView.setDelegate(this)
+        questJournalView.setDelegate(this)
     }
 
-    /** Hands the taps on the tracker over, e.g.: to open the detail view when it can take the place of the pad. */
+    /** Hands the taps on the tracker over, e.g.: to open the quest when it can take the place of the pad. */
     fun setOnTrackerSelected(listener: () -> Unit) {
         onTrackerSelected = listener
     }
 
-    /** Displays the quest in full, read now, as time stops while it is open. To be played in the timeline. */
-    fun openDetail() {
-        val quest = mainQuest()?.let { mainQuest -> QuestMapper.questInfo(mainQuest, texts) } ?: return
-        isDetailOpen = true
-        questDetailView.display(quest)
+    /**
+     * Displays the journal once a side quest is listed, and otherwise the main quest in full, so there is no list of one row.
+     * Read now, as time stops while it is open. To be played in the timeline.
+     */
+    fun openQuest() {
+        val quests = listedQuests()
+        if (quests.isEmpty()) return
+        isQuestOpen = true
+        if (quests.any { quest -> !quest.isMain }) {
+            questJournalView.display(quests)
+        } else {
+            isDetailFromJournal = false
+            questDetailView.display(quests.single())
+        }
     }
 
-    /** Hides the detail view. Nothing happens when it is not open. */
-    fun closeDetail() {
-        if (!isDetailOpen) return
-        isDetailOpen = false
+    /** Hides whichever is open. Nothing happens when none is. */
+    fun closeQuest() {
+        if (!isQuestOpen) return
+        isQuestOpen = false
         questDetailView.hide()
+        questJournalView.hide()
     }
 
     override fun questTrackerSelected() {
         onTrackerSelected?.invoke()
     }
 
-    // The player can only act once the scene shows the detail view.
+    // The player can only act once the scene shows them.
+    override fun questJournalSelected(questId: String) {
+        if (!canAct()) return
+        val quest = listedQuests().firstOrNull { quest -> quest.id == questId } ?: return
+        isDetailFromJournal = true
+        questJournalView.hide()
+        questDetailView.display(quest)
+    }
+
+    override fun questJournalBackSelected() {
+        if (canAct()) partyApi.closeQuest()
+    }
+
     override fun questDetailBackSelected() {
-        if (isDetailOpen && !timeline.isPlaying) partyApi.closeQuest()
+        if (!canAct()) return
+        if (isDetailFromJournal) {
+            questDetailView.hide()
+            questJournalView.display(listedQuests())
+        } else {
+            partyApi.closeQuest()
+        }
     }
 
     fun dispose() {
@@ -149,6 +186,20 @@ class QuestPresenter(
             questAnnouncementView.announce(moment, quest)
         }
         isPlayingToasts = false
+    }
+
+    private fun canAct() = isQuestOpen && !timeline.isPlaying
+
+    // The main quest first while active, then the active side quests, then the completed quests, each group in the order
+    // the quests were created. The side quests not started are hidden, so nothing is spoiled.
+    private fun listedQuests(): List<QuestInfo> {
+        val (completed, active) =
+            questApi
+                .searchQuests()
+                .filter { quest -> quest.type == QuestTypeDto.MAIN || quest.progress.status != StatusDto.NOT_STARTED }
+                .map { quest -> QuestMapper.questInfo(quest, texts) }
+                .partition { quest -> quest.isCompleted }
+        return active.sortedByDescending { quest -> quest.isMain } + completed
     }
 
     private fun displayTracker(mainQuest: Quest.Dto) {

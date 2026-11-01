@@ -36,6 +36,8 @@ fun Stage.questTrackerView(): QuestTrackerView? = descendants().filterIsInstance
 /** The detail of the main quest of the battle scene, or `null` while the battle scene is not on the stage yet. */
 fun Stage.questDetailView(): QuestDetailView? = descendants().filterIsInstance<QuestDetailView>().firstOrNull()
 
+fun Stage.questJournalView(): QuestJournalView? = descendants().filterIsInstance<QuestJournalView>().firstOrNull()
+
 /** The card announcing the main quest of the battle scene, or `null` while the battle scene is not on the stage yet. */
 fun Stage.questAnnouncementView(): QuestAnnouncementView? = descendants().filterIsInstance<QuestAnnouncementView>().firstOrNull()
 

@@ -103,7 +103,18 @@ class ExplorationPresenterTest {
         ) {}
 
     private val questDetailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
-    private val questPresenter = QuestPresenter(FakeQuestTrackerView(), questDetailView, FakeQuestAnnouncementView(), apis.questApi, apis.partyApi, TextsMother.texts(), timeline, eventBus)
+    private val questPresenter =
+        QuestPresenter(
+            FakeQuestTrackerView(),
+            questDetailView,
+            QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts()),
+            FakeQuestAnnouncementView(),
+            apis.questApi,
+            apis.partyApi,
+            TextsMother.texts(),
+            timeline,
+            eventBus,
+        )
 
     private fun createPresenter() =
         ExplorationPresenter(
@@ -394,6 +405,7 @@ class ExplorationPresenterTest {
             QuestPresenter(
                 FakeQuestTrackerView(),
                 QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts()),
+                QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts()),
                 FakeQuestAnnouncementView(),
                 apis.questApi,
                 apis.partyApi,
@@ -969,7 +981,7 @@ class ExplorationPresenterTest {
         tapTracker()
         // Then
         isReadingQuest().shouldBeTrue()
-        questPresenter.isDetailOpen.shouldBeTrue()
+        questPresenter.isQuestOpen.shouldBeTrue()
         questDetailView.visible.shouldBeTrue()
         virtualPadView.visible.shouldBeFalse()
     }

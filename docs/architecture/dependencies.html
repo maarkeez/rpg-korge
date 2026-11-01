@@ -225,11 +225,11 @@ const DATA = {
     {"name": "npc", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 10, "importsOut": 29},
     {"name": "party", "files": 43, "fanIn": 7, "fanOut": 6, "instability": 0.46, "importsIn": 54, "importsOut": 75},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
-    {"name": "quest", "files": 26, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 14, "importsOut": 36},
+    {"name": "quest", "files": 26, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 15, "importsOut": 36},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 100, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 100, "importsOut": 255},
+    {"name": "screen", "files": 101, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 101, "importsOut": 256},
     {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 490, "importsOut": 0},
-    {"name": "storybook", "files": 98, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 118},
+    {"name": "storybook", "files": 99, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 119},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
   ],
@@ -1364,7 +1364,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.domain.Player"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "player.usecases.queries.SearchPlayerById"}
     ]},
-    {"from": "screen", "to": "quest", "weight": 13, "files": 3, "imports": [
+    {"from": "screen", "to": "quest", "weight": 14, "files": 3, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "quest.adapters.presentation.QuestApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "quest.adapters.resources.ResourcesQuestLoader"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt", "layer": "adapters", "name": "quest.domain.Quest"},
@@ -1374,6 +1374,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.adapters.presentation.QuestApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.QuestTypeDto"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.StatusDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestCompleted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestStarted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.TaskCompleted"},
@@ -1467,7 +1468,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 100, "files": 56, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 101, "files": 57, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView.AbilityInfo"},
@@ -1536,6 +1537,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestAnnouncementViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestAnnouncementView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestAnnouncementViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestAnnouncementView.Moment"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestDetailViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestDetailView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestJournalViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestJournalView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestSample.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestInfo"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestSample.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestInfo.Kind"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/QuestSample.kt", "layer": "adapters", "name": "screen.adapters.presentation.QuestInfo.RewardItem"},

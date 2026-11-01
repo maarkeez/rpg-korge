@@ -32,6 +32,7 @@ class QuestPresenterTest {
     private val questId = "defeat-the-goat-wizard"
     private val trackerView = FakeQuestTrackerView()
     private val detailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val journalView = QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val announcementView = FakeQuestAnnouncementView()
     private val timeline = battleSceneTimeline()
 
@@ -47,7 +48,7 @@ class QuestPresenterTest {
             explore = true,
         ).also(SubdomainApis::initialise)
 
-    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
+    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, journalView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
@@ -233,25 +234,25 @@ class QuestPresenterTest {
         // Given
         val apis = apis(mainQuest(id = questId))
         val presenter = apis.presenter()
-        presenter.openDetail()
+        presenter.openQuest()
         // When
         apis.eventBus.publish(PlayerVictory(playerId = "human"))
         apis.eventBus.dispatch()
         // Then
-        presenter.isDetailOpen.shouldBeFalse()
+        presenter.isQuestOpen.shouldBeFalse()
         detailView.visible.shouldBeFalse()
     }
 
     @Test
-    fun `OpenDetail should display the quest in its completed state when it is completed`() {
+    fun `OpenQuest should display the quest in its completed state when it is completed`() {
         // Given
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
         val presenter = apis.startedPresenter()
         apis.defeatRat()
         // When
-        presenter.openDetail()
+        presenter.openQuest()
         // Then
-        presenter.isDetailOpen.shouldBeTrue()
+        presenter.isQuestOpen.shouldBeTrue()
         detailView.displayedCaption() shouldBe "QUEST COMPLETED"
     }
 
@@ -262,7 +263,7 @@ class QuestPresenterTest {
         val presenter = apis.presenter()
         apis.partyApi.openQuest()
         apis.eventBus.dispatch()
-        presenter.openDetail()
+        presenter.openQuest()
         // When
         presenter.questDetailBackSelected()
         // Then
@@ -279,7 +280,7 @@ class QuestPresenterTest {
         val presenter = apis.presenter()
         apis.partyApi.openQuest()
         apis.eventBus.dispatch()
-        presenter.openDetail()
+        presenter.openQuest()
         timeline.playLongStep()
         // When
         presenter.questDetailBackSelected()
@@ -288,5 +289,103 @@ class QuestPresenterTest {
             .searchParty()!!
             .isReadingQuest
             .shouldBeTrue()
+    }
+
+    // The main quest under way and the side quests of the farmer started, with the party reading them.
+    private fun SubdomainApis.presenterWithASideQuestOpen(): QuestPresenter {
+        val presenter = presenter()
+        startQuest()
+        questApi.resolveNpcTalk("farmer")
+        partyApi.openQuest()
+        eventBus.dispatch()
+        presenter.openQuest()
+        return presenter
+    }
+
+    @Test
+    fun `OpenQuest should open the journal when a side quest is listed`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        // When
+        apis.presenterWithASideQuestOpen()
+        // Then
+        journalView.visible.shouldBeTrue()
+        detailView.visible.shouldBeFalse()
+        journalView.displayedRows().shouldContainExactly(questId, "side")
+    }
+
+    @Test
+    fun `OpenQuest should open the detail view when only the main quest is listed`() {
+        // Given: a side quest that has not started is hidden.
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenter()
+        apis.startQuest()
+        // When
+        presenter.openQuest()
+        // Then
+        detailView.visible.shouldBeTrue()
+        journalView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `OpenQuest should list the active quests before the completed ones when one is completed`() {
+        // Given
+        val completed = sideQuest(id = "completed", tasks = listOf(defeatUnits(unitId = "rat", count = 1)))
+        val active = sideQuest(id = "active")
+        val apis = apis(completed, mainQuest(id = questId), active)
+        val presenter = apis.presenter()
+        apis.startQuest()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        apis.defeatRat()
+        // When
+        presenter.openQuest()
+        // Then
+        journalView.displayedRows().shouldContainExactly(questId, "active", "completed")
+    }
+
+    @Test
+    fun `QuestJournalSelected should display the quest in full in place of the journal`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        // When
+        presenter.questJournalSelected("side")
+        // Then
+        detailView.visible.shouldBeTrue()
+        journalView.visible.shouldBeFalse()
+        detailView.displayedCaption() shouldBe "SIDE QUEST"
+    }
+
+    @Test
+    fun `QuestDetailBackSelected should display the journal again when it was opened from it`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        presenter.questJournalSelected("side")
+        // When
+        presenter.questDetailBackSelected()
+        apis.eventBus.dispatch()
+        // Then
+        journalView.visible.shouldBeTrue()
+        detailView.visible.shouldBeFalse()
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `QuestJournalBackSelected should close the quest when the journal is open`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        // When
+        presenter.questJournalBackSelected()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeFalse()
     }
 }

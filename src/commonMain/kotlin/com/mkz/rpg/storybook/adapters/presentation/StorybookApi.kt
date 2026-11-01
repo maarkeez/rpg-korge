@@ -80,6 +80,7 @@ class StorybookApi(
                 BattleInfoViewStories,
                 QuestTrackerViewStories,
                 QuestDetailViewStories,
+                QuestJournalViewStories,
                 QuestAnnouncementViewStories,
                 MenuViewStories,
                 MapBuilderInfoViewStories,

@@ -84,7 +84,17 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 
 ### The detail view
 
-Tapping the tracker while exploring opens [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown. Once completed, the tracker still opens it, with a ticked target, so the story can be read again.
+[`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) displays a quest in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with its caption (MAIN QUEST, SIDE QUEST or QUEST COMPLETED), the Repeatable pill when it runs again, the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown. The bottom row only holds the buttons, with Back on the left, so a reward of gold and four items never slides under them. Once completed, it still opens, with a ticked target, so the story can be read again.
+
+### The journal
+
+Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestJournalView.kt) once a side quest is listed, and otherwise the detail view of the main quest, so there is no list of one row. It takes the place of the pad, in the 300 of its slot, so the battlefield stays in sight.
+
+- It lists the main quest first while active, then the active side quests, then the completed quests ticked, each group in the order the quests were created. Side quests not started are hidden, so nothing is spoiled.
+- Each row names its section (MAIN QUEST, SIDE QUEST, COMPLETED), and holds the target's portrait, the name, the current task, its count and bar only when it counts above 1, and the Repeatable pill.
+- It holds any number of quests, dragged to scroll. A drag above 4 points does not select the row under it, and the list keeps its place when coming back from a detail view.
+- KorGE's `clipContainer` does not clip rounded rectangles, so the rows that would show out of the panel are hidden, and the header and the footer are drawn over the others.
+- Tapping a row opens its detail view, and Back steps out one level at a time.
 
 ### The announcements
 
@@ -99,7 +109,7 @@ For example, a new game, then defeating the goat wizard in a battle:
 | When                        | Published                                           | Displayed                                                                                       | Time     |
 |-----------------------------|-----------------------------------------------------|-------------------------------------------------------------------------------------------------|----------|
 | The new game is set up      | `QuestStarted`                                      | The tracker reads Defeat the Goat Wizard, and a toast announces the quest for 4.5 seconds       | Runs     |
-| The tracker is tapped       | `QuestOpened`                                       | The detail view takes the place of the pad                                                      | Stopped  |
+| The tracker is tapped       | `QuestOpened`                                       | The detail view takes the place of the pad, as no side quest is listed                          | Stopped  |
 | Back is tapped              | `QuestClosed`                                       | The pad is displayed again                                                                      | Runs     |
 | A battle starts             | `ExplorationPaused`                                 | The tracker stays, without its chevron                                                          | In turns |
 | The goat wizard is defeated | `TaskProgressed`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and a toast announces 150 G              | In turns |

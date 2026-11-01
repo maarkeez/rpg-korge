@@ -1,0 +1,232 @@
+package com.mkz.rpg.screen.adapters.presentation
+
+import com.mkz.rpg.screen.adapters.presentation.HudStyle.panel
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.chevron
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.fitted
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.progressBar
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.repeatablePill
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.ringOf
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.targetSlot
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.tickDisc
+import com.mkz.rpg.screen.adapters.presentation.QuestViewParts.widthOf
+import korlibs.image.color.Colors
+import korlibs.korge.input.onClick
+import korlibs.korge.input.onMouseDrag
+import korlibs.korge.view.Container
+import korlibs.korge.view.Text
+import korlibs.korge.view.clipContainer
+import korlibs.korge.view.container
+import korlibs.korge.view.roundRect
+import korlibs.korge.view.solidRect
+import korlibs.korge.view.text
+import korlibs.korge.view.xy
+import korlibs.math.geom.RectCorners
+import korlibs.math.geom.Size
+import kotlin.math.abs
+
+/**
+ * Every quest started, in place of the pad, one row per quest, each naming its section. It is dragged to scroll, keeping its
+ * place when it is displayed again. Tapping a row opens the quest, and Back steps out.
+ */
+class QuestJournalView(
+    private val resourcesLoader: BattleSceneResourcesLoader,
+    private val texts: Texts,
+) : Container() {
+    companion object {
+        const val WIDTH = 378.0
+        const val HEIGHT = 300.0
+
+        private const val PADDING = 12.0
+        private const val CONTENT_WIDTH = WIDTH - 2 * PADDING
+        private const val TITLE_Y = 9.0
+        private const val TITLE_SIZE = 16.0
+        private const val ACTIVE_Y = 12.0
+        private const val ACTIVE_SIZE = 12.0
+        private const val LIST_Y = 34.0
+        private const val LIST_HEIGHT = 214.0
+        private const val FOOTER_Y = LIST_Y + LIST_HEIGHT
+        private const val FOOTER_HEIGHT = HEIGHT - FOOTER_Y
+        private const val ROW_HEIGHT = 66.0
+        private const val ROW_SPACING = 4.0
+        private const val TARGET_AT = 8.0
+        private const val TARGET_SIZE = 50.0
+        private const val TARGET_TICK_AT = 44.0
+        private const val TARGET_TICK_SIZE = 18.0
+        private const val TEXT_X = 68.0
+        private const val SECTION_Y = 6.0
+        private const val SECTION_SIZE = 10.0
+        private const val NAME_Y = 19.0
+        private const val NAME_SIZE = 14.0
+        private const val TASK_Y = 36.0
+        private const val TASK_SIZE = 12.0
+        private const val BAR_Y = 53.0
+        private const val BAR_HEIGHT = 5.0
+        private const val END_PADDING = 10.0
+        private const val END_SPACING = 8.0
+        private const val CHEVRON_SIZE = 10.0
+        private const val COUNT_SIZE = 13.0
+        private const val PILL_HEIGHT = 18.0
+        private const val SCROLLBAR_X = 370.0
+        private const val SCROLLBAR_WIDTH = 3.0
+        private const val DRAG_THRESHOLD = 4.0
+        private const val BACK_Y = 256.0
+        private const val BACK_WIDTH = 72.0
+    }
+
+    interface Delegate {
+        fun questJournalSelected(questId: String)
+
+        fun questJournalBackSelected()
+    }
+
+    /** A row of the list, as the page object of the tests reads it. */
+    internal class Row(
+        val questId: String,
+        val view: Container,
+        val sectionText: Text,
+        val nameText: Text,
+        val taskText: Text,
+        val countText: Text?,
+        val repeatablePillView: PillView?,
+        val progressBarView: Container?,
+    )
+
+    private var delegate: Delegate? = null
+    private var contentHeight = 0.0
+    private var hasDragged = false
+
+    internal var rows: List<Row> = emptyList()
+    internal val backButton: CancelButton
+
+    private val activeText: Text
+    private val rowsView: Container
+    private val scrollbar: Container
+
+    init {
+        visible = false
+        // It takes the taps between the rows, so a drag can start there, and nothing under it is pressed.
+        panel(Size(WIDTH, HEIGHT)).mouseEnabled = true
+        rowsView = clipContainer(Size(WIDTH, LIST_HEIGHT)).xy(0.0, LIST_Y).container()
+        scrollbar = container()
+        // Over the list, as the rounded rectangles of the rows are not clipped: they would show over the title and Back. They
+        // take the taps, so a row half under them can only be tapped on the part in sight.
+        solidRect(Size(CONTENT_WIDTH + 2, LIST_Y - 1), HudStyle.PANEL) {
+            xy(PADDING - 1, 1.0)
+            mouseEnabled = true
+        }
+        solidRect(Size(CONTENT_WIDTH + 2, FOOTER_HEIGHT - 1), HudStyle.PANEL) {
+            xy(PADDING - 1, FOOTER_Y)
+            mouseEnabled = true
+        }
+        text(texts[UiText.QUEST_JOURNAL_TITLE], textSize = TITLE_SIZE, color = Colors.WHITE) { xy(PADDING, TITLE_Y) }
+        activeText = text("", textSize = ACTIVE_SIZE, color = HudStyle.FAINT)
+        solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, FOOTER_Y) }
+        backButton = CancelButton(texts[UiText.QUEST_DETAIL_BACK], BACK_WIDTH) { delegate?.questJournalBackSelected() }
+        addChild(backButton)
+        backButton.xy(PADDING, BACK_Y)
+        // The distance so far is measured from where the drag started, against the rows, so a tap, which does not move, keeps the scroll.
+        var draggedY = 0.0
+        onMouseDrag { event ->
+            if (event.start) {
+                draggedY = 0.0
+                hasDragged = false
+            }
+            val dy = event.localDXY(rowsView).y
+            if (abs(dy) > DRAG_THRESHOLD) hasDragged = true
+            moveRowsTo(rowsView.y + dy - draggedY)
+            draggedY = dy
+        }
+    }
+
+    fun setDelegate(delegate: Delegate) {
+        this.delegate = delegate
+    }
+
+    /** Draws the quests in the order given, keeping the scroll, up to what still fits. */
+    fun display(quests: List<QuestInfo>) {
+        rowsView.removeChildren()
+        rows = quests.mapIndexed { index, quest -> rowsView.drawRow(quest, index * (ROW_HEIGHT + ROW_SPACING)) }
+        contentHeight = quests.size * (ROW_HEIGHT + ROW_SPACING)
+        val active = quests.count { quest -> !quest.isCompleted }
+        activeText.text = texts.plural(UiText.QUEST_JOURNAL_ACTIVE, active, "quests" to active)
+        activeText.xy(WIDTH - PADDING - widthOf(activeText.text, ACTIVE_SIZE), ACTIVE_Y)
+        scrollbar.removeChildren()
+        if (contentHeight > LIST_HEIGHT) {
+            scrollbar.roundRect(Size(SCROLLBAR_WIDTH, LIST_HEIGHT * LIST_HEIGHT / contentHeight), RectCorners(SCROLLBAR_WIDTH / 2), fill = HudStyle.STROKE)
+            scrollbar.xy(SCROLLBAR_X, LIST_Y)
+        }
+        moveRowsTo(rowsView.y)
+        visible = true
+    }
+
+    fun hide() {
+        visible = false
+    }
+
+    /** Scrolls the list down by [pixels] from its top, up to what still fits. */
+    fun scrollTo(pixels: Double) = moveRowsTo(-pixels)
+
+    private fun moveRowsTo(y: Double) {
+        rowsView.y = y.coerceIn(minOf(0.0, LIST_HEIGHT - contentHeight), 0.0)
+        scrollbar.y = LIST_Y + if (contentHeight > 0.0) -rowsView.y / contentHeight * LIST_HEIGHT else 0.0
+        // The rows that would show out of the panel are hidden: the header and the footer cover the rest.
+        rows.forEach { row ->
+            val top = rowsView.y + row.view.y
+            row.view.visible = top > -LIST_Y && top + ROW_HEIGHT < LIST_HEIGHT + FOOTER_HEIGHT
+        }
+    }
+
+    private fun Container.drawRow(
+        quest: QuestInfo,
+        rowY: Double,
+    ): Row {
+        val task = quest.currentTask
+        val isCounted = !quest.isCompleted && task.count > 1
+        lateinit var row: Row
+        container {
+            xy(PADDING, rowY)
+            panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
+            targetSlot(task, resourcesLoader, TARGET_AT, TARGET_AT, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
+            if (quest.isCompleted) tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE)
+            // What ends the row, from the right, up to where the texts have to stop.
+            var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
+            chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)
+            val countText =
+                if (isCounted) {
+                    val count = "${task.progress}/${task.count}"
+                    right -= END_SPACING + widthOf(count, COUNT_SIZE)
+                    val countX = right
+                    text(count, textSize = COUNT_SIZE, color = HudStyle.SELECTION) { xy(countX, (ROW_HEIGHT - COUNT_SIZE) / 2 - 1) }
+                } else {
+                    null
+                }
+            val pill =
+                if (quest.isRepeatable) {
+                    repeatablePill(0.0, (ROW_HEIGHT - PILL_HEIGHT) / 2, texts).also { pill ->
+                        right -= END_SPACING + pill.width
+                        pill.x = right
+                    }
+                } else {
+                    null
+                }
+            val textWidth = right - END_SPACING - TEXT_X
+            val sectionText = text(sectionOf(quest), textSize = SECTION_SIZE, color = HudStyle.FAINT) { xy(TEXT_X, SECTION_Y) }
+            val nameText = text(fitted(quest.name, NAME_SIZE, textWidth), textSize = NAME_SIZE, color = if (quest.isCompleted) HudStyle.MUTED else Colors.WHITE) { xy(TEXT_X, NAME_Y) }
+            val taskLine = if (quest.isCompleted) texts[UiText.QUEST_TRACKER_COMPLETED] else task.text
+            val taskText = text(fitted(taskLine, TASK_SIZE, textWidth), textSize = TASK_SIZE, color = HudStyle.MUTED) { xy(TEXT_X, TASK_Y) }
+            val bar = if (isCounted) container { progressBar(TEXT_X, BAR_Y, textWidth, BAR_HEIGHT, task.progress, task.count) } else null
+            onClick { if (!hasDragged) delegate?.questJournalSelected(quest.id) }
+            row = Row(quest.id, this, sectionText, nameText, taskText, countText, pill, bar)
+        }
+        return row
+    }
+
+    private fun sectionOf(quest: QuestInfo): String =
+        texts[
+            when {
+                quest.isCompleted -> UiText.QUEST_JOURNAL_COMPLETED
+                quest.isMain -> UiText.QUEST_DETAIL_MAIN_QUEST
+                else -> UiText.QUEST_DETAIL_SIDE_QUEST
+            },
+        ]
+}

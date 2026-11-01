@@ -148,7 +148,7 @@ class ExplorationPresenter(
             eventBus.subscribe<QuestOpened> {
                 timeline.play {
                     virtualPadView.visible = false
-                    questPresenter.openDetail()
+                    questPresenter.openQuest()
                 }
             },
             eventBus.subscribe<QuestClosed> {
@@ -162,7 +162,7 @@ class ExplorationPresenter(
                     shopPresenter.close()
                     formationPresenter.close()
                     pausePresenter.close()
-                    questPresenter.closeDetail()
+                    questPresenter.closeQuest()
                 }
             },
         )
@@ -300,13 +300,13 @@ class ExplorationPresenter(
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
     // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog,
-    // the shop, the formation, the pause screen and the detail of the quest.
+    // the shop, the formation, the pause screen and the quest being read.
     private fun displayVirtualPad(isDisplayed: Boolean) {
         npcDialogView.visible = false
         shopPresenter.close()
         formationPresenter.close()
         pausePresenter.close()
-        questPresenter.closeDetail()
+        questPresenter.closeQuest()
         virtualPadView.visible = isDisplayed
         battleHudView.visible = !isDisplayed
         playerCallToActionView.visible = !isDisplayed
