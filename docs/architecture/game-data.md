@@ -249,6 +249,8 @@ gold = 150                       # Optional, 0 by default
 # lootableItemIds = ["hammer"]   # Optional, none by default
 ```
 
+The shipped side quests are examples of each: [`bats-in-the-meadow`](../../resources/quest/bats-in-the-meadow.toml) counts defeats then asks to talk, [`the-elders-errand`](../../resources/quest/the-elders-errand.toml) asks to reach some tiles and pays an item, and [`rats-in-the-fields`](../../resources/quest/rats-in-the-fields.toml) is repeatable.
+
 ## How to add a unit
 
 1. Add `resources/unit/<unit id>.toml`, and its name to `resources/localization/messages.pot` as `unit.<unit id>.name`.

@@ -1,0 +1,11 @@
+type = "SIDE"
+giverNpcId = "elf"
+repeatable = true
+
+[[tasks]]
+type = "DEFEAT_UNITS"
+unitId = "rat"
+count = 2
+
+[reward]
+gold = 20

@@ -758,6 +758,26 @@ msgid "CPU"
 msgstr ""
 
 #. The name of a quest.
+msgctxt "quest.bats-in-the-meadow.name"
+msgid "Bats in the Meadow"
+msgstr ""
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.bats-in-the-meadow.description"
+msgid "Bats nest in the meadow near the farm, and the Farmer wants them gone."
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.bats-in-the-meadow.task.0"
+msgid "Defeat 3 Bats"
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.bats-in-the-meadow.task.1"
+msgid "Talk to the Farmer"
+msgstr ""
+
+#. The name of a quest.
 msgctxt "quest.defeat-the-goat-wizard.name"
 msgid "The Goat Wizard's Lair"
 msgstr ""
@@ -770,6 +790,41 @@ msgstr ""
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.defeat-the-goat-wizard.task.0"
 msgid "Defeat the Goat Wizard"
+msgstr ""
+
+#. The name of a quest.
+msgctxt "quest.rats-in-the-fields.name"
+msgid "Rats in the Fields"
+msgstr ""
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.rats-in-the-fields.description"
+msgid "Rats keep coming back to the southern fields. The Elf pays to thin them out, as often as it takes."
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.rats-in-the-fields.task.0"
+msgid "Defeat 2 Rats"
+msgstr ""
+
+#. The name of a quest.
+msgctxt "quest.the-elders-errand.name"
+msgid "The Elder's Errand"
+msgstr ""
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.the-elders-errand.description"
+msgid "The Elder wants to know whether the path to the southern fields is still open."
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.the-elders-errand.task.0"
+msgid "Reach the southern fields"
+msgstr ""
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.the-elders-errand.task.1"
+msgid "Talk to the Elder"
 msgstr ""
 
 #. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".

@@ -14,6 +14,13 @@ A quest is a line of tasks, completed one after the other, and completing the la
 | Leader      | Who receives the reward, already a term of `Party` | `leaderBattleUnitId`                                                                        |
 | Quest giver | The npc who starts a side quest                    | `giverNpcId`                                                                                |
 | Repeatable  | A side quest that can run again once completed     | `repeatable`, `false` by default                                                            |
+| Journal     | The list of every quest started, in place of the pad | `QuestJournalView`                                                                        |
+| Pinned quest | The quest the tracker names: the main quest, unless the player pins another | `ProgressDto.isPinned`, `PinQuest`, `QuestPinned`                 |
+| Quest marker | The sign over an npc's head on the battlefield    | `QuestMarkerView`, `QuestMarkerView.Sign`                                                   |
+| Quest to start | The gold sign: the npc can start a side quest   | `Sign.QUEST_TO_START`                                                                       |
+| Talk task   | The green sign: a current task is to talk to the npc | `Sign.TALK_TASK`                                                                          |
+| Repeatable pill | The pill saying that a side quest can run again | `QuestViewParts.repeatablePill`                                                            |
+| Announcement | A quest starting or completing, drawn as a toast  | `QuestAnnouncementView`                                                                     |
 | Status      | Where a quest is in its life                       | `NOT_STARTED`, `ACTIVE`, `COMPLETED`                                                        |
 
 ## Starting
@@ -59,6 +66,16 @@ For example, a new game with the only quest of the game, defeating the goat wiza
 | The goat wizard is defeated              | `TaskProgressed` (1 of 1), `TaskCompleted`, `QuestCompleted`, then `RequestGrantReward` for the hero | `COMPLETED`                                        |
 | `inventory` handles the request          | `RewardGranted(hero, gold = 150)`                                                                    | The hero carries 180 gold                          |
 | The goat wizard respawns and is defeated | Nothing                                                                                              | The quest is completed, and a main quest runs once |
+
+## The side quests shipped
+
+| Quest id             | Giver  | Tasks                                                  | Reward                   | Repeatable |
+|----------------------|--------|--------------------------------------------------------|--------------------------|------------|
+| `bats-in-the-meadow` | Farmer | `DEFEAT_UNITS` bat, 3. `TALK_TO_NPC` farmer            | 40 gold                  | No         |
+| `the-elders-errand`  | Elder  | `REACH_TILES` (25, 3) and (25, 4). `TALK_TO_NPC` elder | 25 gold, `health-potion` | No         |
+| `rats-in-the-fields` | Elf    | `DEFEAT_UNITS` rat, 2                                  | 20 gold                  | Yes        |
+
+Between them they use each kind of task, a count, a task done, gold and an item, and a repeatable quest. Rows 24 and 25 only have columns 3 and 4, so nobody reaches the southern fields without touching one of those two tiles. Rats respawn, so the repeatable quest stays playable. See [Respawning](cpu-battle-brain.md#respawning).
 
 ## Pinning
 
@@ -143,12 +160,14 @@ For example, a new game, then defeating the goat wizard in a battle:
 
 ## Known limitations
 
-- A side quest is played with nothing but its toasts on the screen.
-- The toast shows the reward the quest defines, so a leader near the cap of 99,999 gold reads 150 G and receives less, and an item that did not fit the bag drops on its tile without a word. The shipped quest pays gold, and only a leader past 99,849 gold would notice.
-- A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped description takes 2.
+- The toast shows the reward the quest defines, so a leader near the cap of 99,999 gold reads 150 G and receives less, and an item that did not fit the bag drops on its tile without a word. Only a leader close to the cap, or with a full bag on The Elder's Errand, would notice.
+- A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped descriptions take 2 or 3.
 - A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
 - The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.
-- Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, and the main quest pays no items. Only the tests play them.
+- A quest giver's dialog says nothing about its quest: the toast is what tells the player. E.g.: the Farmer still only thanks the party for dealing with that bat.
+- The toast can be missed, as nothing brings it back: the journal holds the same story.
+- A marker only shows on an npc in view, with nothing pointing at one further away.
+- The drag of the journal was only tried with a mouse, so its feel on a phone is still to be checked.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.
 - A leader defeated by an event still waiting on the bus when the reward is requested receives the reward. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.

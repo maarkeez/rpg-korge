@@ -1,0 +1,14 @@
+type = "SIDE"
+giverNpcId = "elder"
+
+[[tasks]]
+type = "REACH_TILES"
+tiles = [[25, 3], [25, 4]]
+
+[[tasks]]
+type = "TALK_TO_NPC"
+npcId = "elder"
+
+[reward]
+gold = 25
+lootableItemIds = ["health-potion"]

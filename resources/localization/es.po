@@ -758,6 +758,26 @@ msgid "CPU"
 msgstr "CPU"
 
 #. The name of a quest.
+msgctxt "quest.bats-in-the-meadow.name"
+msgid "Bats in the Meadow"
+msgstr "Murciélagos en el prado"
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.bats-in-the-meadow.description"
+msgid "Bats nest in the meadow near the farm, and the Farmer wants them gone."
+msgstr "Los murciélagos anidan en el prado cerca de la granja, y el Granjero quiere que se vayan."
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.bats-in-the-meadow.task.0"
+msgid "Defeat 3 Bats"
+msgstr "Derrota 3 Murciélagos"
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.bats-in-the-meadow.task.1"
+msgid "Talk to the Farmer"
+msgstr "Habla con el Granjero"
+
+#. The name of a quest.
 msgctxt "quest.defeat-the-goat-wizard.name"
 msgid "The Goat Wizard's Lair"
 msgstr "La guarida del Mago Cabra"
@@ -771,6 +791,41 @@ msgstr "Una cabra se tragó la magia de un mago y ahora gobierna la guarida del 
 msgctxt "quest.defeat-the-goat-wizard.task.0"
 msgid "Defeat the Goat Wizard"
 msgstr "Derrota al Mago Cabra"
+
+#. The name of a quest.
+msgctxt "quest.rats-in-the-fields.name"
+msgid "Rats in the Fields"
+msgstr "Ratas en los campos"
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.rats-in-the-fields.description"
+msgid "Rats keep coming back to the southern fields. The Elf pays to thin them out, as often as it takes."
+msgstr "Las ratas siempre vuelven a los campos del sur. La Elfa paga por ahuyentarlas, tantas veces como haga falta."
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.rats-in-the-fields.task.0"
+msgid "Defeat 2 Rats"
+msgstr "Derrota 2 Ratas"
+
+#. The name of a quest.
+msgctxt "quest.the-elders-errand.name"
+msgid "The Elder's Errand"
+msgstr "El encargo del Anciano"
+
+#. What a quest is about, displayed when it starts and in its detail.
+msgctxt "quest.the-elders-errand.description"
+msgid "The Elder wants to know whether the path to the southern fields is still open."
+msgstr "El Anciano quiere saber si el paso a los campos del sur sigue abierto."
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.the-elders-errand.task.0"
+msgid "Reach the southern fields"
+msgstr "Llega a los campos del sur"
+
+#. A task of a quest, by its place in the line of tasks, as a whole sentence.
+msgctxt "quest.the-elders-errand.task.1"
+msgid "Talk to the Elder"
+msgstr "Habla con el Anciano"
 
 #. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.grass.name"

@@ -41,6 +41,7 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
@@ -115,7 +116,7 @@ class QuestAcceptanceTest {
     fun `The main quest should be active when a new game is set up`() =
         scenarioTest(::setUp) {
             // When
-            val mainQuest = questApi.searchQuests().single()
+            val mainQuest = questApi.searchQuests().first { quest -> quest.type == QuestTypeDto.MAIN }
             // Then
             mainQuest.id shouldBe "defeat-the-goat-wizard"
             mainQuest.progress.status shouldBe StatusDto.ACTIVE
@@ -133,7 +134,7 @@ class QuestAcceptanceTest {
             // Then
             questApi
                 .searchQuests()
-                .single()
+                .first { quest -> quest.type == QuestTypeDto.MAIN }
                 .progress.status shouldBe StatusDto.COMPLETED
             inventoryApi.searchInventoryByBattleUnitId("hero")!!.gold shouldBe 180
         }

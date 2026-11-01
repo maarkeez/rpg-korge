@@ -1,0 +1,14 @@
+type = "SIDE"
+giverNpcId = "farmer"
+
+[[tasks]]
+type = "DEFEAT_UNITS"
+unitId = "bat"
+count = 3
+
+[[tasks]]
+type = "TALK_TO_NPC"
+npcId = "farmer"
+
+[reward]
+gold = 40
