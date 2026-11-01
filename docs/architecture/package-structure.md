@@ -85,6 +85,7 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
   | `battle`                              | `shared`, `player`                                                       |
   | `lootTable`                           | `shared`, `lootableItem`                                                 |
   | `building`                            | `shared`, `battlefield`                                                  |
+  | `quest`                               | `shared`, `battlefield`                                                  |
   | `battlefield`                         | `shared`, `effect`, `terrain`, `battle` (to remove next, see below)      |
   | `party`                               | `shared`, `effect`, `player`, `battle`, `battlefield`, `battleUnit`      |
   | `battleUnit`                          | `shared`, `effect`, `player`, `unit`, `ability`, `battle`, `battlefield` |

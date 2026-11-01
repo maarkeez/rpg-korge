@@ -210,7 +210,7 @@ const DATA = {
     {"name": "ability", "files": 14, "fanIn": 4, "fanOut": 2, "instability": 0.33, "importsIn": 29, "importsOut": 15},
     {"name": "battle", "files": 23, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 39, "importsOut": 27},
     {"name": "battleUnit", "files": 62, "fanIn": 6, "fanOut": 7, "instability": 0.54, "importsIn": 67, "importsOut": 168},
-    {"name": "battlefield", "files": 44, "fanIn": 9, "fanOut": 4, "instability": 0.31, "importsIn": 107, "importsOut": 40},
+    {"name": "battlefield", "files": 44, "fanIn": 10, "fanOut": 4, "instability": 0.29, "importsIn": 109, "importsOut": 40},
     {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 14, "instability": 0.93, "importsIn": 1, "importsOut": 15},
     {"name": "building", "files": 10, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 4, "importsOut": 12},
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
@@ -225,9 +225,10 @@ const DATA = {
     {"name": "npc", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 10, "importsOut": 29},
     {"name": "party", "files": 41, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
+    {"name": "quest", "files": 11, "fanIn": 0, "fanOut": 2, "instability": 1.0, "importsIn": 0, "importsOut": 11},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 11, "importsOut": 8},
     {"name": "screen", "files": 93, "fanIn": 1, "fanOut": 22, "instability": 0.96, "importsIn": 91, "importsOut": 232},
-    {"name": "shared", "files": 14, "fanIn": 23, "fanOut": 0, "instability": 0.0, "importsIn": 460, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 469, "importsOut": 0},
     {"name": "storybook", "files": 94, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 109},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
@@ -1099,6 +1100,21 @@ const DATA = {
       {"file": "com/mkz/rpg/player/domain/PlayerEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/player/usecases/commands/InitialisePlayers.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/player/usecases/commands/RequestPlayerCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "quest", "to": "battlefield", "weight": 2, "files": 2, "imports": [
+      {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
+      {"file": "com/mkz/rpg/quest/usecases/commands/InitialiseQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
+    ]},
+    {"from": "quest", "to": "shared", "weight": 9, "files": 4, "imports": [
+      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
+      {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.enumOf"},
+      {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.fromResource"},
+      {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
+      {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.required"},
+      {"file": "com/mkz/rpg/quest/domain/QuestEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"}
     ]},
     {"from": "save", "to": "shared", "weight": 8, "files": 5, "imports": [
       {"file": "com/mkz/rpg/save/adapters/presentation/SaveApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},

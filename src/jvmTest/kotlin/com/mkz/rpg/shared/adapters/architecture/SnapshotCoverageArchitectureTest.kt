@@ -25,6 +25,7 @@ class SnapshotCoverageArchitectureTest {
             "player" to "read from the resources",
             "terrain" to "read from the resources",
             "unit" to "read from the resources",
+            "quest" to "no quest starts yet",
             "battle" to "no battle is in progress while exploring, the only time the game is saved",
             "cpuBattleBrain" to "no battle is in progress while exploring, the only time the game is saved",
             "localization" to "the language is picked for the session",
