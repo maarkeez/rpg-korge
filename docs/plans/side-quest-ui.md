@@ -76,7 +76,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The toast         | The main quest is announced by a toast that fades with time running, and the card is gone. Any quest starting or completing gets one.        | ✅      | `c749d674` |
 | M2 | The journal       | Once a side quest is listed, tapping the tracker opens the journal, dragged to scroll, each row opening the new detail view. Back steps out. | ✅      | `6af72e0f` |
-| M3 | Abandoning        | Abandon in red asks first, and takes the side quest back to not started, returning to the journal or the pad.                                | ⬜      |         |
+| M3 | Abandoning        | Abandon in red asks first, and takes the side quest back to not started, returning to the journal or the pad.                                | ✅      | `51694f3f` |
 | M4 | The pinned quest  | Pinning a quest in the journal makes the tracker name it, also in a loaded game, with `SAVE_VERSION` 4.                                      | ⬜      |         |
 | M5 | The quest markers | An npc with a quest to start or a talk task has its sign while exploring, also in a loaded game.                                             | ⬜      |         |
 | M6 | The side quests   | The three quests can be played from a new game, proved end to end. The plan is marked as done.                                               | ⬜      |         |
