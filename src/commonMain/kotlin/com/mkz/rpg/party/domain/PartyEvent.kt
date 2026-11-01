@@ -71,6 +71,16 @@ sealed interface PartyEvent : DomainEvent {
         val playerId: String,
     ) : PartyEvent
 
+    /** The player reads a quest: time stops until it is closed. */
+    data class QuestOpened(
+        val playerId: String,
+    ) : PartyEvent
+
+    /** The quest is closed, so the party explores again. */
+    data class QuestClosed(
+        val playerId: String,
+    ) : PartyEvent
+
     // Requested for a recruited npc, which joins the party as a battle unit of its unit, on its tile.
     data class RequestRecruitMember(
         val battleUnitId: String,

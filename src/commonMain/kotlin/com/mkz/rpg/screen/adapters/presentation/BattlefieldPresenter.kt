@@ -610,8 +610,8 @@ class BattlefieldPresenter(
         return battleUnit.id !in battle.battleUnitIds
     }
 
-    // While talking to an npc, setting the party order in the formation, or paused, time stops: the tiles can not be selected.
-    private fun isTimeStopped(): Boolean = partyApi.searchParty()?.let { party -> party.talkingNpcId != null || party.isInFormation || party.isPaused } == true
+    // While talking to an npc, setting the party order in the formation, paused, or reading a quest, time stops: the tiles can not be selected.
+    private fun isTimeStopped(): Boolean = partyApi.searchParty()?.let { party -> party.talkingNpcId != null || party.isInFormation || party.isPaused || party.isReadingQuest } == true
 
     // Delegates
     override fun tileSelected(

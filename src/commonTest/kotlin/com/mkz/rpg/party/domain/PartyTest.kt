@@ -32,6 +32,7 @@ class PartyTest {
                 talkingNpcId = null,
                 isInFormation = false,
                 isPaused = false,
+                isReadingQuest = false,
             )
         party.pullEvents().first.shouldContainExactly(
             PartyEvent.ExplorationStarted(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"), unitIds = listOf("knight", "knight")),
@@ -587,6 +588,56 @@ class PartyTest {
         val exploringParty = party()
         // When
         val party = exploringParty.closePause()
+        // Then
+        party shouldBe exploringParty
+    }
+
+    @Test
+    fun `openQuest should read the quest when the party can walk`() {
+        // When
+        val party = party().openQuest()
+        // Then
+        party.toDto().isReadingQuest.shouldBeTrue()
+        party.toDto().isExploring.shouldBeFalse()
+        party.canWalk().shouldBeFalse()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.QuestOpened(playerId = "human"))
+    }
+
+    @Test
+    fun `openQuest should change nothing when the party is walking, talking, in formation, paused or battling`() {
+        // Given
+        val parties =
+            listOf(
+                party().walkParty(listOf(leaderStep)),
+                party().talk("the-guy").pullEvents().second,
+                party().openFormation().pullEvents().second,
+                party().openPause().pullEvents().second,
+                party().pause().pullEvents().second,
+            )
+        // When
+        val openedParties = parties.map(Party::openQuest)
+        // Then
+        openedParties shouldBe parties
+    }
+
+    @Test
+    fun `closeQuest should explore again when reading the quest`() {
+        // Given
+        val readingParty = party().openQuest().pullEvents().second
+        // When
+        val party = readingParty.closeQuest()
+        // Then
+        party.toDto().isReadingQuest.shouldBeFalse()
+        party.canWalk().shouldBeTrue()
+        party.pullEvents().first.shouldContainExactly(PartyEvent.QuestClosed(playerId = "human"))
+    }
+
+    @Test
+    fun `closeQuest should change nothing when not reading the quest`() {
+        // Given
+        val exploringParty = party()
+        // When
+        val party = exploringParty.closeQuest()
         // Then
         party shouldBe exploringParty
     }

@@ -1275,6 +1275,23 @@ class BattlefieldPresenterTest {
     }
 
     @Test
+    fun `BattlefieldPresenter should ignore a tile selected when the party is reading the quest`() {
+        // Given
+        val exploringApis = exploringApis()
+        val presenter = exploringPresenter(exploringApis, FakeBattlefieldView())
+        exploringApis.partyApi.startExploration()
+        exploringApis.partyApi.openQuest()
+        exploringApis.eventBus.dispatch()
+        val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()
+        exploringApis.eventBus.subscribe<BattlefieldHudEvent.SelectedBattleUnit> { event -> selections += event }
+        // When
+        presenter.tileSelected(row = 1, column = 1)
+        exploringApis.eventBus.dispatch()
+        // Then
+        selections.shouldBeEmpty()
+    }
+
+    @Test
     fun `TileSelected should process the selected tile when the timeline is idle`() {
         // Given
         val selections = mutableListOf<BattlefieldHudEvent.SelectedBattleUnit>()

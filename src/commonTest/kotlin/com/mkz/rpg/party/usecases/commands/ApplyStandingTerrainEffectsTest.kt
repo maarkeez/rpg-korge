@@ -96,6 +96,17 @@ class ApplyStandingTerrainEffectsTest {
     }
 
     @Test
+    fun `should start no second when the party is reading the quest`() {
+        // Given
+        givenBattlefield()
+        partyRepository.save(party().openQuest().pullEvents().second)
+        // When
+        applyStandingTerrainEffects()
+        // Then
+        eventBus.shouldNotHavePublishedEvents()
+    }
+
+    @Test
     fun `should only start the next second when every battle unit moved during the second`() {
         // Given
         givenBattleUnits("knight-1")
