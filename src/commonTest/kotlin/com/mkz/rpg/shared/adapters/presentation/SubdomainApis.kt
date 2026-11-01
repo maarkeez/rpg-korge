@@ -85,7 +85,7 @@ class SubdomainApis(
     val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
-    val questApi = QuestApi(battlefieldApi, eventBus, FakeQuestLoader(quests))
+    val questApi = QuestApi(battlefieldApi, partyApi, eventBus, FakeQuestLoader(quests))
 
     /** Stores the given data, places the buildings, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
     fun initialise() {

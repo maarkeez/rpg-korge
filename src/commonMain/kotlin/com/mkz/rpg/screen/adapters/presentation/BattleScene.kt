@@ -116,7 +116,7 @@ class BattleScene(
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
         val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
-        val questApi = QuestApi(battlefieldApi, eventBus, ResourcesQuestLoader())
+        val questApi = QuestApi(battlefieldApi, partyApi, eventBus, ResourcesQuestLoader())
         val battleSetupApi = BattleSetupApi(eventBus)
         // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
         val saveApi =

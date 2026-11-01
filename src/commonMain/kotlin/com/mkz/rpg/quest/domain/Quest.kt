@@ -15,7 +15,10 @@ import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
+import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
+import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
+import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
 import kotlin.jvm.JvmInline
 
 /**
@@ -60,6 +63,38 @@ data class Quest private constructor(
             progress = Progress(status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0),
             events = events + QuestStarted(questId = id.value),
         )
+
+    /** Counts a defeated battle unit of the unit, when the current task asks for it. Only events from when a task became the current one count. */
+    fun defeated(unitId: String): Quest {
+        val task = currentTask() as? Task.DefeatUnits
+        if (progress.status != StatusDto.ACTIVE || task?.unitId != unitId) return this
+        val taskProgress = progress.currentTaskProgress + 1
+        val progressedQuest =
+            copy(
+                progress = progress.copy(currentTaskProgress = taskProgress),
+                events = events + TaskProgressed(questId = id.value, taskIndex = progress.currentTaskIndex, progress = taskProgress, count = task.count),
+            )
+        return if (taskProgress >= task.count) progressedQuest.completeCurrentTask() else progressedQuest
+    }
+
+    /** Completes the current task, when it asks for any of the tiles. */
+    fun reached(tiles: List<PositionDto>): Quest {
+        val task = currentTask() as? Task.ReachTiles
+        if (progress.status != StatusDto.ACTIVE || task == null || tiles.none(task.tiles::contains)) return this
+        return completeCurrentTask()
+    }
+
+    /** Moves on to the next task, or completes the quest after the last one. */
+    private fun completeCurrentTask(): Quest {
+        val taskCompleted = TaskCompleted(questId = id.value, taskIndex = progress.currentTaskIndex)
+        return if (progress.currentTaskIndex == tasks.value.lastIndex) {
+            copy(progress = progress.copy(status = StatusDto.COMPLETED), events = events + taskCompleted + QuestCompleted(questId = id.value))
+        } else {
+            copy(progress = progress.copy(currentTaskIndex = progress.currentTaskIndex + 1, currentTaskProgress = 0), events = events + taskCompleted)
+        }
+    }
+
+    private fun currentTask(): Task = tasks.value[progress.currentTaskIndex]
 
     /** Puts back how far it went when the game was saved, publishing no events. */
     fun restoreProgress(progress: ProgressDto): Quest {

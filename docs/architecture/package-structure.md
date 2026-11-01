@@ -85,7 +85,7 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
   | `battle`                              | `shared`, `player`                                                       |
   | `lootTable`                           | `shared`, `lootableItem`                                                 |
   | `building`                            | `shared`, `battlefield`                                                  |
-  | `quest`                               | `shared`, `battlefield`                                                  |
+  | `quest`                               | `shared`, `battlefield`, `battleUnit`, `party`, `inventory`, see [Quests](quests.md) |
   | `battlefield`                         | `shared`, `effect`, `terrain`, `battle` (to remove next, see below)      |
   | `party`                               | `shared`, `effect`, `player`, `battle`, `battlefield`, `battleUnit`      |
   | `battleUnit`                          | `shared`, `effect`, `player`, `unit`, `ability`, `battle`, `battlefield` |
@@ -122,6 +122,16 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 | An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Vacates its tile.  |
 
 So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
+
+`inventory` knows nothing of quests, and `lootDrop` knows nothing of rewards. `quest` requests the reward once `QuestCompleted` is handled, so it reads the party and the tile of the leader after the requests already waiting on the bus:
+
+| When                               | `quest` publishes                                                      | `inventory`                                                      |
+|------------------------------------|------------------------------------------------------------------------|------------------------------------------------------------------|
+| The last task of a quest completes | `RequestGrantReward(battleUnitId, gold, lootableItemIds, row, column)` | Adds the gold, stores the items, and requests dropping the rest. |
+
+| When                       | `Inventory` records                              | `lootDrop`                                          |
+|----------------------------|--------------------------------------------------|-----------------------------------------------------|
+| A reward item does not fit | `RequestDropItems(lootableItemIds, row, column)` | Keeps them on the tile, in the ownerless loot drop. |
 
 `battlefield` does not depend on `building` either. A building is an occupant over several tiles, and the `Building` aggregate records its request right after its own event:
 

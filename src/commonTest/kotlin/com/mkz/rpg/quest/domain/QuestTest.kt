@@ -1,5 +1,6 @@
 package com.mkz.rpg.quest.domain
 
+import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -13,7 +14,10 @@ import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
 import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
+import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
+import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
+import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
 import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.reachTiles
@@ -26,6 +30,8 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
 class QuestTest {
+    private fun started(tasks: List<TaskDto>) = mainQuest(id = "a-quest", tasks = tasks).start().pullEvents().second
+
     @Test
     fun `Quest should start not started on its first task when it is created`() {
         // When
@@ -101,6 +107,88 @@ class QuestTest {
         // Then
         startedQuest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0)
         startedQuest.pullEvents().first.shouldContainExactly(QuestStarted(questId = "defeat-the-goat-wizard"))
+    }
+
+    @Test
+    fun `Quest should move on to the next task when the current one is done`() {
+        // Given
+        val quest = started(tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat")))
+        // When
+        val updatedQuest = quest.reached(listOf(PositionDto(row = 1, column = 1)))
+        // Then
+        updatedQuest.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0)
+        updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0))
+    }
+
+    @Test
+    fun `Quest should not count an event when its task is not the current one`() {
+        // Given
+        val quest = started(tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat")))
+        // When
+        val updatedQuest = quest.defeated("rat")
+        // Then
+        updatedQuest shouldBe quest
+    }
+
+    @Test
+    fun `Quest should not count an event when the current task asks for something else`() {
+        // Given
+        val quest = started(tasks = listOf(defeatUnits(unitId = "rat")))
+        // When
+        val updatedQuest = quest.defeated("bat").reached(listOf(PositionDto(row = 1, column = 1)))
+        // Then
+        updatedQuest shouldBe quest
+    }
+
+    @Test
+    fun `Quest should not count an event when it has not started`() {
+        // Given
+        val quest = mainQuest(tasks = listOf(defeatUnits(unitId = "rat")))
+        // When
+        val updatedQuest = quest.defeated("rat")
+        // Then
+        updatedQuest shouldBe quest
+    }
+
+    @Test
+    fun `Quest should complete only once the defeats reach the count`() {
+        // Given
+        val quest = started(tasks = listOf(defeatUnits(unitId = "rat", count = 2)))
+        // When
+        val onceDefeated = quest.defeated("rat").pullEvents()
+        val twiceDefeated = onceDefeated.second.defeated("rat").pullEvents()
+        // Then
+        onceDefeated.second.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 1)
+        onceDefeated.first.shouldContainExactly(TaskProgressed(questId = "a-quest", taskIndex = 0, progress = 1, count = 2))
+        twiceDefeated.second
+            .toDto()
+            .progress.status shouldBe StatusDto.COMPLETED
+        twiceDefeated.first.shouldContainExactly(
+            TaskProgressed(questId = "a-quest", taskIndex = 0, progress = 2, count = 2),
+            TaskCompleted(questId = "a-quest", taskIndex = 0),
+            QuestCompleted(questId = "a-quest"),
+        )
+    }
+
+    @Test
+    fun `Quest should complete when the last task is done`() {
+        // Given
+        val quest = started(tasks = listOf(reachTiles(1 to 1)))
+        // When
+        val updatedQuest = quest.reached(listOf(PositionDto(row = 0, column = 0), PositionDto(row = 1, column = 1)))
+        // Then
+        updatedQuest.toDto().progress.status shouldBe StatusDto.COMPLETED
+        updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0), QuestCompleted(questId = "a-quest"))
+    }
+
+    @Test
+    fun `Quest should not count an event when it is completed`() {
+        // Given
+        val completedQuest = started(tasks = listOf(defeatUnits(unitId = "rat"))).defeated("rat").pullEvents().second
+        // When
+        val updatedQuest = completedQuest.defeated("rat")
+        // Then
+        updatedQuest shouldBe completedQuest
     }
 
     @Test
