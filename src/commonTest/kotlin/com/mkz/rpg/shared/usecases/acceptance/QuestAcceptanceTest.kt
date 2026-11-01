@@ -30,6 +30,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
+import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -45,6 +46,8 @@ import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
+import com.mkz.rpg.quest.domain.QuestMother.sideQuest
+import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -135,8 +138,8 @@ class QuestAcceptanceTest {
             inventoryApi.searchInventoryByBattleUnitId("hero")!!.gold shouldBe 180
         }
 
-    // A small game: a knight explores from (1,0), on a 3x6 field of sand, with a rat at (1,5), and its quest pays 13 health potions, one more than its bag holds.
-    private fun smallGame(quest: Quest.Dto): SubdomainApis =
+    // A small game: a knight explores from (1,0), next to a farmer at (0,0), on a 3x6 field of sand, with a rat at (1,5).
+    private fun smallGame(vararg quests: Quest.Dto): SubdomainApis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             effects = listOf(increaseHealthEffect(id = "cure").toDto(), decreaseHealthEffect(id = "smite", damage = 100, applicationType = "IMMEDIATELY").toDto()),
@@ -149,7 +152,8 @@ class QuestAcceptanceTest {
                     Deployment(battleUnitId = "knight-1", unitId = "knight", playerId = "human", row = 1, column = 0),
                     Deployment(battleUnitId = "rat-1", unitId = "rat", playerId = "cpu", row = 1, column = 5),
                 ),
-            quests = listOf(quest),
+            npcs = listOf(npc(id = "farmer", row = 0, column = 0).toDto()),
+            quests = quests.toList(),
             explore = true,
         ).also { apis ->
             apis.initialise()
@@ -174,6 +178,14 @@ class QuestAcceptanceTest {
         eventBus.dispatch()
     }
 
+    private fun SubdomainApis.talkToTheFarmer() {
+        npcApi.talkToAdjacentNpc()
+        eventBus.dispatch()
+        partyApi.finishTalk()
+        eventBus.dispatch()
+    }
+
+    // One more than a bag holds.
     private val thirteenPotions = reward(gold = 0, lootableItemIds = List(13) { "health-potion" })
 
     @Test
@@ -204,5 +216,49 @@ class QuestAcceptanceTest {
         // Then
         apis.battlefieldApi.searchPosition("knight-1")?.let { position -> position.row to position.column } shouldBe (1 to 1)
         apis.lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 1, column = 1) to listOf("health-potion"))
+    }
+
+    @Test
+    fun `A side quest should run through its tasks and pay its reward when it is started by talking to its giver`() {
+        // Given
+        val sideQuest =
+            sideQuest(
+                id = "help-the-farmer",
+                giverNpcId = "farmer",
+                repeatable = true,
+                tasks = listOf(reachTiles(2 to 0), talkToNpc(npcId = "farmer")),
+                reward = reward(gold = 20, lootableItemIds = listOf("health-potion")),
+            ).toDto()
+        val apis = smallGame(mainQuest(tasks = listOf(defeatUnits(unitId = "rat"))).toDto(), sideQuest)
+
+        fun progress() =
+            apis.questApi
+                .searchQuests()
+                .single { quest -> quest.id == "help-the-farmer" }
+                .progress
+
+        fun knight() = apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")!!
+        val startingGold = knight().gold
+        // When: the talk starts it, on its first task
+        apis.talkToTheFarmer()
+        // Then
+        progress().status shouldBe StatusDto.ACTIVE
+        progress().currentTaskIndex shouldBe 0
+        // When: the knight walks onto the tile of its first task, then back next to the farmer
+        apis.walk(DirectionDto.SOUTH)
+        apis.walk(DirectionDto.NORTH)
+        // Then
+        progress().currentTaskIndex shouldBe 1
+        // When: the knight talks to the farmer for its second task
+        apis.talkToTheFarmer()
+        // Then
+        progress().status shouldBe StatusDto.COMPLETED
+        knight().gold shouldBe startingGold + 20
+        knight().storedItems shouldBe listOf("health-potion")
+        // When: a later talk runs it again
+        apis.talkToTheFarmer()
+        // Then
+        progress().status shouldBe StatusDto.ACTIVE
+        progress().currentTaskIndex shouldBe 0
     }
 }

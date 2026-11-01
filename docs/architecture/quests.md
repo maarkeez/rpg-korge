@@ -12,11 +12,21 @@ A quest is a line of tasks, completed one after the other, and completing the la
 | Task        | One stage of a quest                               | `DEFEAT_UNITS` (`unitId`, `count`), `TALK_TO_NPC` (`npcId`), `REACH_TILES` (`tiles`)        |
 | Reward      | The gold and lootable items a completed quest pays | `[reward]`, `gold`, `lootableItemIds`                                                       |
 | Leader      | Who receives the reward, already a term of `Party` | `leaderBattleUnitId`                                                                        |
+| Quest giver | The npc who starts a side quest                    | `giverNpcId`                                                                                |
+| Repeatable  | A side quest that can run again once completed     | `repeatable`, `false` by default                                                            |
 | Status      | Where a quest is in its life                       | `NOT_STARTED`, `ACTIVE`, `COMPLETED`                                                        |
 
 ## Starting
 
 The game has exactly one main quest, and fails to start without it (`MainQuestNotUnique`). `SetupBattle` requests initialising the quests after the buildings, in a new game and in a loaded one, and starts the main quest last, only in a new game. It runs once, and can not be abandoned, repeated nor failed. Completing it pays its reward and publishes its events, and exploring goes on. See [Game data](game-data.md#how-the-battle-is-set-up).
+
+## Side quests
+
+The game can hold any number of side quests, and ships none yet, so only the tests play them. A side quest starts once the party finishes talking to its quest giver, with no choice to accept or decline, and every eligible side quest of that giver starts on the same talk. It can not fail.
+
+A side quest with `repeatable = true` starts again on a later talk to its giver, from its first task, and pays its full reward each time.
+
+[`ResolveNpcTalk`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/commands/ResolveNpcTalk.kt) lists the quests that npc can start, then counts the talk on every quest, and finally starts the listed ones. So the talk that starts a quest does not complete its first task, and the talk that completes a quest does not restart it.
 
 ## Tasks
 
@@ -62,6 +72,7 @@ A reward is some gold and a list of lootable items, as the game has no experienc
 ## Known limitations
 
 - Nothing shows a quest: the only one in the game pays its gold silently, and the player has to open the inventory to notice.
+- Side quests, repeating them and dropping a reward can not happen in the game yet, as no side quest ships, and the main quest pays no items. Only the tests play them.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.
 - A leader defeated by an event still waiting on the bus when the reward is requested receives the reward. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.

@@ -57,6 +57,9 @@ data class Quest private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
+    /** Whether talking to the npc starts it: it is a side quest of that giver, not started, or completed and repeatable. */
+    fun canBeStartedBy(npcId: String): Boolean = giverNpcId?.value == npcId && (progress.status == StatusDto.NOT_STARTED || (progress.status == StatusDto.COMPLETED && repeatable))
+
     /** Starts it from its first task. */
     fun start(): Quest =
         copy(

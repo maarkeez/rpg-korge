@@ -228,6 +228,8 @@ A line of tasks, completed one after the other, and the reward paid to the party
 
 ```toml
 type = "MAIN"                    # MAIN, SIDE
+# giverNpcId = "farmer"          # Only for SIDE, required: the npc who starts it once the party finishes talking to it
+# repeatable = true              # Only for SIDE, false by default: whether a later talk to its giver runs it again once completed
 
 [[tasks]]
 type = "DEFEAT_UNITS"            # DEFEAT_UNITS, TALK_TO_NPC, REACH_TILES

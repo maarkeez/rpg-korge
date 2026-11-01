@@ -213,6 +213,54 @@ class QuestTest {
     }
 
     @Test
+    fun `Quest should be startable by its giver when it is not started`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer")
+        // When / Then
+        quest.canBeStartedBy("farmer") shouldBe true
+    }
+
+    @Test
+    fun `Quest should not be startable by another npc`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer")
+        // When / Then
+        quest.canBeStartedBy("blacksmith") shouldBe false
+    }
+
+    @Test
+    fun `Quest should not be startable by its giver when it is active`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer", repeatable = true).start()
+        // When / Then
+        quest.canBeStartedBy("farmer") shouldBe false
+    }
+
+    @Test
+    fun `Quest should be startable by its giver when it is completed and repeatable`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat"))).start().defeated("rat")
+        // When / Then
+        quest.canBeStartedBy("farmer") shouldBe true
+    }
+
+    @Test
+    fun `Quest should not be startable by its giver when it is completed and not repeatable`() {
+        // Given
+        val quest = sideQuest(giverNpcId = "farmer", tasks = listOf(defeatUnits(unitId = "rat"))).start().defeated("rat")
+        // When / Then
+        quest.canBeStartedBy("farmer") shouldBe false
+    }
+
+    @Test
+    fun `Quest should not be startable by any npc when it is the main quest`() {
+        // Given
+        val quest = mainQuest()
+        // When / Then
+        quest.canBeStartedBy("farmer") shouldBe false
+    }
+
+    @Test
     fun `PullEvents should clear the pending events when the events are pulled`() {
         // Given
         val quest = mainQuest().start()
