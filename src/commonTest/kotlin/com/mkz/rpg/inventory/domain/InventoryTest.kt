@@ -22,8 +22,10 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.RewardGranted
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropItems
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.HEAD
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
@@ -402,6 +404,44 @@ class InventoryTest {
         val result = runCatching { inventory.unequip("hammer") }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<ItemNotEquipped>()
+    }
+
+    @Test
+    fun `Inventory should add the gold and store the items when a reward is granted`() {
+        // Given
+        val inventory = inventory(battleUnitId = "hero", storedItems = listOf("dagger"), gold = 30)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 150, lootableItemIds = listOf("hammer", "health-potion"), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().gold shouldBe 180
+        updatedInventory.toDto().storedItems.shouldContainExactly("dagger", "hammer", "health-potion")
+        updatedInventory.pullEvents().first.shouldContainExactly(RewardGranted(battleUnitId = "hero", gold = 150, lootableItemIds = listOf("hammer", "health-potion")))
+    }
+
+    @Test
+    fun `Inventory should stop at the maximum gold when a reward takes it above`() {
+        // Given
+        val inventory = inventory(battleUnitId = "hero", gold = 99_950)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 150, lootableItemIds = emptyList(), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().gold shouldBe 99_999
+        updatedInventory.pullEvents().first.shouldContainExactly(RewardGranted(battleUnitId = "hero", gold = 49, lootableItemIds = emptyList()))
+    }
+
+    @Test
+    fun `Inventory should request dropping the items left when the bag fills up`() {
+        // Given
+        val storedItems = List(11) { "dagger" }
+        val inventory = inventory(battleUnitId = "hero", storedItems = storedItems)
+        // When
+        val updatedInventory = inventory.grantReward(gold = 0, lootableItemIds = listOf("hammer", "health-potion", "health-potion"), row = 1, column = 2)
+        // Then
+        updatedInventory.toDto().storedItems shouldBe storedItems + "hammer"
+        updatedInventory.pullEvents().first.shouldContainExactly(
+            RewardGranted(battleUnitId = "hero", gold = 0, lootableItemIds = listOf("hammer")),
+            RequestDropItems(lootableItemIds = listOf("health-potion", "health-potion"), row = 1, column = 2),
+        )
     }
 
     @Test

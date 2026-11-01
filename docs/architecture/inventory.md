@@ -13,6 +13,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | Command           | What it does                                                                                                                                       |
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `storeLootedItem` | Stores an item lying on a tile, or announces `InventoryFull` without storing it when there is no space left.                                       |
+| `grantReward`     | Adds the gold of a reward and stores its items, dropping what does not fit. See [Rewards](#rewards).                                                |
 | `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. Fails, keeping it, when its battle unit can not learn the ability it teaches. See [Learning an ability](#learning-an-ability). |
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
 | `equipItem`       | Equips a stored equippable item in its zone, and requests the application of its effects. See [Equipment](#equipment).                              |
@@ -32,7 +33,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `searchGiveReceivers`           | The party members that can receive an item from it.     |
 
 - Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
-- Storing is not limited to the player's turn, as it happens while a battle unit moves.
+- Storing and granting a reward are not limited to the player's turn, as they happen while a battle unit moves, or as a task completes in a battle.
 
 ## Looting from the battlefield
 
@@ -51,6 +52,18 @@ Storing an item in a full inventory does not store it: it announces `InventoryFu
 
 1. To keep the new item: the screen discards one of the stored items with `discardItem`, then stores the new one with `storeLootedItem` and its tile.
 2. To leave the new item behind: nothing is called, and the item stays on its tile, to be looted later.
+
+## Rewards
+
+`RequestGrantReward(battleUnitId, gold, lootableItemIds, row, column)` asks `inventory` to pay a reward to a battle unit standing on the tile at `row` and `column`, as it does not know where it stands. `grantReward` then:
+
+1. Adds the gold, up to 99,999 G. The excess is lost, as a reward can not be refused the way selling is. E.g.: a battle unit with 99,950 G granted 150 receives 49.
+2. Stores the items in order while there is space.
+3. Announces `RewardGranted` with what the battle unit really received, then requests dropping the items left on its tile (`RequestDropItems`).
+
+`lootDrop` keeps the items left in its ownerless loot drop (`dropItems`, announcing one `LootDropped` per item), which has no unit nor loot tables, so nothing rolls it. They are found, picked up and drawn as any other dropped item: walking back onto the tile stores them, or announces `InventoryFull`. A save leaves the ownerless loot drop out while it holds nothing.
+
+A battle unit with no inventory receives nothing. A lootable item the game does not have fails with `InventoryLootableItemDoesNotExist`, before paying anything.
 
 ## Equipment
 

@@ -15,6 +15,7 @@ import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.inventory.domain.InventoryEvent.RequestGrantReward
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
 import com.mkz.rpg.lootDrop.domain.LootDrop
@@ -103,6 +104,36 @@ class LootDroppedItemsAcceptanceTest {
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe listOf("health-potion")
+            lootDropApi.searchDroppedItems().shouldBeEmpty()
+        }
+
+    @Test
+    fun `should drop the reward items that do not fit on the tile of the knight when a reward is requested`() =
+        scenarioTest(::setUp) {
+            // Given
+            eventBus.publish(RequestGrantReward(playerOneKnightBattleUnitId, gold = 150, lootableItemIds = List(13) { "health-potion" }, row = 2, column = 1))
+            // When
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.gold shouldBe 180
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe List(12) { "health-potion" }
+            lootDropApi.searchDroppedItems() shouldBe mapOf(LootDrop.Dto.PositionDto(row = 2, column = 1) to listOf("health-potion"))
+        }
+
+    @Test
+    fun `should store a dropped reward item and clear its tile when the knight walks back onto it with space in its bag`() =
+        scenarioTest(::setUp) {
+            // Given
+            eventBus.publish(RequestGrantReward(playerOneKnightBattleUnitId, gold = 0, lootableItemIds = List(13) { "health-potion" }, row = 2, column = 1))
+            eventBus.dispatch()
+            inventoryApi.discardItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 2)
+            eventBus.dispatch()
+            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 1)
+            // When
+            eventBus.dispatch()
+            // Then
+            inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems shouldBe List(12) { "health-potion" }
             lootDropApi.searchDroppedItems().shouldBeEmpty()
         }
 

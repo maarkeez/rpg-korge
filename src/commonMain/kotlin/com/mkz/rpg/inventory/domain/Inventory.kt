@@ -22,6 +22,8 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
+import com.mkz.rpg.inventory.domain.InventoryEvent.RewardGranted
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropItems
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -99,6 +101,32 @@ data class Inventory private constructor(
         } else {
             copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))
         }
+
+    /**
+     * Adds the gold, up to the most it can carry, the excess being lost, and stores the items in order while there is space. The items left are
+     * requested to drop on the tile at [row] and [column], as a reward can not be refused. E.g.: 99,950 gold granted 150 receives 49.
+     */
+    fun grantReward(
+        gold: Int,
+        lootableItemIds: List<String>,
+        row: Int,
+        column: Int,
+    ): Inventory {
+        val receivedGold = minOf(gold, MAXIMUM_GOLD - this.gold.value)
+        val spaceLeft = maximumStorageSpace.value - storedItems.value.size
+        val receivedItems = lootableItemIds.take(spaceLeft)
+        val itemsLeft = lootableItemIds.drop(spaceLeft)
+        return copy(
+            storedItems = StoredItems(storedItems.value + receivedItems.map(::LootableItemId)),
+            gold = Gold(this.gold.value + receivedGold),
+            events =
+                events +
+                    listOfNotNull(
+                        RewardGranted(battleUnitId = battleUnitId.value, gold = receivedGold, lootableItemIds = receivedItems),
+                        RequestDropItems(lootableItemIds = itemsLeft, row = row, column = column).takeIf { itemsLeft.isNotEmpty() },
+                    ),
+        )
+    }
 
     /** Whether the item is stored, so it can be consumed. */
     fun canConsume(lootableItemId: String): Boolean = storedItems.count(LootableItemId(lootableItemId)) > 0

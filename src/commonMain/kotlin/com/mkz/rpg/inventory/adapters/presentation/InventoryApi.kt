@@ -5,6 +5,7 @@ import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.inventory.adapters.events.OnExplorationStarted
 import com.mkz.rpg.inventory.adapters.events.OnLootFound
 import com.mkz.rpg.inventory.adapters.events.OnPartyJoined
+import com.mkz.rpg.inventory.adapters.events.OnRequestGrantReward
 import com.mkz.rpg.inventory.adapters.save.InventorySnapshottable
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryRepository
@@ -14,6 +15,7 @@ import com.mkz.rpg.inventory.usecases.commands.CreateInventory
 import com.mkz.rpg.inventory.usecases.commands.DiscardItem
 import com.mkz.rpg.inventory.usecases.commands.EquipItem
 import com.mkz.rpg.inventory.usecases.commands.GiveItem
+import com.mkz.rpg.inventory.usecases.commands.GrantReward
 import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
 import com.mkz.rpg.inventory.usecases.commands.SellItem
 import com.mkz.rpg.inventory.usecases.commands.StoreLootedItem
@@ -63,6 +65,7 @@ class InventoryApi(
     // Commands
     val createInventory = CreateInventory(inventoryRepository, unitApi.searchUnitById)
     val storeLootedItem = StoreLootedItem(inventoryRepository, lootableItemApi.searchLootableItemById, eventBus)
+    val grantReward = GrantReward(inventoryRepository, lootableItemApi.searchLootableItemById, eventBus)
     val consumeItem = ConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, consumptionRule, eventBus)
     val discardItem = DiscardItem(inventoryRepository, playerTurnRule, eventBus)
     val equipItem = EquipItem(inventoryRepository, lootableItemApi.searchLootableItemById, playerTurnRule, eventBus)
@@ -84,4 +87,5 @@ class InventoryApi(
     private val onLootFound = OnLootFound(storeLootedItem, eventBus)
     private val onExplorationStarted = OnExplorationStarted(createInventory, eventBus)
     private val onPartyJoined = OnPartyJoined(createInventory, eventBus)
+    private val onRequestGrantReward = OnRequestGrantReward(grantReward, eventBus)
 }

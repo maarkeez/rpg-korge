@@ -216,9 +216,9 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 26, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 68, "importsOut": 13},
-    {"name": "inventory", "files": 34, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 60},
+    {"name": "inventory", "files": 34, "fanIn": 1, "fanOut": 8, "instability": 0.89, "importsIn": 12, "importsOut": 61},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
-    {"name": "lootDrop", "files": 23, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 7, "importsOut": 32},
+    {"name": "lootDrop", "files": 23, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 32},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 7, "importsOut": 12},
     {"name": "lootableItem", "files": 12, "fanIn": 5, "fanOut": 2, "instability": 0.29, "importsIn": 28, "importsOut": 14},
     {"name": "mapBuilder", "files": 13, "fanIn": 1, "fanOut": 3, "instability": 0.75, "importsIn": 5, "importsOut": 15},
@@ -792,8 +792,9 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
       {"file": "com/mkz/rpg/inventory/usecases/services/ConsumptionRule.kt", "layer": "usecases", "name": "effect.usecases.queries.SearchEffectById"}
     ]},
-    {"from": "inventory", "to": "lootDrop", "weight": 2, "files": 2, "imports": [
+    {"from": "inventory", "to": "lootDrop", "weight": 3, "files": 2, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "lootDrop.domain.LootDropEvent.LootFound"},
+      {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestDropItems"},
       {"file": "com/mkz/rpg/inventory/domain/Inventory.kt", "layer": "domain", "name": "lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem"}
     ]},
     {"from": "inventory", "to": "lootableItem", "weight": 16, "files": 16, "imports": [
