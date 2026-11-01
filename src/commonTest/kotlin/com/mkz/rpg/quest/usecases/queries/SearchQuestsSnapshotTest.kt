@@ -21,7 +21,7 @@ class SearchQuestsSnapshotTest {
         val result = searchQuestsSnapshot()
         // Then
         result.shouldContainExactly(
-            ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0),
+            ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false),
             ProgressDto.notStarted("help-the-farmer"),
         )
     }

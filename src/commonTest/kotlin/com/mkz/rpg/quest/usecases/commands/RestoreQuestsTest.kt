@@ -20,8 +20,8 @@ class RestoreQuestsTest {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
         questRepository.save(sideQuest(id = "clear-the-rats", tasks = listOf(defeatUnits(unitId = "bat"), defeatUnits(unitId = "rat", count = 5))))
-        val mainProgress = ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.COMPLETED, currentTaskIndex = 0, currentTaskProgress = 1)
-        val sideProgress = ProgressDto(questId = "clear-the-rats", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 3)
+        val mainProgress = ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.COMPLETED, currentTaskIndex = 0, currentTaskProgress = 1, isPinned = false)
+        val sideProgress = ProgressDto(questId = "clear-the-rats", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 3, isPinned = false)
         // When
         restoreQuests(listOf(mainProgress, sideProgress))
         // Then
@@ -44,7 +44,7 @@ class RestoreQuestsTest {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
         // When
-        val result = runCatching { restoreQuests(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0))) }
+        val result = runCatching { restoreQuests(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0, isPinned = false))) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "defeat-the-goat-wizard"
     }

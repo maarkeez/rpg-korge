@@ -29,6 +29,11 @@ sealed interface QuestEvent : DomainEvent {
         val questId: String,
     ) : QuestEvent
 
+    /** The player follows the quest: the main quest, when no other quest is pinned. */
+    data class QuestPinned(
+        val questId: String,
+    ) : QuestEvent
+
     /** The last task was completed: the reward is requested for whoever leads the party. */
     data class QuestCompleted(
         val questId: String,

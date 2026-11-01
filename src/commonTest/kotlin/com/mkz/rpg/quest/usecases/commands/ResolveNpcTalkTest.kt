@@ -91,7 +91,8 @@ class ResolveNpcTalkTest {
         // When
         resolveNpcTalk(npcId = "farmer")
         // Then
-        questRepository.searchById("talk-again")!!.toDto().progress shouldBe ProgressDto(questId = "talk-again", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0)
+        questRepository.searchById("talk-again")!!.toDto().progress shouldBe
+            ProgressDto(questId = "talk-again", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
         eventBus.shouldHavePublishedEvents(QuestStarted(questId = "talk-again"))
     }
 

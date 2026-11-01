@@ -28,7 +28,7 @@ class QuestMapperTest {
         currentTaskProgress: Int = 0,
     ): QuestInfo {
         val id = quest.toDto().id
-        return QuestMapper.questInfo(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskProgress)).toDto(), TextsMother.texts())
+        return QuestMapper.questInfo(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskProgress, isPinned = false)).toDto(), TextsMother.texts())
     }
 
     @Test

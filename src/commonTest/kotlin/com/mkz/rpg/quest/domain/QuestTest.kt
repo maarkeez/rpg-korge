@@ -18,6 +18,7 @@ import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
+import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
@@ -41,7 +42,7 @@ class QuestTest {
         // When
         val quest = mainQuest(id = "defeat-the-goat-wizard")
         // Then
-        quest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0)
+        quest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
         quest.pullEvents().first.shouldBeEmpty()
     }
 
@@ -109,7 +110,7 @@ class QuestTest {
         // When
         val startedQuest = quest.start()
         // Then
-        startedQuest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0)
+        startedQuest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
         startedQuest.pullEvents().first.shouldContainExactly(QuestStarted(questId = "defeat-the-goat-wizard"))
     }
 
@@ -120,7 +121,7 @@ class QuestTest {
         // When
         val updatedQuest = quest.reached(listOf(PositionDto(row = 1, column = 1)))
         // Then
-        updatedQuest.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0)
+        updatedQuest.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0, isPinned = false)
         updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0))
     }
 
@@ -162,7 +163,7 @@ class QuestTest {
         val onceDefeated = quest.defeated("rat").pullEvents()
         val twiceDefeated = onceDefeated.second.defeated("rat").pullEvents()
         // Then
-        onceDefeated.second.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 1)
+        onceDefeated.second.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 1, isPinned = false)
         onceDefeated.first.shouldContainExactly(TaskProgressed(questId = "a-quest", taskIndex = 0, progress = 1, count = 2))
         twiceDefeated.second
             .toDto()
@@ -302,5 +303,66 @@ class QuestTest {
         val (_, clearedQuest) = quest.pullEvents()
         // Then
         clearedQuest.pullEvents().first.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Pin should mark the quest and publish QuestPinned when it is active`() {
+        // When
+        val (events, pinned) = started(listOf(defeatUnits())).pin().pullEvents()
+        // Then
+        pinned.toDto().progress.isPinned shouldBe true
+        events.shouldContainExactly(QuestPinned(questId = "a-quest"))
+    }
+
+    @Test
+    fun `Pin should fail with QuestNotActive when it is not active`() {
+        shouldThrow<QuestNotActive> { mainQuest().pin() }
+    }
+
+    @Test
+    fun `Unpin should clear the pin and publish nothing when it is pinned`() {
+        // Given
+        val pinned = started(listOf(defeatUnits())).pin().pullEvents().second
+        // When
+        val (events, unpinned) = pinned.unpin().pullEvents()
+        // Then
+        unpinned.toDto().progress.isPinned shouldBe false
+        events.shouldBeEmpty()
+    }
+
+    @Test
+    fun `Abandon should unpin the quest when it is pinned`() {
+        // Given
+        val pinned =
+            sideQuest()
+                .start()
+                .pin()
+                .pullEvents()
+                .second
+        // When
+        val abandoned = pinned.abandon()
+        // Then
+        abandoned.toDto().progress.isPinned shouldBe false
+    }
+
+    @Test
+    fun `Defeated should unpin the quest when its last task is completed`() {
+        // Given
+        val pinned = started(listOf(defeatUnits(unitId = "rat", count = 1))).pin().pullEvents().second
+        // When
+        val completed = pinned.defeated("rat")
+        // Then
+        completed.toDto().progress.status shouldBe StatusDto.COMPLETED
+        completed.toDto().progress.isPinned shouldBe false
+    }
+
+    @Test
+    fun `Defeated should keep the pin when a task is left`() {
+        // Given
+        val pinned = started(listOf(defeatUnits(unitId = "rat", count = 1), talkToNpc("farmer"))).pin().pullEvents().second
+        // When
+        val progressed = pinned.defeated("rat")
+        // Then
+        progressed.toDto().progress.isPinned shouldBe true
     }
 }

@@ -89,7 +89,7 @@ tables, players, the map and its buildings, and the definition of each quest) is
 | 5  | `inventory`      | Stored and equipped items, and gold                                   | -                                              |
 | 6  | `party`          | The members and the line                                              | It explores again: no pending step, no battle unit moved this second |
 | 7  | `cpuWanderBrain` | The homes, the battle units returning home, and the respawns          | The wandering in progress                      |
-| 8  | `quest`          | Each quest's status, current task and its progress                    | -                                              |
+| 8  | `quest`          | Each quest's status, current task, progress and whether it is pinned  | -                                              |
 
 The battle and the CPU battle brain hold no state while exploring, so they are not saved: the CPU battle brain starts
 its state with a CPU turn. The random rolls are not saved either, so a reload rolls anew.

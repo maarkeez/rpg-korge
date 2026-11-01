@@ -60,6 +60,10 @@ For example, a new game with the only quest of the game, defeating the goat wiza
 | `inventory` handles the request          | `RewardGranted(hero, gold = 150)`                                                                    | The hero carries 180 gold                          |
 | The goat wizard respawns and is defeated | Nothing                                                                                              | The quest is completed, and a main quest runs once |
 
+## Pinning
+
+The pinned quest is the one the tracker names. Exactly one quest is followed: the main quest by default, which holds no flag, or the side quest with `ProgressDto.isPinned`. [`PinQuest`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/commands/PinQuest.kt) unpins every other quest, then pins an active one with `Quest.pin`, publishing `QuestPinned`, and fails with `QuestNotActive` otherwise. Pinning the main quest, or a quest already pinned, clears every pin and publishes `QuestPinned` with the main quest's id. Completing or abandoning a pinned quest clears its pin too, returning to the main quest, and a quest starting does not take the pin.
+
 ## The reward
 
 [`RequestQuestReward`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt) runs on `QuestCompleted`, and publishes `RequestGrantReward` for whoever leads, on the tile it stands on. As the bus is FIFO, it is handled after the requests already waiting: a leader that just moved onto a tile of a `REACH_TILES` task is on it by then, as `BattleUnitMoved` is followed by `RequestMoveOccupant`, and a leader defeated by the same chain of events has already left the party. So the next member receives the reward when the leader was defeated, and nobody does once the whole party is gone.
@@ -121,7 +125,7 @@ For example, a new game, then defeating the goat wizard in a battle:
 
 ## Saving
 
-`quest` is saved: each quest's status, current task and its progress. The rest is read from the resources again. See [Save and load](save-and-load.md#snapshots).
+`quest` is saved: each quest's status, current task, its progress and whether it is pinned. The rest is read from the resources again. See [Save and load](save-and-load.md#snapshots).
 
 ## Dependencies
 

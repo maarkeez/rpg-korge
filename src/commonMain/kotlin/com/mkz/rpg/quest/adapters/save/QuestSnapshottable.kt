@@ -25,6 +25,7 @@ class QuestSnapshottable(
                     status = progress.status.name,
                     currentTaskIndex = progress.currentTaskIndex,
                     currentTaskProgress = progress.currentTaskProgress,
+                    isPinned = progress.isPinned,
                 )
             },
         )
@@ -37,6 +38,7 @@ class QuestSnapshottable(
                     status = enumValueOf<StatusDto>(quest.status),
                     currentTaskIndex = quest.currentTaskIndex,
                     currentTaskProgress = quest.currentTaskProgress,
+                    isPinned = quest.isPinned,
                 )
             },
         )
@@ -48,4 +50,5 @@ private data class QuestSnapshot(
     val status: String,
     val currentTaskIndex: Int,
     val currentTaskProgress: Int,
+    val isPinned: Boolean,
 )

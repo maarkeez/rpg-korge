@@ -34,6 +34,21 @@ class QuestSnapshottableTest {
     }
 
     @Test
+    fun `Restore should pin the quest when it was saved pinned`() {
+        // Given
+        val side = sideQuest(id = "help-the-farmer")
+        val played = InMemoryQuestRepository().apply { save(side.start().pin()) }
+        val restored = InMemoryQuestRepository().apply { save(side) }
+        // When
+        snapshottable(restored).restore(snapshottable(played).snapshot())
+        // Then
+        restored
+            .searchById("help-the-farmer")!!
+            .toDto()
+            .progress.isPinned shouldBe true
+    }
+
+    @Test
     fun `Key should be quest`() {
         // When
         val result = snapshottable(InMemoryQuestRepository()).key

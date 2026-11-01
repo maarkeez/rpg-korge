@@ -19,6 +19,7 @@ import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
 import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
+import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
@@ -52,7 +53,7 @@ data class Quest private constructor(
                 repeatable = dto.repeatable,
                 tasks = Tasks(dto.tasks.map(Task::create)),
                 reward = Reward(gold = dto.reward.gold, lootableItemIds = dto.reward.lootableItemIds),
-                progress = Progress(status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0),
+                progress = Progress(status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false),
                 events = emptySet(),
             )
         }
@@ -66,7 +67,7 @@ data class Quest private constructor(
     /** Starts it from its first task. */
     fun start(): Quest =
         copy(
-            progress = Progress(status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0),
+            progress = Progress(status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false),
             events = events + QuestStarted(questId = id.value),
         )
 
@@ -102,16 +103,25 @@ data class Quest private constructor(
         if (type == QuestTypeDto.MAIN) throw MainQuestCanNotBeAbandoned()
         if (progress.status != StatusDto.ACTIVE) throw QuestNotActive()
         return copy(
-            progress = Progress(status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0),
+            progress = Progress(status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false),
             events = events + QuestAbandoned(questId = id.value),
         )
     }
+
+    /** Makes it the quest the player follows. Only an active quest can be pinned. */
+    fun pin(): Quest {
+        if (progress.status != StatusDto.ACTIVE) throw QuestNotActive()
+        return copy(progress = progress.copy(isPinned = true), events = events + QuestPinned(questId = id.value))
+    }
+
+    /** The player no longer follows it, e.g.: as another quest is pinned. */
+    fun unpin(): Quest = copy(progress = progress.copy(isPinned = false))
 
     /** Moves on to the next task, or completes the quest after the last one. */
     private fun completeCurrentTask(): Quest {
         val taskCompleted = TaskCompleted(questId = id.value, taskIndex = progress.currentTaskIndex)
         return if (progress.currentTaskIndex == tasks.value.lastIndex) {
-            copy(progress = progress.copy(status = StatusDto.COMPLETED), events = events + taskCompleted + QuestCompleted(questId = id.value))
+            copy(progress = progress.copy(status = StatusDto.COMPLETED, isPinned = false), events = events + taskCompleted + QuestCompleted(questId = id.value))
         } else {
             copy(progress = progress.copy(currentTaskIndex = progress.currentTaskIndex + 1, currentTaskProgress = 0), events = events + taskCompleted)
         }
@@ -122,7 +132,7 @@ data class Quest private constructor(
     /** Puts back how far it went when the game was saved, publishing no events. */
     fun restoreProgress(progress: ProgressDto): Quest {
         require(progress.currentTaskIndex in tasks.value.indices) { "Quest ${id.value} has no task ${progress.currentTaskIndex}" }
-        return copy(progress = Progress(status = progress.status, currentTaskIndex = progress.currentTaskIndex, currentTaskProgress = progress.currentTaskProgress))
+        return copy(progress = Progress(status = progress.status, currentTaskIndex = progress.currentTaskIndex, currentTaskProgress = progress.currentTaskProgress, isPinned = progress.isPinned))
     }
 
     fun toDto() =
@@ -139,6 +149,7 @@ data class Quest private constructor(
                     status = progress.status,
                     currentTaskIndex = progress.currentTaskIndex,
                     currentTaskProgress = progress.currentTaskProgress,
+                    isPinned = progress.isPinned,
                 ),
         )
 
@@ -212,6 +223,7 @@ data class Quest private constructor(
         val status: StatusDto,
         val currentTaskIndex: Int,
         val currentTaskProgress: Int,
+        val isPinned: Boolean,
     )
 
     /** Progress: where it is in its life, which the save keeps. The rest is read from the resources. */
@@ -290,9 +302,10 @@ data class Quest private constructor(
             val status: StatusDto,
             val currentTaskIndex: Int,
             val currentTaskProgress: Int,
+            val isPinned: Boolean,
         ) {
             companion object {
-                fun notStarted(questId: String) = ProgressDto(questId = questId, status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0)
+                fun notStarted(questId: String) = ProgressDto(questId = questId, status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
             }
         }
     }
