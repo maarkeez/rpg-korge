@@ -11,6 +11,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.PlayerEvent
+import com.mkz.rpg.quest.domain.QuestEvent
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.domain.TerrainEvent
@@ -22,7 +23,7 @@ class SetupBattleTest {
     private val setupBattle = SetupBattle(eventBus)
 
     @Test
-    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, when the battle is set up`() {
+    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, then the main quest, when the battle is set up`() {
         // Given
         // When
         setupBattle()
@@ -38,14 +39,16 @@ class SetupBattleTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BuildingEvent.RequestInitialiseBuildings,
+            QuestEvent.RequestInitialiseQuests,
             BattleUnitEvent.RequestInitialiseBattleUnits,
             NpcEvent.RequestInitialiseNpcs,
             PartyEvent.RequestStartExploration,
+            QuestEvent.RequestStartMainQuest,
         )
     }
 
     @Test
-    fun `should stop after the buildings, which the saved game is restored on, when a saved game is loaded`() {
+    fun `should stop after the quests, which the saved game is restored on, when a saved game is loaded`() {
         // When
         setupBattle(isLoadingASavedGame = true)
         // Then
@@ -60,6 +63,7 @@ class SetupBattleTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BuildingEvent.RequestInitialiseBuildings,
+            QuestEvent.RequestInitialiseQuests,
         )
     }
 }

@@ -8,6 +8,7 @@ import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestError.EmptyQuestReward
 import com.mkz.rpg.quest.domain.QuestError.EmptyTaskTiles
+import com.mkz.rpg.quest.domain.QuestError.InvalidTask
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithGiver
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
@@ -97,9 +98,9 @@ data class Quest private constructor(
         companion object {
             fun create(dto: TaskDto): Task =
                 when (dto.type) {
-                    TaskDto.TypeDto.DEFEAT_UNITS -> DefeatUnits(dto.defeatUnits!!.unitId, dto.defeatUnits.count)
-                    TaskDto.TypeDto.TALK_TO_NPC -> TalkToNpc(dto.talkToNpc!!.npcId)
-                    TaskDto.TypeDto.REACH_TILES -> ReachTiles(dto.reachTiles!!.tiles)
+                    TaskDto.TypeDto.DEFEAT_UNITS -> (dto.defeatUnits ?: throw InvalidTask()).let { task -> DefeatUnits(task.unitId, task.count) }
+                    TaskDto.TypeDto.TALK_TO_NPC -> TalkToNpc((dto.talkToNpc ?: throw InvalidTask()).npcId)
+                    TaskDto.TypeDto.REACH_TILES -> ReachTiles((dto.reachTiles ?: throw InvalidTask()).tiles)
                 }
         }
 

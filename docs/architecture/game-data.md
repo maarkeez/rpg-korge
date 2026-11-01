@@ -5,7 +5,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 ## How the battle is set up
 
 1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the battle is set up.
-2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring:
+2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring and the main quest:
 
 | #  | Event                            | Creates                        | Requires                       |
 |----|----------------------------------|--------------------------------|--------------------------------|
@@ -19,14 +19,16 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 | 8  | `RequestInitialisePlayers`       | Players                        | -                              |
 | 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
 | 10 | `RequestInitialiseBuildings`     | The placed buildings           | Their tiles                    |
-| 11 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
-| 12 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
-| 13 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
+| 11 | `RequestInitialiseQuests`        | The quests, not started yet    | The tiles they name            |
+| 12 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
+| 13 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
+| 14 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
+| 15 | `RequestStartMainQuest`          | The main quest, active         | The quests                     |
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
-To load a saved game, `SetupBattle` stops after step 10 (`isLoadingASavedGame`): the battle units, the npcs and the
-party are restored from the save instead, once the first 10 steps are dispatched. See [Save and load](save-and-load.md#loading).
+To load a saved game, `SetupBattle` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
+and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).
 
 The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsNotVacant`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc can not be occupied (e.g.: void, out of the battlefield).
 

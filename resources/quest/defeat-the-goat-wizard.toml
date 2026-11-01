@@ -1,0 +1,9 @@
+type = "MAIN"
+
+[[tasks]]
+type = "DEFEAT_UNITS"
+unitId = "goat-wizard"
+count = 1
+
+[reward]
+gold = 150

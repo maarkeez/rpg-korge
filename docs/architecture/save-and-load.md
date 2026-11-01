@@ -103,8 +103,8 @@ fails when a subdomain with a repository has no `Snapshottable` and is not liste
 1. Load game, in the menu, lists the slots in place of its options ([`LoadGamePresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/LoadGamePresenter.kt)).
    Only a saved slot can be chosen; Delete, on any slot not empty, deletes its game once confirmed
    ([`DeleteSaveSlot`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/DeleteSaveSlot.kt), `SaveSlotDeleted`).
-2. Choosing a slot starts `BattleScene` with it. It runs the first 10 steps of the [setup](game-data.md#how-the-battle-is-set-up),
-   terrains to buildings, as a new game does, and dispatches them, so the battlefield and its buildings are drawn.
+2. Choosing a slot starts `BattleScene` with it. It runs the first 11 steps of the [setup](game-data.md#how-the-battle-is-set-up),
+   terrains to quests, as a new game does, and dispatches them, so the battlefield and its buildings are drawn.
 3. [`LoadGame`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/LoadGame.kt) restores each snapshot in
    order, silently, without creation events, as replaying them would create empty inventories and new homes. Then it
    publishes one `GameRestored`.

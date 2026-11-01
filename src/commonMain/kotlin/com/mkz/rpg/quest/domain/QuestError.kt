@@ -9,6 +9,8 @@ sealed class QuestError(
 
     class NegativeQuestRewardGold : QuestError("The gold of a quest reward is negative")
 
+    class InvalidTask : QuestError("A task needs the details of its type")
+
     class EmptyTaskTiles : QuestError("A task to reach tiles needs at least one tile")
 
     class TaskCountBelowOne : QuestError("A task to defeat units needs a count of at least 1")

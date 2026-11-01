@@ -11,16 +11,17 @@ import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.npc.domain.NpcEvent
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.PlayerEvent
+import com.mkz.rpg.quest.domain.QuestEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 
 /**
- * Initialises each subdomain from its resources, then starts exploring. The order matters, as each subdomain
- * requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
+ * Initialises each subdomain from its resources, then starts exploring and the main quest. The order matters, as each
+ * subdomain requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
  *
- * To load a saved game, only what never changes while playing is initialised, up to the buildings: the saved game
- * restores the rest (the battle units, the npcs and the party).
+ * To load a saved game, only what never changes while playing is initialised, up to the quests: the saved game restores
+ * the rest (the battle units, the npcs and the party) and how far each quest went.
  */
 class SetupBattle(
     private val eventBus: EventBus,
@@ -36,9 +37,11 @@ class SetupBattle(
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
         eventBus.publish(BuildingEvent.RequestInitialiseBuildings)
+        eventBus.publish(QuestEvent.RequestInitialiseQuests)
         if (isLoadingASavedGame) return
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
         eventBus.publish(NpcEvent.RequestInitialiseNpcs)
         eventBus.publish(PartyEvent.RequestStartExploration)
+        eventBus.publish(QuestEvent.RequestStartMainQuest)
     }
 }

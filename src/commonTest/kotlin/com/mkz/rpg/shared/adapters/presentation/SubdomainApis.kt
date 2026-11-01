@@ -35,6 +35,9 @@ import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.usecases.services.FakePlayerLoader
+import com.mkz.rpg.quest.adapters.presentation.QuestApi
+import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.usecases.services.FakeQuestLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.domain.Terrain
@@ -62,6 +65,7 @@ class SubdomainApis(
     buildings: List<Building.Dto> = emptyList(),
     deployments: List<Deployment> = emptyList(),
     npcs: List<Npc.Dto> = emptyList(),
+    private val quests: List<Quest.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
     // Whether the human player explores with their battle units before the battle starts, as when the battle is set up, so they get their inventories.
     private val explore: Boolean = false,
@@ -81,6 +85,7 @@ class SubdomainApis(
     val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, FakeNpcLoader(npcs))
     val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
+    val questApi = QuestApi(battlefieldApi, eventBus, FakeQuestLoader(quests))
 
     /** Stores the given data, places the buildings, deploys the battle units, places the npcs, explores and starts the battle, dispatching the events it publishes. */
     fun initialise() {
@@ -96,6 +101,8 @@ class SubdomainApis(
         eventBus.dispatch()
         buildingApi.initialiseBuildings()
         eventBus.dispatch()
+        // Only with quests, as the game needs exactly one main quest once it has any.
+        if (quests.isNotEmpty()) questApi.initialiseQuests()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()
         npcApi.initialiseNpcs()

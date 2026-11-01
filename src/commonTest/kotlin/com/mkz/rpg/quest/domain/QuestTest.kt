@@ -3,8 +3,10 @@ package com.mkz.rpg.quest.domain
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
+import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestError.EmptyQuestReward
 import com.mkz.rpg.quest.domain.QuestError.EmptyTaskTiles
+import com.mkz.rpg.quest.domain.QuestError.InvalidTask
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
 import com.mkz.rpg.quest.domain.QuestError.MainQuestWithGiver
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
@@ -46,6 +48,14 @@ class QuestTest {
     @Test
     fun `Quest should fail when its reward gold is negative`() {
         shouldThrow<NegativeQuestRewardGold> { mainQuest(reward = reward(gold = -1, lootableItemIds = listOf("hammer"))) }
+    }
+
+    @Test
+    fun `Quest should fail when a task has no details of its type`() {
+        // Given
+        val task = TaskDto(type = TaskDto.TypeDto.TALK_TO_NPC, defeatUnits = null, talkToNpc = null, reachTiles = null)
+        // When / Then
+        shouldThrow<InvalidTask> { mainQuest(tasks = listOf(task)) }
     }
 
     @Test

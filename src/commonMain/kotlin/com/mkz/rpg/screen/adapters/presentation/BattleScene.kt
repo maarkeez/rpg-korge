@@ -29,6 +29,8 @@ import com.mkz.rpg.npc.adapters.resources.ResourcesNpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
+import com.mkz.rpg.quest.adapters.presentation.QuestApi
+import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -114,6 +116,7 @@ class BattleScene(
         val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
         val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
+        val questApi = QuestApi(battlefieldApi, eventBus, ResourcesQuestLoader())
         val battleSetupApi = BattleSetupApi(eventBus)
         // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
         val saveApi =
@@ -155,6 +158,7 @@ class BattleScene(
         buildingApi.init()
         battleUnitApi.init()
         npcApi.init()
+        questApi.init()
 
         // Main scene: the presenters replay the battle events in order on the timeline
         val timeline = BattleSceneTimeline(this@BattleScene)
