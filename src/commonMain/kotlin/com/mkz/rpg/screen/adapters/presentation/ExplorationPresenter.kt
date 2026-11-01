@@ -16,6 +16,8 @@ import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
 import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
+import com.mkz.rpg.party.domain.PartyEvent.QuestClosed
+import com.mkz.rpg.party.domain.PartyEvent.QuestOpened
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -45,6 +47,9 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Pressing Start pauses the game: the pause screen takes the place of the pad (see [PausePresenter]), and time stops
  * until Resume displays the pad again.
+ *
+ * Tapping the tracker of the main quest opens it in full in place of the pad (see [QuestPresenter]), and time stops until
+ * Back displays the pad again. A tap at any other moment is ignored, as it is no press of the pad.
  */
 class ExplorationPresenter(
     private val virtualPadView: VirtualPadView,
@@ -56,6 +61,7 @@ class ExplorationPresenter(
     private val shopPresenter: ShopPresenter,
     private val formationPresenter: FormationPresenter,
     private val pausePresenter: PausePresenter,
+    private val questPresenter: QuestPresenter,
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
@@ -139,6 +145,15 @@ class ExplorationPresenter(
             eventBus.subscribe<PauseClosed> {
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
+            eventBus.subscribe<QuestOpened> {
+                timeline.play {
+                    virtualPadView.visible = false
+                    questPresenter.openDetail()
+                }
+            },
+            eventBus.subscribe<QuestClosed> {
+                timeline.play { displayVirtualPad(isDisplayed = true) }
+            },
             eventBus.subscribe<PlayerVictory> {
                 isGameOver = true
                 timeline.play {
@@ -147,6 +162,7 @@ class ExplorationPresenter(
                     shopPresenter.close()
                     formationPresenter.close()
                     pausePresenter.close()
+                    questPresenter.closeDetail()
                 }
             },
         )
@@ -170,6 +186,7 @@ class ExplorationPresenter(
         }
         npcDialogView.setOnTapped { dialogTapped() }
         shopPresenter.setOnBack { shopBackSelected() }
+        questPresenter.setOnTrackerSelected { openQuest() }
     }
 
     /**
@@ -240,6 +257,13 @@ class ExplorationPresenter(
         partyApi.openPause()
     }
 
+    // As walking: once the scene shows where the party is, and while the pad is displayed. It clears no pending press, as
+    // a tap on the tracker is no press of the pad.
+    private fun openQuest() {
+        if (timeline.isPlaying || !virtualPadView.visible) return
+        partyApi.openQuest()
+    }
+
     // Finishes the talk, but with a merchant, which is left with its Leave choice.
     private fun dialogTapped() {
         if (timeline.isPlaying || !npcDialogView.visible || talkingNpc()?.let { npc -> npcApi.searchIsMerchant(npc.id) } == true) return
@@ -276,12 +300,13 @@ class ExplorationPresenter(
     private fun isExploring() = !isGameOver && partyApi.searchParty()?.isExploring == true
 
     // The pad takes the place of the battle HUD and the call to action, or the other way around. Either closes the dialog,
-    // the shop, the formation and the pause screen.
+    // the shop, the formation, the pause screen and the detail of the quest.
     private fun displayVirtualPad(isDisplayed: Boolean) {
         npcDialogView.visible = false
         shopPresenter.close()
         formationPresenter.close()
         pausePresenter.close()
+        questPresenter.closeDetail()
         virtualPadView.visible = isDisplayed
         battleHudView.visible = !isDisplayed
         playerCallToActionView.visible = !isDisplayed

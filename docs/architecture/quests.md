@@ -82,6 +82,10 @@ The screen only follows the main quest, in [`QuestPresenter`](../../src/commonMa
 | `ExplorationPaused`, `ExplorationResumed` | Stays in the same place, read only in a battle: no chevron, and tapping it does nothing.                        |
 | `PlayerVictory`                           | Is hidden, as the winner is drawn centred across the whole top line.                                            |
 
+### The detail view
+
+Tapping the tracker while exploring opens [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown. Once completed, the tracker still opens it, with a ticked target, so the story can be read again.
+
 ## Saving
 
 `quest` is saved: each quest's status, current task and its progress. The rest is read from the resources again. See [Save and load](save-and-load.md#snapshots).
@@ -93,6 +97,7 @@ The screen only follows the main quest, in [`QuestPresenter`](../../src/commonMa
 ## Known limitations
 
 - A side quest is played and paid with nothing on the screen.
+- A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped description takes 2.
 - A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
 - The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.
 - Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, no view abandons, and the main quest pays no items. Only the tests play them.

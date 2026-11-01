@@ -519,6 +519,33 @@ msgctxt "ui.questTracker.completed"
 msgid "Quest completed"
 msgstr "Misión completada"
 
+#. Over the name of the quest, in its detail.
+msgctxt "ui.questDetail.mainQuest"
+msgid "MAIN QUEST"
+msgstr "MISIÓN PRINCIPAL"
+
+#. Over the name of the quest, in its detail, once it is completed.
+msgctxt "ui.questDetail.completed"
+msgid "QUEST COMPLETED"
+msgstr "MISIÓN COMPLETADA"
+
+#. Before what the quest pays, in its detail.
+msgctxt "ui.questDetail.reward"
+msgid "REWARD"
+msgstr "RECOMPENSA"
+
+#. How many tasks of the quest are done, in its detail. {tasks}: how many.
+msgctxt "ui.questDetail.tasksDone"
+msgid "{tasks} task done"
+msgid_plural "{tasks} tasks done"
+msgstr[0] "{tasks} tarea hecha"
+msgstr[1] "{tasks} tareas hechas"
+
+#. Closes the detail of the quest, displaying the pad again.
+msgctxt "ui.questDetail.back"
+msgid "Back"
+msgstr "Volver"
+
 # Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
 
 msgctxt "ability.bat.name"

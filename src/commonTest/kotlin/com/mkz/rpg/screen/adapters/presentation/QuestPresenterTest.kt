@@ -15,6 +15,7 @@ import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -28,6 +29,7 @@ import kotlin.test.Test
 class QuestPresenterTest {
     private val questId = "defeat-the-goat-wizard"
     private val trackerView = FakeQuestTrackerView()
+    private val detailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
 
     // The knight explores the sand, alone, with the quests given.
     private fun apis(vararg quests: Quest) =
@@ -41,7 +43,7 @@ class QuestPresenterTest {
             explore = true,
         ).also(SubdomainApis::initialise)
 
-    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, questApi, TextsMother.texts(), battleSceneTimeline(), eventBus)
+    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, questApi, partyApi, TextsMother.texts(), battleSceneTimeline(), eventBus)
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
@@ -169,5 +171,69 @@ class QuestPresenterTest {
         apis.eventBus.dispatch()
         // Then
         trackerView.hides shouldBe 1
+    }
+
+    @Test
+    fun `QuestPresenter should close the detail view when a player wins`() {
+        // Given
+        val apis = apis(mainQuest(id = questId))
+        val presenter = apis.presenter()
+        presenter.openDetail()
+        // When
+        apis.eventBus.publish(PlayerVictory(playerId = "human"))
+        apis.eventBus.dispatch()
+        // Then
+        presenter.isDetailOpen.shouldBeFalse()
+        detailView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `OpenDetail should display the quest in its completed state when it is completed`() {
+        // Given
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val presenter = apis.presenter()
+        apis.startQuest()
+        apis.defeatRat()
+        // When
+        presenter.openDetail()
+        // Then
+        presenter.isDetailOpen.shouldBeTrue()
+        detailView.displayedCaption() shouldBe "QUEST COMPLETED"
+    }
+
+    @Test
+    fun `QuestDetailBackSelected should close the quest when the detail view is open`() {
+        // Given
+        val apis = apis(mainQuest(id = questId))
+        val presenter = apis.presenter()
+        apis.partyApi.openQuest()
+        apis.eventBus.dispatch()
+        presenter.openDetail()
+        // When
+        presenter.questDetailBackSelected()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeFalse()
+    }
+
+    @Test
+    fun `QuestDetailBackSelected should do nothing when the timeline is playing`() {
+        // Given
+        val apis = apis(mainQuest(id = questId))
+        val timeline = battleSceneTimeline()
+        val presenter = QuestPresenter(trackerView, detailView, apis.questApi, apis.partyApi, TextsMother.texts(), timeline, apis.eventBus)
+        apis.partyApi.openQuest()
+        apis.eventBus.dispatch()
+        presenter.openDetail()
+        timeline.playLongStep()
+        // When
+        presenter.questDetailBackSelected()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeTrue()
     }
 }

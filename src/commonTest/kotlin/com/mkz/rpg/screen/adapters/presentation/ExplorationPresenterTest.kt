@@ -14,6 +14,7 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.SaveEvent
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
@@ -59,6 +60,7 @@ class ExplorationPresenterTest {
                     npc(id = "elder", row = 1, column = 0).toDto(),
                     npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion", "mana-potion")).toDto(),
                 ),
+            quests = listOf(mainQuest(id = "defeat-the-goat-wizard").toDto()),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
     private val virtualPadView = VirtualPadView()
@@ -100,6 +102,9 @@ class ExplorationPresenterTest {
             timeline,
         ) {}
 
+    private val questDetailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val questPresenter = QuestPresenter(FakeQuestTrackerView(), questDetailView, apis.questApi, apis.partyApi, TextsMother.texts(), timeline, eventBus)
+
     private fun createPresenter() =
         ExplorationPresenter(
             virtualPadView,
@@ -111,6 +116,7 @@ class ExplorationPresenterTest {
             shopPresenter,
             formationPresenter,
             pausePresenter,
+            questPresenter,
             TextsMother.texts(),
             timeline,
             eventBus,
@@ -385,6 +391,7 @@ class ExplorationPresenterTest {
             shopPresenter,
             formationPresenter,
             pausePresenter,
+            QuestPresenter(FakeQuestTrackerView(), QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts()), apis.questApi, apis.partyApi, TextsMother.texts(), timeline, apis.eventBus),
             TextsMother.texts(),
             timeline,
             apis.eventBus,
@@ -935,6 +942,74 @@ class ExplorationPresenterTest {
             .searchParty()!!
             .isExploring
             .shouldBeTrue()
+    }
+
+    private fun tapTracker() {
+        questPresenter.questTrackerSelected()
+        eventBus.dispatch()
+    }
+
+    private fun isReadingQuest() = apis.partyApi.searchParty()!!.isReadingQuest
+
+    @Test
+    fun `ExplorationPresenter should open the quest when the tracker is tapped while the pad is displayed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        tapTracker()
+        // Then
+        isReadingQuest().shouldBeTrue()
+        questPresenter.isDetailOpen.shouldBeTrue()
+        questDetailView.visible.shouldBeTrue()
+        virtualPadView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `ExplorationPresenter should not open the quest when the tracker is tapped while the timeline is playing, or the pad is hidden`() {
+        // Given
+        createPresenter()
+        startExploring()
+        val longStep = timeline.playLongStep()
+        // When
+        tapTracker()
+        val isReadingWhilePlaying = isReadingQuest()
+        longStep.complete(Unit)
+        virtualPadView.visible = false
+        tapTracker()
+        // Then
+        isReadingWhilePlaying.shouldBeFalse()
+        isReadingQuest().shouldBeFalse()
+        questDetailView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `ExplorationPresenter should display the pad when the quest is closed`() {
+        // Given
+        createPresenter()
+        startExploring()
+        tapTracker()
+        // When
+        questPresenter.questDetailBackSelected()
+        eventBus.dispatch()
+        // Then
+        isReadingQuest().shouldBeFalse()
+        questDetailView.visible.shouldBeFalse()
+        virtualPadView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `Tick should not apply the terrain effects while reading the quest`() {
+        // Given
+        val presenter = createPresenter()
+        startExploring()
+        tapTracker()
+        val requests = requestedTerrainEffects()
+        // When
+        presenter.tick(3.seconds)
+        eventBus.dispatch()
+        // Then
+        requests.shouldBeEmpty()
     }
 
     @Test

@@ -79,6 +79,7 @@ class StorybookApi(
                 ConfirmDialogViewStories,
                 BattleInfoViewStories,
                 QuestTrackerViewStories,
+                QuestDetailViewStories,
                 MenuViewStories,
                 MapBuilderInfoViewStories,
                 MapBuilderHudViewStories,

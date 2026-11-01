@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
@@ -19,14 +20,26 @@ import com.mkz.rpg.shared.domain.subscribe
  * Keeps the main quest on the screen: the tracker always names its current task, popping when it changes, and stays ticked
  * once completed. An event naming any other quest is ignored. The tracker is read only in a battle, and hidden once a
  * player wins, as the winner is drawn across the whole top line.
+ *
+ * The detail view displays the quest in full, in place of the pad, while the party reads it: [ExplorationPresenter] opens
+ * it when the tracker is tapped, and Back closes it.
  */
 class QuestPresenter(
     private val questTrackerView: QuestTrackerView,
+    private val questDetailView: QuestDetailView,
     private val questApi: QuestApi,
+    private val partyApi: PartyApi,
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
-) {
+) : QuestTrackerView.Delegate,
+    QuestDetailView.Delegate {
+    /** Whether the scene displays the detail view. */
+    var isDetailOpen = false
+        private set
+
+    private var onTrackerSelected: (() -> Unit)? = null
+
     // What the tracker displays, or will once the timeline gets to it, so an event with nothing new draws nothing.
     private var displayedQuest: QuestInfo? = null
 
@@ -50,9 +63,46 @@ class QuestPresenter(
                 timeline.play { questTrackerView.setTappable(true) }
             },
             eventBus.subscribe<PlayerVictory> {
-                timeline.play { questTrackerView.hide() }
+                timeline.play {
+                    questTrackerView.hide()
+                    closeDetail()
+                }
             },
         )
+
+    init {
+        questDetailView.hide()
+        questTrackerView.setDelegate(this)
+        questDetailView.setDelegate(this)
+    }
+
+    /** Hands the taps on the tracker over, e.g.: to open the detail view when it can take the place of the pad. */
+    fun setOnTrackerSelected(listener: () -> Unit) {
+        onTrackerSelected = listener
+    }
+
+    /** Displays the quest in full, read now, as time stops while it is open. To be played in the timeline. */
+    fun openDetail() {
+        val quest = mainQuest()?.let { mainQuest -> QuestMapper.questInfo(mainQuest, texts) } ?: return
+        isDetailOpen = true
+        questDetailView.display(quest)
+    }
+
+    /** Hides the detail view. Nothing happens when it is not open. */
+    fun closeDetail() {
+        if (!isDetailOpen) return
+        isDetailOpen = false
+        questDetailView.hide()
+    }
+
+    override fun questTrackerSelected() {
+        onTrackerSelected?.invoke()
+    }
+
+    // The player can only act once the scene shows the detail view.
+    override fun questDetailBackSelected() {
+        if (isDetailOpen && !timeline.isPlaying) partyApi.closeQuest()
+    }
 
     fun dispose() {
         subscriptions.forEach(Subscription::dispose)

@@ -30,6 +30,12 @@ fun Stage.inventoryView(): InventoryView? = descendants().filterIsInstance<Inven
 /** The battle info on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleInfoView(): BattleInfoView? = descendants().filterIsInstance<BattleInfoView>().firstOrNull()
 
+/** The tracker of the main quest on the screen, or `null` while the battle scene is not on the stage yet. */
+fun Stage.questTrackerView(): QuestTrackerView? = descendants().filterIsInstance<QuestTrackerView>().firstOrNull()
+
+/** The detail of the main quest of the battle scene, or `null` while the battle scene is not on the stage yet. */
+fun Stage.questDetailView(): QuestDetailView? = descendants().filterIsInstance<QuestDetailView>().firstOrNull()
+
 /**
  * Whether the start of the current turn has been announced: the header displays the turn and the battlefield is no
  * longer tinted. The player can not act on the battle scene until then.

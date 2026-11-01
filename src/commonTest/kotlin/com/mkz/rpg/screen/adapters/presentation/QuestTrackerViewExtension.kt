@@ -1,14 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
-import com.mkz.rpg.shared.adapters.presentation.descendants
 import korlibs.korge.tests.ViewsForTesting
-import korlibs.korge.view.Stage
 
 // Page object of [QuestTrackerView].
-
-/** The tracker of the battle scene, or `null` when the scene is not displayed yet. */
-fun Stage.questTrackerView(): QuestTrackerView? = descendants().filterIsInstance<QuestTrackerView>().firstOrNull()
 
 /** The text it names, e.g.: `Defeat the Goat Wizard`, or `null` until it displays a quest. */
 fun QuestTrackerView.displayedTask(): String? = taskText?.text

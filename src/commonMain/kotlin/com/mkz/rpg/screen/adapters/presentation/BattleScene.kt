@@ -47,6 +47,7 @@ import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.SContainer
 import korlibs.korge.view.addUpdater
 import korlibs.korge.view.fixedSizeContainer
+import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 import korlibs.time.DateTime
 import kotlin.random.Random
@@ -60,6 +61,11 @@ class BattleScene(
     private val random: Random = Random.Default,
     private val slot: Int? = null,
 ) : Scene() {
+    private companion object {
+        // The detail of the main quest is centred in the slot of the pad, as it is narrower.
+        const val QUEST_DETAIL_X = 6.0
+    }
+
     // The scene coroutines (e.g.: the presentation timeline) run on the game window event loop, like the frames, so
     // the views are only changed from that loop. KorGE adds it to the views coroutine context when running the game,
     // but not when running the headless tests (ViewsForTesting), which would run them on Dispatchers.Default instead.
@@ -87,6 +93,7 @@ class BattleScene(
     val saveSlotsView = SaveSlotsView(texts)
     val confirmDialogView = ConfirmDialogView()
     val questTrackerView = QuestTrackerView(texts)
+    val questDetailView = QuestDetailView(resourcesLoader, texts)
 
     override suspend fun SContainer.sceneInit() {
         resourcesLoader.load()
@@ -213,7 +220,7 @@ class BattleScene(
                 addChild(battleInfoView)
                 addChild(questTrackerView)
             }
-            QuestPresenter(questTrackerView, questApi, texts, timeline, eventBus)
+            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questApi, partyApi, texts, timeline, eventBus)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,
@@ -229,7 +236,8 @@ class BattleScene(
             uiVerticalStack(padding = 5.0) {
                 uiSpacing(Size(0, 10))
                 // While exploring, the virtual pad takes the place of the battle HUD, an npc dialog the place of the pad, and a
-                // merchant's shop the place of its dialog. The party formation and the pause screen also take the place of the pad.
+                // merchant's shop the place of its dialog. The party formation, the pause screen and the detail of the main quest
+                // also take the place of the pad.
                 // It is as tall as the battle HUD: the taller pad reaches below it, over the empty call to action, without
                 // pushing the call to action down.
                 fixedSizeContainer(Size(390, 300)) {
@@ -241,6 +249,8 @@ class BattleScene(
                     addChild(pauseView)
                     addChild(saveSlotsView)
                     addChild(confirmDialogView)
+                    addChild(questDetailView)
+                    questDetailView.xy(QUEST_DETAIL_X, 0.0)
                 }
                 uiSpacing(Size(0, 5))
                 // val finishTurnView = FinishTurnView()
@@ -277,6 +287,7 @@ class BattleScene(
                         shopPresenter,
                         formationPresenter,
                         pausePresenter,
+                        questPresenter,
                         texts,
                         timeline,
                         eventBus,

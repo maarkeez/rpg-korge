@@ -113,4 +113,9 @@ enum class UiText(
     ATTACK_PREVIEW_BY("ui.attackPreview.by"),
     ATTACK_PREVIEW_MANA("ui.attackPreview.mana"),
     QUEST_TRACKER_COMPLETED("ui.questTracker.completed"),
+    QUEST_DETAIL_MAIN_QUEST("ui.questDetail.mainQuest"),
+    QUEST_DETAIL_COMPLETED("ui.questDetail.completed"),
+    QUEST_DETAIL_REWARD("ui.questDetail.reward"),
+    QUEST_DETAIL_TASKS_DONE("ui.questDetail.tasksDone", isPlural = true),
+    QUEST_DETAIL_BACK("ui.questDetail.back"),
 }
