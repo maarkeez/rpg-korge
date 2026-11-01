@@ -75,7 +75,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone        | Done when                                                                                                                              | Status | Done in |
 |----|------------------|----------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The reward       | `inventory` grants a requested reward, capping the gold and dropping what does not fit, and the dropped items can be looted and saved. | ✅      | `4666980b` |
-| M2 | Quests and saves | A new game starts the main quest, and saving and loading keep its status. `SAVE_VERSION` is 3.                                         | ⬜      |         |
+| M2 | Quests and saves | A new game starts the main quest, and saving and loading keep its status. `SAVE_VERSION` is 3.                                         | ✅      | `a584e01e` |
 | M3 | Task progress    | Defeating the goat wizard completes the main quest, and the leader carries 150 more gold. The three kinds of task work.                | ⬜      |         |
 | M4 | Side quests      | Talking to a giver starts its side quests, which can be repeated and abandoned, played by the tests only.                              | ⬜      |         |
 
@@ -121,8 +121,8 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 #### Domain
 
-- `Quest.Dto(id, type, giverNpcId, repeatable, tasks, reward, progress)`, with `QuestTypeDto` (`MAIN`, `SIDE`), `TaskDto` (`DefeatUnitsDto(unitId, count)`, `TalkToNpcDto(npcId)`, `ReachTilesDto(tiles)`), `RewardDto(gold, lootableItemIds)` and `ProgressDto(questId, status, currentTaskIndex, currentTaskProgress)`, with `StatusDto` (`NOT_STARTED`, `ACTIVE`, `COMPLETED`).
-- `Quest.create(dto)` fails with `QuestWithoutTasks`, `EmptyQuestReward`, `NegativeQuestRewardGold`, `EmptyTaskTiles`, `TaskCountBelowOne`, `SideQuestWithoutGiver`, `MainQuestWithGiver` or `MainQuestRepeatable`. It starts `NOT_STARTED`, on its first task, with progress 0.
+- `Quest.Dto(id, type, giverNpcId, repeatable, tasks, reward, progress)`, with `QuestTypeDto` (`MAIN`, `SIDE`), `TaskDto` (its `TypeDto`, with one of `DefeatUnitsDto(unitId, count)`, `TalkToNpcDto(npcId)` or `ReachTilesDto(tiles)`, as a `Dto` holds a choice of shapes as an enum type with optional fields), `RewardDto(gold, lootableItemIds)` and `ProgressDto(questId, status, currentTaskIndex, currentTaskProgress)`, with `StatusDto` (`NOT_STARTED`, `ACTIVE`, `COMPLETED`).
+- `Quest.create(dto)` fails with `QuestWithoutTasks`, `InvalidTask`, `EmptyQuestReward`, `NegativeQuestRewardGold`, `EmptyTaskTiles`, `TaskCountBelowOne`, `SideQuestWithoutGiver`, `MainQuestWithGiver` or `MainQuestRepeatable`. It starts `NOT_STARTED`, on its first task, with progress 0.
 - `start()` makes it `ACTIVE`, on its first task with progress 0, recording `QuestStarted(questId)`.
 - `canBeStartedBy(npcId)`: it is a side quest of that giver, `NOT_STARTED`, or `COMPLETED` and repeatable.
 - `defeated(unitId)`, `reached(tiles)` and `talkedTo(npcId)` do nothing unless it is `ACTIVE` and the current task asks for it. A defeat records `TaskProgressed(questId, taskIndex, progress, count)`, each time. Once a task is done it records `TaskCompleted(questId, taskIndex)` and moves on to the next one, or, after the last one, becomes `COMPLETED` and records `QuestCompleted(questId)`.
@@ -163,9 +163,8 @@ gold = 150
 ```
 
 A side quest, with the other two kinds of task. `tiles` is a list of `[row, column]`, as `battlefield.toml` nests its
-lists, for a line of tiles across a corridor. `battlefield.toml` only nests them at the top level of its file, so
-`ResourcesQuestLoaderTest` first proves ktoml 0.7.1 reads them inside `[[tasks]]`, and `tiles` becomes a list of
-`"row,column"` strings if it does not:
+lists, for a line of tiles across a corridor. `ResourcesQuestLoaderTest` proves ktoml 0.7.1 reads them inside
+`[[tasks]]`:
 
 ```toml
 type = "SIDE"
