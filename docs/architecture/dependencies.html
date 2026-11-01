@@ -225,10 +225,10 @@ const DATA = {
     {"name": "npc", "files": 19, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 10, "importsOut": 29},
     {"name": "party", "files": 41, "fanIn": 6, "fanOut": 6, "instability": 0.5, "importsIn": 44, "importsOut": 73},
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
-    {"name": "quest", "files": 13, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 3, "importsOut": 14},
+    {"name": "quest", "files": 16, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 3, "importsOut": 17},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 11, "importsOut": 8},
     {"name": "screen", "files": 93, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 91, "importsOut": 234},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 472, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 475, "importsOut": 0},
     {"name": "storybook", "files": 94, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 109},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
@@ -1108,17 +1108,20 @@ const DATA = {
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/quest/usecases/commands/InitialiseQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
     ]},
-    {"from": "quest", "to": "shared", "weight": 12, "files": 6, "imports": [
+    {"from": "quest", "to": "shared", "weight": 15, "files": 7, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.enumOf"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.fromResource"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
       {"file": "com/mkz/rpg/quest/adapters/resources/ResourcesQuestLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.required"},
+      {"file": "com/mkz/rpg/quest/adapters/save/QuestSnapshottable.kt", "layer": "adapters", "name": "shared.adapters.save.SnapshotJson"},
+      {"file": "com/mkz/rpg/quest/adapters/save/QuestSnapshottable.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/quest/domain/QuestEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/quest/usecases/commands/StartMainQuest.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},

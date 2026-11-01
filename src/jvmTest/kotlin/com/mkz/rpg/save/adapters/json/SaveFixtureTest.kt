@@ -15,6 +15,10 @@ import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
+import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
+import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.mainQuest
+import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError
@@ -48,7 +52,7 @@ class SaveFixtureTest {
     // The game of the fixture, as read from the resources: a 3x6 sand field split by a column of void, a knight carrying
     // 40 gold, and a rat that drops health potions. Played: the knight explores from (1,0), the elder at (0,3) sells
     // health potions, a rat wanders from its home at (2,5), past the void, out of the knight's reach, and a health potion
-    // lies at (1,1). Nothing is random, so the game is saved the same every time.
+    // lies at (1,1). The main quest asks to defeat a rat. Nothing is random, so the game is saved the same every time.
     private class Game(
         isPlayed: Boolean,
     ) {
@@ -76,6 +80,7 @@ class SaveFixtureTest {
                         emptyList()
                     },
                 npcs = if (isPlayed) listOf(npc(id = "elder", row = 0, column = 3, stock = listOf("health-potion")).toDto()) else emptyList(),
+                quests = listOf(mainQuest(id = "defeat-a-rat", tasks = listOf(defeatUnits(unitId = "rat")), reward = reward(gold = 15)).toDto()),
                 explore = isPlayed,
             )
         private val cpuBattleBrainApi =
@@ -95,6 +100,7 @@ class SaveFixtureTest {
                         apis.inventoryApi.snapshottable,
                         apis.partyApi.snapshottable,
                         cpuWanderBrainApi.snapshottable,
+                        apis.questApi.snapshottable,
                     ),
                 canSave = { apis.partyApi.searchParty()?.isPaused == true },
                 leaderUnitId = { "knight" },
@@ -111,8 +117,9 @@ class SaveFixtureTest {
             apis.initialise()
         }
 
-        // The knight walks east onto the health potion, which it stores, then the game is saved in slot 1.
+        // The main quest starts, the knight walks east onto the health potion, which it stores, then the game is saved in slot 1.
         fun playAndSave(): String {
+            apis.questApi.startMainQuest()
             apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
             apis.partyApi.walkParty(DirectionDto.EAST)
             apis.eventBus.dispatch()
@@ -178,6 +185,10 @@ class SaveFixtureTest {
             .orEmpty()
             .shouldContainExactly("health-potion")
         game.cpuWanderBrainApi.snapshottable.snapshot() shouldBe Game(isPlayed = true).cpuWanderBrainApi.snapshottable.snapshot()
+        game.apis.questApi
+            .searchQuests()
+            .single()
+            .progress.status shouldBe StatusDto.ACTIVE
     }
 
     @Test

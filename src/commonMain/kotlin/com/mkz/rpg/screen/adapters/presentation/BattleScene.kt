@@ -132,6 +132,7 @@ class BattleScene(
                         inventoryApi.snapshottable,
                         partyApi.snapshottable,
                         cpuWanderBrainApi.snapshottable,
+                        questApi.snapshottable,
                     ),
                 canSave = { partyApi.searchParty()?.isPaused == true },
                 leaderUnitId = {

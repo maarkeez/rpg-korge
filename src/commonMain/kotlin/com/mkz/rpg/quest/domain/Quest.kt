@@ -61,6 +61,12 @@ data class Quest private constructor(
             events = events + QuestStarted(questId = id.value),
         )
 
+    /** Puts back how far it went when the game was saved, publishing no events. */
+    fun restoreProgress(progress: ProgressDto): Quest {
+        require(progress.currentTaskIndex in tasks.value.indices) { "Quest ${id.value} has no task ${progress.currentTaskIndex}" }
+        return copy(progress = Progress(status = progress.status, currentTaskIndex = progress.currentTaskIndex, currentTaskProgress = progress.currentTaskProgress))
+    }
+
     fun toDto() =
         Dto(
             id = id.value,
