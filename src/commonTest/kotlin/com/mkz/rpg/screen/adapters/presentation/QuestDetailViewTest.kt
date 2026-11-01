@@ -131,6 +131,32 @@ class QuestDetailViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `display should show Abandon in danger when it is an active side quest`() =
+        sharedViewsTest {
+            // Given
+            val detailView = detailView()
+            // When
+            detailView.display(questInfo(isMain = false))
+            // Then
+            detailView.isAbandonShown().shouldBeTrue()
+            detailView.abandonColor() shouldBe HudStyle.DANGER
+        }
+
+    @Test
+    fun `display should hide Abandon when it is the main quest or a completed one`() =
+        sharedViewsTest {
+            // Given
+            val detailView = detailView()
+            // When
+            detailView.display(questInfo())
+            val isShownOnTheMainQuest = detailView.isAbandonShown()
+            detailView.display(completedQuestInfo().copy(isMain = false))
+            // Then
+            isShownOnTheMainQuest.shouldBeFalse()
+            detailView.isAbandonShown().shouldBeFalse()
+        }
+
+    @Test
     fun `display should draw the reward above the buttons when it is a large reward`() =
         sharedViewsTest {
             // Given
@@ -155,23 +181,30 @@ class QuestDetailViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `QuestDetailView should call its delegate when Back is tapped`() =
+    fun `QuestDetailView should call its delegate when Back or Abandon is tapped`() =
         sharedViewsTest {
             // Given
             var backs = 0
+            var abandons = 0
             val detailView = detailView()
             detailView.setDelegate(
                 object : QuestDetailView.Delegate {
                     override fun questDetailBackSelected() {
                         backs++
                     }
+
+                    override fun questDetailAbandonSelected() {
+                        abandons++
+                    }
                 },
             )
-            detailView.display(questInfo())
+            detailView.display(questInfo(isMain = false))
             addChild(detailView)
             // When
             clickBack(detailView)
+            clickAbandon(detailView)
             // Then
             backs shouldBe 1
+            abandons shouldBe 1
         }
 }

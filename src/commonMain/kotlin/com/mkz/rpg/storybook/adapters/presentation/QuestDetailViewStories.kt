@@ -7,7 +7,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestDetailView], with each kind of quest. Back logs itself. */
+/** The stories of [QuestDetailView], with each kind of quest. Back and Abandon log themselves. */
 object QuestDetailViewStories : StoryBinding {
     private const val QUEST = "quest"
 
@@ -49,6 +49,8 @@ object QuestDetailViewStories : StoryBinding {
             setDelegate(
                 object : QuestDetailView.Delegate {
                     override fun questDetailBackSelected() = context.action("questDetailBackSelected")
+
+                    override fun questDetailAbandonSelected() = context.action("questDetailAbandonSelected")
                 },
             )
             display(QuestSample.valueOf(args.text(QUEST)).quest(context.texts))

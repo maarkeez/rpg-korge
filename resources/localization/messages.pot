@@ -556,6 +556,16 @@ msgctxt "ui.quest.repeatable"
 msgid "Repeatable"
 msgstr ""
 
+#. Gives a side quest up, in its detail and in the question that asks first.
+msgctxt "ui.quest.abandon"
+msgid "Abandon"
+msgstr ""
+
+#. Asked before abandoning a side quest. {quest}: its name.
+msgctxt "ui.quest.abandonQuestion"
+msgid "Abandon {quest}? Its progress is lost, and its giver can start it again."
+msgstr ""
+
 #. The title of the list of every quest started.
 msgctxt "ui.questJournal.title"
 msgid "Journal"

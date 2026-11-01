@@ -263,6 +263,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-confirm-dialog--overwrite",
                     "screen-confirm-dialog--delete",
                     "screen-confirm-dialog--quit",
+                    "screen-confirm-dialog--abandon",
                     "screen-battle-info",
                     "screen-battle-info--exploring",
                     "screen-battle-info--human-turn",

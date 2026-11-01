@@ -23,7 +23,7 @@ import korlibs.math.geom.Size
 /**
  * A quest in full, in place of the pad, led by the portrait of who its current task is about: its name and description
  * beside it, the current task under them, the tasks done as a count, and the reward, with a bottom row just for the
- * buttons, so a large reward never slides under them. It stays open once completed, so the story can be read again.
+ * buttons, so a large reward never slides under them. An active side quest can be abandoned, in red. It stays open once completed, so the story can be read again.
  */
 class QuestDetailView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -68,10 +68,14 @@ class QuestDetailView(
         private const val BACK_X = PADDING
         private const val BACK_Y = 256.0
         private const val BACK_WIDTH = 72.0
+        private const val ABANDON_X = 256.0
+        private const val ABANDON_WIDTH = 110.0
     }
 
     interface Delegate {
         fun questDetailBackSelected()
+
+        fun questDetailAbandonSelected()
     }
 
     private var delegate: Delegate? = null
@@ -87,6 +91,7 @@ class QuestDetailView(
     internal var tasksDoneText: Text? = null
     internal var rewardView: Container? = null
     internal var backButton: CancelButton? = null
+    internal var abandonButton: ConfirmButton? = null
 
     fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
@@ -100,7 +105,7 @@ class QuestDetailView(
         drawTask(quest)
         drawTasksDone(quest)
         drawReward(quest)
-        drawButtons()
+        drawButtons(quest)
         visible = true
     }
 
@@ -161,12 +166,21 @@ class QuestDetailView(
         rewardView = container { rewardRow(quest, PADDING + widthOf(caption, QuestViewParts.CAPTION_SIZE) + REWARD_SPACING, REWARD_ROW_Y, resourcesLoader, texts) }
     }
 
-    private fun drawButtons() {
+    private fun drawButtons(quest: QuestInfo) {
         solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, DIVIDER_Y) }
         backButton =
             CancelButton(texts[UiText.QUEST_DETAIL_BACK], BACK_WIDTH) { delegate?.questDetailBackSelected() }.also { button ->
                 addChild(button)
                 button.xy(BACK_X, BACK_Y)
+            }
+        abandonButton =
+            if (!quest.isMain && !quest.isCompleted) {
+                ConfirmButton(texts[UiText.QUEST_ABANDON], ABANDON_WIDTH, HudStyle.DANGER, HudStyle.DANGER_PRESSED) { delegate?.questDetailAbandonSelected() }.also { button ->
+                    addChild(button)
+                    button.xy(ABANDON_X, BACK_Y)
+                }
+            } else {
+                null
             }
     }
 }

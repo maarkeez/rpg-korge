@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.descendants
 import com.mkz.rpg.shared.adapters.presentation.isShown
+import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 import korlibs.korge.view.Text
 import korlibs.korge.view.View
@@ -40,6 +41,13 @@ fun QuestDetailView.isTargetTicked(): Boolean = targetTick != null
 
 /** The texts of the reward row, e.g.: `150 G`. */
 fun QuestDetailView.displayedReward(): List<String> = linesOf(rewardView)
+
+fun QuestDetailView.isAbandonShown(): Boolean = abandonButton != null
+
+/** The colour of Abandon, not pressed. */
+fun QuestDetailView.abandonColor(): RGBA = requireNotNull(abandonButton) { "It displays no Abandon" }.confirmButton.bgColorOut
+
+suspend fun ViewsForTesting.clickAbandon(questDetailView: QuestDetailView) = clickConfirm(requireNotNull(questDetailView.abandonButton) { "It displays no Abandon" })
 
 suspend fun ViewsForTesting.clickBack(questDetailView: QuestDetailView) = clickCancel(requireNotNull(questDetailView.backButton) { "It displays no quest" })
 

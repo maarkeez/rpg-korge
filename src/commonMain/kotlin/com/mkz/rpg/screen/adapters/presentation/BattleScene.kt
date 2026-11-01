@@ -222,7 +222,7 @@ class BattleScene(
                 addChild(battleInfoView)
                 addChild(questTrackerView)
             }
-            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questJournalView, questAnnouncementView, questApi, partyApi, texts, timeline, eventBus)
+            val questPresenter = QuestPresenter(questTrackerView, questDetailView, questJournalView, confirmDialogView, questAnnouncementView, questApi, partyApi, texts, timeline, eventBus)
             val battleInfoPresenter =
                 BattleInfoPresenter(
                     battleInfoView,

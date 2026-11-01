@@ -30,7 +30,7 @@ A side quest with `repeatable = true` starts again on a later talk to its giver,
 
 ## Abandoning
 
-`QuestApi.abandonQuest`, with no view yet, abandons an active side quest: it goes back to `NOT_STARTED` with its progress reset, announcing `QuestAbandoned`, so its giver can start it again even when it is not repeatable. It fails with `MainQuestCanNotBeAbandoned` on the main quest, and with `QuestNotActive` on a quest that is not active.
+`QuestApi.abandonQuest` abandons an active side quest (see [Abandoning](#abandoning)): it goes back to `NOT_STARTED` with its progress reset, announcing `QuestAbandoned`, so its giver can start it again even when it is not repeatable. It fails with `MainQuestCanNotBeAbandoned` on the main quest, and with `QuestNotActive` on a quest that is not active.
 
 ## Tasks
 
@@ -96,6 +96,10 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 - KorGE's `clipContainer` does not clip rounded rectangles, so the rows that would show out of the panel are hidden, and the header and the footer are drawn over the others.
 - Tapping a row opens its detail view, and Back steps out one level at a time.
 
+### Abandoning
+
+The detail view of an active side quest has Abandon on the right, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
+
 ### The announcements
 
 [`QuestAnnouncementView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestAnnouncementView.kt) is a toast over the top of the battlefield, announcing every quest starting, with its goal, and completing, with the reward the quest defines, also when a repeatable quest runs again. It is held for 4 seconds and fades in 0.5 seconds. A count or a task done only pops the tracker.
@@ -130,7 +134,7 @@ For example, a new game, then defeating the goat wizard in a battle:
 - A long description is cut with an ellipsis beside the target, at 4 lines with a name of one line and 3 with two, as the detail view has no scrolling. The shipped description takes 2.
 - A long task beside a long turn name may touch while the turn pops to 1.3 on the left of the top line. The tracker draws on top, and the pop lasts 400ms.
 - The pop of the tracker, 1.15 for 400ms, was not seen in the prototypes, whose stories draw the settled state: it is a first guess, to check by playing.
-- Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, no view abandons, and the main quest pays no items. Only the tests play them.
+- Side quests, abandoning, repeating and dropping a reward can not happen in the game yet, as no side quest ships, and the main quest pays no items. Only the tests play them.
 - A battle unit already standing on a tile of a `REACH_TILES` task when it becomes current does not complete it: it has to move onto one.
 - A defeat task can be farmed by waiting for respawns, as `BattleUnitDefeated` counts them all.
 - A leader defeated by an event still waiting on the bus when the reward is requested receives the reward. It needs a defeat of the task's unit and of the leader in the same chain of events, which should be rare.

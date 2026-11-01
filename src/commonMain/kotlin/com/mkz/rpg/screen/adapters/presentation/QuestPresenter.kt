@@ -26,12 +26,13 @@ import com.mkz.rpg.shared.domain.subscribe
  *
  * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
  * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed, and
- * Back steps out one level at a time.
+ * Back steps out one level at a time. Abandon asks first, and returns to the journal, or to the pad when no side quest is left.
  */
 class QuestPresenter(
     private val questTrackerView: QuestTrackerView,
     private val questDetailView: QuestDetailView,
     private val questJournalView: QuestJournalView,
+    private val confirmDialogView: ConfirmDialogView,
     private val questAnnouncementView: QuestAnnouncementView,
     private val questApi: QuestApi,
     private val partyApi: PartyApi,
@@ -47,6 +48,9 @@ class QuestPresenter(
 
     // Whether Back in the detail view returns to the journal.
     private var isDetailFromJournal = false
+
+    // The quest the detail view displays, so Abandon knows which one.
+    private var detailedQuest: QuestInfo? = null
 
     // The toasts still to play, and whether one is on its way out, so they never overlap.
     private val pendingToasts = ArrayDeque<Pair<Moment, QuestInfo>>()
@@ -83,6 +87,7 @@ class QuestPresenter(
     init {
         questDetailView.hide()
         questJournalView.hide()
+        confirmDialogView.visible = false
         questTrackerView.setDelegate(this)
         questDetailView.setDelegate(this)
         questJournalView.setDelegate(this)
@@ -105,7 +110,7 @@ class QuestPresenter(
             questJournalView.display(quests)
         } else {
             isDetailFromJournal = false
-            questDetailView.display(quests.single())
+            displayDetail(quests.single())
         }
     }
 
@@ -115,6 +120,7 @@ class QuestPresenter(
         isQuestOpen = false
         questDetailView.hide()
         questJournalView.hide()
+        confirmDialogView.visible = false
     }
 
     override fun questTrackerSelected() {
@@ -127,7 +133,7 @@ class QuestPresenter(
         val quest = listedQuests().firstOrNull { quest -> quest.id == questId } ?: return
         isDetailFromJournal = true
         questJournalView.hide()
-        questDetailView.display(quest)
+        displayDetail(quest)
     }
 
     override fun questJournalBackSelected() {
@@ -142,6 +148,20 @@ class QuestPresenter(
         } else {
             partyApi.closeQuest()
         }
+    }
+
+    override fun questDetailAbandonSelected() {
+        val quest = detailedQuest
+        if (!canAct() || quest == null) return
+        questDetailView.hide()
+        confirmDialogView.display(
+            message = texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name],
+            cancelLabel = texts[UiText.QUEST_DETAIL_BACK],
+            confirmLabel = texts[UiText.QUEST_ABANDON],
+            onCancelled = { if (canAct()) keepQuest(quest) },
+            onConfirmed = { if (canAct()) abandonQuest(quest) },
+        )
+        confirmDialogView.visible = true
     }
 
     fun dispose() {
@@ -189,6 +209,28 @@ class QuestPresenter(
     }
 
     private fun canAct() = isQuestOpen && !timeline.isPlaying
+
+    private fun displayDetail(quest: QuestInfo) {
+        detailedQuest = quest
+        questDetailView.display(quest)
+    }
+
+    private fun keepQuest(quest: QuestInfo) {
+        confirmDialogView.visible = false
+        displayDetail(quest)
+    }
+
+    // With it gone from the list, the journal is displayed when a side quest is still listed, and otherwise the pad.
+    private fun abandonQuest(quest: QuestInfo) {
+        questApi.abandonQuest(quest.id)
+        val quests = listedQuests()
+        if (quests.any { listed -> !listed.isMain }) {
+            confirmDialogView.visible = false
+            questJournalView.display(quests)
+        } else {
+            partyApi.closeQuest()
+        }
+    }
 
     // The main quest first while active, then the active side quests, then the completed quests, each group in the order
     // the quests were created. The side quests not started are hidden, so nothing is spoiled.

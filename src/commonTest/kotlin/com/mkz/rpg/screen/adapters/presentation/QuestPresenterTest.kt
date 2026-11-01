@@ -9,6 +9,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
@@ -33,6 +34,7 @@ class QuestPresenterTest {
     private val trackerView = FakeQuestTrackerView()
     private val detailView = QuestDetailView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val journalView = QuestJournalView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val confirmDialogView = ConfirmDialogView()
     private val announcementView = FakeQuestAnnouncementView()
     private val timeline = battleSceneTimeline()
 
@@ -48,7 +50,7 @@ class QuestPresenterTest {
             explore = true,
         ).also(SubdomainApis::initialise)
 
-    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, journalView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
+    private fun SubdomainApis.presenter() = QuestPresenter(trackerView, detailView, journalView, confirmDialogView, announcementView, questApi, partyApi, TextsMother.texts(), timeline, eventBus)
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
@@ -382,6 +384,71 @@ class QuestPresenterTest {
         val presenter = apis.presenterWithASideQuestOpen()
         // When
         presenter.questJournalBackSelected()
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeFalse()
+    }
+
+    @Test
+    fun `QuestDetailAbandonSelected should ask first, and Back should return to the detail view`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        presenter.questJournalSelected("side")
+        // When
+        presenter.questDetailAbandonSelected()
+        // Then
+        confirmDialogView.visible.shouldBeTrue()
+        detailView.visible.shouldBeFalse()
+        confirmDialogView.choiceLabels().shouldContainExactly("Back", "Abandon")
+        apis.questApi
+            .searchQuests()
+            .first { quest -> quest.id == "side" }
+            .progress.status shouldBe StatusDto.ACTIVE
+        // When
+        confirmDialogView.chooseCancel()
+        // Then
+        confirmDialogView.visible.shouldBeFalse()
+        detailView.visible.shouldBeTrue()
+        detailView.displayedCaption() shouldBe "SIDE QUEST"
+    }
+
+    @Test
+    fun `QuestAbandon should return to the journal when a side quest is still listed`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        presenter.questJournalSelected("side")
+        presenter.questDetailAbandonSelected()
+        // When
+        confirmDialogView.chooseConfirm()
+        apis.eventBus.dispatch()
+        // Then
+        apis.questApi
+            .searchQuests()
+            .first { quest -> quest.id == "side" }
+            .progress.status shouldBe StatusDto.NOT_STARTED
+        confirmDialogView.visible.shouldBeFalse()
+        journalView.visible.shouldBeTrue()
+        journalView.displayedRows().shouldContainExactly(questId, "other")
+        apis.partyApi
+            .searchParty()!!
+            .isReadingQuest
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `QuestAbandon should close the quest when no side quest is listed`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        presenter.questJournalSelected("side")
+        presenter.questDetailAbandonSelected()
+        // When
+        confirmDialogView.chooseConfirm()
+        apis.eventBus.dispatch()
         // Then
         apis.partyApi
             .searchParty()!!

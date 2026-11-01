@@ -120,6 +120,8 @@ enum class UiText(
     QUEST_DETAIL_BACK("ui.questDetail.back"),
     QUEST_DETAIL_SIDE_QUEST("ui.questDetail.sideQuest"),
     QUEST_REPEATABLE("ui.quest.repeatable"),
+    QUEST_ABANDON("ui.quest.abandon"),
+    QUEST_ABANDON_QUESTION("ui.quest.abandonQuestion"),
     QUEST_JOURNAL_TITLE("ui.questJournal.title"),
     QUEST_JOURNAL_ACTIVE("ui.questJournal.active", isPlural = true),
     QUEST_JOURNAL_COMPLETED("ui.questJournal.completed"),
