@@ -118,4 +118,8 @@ enum class UiText(
     QUEST_DETAIL_REWARD("ui.questDetail.reward"),
     QUEST_DETAIL_TASKS_DONE("ui.questDetail.tasksDone", isPlural = true),
     QUEST_DETAIL_BACK("ui.questDetail.back"),
+    QUEST_ANNOUNCEMENT_STARTED("ui.questAnnouncement.started"),
+    QUEST_ANNOUNCEMENT_COMPLETED("ui.questAnnouncement.completed"),
+    QUEST_ANNOUNCEMENT_REWARD("ui.questAnnouncement.reward"),
+    QUEST_ANNOUNCEMENT_CONTINUE("ui.questAnnouncement.continue"),
 }

@@ -546,6 +546,26 @@ msgctxt "ui.questDetail.back"
 msgid "Back"
 msgstr ""
 
+#. Over the name of the quest, on the card announcing that it starts.
+msgctxt "ui.questAnnouncement.started"
+msgid "NEW QUEST"
+msgstr ""
+
+#. Over the name of the quest, on the card announcing that it is completed.
+msgctxt "ui.questAnnouncement.completed"
+msgid "QUEST COMPLETED"
+msgstr ""
+
+#. Over what the quest pays, on the card announcing that it is completed.
+msgctxt "ui.questAnnouncement.reward"
+msgid "REWARD"
+msgstr ""
+
+#. Closes the card announcing a quest, so the game goes on.
+msgctxt "ui.questAnnouncement.continue"
+msgid "Continue"
+msgstr ""
+
 # Game data: the names of resources/ability/<id>.toml, lootableItem, npc, player, terrain and unit, and the npc lines.
 
 msgctxt "ability.bat.name"
