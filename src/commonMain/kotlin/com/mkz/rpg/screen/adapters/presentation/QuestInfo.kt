@@ -5,12 +5,15 @@ package com.mkz.rpg.screen.adapters.presentation
  * to come are never revealed.
  */
 data class QuestInfo(
+    val id: String,
     val name: String,
     val description: String,
     val tasks: List<Task>,
     val gold: Int,
     val items: List<RewardItem> = emptyList(),
     val isCompleted: Boolean = false,
+    val isMain: Boolean = false,
+    val isRepeatable: Boolean = false,
 ) {
     enum class Kind { DEFEAT, TALK, REACH }
 

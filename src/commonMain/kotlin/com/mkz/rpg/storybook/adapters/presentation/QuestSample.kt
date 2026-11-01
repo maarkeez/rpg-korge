@@ -14,10 +14,12 @@ private const val ELDER_PORTRAIT = "npc/elder_portrait.png"
 // The quest the game ships, with the texts of the language global, which the other samples are built on.
 private fun goatWizard(texts: Texts) =
     QuestInfo(
+        id = GOAT_WIZARD_QUEST,
         name = texts.questName(GOAT_WIZARD_QUEST),
         description = texts.questDescription(GOAT_WIZARD_QUEST),
         tasks = listOf(goatWizardTask(texts)),
         gold = 150,
+        isMain = true,
     )
 
 private fun goatWizardTask(texts: Texts) = Task(Kind.DEFEAT, texts.questTask(GOAT_WIZARD_QUEST, 0), portraitPath = GOAT_WIZARD_PORTRAIT)
@@ -82,10 +84,12 @@ enum class QuestSample(
         "The longest texts, as a translation may be: a long name, description and task, and the largest gold.",
         {
             QuestInfo(
+                id = GOAT_WIZARD_QUEST,
                 name = "La guarida del mago cabra en las montañas del sur",
                 description = "Hace mucho tiempo una cabra se comió el libro de hechizos de un mago y se tragó toda su magia. Ahora gobierna la guarida del sur, y nadie se atreve a acercarse.",
                 tasks = listOf(Task(Kind.DEFEAT, "Derrota al mago cabra de la guarida del sur", portraitPath = GOAT_WIZARD_PORTRAIT)),
                 gold = 99_999,
+                isMain = true,
             )
         },
     ),

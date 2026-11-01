@@ -7,6 +7,7 @@ import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
+import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.Kind
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.RewardItem
@@ -101,5 +102,24 @@ class QuestMapperTest {
         // Then
         info.gold shouldBe 40
         info.items.shouldContainExactly(RewardItem("health-potion", TextsMother.texts().lootableItemName("health-potion")), RewardItem("hammer", TextsMother.texts().lootableItemName("hammer")))
+    }
+
+    @Test
+    fun `questInfo should name the id and tell the main quest when given the main quest`() {
+        // When
+        val info = questInfo(mainQuest(id = goatWizardQuestId))
+        // Then
+        info.id shouldBe goatWizardQuestId
+        info.isMain.shouldBeTrue()
+        info.isRepeatable.shouldBeFalse()
+    }
+
+    @Test
+    fun `questInfo should tell a side quest and whether it repeats when given a side quest`() {
+        // When
+        val info = questInfo(sideQuest(id = "bats-in-the-meadow", repeatable = true))
+        // Then
+        info.isMain.shouldBeFalse()
+        info.isRepeatable.shouldBeTrue()
     }
 }

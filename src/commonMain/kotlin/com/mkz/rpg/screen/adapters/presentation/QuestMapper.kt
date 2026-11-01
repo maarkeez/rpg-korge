@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.quest.domain.Quest
+import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 
@@ -13,6 +14,7 @@ internal object QuestMapper {
         val isCompleted = quest.progress.status == StatusDto.COMPLETED
         val currentTaskIndex = quest.progress.currentTaskIndex
         return QuestInfo(
+            id = quest.id,
             name = texts.questName(quest.id),
             description = texts.questDescription(quest.id),
             tasks =
@@ -31,6 +33,8 @@ internal object QuestMapper {
             gold = quest.reward.gold,
             items = quest.reward.lootableItemIds.map { lootableItemId -> QuestInfo.RewardItem(id = lootableItemId, name = texts.lootableItemName(lootableItemId)) },
             isCompleted = isCompleted,
+            isMain = quest.type == QuestTypeDto.MAIN,
+            isRepeatable = quest.repeatable,
         )
     }
 

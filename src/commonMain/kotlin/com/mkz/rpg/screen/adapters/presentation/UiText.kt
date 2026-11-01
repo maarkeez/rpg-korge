@@ -118,6 +118,11 @@ enum class UiText(
     QUEST_DETAIL_REWARD("ui.questDetail.reward"),
     QUEST_DETAIL_TASKS_DONE("ui.questDetail.tasksDone", isPlural = true),
     QUEST_DETAIL_BACK("ui.questDetail.back"),
+    QUEST_DETAIL_SIDE_QUEST("ui.questDetail.sideQuest"),
+    QUEST_REPEATABLE("ui.quest.repeatable"),
+    QUEST_JOURNAL_TITLE("ui.questJournal.title"),
+    QUEST_JOURNAL_ACTIVE("ui.questJournal.active", isPlural = true),
+    QUEST_JOURNAL_COMPLETED("ui.questJournal.completed"),
     QUEST_ANNOUNCEMENT_STARTED("ui.questAnnouncement.started"),
     QUEST_ANNOUNCEMENT_COMPLETED("ui.questAnnouncement.completed"),
 }

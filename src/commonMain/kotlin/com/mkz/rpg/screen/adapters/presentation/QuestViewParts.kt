@@ -27,6 +27,7 @@ internal object QuestViewParts {
     private const val REWARD_GAP = 5.0
     private const val RING_THICKNESS = 2.0
     private const val ELLIPSIS = "…"
+    private const val PILL_TEXT_SIZE = 10.0
 
     fun widthOf(
         content: String,
@@ -217,6 +218,19 @@ internal object QuestViewParts {
             cursor += REWARD_ROW_HEIGHT + REWARD_GAP
         }
         return cursor - x - REWARD_GAP
+    }
+
+    /** The pill saying that a side quest can run again. */
+    fun Container.repeatablePill(
+        x: Double,
+        y: Double,
+        texts: Texts,
+    ): PillView {
+        val pill = PillView(color = HudStyle.MANA, textSize = PILL_TEXT_SIZE)
+        pill.display(texts[UiText.QUEST_REPEATABLE])
+        addChild(pill)
+        pill.xy(x, y)
+        return pill
     }
 
     /** The icon of a reward item, at its real size, in a slot. */

@@ -546,6 +546,33 @@ msgctxt "ui.questDetail.back"
 msgid "Back"
 msgstr "Volver"
 
+#. Over the name of a side quest, in its detail and on its row of the journal.
+msgctxt "ui.questDetail.sideQuest"
+msgid "SIDE QUEST"
+msgstr "MISIÓN SECUNDARIA"
+
+#. On a side quest that can run again, in its detail and on its row of the journal.
+msgctxt "ui.quest.repeatable"
+msgid "Repeatable"
+msgstr "Repetible"
+
+#. The title of the list of every quest started.
+msgctxt "ui.questJournal.title"
+msgid "Journal"
+msgstr "Diario"
+
+#. How many quests are active, beside the title of the journal. {quests}: how many.
+msgctxt "ui.questJournal.active"
+msgid "{quests} active"
+msgid_plural "{quests} active"
+msgstr[0] "{quests} activa"
+msgstr[1] "{quests} activas"
+
+#. Over the name of a completed quest, on its row of the journal.
+msgctxt "ui.questJournal.completed"
+msgid "COMPLETED"
+msgstr "COMPLETADA"
+
 #. Over the name of the quest, on the toast announcing that it starts.
 msgctxt "ui.questAnnouncement.started"
 msgid "NEW QUEST"
