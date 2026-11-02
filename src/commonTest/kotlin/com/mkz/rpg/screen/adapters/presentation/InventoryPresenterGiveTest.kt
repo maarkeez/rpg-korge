@@ -70,6 +70,7 @@ class InventoryPresenterGiveTest {
     private val inventoryPresenter =
         InventoryPresenter(
             inventoryView = inventoryView,
+            giveGoldView = FakeGiveGoldView(),
             battleUnitInfoView = battleUnitInfoView,
             battleHudView = FakeBattleHudView(),
             playerCallToActionView = playerCallToActionView,

@@ -198,6 +198,7 @@ class BattleScene(
         val inventoryPresenter =
             InventoryPresenter(
                 inventoryView,
+                giveGoldView,
                 battleUnitInfoView,
                 battleHudView,
                 playerCallToActionView,

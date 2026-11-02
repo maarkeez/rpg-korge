@@ -30,12 +30,29 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         val onCancelled: () -> Unit,
     )
 
+    data class DisplayedGiveGold(
+        val amount: Int,
+        val maximum: Int,
+        val onCancelled: () -> Unit,
+        val onAll: () -> Unit,
+        val onGiven: () -> Unit,
+    )
+
+    data class DisplayedGiveGoldRefusal(
+        val message: String,
+        val onDismissed: () -> Unit,
+    )
+
     // What the call to action displays last, e.g.: the item actions. `null` once dismissed.
     var displayedItemActions: DisplayedItemActions? = null
         private set
     var displayedInventoryFull: DisplayedInventoryFull? = null
         private set
     var displayedGiveItem: DisplayedGiveItem? = null
+        private set
+    var displayedGiveGold: DisplayedGiveGold? = null
+        private set
+    var displayedGiveGoldRefusal: DisplayedGiveGoldRefusal? = null
         private set
     var hideCount = 0
         private set
@@ -59,6 +76,39 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         displayedItemActions = null
         displayedInventoryFull = null
         displayedGiveItem = null
+        displayedGiveGold = null
+        displayedGiveGoldRefusal = null
+    }
+
+    override fun displayGiveGold(
+        amount: Int,
+        maximum: Int,
+        onCancelled: () -> Unit,
+        onAll: () -> Unit,
+        onGiven: () -> Unit,
+    ) {
+        dismiss()
+        displayedGiveGold = DisplayedGiveGold(amount, maximum, onCancelled, onAll, onGiven)
+    }
+
+    override fun updateGiveGold(
+        amount: Int,
+        maximum: Int,
+    ) {
+        displayedGiveGold = displayedGiveGold?.copy(amount = amount, maximum = maximum)
+    }
+
+    // As the real view, OK dismisses it.
+    override fun displayGiveGoldRefusal(
+        message: String,
+        onDismissed: () -> Unit,
+    ) {
+        dismiss()
+        displayedGiveGoldRefusal =
+            DisplayedGiveGoldRefusal(message) {
+                onDismissed()
+                dismiss()
+            }
     }
 
     // As the real view, it is dismissed once an action is selected, unless the action displayed something else (e.g.: Give).
@@ -69,6 +119,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
     ) {
         displayedInventoryFull = null
         displayedGiveItem = null
+        displayedGiveGoldRefusal = null
         lateinit var itemActions: DisplayedItemActions
         itemActions =
             DisplayedItemActions(

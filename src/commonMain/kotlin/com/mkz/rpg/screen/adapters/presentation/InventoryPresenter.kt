@@ -6,11 +6,15 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveGoldRefusalDto
 import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryEvent
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldGiven
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemGiven
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemReceived
+import com.mkz.rpg.inventory.domain.InventoryEvent.RewardGranted
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.CONSUMABLE
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.EQUIPPABLE
@@ -31,6 +35,9 @@ import kotlinx.coroutines.CompletableDeferred
  * While exploring, an item can be given to another party member: Give dims every tile but the ones of the members that
  * can receive it, and tapping one of them gives the item. Until then, every other tap is ignored, but Cancel's.
  *
+ * While exploring, the gold button opens the panel to give gold in place of the bag, with Cancel, All and Give in the call
+ * to action, or reads why no gold can be given. Every tile is dimmed but the receivers' ones, and tapping one chooses it.
+ *
  * While exploring, the arrows (or a swipe) switch the inventory to the previous or next party member, selecting it on the
  * battlefield through the selector set with [setBattleUnitSelector], so its inventory stays open meanwhile.
  *
@@ -39,6 +46,7 @@ import kotlinx.coroutines.CompletableDeferred
  */
 class InventoryPresenter(
     private val inventoryView: InventoryView,
+    private val giveGoldView: GiveGoldView,
     private val battleUnitInfoView: BattleUnitInfoView,
     private val battleHudView: BattleHudView,
     private val playerCallToActionView: PlayerCallToActionView,
@@ -53,7 +61,8 @@ class InventoryPresenter(
     private val texts: Texts,
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
-) : InventoryView.Delegate {
+) : InventoryView.Delegate,
+    GiveGoldView.Delegate {
     // What the scene displays. Changed in timeline order, like the views.
     private var displayedBattleUnitId: String? = null
     private var displayedSlots: List<InventoryView.Slot> = emptyList()
@@ -66,6 +75,12 @@ class InventoryPresenter(
     // The item being given, while the player taps the party member who receives it.
     private var giving: Giving? = null
 
+    // The gold being given, while the panel is on show.
+    private var givingGold: GivingGold? = null
+
+    // Why no gold can be given is on show, until OK or until the bag it was read from goes away.
+    private var isReadingGoldRefusal = false
+
     // The party member the inventory switches to, until the battlefield HUD has selected it.
     private var switchingTo: String? = null
     private var battleUnitSelector: ((battleUnitId: String) -> Unit)? = null
@@ -76,6 +91,34 @@ class InventoryPresenter(
         val slotIndex: Int,
         val lootableItemId: String,
         val receivers: Map<PositionDto, String>,
+    )
+
+    /** Who gives the gold and carries how much, who can receive it, in party order, which of them is chosen, and the amount. */
+    private data class GivingGold(
+        val giverBattleUnitId: String,
+        val giverGold: Int,
+        val receivers: List<GoldReceiver>,
+        val receiverIndex: Int,
+        val amount: Int,
+    ) {
+        val receiver: GoldReceiver = receivers[receiverIndex]
+        val maximum: Int = minOf(giverGold, receiver.room)
+
+        // Another receiver may have less room, so the amount is lowered to fit.
+        fun updated(
+            newReceivers: List<GoldReceiver> = receivers,
+            newIndex: Int = receiverIndex,
+            newGiverGold: Int = giverGold,
+        ): GivingGold = copy(giverGold = newGiverGold, receivers = newReceivers, receiverIndex = newIndex, amount = amount.coerceAtMost(minOf(newGiverGold, newReceivers[newIndex].room)))
+    }
+
+    /** A party member who can receive gold, and the tile it stands on. */
+    private data class GoldReceiver(
+        val battleUnitId: String,
+        val unitId: String,
+        val gold: Int,
+        val room: Int,
+        val position: PositionDto,
     )
 
     private val subscriptions =
@@ -123,6 +166,16 @@ class InventoryPresenter(
             eventBus.subscribe<ExplorationPaused> { timeline.play { abandonGiving() } },
             // The giver leaves the party, or a receiver can no longer receive: back to the item's actions, when the giver remains.
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingOf(event.battleUnitId) } },
+            // The bag is displayed again with the new gold, so the next give can start straight away, and the receiver flashes on its tile.
+            eventBus.subscribe<GoldGiven> { event -> timeline.play { finishGivingGold(event.battleUnitId) } },
+            eventBus.subscribe<GoldReceived> { event ->
+                refreshInventory(event.battleUnitId)
+                flashReceiver(event.battleUnitId)
+            },
+            // The gold and the room are read again, e.g.: a wandering rat dies on lava and completes a task.
+            eventBus.subscribe<RewardGranted> { event -> timeline.play { readGivingGoldAgain(event.battleUnitId) } },
+            eventBus.subscribe<ExplorationPaused> { timeline.play { abandonGivingGold() } },
+            eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingGoldOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
                 val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
                 timeline.play { askWhatToDoWith(event, foundItemName = texts.lootableItemName(foundItem.id), foundItemPrice = foundItem.price) }
@@ -131,6 +184,7 @@ class InventoryPresenter(
 
     init {
         inventoryView.setDelegate(this)
+        giveGoldView.setDelegate(this)
     }
 
     fun dispose() {
@@ -160,8 +214,7 @@ class InventoryPresenter(
             name = texts.unitName(battleUnit.unitId),
             partyIndex = partyIndex,
             partySize = party.battleUnitIds.size,
-            canGiveGold =
-                inventoryApi.searchGiveGoldRefusal(battleUnitId) == null,
+            canGiveGold = inventoryApi.searchGiveGoldRefusal(battleUnitId) == null,
         )
     }
 
@@ -213,8 +266,10 @@ class InventoryPresenter(
         giving = null
         displayedBattleUnitId = null
         displayedSlots = emptyList()
-        if (selectedSlotIndex != null) playerCallToActionView.dismiss()
+        if (selectedSlotIndex != null || isReadingGoldRefusal || givingGold != null) playerCallToActionView.dismiss()
         selectedSlotIndex = null
+        isReadingGoldRefusal = false
+        givingGold = null
     }
 
     /**
@@ -396,16 +451,173 @@ class InventoryPresenter(
         timeline.playAlongside { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = receiver.unitId) }
     }
 
+    // Reads why no gold can be given, or opens the panel. Either way, the selected item is cleared.
+    private fun selectGold() {
+        val giverBattleUnitId = displayedBattleUnitId ?: return
+        val refusal = inventoryApi.searchGiveGoldRefusal(giverBattleUnitId)
+        if (refusal == null) {
+            startGivingGold(giverBattleUnitId)
+        } else {
+            val message = refusalMessage(refusal) ?: return
+            timeline.play {
+                clearSelectedSlot()
+                isReadingGoldRefusal = true
+                playerCallToActionView.displayGiveGoldRefusal(message, onDismissed = { isReadingGoldRefusal = false })
+            }
+        }
+    }
+
+    // A party that does not explore never displays the gold button.
+    private fun refusalMessage(refusal: GiveGoldRefusalDto): String? =
+        when (refusal) {
+            GiveGoldRefusalDto.NOT_EXPLORING -> null
+            GiveGoldRefusalDto.NO_GOLD -> texts[UiText.GIVE_GOLD_NO_GOLD]
+            GiveGoldRefusalDto.NO_ONE -> texts[UiText.GIVE_GOLD_NO_ONE]
+            GiveGoldRefusalDto.GOLD_FULL -> texts[UiText.GIVE_GOLD_GOLD_FULL]
+        }
+
+    private fun clearSelectedSlot() {
+        selectedSlotIndex = null
+        inventoryView.selectSlot(null)
+    }
+
+    private fun goldReceiversOf(giverBattleUnitId: String): List<GoldReceiver> =
+        inventoryApi.searchGoldReceivers(giverBattleUnitId).mapNotNull { receiver ->
+            val unitId = battleUnitApi.searchBattleUnitById(receiver.battleUnitId)?.unitId ?: return@mapNotNull null
+            val position = battlefieldApi.searchPosition(receiver.battleUnitId) ?: return@mapNotNull null
+            GoldReceiver(battleUnitId = receiver.battleUnitId, unitId = unitId, gold = receiver.gold, room = receiver.room, position = position)
+        }
+
+    private fun startGivingGold(giverBattleUnitId: String) {
+        val receivers = goldReceiversOf(giverBattleUnitId)
+        if (receivers.isEmpty()) return
+        val current = GivingGold(giverBattleUnitId, giverGold = goldOf(giverBattleUnitId), receivers = receivers, receiverIndex = 0, amount = 1)
+        timeline.play {
+            clearSelectedSlot()
+            isReadingGoldRefusal = false
+            givingGold = current
+            displayGivingGold(current)
+            playerCallToActionView.displayGiveGold(
+                amount = current.amount,
+                maximum = current.maximum,
+                onCancelled = { if (!timeline.isPlaying) cancelGivingGold() },
+                onAll = { giveAllGold() },
+                onGiven = { giveGold() },
+            )
+            battleHudView.displayGiveGoldView()
+        }
+    }
+
+    // Displays the panel and the receivers' tiles, as anything but the slider changes what they show.
+    private fun displayGivingGold(current: GivingGold) {
+        val giverUnitId = battleUnitApi.searchBattleUnitById(current.giverBattleUnitId)?.unitId ?: return
+        giveGoldView.display(
+            giver = GiveGoldView.Member(name = texts.unitName(giverUnitId), unitId = giverUnitId, gold = current.giverGold),
+            receiver = GiveGoldView.Member(name = texts.unitName(current.receiver.unitId), unitId = current.receiver.unitId, gold = current.receiver.gold),
+            amount = current.amount,
+            maximum = current.maximum,
+            canStepToPrevious = current.receiverIndex > 0,
+            canStepToNext = current.receiverIndex < current.receivers.lastIndex,
+        )
+        playerCallToActionView.updateGiveGold(amount = current.amount, maximum = current.maximum)
+        battlefieldView.resetTiles()
+        battlefieldView.dimTilesExcept(BattlefieldMapper.positions(current.receivers.map { receiver -> receiver.position }.toSet()))
+        battlefieldView.displayTileSelection(row = current.receiver.position.row, column = current.receiver.position.column)
+    }
+
+    private fun updateGivingGold(change: (GivingGold) -> GivingGold) {
+        timeline.play {
+            val current = givingGold ?: return@play
+            val changed = change(current)
+            givingGold = changed
+            displayGivingGold(changed)
+        }
+    }
+
+    private fun giveAllGold() = updateGivingGold { current -> current.copy(amount = current.maximum) }
+
+    private fun chooseReceiver(index: Int) = updateGivingGold { current -> if (index in current.receivers.indices) current.updated(newIndex = index) else current }
+
+    private fun giveGold() {
+        val current = givingGold ?: return
+        if (!timeline.isPlaying) inventoryApi.giveGold(giverBattleUnitId = current.giverBattleUnitId, receiverBattleUnitId = current.receiver.battleUnitId, amount = current.amount)
+    }
+
+    private fun finishGivingGold(giverBattleUnitId: String) {
+        if (givingGold == null) return
+        displayBagAgain(giverBattleUnitId)
+        restoreGiverSelection(battlefieldApi.searchPosition(giverBattleUnitId))
+    }
+
+    // Back to the bag with nothing moved, with the giver selected again.
+    private fun cancelGivingGold() {
+        val current = givingGold ?: return
+        timeline.play { finishGivingGold(current.giverBattleUnitId) }
+    }
+
+    private fun displayBagAgain(giverBattleUnitId: String) {
+        givingGold = null
+        playerCallToActionView.dismiss()
+        displayInventory(giverBattleUnitId, slotsOf(giverBattleUnitId), goldOf(giverBattleUnitId), ownerOf(giverBattleUnitId))
+    }
+
+    private fun abandonGivingGold() {
+        val current = givingGold ?: return
+        displayBagAgain(current.giverBattleUnitId)
+        battlefieldView.resetTiles()
+    }
+
+    // The giver being defeated abandons the give. A receiver being defeated moves on to the next one.
+    private fun abandonGivingGoldOf(battleUnitId: String) {
+        val current = givingGold ?: return
+        when {
+            battleUnitId == current.giverBattleUnitId -> abandonGivingGold()
+            current.receivers.any { receiver -> receiver.battleUnitId == battleUnitId } ->
+                continueGivingGold(current, current.receivers.filterNot { receiver -> receiver.battleUnitId == battleUnitId })
+        }
+    }
+
+    // A reward takes room from a receiver or adds gold to the giver, so both are read again.
+    private fun readGivingGoldAgain(battleUnitId: String) {
+        val current = givingGold ?: return
+        val isInvolved = battleUnitId == current.giverBattleUnitId || current.receivers.any { receiver -> receiver.battleUnitId == battleUnitId }
+        if (isInvolved) continueGivingGold(current, goldReceiversOf(current.giverBattleUnitId), goldOf(current.giverBattleUnitId))
+    }
+
+    // The chosen receiver stays while it can receive gold, or the next one takes its place. Back to the bag when none is left.
+    private fun continueGivingGold(
+        current: GivingGold,
+        receivers: List<GoldReceiver>,
+        giverGold: Int = current.giverGold,
+    ) {
+        if (receivers.isEmpty()) {
+            finishGivingGold(current.giverBattleUnitId)
+            return
+        }
+        val chosenIndex = receivers.indexOfFirst { receiver -> receiver.battleUnitId == current.receiver.battleUnitId }
+        val index = if (chosenIndex >= 0) chosenIndex else current.receiverIndex.coerceAtMost(receivers.lastIndex)
+        val changed = current.updated(newReceivers = receivers, newIndex = index, newGiverGold = giverGold)
+        givingGold = changed
+        displayGivingGold(changed)
+    }
+
     private fun isExploring(): Boolean = partyApi.searchParty()?.isExploring == true
 
     /**
-     * Gives the item to the party member on the tile, while giving. Returns whether the tap was taken, so the battlefield
-     * ignores it: every tap is taken while giving, also the ones on a tile no receiver stands on.
+     * Gives the item to the party member on the tile, while giving, or chooses it to receive the gold, while giving gold.
+     * Returns whether the tap was taken, so the battlefield ignores it: every tap is taken meanwhile, also the ones on a tile
+     * no receiver stands on.
      */
     fun tileSelected(
         row: Int,
         column: Int,
     ): Boolean {
+        val currentGold = givingGold
+        if (currentGold != null) {
+            val index = currentGold.receivers.indexOfFirst { receiver -> receiver.position == PositionDto(row = row, column = column) }
+            if (index >= 0) chooseReceiver(index)
+            return true
+        }
         val current = giving ?: return false
         val receiverId = current.receivers[PositionDto(row = row, column = column)] ?: return true
         if (!timeline.isPlaying) {
@@ -429,9 +641,9 @@ class InventoryPresenter(
     }
 
     // The player can only act once the scene shows the current state of the battle, has chosen what to do with the found
-    // item, has given the item or cancelled giving it, and once the party member switched to is selected.
+    // item, has given the item or the gold or cancelled giving it, and once the party member switched to is selected.
     private fun whenIdle(action: () -> Unit) {
-        if (!timeline.isPlaying && choice == null && giving == null && switchingTo == null) action()
+        if (!timeline.isPlaying && choice == null && giving == null && givingGold == null && switchingTo == null) action()
     }
 
     // Delegates
@@ -446,7 +658,20 @@ class InventoryPresenter(
 
     override fun inventoryOwnerStepped(step: Int) = whenIdle { switchOwner(step) }
 
-    override fun goldSelected() = Unit
+    override fun goldSelected() = whenIdle { selectGold() }
+
+    override fun amountChanged(amount: Int) {
+        timeline.play {
+            val current = givingGold ?: return@play
+            givingGold = current.copy(amount = amount)
+            playerCallToActionView.updateGiveGold(amount = amount, maximum = current.maximum)
+        }
+    }
+
+    override fun receiverStepped(step: Int) {
+        val current = givingGold ?: return
+        chooseReceiver(current.receiverIndex + step)
+    }
 
     override fun inventoryClosed() =
         whenIdle {
