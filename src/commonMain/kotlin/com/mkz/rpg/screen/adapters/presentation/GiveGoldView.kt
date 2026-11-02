@@ -36,9 +36,9 @@ open class GiveGoldView(
         private const val COLUMN_WIDTH = (WIDTH - 2 * MARGIN) / 2
         private const val GIVER_CENTER = MARGIN + COLUMN_WIDTH / 2
         private const val RECEIVER_CENTER = MARGIN + 3 * COLUMN_WIDTH / 2
-        private const val PORTRAIT = 96.0
+        private const val PORTRAIT = 104.0
         private const val PORTRAIT_SCALE = 3.0
-        private const val PORTRAIT_Y = 34.0
+        private const val PORTRAIT_Y = 32.0
         private const val NAME_Y = PORTRAIT_Y + PORTRAIT + 3.0
         private const val GOLD_Y = NAME_Y + 22.0
         private const val AMOUNT_Y = GOLD_Y + 26.0
