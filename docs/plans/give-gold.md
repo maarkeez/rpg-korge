@@ -1,6 +1,6 @@
 # Plan: Give gold between party members, from a panel in place of the bag
 
-> **Status:** in progress.
+> **Status:** done.
 >
 > **Summary:** Each battle unit carries its own gold, and the only way to move it is not to: a knight with 20 G can not buy the 50 G hammer while the viking beside it carries 100 G, as [Giving](../architecture/inventory.md#giving) moves items only ("Gold is never given"). Instead, while exploring, the gold on the bag's title line looks like a button. Tapping it opens a panel in place of the bag, with the giver, the receiver, what each would carry and a slider, while Cancel, All and Give sit at the level of the finish turn. Giving moves the gold, goes back to the bag and flashes the receiver. A faded button reads why when no gold can be given. Chosen among the Storybook prototypes of the local branch `prototype/give-gold` (`6b7c817a`): flow C with its buttons moved down, the faded button that reads why, and the flash only. It builds on [Inventory](../architecture/inventory.md), [Exploration](../architecture/exploration.md), the [Presentation timeline](../architecture/presentation-timeline.md), [Localization](../architecture/localization.md) and the [battle HUD](battle-hud-vector-chrome.md), whose vector chrome it draws with.
 
@@ -27,7 +27,7 @@
 | Limit                   | The amount never goes above what the receiver can carry, so no gold is lost: a receiver with 99,990 G takes at most 9 G, and one at 99,999 G can not be chosen. `giveGold` still fails above it (`GoldAboveLimit`). Chosen over the excess being lost, as with a reward, as a give can be refused.                                                                            |
 | Flow                    | Variant C, a panel in place of the bag, with everything on one view. Chosen over a stepper, whose 25 G takes 9 taps, chips, which can not give 25 G, and a keypad, the only one of the game.                                                                                                                                                                                  |
 | Buttons                 | Cancel, All and Give sit in the call to action, at the level of Finish turn, as tall as it, so every action of the game is on one level and the panel keeps the height of the battle HUD. It replaces the prototype, where they were inside the panel. Give is blue like Finish turn and reads the amount, e.g.: `Give 25 G`.                                                 |
-| Panel                   | 378x292, at the x of the quest detail view, in the 300 of the battle HUD. The room freed by the buttons goes to the portraits, at 3× (96) instead of the prototype's 2×. The giver is ringed in `HudStyle.SELECTION` and the receiver in `HudStyle.ALLY`.                                                                                                                     |
+| Panel                   | 378x292, at the x of the quest detail view, in the 300 of the battle HUD. The room freed by the buttons goes to the portraits, at 3× in a slot of 104, so the ring shows around them, instead of the prototype's 2×. The giver is ringed in `HudStyle.SELECTION` and the receiver in `HudStyle.ALLY`.                                                                                                                     |
 | Starting the give       | Tapping the gold button, once the timeline is idle, clearing the selected item. It is ignored while giving an item or choosing what to do with a found one (`whenIdle`). Chosen over a Give gold button in the empty call to action, as the gold is where the player looks for it.                                                                                            |
 | Gold button             | Only while exploring: in a battle the gold stays the plain text it is today, as it can not be given. It is drawn with `GameButton`'s colours and a coin, right aligned where the gold is.                                                                                                                                                                                     |
 | Can not give            | The button is faded, and tapping it displays why in the call to action, with OK: `No gold to give`, `No one to give gold to` or `Everyone's gold is full`. Chosen over a tap doing nothing, as the player would have to guess.                                                                                                                                                |
@@ -65,7 +65,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The rules   | `inventoryApi.giveGold` moves the gold, and the refusal and receivers can be asked. Nothing on the screen yet.                                                       | ✅      | `291e4175` |
 | M2 | The views   | The gold button, the panel, its buttons and the refusal have their stories and texts, and the user has approved them on screenshots. The game does not use them yet. | ✅      | `f90f7e29` |
-| M3 | In the game | The gold can be given while exploring, from the bag to the flash, with the docs up to date.                                                                          | ⬜      |         |
+| M3 | In the game | The gold can be given while exploring, from the bag to the flash, with the docs up to date.                                                                          | ✅      | `b1c373fe` |
 
 ### M1 commits
 
@@ -112,7 +112,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 - `GoldButtonView(onSelected)` draws a rounded button with a coin and the amount, with `GameButton`'s colours, or faded. It can still be tapped when faded.
 - `InventoryView.Owner` gains `canGiveGold`. With an owner, `InventoryView.display` draws `GoldButtonView` in place of `goldView`, faded when it can not. Without one, the gold stays plain text. `InventoryView.Delegate` gains `goldSelected()`.
-- `GiveGoldView(resourcesLoader, texts)` is the panel, taking plain data through `display(giver, receiver, amount, maximum, canStepToPrevious, canStepToNext)`, with `GiveGoldView.Member(name, unitId, gold)`. Its `Delegate` has `amountChanged(amount)` and `receiverStepped(step)`.
+- `GiveGoldView(resourcesLoader, texts)` is the panel, taking plain data through `display(giver, receiver, amount, maximum, canStepToPrevious, canStepToNext)`, with `GiveGoldView.Member(name, unitId, gold)`. Its `Delegate` has `amountChanged(amount)`, `amountSettled(amount)`, for the Storybook to set its control once the slider is released, and `receiverStepped(step)`.
   - It follows the finger on its own, calling `amountChanged` on every whole amount, and only displays again when asked, so a drag is not interrupted.
   - E.g.: `Knight 120 G > 95 G` and `Viking 100 G > 125 G`, with 25 G above the slider.
 - `GiveGoldActionsView(texts, onCancelled, onAll, onGiven)` is the row of the call to action: three `gameButton`s of `(390 - 2 × 10) / 3`, as tall as Finish turn (`UIButton.DEFAULT_SIZE.height`). Give is `ConfirmButton.COLOR`. `displayAmount(amount, maximum)` updates `Give 25 G`, and disables All at the maximum.
@@ -154,7 +154,7 @@ New `UiText` entries, in `messages.pot` and `es.po`, with a comment each:
 ### Storybook
 
 - `GoldButtonViewStories`: **Screen / Gold button › Default** (`screen-gold-button--default`) and **› Faded** (`screen-gold-button--faded`), with its `gold` (int, 0 to 99,999) and `faded` (boolean) controls.
-- `GiveGoldViewStories`: **Screen / Give gold › Default** (`screen-give-gold--default`), **› Several receivers** (`screen-give-gold--several-receivers`), **› Limited by the receiver** (`screen-give-gold--limited`, 9 G at most) and **› Long names** (`screen-give-gold--long-names`). Its `amount`, `giverGold`, `receiverGold` (int, 0 to 99,999) and `receivers` (int, 1 to 3) controls. Dragging the slider maps to `amount`, on its release.
+- `GiveGoldViewStories`: **Screen / Give gold › Default** (`screen-give-gold--default`), **› Several receivers** (`screen-give-gold--several-receivers`), **› Limited by the receiver** (`screen-give-gold--limited`, 9 G at most) and **› Long names** (`screen-give-gold--long-names`). Its `amount`, `giverGold`, `receiverGold` and `receivers` (int, 1 to 3) controls, within what the panel can open with: 1 to 99,999 G for the amount and the giver, and at most 99,998 G for the receiver. Its `receiverIndex`, `giverName` and `receiverName` controls switch the receiver and write the long names. Dragging the slider maps to `amount`, on its release.
 - `GiveGoldActionsViewStories`: **Screen / Give gold actions › Default** (`screen-give-gold-actions--default`) and **› At the maximum** (`screen-give-gold-actions--at-the-maximum`).
 - `GiveGoldRefusalViewStories`: **Screen / Give gold refusal › No gold** (`screen-give-gold-refusal--no-gold`), **› No one** (`screen-give-gold-refusal--no-one`) and **› Gold full** (`screen-give-gold-refusal--gold-full`).
 - `InventoryViewStories`: its exploring stories display the gold button, and **› Exploring, no gold** (`screen-inventory--exploring-no-gold`) the faded one. It takes no new control, as it has the 8 that fit: the button fades with `gold` at 0 or `partySize` at 1.
@@ -232,7 +232,7 @@ New `UiText` entries, in `messages.pot` and `es.po`, with a comment each:
 
 ### Known limitations
 
-- The slider has only been tried with a mouse in the Storybook, so its feel on a phone is to be checked in M3. The - and + stay as the exact fallback.
+- The slider has only been tried with a mouse, so its feel on a phone is still to be checked. The - and + stay as the exact fallback.
 - Large amounts take many taps of - and +, as they do not repeat while held: the slider and All cover them.
 - A member short of gold at a merchant leaves the shop to receive some, and comes back.
 - The Spanish texts are written with the plan, and not yet reviewed by a translator.
