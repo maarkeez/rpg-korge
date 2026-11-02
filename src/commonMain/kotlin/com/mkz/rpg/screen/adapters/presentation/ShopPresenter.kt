@@ -10,6 +10,7 @@ import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -167,11 +168,16 @@ class ShopPresenter(
         selectedSlotIndex = slotIndex
         shopView.selectSlot(slotIndex)
         val refusal = refusal(buyerId, lootableItemId)
+        val (color, pressedColor) =
+            when (mode) {
+                Mode.BUY -> ConfirmButton.COLOR to ConfirmButton.PRESSED_COLOR
+                Mode.SELL -> GameButton.GREY to GameButton.GREY_OVER
+            }
         shopView.displayItem(texts.lootableItemName(lootableItem.id), price)
         playerCallToActionView.displayActions(
             listOf(
                 backAction(),
-                ActionRowView.Action(refusal?.let(::refusalText) ?: actionLabel, isEnabled = refusal == null) { whenIdle { trade() } },
+                ActionRowView.Action(refusal?.let(::refusalText) ?: actionLabel, color, pressedColor, isEnabled = refusal == null) { whenIdle { trade() } },
             ),
         )
     }

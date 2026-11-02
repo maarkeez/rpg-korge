@@ -15,6 +15,7 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -352,6 +353,29 @@ class ShopPresenterTest {
             .last()
             .isEnabled
             .shouldBeTrue()
+    }
+
+    @Test
+    fun `Selecting an item to buy should display Buy in blue`() {
+        // Given
+        openTheShop()
+        presenter.shopBuyerStepped(1)
+        // When
+        presenter.shopSlotSelected(1)
+        // Then
+        callToActionView.displayedActions!!.last().color shouldBe ConfirmButton.COLOR
+        callToActionView.displayedActions!!.last().pressedColor shouldBe ConfirmButton.PRESSED_COLOR
+    }
+
+    @Test
+    fun `Selecting an item to sell should display Sell in grey`() {
+        // Given
+        reopenToSellTheVikingsHammer()
+        // When
+        presenter.shopSlotSelected(0)
+        // Then
+        callToActionView.displayedActions!!.last().color shouldBe GameButton.GREY
+        callToActionView.displayedActions!!.last().pressedColor shouldBe GameButton.GREY_OVER
     }
 
     @Test

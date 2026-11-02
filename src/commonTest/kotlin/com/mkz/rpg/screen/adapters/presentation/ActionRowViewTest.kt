@@ -40,7 +40,7 @@ class ActionRowViewTest : ViewsForTesting() {
     fun `ActionRowView should share the width in thirds when it has three actions`() =
         sharedViewsTest {
             // When
-            val rowView = ActionRowView(listOf("Buy", "Sell", "Leave").map { label -> ActionRowView.Action(label) {} })
+            val rowView = ActionRowView(listOf("Leave", "Sell", "Buy").map { label -> ActionRowView.Action(label) {} })
             // Then
             val last = rowView.buttons.last()
             abs(last.x + last.width - rowWidth) shouldBeLessThan 0.001

@@ -22,6 +22,7 @@ import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLo
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -673,14 +674,26 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `ExplorationPresenter should display Buy, Sell and Leave when a merchant talks`() {
+    fun `ExplorationPresenter should display Leave, Sell and Buy when a merchant talks`() {
         // Given
         createPresenter()
         startExploring()
         // When
         talkToTheMerchant()
         // Then
-        playerCallToActionView.actionLabels().shouldContainExactly("Buy", "Sell", "Leave")
+        playerCallToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
+    }
+
+    @Test
+    fun `ExplorationPresenter should display only Buy in blue when a merchant talks`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        talkToTheMerchant()
+        // Then
+        playerCallToActionView.displayedActions!!.map { action -> action.color }.shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        playerCallToActionView.displayedActions!!.last().pressedColor shouldBe ConfirmButton.PRESSED_COLOR
     }
 
     @Test
@@ -788,7 +801,7 @@ class ExplorationPresenterTest {
         shopPresenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
         npcDialogView.visible.shouldBeTrue()
-        playerCallToActionView.actionLabels().shouldContainExactly("Buy", "Sell", "Leave")
+        playerCallToActionView.actionLabels().shouldContainExactly("Leave", "Sell", "Buy")
         virtualPadView.visible.shouldBeFalse()
         playerCallToActionView.visible.shouldBeTrue()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"

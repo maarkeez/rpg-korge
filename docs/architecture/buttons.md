@@ -26,7 +26,8 @@ border with it, whenever `enabled` changes.
 buttons of a panel at the level of Finish turn and as tall as it, so a thumb has one place to go. They share the 390 of
 the row with a spacing of 10: Back alone is 390, Back and Abandon are 190 each, and three buttons are 123.3 each. The
 first one always starts on the left, so Back does not jump when stepping out. Each is grey, but for an action that can
-not be undone, in `HudStyle.DANGER`, and a disabled one fades as any other.
+not be undone, in `HudStyle.DANGER`, and Buy, blue as Finish turn, in `ConfirmButton.COLOR`. A disabled one fades as any
+other.
 
 The presenter of the panel owns the actions and displays them with `PlayerCallToActionView.displayActions`. A tap does
 not dismiss them, unlike the item actions: the presenter displays what follows. `hideActions` removes the row and
@@ -48,8 +49,8 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
   turn, blue, disabled while the turn can not be ended.
 - [`ActionRowView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ActionRowView.kt): Back and
   Abandon of the quest journal and the detail view, Back of the save slots, both choices of every question, Close of the
-  formation, Back and Buy or Sell of the shop, disabled with the reason it can not, e.g.: `Not enough gold`, and Buy, Sell
-  and Leave of a merchant.
+  formation, Back and Buy or Sell of the shop, disabled with the reason it can not, e.g.: `Not enough gold`, and Leave, Sell
+  and Buy of a merchant.
 
 A new button of a view is a `gameButton`, so a disabled one looks disabled. The buttons drawn with images (e.g.: the
 abilities, the bag, the virtual pad, the terrains of the map builder) and the Storybook's own buttons are not.

@@ -2,11 +2,13 @@ package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.STORYBOOK_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.ActionRowView
+import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.HealthBarView
 import com.mkz.rpg.screen.adapters.presentation.ShopView
 import com.mkz.rpg.screen.adapters.presentation.clickSlot
 import com.mkz.rpg.screen.adapters.presentation.footerPrice
 import com.mkz.rpg.screen.adapters.presentation.selectedSlotIndexes
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
@@ -188,6 +190,18 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             waitUntil { stage.actionsView()?.actionTexts()?.size == 2 }
             stage.actionsView()?.actionTexts().shouldContainExactly("onSelected(Buy)", "onSelected(Back)")
             stage.phoneFrameView()?.displayedView() shouldBe rowView
+        }
+
+    @Test
+    fun `should display the last button of the action row in blue when the story has it primary`() =
+        sharedViewsTest {
+            // When
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--three-actions"))
+            waitUntil { stage.phoneFrameView()?.displayedView() is ActionRowView }
+            // Then
+            val rowView = stage.phoneFrameView()?.displayedView() as ActionRowView
+            rowView.buttons.map { button -> button.text }.shouldContainExactly("Leave", "Sell", "Buy")
+            rowView.buttons.map { button -> button.bgColorOut }.shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
         }
 
     @Test

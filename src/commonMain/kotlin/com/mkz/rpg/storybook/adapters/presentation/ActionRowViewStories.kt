@@ -1,6 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ActionRowView
+import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.HudStyle
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
@@ -13,6 +14,7 @@ object ActionRowViewStories : StoryBinding {
     private const val FIRST = "first"
     private const val SECOND = "second"
     private const val THIRD = "third"
+    private const val LAST_IS_PRIMARY = "lastIsPrimary"
     private const val LAST_IS_DANGER = "lastIsDanger"
     private const val LAST_IS_ENABLED = "lastIsEnabled"
 
@@ -34,6 +36,7 @@ object ActionRowViewStories : StoryBinding {
                     ControlDto.text(FIRST),
                     ControlDto.text(SECOND),
                     ControlDto.text(THIRD),
+                    ControlDto.boolean(LAST_IS_PRIMARY),
                     ControlDto.boolean(LAST_IS_DANGER),
                     ControlDto.boolean(LAST_IS_ENABLED),
                 ),
@@ -42,21 +45,23 @@ object ActionRowViewStories : StoryBinding {
                     FIRST to ArgDto.text("Back"),
                     SECOND to ArgDto.text(""),
                     THIRD to ArgDto.text(""),
+                    LAST_IS_PRIMARY to ArgDto.boolean(false),
                     LAST_IS_DANGER to ArgDto.boolean(false),
                     LAST_IS_ENABLED to ArgDto.boolean(true),
                 ),
             stories =
                 listOf(
                     story("one-action", "One action", "A lone button fills the row, e.g.: Back of the journal."),
-                    story("two-actions", "Two actions", "Two buttons share it in halves, e.g.: Back and Buy in the shop.", SECOND to ArgDto.text("Buy")),
+                    story("two-actions", "Two actions", "Two buttons share it in halves, e.g.: Back and Buy in the shop.", SECOND to ArgDto.text("Buy"), LAST_IS_PRIMARY to ArgDto.boolean(true)),
                     story("danger", "Danger", "An action that can not be undone, in red, e.g.: Abandon.", SECOND to ArgDto.text("Abandon"), LAST_IS_DANGER to ArgDto.boolean(true)),
                     story(
                         "three-actions",
                         "Three actions",
                         "Three buttons share it in thirds, e.g.: the merchant's choices.",
-                        FIRST to ArgDto.text("Buy"),
+                        FIRST to ArgDto.text("Leave"),
                         SECOND to ArgDto.text("Sell"),
-                        THIRD to ArgDto.text("Leave"),
+                        THIRD to ArgDto.text("Buy"),
+                        LAST_IS_PRIMARY to ArgDto.boolean(true),
                     ),
                     story(
                         "disabled-action",
@@ -77,10 +82,10 @@ object ActionRowViewStories : StoryBinding {
             labels.mapIndexed { index, label ->
                 val isLast = index == labels.lastIndex
                 val onSelected = { context.action("onSelected", label) }
-                if (isLast && args.boolean(LAST_IS_DANGER)) {
-                    ActionRowView.Action(label, HudStyle.DANGER, HudStyle.DANGER_PRESSED, onSelected = onSelected)
-                } else {
-                    ActionRowView.Action(label, isEnabled = !isLast || args.boolean(LAST_IS_ENABLED), onSelected = onSelected)
+                when {
+                    isLast && args.boolean(LAST_IS_DANGER) -> ActionRowView.Action(label, HudStyle.DANGER, HudStyle.DANGER_PRESSED, onSelected = onSelected)
+                    isLast && args.boolean(LAST_IS_PRIMARY) -> ActionRowView.Action(label, ConfirmButton.COLOR, ConfirmButton.PRESSED_COLOR, onSelected = onSelected)
+                    else -> ActionRowView.Action(label, isEnabled = !isLast || args.boolean(LAST_IS_ENABLED), onSelected = onSelected)
                 }
             },
         )

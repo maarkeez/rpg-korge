@@ -45,7 +45,7 @@ object NpcDialogViewStories : StoryBinding {
         StoryDto(
             id = "screen-npc-dialog--merchant",
             name = "Merchant",
-            description = "A merchant, whose line has the whole panel: its Buy, Sell and Leave are in the row of the call to action.",
+            description = "A merchant, whose line has the whole panel: its Leave, Sell and Buy are in the row of the call to action.",
             args = mapOf(NAME to ArgDto.text("Merchant"), LINE to ArgDto.text("Fine wares, for fine adventurers!"), NPC to ArgDto.text("merchant")),
         )
     private val recruitable =

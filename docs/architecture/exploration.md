@@ -86,7 +86,7 @@ The events are dispatched in the order they are published, so the tile is vacate
 
 ## Shopping at a merchant
 
-An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave in the [action row](buttons.md#the-action-row), and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
+An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Leave, Sell and Buy in the [action row](buttons.md#the-action-row), and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
 
 1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel, its 300 spread evenly: the buyer on top, 12 slots as the inventory does, and a line with the hint or the item. Its buttons are in the action row.
 2. The buyer is one party member at a time, the leader when the shop opens. The header displays its name, gold and bag (e.g.: `< Knight · 20 G · Bag 11/12 >`, or `Bag full`).

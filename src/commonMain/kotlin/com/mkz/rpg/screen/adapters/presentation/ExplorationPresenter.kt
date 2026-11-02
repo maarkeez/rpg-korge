@@ -314,7 +314,7 @@ class ExplorationPresenter(
         playerCallToActionView.visible = !isDisplayed
     }
 
-    // The dialog takes the place of the pad, with Buy, Sell and Leave in the row for a merchant.
+    // The dialog takes the place of the pad, with Leave, Sell and Buy in the row for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
         npcDialogView.display(NpcDialog(npcId = npc.id, unitId = npc.unitId, name = texts.npcName(npc.id), line = texts.npcLine(npc.id)))
         virtualPadView.visible = false
@@ -322,9 +322,9 @@ class ExplorationPresenter(
         if (npcApi.searchIsMerchant(npc.id)) {
             playerCallToActionView.displayActions(
                 listOf(
-                    ActionRowView.Action(texts[UiText.NPC_DIALOG_BUY]) { openShop(Mode.BUY) },
-                    ActionRowView.Action(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
                     ActionRowView.Action(texts[UiText.NPC_DIALOG_LEAVE]) { leaveMerchant() },
+                    ActionRowView.Action(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
+                    ActionRowView.Action(texts[UiText.NPC_DIALOG_BUY], ConfirmButton.COLOR, ConfirmButton.PRESSED_COLOR) { openShop(Mode.BUY) },
                 ),
             )
         }
