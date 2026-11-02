@@ -103,6 +103,16 @@ msgctxt "ui.itemActions.discard"
 msgid "Discard"
 msgstr ""
 
+#. Asked before discarding an item, once Discard or a stored item to swap is tapped. {item} is its name.
+msgctxt "ui.itemActions.discardQuestion"
+msgid "Discard {item}? It can't be undone."
+msgstr ""
+
+#. Steps back from the question to discard an item.
+msgctxt "ui.itemActions.back"
+msgid "Back"
+msgstr ""
+
 #. Gives the item to another party member.
 msgctxt "ui.itemActions.give"
 msgid "Give"

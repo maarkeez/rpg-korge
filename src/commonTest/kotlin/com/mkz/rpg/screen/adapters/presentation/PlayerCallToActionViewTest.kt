@@ -1,6 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneResourcesLoaderMother.loadedResourcesLoader
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -235,6 +236,57 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Then
             playerCallToActionView.giveItemMessage() shouldBe "Tap a party member to give: Hammer"
             cancelled.shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayItemActions should display an action in the colour it is given, and grey by default`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
+            addChild(playerCallToActionView)
+            // When
+            playerCallToActionView.displayItemActions(
+                itemName = "Health Potion",
+                itemPrice = 10,
+                actions =
+                    listOf(
+                        ItemActionsView.Action(label = "Cancel") {},
+                        ItemActionsView.Action(label = "Consume", color = ConfirmButton.COLOR, pressedColor = ConfirmButton.PRESSED_COLOR) {},
+                    ),
+            )
+            // Then
+            playerCallToActionView.itemActionColor("Cancel") shouldBe GameButton.GREY
+            playerCallToActionView.itemActionColor("Consume") shouldBe ConfirmButton.COLOR
+        }
+
+    @Test
+    fun `DisplayDiscardQuestion should display the question with Back in grey and Discard in red`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
+            addChild(playerCallToActionView)
+            // When
+            playerCallToActionView.displayDiscardQuestion(itemName = "Health Potion", onBack = {}, onDiscarded = {})
+            // Then
+            playerCallToActionView.discardQuestion() shouldBe "Discard Health Potion? It can't be undone."
+            playerCallToActionView.discardQuestionLabels().shouldContainExactly("Back", "Discard")
+            playerCallToActionView.discardQuestionColors().shouldContainExactly(GameButton.GREY, HudStyle.DANGER)
+        }
+
+    @Test
+    fun `DisplayDiscardQuestion should call the answer, staying displayed, when a button is clicked`() =
+        sharedViewsTest {
+            // Given
+            val answers = mutableListOf<String>()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
+            addChild(playerCallToActionView)
+            playerCallToActionView.displayDiscardQuestion(itemName = "Health Potion", onBack = { answers += "back" }, onDiscarded = { answers += "discarded" })
+            // When
+            clickDiscardQuestionBack(playerCallToActionView)
+            clickDiscardQuestionDiscard(playerCallToActionView)
+            // Then
+            answers.shouldContainExactly("back", "discarded")
+            playerCallToActionView.discardQuestionLabels().shouldContainExactly("Back", "Discard")
         }
 
     @Test

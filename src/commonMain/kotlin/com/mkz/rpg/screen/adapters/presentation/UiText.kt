@@ -27,6 +27,8 @@ enum class UiText(
     INVENTORY_CLOSE("ui.inventory.close"),
     ITEM_ACTIONS_CANCEL("ui.itemActions.cancel"),
     ITEM_ACTIONS_DISCARD("ui.itemActions.discard"),
+    ITEM_ACTIONS_DISCARD_QUESTION("ui.itemActions.discardQuestion"),
+    ITEM_ACTIONS_BACK("ui.itemActions.back"),
     ITEM_ACTIONS_GIVE("ui.itemActions.give"),
     ITEM_ACTIONS_NO_ONE("ui.itemActions.noOne"),
     ITEM_ACTIONS_BAGS_FULL("ui.itemActions.bagsFull"),

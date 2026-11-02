@@ -53,7 +53,7 @@ An item that is not stored stays on its tile: when a CPU battle unit or a summon
 
 Storing an item in a full inventory does not store it: it announces `InventoryFull` with the battle unit, the item and its tile, and the player chooses:
 
-1. To keep the new item: the screen discards one of the stored items with `discardItem`, then stores the new one with `storeLootedItem` and its tile.
+1. To keep the new item: the player taps one of the stored items and confirms, and the screen discards it with `discardItem`, then stores the new one with `storeLootedItem` and its tile.
 2. To leave the new item behind: nothing is called, and the item stays on its tile, to be looted later.
 
 ## Rewards

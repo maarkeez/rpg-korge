@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.gameButton
+import korlibs.image.color.RGBA
 import korlibs.korge.input.onClick
 import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIContainer
@@ -29,6 +30,8 @@ class ItemActionsView(
     data class Action(
         val label: String,
         val isEnabled: Boolean = true,
+        val color: RGBA = GameButton.GREY,
+        val pressedColor: RGBA = GameButton.GREY_OVER,
         val onSelected: () -> Unit,
     )
 
@@ -49,7 +52,7 @@ class ItemActionsView(
                     val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
                     actionButtons =
                         actions.map { action ->
-                            gameButton(action.label, Size(buttonWidth, UIButton.DEFAULT_SIZE.height)) {
+                            gameButton(action.label, Size(buttonWidth, UIButton.DEFAULT_SIZE.height), action.color, action.pressedColor) {
                                 enabled = action.isEnabled
                                 onClick { action.onSelected() }
                             }

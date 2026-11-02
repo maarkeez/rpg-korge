@@ -28,6 +28,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattleHudView.Display
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -164,6 +165,17 @@ class InventoryPresenterTest {
             .actions
             .single { action -> action.label == label }
             .onSelected()
+        eventBus.dispatch()
+    }
+
+    private fun colorsOfItemActions() =
+        playerCallToActionView.displayedItemActions
+            .shouldNotBeNull()
+            .actions
+            .map { action -> action.color }
+
+    private fun answerDiscardQuestion(answer: FakePlayerCallToActionView.DisplayedDiscardQuestion.() -> Unit) {
+        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().answer()
         eventBus.dispatch()
     }
 
@@ -343,6 +355,124 @@ class InventoryPresenterTest {
     }
 
     @Test
+    fun `SelectItem should display only Consume in blue when a consumable is clicked`() {
+        // Given
+        loot("knight-1", "health-potion")
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+        playerCallToActionView.displayedItemActions!!
+            .actions
+            .last()
+            .pressedColor shouldBe ConfirmButton.PRESSED_COLOR
+    }
+
+    @Test
+    fun `SelectItem should display only Equip in blue when an item to equip is clicked`() {
+        // Given
+        loot("knight-1", "hammer")
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+    }
+
+    @Test
+    fun `SelectItem should display only Unequip in blue when an equipped item is clicked`() {
+        // Given
+        loot("knight-1", "hammer")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Equip")
+        // When
+        clickSlot(0)
+        // Then
+        colorsOfItemActions().shouldContainExactly(GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
+    }
+
+    @Test
+    fun `Discard should ask first, keeping the item framed and stored, when discard is clicked`() {
+        // Given
+        loot("knight-1", "health-potion")
+        openKnightInventory()
+        clickSlot(0)
+        // When
+        clickItemAction("Discard")
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
+        playerCallToActionView.displayedItemActions.shouldBeNull()
+        inventoryView.selectedSlot shouldBe 0
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
+    }
+
+    @Test
+    fun `DiscardQuestion should discard the item and clear the selection when discard is clicked`() {
+        // Given
+        loot("knight-1", "health-potion")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Discard")
+        // When
+        answerDiscardQuestion { onDiscarded() }
+        // Then
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe emptyList()
+        inventoryView.displayedSlots.last().shouldBeEmpty()
+        inventoryView.selectedSlot.shouldBeNull()
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+    }
+
+    @Test
+    fun `DiscardQuestion should display the item's actions again, discarding nothing, when back is clicked`() {
+        // Given
+        loot("knight-1", "health-potion")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Discard")
+        // When
+        answerDiscardQuestion { onBack() }
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemName shouldBe "Health Potion"
+        inventoryView.selectedSlot shouldBe 0
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
+    }
+
+    @Test
+    fun `DiscardQuestion should give way to the actions of another item, discarding nothing, when it is clicked`() {
+        // Given
+        loot("knight-1", "health-potion")
+        loot("knight-1", "hammer")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Discard")
+        // When
+        clickSlot(1)
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemName shouldBe "Hammer"
+        inventoryView.selectedSlot shouldBe 1
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion", "hammer")
+    }
+
+    @Test
+    fun `DiscardQuestion should be dropped, discarding nothing, when the inventory is closed`() {
+        // Given
+        loot("knight-1", "health-potion")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Discard")
+        // When
+        inventoryView.delegate.shouldNotBeNull().inventoryClosed()
+        eventBus.dispatch()
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe listOf("health-potion")
+    }
+
+    @Test
     fun `ConsumeItem should consume the item and display the finish turn again when consume is clicked`() {
         // Given
         loot("knight-1", "health-potion")
@@ -418,13 +548,78 @@ class InventoryPresenterTest {
     }
 
     @Test
-    fun `InventoryFull should discard the tapped item and store the found one when a stored item is tapped`() {
+    fun `InventoryFull should ask first, keeping the choice open, when a stored item is tapped`() {
         // Given
         fillKnightInventoryWithHealthPotions()
         findWhileFull("hammer")
         // When
         clickSlot(0)
         // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull().itemName shouldBe "Health Potion"
+        playerCallToActionView.displayedInventoryFull.shouldBeNull()
+        inventoryView.selectedSlot shouldBe 0
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(12) { "health-potion" }
+        timeline.isPlaying.shouldBeTrue()
+    }
+
+    @Test
+    fun `InventoryFull should display the found item again, with no item framed, when back is clicked`() {
+        // Given
+        fillKnightInventoryWithHealthPotions()
+        findWhileFull("hammer")
+        clickSlot(0)
+        // When
+        answerDiscardQuestion { onBack() }
+        // Then
+        playerCallToActionView.displayedInventoryFull.shouldNotBeNull().foundItemName shouldBe "Hammer"
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        inventoryView.selectedSlot.shouldBeNull()
+        apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(12) { "health-potion" }
+        timeline.isPlaying.shouldBeTrue()
+    }
+
+    @Test
+    fun `InventoryFull should move the question when another stored item is tapped`() {
+        // Given
+        fillKnightInventoryWithHealthPotions()
+        findWhileFull("hammer")
+        clickSlot(0)
+        // When
+        clickSlot(3)
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldNotBeNull()
+        inventoryView.selectedSlot shouldBe 3
+        timeline.isPlaying.shouldBeTrue()
+    }
+
+    @Test
+    fun `InventoryFull should ignore an equipped item when it is tapped`() {
+        // Given
+        loot("knight-1", "hammer")
+        openKnightInventory()
+        clickSlot(0)
+        clickItemAction("Equip")
+        repeat(11) { loot("knight-1", "health-potion") }
+        findWhileFull("hammer")
+        // When
+        clickSlot(0)
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
+        inventoryView.selectedSlot.shouldBeNull()
+    }
+
+    @Test
+    fun `InventoryFull should discard the tapped item and store the found one when the question is answered`() {
+        // Given
+        fillKnightInventoryWithHealthPotions()
+        findWhileFull("hammer")
+        clickSlot(0)
+        // When
+        answerDiscardQuestion { onDiscarded() }
+        // Then
+        playerCallToActionView.displayedDiscardQuestion.shouldBeNull()
+        inventoryView.selectedSlot.shouldBeNull()
         apis.inventoryApi.searchInventoryByBattleUnitId("knight-1")?.storedItems shouldBe List(11) { "health-potion" } + "hammer"
         apis.lootDropApi.searchDroppedItems()[LootDrop.Dto.PositionDto(1, 2)].shouldBeNull()
         playerCallToActionView.displayedInventoryFull.shouldBeNull()

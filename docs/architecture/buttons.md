@@ -42,7 +42,10 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
 - [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt): the arrows that switch
   the buyer. Back and Buy or Sell are in the action row.
 - [`ItemActionsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ItemActionsView.kt): the
-  actions on the selected item, e.g.: Give, disabled as `No one` or `Bags full`.
+  actions on the selected item, e.g.: Give, disabled as `No one` or `Bags full`, with Consume, Equip and Unequip in blue
+  (`ConfirmButton.COLOR`).
+- [`DiscardQuestionView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/DiscardQuestionView.kt):
+  Back and Discard, in red, of the question asked before discarding an item, in an `ActionRowView` of its own.
 - [`MapBuilderHudView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/MapBuilderHudView.kt): the
   steps of the rows and the columns, disabled out of the allowed sizes.
 - [`FinishTurnView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt): Finish

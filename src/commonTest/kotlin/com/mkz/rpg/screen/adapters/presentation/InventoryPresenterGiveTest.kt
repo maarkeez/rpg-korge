@@ -20,6 +20,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBattlefieldView.BattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
+import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
@@ -153,6 +154,10 @@ class InventoryPresenterGiveTest {
             .actions
             .map { action -> action.label to action.isEnabled }
             .shouldContainExactly("Cancel" to true, "Discard" to true, "Give" to true, "Consume" to true)
+        playerCallToActionView.displayedItemActions!!
+            .actions
+            .map { action -> action.color }
+            .shouldContainExactly(GameButton.GREY, GameButton.GREY, GameButton.GREY, ConfirmButton.COLOR)
     }
 
     @Test

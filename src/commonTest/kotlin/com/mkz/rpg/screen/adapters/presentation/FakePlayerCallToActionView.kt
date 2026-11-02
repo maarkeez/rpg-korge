@@ -18,6 +18,12 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         val actions: List<ItemActionsView.Action>,
     )
 
+    data class DisplayedDiscardQuestion(
+        val itemName: String,
+        val onBack: () -> Unit,
+        val onDiscarded: () -> Unit,
+    )
+
     data class DisplayedInventoryFull(
         val foundItemName: String,
         val foundItemPrice: Int,
@@ -45,6 +51,8 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
 
     // What the call to action displays last, e.g.: the item actions. `null` once dismissed.
     var displayedItemActions: DisplayedItemActions? = null
+        private set
+    var displayedDiscardQuestion: DisplayedDiscardQuestion? = null
         private set
     var displayedInventoryFull: DisplayedInventoryFull? = null
         private set
@@ -82,6 +90,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
 
     override fun dismiss() {
         displayedItemActions = null
+        displayedDiscardQuestion = null
         displayedInventoryFull = null
         displayedGiveItem = null
         displayedGiveGold = null
@@ -137,6 +146,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         itemPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
+        displayedDiscardQuestion = null
         displayedInventoryFull = null
         displayedGiveItem = null
         displayedGiveGoldRefusal = null
@@ -156,6 +166,16 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         displayedItemActions = itemActions
     }
 
+    override fun displayDiscardQuestion(
+        itemName: String,
+        onBack: () -> Unit,
+        onDiscarded: () -> Unit,
+    ) {
+        displayedItemActions = null
+        displayedInventoryFull = null
+        displayedDiscardQuestion = DisplayedDiscardQuestion(itemName, onBack, onDiscarded)
+    }
+
     override fun displayGiveItem(
         itemName: String,
         onCancelled: () -> Unit,
@@ -172,6 +192,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         onLeft: () -> Unit,
     ) {
         displayedItemActions = null
+        displayedDiscardQuestion = null
         displayedGiveItem = null
         displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemPrice, foundItemId, onLeft)
     }

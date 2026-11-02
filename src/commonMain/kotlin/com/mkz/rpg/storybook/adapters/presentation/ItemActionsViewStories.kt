@@ -1,5 +1,6 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.ItemActionsView
 import com.mkz.rpg.screen.adapters.presentation.UiText
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
@@ -18,6 +19,9 @@ object ItemActionsViewStories : StoryBinding {
     private const val ITEM_NAME = "itemName"
     private const val ITEM_PRICE = "itemPrice"
     private const val ACTIONS = "actions"
+
+    // In blue, as in the inventory.
+    private val PRIMARY_ACTIONS = setOf(UiText.ITEM_ACTIONS_CONSUME, UiText.ITEM_ACTIONS_EQUIP, UiText.ITEM_ACTIONS_UNEQUIP)
 
     /** What the player can do with the item, as the inventory decides it. */
     private enum class Kind(
@@ -98,7 +102,12 @@ object ItemActionsViewStories : StoryBinding {
             actions =
                 Kind.valueOf(args.text(ACTIONS)).actions.map { (text, isEnabled) ->
                     val label = context.texts[text]
-                    ItemActionsView.Action(label = label, isEnabled = isEnabled) { context.action("onSelected", label) }
+                    val onSelected = { context.action("onSelected", label) }
+                    if (text in PRIMARY_ACTIONS) {
+                        ItemActionsView.Action(label, isEnabled, ConfirmButton.COLOR, ConfirmButton.PRESSED_COLOR, onSelected)
+                    } else {
+                        ItemActionsView.Action(label = label, isEnabled = isEnabled, onSelected = onSelected)
+                    }
                 },
         )
 }

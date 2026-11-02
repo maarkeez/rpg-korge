@@ -30,7 +30,8 @@ import kotlinx.coroutines.CompletableDeferred
 
 /**
  * Displays the inventory of the selected battle unit behind the bag, lets the player act on its items, and asks the
- * player what to do with an item found while the inventory is full.
+ * player what to do with an item found while the inventory is full. Discarding an item, also to swap it for the found
+ * one, asks first.
  *
  * While exploring, an item can be given to another party member: Give dims every tile but the ones of the members that
  * can receive it, and tapping one of them gives the item. Until then, every other tap is ignored, but Cancel's.
@@ -69,7 +70,7 @@ class InventoryPresenter(
     private var selectedSlotIndex: Int? = null
 
     // The item found while the inventory was full. The timeline waits until the player chooses what to do with it.
-    private var foundItem: InventoryFull? = null
+    private var foundItem: FoundItem? = null
     private var choice: CompletableDeferred<Unit>? = null
 
     // The item being given, while the player taps the party member who receives it.
@@ -84,6 +85,13 @@ class InventoryPresenter(
     // The party member the inventory switches to, until the battlefield HUD has selected it.
     private var switchingTo: String? = null
     private var battleUnitSelector: ((battleUnitId: String) -> Unit)? = null
+
+    /** An item found while the inventory was full, and what the call to action reads about it. */
+    private data class FoundItem(
+        val event: InventoryFull,
+        val name: String,
+        val price: Int,
+    )
 
     /** The item of the slot being given, and the tile of each party member that can receive it. */
     private data class Giving(
@@ -178,7 +186,7 @@ class InventoryPresenter(
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingGoldOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
                 val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
-                timeline.play { askWhatToDoWith(event, foundItemName = texts.lootableItemName(foundItem.id), foundItemPrice = foundItem.price) }
+                timeline.play { askWhatToDoWith(FoundItem(event, name = texts.lootableItemName(foundItem.id), price = foundItem.price)) }
             },
         )
 
@@ -276,22 +284,23 @@ class InventoryPresenter(
      * Opens the inventory and waits for the player to choose: to swap a stored item for the found one, or to leave it on
      * its tile. The inventory is read now, as a previous choice of the same walk may have changed it.
      */
-    private suspend fun askWhatToDoWith(
-        found: InventoryFull,
-        foundItemName: String,
-        foundItemPrice: Int,
-    ) {
+    private suspend fun askWhatToDoWith(found: FoundItem) {
         val pendingChoice = CompletableDeferred<Unit>()
+        val battleUnitId = found.event.battleUnitId
         foundItem = found
         choice = pendingChoice
-        displayInventory(found.battleUnitId, slotsOf(found.battleUnitId), goldOf(found.battleUnitId), ownerOf(found.battleUnitId))
+        displayInventory(battleUnitId, slotsOf(battleUnitId), goldOf(battleUnitId), ownerOf(battleUnitId))
+        displayFoundItem(found)
+        pendingChoice.await()
+    }
+
+    private fun displayFoundItem(found: FoundItem) {
         playerCallToActionView.displayInventoryFull(
-            foundItemName = foundItemName,
-            foundItemPrice = foundItemPrice,
-            foundItemId = found.lootableItemId,
+            foundItemName = found.name,
+            foundItemPrice = found.price,
+            foundItemId = found.event.lootableItemId,
             onLeft = { completeChoice() },
         )
-        pendingChoice.await()
     }
 
     private fun completeChoice() {
@@ -302,14 +311,37 @@ class InventoryPresenter(
         pendingChoice.complete(Unit)
     }
 
-    // An equipped item can not be discarded, so it can not be swapped either.
-    private fun swap(
-        found: InventoryFull,
+    // An equipped item can not be discarded, so it can not be swapped either. Tapping another item moves the question to it.
+    // The timeline is waiting for the choice, so the views change straight away.
+    private fun askToSwap(
+        found: FoundItem,
         slotIndex: Int,
     ) {
         val slot = displayedSlots.getOrNull(slotIndex) ?: return
         if (slot.isEquipped) return
-        inventoryApi.discardItem(battleUnitId = found.battleUnitId, lootableItemId = slot.lootableItemId)
+        selectedSlotIndex = slotIndex
+        inventoryView.selectSlot(slotIndex)
+        playerCallToActionView.displayDiscardQuestion(
+            itemName = texts.lootableItemName(slot.lootableItemId),
+            onBack = {
+                clearSwapSelection()
+                displayFoundItem(found)
+            },
+            onDiscarded = { swap(found.event, slot.lootableItemId) },
+        )
+    }
+
+    private fun clearSwapSelection() {
+        selectedSlotIndex = null
+        inventoryView.selectSlot(null)
+    }
+
+    private fun swap(
+        found: InventoryFull,
+        lootableItemId: String,
+    ) {
+        clearSwapSelection()
+        inventoryApi.discardItem(battleUnitId = found.battleUnitId, lootableItemId = lootableItemId)
         inventoryApi.storeLootedItem(battleUnitId = found.battleUnitId, lootableItemId = found.lootableItemId, row = found.row, column = found.column)
         completeChoice()
     }
@@ -323,7 +355,11 @@ class InventoryPresenter(
         val actions =
             buildList {
                 add(action(texts[UiText.ITEM_ACTIONS_CANCEL]) {})
-                add(action(texts[UiText.ITEM_ACTIONS_DISCARD], isEnabled = !slot.isEquipped) { inventoryApi.discardItem(battleUnitId, slot.lootableItemId) })
+                add(
+                    ItemActionsView.Action(label = texts[UiText.ITEM_ACTIONS_DISCARD], isEnabled = !slot.isEquipped) {
+                        if (!timeline.isPlaying) askToDiscard(battleUnitId, slotIndex, slot.lootableItemId, texts.lootableItemName(lootableItem.id))
+                    },
+                )
                 // Only while exploring: the battle actions stay as they are.
                 if (isExploring()) {
                     val refusal = inventoryApi.searchGiveRefusal(battleUnitId, slot.lootableItemId)
@@ -337,16 +373,16 @@ class InventoryPresenter(
                     // An item teaching an ability its battle unit can not learn (e.g.: already known) can not be consumed.
                     CONSUMABLE ->
                         add(
-                            action(texts[UiText.ITEM_ACTIONS_CONSUME], isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
+                            primaryAction(texts[UiText.ITEM_ACTIONS_CONSUME], isEnabled = inventoryApi.canConsumeItem(battleUnitId, slot.lootableItemId)) {
                                 inventoryApi.consumeItem(battleUnitId, slot.lootableItemId)
                             },
                         )
                     EQUIPPABLE ->
                         if (slot.isEquipped) {
-                            add(action(texts[UiText.ITEM_ACTIONS_UNEQUIP]) { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
+                            add(primaryAction(texts[UiText.ITEM_ACTIONS_UNEQUIP]) { inventoryApi.unequipItem(battleUnitId, slot.lootableItemId) })
                         } else {
                             // Another copy of the item is already equipped.
-                            add(action(texts[UiText.ITEM_ACTIONS_EQUIP], isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
+                            add(primaryAction(texts[UiText.ITEM_ACTIONS_EQUIP], isEnabled = !isItemEquipped) { inventoryApi.equipItem(battleUnitId, slot.lootableItemId) })
                         }
                 }
             }
@@ -367,6 +403,37 @@ class InventoryPresenter(
         timeline.play {
             selectedSlotIndex = null
             inventoryView.selectSlot(null)
+        }
+    }
+
+    private fun primaryAction(
+        label: String,
+        isEnabled: Boolean = true,
+        act: () -> Unit,
+    ) = action(label, isEnabled, act).copy(color = ConfirmButton.COLOR, pressedColor = ConfirmButton.PRESSED_COLOR)
+
+    // The item stays framed, and Back displays its actions again. Tapping another item, the arrows or Close drop the question.
+    private fun askToDiscard(
+        battleUnitId: String,
+        slotIndex: Int,
+        lootableItemId: String,
+        itemName: String,
+    ) {
+        timeline.play {
+            playerCallToActionView.displayDiscardQuestion(
+                itemName = itemName,
+                onBack = { whenIdle { selectItem(slotIndex) } },
+                onDiscarded = {
+                    whenIdle {
+                        inventoryApi.discardItem(battleUnitId, lootableItemId)
+                        playerCallToActionView.dismiss()
+                        timeline.play {
+                            selectedSlotIndex = null
+                            inventoryView.selectSlot(null)
+                        }
+                    }
+                },
+            )
         }
     }
 
@@ -650,7 +717,7 @@ class InventoryPresenter(
     override fun slotSelected(index: Int) {
         val found = foundItem
         if (found != null) {
-            swap(found, index)
+            askToSwap(found, index)
         } else {
             whenIdle { selectItem(index) }
         }

@@ -96,6 +96,15 @@ open class PlayerCallToActionView(
         display(itemActionsView)
     }
 
+    /** Asks the player whether to discard the item. A tap does not dismiss it: the presenter displays what follows. */
+    open fun displayDiscardQuestion(
+        itemName: String,
+        onBack: () -> Unit,
+        onDiscarded: () -> Unit,
+    ) {
+        display(DiscardQuestionView(texts, itemName = itemName, onBack = onBack, onDiscarded = onDiscarded))
+    }
+
     /** Asks the player to tap the party member who receives the item, with Cancel. */
     open fun displayGiveItem(
         itemName: String,

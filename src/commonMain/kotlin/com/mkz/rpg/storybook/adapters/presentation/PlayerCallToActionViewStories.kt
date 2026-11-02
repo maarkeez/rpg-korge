@@ -1,6 +1,7 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ActionRowView
+import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.ItemActionsView
 import com.mkz.rpg.screen.adapters.presentation.PlayerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.UiText
@@ -148,7 +149,12 @@ object PlayerCallToActionViewStories : StoryBinding {
                         actions =
                             listOf(UiText.ITEM_ACTIONS_CANCEL, UiText.ITEM_ACTIONS_DISCARD, UiText.ITEM_ACTIONS_CONSUME).map { text ->
                                 val label = texts[text]
-                                ItemActionsView.Action(label = label) { context.action("onSelected", label, setArg = dismissed) }
+                                val onSelected = { context.action("onSelected", label, setArg = dismissed) }
+                                if (text == UiText.ITEM_ACTIONS_CONSUME) {
+                                    ItemActionsView.Action(label, color = ConfirmButton.COLOR, pressedColor = ConfirmButton.PRESSED_COLOR, onSelected = onSelected)
+                                } else {
+                                    ItemActionsView.Action(label = label, onSelected = onSelected)
+                                }
                             },
                     )
                 CallToAction.GIVE_ITEM -> displayGiveItem(itemName = args.text(ITEM_NAME), onCancelled = { context.action("onCancelled", setArg = dismissed) })

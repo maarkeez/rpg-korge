@@ -43,6 +43,20 @@ suspend fun ViewsForTesting.clickItemAction(
     label: String,
 ) = clickOn((playerCallToActionView.callToAction as ItemActionsView).actionButtons.single { button -> button.text == label })
 
+/** The colour of the item action with the label, not pressed. */
+fun PlayerCallToActionView.itemActionColor(label: String): RGBA = (callToAction as ItemActionsView).actionButtons.single { button -> button.text == label }.bgColorOut
+
+fun PlayerCallToActionView.discardQuestion(): String = (callToAction as DiscardQuestionView).questionView.nameText()
+
+fun PlayerCallToActionView.discardQuestionLabels(): List<String> = (callToAction as DiscardQuestionView).rowView.buttons.map { button -> button.text }
+
+/** The colours of Back and Discard of the question, not pressed. */
+fun PlayerCallToActionView.discardQuestionColors(): List<RGBA> = (callToAction as DiscardQuestionView).rowView.buttons.map { button -> button.bgColorOut }
+
+suspend fun ViewsForTesting.clickDiscardQuestionBack(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as DiscardQuestionView).rowView.buttons.first())
+
+suspend fun ViewsForTesting.clickDiscardQuestionDiscard(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as DiscardQuestionView).rowView.buttons.last())
+
 fun PlayerCallToActionView.isDisplayingInventoryFull(): Boolean = visible && callToAction is InventoryFullView
 
 fun PlayerCallToActionView.inventoryFullMessage(): String = (callToAction as InventoryFullView).messageView.nameText()
