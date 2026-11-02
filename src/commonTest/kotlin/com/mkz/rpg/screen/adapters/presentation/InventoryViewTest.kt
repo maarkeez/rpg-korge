@@ -259,6 +259,21 @@ class InventoryViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `Swipe should be ignored when it started before the inventory was displayed again`() =
+        sharedViewsTest {
+            // Given
+            val delegate = RecordingDelegate()
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.setDelegate(delegate)
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
+            addChild(inventoryView)
+            // When
+            swipeInventoryWhileItIsDisplayedAgain(inventoryView, dx = 100.0)
+            // Then
+            delegate.steps.shouldBeEmpty()
+        }
+
+    @Test
     fun `Swipe should notify the delegate of the direction, without selecting a slot`() =
         sharedViewsTest {
             // Given

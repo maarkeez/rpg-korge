@@ -150,6 +150,14 @@ The selected battle unit info displays a bag (the chest icon) next to its abilit
 - In a battle, the actions are only offered during the turn of the battle unit player. Out of the battles (e.g.: while exploring), they are always offered. They are ignored while the timeline is playing. Closing the inventory displays the battle unit info again, read again, as the items may have changed it (e.g.: healed it, or raised its maximum health).
 - The inventory is redrawn, in timeline order, when the battle unit stores, consumes, discards, equips, unequips, gives or receives an item. Selecting a battle unit or clearing the selection displays the battle unit info again.
 
+### Giving gold
+
+While exploring, the gold button opens [`GiveGoldView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/GiveGoldView.kt) in the HUD instead of the inventory, and the call to action displays Cancel, All and Give (`displayGiveGold`), as tall as the finish turn, so the panel keeps the height of the HUD.
+
+- The slider follows the finger on its own, and only `updateGiveGold` writes the amount on Give, as displaying the panel again would end the drag. Anything else that changes the panel (All, a receiver chosen, a reward) displays it again.
+- Give only acts while the timeline is idle, as Cancel does. `GoldGiven` displays the bag again in timeline order, redrawn with the new gold, and `GoldReceived` flashes the receiver alongside the timeline, so the next give can start straight away.
+- Taking the bag off the stage ends no swipe, so the inventory ignores a swipe that started before it was last displayed: the tap on the gold button would otherwise end as a swipe on the tap on Give.
+
 ### Inventory full
 
 When an item is found while the inventory is full (`InventoryFull`), a step opens the inventory and the call to action displays "Inventory full", the found item icon and a "Leave it" button. **The step waits for the player to choose**, so the timeline keeps playing and the player can not move, cast, close the inventory or finish the turn meanwhile:

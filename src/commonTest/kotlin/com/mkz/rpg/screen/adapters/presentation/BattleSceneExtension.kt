@@ -27,6 +27,9 @@ fun Stage.battleUnitInfoView(): BattleUnitInfoView? = descendants().filterIsInst
 /** The inventory of the selected battle unit, or `null` while the HUD does not display it. */
 fun Stage.inventoryView(): InventoryView? = descendants().filterIsInstance<InventoryView>().firstOrNull()
 
+/** The panel to give gold, or `null` while the HUD does not display it. */
+fun Stage.giveGoldView(): GiveGoldView? = descendants().filterIsInstance<GiveGoldView>().firstOrNull()
+
 /** The battle info on the screen, or `null` while the battle scene is not on the stage yet. */
 fun Stage.battleInfoView(): BattleInfoView? = descendants().filterIsInstance<BattleInfoView>().firstOrNull()
 

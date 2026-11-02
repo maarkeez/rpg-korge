@@ -21,6 +21,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `buyItem`         | Pays the price of an item the merchant sells, and stores it. See [Buying and selling](#buying-and-selling).                                        |
 | `sellItem`        | Removes an item that is not equipped, and receives half its price. See [Buying and selling](#buying-and-selling).                                  |
 | `giveItem`        | Moves an item that is not equipped to another party member's inventory, while exploring. See [Giving](#giving).                                     |
+| `giveGold`        | Moves an amount of gold to another party member's inventory, while exploring. See [Giving gold](#giving-gold).                                      |
 
 | Query                           | What it answers                                         |
 |---------------------------------|---------------------------------------------------------|
@@ -31,6 +32,8 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 | `searchSellRefusal`             | Why the battle unit can not sell the item now, if so.   |
 | `searchGiveRefusal`             | Why the battle unit can not give the item now, if so.   |
 | `searchGiveReceivers`           | The party members that can receive an item from it.     |
+| `searchGiveGoldRefusal`         | Why the battle unit can not give gold now, if so.       |
+| `searchGoldReceivers`           | The party members that can receive gold from it.        |
 
 - Consuming, discarding, equipping and unequipping do not cost any turn action, but in a battle they are only allowed during the turn of the battle unit's player. Out of the battles (e.g.: while exploring), there are no turns, so they are always allowed (see `PlayerTurnRule`).
 - Storing and granting a reward are not limited to the player's turn, as they happen while a battle unit moves, or as a task completes in a battle.
@@ -86,7 +89,7 @@ The price of an item is displayed in gold: on the line of its name, aligned to t
 
 ## Gold
 
-Each battle unit carries its own gold in its inventory: the party never shares it. It starts with the `startingGold` of its unit (e.g.: the knights 20 G, and the viking 100 G, see [Game data](game-data.md)), and goes from 0 to 99,999 G, a cap private to `Inventory` (`MAXIMUM_GOLD`), checked against the `startingGold` of every unit in CI by `InventoryUnitResourcesTest`. The bag displays it on its title line, e.g.: `Inventory ........ 20 G`.
+Each battle unit carries its own gold in its inventory: the party has no shared purse, though a member can [give gold](#giving-gold) to another one while exploring. It starts with the `startingGold` of its unit (e.g.: the knights 20 G, and the viking 100 G, see [Game data](game-data.md)), and goes from 0 to 99,999 G, a cap private to `Inventory` (`MAXIMUM_GOLD`), checked against the `startingGold` of every unit in CI by `InventoryUnitResourcesTest`. The bag displays it on its title line, e.g.: `Inventory ........ 20 G`.
 
 ## Buying and selling
 
@@ -108,8 +111,17 @@ While exploring, only the leader walks where the player says, so the other party
 - Only while the party explores: not in a battle, and not while talking to an npc, the merchants included. Otherwise `giveItem` fails (`NotExploringTheParty`). The receiver is another member of the party (`NotAPartyMember`), wherever it stands.
 - One item at a time. The giver removes a stored copy that is not equipped, announcing `ItemGiven`, and the receiver stores it last, not equipped, announcing `ItemReceived`. Both inventories are saved together, so nothing changes when either side fails.
 - The only stored copy of an equipped item can not be given (`EquippedItemCanNotBeGiven`): the player unequips it first. A receiver with no space left can not receive (`NoStorageSpaceLeft`).
-- Gold is never given: each battle unit keeps its own.
 - `searchGiveRefusal` answers why the item can not be given to anyone (a `GiveRefusalDto`: `NOT_EXPLORING`, `NOT_STORED`, `EQUIPPED`, `NO_ONE` when the giver is alone, or `BAGS_FULL` when every other member is full), or `null`. `searchGiveReceivers` answers the other members with space left, in party order. See [Inventory while exploring](exploration.md#inventory).
+
+## Giving gold
+
+A member short of gold can receive some from another one, e.g.: a knight with 20 G can not buy the 50 G hammer while the viking beside it carries 100 G. `giveGold` follows the rules of [Giving](#giving), through [`GiveRule`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/services/GiveRule.kt):
+
+- Only while the party explores (`NotExploringTheParty`), to another member of the party (`NotAPartyMember`), wherever it stands. So a member short of gold at a merchant leaves the shop first.
+- One giver, one receiver and an amount. The giver removes the gold, announcing `GoldGiven`, and the receiver adds it, announcing `GoldReceived`. Both inventories are saved together, so nothing changes when either side fails.
+- The amount is at least 1 (`InvalidGoldAmount`), and at most what the giver carries (`NotEnoughGold`).
+- No gold is lost: a give above what the receiver can carry fails (`GoldAboveLimit`), unlike a [reward](#rewards), as a give can be refused. `Inventory.goldRoom` answers how much more it can carry, so `MAXIMUM_GOLD` stays private.
+- `searchGiveGoldRefusal` answers why no gold can be given to anyone (a `GiveGoldRefusalDto`, in this order: `NOT_EXPLORING`, `NO_GOLD`, `NO_ONE` when the giver is alone, or `GOLD_FULL` when every other member is at the limit), or `null`. `searchGoldReceivers` answers the other members with room, in party order, with their gold and room (`GoldReceiverDto`). See [Inventory while exploring](exploration.md#inventory).
 
 ## Learning an ability
 

@@ -77,3 +77,21 @@ suspend fun ViewsForTesting.swipeInventory(
     for (step in 1..steps) mouseMoveTo(start.x + dx * step / steps, start.y)
     mouseUp()
 }
+
+/** Presses on the first slot, displays the inventory again, as a tap on the gold button and then on Give does, and releases [dx] pixels to the right. */
+suspend fun ViewsForTesting.swipeInventoryWhileItIsDisplayedAgain(
+    inventoryView: InventoryView,
+    dx: Double,
+) {
+    val start =
+        inventoryView.slotViews
+            .first()
+            .getGlobalBounds()
+            .center
+    mouseMoveTo(start.x, start.y)
+    mouseDown()
+    inventoryView.display(emptyList(), gold = 0)
+    val steps = 5
+    for (step in 1..steps) mouseMoveTo(start.x + dx * step / steps, start.y)
+    mouseUp()
+}

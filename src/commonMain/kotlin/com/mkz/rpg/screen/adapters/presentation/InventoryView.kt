@@ -5,6 +5,7 @@ import com.mkz.rpg.shared.adapters.presentation.gameButton
 import korlibs.image.color.Colors
 import korlibs.korge.input.SwipeDirection
 import korlibs.korge.input.onClick
+import korlibs.korge.input.onDown
 import korlibs.korge.input.onSwipe
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.uiHorizontalStack
@@ -76,6 +77,10 @@ open class InventoryView(
     }
 
     private var delegate: Delegate? = null
+
+    // Whether the finger was pressed on the inventory since it was last displayed. A tap that replaces the inventory, e.g.: the gold
+    // button opening the panel, takes it off the stage before its swipe ends, and the swipe would end on a later tap anywhere else.
+    private var isPressed = false
     internal lateinit var previousOwnerButton: GameButton
     internal lateinit var nextOwnerButton: GameButton
     internal lateinit var titleView: UnitNameView
@@ -101,7 +106,9 @@ open class InventoryView(
             }
         }
         slotViews.forEachIndexed { index, slotView -> slotView.setOnSelected { delegate?.slotSelected(index) } }
+        onDown { isPressed = true }
         onSwipe(threshold = SWIPE_THRESHOLD) { swipe ->
+            if (!isPressed) return@onSwipe
             when (swipe.direction) {
                 SwipeDirection.LEFT -> swiped(-1)
                 SwipeDirection.RIGHT -> swiped(1)
@@ -129,6 +136,7 @@ open class InventoryView(
         gold: Int,
         owner: Owner? = null,
     ) {
+        isPressed = false
         displayTitle(owner)
         displayGold(gold, owner)
         slotViews.forEachIndexed { index, slotView ->

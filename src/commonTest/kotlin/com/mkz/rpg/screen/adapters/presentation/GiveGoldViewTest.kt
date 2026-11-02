@@ -36,7 +36,7 @@ class GiveGoldViewTest : ViewsForTesting() {
     private val knight = Member(name = "Knight", unitId = "knight", gold = 120)
     private val viking = Member(name = "Viking", unitId = "viking", gold = 100)
 
-    private suspend fun giveGoldView(
+    private suspend fun displayedGiveGoldView(
         amount: Int = 25,
         maximum: Int = 120,
         canStepToPrevious: Boolean = false,
@@ -49,7 +49,7 @@ class GiveGoldViewTest : ViewsForTesting() {
     fun `Display should write what the giver and the receiver would carry`() =
         sharedViewsTest {
             // When
-            val giveGoldView = giveGoldView(amount = 25)
+            val giveGoldView = displayedGiveGoldView(amount = 25)
             // Then
             giveGoldView.giverTexts() shouldBe ("Knight" to "120 G > 95 G")
             giveGoldView.receiverTexts() shouldBe ("Viking" to "100 G > 125 G")
@@ -60,7 +60,7 @@ class GiveGoldViewTest : ViewsForTesting() {
     fun `Display should hide the arrows when there is a single receiver`() =
         sharedViewsTest {
             // When
-            val giveGoldView = giveGoldView()
+            val giveGoldView = displayedGiveGoldView()
             // Then
             giveGoldView.arrowsVisible().shouldBeFalse()
         }
@@ -69,7 +69,7 @@ class GiveGoldViewTest : ViewsForTesting() {
     fun `Display should disable the arrow at each end of the receivers`() =
         sharedViewsTest {
             // When
-            val giveGoldView = giveGoldView(canStepToNext = true)
+            val giveGoldView = displayedGiveGoldView(canStepToNext = true)
             // Then
             giveGoldView.arrowsVisible().shouldBeTrue()
             giveGoldView.arrowsEnabled() shouldBe (false to true)
@@ -81,7 +81,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val giveGoldView = giveGoldView(canStepToPrevious = true, canStepToNext = true)
+            val giveGoldView = displayedGiveGoldView(canStepToPrevious = true, canStepToNext = true)
             giveGoldView.setDelegate(delegate)
             addChild(giveGoldView)
             // When
@@ -96,7 +96,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val giveGoldView = giveGoldView(amount = 25, maximum = 120)
+            val giveGoldView = displayedGiveGoldView(amount = 25, maximum = 120)
             giveGoldView.setDelegate(delegate)
             addChild(giveGoldView)
             // When
@@ -115,7 +115,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val giveGoldView = giveGoldView(amount = 25, maximum = 120)
+            val giveGoldView = displayedGiveGoldView(amount = 25, maximum = 120)
             giveGoldView.setDelegate(delegate)
             addChild(giveGoldView)
             // When
@@ -130,7 +130,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val giveGoldView = giveGoldView(amount = 1, maximum = 2)
+            val giveGoldView = displayedGiveGoldView(amount = 1, maximum = 2)
             giveGoldView.setDelegate(delegate)
             addChild(giveGoldView)
             // Then
@@ -154,7 +154,7 @@ class GiveGoldViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
-            val giveGoldView = giveGoldView(amount = 25)
+            val giveGoldView = displayedGiveGoldView(amount = 25)
             giveGoldView.setDelegate(delegate)
             // When
             giveGoldView.display(giver = knight, receiver = viking, amount = 30, maximum = 120, canStepToPrevious = false, canStepToNext = false)
