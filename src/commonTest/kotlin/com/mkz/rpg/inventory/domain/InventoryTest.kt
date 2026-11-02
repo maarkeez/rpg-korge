@@ -6,12 +6,15 @@ import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
+import com.mkz.rpg.inventory.domain.InventoryError.InvalidGoldAmount
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.NegativeGold
 import com.mkz.rpg.inventory.domain.InventoryError.NoStorageSpaceLeft
 import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldGiven
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
@@ -205,6 +208,55 @@ class InventoryTest {
     fun `Receive should fail when there is no space left`() {
         // Then
         runCatching { fullInventory().receive("hammer", giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
+    }
+
+    @Test
+    fun `GiveGold should remove the gold and announce it when the amount is carried`() {
+        // Given
+        val inventory = inventory(battleUnitId = "knight-1", gold = 120)
+        // When
+        val (events, updatedInventory) = inventory.giveGold(120, receiverBattleUnitId = "viking-1").pullEvents()
+        // Then
+        updatedInventory.toDto().gold shouldBe 0
+        events.shouldContainExactly(GoldGiven(battleUnitId = "knight-1", receiverBattleUnitId = "viking-1", gold = 120))
+    }
+
+    @Test
+    fun `GiveGold should fail when the amount is below 1`() {
+        // Then
+        runCatching { inventory(gold = 120).giveGold(0, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InvalidGoldAmount>()
+        runCatching { inventory(gold = 120).giveGold(-5, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InvalidGoldAmount>()
+    }
+
+    @Test
+    fun `GiveGold should fail when the amount is above the gold carried`() {
+        // Then
+        runCatching { inventory(gold = 120).giveGold(121, receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<NotEnoughGold>()
+    }
+
+    @Test
+    fun `ReceiveGold should add the gold and announce it when it fits`() {
+        // Given
+        val inventory = inventory(battleUnitId = "viking-1", gold = 99_990)
+        // When
+        val (events, updatedInventory) = inventory.receiveGold(9, giverBattleUnitId = "knight-1").pullEvents()
+        // Then
+        updatedInventory.toDto().gold shouldBe 99_999
+        events.shouldContainExactly(GoldReceived(battleUnitId = "viking-1", giverBattleUnitId = "knight-1", gold = 9))
+    }
+
+    @Test
+    fun `ReceiveGold should fail when it goes above 99,999 G`() {
+        // Then
+        runCatching { inventory(gold = 99_990).receiveGold(10, giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+    }
+
+    @Test
+    fun `GoldRoom should answer how much more gold it can carry`() {
+        // Then
+        inventory(gold = 0).goldRoom() shouldBe 99_999
+        inventory(gold = 99_990).goldRoom() shouldBe 9
+        inventory(gold = 99_999).goldRoom() shouldBe 0
     }
 
     @Test

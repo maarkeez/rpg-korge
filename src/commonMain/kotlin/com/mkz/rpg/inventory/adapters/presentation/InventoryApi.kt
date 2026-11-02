@@ -14,6 +14,7 @@ import com.mkz.rpg.inventory.usecases.commands.ConsumeItem
 import com.mkz.rpg.inventory.usecases.commands.CreateInventory
 import com.mkz.rpg.inventory.usecases.commands.DiscardItem
 import com.mkz.rpg.inventory.usecases.commands.EquipItem
+import com.mkz.rpg.inventory.usecases.commands.GiveGold
 import com.mkz.rpg.inventory.usecases.commands.GiveItem
 import com.mkz.rpg.inventory.usecases.commands.GrantReward
 import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
@@ -73,6 +74,7 @@ class InventoryApi(
     val buyItem = BuyItem(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule, eventBus)
     val sellItem = SellItem(inventoryRepository, lootableItemApi.searchSellPrice, tradeRule, eventBus)
     val giveItem = GiveItem(inventoryRepository, giveRule, eventBus)
+    val giveGold = GiveGold(inventoryRepository, giveRule, eventBus)
 
     // Queries
     val searchInventoryByBattleUnitId = SearchInventoryByBattleUnitId(inventoryRepository)

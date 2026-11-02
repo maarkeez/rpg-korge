@@ -6,12 +6,15 @@ import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
 import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
+import com.mkz.rpg.inventory.domain.InventoryError.InvalidGoldAmount
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.NegativeGold
 import com.mkz.rpg.inventory.domain.InventoryError.NoStorageSpaceLeft
 import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldGiven
+import com.mkz.rpg.inventory.domain.InventoryEvent.GoldReceived
 import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemBought
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemConsumed
@@ -31,8 +34,8 @@ import kotlin.jvm.JvmInline
 
 /**
  * The lootable items a battle unit of the human player carries, and its gold. Each item takes one storage space, even while equipped. Each
- * equipment zone holds one equipped item. Items are looted, bought, sold and given to other party members, and the gold goes from 0 to
- * 99,999.
+ * equipment zone holds one equipped item. Items are looted, bought, sold and given to other party members, and the gold, also given, goes
+ * from 0 to 99,999.
  */
 @ConsistentCopyVisibility
 data class Inventory private constructor(
@@ -268,6 +271,32 @@ data class Inventory private constructor(
             events = events + ItemReceived(battleUnitId = battleUnitId.value, giverBattleUnitId = giverBattleUnitId, lootableItemId = lootableItemId),
         )
     }
+
+    /** How much more gold it can carry. */
+    fun goldRoom(): Int = MAXIMUM_GOLD - gold.value
+
+    /** Removes the gold, given to the receiver's inventory. Fails below 1, and above the gold it carries. */
+    fun giveGold(
+        amount: Int,
+        receiverBattleUnitId: String,
+    ): Inventory {
+        if (amount < 1) throw InvalidGoldAmount()
+        if (amount > gold.value) throw NotEnoughGold()
+        return copy(
+            gold = Gold(gold.value - amount),
+            events = events + GoldGiven(battleUnitId = battleUnitId.value, receiverBattleUnitId = receiverBattleUnitId, gold = amount),
+        )
+    }
+
+    /** Adds the gold given by another party member. Fails above the most it can carry, as a give, unlike a reward, can be refused. */
+    fun receiveGold(
+        amount: Int,
+        giverBattleUnitId: String,
+    ): Inventory =
+        copy(
+            gold = Gold(gold.value + amount),
+            events = events + GoldReceived(battleUnitId = battleUnitId.value, giverBattleUnitId = giverBattleUnitId, gold = amount),
+        )
 
     /** Unequips an item, which stays stored. */
     fun unequip(lootableItemId: String): Inventory {

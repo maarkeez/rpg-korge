@@ -5,8 +5,8 @@ import com.mkz.rpg.inventory.domain.InventoryError.NotExploringTheParty
 import com.mkz.rpg.party.usecases.queries.SearchParty
 
 /**
- * A battle unit can only give an item to another member of its party, while the party explores: not in a battle, and
- * not while talking to an npc. The distance between them does not matter.
+ * A battle unit can only give an item or gold to another member of its party, while the party explores: not in a battle,
+ * and not while talking to an npc. The distance between them does not matter.
  */
 class GiveRule(
     private val searchParty: SearchParty,

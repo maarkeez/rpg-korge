@@ -216,7 +216,7 @@ const DATA = {
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 26, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 68, "importsOut": 13},
-    {"name": "inventory", "files": 34, "fanIn": 2, "fanOut": 8, "instability": 0.8, "importsIn": 13, "importsOut": 61},
+    {"name": "inventory", "files": 35, "fanIn": 2, "fanOut": 8, "instability": 0.8, "importsIn": 13, "importsOut": 62},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 23, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 32},
     {"name": "lootTable", "files": 11, "fanIn": 3, "fanOut": 2, "instability": 0.4, "importsIn": 7, "importsOut": 12},
@@ -228,7 +228,7 @@ const DATA = {
     {"name": "quest", "files": 28, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 16, "importsOut": 37},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
     {"name": "screen", "files": 102, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 103, "importsOut": 259},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 491, "importsOut": 0},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 492, "importsOut": 0},
     {"name": "storybook", "files": 100, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 121},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
@@ -836,7 +836,7 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/services/PlayerTurnRule.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/inventory/usecases/services/TradeRule.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
-    {"from": "inventory", "to": "shared", "weight": 23, "files": 17, "imports": [
+    {"from": "inventory", "to": "shared", "weight": 24, "files": 18, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/events/OnExplorationStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/adapters/events/OnExplorationStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/inventory/adapters/events/OnLootFound.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -855,6 +855,7 @@ const DATA = {
       {"file": "com/mkz/rpg/inventory/usecases/commands/ConsumeItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/DiscardItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/EquipItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/inventory/usecases/commands/GiveGold.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/GiveItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/GrantReward.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/inventory/usecases/commands/SellItem.kt", "layer": "usecases", "name": "shared.domain.EventBus"},

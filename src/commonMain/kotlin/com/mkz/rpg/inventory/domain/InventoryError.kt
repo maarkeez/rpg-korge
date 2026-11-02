@@ -23,7 +23,9 @@ sealed class InventoryError(
 
     class GoldAboveLimit : InventoryError("The inventory gold is above its limit")
 
-    class NotEnoughGold : InventoryError("The inventory gold is not enough to buy the item")
+    class NotEnoughGold : InventoryError("The inventory gold is not enough to pay or give the amount")
+
+    class InvalidGoldAmount : InventoryError("The gold given must be at least 1")
 
     class NoStorageSpaceLeft : InventoryError("The inventory has no storage space left")
 
@@ -35,7 +37,7 @@ sealed class InventoryError(
 
     class EquippedItemCanNotBeGiven : InventoryError("The item must be unequipped before giving it")
 
-    class NotExploringTheParty : InventoryError("The items can only be given while the party explores")
+    class NotExploringTheParty : InventoryError("The items and the gold can only be given while the party explores")
 
     class NotAPartyMember : InventoryError("The inventory can only be used by a party member")
 

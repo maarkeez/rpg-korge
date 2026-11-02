@@ -74,6 +74,20 @@ sealed interface InventoryEvent : DomainEvent {
         val lootableItemId: String,
     ) : InventoryEvent
 
+    /** The gold left the inventory, given to the inventory of another party member. */
+    data class GoldGiven(
+        val battleUnitId: String,
+        val receiverBattleUnitId: String,
+        val gold: Int,
+    ) : InventoryEvent
+
+    /** The gold was added, given by another party member. */
+    data class GoldReceived(
+        val battleUnitId: String,
+        val giverBattleUnitId: String,
+        val gold: Int,
+    ) : InventoryEvent
+
     data class ItemEquipped(
         val battleUnitId: String,
         val lootableItemId: String,
