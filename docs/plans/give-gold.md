@@ -64,7 +64,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone   | Done when                                                                                                                                                            | Status | Done in |
 |----|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The rules   | `inventoryApi.giveGold` moves the gold, and the refusal and receivers can be asked. Nothing on the screen yet.                                                       | ✅      | `291e4175` |
-| M2 | The views   | The gold button, the panel, its buttons and the refusal have their stories and texts, and the user has approved them on screenshots. The game does not use them yet. | ⬜      |         |
+| M2 | The views   | The gold button, the panel, its buttons and the refusal have their stories and texts, and the user has approved them on screenshots. The game does not use them yet. | ✅      | `f90f7e29` |
 | M3 | In the game | The gold can be given while exploring, from the bag to the flash, with the docs up to date.                                                                          | ⬜      |         |
 
 ### M1 commits
