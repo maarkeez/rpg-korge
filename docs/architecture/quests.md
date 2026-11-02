@@ -122,7 +122,7 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 
 ### Abandoning
 
-The detail view of an active side quest has Abandon beside Back in the action row, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
+The detail view of an active side quest has Abandon beside Back in the action row, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back and Abandon stay in the row, under the thumb, so tapping Abandon twice abandons the quest without the question being read. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
 
 ### The quest markers
 

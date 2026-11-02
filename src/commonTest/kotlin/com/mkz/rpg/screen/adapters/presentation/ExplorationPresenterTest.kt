@@ -94,6 +94,7 @@ class ExplorationPresenterTest {
             pauseView,
             saveSlotsView,
             confirmDialogView,
+            playerCallToActionView,
             apis.partyApi,
             SaveApi(InmemoryStorage(), eventBus, emptyList(), {
                 false
@@ -389,6 +390,7 @@ class ExplorationPresenterTest {
                 pauseView,
                 saveSlotsView,
                 confirmDialogView,
+                playerCallToActionView,
                 apis.partyApi,
                 SaveApi(InmemoryStorage(), apis.eventBus, emptyList(), {
                     false

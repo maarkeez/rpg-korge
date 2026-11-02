@@ -32,7 +32,7 @@ The presenter of the panel owns the actions and displays them with `PlayerCallTo
 not dismiss them, unlike the item actions: the presenter displays what follows. `hideActions` removes the row and
 nothing else, so an item found with a full bag stays, and Finish turn returns when the battle has one.
 
-The row sits 15 below the 300 of the panels, as it does below the battle HUD.
+The row sits 15 below the 300 of the panels, as it does below the battle HUD, also in the main menu, where it is at y 587.
 
 ## Where it is used
 
@@ -47,7 +47,7 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD.
 - [`FinishTurnView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt): Finish
   turn, blue, disabled while the turn can not be ended.
 - [`ActionRowView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ActionRowView.kt): Back and
-  Abandon of the quest journal and the detail view.
+  Abandon of the quest journal and the detail view, Back of the save slots, and both choices of every question.
 
 A new button of a view is a `gameButton`, so a disabled one looks disabled. The buttons drawn with images (e.g.: the
 abilities, the bag, the virtual pad, the terrains of the map builder) and the Storybook's own buttons are not.

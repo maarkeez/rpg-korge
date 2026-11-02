@@ -3,8 +3,9 @@ package com.mkz.rpg.shared.adapters.e2e
 import com.mkz.rpg.GAME_WINDOW_SIZE
 import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
+import com.mkz.rpg.screen.adapters.presentation.clickAction
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
-import com.mkz.rpg.screen.adapters.presentation.clickConfirm
+import com.mkz.rpg.screen.adapters.presentation.clickConfirmation
 import com.mkz.rpg.screen.adapters.presentation.clickLoadGame
 import com.mkz.rpg.screen.adapters.presentation.clickQuit
 import com.mkz.rpg.screen.adapters.presentation.clickSave
@@ -12,17 +13,21 @@ import com.mkz.rpg.screen.adapters.presentation.clickSlot
 import com.mkz.rpg.screen.adapters.presentation.clickStart
 import com.mkz.rpg.screen.adapters.presentation.confirmDialogView
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
+import com.mkz.rpg.screen.adapters.presentation.isDisplayingNothing
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
 import com.mkz.rpg.screen.adapters.presentation.isSavedShown
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.pauseView
+import com.mkz.rpg.screen.adapters.presentation.playerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.saveSlotsView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.isShown
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
+import com.mkz.rpg.startGame
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.shouldBe
 import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
@@ -53,7 +58,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             // And the human player quits to the menu.
             clickQuit(requireNotNull(pauseView()))
             waitUntil { confirmDialogView()?.isShown() == true }
-            clickConfirm(requireNotNull(confirmDialogView()))
+            clickConfirmation(requireNotNull(stage.playerCallToActionView()))
             waitUntil { menuView()?.isShown() == true }
             // When
             clickLoadGame(requireNotNull(menuView()))
@@ -64,5 +69,23 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the hero where the game was saved") { battlefieldView()?.hasBattleUnitAt(savedRow, savedColumn)?.shouldBeTrue() }
             withClue("Expected nobody where the hero starts a new game") { battlefieldView()?.hasBattleUnitAt(KNIGHT_START_ROW, KNIGHT_START_COLUMN)?.shouldBeFalse() }
             withClue("Expected the virtual pad, as the game is loaded exploring") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
+        }
+
+    @Test
+    fun `Back should display the options again, from the row directly below the save slots, when Load game is open in the menu`() =
+        sharedViewsTest {
+            // Given
+            stage.startGame(storage = storage)
+            waitUntil { menuView() != null }
+            clickLoadGame(requireNotNull(menuView()))
+            waitUntil { saveSlotsView()?.isShown() == true }
+            val callToAction = requireNotNull(stage.playerCallToActionView())
+            callToAction.y shouldBe 587.0
+            // When
+            clickAction(callToAction, "Back")
+            waitUntil { menuView()?.isShown() == true }
+            // Then
+            withClue("Expected the save slots to be hidden") { saveSlotsView()?.isShown()?.shouldBeFalse() }
+            withClue("Expected the row to be hidden") { callToAction.isDisplayingNothing().shouldBeTrue() }
         }
 }

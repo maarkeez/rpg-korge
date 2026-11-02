@@ -8,8 +8,8 @@ import com.mkz.rpg.save.domain.Save
  * The pause screen, opened with Start while exploring, in place of the pad: time stops until Resume.
  *
  * Save lists the save slots in its place: choosing an empty one saves into it straight away, and choosing one holding a
- * game asks to confirm first, as that game is lost. Once saved, the pause screen is displayed again, with Saved. Back
- * goes back to it without saving.
+ * game asks to confirm first, as that game is lost. Once saved, the pause screen is displayed again, with Saved. Back,
+ * in the row of the call to action as the choices of a question, goes back to it without saving.
  *
  * Quit to menu asks to confirm first, as the progress since the last save is lost, and goes back to the menu ([onQuit]).
  */
@@ -17,6 +17,7 @@ class PausePresenter(
     private val pauseView: PauseView,
     private val saveSlotsView: SaveSlotsView,
     private val confirmDialogView: ConfirmDialogView,
+    private val playerCallToActionView: PlayerCallToActionView,
     private val partyApi: PartyApi,
     private val saveApi: SaveApi,
     private val texts: Texts,
@@ -85,18 +86,18 @@ class PausePresenter(
     // Slots are only deleted from Load game, in the menu.
     override fun saveSlotDeleteSelected(number: Int) = Unit
 
-    override fun saveSlotsBackSelected() = whenIdle { displayPause() }
-
     private fun save(number: Int) {
         saveApi.saveGame(slot = number)
         displayPause()
         pauseView.displaySaved(isDisplayed = true)
     }
 
+    // The pause screen has no row, as moving its options leaves the panel empty.
     private fun displayPause() {
         saveSlotsView.visible = false
         confirmDialogView.visible = false
         pauseView.visible = true
+        playerCallToActionView.hideActions()
     }
 
     private fun displaySaveSlots() {
@@ -104,6 +105,9 @@ class PausePresenter(
         pauseView.visible = false
         confirmDialogView.visible = false
         saveSlotsView.visible = true
+        playerCallToActionView.displayActions(
+            listOf(ActionRowView.Action(texts[UiText.SAVE_SLOTS_BACK]) { whenIdle { displayPause() } }),
+        )
     }
 
     private fun confirm(
@@ -112,16 +116,16 @@ class PausePresenter(
         onCancelled: () -> Unit,
         onConfirmed: () -> Unit,
     ) {
-        confirmDialogView.display(
-            message = message,
-            cancelLabel = texts[UiText.CALL_TO_ACTION_CANCEL],
-            confirmLabel = confirmLabel,
-            onCancelled = onCancelled,
-            onConfirmed = onConfirmed,
-        )
+        confirmDialogView.display(message)
         pauseView.visible = false
         saveSlotsView.visible = false
         confirmDialogView.visible = true
+        playerCallToActionView.displayConfirmation(
+            cancelLabel = texts[UiText.CALL_TO_ACTION_CANCEL],
+            confirmLabel = confirmLabel,
+            onCancelled = { whenIdle(onCancelled) },
+            onConfirmed = { whenIdle(onConfirmed) },
+        )
     }
 
     // The player can only act once the scene shows the pause screen.

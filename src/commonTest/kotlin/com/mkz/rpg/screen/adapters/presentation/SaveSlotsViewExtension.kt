@@ -39,4 +39,8 @@ suspend fun ViewsForTesting.clickDelete(
     number: Int,
 ) = clickOn(saveSlotsView.deleteButtons[number - 1])
 
-suspend fun ViewsForTesting.clickBack(saveSlotsView: SaveSlotsView) = clickOn(saveSlotsView.backButton)
+/** Where each row starts, from the first. */
+fun SaveSlotsView.rowTops(): List<Double> = slotButtons.map { button -> button.y }
+
+/** Where the last row ends. */
+fun SaveSlotsView.rowsBottom(): Double = slotButtons.last().let { button -> button.y + button.height }

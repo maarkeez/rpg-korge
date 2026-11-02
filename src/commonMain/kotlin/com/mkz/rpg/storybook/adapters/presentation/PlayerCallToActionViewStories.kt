@@ -27,7 +27,7 @@ object PlayerCallToActionViewStories : StoryBinding {
     private const val ITEM = "item"
 
     /** What the player is called to do. */
-    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, ACTIONS }
+    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, ACTIONS, CONFIRMATION }
 
     private val finishTurn =
         StoryDto(id = "screen-player-call-to-action--finish-turn", name = "Finish turn", description = "The player has nothing else to choose: the button ends the turn.", args = emptyMap())
@@ -88,6 +88,13 @@ object PlayerCallToActionViewStories : StoryBinding {
             description = "A panel open in place of the pad: its buttons, which stay until the presenter displays what follows.",
             args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.ACTIONS.name)),
         )
+    private val confirmation =
+        StoryDto(
+            id = "screen-player-call-to-action--confirmation",
+            name = "Confirmation",
+            description = "A question asked before an action that can not be undone: Cancel, and the action in red.",
+            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.CONFIRMATION.name)),
+        )
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -113,7 +120,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                     ITEM_PRICE to ArgDto.int(25),
                     ITEM to ArgDto.text(DEFAULT_ITEM),
                 ),
-            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull, actions),
+            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull, actions, confirmation),
         )
 
     override fun render(
@@ -167,6 +174,13 @@ object PlayerCallToActionViewStories : StoryBinding {
                             val label = texts[text]
                             ActionRowView.Action(label = label) { context.action("onSelected", label) }
                         },
+                    )
+                CallToAction.CONFIRMATION ->
+                    displayConfirmation(
+                        cancelLabel = texts[UiText.CALL_TO_ACTION_CANCEL],
+                        confirmLabel = texts[UiText.PAUSE_QUIT],
+                        onCancelled = { context.action("onCancelled") },
+                        onConfirmed = { context.action("onConfirmed") },
                     )
             }
         }

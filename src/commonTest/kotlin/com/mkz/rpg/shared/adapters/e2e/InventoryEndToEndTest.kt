@@ -7,7 +7,7 @@ import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.clickA
 import com.mkz.rpg.screen.adapters.presentation.clickBag
 import com.mkz.rpg.screen.adapters.presentation.clickClose
-import com.mkz.rpg.screen.adapters.presentation.clickConfirm
+import com.mkz.rpg.screen.adapters.presentation.clickConfirmation
 import com.mkz.rpg.screen.adapters.presentation.clickDialog
 import com.mkz.rpg.screen.adapters.presentation.clickGiveGold
 import com.mkz.rpg.screen.adapters.presentation.clickGoldButton
@@ -104,7 +104,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { stage.pauseView()?.isSavedShown() == true }
         clickQuit(requireNotNull(stage.pauseView()))
         waitUntil { stage.confirmDialogView()?.isShown() == true }
-        clickConfirm(requireNotNull(stage.confirmDialogView()))
+        clickConfirmation(requireNotNull(stage.playerCallToActionView()))
         waitUntil { stage.menuView()?.isShown() == true }
         val save = requireNotNull(storage.getOrNull("save.slot1")) { "Nothing is saved in the slot" }
         save shouldContain """"id":"herbalist","row":16,"column":15"""

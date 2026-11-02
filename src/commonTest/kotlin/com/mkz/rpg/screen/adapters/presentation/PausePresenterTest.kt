@@ -6,6 +6,7 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.save.adapters.presentation.SaveApi
 import com.mkz.rpg.save.domain.Save.Dto.SlotStateDto
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
+import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -42,8 +43,9 @@ class PausePresenterTest {
     private val pauseView = PauseView(TextsMother.texts())
     private val saveSlotsView = SaveSlotsView(TextsMother.texts())
     private val confirmDialogView = ConfirmDialogView()
+    private val callToActionView = FakePlayerCallToActionView()
     private var quits = 0
-    private val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, apis.partyApi, saveApi, TextsMother.texts(), battleSceneTimeline()) { quits++ }
+    private val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, TextsMother.texts(), battleSceneTimeline()) { quits++ }
 
     private fun openPause() {
         apis.partyApi.openPause()
@@ -117,7 +119,7 @@ class PausePresenterTest {
         // Then
         confirmDialogView.visible.shouldBeTrue()
         confirmDialogView.message() shouldBe "Overwrite the game saved in slot 2?"
-        confirmDialogView.choiceLabels().shouldContainExactly("Cancel", "Overwrite")
+        callToActionView.actionLabels().shouldContainExactly("Cancel", "Overwrite")
         saveSlotsView.slotLabels()[1] shouldEndWith "Knight · party of 1"
     }
 
@@ -130,7 +132,7 @@ class PausePresenterTest {
         presenter.pauseSaveSelected()
         presenter.saveSlotSelected(2)
         // When
-        confirmDialogView.chooseConfirm()
+        callToActionView.chooseAction("Overwrite")
         // Then
         pauseView.isSavedShown().shouldBeTrue()
         confirmDialogView.visible.shouldBeFalse()
@@ -145,23 +147,55 @@ class PausePresenterTest {
         presenter.pauseSaveSelected()
         presenter.saveSlotSelected(2)
         // When
-        confirmDialogView.chooseCancel()
+        callToActionView.chooseAction("Cancel")
         // Then
         saveSlotsView.visible.shouldBeTrue()
         confirmDialogView.visible.shouldBeFalse()
+        callToActionView.actionLabels().shouldContainExactly("Back")
     }
 
     @Test
-    fun `SaveSlotsBackSelected should display the pause screen again without saving`() {
+    fun `Save should display Back, and Back hide it again`() {
         // Given
         openPause()
-        presenter.pauseSaveSelected()
         // When
-        presenter.saveSlotsBackSelected()
+        presenter.pauseSaveSelected()
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back")
+        // When
+        callToActionView.chooseAction("Back")
         // Then
         pauseView.visible.shouldBeTrue()
         saveSlotsView.visible.shouldBeFalse()
         slotStates().shouldContainExactly(SlotStateDto.EMPTY, SlotStateDto.EMPTY, SlotStateDto.EMPTY)
+        callToActionView.displayedActions shouldBe null
+    }
+
+    @Test
+    fun `pauseQuitSelected should display the question's actions, and Cancel hide them again`() {
+        // Given
+        openPause()
+        presenter.pauseQuitSelected()
+        // When
+        callToActionView.chooseAction("Cancel")
+        // Then
+        callToActionView.displayedActions shouldBe null
+    }
+
+    @Test
+    fun `PausePresenter should do nothing when a choice is tapped while the timeline is playing`() {
+        // Given
+        val timeline = battleSceneTimeline()
+        val presenter = PausePresenter(pauseView, saveSlotsView, confirmDialogView, callToActionView, apis.partyApi, saveApi, TextsMother.texts(), timeline) { quits++ }
+        apis.partyApi.openPause()
+        apis.eventBus.dispatch()
+        presenter.open()
+        presenter.pauseQuitSelected()
+        timeline.playLongStep()
+        // When
+        callToActionView.chooseAction("Quit to menu")
+        // Then
+        quits shouldBe 0
     }
 
     @Test
@@ -174,7 +208,7 @@ class PausePresenterTest {
         pauseView.visible.shouldBeFalse()
         confirmDialogView.visible.shouldBeTrue()
         confirmDialogView.message() shouldBe "Quit to the menu? The progress since the last save is lost."
-        confirmDialogView.choiceLabels().shouldContainExactly("Cancel", "Quit to menu")
+        callToActionView.actionLabels().shouldContainExactly("Cancel", "Quit to menu")
         quits shouldBe 0
     }
 
@@ -184,7 +218,7 @@ class PausePresenterTest {
         openPause()
         presenter.pauseQuitSelected()
         // When
-        confirmDialogView.chooseConfirm()
+        callToActionView.chooseAction("Quit to menu")
         // Then
         quits shouldBe 1
     }
@@ -195,7 +229,7 @@ class PausePresenterTest {
         openPause()
         presenter.pauseQuitSelected()
         // When
-        confirmDialogView.chooseCancel()
+        callToActionView.chooseAction("Cancel")
         // Then
         pauseView.visible.shouldBeTrue()
         confirmDialogView.visible.shouldBeFalse()

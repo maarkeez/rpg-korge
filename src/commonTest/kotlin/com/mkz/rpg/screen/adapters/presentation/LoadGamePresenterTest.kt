@@ -30,6 +30,7 @@ class LoadGamePresenterTest {
     private val menuView = MenuView(texts, onNewGameSelected = {}, onLoadGameSelected = {}, onMapBuilderSelected = {})
     private val saveSlotsView = SaveSlotsView(texts)
     private val confirmDialogView = ConfirmDialogView()
+    private val callToActionView = FakePlayerCallToActionView()
     private val loadedSlots = mutableListOf<Int>()
 
     init {
@@ -39,7 +40,11 @@ class LoadGamePresenterTest {
         storage["save.slot3.summary"] = """{"version":0,"savedAt":0.0,"leaderUnitId":"knight","partySize":1}"""
     }
 
-    private fun presenter(incompatibleSlot: Int? = null) = LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, saveApi, texts, incompatibleSlot) { slot -> loadedSlots += slot }
+    private fun presenter(incompatibleSlot: Int? = null) =
+        LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, callToActionView, saveApi, texts, incompatibleSlot) { slot ->
+            loadedSlots +=
+                slot
+        }
 
     private fun slotStates() = saveApi.searchSaveSlots().map(Save.Dto.SlotDto::state)
 
@@ -100,7 +105,7 @@ class LoadGamePresenterTest {
         confirmDialogView.visible.shouldBeTrue()
         saveSlotsView.visible.shouldBeFalse()
         confirmDialogView.message() shouldBe "Delete the game saved in slot 2?"
-        confirmDialogView.choiceLabels().shouldContainExactly("Cancel", "Delete")
+        callToActionView.actionLabels().shouldContainExactly("Cancel", "Delete")
     }
 
     @Test
@@ -109,7 +114,7 @@ class LoadGamePresenterTest {
         val presenter = presenter().apply { open() }
         presenter.saveSlotDeleteSelected(2)
         // When
-        confirmDialogView.chooseConfirm()
+        callToActionView.chooseAction("Delete")
         // Then
         slotStates().shouldContainExactly(SlotStateDto.EMPTY, SlotStateDto.EMPTY, SlotStateDto.INCOMPATIBLE)
         saveSlotsView.visible.shouldBeTrue()
@@ -122,21 +127,33 @@ class LoadGamePresenterTest {
         val presenter = presenter().apply { open() }
         presenter.saveSlotDeleteSelected(2)
         // When
-        confirmDialogView.chooseCancel()
+        callToActionView.chooseAction("Cancel")
         // Then
         slotStates()[1] shouldBe SlotStateDto.SAVED
         saveSlotsView.visible.shouldBeTrue()
     }
 
     @Test
-    fun `SaveSlotsBackSelected should display the options again`() {
+    fun `saveSlotDeleteSelected should display the question's actions, and Cancel display Back again`() {
         // Given
         val presenter = presenter().apply { open() }
+        presenter.saveSlotDeleteSelected(2)
         // When
-        presenter.saveSlotsBackSelected()
+        callToActionView.chooseAction("Cancel")
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back")
+    }
+
+    @Test
+    fun `Back should hide the row when the menu is displayed again`() {
+        // Given
+        presenter().open()
+        // When
+        callToActionView.chooseAction("Back")
         // Then
         saveSlotsView.visible.shouldBeFalse()
         menuView.visible.shouldBeTrue()
         menuView.areOptionsShown().shouldBeTrue()
+        callToActionView.displayedActions shouldBe null
     }
 }

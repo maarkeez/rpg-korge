@@ -10,7 +10,7 @@ import korlibs.korge.view.View
 
 /**
  * The stories of [SaveSlotsView], built with its real buttons, with a control per slot for what it holds. A saved slot
- * shows the units that have a portrait, in alphabetical order, as its leader. Tapping a slot, Delete or Back logs it.
+ * shows the units that have a portrait, in alphabetical order, as its leader. Tapping a slot or Delete logs it.
  */
 object SaveSlotsViewStories : StoryBinding {
     private const val EMPTY = "empty"
@@ -41,7 +41,7 @@ object SaveSlotsViewStories : StoryBinding {
             id = "screen-save-slots",
             group = "Screen",
             title = "Save slots",
-            description = "The 3 save slots, each empty, saved with when, its leader and its party size, or incompatible, and Back.",
+            description = "The 3 save slots, each empty, saved with when, its leader and its party size, or incompatible, evenly apart. Its Back is in the row of the call to action.",
             controls = SLOT_ARGS.map { slot -> ControlDto.pick(slot, STATES) } + ControlDto.boolean(LOADING),
             args = mapOf(SLOT_ARGS[0] to ArgDto.text(EMPTY), SLOT_ARGS[1] to ArgDto.text(SAVED), SLOT_ARGS[2] to ArgDto.text(INCOMPATIBLE), LOADING to ArgDto.boolean(false)),
             stories = listOf(save, load),
@@ -76,8 +76,6 @@ object SaveSlotsViewStories : StoryBinding {
                     override fun saveSlotSelected(number: Int) = context.action("saveSlotSelected", number)
 
                     override fun saveSlotDeleteSelected(number: Int) = context.action("saveSlotDeleteSelected", number)
-
-                    override fun saveSlotsBackSelected() = context.action("saveSlotsBackSelected")
                 },
             )
             display(title = context.texts[if (isLoading) UiText.SAVE_SLOTS_LOAD_TITLE else UiText.SAVE_SLOTS_SAVE_TITLE], slots = slots)

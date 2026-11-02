@@ -27,6 +27,9 @@ class MenuScene(
     private companion object {
         // The height of the save slots and of the question, as in place of the pad.
         const val PANEL_HEIGHT = 300.0
+
+        // The row of their buttons, directly below them, with the same 15 as in a game.
+        val ROW_Y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 + PANEL_HEIGHT + 15
     }
 
     // Like the battle scene, the scene coroutines run on the game window event loop, also in the headless tests.
@@ -57,10 +60,12 @@ class MenuScene(
         val confirmDialogView = ConfirmDialogView()
         menuView.x = (GAME_WINDOW_SIZE.width - menuView.width) / 2
         menuView.y = (GAME_WINDOW_SIZE.height - menuView.height) / 2
-        listOf(menuView, saveSlotsView, confirmDialogView).forEach(::addChild)
+        val playerCallToActionView = PlayerCallToActionView(texts)
+        playerCallToActionView.y = ROW_Y
+        listOf(menuView, saveSlotsView, confirmDialogView, playerCallToActionView).forEach(::addChild)
         listOf(saveSlotsView, confirmDialogView).forEach { view -> view.y = (GAME_WINDOW_SIZE.height - PANEL_HEIGHT) / 2 }
         loadGamePresenter =
-            LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, saveApi, texts, incompatibleSlot) { slot ->
+            LoadGamePresenter(menuView, saveSlotsView, confirmDialogView, playerCallToActionView, saveApi, texts, incompatibleSlot) { slot ->
                 launchImmediately { sceneContainer.changeTo { BattleScene(localizationApi, storage, random, slot) } }
             }
     }

@@ -196,6 +196,7 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-player-call-to-action--give-gold-refusal",
                     "screen-player-call-to-action--inventory-full",
                     "screen-player-call-to-action--actions",
+                    "screen-player-call-to-action--confirmation",
                     "screen-battlefield",
                     "screen-battlefield--map",
                     "screen-battlefield--move-range",

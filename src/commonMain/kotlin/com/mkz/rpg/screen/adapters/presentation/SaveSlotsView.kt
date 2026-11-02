@@ -14,9 +14,9 @@ import korlibs.math.geom.Size
 
 /**
  * The save slots, displayed in place of the pad to save the game into one, or in place of the menu to load one. A
- * title, a row per slot from the first, each with its number and what it holds (e.g.: Empty, or when it was saved, the
- * leader and the party size), and Back. A slot that can not be chosen is faded (e.g.: an empty one, to load), and a slot
- * that can be deleted has Delete on its right.
+ * title, and a row per slot from the first, evenly apart, each with its number and what it holds (e.g.: Empty, or when it
+ * was saved, the leader and the party size). A slot that can not be chosen is faded (e.g.: an empty one, to load), and a
+ * slot that can be deleted has Delete on its right.
  */
 open class SaveSlotsView(
     texts: Texts,
@@ -26,15 +26,13 @@ open class SaveSlotsView(
         const val ROWS = 3
 
         private const val WIDTH = 390.0
-        private const val HEIGHT = 300.0
         private const val PADDING = 10.0
         private const val TITLE_HEIGHT = 30.0
         private const val NUMBER_WIDTH = 24.0
+        private const val ROWS_Y = 72.0
         private const val ROW_HEIGHT = 48.0
-        private const val ROW_SPACING = 10.0
+        private const val ROW_SPACING = 32.0
         private const val DELETE_WIDTH = 80.0
-        private const val BACK_WIDTH = 120.0
-        private const val BAR_HEIGHT = 32.0
     }
 
     /** A save slot, numbered from 1. Label: what it holds. Enabled: whether it can be chosen. Deletable: whether it shows Delete. */
@@ -49,8 +47,6 @@ open class SaveSlotsView(
         fun saveSlotSelected(number: Int)
 
         fun saveSlotDeleteSelected(number: Int)
-
-        fun saveSlotsBackSelected()
     }
 
     private var delegate: Delegate? = null
@@ -84,11 +80,6 @@ open class SaveSlotsView(
                 onClick { delegate?.saveSlotDeleteSelected(index + 1) }
             }
         }
-    internal val backButton: GameButton =
-        gameButton(texts[UiText.SAVE_SLOTS_BACK], Size(BACK_WIDTH, BAR_HEIGHT)) {
-            position((WIDTH - BACK_WIDTH) / 2, HEIGHT - PADDING - BAR_HEIGHT)
-            onClick { delegate?.saveSlotsBackSelected() }
-        }
 
     open fun setDelegate(delegate: Delegate) {
         this.delegate = delegate
@@ -113,7 +104,7 @@ open class SaveSlotsView(
         }
     }
 
-    private fun rowY(index: Int) = PADDING + TITLE_HEIGHT + PADDING + index * (ROW_HEIGHT + ROW_SPACING)
+    private fun rowY(index: Int) = ROWS_Y + index * (ROW_HEIGHT + ROW_SPACING)
 
     private fun slotWidth(isDeletable: Boolean) = WIDTH - 3 * PADDING - NUMBER_WIDTH - if (isDeletable) DELETE_WIDTH + PADDING else 0.0
 }

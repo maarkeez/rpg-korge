@@ -295,7 +295,7 @@ class BattleScene(
                     )
                 val formationPresenter = FormationPresenter(formationView, battlefieldView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
                 val pausePresenter =
-                    PausePresenter(pauseView, saveSlotsView, confirmDialogView, partyApi, saveApi, texts, timeline) {
+                    PausePresenter(pauseView, saveSlotsView, confirmDialogView, playerCallToActionView, partyApi, saveApi, texts, timeline) {
                         launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }
                     }
                 val explorationPresenter =

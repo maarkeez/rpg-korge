@@ -400,6 +400,33 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayConfirmation should draw the confirm action in danger`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            // When
+            playerCallToActionView.displayConfirmation(cancelLabel = "Cancel", confirmLabel = "Quit to menu", onCancelled = {}, onConfirmed = {})
+            // Then
+            playerCallToActionView.actionLabels().shouldContainExactly("Cancel", "Quit to menu")
+            playerCallToActionView.actionColor("Quit to menu") shouldBe HudStyle.DANGER
+        }
+
+    @Test
+    fun `DisplayConfirmation should call the action of the choice tapped`() =
+        sharedViewsTest {
+            // Given
+            val choices = mutableListOf<String>()
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            addChild(playerCallToActionView)
+            playerCallToActionView.displayConfirmation(cancelLabel = "Cancel", confirmLabel = "Quit to menu", onCancelled = { choices += "cancel" }, onConfirmed = { choices += "confirm" })
+            // When
+            clickCancelConfirmation(playerCallToActionView)
+            clickConfirmation(playerCallToActionView)
+            // Then
+            choices.shouldContainExactly("cancel", "confirm")
+        }
+
+    @Test
     fun `HideActions should display the finish turn again when the battle has one`() =
         sharedViewsTest {
             // Given

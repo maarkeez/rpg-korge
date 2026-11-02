@@ -263,15 +263,14 @@ class QuestPresenter(
     private fun abandonSelected(quest: QuestInfo) {
         if (!canAct()) return
         questDetailView.hide()
-        playerCallToActionView.hideActions()
-        confirmDialogView.display(
-            message = texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name],
+        confirmDialogView.display(texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name])
+        confirmDialogView.visible = true
+        playerCallToActionView.displayConfirmation(
             cancelLabel = texts[UiText.QUEST_DETAIL_BACK],
             confirmLabel = texts[UiText.QUEST_ABANDON],
             onCancelled = { if (canAct()) keepQuest(quest) },
             onConfirmed = { if (canAct()) abandonQuest(quest) },
         )
-        confirmDialogView.visible = true
     }
 
     private fun keepQuest(quest: QuestInfo) {

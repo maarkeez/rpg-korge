@@ -461,7 +461,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `Abandon should ask first, hiding the row, and Back should return to the detail view with its row`() {
+    fun `Abandon should display the question's actions, and Back the detail view's again`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenterWithASideQuestOpen()
@@ -471,14 +471,14 @@ class QuestPresenterTest {
         // Then
         confirmDialogView.visible.shouldBeTrue()
         detailView.visible.shouldBeFalse()
-        confirmDialogView.choiceLabels().shouldContainExactly("Back", "Abandon")
-        callToActionView.displayedActions shouldBe null
+        callToActionView.actionLabels().shouldContainExactly("Back", "Abandon")
+        callToActionView.displayedActions!!.last().color shouldBe HudStyle.DANGER
         apis.questApi
             .searchQuests()
             .first { quest -> quest.id == "side" }
             .progress.status shouldBe StatusDto.ACTIVE
         // When
-        confirmDialogView.chooseCancel()
+        callToActionView.chooseAction("Back")
         // Then
         confirmDialogView.visible.shouldBeFalse()
         detailView.visible.shouldBeTrue()
@@ -494,7 +494,7 @@ class QuestPresenterTest {
         presenter.questJournalSelected("side")
         callToActionView.chooseAction("Abandon")
         // When
-        confirmDialogView.chooseConfirm()
+        callToActionView.chooseAction("Abandon")
         apis.eventBus.dispatch()
         // Then
         apis.questApi
@@ -519,7 +519,7 @@ class QuestPresenterTest {
         presenter.questJournalSelected("side")
         callToActionView.chooseAction("Abandon")
         // When
-        confirmDialogView.chooseConfirm()
+        callToActionView.chooseAction("Abandon")
         apis.eventBus.dispatch()
         // Then
         apis.partyApi

@@ -21,10 +21,6 @@ class SaveSlotsViewTest : ViewsForTesting() {
                     override fun saveSlotDeleteSelected(number: Int) {
                         selections += "delete $number"
                     }
-
-                    override fun saveSlotsBackSelected() {
-                        selections += "back"
-                    }
                 },
             )
             display(title = "Save the game", slots = slots)
@@ -60,8 +56,17 @@ class SaveSlotsViewTest : ViewsForTesting() {
             clickSlot(saveSlotsView, 1)
             clickSlot(saveSlotsView, 2)
             clickDelete(saveSlotsView, 3)
-            clickBack(saveSlotsView)
             // Then
-            selections.shouldContainExactly("slot 2", "delete 3", "back")
+            selections.shouldContainExactly("slot 2", "delete 3")
+        }
+
+    @Test
+    fun `display should spread the rows when they are 3`() =
+        sharedViewsTest {
+            // When
+            val saveSlotsView = newSaveSlotsView(slots)
+            // Then
+            saveSlotsView.rowTops().shouldContainExactly(72.0, 152.0, 232.0)
+            saveSlotsView.rowsBottom() shouldBe 280.0
         }
 }

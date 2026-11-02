@@ -11,9 +11,10 @@ import com.mkz.rpg.screen.adapters.presentation.clickA
 import com.mkz.rpg.screen.adapters.presentation.clickAbility
 import com.mkz.rpg.screen.adapters.presentation.clickAction
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
-import com.mkz.rpg.screen.adapters.presentation.clickCancel
+import com.mkz.rpg.screen.adapters.presentation.clickCancelConfirmation
 import com.mkz.rpg.screen.adapters.presentation.clickCapsule
 import com.mkz.rpg.screen.adapters.presentation.clickConfirm
+import com.mkz.rpg.screen.adapters.presentation.clickConfirmation
 import com.mkz.rpg.screen.adapters.presentation.clickDialog
 import com.mkz.rpg.screen.adapters.presentation.clickLoadGame
 import com.mkz.rpg.screen.adapters.presentation.clickPin
@@ -102,11 +103,11 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         clickSlot(requireNotNull(stage.saveSlotsView()), 1)
         // A slot already holding a game asks before overwriting it.
         waitUntil { stage.pauseView()?.isSavedShown() == true || stage.confirmDialogView()?.isShown() == true }
-        if (stage.confirmDialogView()?.isShown() == true) clickConfirm(requireNotNull(stage.confirmDialogView()))
+        if (stage.confirmDialogView()?.isShown() == true) clickConfirmation(requireNotNull(stage.playerCallToActionView()))
         waitUntil { stage.pauseView()?.isSavedShown() == true }
         clickQuit(requireNotNull(stage.pauseView()))
         waitUntil { stage.confirmDialogView()?.isShown() == true }
-        clickConfirm(requireNotNull(stage.confirmDialogView()))
+        clickConfirmation(requireNotNull(stage.playerCallToActionView()))
         waitUntil { stage.menuView()?.isShown() == true }
     }
 
@@ -337,12 +338,12 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             clickAction(requireNotNull(stage.playerCallToActionView()), "Abandon")
             val confirmDialogView = requireNotNull(confirmDialogView())
             waitUntil { confirmDialogView.isShown() }
-            clickCancel(confirmDialogView)
+            clickCancelConfirmation(requireNotNull(stage.playerCallToActionView()))
             waitUntil { detailView.isDetailShown() }
             // And it is abandoned.
             clickAction(requireNotNull(stage.playerCallToActionView()), "Abandon")
             waitUntil { confirmDialogView.isShown() }
-            clickConfirm(confirmDialogView)
+            clickConfirmation(requireNotNull(stage.playerCallToActionView()))
             waitUntil { virtualPadView()?.isPadShown() == true }
             // Then: no side quest is listed, so the pad is back, and its giver can start it again.
             withClue("Expected the gold marker back over the farmer") { battlefieldView()?.questMarkerColorAt(FARMER_ROW, FARMER_COLUMN) shouldBe HudStyle.SELECTION }

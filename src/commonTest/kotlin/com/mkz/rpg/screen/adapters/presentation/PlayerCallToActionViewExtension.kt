@@ -88,3 +88,9 @@ suspend fun ViewsForTesting.clickAction(
     playerCallToActionView: PlayerCallToActionView,
     label: String,
 ) = clickOn((playerCallToActionView.callToAction as ActionRowView).buttons.single { button -> button.text == label })
+
+/** Chooses the secondary choice of a question, e.g.: Cancel. */
+suspend fun ViewsForTesting.clickCancelConfirmation(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as ActionRowView).buttons.first())
+
+/** Chooses the primary choice of a question, e.g.: Quit to menu. */
+suspend fun ViewsForTesting.clickConfirmation(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as ActionRowView).buttons.last())

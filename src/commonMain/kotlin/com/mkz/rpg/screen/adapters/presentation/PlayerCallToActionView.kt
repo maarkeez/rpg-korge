@@ -145,6 +145,21 @@ open class PlayerCallToActionView(
         visible = true
     }
 
+    /** Displays both choices of a question in the row, the one that can not be undone in red, e.g.: Cancel and Quit to menu. */
+    open fun displayConfirmation(
+        cancelLabel: String,
+        confirmLabel: String,
+        onCancelled: () -> Unit,
+        onConfirmed: () -> Unit,
+    ) {
+        displayActions(
+            listOf(
+                ActionRowView.Action(cancelLabel, onSelected = onCancelled),
+                ActionRowView.Action(confirmLabel, HudStyle.DANGER, HudStyle.DANGER_PRESSED, onSelected = onConfirmed),
+            ),
+        )
+    }
+
     /** Removes the row and nothing else, e.g.: an item found with a full inventory stays. The finish turn returns when the battle has one. */
     open fun hideActions() {
         if (callToAction is ActionRowView) dismiss()

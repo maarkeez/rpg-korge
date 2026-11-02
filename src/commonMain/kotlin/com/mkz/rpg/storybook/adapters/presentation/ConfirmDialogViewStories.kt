@@ -8,21 +8,19 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [ConfirmDialogView], with the questions the game asks, built with its real buttons. */
+/** The stories of [ConfirmDialogView], with the questions the game asks. */
 object ConfirmDialogViewStories : StoryBinding {
     private const val QUESTION = "question"
     private const val QUEST_NAME = "Bats in the Meadow"
 
-    // The questions the game asks, each with its message, and its secondary and primary choices.
+    // The questions the game asks.
     private enum class Question(
         val message: UiText,
-        val cancel: UiText,
-        val confirm: UiText,
     ) {
-        QUIT(message = UiText.PAUSE_QUIT_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.PAUSE_QUIT),
-        OVERWRITE(message = UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.SAVE_SLOTS_OVERWRITE),
-        DELETE(message = UiText.SAVE_SLOTS_DELETE_CONFIRMATION, cancel = UiText.CALL_TO_ACTION_CANCEL, confirm = UiText.SAVE_SLOTS_DELETE),
-        ABANDON(message = UiText.QUEST_ABANDON_QUESTION, cancel = UiText.QUEST_DETAIL_BACK, confirm = UiText.QUEST_ABANDON),
+        QUIT(UiText.PAUSE_QUIT_CONFIRMATION),
+        OVERWRITE(UiText.SAVE_SLOTS_OVERWRITE_CONFIRMATION),
+        DELETE(UiText.SAVE_SLOTS_DELETE_CONFIRMATION),
+        ABANDON(UiText.QUEST_ABANDON_QUESTION),
     }
 
     private val delete =
@@ -62,7 +60,7 @@ object ConfirmDialogViewStories : StoryBinding {
             id = "screen-confirm-dialog",
             group = "Screen",
             title = "Confirm dialog",
-            description = "A question displayed in place of the pad before an action that can not be undone, over a secondary and a primary choice.",
+            description = "A question displayed in place of the pad before an action that can not be undone. Its choices are in the row of the call to action.",
             controls = listOf(ControlDto.pick(QUESTION, Question.entries.map { question -> question.name.lowercase() })),
             args = mapOf(QUESTION to ArgDto.text(Question.QUIT.name.lowercase())),
             stories = listOf(overwrite, delete, quit, abandon),
@@ -73,14 +71,6 @@ object ConfirmDialogViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         val question = Question.valueOf(args.text(QUESTION).uppercase())
-        return ConfirmDialogView().apply {
-            display(
-                message = context.texts[question.message, "slot" to 2, "quest" to QUEST_NAME],
-                cancelLabel = context.texts[question.cancel],
-                confirmLabel = context.texts[question.confirm],
-                onCancelled = { context.action("onCancelled") },
-                onConfirmed = { context.action("onConfirmed") },
-            )
-        }
+        return ConfirmDialogView().apply { display(context.texts[question.message, "slot" to 2, "quest" to QUEST_NAME]) }
     }
 }
