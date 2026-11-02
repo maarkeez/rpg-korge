@@ -77,12 +77,14 @@ class BattleScene(
     val battleUnitInfoView = BattleUnitInfoView(resourcesLoader, texts)
     val attackPreviewView = AttackPreviewView(resourcesLoader, texts)
     val inventoryView = InventoryView(resourcesLoader, texts)
+    val giveGoldView = GiveGoldView(resourcesLoader, texts)
     val battleHudView =
         BattleHudView(
             Size(390, 300),
             battleUnitInfoView,
             attackPreviewView,
             inventoryView,
+            giveGoldView,
         )
     val playerCallToActionView = PlayerCallToActionView(texts, resourcesLoader)
     val virtualPadView = VirtualPadView(VirtualPadView.SIZE)

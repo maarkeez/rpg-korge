@@ -35,6 +35,7 @@ enum class UiText(
     ITEM_ACTIONS_UNEQUIP("ui.itemActions.unequip"),
     GIVE_ITEM_MESSAGE("ui.giveItem.message"),
     GIVE_ITEM_CANCEL("ui.giveItem.cancel"),
+    GIVE_GOLD_TITLE("ui.giveGold.title"),
     INVENTORY_FULL_TITLE("ui.inventoryFull.title"),
     INVENTORY_FULL_MESSAGE("ui.inventoryFull.message"),
     INVENTORY_FULL_LEAVE("ui.inventoryFull.leave"),

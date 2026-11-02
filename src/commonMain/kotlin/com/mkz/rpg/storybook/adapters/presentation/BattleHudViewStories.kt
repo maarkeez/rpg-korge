@@ -5,6 +5,7 @@ import com.mkz.rpg.screen.adapters.presentation.AttackPreviewView
 import com.mkz.rpg.screen.adapters.presentation.BattleHudView
 import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfoView
+import com.mkz.rpg.screen.adapters.presentation.GiveGoldView
 import com.mkz.rpg.screen.adapters.presentation.InventoryView
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
@@ -28,11 +29,13 @@ object BattleHudViewStories : StoryBinding {
     private const val ABILITIES = 4
     private const val ITEMS = 4
     private const val GOLD = 120
+    private const val OTHER_GOLD = 100
+    private const val GIVEN_GOLD = 25
 
     private const val DISPLAY = "display"
 
     /** What the HUD displays. */
-    private enum class Display { BATTLE_UNIT_INFO, ATTACK_PREVIEW, INVENTORY, HIDDEN }
+    private enum class Display { BATTLE_UNIT_INFO, ATTACK_PREVIEW, INVENTORY, GIVE_GOLD, HIDDEN }
 
     private val battleUnitInfo =
         StoryDto(id = "screen-battle-hud--battle-unit-info", name = "Battle unit info", description = "A battle unit selected: its info, with its abilities and its bag.", args = emptyMap())
@@ -50,6 +53,13 @@ object BattleHudViewStories : StoryBinding {
             description = "The items of the battle unit, in place of the info, after tapping its bag.",
             args = mapOf(DISPLAY to ArgDto.text(Display.INVENTORY.name)),
         )
+    private val giveGold =
+        StoryDto(
+            id = "screen-battle-hud--give-gold",
+            name = "Give gold",
+            description = "The panel to give gold to another party member, in place of the bag, after tapping the gold button while exploring.",
+            args = mapOf(DISPLAY to ArgDto.text(Display.GIVE_GOLD.name)),
+        )
     private val hidden =
         StoryDto(
             id = "screen-battle-hud--hidden",
@@ -63,10 +73,10 @@ object BattleHudViewStories : StoryBinding {
             id = "screen-battle-hud",
             group = "Screen",
             title = "Battle HUD",
-            description = "Under the battlefield, in a battle: it displays one of the battle unit info, the attack preview and the inventory at a time, or none.",
+            description = "Under the battlefield, in a battle: it displays one of the battle unit info, the attack preview, the inventory and the panel to give gold at a time, or none.",
             controls = listOf(ControlDto.enum(DISPLAY, Display.entries.map { display -> display.name })),
             args = mapOf(DISPLAY to ArgDto.text(Display.BATTLE_UNIT_INFO.name)),
-            stories = listOf(battleUnitInfo, attackPreview, inventory, hidden),
+            stories = listOf(battleUnitInfo, attackPreview, inventory, giveGold, hidden),
         )
 
     override fun render(
@@ -132,11 +142,30 @@ object BattleHudViewStories : StoryBinding {
                 // The first lootable items, in alphabetical order, as many times as needed.
                 display(slots = List(ITEMS) { index -> InventoryView.Slot(itemIds[index % itemIds.size], isEquipped = false) }, gold = GOLD)
             }
-        return BattleHudView(SIZE, battleUnitInfoView, attackPreviewView, inventoryView).apply {
+        val giveGoldView =
+            GiveGoldView(context.resourcesLoader, context.texts).apply {
+                setDelegate(
+                    object : GiveGoldView.Delegate {
+                        override fun amountChanged(amount: Int) = context.action("amountChanged", amount)
+
+                        override fun receiverStepped(step: Int) = context.action("receiverStepped", step)
+                    },
+                )
+                display(
+                    giver = GiveGoldView.Member("Knight", "knight", GOLD),
+                    receiver = GiveGoldView.Member("Viking", "viking", OTHER_GOLD),
+                    amount = GIVEN_GOLD,
+                    maximum = GOLD,
+                    canStepToPrevious = false,
+                    canStepToNext = false,
+                )
+            }
+        return BattleHudView(SIZE, battleUnitInfoView, attackPreviewView, inventoryView, giveGoldView).apply {
             when (display) {
                 Display.BATTLE_UNIT_INFO -> displayBattleUnitInfoView()
                 Display.ATTACK_PREVIEW -> displayAttackPreviewView()
                 Display.INVENTORY -> displayInventoryView()
+                Display.GIVE_GOLD -> displayGiveGoldView()
                 Display.HIDDEN -> hide()
             }
         }

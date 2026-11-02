@@ -139,6 +139,11 @@ msgctxt "ui.giveItem.cancel"
 msgid "Cancel"
 msgstr "Cancelar"
 
+#. The title of the panel that moves gold from a party member to another.
+msgctxt "ui.giveGold.title"
+msgid "Give gold"
+msgstr "Dar oro"
+
 msgctxt "ui.inventoryFull.title"
 msgid "Inventory full"
 msgstr "Inventario lleno"

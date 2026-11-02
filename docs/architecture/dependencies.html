@@ -227,9 +227,9 @@ const DATA = {
     {"name": "player", "files": 15, "fanIn": 7, "fanOut": 1, "instability": 0.13, "importsIn": 36, "importsOut": 12},
     {"name": "quest", "files": 28, "fanIn": 2, "fanOut": 5, "instability": 0.71, "importsIn": 16, "importsOut": 37},
     {"name": "save", "files": 11, "fanIn": 1, "fanOut": 1, "instability": 0.5, "importsIn": 12, "importsOut": 8},
-    {"name": "screen", "files": 103, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 104, "importsOut": 260},
-    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 493, "importsOut": 0},
-    {"name": "storybook", "files": 101, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 122},
+    {"name": "screen", "files": 104, "fanIn": 1, "fanOut": 23, "instability": 0.96, "importsIn": 106, "importsOut": 262},
+    {"name": "shared", "files": 14, "fanIn": 24, "fanOut": 0, "instability": 0.0, "importsIn": 495, "importsOut": 0},
+    {"name": "storybook", "files": 102, "fanIn": 0, "fanOut": 3, "instability": 1.0, "importsIn": 0, "importsOut": 124},
     {"name": "terrain", "files": 13, "fanIn": 5, "fanOut": 1, "instability": 0.17, "importsIn": 15, "importsOut": 7},
     {"name": "unit", "files": 14, "fanIn": 6, "fanOut": 1, "instability": 0.14, "importsIn": 17, "importsOut": 11}
   ],
@@ -1399,7 +1399,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/SaveSlotsMapper.kt", "layer": "adapters", "name": "save.domain.Save"}
     ]},
-    {"from": "screen", "to": "shared", "weight": 56, "files": 35, "imports": [
+    {"from": "screen", "to": "shared", "weight": 58, "files": 36, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.Subscription"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
@@ -1417,6 +1417,8 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/FinishTurnPresenter.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/GiveGoldView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/GiveGoldView.kt", "layer": "adapters", "name": "shared.adapters.presentation.gameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/GoldButtonView.kt", "layer": "adapters", "name": "shared.adapters.presentation.GameButton"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/HealthBarPreviewView.kt", "layer": "adapters", "name": "shared.adapters.presentation.PreviewBarView"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/HealthBarView.kt", "layer": "adapters", "name": "shared.adapters.presentation.BarView"},
@@ -1474,7 +1476,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/StorybookScene.kt", "layer": "adapters", "name": "localization.adapters.presentation.LocalizationApi"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/ToolbarView.kt", "layer": "adapters", "name": "localization.domain.Localization.Dto.LanguageDto"}
     ]},
-    {"from": "storybook", "to": "screen", "weight": 104, "files": 59, "imports": [
+    {"from": "storybook", "to": "screen", "weight": 106, "files": 60, "imports": [
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/AbilityInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityInfoView.AbilityInfo"},
@@ -1489,6 +1491,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleHudView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleUnitInfo"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleUnitInfoView"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.GiveGoldView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleHudViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.InventoryView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.BattleInfoView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/BattleUnitInfoViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.AbilityButtonView"},
@@ -1514,6 +1517,7 @@ const DATA = {
       {"file": "com/mkz/rpg/storybook/adapters/presentation/FormationRowViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.FormationView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/FormationViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.FormationView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/FormationViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.UiText"},
+      {"file": "com/mkz/rpg/storybook/adapters/presentation/GiveGoldViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.GiveGoldView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/GiveItemViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.GiveItemView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/GoldButtonViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.GoldButtonView"},
       {"file": "com/mkz/rpg/storybook/adapters/presentation/HealthBarPreviewViewStories.kt", "layer": "adapters", "name": "screen.adapters.presentation.HealthBarPreviewView"},

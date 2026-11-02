@@ -15,7 +15,14 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
+            val battleHudView =
+                BattleHudView(
+                    Size(width = 400.00, height = 200.00),
+                    battleUnitInfoView,
+                    attackPreviewView,
+                    InventoryView(loadedResourcesLoader(), TextsMother.texts()),
+                    GiveGoldView(loadedResourcesLoader(), TextsMother.texts()),
+                )
             battleHudView.displayAttackPreviewView()
             // When
             battleHudView.displayBattleUnitInfoView()
@@ -29,7 +36,14 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
+            val battleHudView =
+                BattleHudView(
+                    Size(width = 400.00, height = 200.00),
+                    battleUnitInfoView,
+                    attackPreviewView,
+                    InventoryView(loadedResourcesLoader(), TextsMother.texts()),
+                    GiveGoldView(loadedResourcesLoader(), TextsMother.texts()),
+                )
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.displayAttackPreviewView()
@@ -43,7 +57,14 @@ class BattleHudViewTest : ViewsForTesting() {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, AttackPreviewView(loadedResourcesLoader(), TextsMother.texts()), inventoryView)
+            val battleHudView =
+                BattleHudView(
+                    Size(width = 400.00, height = 200.00),
+                    battleUnitInfoView,
+                    AttackPreviewView(loadedResourcesLoader(), TextsMother.texts()),
+                    inventoryView,
+                    GiveGoldView(loadedResourcesLoader(), TextsMother.texts()),
+                )
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.displayInventoryView()
@@ -52,12 +73,40 @@ class BattleHudViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayGiveGoldView should display only the panel`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            val giveGoldView = GiveGoldView(loadedResourcesLoader(), TextsMother.texts())
+            val battleHudView =
+                BattleHudView(
+                    Size(width = 400.00, height = 200.00),
+                    BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts()),
+                    AttackPreviewView(loadedResourcesLoader(), TextsMother.texts()),
+                    inventoryView,
+                    giveGoldView,
+                )
+            battleHudView.displayInventoryView()
+            // When
+            battleHudView.displayGiveGoldView()
+            // Then
+            battleHudView.displayedViews().shouldContainExactly(giveGoldView)
+        }
+
+    @Test
     fun `Hide should not display any view when is hidden`() =
         sharedViewsTest {
             // Given
             val battleUnitInfoView = BattleUnitInfoView(loadedResourcesLoader(), TextsMother.texts())
             val attackPreviewView = AttackPreviewView(loadedResourcesLoader(), TextsMother.texts())
-            val battleHudView = BattleHudView(Size(width = 400.00, height = 200.00), battleUnitInfoView, attackPreviewView, InventoryView(loadedResourcesLoader(), TextsMother.texts()))
+            val battleHudView =
+                BattleHudView(
+                    Size(width = 400.00, height = 200.00),
+                    battleUnitInfoView,
+                    attackPreviewView,
+                    InventoryView(loadedResourcesLoader(), TextsMother.texts()),
+                    GiveGoldView(loadedResourcesLoader(), TextsMother.texts()),
+                )
             battleHudView.displayBattleUnitInfoView()
             // When
             battleHudView.hide()

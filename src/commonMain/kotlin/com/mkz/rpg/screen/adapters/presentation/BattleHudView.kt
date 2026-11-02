@@ -8,6 +8,7 @@ open class BattleHudView(
     private val battleUnitInfoView: BattleUnitInfoView,
     private val attackPreviewView: AttackPreviewView,
     private val inventoryView: InventoryView,
+    private val giveGoldView: GiveGoldView,
 ) : UIContainer(size) {
     open fun displayBattleUnitInfoView() {
         removeChildren()
@@ -22,6 +23,12 @@ open class BattleHudView(
     open fun displayInventoryView() {
         removeChildren()
         addChild(inventoryView)
+    }
+
+    open fun displayGiveGoldView() {
+        removeChildren()
+        addChild(giveGoldView)
+        giveGoldView.x = GiveGoldView.X
     }
 
     open fun hide() {
