@@ -156,7 +156,13 @@ class InventoryPresenter(
         val party = partyApi.searchParty()?.takeIf { party -> party.isExploring } ?: return null
         val partyIndex = party.battleUnitIds.indexOf(battleUnitId).takeIf { index -> index >= 0 } ?: return null
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return null
-        return InventoryView.Owner(name = texts.unitName(battleUnit.unitId), partyIndex = partyIndex, partySize = party.battleUnitIds.size)
+        return InventoryView.Owner(
+            name = texts.unitName(battleUnit.unitId),
+            partyIndex = partyIndex,
+            partySize = party.battleUnitIds.size,
+            canGiveGold =
+                inventoryApi.searchGiveGoldRefusal(battleUnitId) == null,
+        )
     }
 
     private fun openInventory(battleUnitId: String) {
@@ -439,6 +445,8 @@ class InventoryPresenter(
     }
 
     override fun inventoryOwnerStepped(step: Int) = whenIdle { switchOwner(step) }
+
+    override fun goldSelected() = Unit
 
     override fun inventoryClosed() =
         whenIdle {

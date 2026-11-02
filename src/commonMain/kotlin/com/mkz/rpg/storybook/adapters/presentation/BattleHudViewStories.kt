@@ -125,6 +125,8 @@ object BattleHudViewStories : StoryBinding {
                         override fun inventoryOwnerStepped(step: Int) = context.action("inventoryOwnerStepped", step)
 
                         override fun inventoryClosed() = context.action("inventoryClosed", setArg = DISPLAY to ArgDto.text(Display.BATTLE_UNIT_INFO.name))
+
+                        override fun goldSelected() = context.action("goldSelected")
                     },
                 )
                 // The first lootable items, in alphabetical order, as many times as needed.

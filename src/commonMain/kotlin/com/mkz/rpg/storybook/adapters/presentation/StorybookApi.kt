@@ -55,6 +55,7 @@ class StorybookApi(
                 CancelAndConfirmViewStories,
                 InventorySlotViewStories,
                 InventoryViewStories,
+                GoldButtonViewStories,
                 ItemActionsViewStories,
                 GiveItemViewStories,
                 InventoryFullViewStories,

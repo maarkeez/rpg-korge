@@ -131,7 +131,7 @@ class InventoryPresenterSwitchTest {
         // When
         openInventoryOf("knight-1")
         // Then
-        inventoryView.displayedOwner shouldBe Owner(name = "Knight", partyIndex = 0, partySize = 3)
+        inventoryView.displayedOwner shouldBe Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true)
     }
 
     @Test
@@ -146,7 +146,7 @@ class InventoryPresenterSwitchTest {
         selectedBattleUnitIds.shouldContainExactly("viking-1")
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false))
         inventoryView.displayedGold shouldBe 30
-        inventoryView.displayedOwner shouldBe Owner(name = "Viking", partyIndex = 1, partySize = 3)
+        inventoryView.displayedOwner shouldBe Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true)
         battleHudView.displays.last() shouldBe Display.INVENTORY
     }
 
@@ -158,7 +158,7 @@ class InventoryPresenterSwitchTest {
         step(-1)
         // Then
         selectedBattleUnitIds.shouldContainExactly("viking-1")
-        inventoryView.displayedOwner shouldBe Owner(name = "Viking", partyIndex = 1, partySize = 3)
+        inventoryView.displayedOwner shouldBe Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true)
     }
 
     @Test
@@ -169,7 +169,7 @@ class InventoryPresenterSwitchTest {
         step(-1)
         // Then
         selectedBattleUnitIds.shouldBeEmpty()
-        inventoryView.displayedOwner shouldBe Owner(name = "Knight", partyIndex = 0, partySize = 3)
+        inventoryView.displayedOwner shouldBe Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true)
     }
 
     @Test

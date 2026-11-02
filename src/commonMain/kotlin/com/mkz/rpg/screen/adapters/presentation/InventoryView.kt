@@ -20,7 +20,8 @@ import korlibs.math.geom.Size
  * battle unit info.
  *
  * While exploring, the title line names the party member instead, between the arrows that switch to the previous or
- * next member, as swiping the inventory left or right does: `< Knight ........ 20 G >`.
+ * next member, as swiping the inventory left or right does: `< Knight ........ [ 20 G ] >`. Its gold is a button then, to
+ * give some, faded when it can not.
  */
 open class InventoryView(
     resourcesLoader: BattleSceneResourcesLoader,
@@ -54,11 +55,12 @@ open class InventoryView(
         val isEquipped: Boolean,
     )
 
-    /** The party member whose inventory is displayed while exploring, and its position in the party, from the leader. */
+    /** The party member whose inventory is displayed while exploring, its position in the party, from the leader, and whether it can give gold. */
     data class Owner(
         val name: String,
         val partyIndex: Int,
         val partySize: Int,
+        val canGiveGold: Boolean,
     )
 
     interface Delegate {
@@ -68,6 +70,9 @@ open class InventoryView(
         fun inventoryOwnerStepped(step: Int)
 
         fun inventoryClosed()
+
+        /** The gold button was tapped, also when faded, to give gold or to read why it can not. */
+        fun goldSelected()
     }
 
     private var delegate: Delegate? = null
@@ -75,6 +80,7 @@ open class InventoryView(
     internal lateinit var nextOwnerButton: GameButton
     internal lateinit var titleView: UnitNameView
     internal lateinit var goldView: UnitNameView
+    internal lateinit var goldButton: GoldButtonView
     internal lateinit var closeButton: GameButton
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
 
@@ -115,7 +121,8 @@ open class InventoryView(
 
     /**
      * Displays the stored items in their order, followed by the empty storage spaces, and the gold. The [owner], while
-     * exploring, is named between the arrows, which are disabled at the ends of the party. Clears the selected slot.
+     * exploring, is named between the arrows, which are disabled at the ends of the party, and its gold is a button.
+     * Clears the selected slot.
      */
     open fun display(
         slots: List<Slot>,
@@ -123,7 +130,7 @@ open class InventoryView(
         owner: Owner? = null,
     ) {
         displayTitle(owner)
-        goldView.display(texts.gold(gold))
+        displayGold(gold, owner)
         slotViews.forEachIndexed { index, slotView ->
             val slot = slots.getOrNull(index)
             slotView.display(lootableItemId = slot?.lootableItemId, isEquipped = slot?.isEquipped ?: false)
@@ -135,7 +142,19 @@ open class InventoryView(
         slotViews.forEachIndexed { slotIndex, slotView -> if (slotIndex == index) slotView.select() else slotView.unselect() }
     }
 
-    // Inventory ........ 20 G, or < Knight ........ 20 G > while exploring. The gold stays right before Close, or before the next arrow.
+    private fun displayGold(
+        gold: Int,
+        owner: Owner?,
+    ) {
+        goldView.display(texts.gold(gold))
+        goldButton.visible = owner != null
+        if (owner == null) return
+        goldView.hide()
+        goldButton.display(texts.gold(gold), isFaded = !owner.canGiveGold)
+        goldButton.position(goldView.x + TEXT_WIDTH - goldButton.buttonWidth, (BAR_HEIGHT - GoldButtonView.HEIGHT) / 2)
+    }
+
+    // Inventory ........ 20 G, or < Knight ........ [ 20 G ] > while exploring. The gold stays right before Close, or before the next arrow.
     private fun displayTitle(owner: Owner?) {
         val hasArrows = owner != null
         previousOwnerButton.visible = hasArrows
@@ -156,6 +175,9 @@ open class InventoryView(
             goldView = UnitNameView(Size(TEXT_WIDTH, TEXT_HEIGHT)).position(0.0, textY)
             goldView.alignTextToRight()
             addChild(goldView)
+            goldButton = GoldButtonView { delegate?.goldSelected() }
+            goldButton.visible = false
+            addChild(goldButton)
             nextOwnerButton = button(">", ARROW_WIDTH) { delegate?.inventoryOwnerStepped(1) }.position(TITLE_LINE_WIDTH - TITLE_SPACING - ARROW_WIDTH, 0.0)
         }
 

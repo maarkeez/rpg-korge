@@ -9,7 +9,8 @@ import korlibs.korge.view.View
 
 /**
  * The stories of [InventoryView], with the items of the game, in alphabetical order, as many times as needed. Tapping a
- * slot selects it, and the arrows switch the party member, as the inventory presenter does.
+ * slot selects it, and the arrows switch the party member, as the inventory presenter does. While exploring its gold is a
+ * button, faded with no gold or no one to give it to.
  */
 object InventoryViewStories : StoryBinding {
     private const val PARTY_LIMIT = 3
@@ -55,6 +56,14 @@ object InventoryViewStories : StoryBinding {
             args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_SIZE to ArgDto.int(1)),
         )
 
+    private val exploringNoGold =
+        StoryDto(
+            id = "screen-inventory--exploring-no-gold",
+            name = "Exploring, no gold",
+            description = "A party member who carries no gold: its gold button is faded, and can still be tapped, to read why.",
+            args = mapOf(EXPLORING to ArgDto.boolean(true), GOLD to ArgDto.int(0)),
+        )
+
     override fun component(context: StoryContext) =
         ComponentDto(
             id = "screen-inventory",
@@ -83,7 +92,7 @@ object InventoryViewStories : StoryBinding {
                     PARTY_INDEX to ArgDto.int(0),
                     PARTY_SIZE to ArgDto.int(PARTY_LIMIT),
                 ),
-            stories = listOf(empty, stored, full, equipped, selected, exploring, exploringLastMember, exploringOnlyMember),
+            stories = listOf(empty, stored, full, equipped, selected, exploring, exploringLastMember, exploringOnlyMember, exploringNoGold),
         )
 
     override fun render(
@@ -114,13 +123,15 @@ object InventoryViewStories : StoryBinding {
                     }
 
                     override fun inventoryClosed() = context.action("inventoryClosed")
+
+                    override fun goldSelected() = context.action("goldSelected")
                 },
             )
             display(
                 // The first lootable items, in alphabetical order, as many times as needed.
                 slots = List(items) { index -> InventoryView.Slot(itemIds[index % itemIds.size], isEquipped = index == equippedSlot) },
                 gold = args.int(GOLD),
-                owner = if (args.boolean(EXPLORING)) InventoryView.Owner(args.text(OWNER), partyIndex, partySize) else null,
+                owner = if (args.boolean(EXPLORING)) InventoryView.Owner(args.text(OWNER), partyIndex, partySize, canGiveGold = args.int(GOLD) > 0 && partySize > 1) else null,
             )
             selectSlot(selectedSlot)
         }

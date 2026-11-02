@@ -13,6 +13,13 @@ fun InventoryView.titleText(): String = titleView.nameText()
 /** The gold of the battle unit, on the title line, e.g.: 120 G. */
 fun InventoryView.goldText(): String = goldView.nameText()
 
+/** Whether the gold is a button, in place of the plain text, as it is while exploring. */
+fun InventoryView.isDisplayingGoldButton(): Boolean = goldButton.visible && !goldView.visible
+
+fun InventoryView.goldButtonText(): String = goldButton.amountText
+
+fun InventoryView.isGoldButtonFaded(): Boolean = goldButton.isFaded
+
 /** Whether the arrows to the previous and the next party member are displayed, and whether each one is enabled. */
 fun InventoryView.arrowsVisible(): Boolean = previousOwnerButton.visible && nextOwnerButton.visible
 
@@ -47,6 +54,8 @@ suspend fun ViewsForTesting.clickSlot(
 ) = clickOn(inventoryView.slotViews[index])
 
 suspend fun ViewsForTesting.clickClose(inventoryView: InventoryView) = clickOn(inventoryView.closeButton)
+
+suspend fun ViewsForTesting.clickGoldButton(inventoryView: InventoryView) = clickOn(inventoryView.goldButton)
 
 suspend fun ViewsForTesting.clickPreviousOwner(inventoryView: InventoryView) = clickOn(inventoryView.previousOwnerButton)
 

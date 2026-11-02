@@ -18,6 +18,7 @@ class InventoryViewTest : ViewsForTesting() {
         val selectedSlots = mutableListOf<Int>()
         val steps = mutableListOf<Int>()
         var isClosed = false
+        var goldSelections = 0
 
         override fun slotSelected(index: Int) {
             selectedSlots += index
@@ -29,6 +30,10 @@ class InventoryViewTest : ViewsForTesting() {
 
         override fun inventoryClosed() {
             isClosed = true
+        }
+
+        override fun goldSelected() {
+            goldSelections++
         }
     }
 
@@ -146,7 +151,7 @@ class InventoryViewTest : ViewsForTesting() {
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             addChild(inventoryView)
             // When
-            inventoryView.display(emptyList(), gold = 20, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            inventoryView.display(emptyList(), gold = 20, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             // Then
             inventoryView.titleText() shouldBe "Viking"
             inventoryView.goldText() shouldBe "20 G"
@@ -162,7 +167,7 @@ class InventoryViewTest : ViewsForTesting() {
             // Given
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             // When
-            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 1))
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 1, canGiveGold = true))
             // Then
             inventoryView.arrowsEnabled() shouldBe (false to false)
             inventoryView.arrowsFaded() shouldBe (true to true)
@@ -173,12 +178,68 @@ class InventoryViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
-            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 2))
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 2, canGiveGold = true))
             // When
             inventoryView.display(emptyList(), gold = 0)
             // Then
             inventoryView.titleText() shouldBe "Inventory"
             inventoryView.arrowsVisible().shouldBeFalse()
+        }
+
+    @Test
+    fun `Display should draw the gold as a button when it names an owner`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            inventoryView.display(emptyList(), gold = 120, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true))
+            // Then
+            inventoryView.isDisplayingGoldButton().shouldBeTrue()
+            inventoryView.goldButtonText() shouldBe "120 G"
+            inventoryView.isGoldButtonFaded().shouldBeFalse()
+        }
+
+    @Test
+    fun `Display should draw the gold as plain text when it names no owner`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.display(emptyList(), gold = 120, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true))
+            // When
+            inventoryView.display(emptyList(), gold = 120)
+            // Then
+            inventoryView.isDisplayingGoldButton().shouldBeFalse()
+            inventoryView.goldView.visible.shouldBeTrue()
+            inventoryView.goldText() shouldBe "120 G"
+        }
+
+    @Test
+    fun `Display should fade the gold button when the owner can not give gold`() =
+        sharedViewsTest {
+            // Given
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            // When
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = false))
+            // Then
+            inventoryView.isDisplayingGoldButton().shouldBeTrue()
+            inventoryView.isGoldButtonFaded().shouldBeTrue()
+        }
+
+    @Test
+    fun `GoldButton should call the delegate when it is tapped, also when faded`() =
+        sharedViewsTest {
+            // Given
+            val delegate = RecordingDelegate()
+            val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
+            inventoryView.setDelegate(delegate)
+            addChild(inventoryView)
+            // When
+            inventoryView.display(emptyList(), gold = 120, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = true))
+            clickGoldButton(inventoryView)
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Knight", partyIndex = 0, partySize = 3, canGiveGold = false))
+            clickGoldButton(inventoryView)
+            // Then
+            delegate.goldSelections shouldBe 2
         }
 
     @Test
@@ -188,7 +249,7 @@ class InventoryViewTest : ViewsForTesting() {
             val delegate = RecordingDelegate()
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.setDelegate(delegate)
-            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            inventoryView.display(emptyList(), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             addChild(inventoryView)
             // When
             clickPreviousOwner(inventoryView)
@@ -204,7 +265,7 @@ class InventoryViewTest : ViewsForTesting() {
             val delegate = RecordingDelegate()
             val inventoryView = InventoryView(loadedResourcesLoader(), TextsMother.texts())
             inventoryView.setDelegate(delegate)
-            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3))
+            inventoryView.display(listOf(Slot("hammer", isEquipped = false)), gold = 0, owner = Owner(name = "Viking", partyIndex = 1, partySize = 3, canGiveGold = true))
             addChild(inventoryView)
             // When
             swipeInventory(inventoryView, dx = -100.0)
