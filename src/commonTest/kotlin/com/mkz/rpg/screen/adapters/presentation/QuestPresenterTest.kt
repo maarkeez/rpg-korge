@@ -42,6 +42,7 @@ class QuestPresenterTest {
     private val confirmDialogView = ConfirmDialogView()
     private val announcementView = FakeQuestAnnouncementView()
     private val battlefieldView = FakeBattlefieldView()
+    private val callToActionView = FakePlayerCallToActionView()
     private val timeline = battleSceneTimeline()
 
     // The knight explores the sand, alone, with the quests given.
@@ -60,7 +61,21 @@ class QuestPresenterTest {
     ).also(SubdomainApis::initialise)
 
     private fun SubdomainApis.presenter() =
-        QuestPresenter(trackerView, detailView, journalView, confirmDialogView, announcementView, battlefieldView, questApi, partyApi, npcApi, TextsMother.texts(), timeline, eventBus)
+        QuestPresenter(
+            trackerView,
+            detailView,
+            journalView,
+            confirmDialogView,
+            announcementView,
+            battlefieldView,
+            callToActionView,
+            questApi,
+            partyApi,
+            npcApi,
+            TextsMother.texts(),
+            timeline,
+            eventBus,
+        )
 
     private fun SubdomainApis.startQuest() {
         questApi.startMainQuest()
@@ -270,7 +285,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestDetailBackSelected should close the quest when the detail view is open`() {
+    fun `Back should close the quest when the detail view is open`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         val presenter = apis.presenter()
@@ -278,7 +293,7 @@ class QuestPresenterTest {
         apis.eventBus.dispatch()
         presenter.openQuest()
         // When
-        presenter.questDetailBackSelected()
+        callToActionView.chooseAction("Back")
         // Then
         apis.partyApi
             .searchParty()!!
@@ -287,7 +302,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestDetailBackSelected should do nothing when the timeline is playing`() {
+    fun `Back should do nothing when the timeline is playing`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         val presenter = apis.presenter()
@@ -296,7 +311,7 @@ class QuestPresenterTest {
         presenter.openQuest()
         timeline.playLongStep()
         // When
-        presenter.questDetailBackSelected()
+        callToActionView.chooseAction("Back")
         // Then
         apis.partyApi
             .searchParty()!!
@@ -325,6 +340,49 @@ class QuestPresenterTest {
         journalView.visible.shouldBeTrue()
         detailView.visible.shouldBeFalse()
         journalView.displayedRows().shouldContainExactly(questId, "side")
+    }
+
+    @Test
+    fun `openQuest should display Back when the journal is listed`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        // When
+        apis.presenterWithASideQuestOpen()
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back")
+    }
+
+    @Test
+    fun `questJournalSelected should display Back and Abandon when it is an active side quest`() {
+        // Given
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
+        val presenter = apis.presenterWithASideQuestOpen()
+        // When
+        presenter.questJournalSelected("side")
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back", "Abandon")
+        callToActionView.displayedActions!!.last().color shouldBe HudStyle.DANGER
+    }
+
+    @Test
+    fun `questJournalSelected should display Back alone when it is the main quest or a completed one`() {
+        // Given: the side quest completed before opening, as the last defeat also wins the battle, which closes the journal.
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val presenter = apis.presenter()
+        apis.startQuest()
+        apis.questApi.resolveNpcTalk("farmer")
+        apis.eventBus.dispatch()
+        apis.defeatRat()
+        presenter.openQuest()
+        // When
+        presenter.questJournalSelected(questId)
+        val onTheMainQuest = callToActionView.actionLabels()
+        callToActionView.chooseAction("Back")
+        presenter.questJournalSelected("side")
+        // Then
+        onTheMainQuest.shouldContainExactly("Back")
+        callToActionView.actionLabels().shouldContainExactly("Back")
+        detailView.displayedCaption() shouldBe "QUEST COMPLETED"
     }
 
     @Test
@@ -371,13 +429,13 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestDetailBackSelected should display the journal again when it was opened from it`() {
+    fun `Back should display the journal again when it was opened from it`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenterWithASideQuestOpen()
         presenter.questJournalSelected("side")
         // When
-        presenter.questDetailBackSelected()
+        callToActionView.chooseAction("Back")
         apis.eventBus.dispatch()
         // Then
         journalView.visible.shouldBeTrue()
@@ -389,12 +447,12 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestJournalBackSelected should close the quest when the journal is open`() {
+    fun `Back should close the quest when the journal is open`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenterWithASideQuestOpen()
         // When
-        presenter.questJournalBackSelected()
+        callToActionView.chooseAction("Back")
         // Then
         apis.partyApi
             .searchParty()!!
@@ -403,17 +461,18 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestDetailAbandonSelected should ask first, and Back should return to the detail view`() {
+    fun `Abandon should ask first, hiding the row, and Back should return to the detail view with its row`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenterWithASideQuestOpen()
         presenter.questJournalSelected("side")
         // When
-        presenter.questDetailAbandonSelected()
+        callToActionView.chooseAction("Abandon")
         // Then
         confirmDialogView.visible.shouldBeTrue()
         detailView.visible.shouldBeFalse()
         confirmDialogView.choiceLabels().shouldContainExactly("Back", "Abandon")
+        callToActionView.displayedActions shouldBe null
         apis.questApi
             .searchQuests()
             .first { quest -> quest.id == "side" }
@@ -424,6 +483,7 @@ class QuestPresenterTest {
         confirmDialogView.visible.shouldBeFalse()
         detailView.visible.shouldBeTrue()
         detailView.displayedCaption() shouldBe "SIDE QUEST"
+        callToActionView.actionLabels().shouldContainExactly("Back", "Abandon")
     }
 
     @Test
@@ -432,7 +492,7 @@ class QuestPresenterTest {
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "other"))
         val presenter = apis.presenterWithASideQuestOpen()
         presenter.questJournalSelected("side")
-        presenter.questDetailAbandonSelected()
+        callToActionView.chooseAction("Abandon")
         // When
         confirmDialogView.chooseConfirm()
         apis.eventBus.dispatch()
@@ -444,6 +504,7 @@ class QuestPresenterTest {
         confirmDialogView.visible.shouldBeFalse()
         journalView.visible.shouldBeTrue()
         journalView.displayedRows().shouldContainExactly(questId, "other")
+        callToActionView.actionLabels().shouldContainExactly("Back")
         apis.partyApi
             .searchParty()!!
             .isReadingQuest
@@ -456,7 +517,7 @@ class QuestPresenterTest {
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         val presenter = apis.presenterWithASideQuestOpen()
         presenter.questJournalSelected("side")
-        presenter.questDetailAbandonSelected()
+        callToActionView.chooseAction("Abandon")
         // When
         confirmDialogView.chooseConfirm()
         apis.eventBus.dispatch()

@@ -1,5 +1,6 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
+import com.mkz.rpg.screen.adapters.presentation.ActionRowView
 import com.mkz.rpg.screen.adapters.presentation.ItemActionsView
 import com.mkz.rpg.screen.adapters.presentation.PlayerCallToActionView
 import com.mkz.rpg.screen.adapters.presentation.UiText
@@ -26,7 +27,7 @@ object PlayerCallToActionViewStories : StoryBinding {
     private const val ITEM = "item"
 
     /** What the player is called to do. */
-    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL }
+    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, ACTIONS }
 
     private val finishTurn =
         StoryDto(id = "screen-player-call-to-action--finish-turn", name = "Finish turn", description = "The player has nothing else to choose: the button ends the turn.", args = emptyMap())
@@ -80,6 +81,14 @@ object PlayerCallToActionViewStories : StoryBinding {
             args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.INVENTORY_FULL.name)),
         )
 
+    private val actions =
+        StoryDto(
+            id = "screen-player-call-to-action--actions",
+            name = "Actions",
+            description = "A panel open in place of the pad: its buttons, which stay until the presenter displays what follows.",
+            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.ACTIONS.name)),
+        )
+
     override fun component(context: StoryContext) =
         ComponentDto(
             id = "screen-player-call-to-action",
@@ -104,7 +113,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                     ITEM_PRICE to ArgDto.int(25),
                     ITEM to ArgDto.text(DEFAULT_ITEM),
                 ),
-            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull),
+            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull, actions),
         )
 
     override fun render(
@@ -151,6 +160,13 @@ object PlayerCallToActionViewStories : StoryBinding {
                         foundItemPrice = args.int(ITEM_PRICE),
                         foundItemId = args.text(ITEM),
                         onLeft = { context.action("onLeft", setArg = dismissed) },
+                    )
+                CallToAction.ACTIONS ->
+                    displayActions(
+                        listOf(UiText.QUEST_DETAIL_BACK, UiText.QUEST_ABANDON).map { text ->
+                            val label = texts[text]
+                            ActionRowView.Action(label = label) { context.action("onSelected", label) }
+                        },
                     )
             }
         }

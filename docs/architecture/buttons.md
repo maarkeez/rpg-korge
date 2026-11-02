@@ -20,6 +20,20 @@ KorGE's own disabled look is not enough: it only changes the background, to `#77
 to be told apart, and keeps the label white. `GameButton` sets the disabled background and fades the label and the
 border with it, whenever `enabled` changes.
 
+## The action row
+
+[`ActionRowView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ActionRowView.kt) holds the
+buttons of a panel at the level of Finish turn and as tall as it, so a thumb has one place to go. They share the 390 of
+the row with a spacing of 10: Back alone is 390, Back and Abandon are 190 each, and three buttons are 123.3 each. The
+first one always starts on the left, so Back does not jump when stepping out. Each is grey, but for an action that can
+not be undone, in `HudStyle.DANGER`, and a disabled one fades as any other.
+
+The presenter of the panel owns the actions and displays them with `PlayerCallToActionView.displayActions`. A tap does
+not dismiss them, unlike the item actions: the presenter displays what follows. `hideActions` removes the row and
+nothing else, so an item found with a full bag stays, and Finish turn returns when the battle has one.
+
+The row sits 15 below the 300 of the panels, as it does below the battle HUD.
+
 ## Where it is used
 
 - [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt): the arrows
@@ -32,13 +46,16 @@ border with it, whenever `enabled` changes.
   steps of the rows and the columns, disabled out of the allowed sizes.
 - [`FinishTurnView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt): Finish
   turn, blue, disabled while the turn can not be ended.
+- [`ActionRowView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ActionRowView.kt): Back and
+  Abandon of the quest journal and the detail view.
 
 A new button of a view is a `gameButton`, so a disabled one looks disabled. The buttons drawn with images (e.g.: the
 abilities, the bag, the virtual pad, the terrains of the map builder) and the Storybook's own buttons are not.
 
 ## Seeing and testing it
 
-- The **Shared / Game button** stories of the [Storybook](storybook.md) show it enabled, disabled and in another color.
+- The **Shared / Game button** stories of the [Storybook](storybook.md) show it enabled, disabled and in another color,
+  and **Screen / Action row** the row, from a lone button to three.
   The stories of each view above show its disabled buttons, e.g.: **Screen / Inventory › Exploring, only member**.
 - `GameButtonTest` checks it fades when disabled, and not once enabled again. The page object `isFaded()`, in
   `GameButtonExtension`, lets the tests of each view check its disabled buttons are displayed faded, besides disabled.

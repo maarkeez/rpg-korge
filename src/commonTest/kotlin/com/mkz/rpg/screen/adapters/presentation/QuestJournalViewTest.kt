@@ -97,14 +97,50 @@ class QuestJournalViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should hide the rows out of the list when they do not all fit`() =
+    fun `display should show 4 rows when it lists more than fit`() =
         sharedViewsTest {
             // Given
             val journalView = journalView()
             // When
             journalView.display(tenQuests)
             // Then
-            journalView.rowsInSight().shouldContainExactly("quest-0", "quest-1", "quest-2")
+            journalView.rowsInSight().shouldContainExactly("quest-0", "quest-1", "quest-2", "quest-3")
+        }
+
+    @Test
+    fun `display should not scroll when it lists the 4 rows that fit`() =
+        sharedViewsTest {
+            // Given
+            val journalView = journalView()
+            // When
+            journalView.display(tenQuests.take(4))
+            journalView.scrollTo(100.0)
+            // Then
+            journalView.rowsInSight().shouldContainExactly("quest-0", "quest-1", "quest-2", "quest-3")
+            journalView.scrollPosition() shouldBe 0.0
+        }
+
+    @Test
+    fun `ScrollTo should keep in sight the rows crossing the edges of the list`() =
+        sharedViewsTest {
+            // Given
+            val journalView = journalView()
+            journalView.display(tenQuests)
+            // When: the second row is cut by the top of the list, and the fifth one by its bottom.
+            journalView.scrollTo(100.0)
+            // Then
+            journalView.rowsInSight().shouldContainExactly("quest-1", "quest-2", "quest-3", "quest-4", "quest-5")
+        }
+
+    @Test
+    fun `display should draw the rounded shapes of the rows as bitmaps, so the list can clip them`() =
+        sharedViewsTest {
+            // Given
+            val journalView = journalView()
+            // When
+            journalView.display(listOf(mainQuest, sideQuest, completedQuest))
+            // Then
+            journalView.rowsAreClippable().shouldBeTrue()
         }
 
     @Test
@@ -167,21 +203,6 @@ class QuestJournalViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Tapping Back should call its delegate when it is displayed`() =
-        sharedViewsTest {
-            // Given
-            val selected = mutableListOf<String>()
-            val journalView = journalView()
-            journalView.setDelegate(delegate(selected))
-            addChild(journalView)
-            journalView.display(listOf(mainQuest, sideQuest))
-            // When
-            clickBack(journalView)
-            // Then
-            selected.shouldContainExactly("back")
-        }
-
-    @Test
     fun `hide should not display it`() =
         sharedViewsTest {
             // Given
@@ -201,10 +222,6 @@ class QuestJournalViewTest : ViewsForTesting() {
 
             override fun questJournalPinSelected(questId: String) {
                 selected += "pin $questId"
-            }
-
-            override fun questJournalBackSelected() {
-                selected += "back"
             }
         }
 }

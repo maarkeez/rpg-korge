@@ -8,10 +8,9 @@ import com.mkz.rpg.screen.adapters.presentation.battleUnitInfoView
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickA
-import com.mkz.rpg.screen.adapters.presentation.clickAbandon
 import com.mkz.rpg.screen.adapters.presentation.clickAbility
+import com.mkz.rpg.screen.adapters.presentation.clickAction
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
-import com.mkz.rpg.screen.adapters.presentation.clickBack
 import com.mkz.rpg.screen.adapters.presentation.clickCancel
 import com.mkz.rpg.screen.adapters.presentation.clickCapsule
 import com.mkz.rpg.screen.adapters.presentation.clickConfirm
@@ -214,7 +213,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the virtual pad to be hidden while reading the quest") { virtualPadView()?.isPadShown()?.shouldBeFalse() }
             questDetailView()?.displayedTask() shouldBe "Defeat the Goat Wizard"
             // When
-            clickBack(requireNotNull(questDetailView()))
+            clickAction(requireNotNull(stage.playerCallToActionView()), "Back")
             waitUntil { virtualPadView()?.isPadShown() == true }
             // Then
             withClue("Expected the virtual pad to be displayed again") { virtualPadView()?.isPadShown()?.shouldBeTrue() }
@@ -293,7 +292,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             withClue("Expected the pin on the tracker") { trackerView.isPinShown().shouldBeTrue() }
             withClue("Expected the pin of the row in gold") { journalView.isPinnedRow(batsQuest).shouldBeTrue() }
             // When: Back steps out.
-            clickBack(journalView)
+            clickAction(requireNotNull(stage.playerCallToActionView()), "Back")
             waitUntil { virtualPadView()?.isPadShown() == true }
             // And the third bat is defeated.
             saveAndQuit()
@@ -335,13 +334,13 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             val detailView = requireNotNull(questDetailView())
             waitUntil { detailView.isDetailShown() }
             // When: Abandon asks first, and Back returns to the detail view.
-            clickAbandon(detailView)
+            clickAction(requireNotNull(stage.playerCallToActionView()), "Abandon")
             val confirmDialogView = requireNotNull(confirmDialogView())
             waitUntil { confirmDialogView.isShown() }
             clickCancel(confirmDialogView)
             waitUntil { detailView.isDetailShown() }
             // And it is abandoned.
-            clickAbandon(detailView)
+            clickAction(requireNotNull(stage.playerCallToActionView()), "Abandon")
             waitUntil { confirmDialogView.isShown() }
             clickConfirm(confirmDialogView)
             waitUntil { virtualPadView()?.isPadShown() == true }
@@ -366,7 +365,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { journalView.isShown() }
             clickPin(journalView, batsQuest)
             waitUntil { trackerView.displayedTask() == "Defeat 3 Bats" }
-            clickBack(journalView)
+            clickAction(requireNotNull(stage.playerCallToActionView()), "Back")
             waitUntil { virtualPadView()?.isPadShown() == true }
             saveAndQuit()
             // When

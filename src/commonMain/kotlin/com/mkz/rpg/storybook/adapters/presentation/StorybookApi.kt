@@ -62,6 +62,7 @@ class StorybookApi(
                 GiveGoldActionsViewStories,
                 GiveGoldRefusalViewStories,
                 InventoryFullViewStories,
+                ActionRowViewStories,
                 PlayerCallToActionViewStories,
                 BattlefieldViewStories,
                 TerrainTileViewStories,

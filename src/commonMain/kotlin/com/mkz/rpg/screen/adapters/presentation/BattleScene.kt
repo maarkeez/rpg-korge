@@ -233,6 +233,7 @@ class BattleScene(
                     confirmDialogView,
                     questAnnouncementView,
                     battlefieldView,
+                    playerCallToActionView,
                     questApi,
                     partyApi,
                     npcApi,

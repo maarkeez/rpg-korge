@@ -106,7 +106,7 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 
 ### The detail view
 
-[`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) displays a quest in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with its caption (MAIN QUEST, SIDE QUEST or QUEST COMPLETED), the Repeatable pill when it runs again, the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown. The bottom row only holds the buttons, with Back on the left, so a reward of gold and four items never slides under them. Once completed, it still opens, with a ticked target, so the story can be read again.
+[`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) displays a quest in place of the pad, with time stopped (see [Reading the quest](exploration.md#reading-the-quest)). It is led by the portrait of who the current task is about, or the task's glyph for a place, with its caption (MAIN QUEST, SIDE QUEST or QUEST COMPLETED), the Repeatable pill when it runs again, the name and the description beside it. Under them, the current task in a banner, with its count and bar only when it counts above 1, the tasks done as a count, and the reward, which is always shown, evenly apart down the 300 of the panel, the banner lower when no tasks done are under it. Its buttons are in the [action row](buttons.md#the-action-row), at the level of the finish turn, with Back first. Once completed, it still opens, with a ticked target, so the story can be read again.
 
 ### The journal
 
@@ -117,11 +117,12 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 - Tapping a pin makes the tracker name that quest, and tapping the gold pin returns it to the main quest. See [Pinning](#pinning). The pin takes its own taps in the 32 around it, so the row does not open.
 - It holds any number of quests, dragged to scroll. A drag above 4 points does not select the row under it, and the list keeps its place when coming back from a detail view.
 - KorGE's `clipContainer` does not clip rounded rectangles, so the rows that would show out of the panel are hidden, and the header and the footer are drawn over the others.
-- Tapping a row opens its detail view, and Back steps out one level at a time.
+- Tapping a row opens its detail view, and Back, filling the action row, steps out one level at a time.
+- 4 rows of 63 fit its list of 261. While dragging, the list clips the rows crossing its edges: they draw their rounded shapes as bitmaps (`GraphicsRenderer.SYSTEM`), as KorGE draws them straight to the GPU otherwise, past the clip.
 
 ### Abandoning
 
-The detail view of an active side quest has Abandon on the right, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
+The detail view of an active side quest has Abandon beside Back in the action row, in `HudStyle.DANGER`, the red of every action that can not be undone. It asks first, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt): Abandon Bats in the Meadow? Its progress is lost, and its giver can start it again. Back returns to the detail view. Once abandoned, the quest leaves the journal, and the player returns to it when a side quest is still listed, and otherwise to the pad. No toast announces it.
 
 ### The quest markers
 

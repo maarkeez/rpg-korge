@@ -136,6 +136,20 @@ open class PlayerCallToActionView(
         )
     }
 
+    /**
+     * Displays the buttons of a panel in the row, also when the pad had hidden the call to action. Unlike the item actions,
+     * a tap does not dismiss them: the presenter displays what follows.
+     */
+    open fun displayActions(actions: List<ActionRowView.Action>) {
+        display(ActionRowView(actions))
+        visible = true
+    }
+
+    /** Removes the row and nothing else, e.g.: an item found with a full inventory stays. The finish turn returns when the battle has one. */
+    open fun hideActions() {
+        if (callToAction is ActionRowView) dismiss()
+    }
+
     /** Asks the player what to do with an item found while the inventory is full. */
     open fun displayInventoryFull(
         foundItemName: String,

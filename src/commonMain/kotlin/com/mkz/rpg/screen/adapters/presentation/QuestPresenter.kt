@@ -27,8 +27,9 @@ import com.mkz.rpg.shared.domain.subscribe
  * is read only in a battle, and hidden once a player wins, as the winner is drawn across the whole top line.
  *
  * While the party reads the quests, in place of the pad, the journal lists every quest started and the detail view displays
- * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed, and
- * Back steps out one level at a time. Abandon asks first, and returns to the journal, or to the pad when no side quest is left.
+ * one in full: [ExplorationPresenter] opens them when the tracker is tapped, the journal once a side quest is listed. Their
+ * buttons are in the row of the call to action, where Back steps out one level at a time. Abandon asks first, and returns to
+ * the journal, or to the pad when no side quest is left.
  *
  * While exploring, a quest marker over an npc's head says who to talk to. An npc can only be talked to then, so a battle
  * removes them all until it finishes.
@@ -40,6 +41,7 @@ class QuestPresenter(
     private val confirmDialogView: ConfirmDialogView,
     private val questAnnouncementView: QuestAnnouncementView,
     private val battlefieldView: BattlefieldView,
+    private val playerCallToActionView: PlayerCallToActionView,
     private val questApi: QuestApi,
     private val partyApi: PartyApi,
     private val npcApi: NpcApi,
@@ -47,7 +49,6 @@ class QuestPresenter(
     private val timeline: BattleSceneTimeline,
     eventBus: EventBus,
 ) : QuestTrackerView.Delegate,
-    QuestDetailView.Delegate,
     QuestJournalView.Delegate {
     /** Whether the scene displays the journal or the detail view. */
     var isQuestOpen = false
@@ -55,9 +56,6 @@ class QuestPresenter(
 
     // Whether Back in the detail view returns to the journal.
     private var isDetailFromJournal = false
-
-    // The quest the detail view displays, so Abandon knows which one.
-    private var detailedQuest: QuestInfo? = null
 
     // The toasts still to play, and whether one is on its way out, so they never overlap.
     private val pendingToasts = ArrayDeque<Pair<Moment, QuestInfo>>()
@@ -129,7 +127,6 @@ class QuestPresenter(
         questJournalView.hide()
         confirmDialogView.visible = false
         questTrackerView.setDelegate(this)
-        questDetailView.setDelegate(this)
         questJournalView.setDelegate(this)
     }
 
@@ -147,7 +144,7 @@ class QuestPresenter(
         if (quests.isEmpty()) return
         isQuestOpen = true
         if (quests.any { quest -> !quest.isMain }) {
-            questJournalView.display(quests)
+            displayJournal(quests)
         } else {
             isDetailFromJournal = false
             displayDetail(quests.single())
@@ -178,34 +175,6 @@ class QuestPresenter(
 
     override fun questJournalPinSelected(questId: String) {
         if (canAct()) questApi.pinQuest(questId)
-    }
-
-    override fun questJournalBackSelected() {
-        if (canAct()) partyApi.closeQuest()
-    }
-
-    override fun questDetailBackSelected() {
-        if (!canAct()) return
-        if (isDetailFromJournal) {
-            questDetailView.hide()
-            questJournalView.display(listedQuests())
-        } else {
-            partyApi.closeQuest()
-        }
-    }
-
-    override fun questDetailAbandonSelected() {
-        val quest = detailedQuest
-        if (!canAct() || quest == null) return
-        questDetailView.hide()
-        confirmDialogView.display(
-            message = texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name],
-            cancelLabel = texts[UiText.QUEST_DETAIL_BACK],
-            confirmLabel = texts[UiText.QUEST_ABANDON],
-            onCancelled = { if (canAct()) keepQuest(quest) },
-            onConfirmed = { if (canAct()) abandonQuest(quest) },
-        )
-        confirmDialogView.visible = true
     }
 
     fun dispose() {
@@ -256,9 +225,53 @@ class QuestPresenter(
 
     private fun canAct() = isQuestOpen && !timeline.isPlaying
 
+    private fun displayJournal(quests: List<QuestInfo>) {
+        questJournalView.display(quests)
+        playerCallToActionView.displayActions(journalActions())
+    }
+
     private fun displayDetail(quest: QuestInfo) {
-        detailedQuest = quest
         questDetailView.display(quest)
+        playerCallToActionView.displayActions(detailActions(quest))
+    }
+
+    private fun journalActions() = listOf(backAction { if (canAct()) partyApi.closeQuest() })
+
+    // Only an active side quest can be abandoned.
+    private fun detailActions(quest: QuestInfo) =
+        listOfNotNull(
+            backAction { detailBackSelected() },
+            if (!quest.isMain && !quest.isCompleted) {
+                ActionRowView.Action(texts[UiText.QUEST_ABANDON], HudStyle.DANGER, HudStyle.DANGER_PRESSED) { abandonSelected(quest) }
+            } else {
+                null
+            },
+        )
+
+    private fun backAction(onSelected: () -> Unit) = ActionRowView.Action(texts[UiText.QUEST_DETAIL_BACK], onSelected = onSelected)
+
+    private fun detailBackSelected() {
+        if (!canAct()) return
+        if (isDetailFromJournal) {
+            questDetailView.hide()
+            displayJournal(listedQuests())
+        } else {
+            partyApi.closeQuest()
+        }
+    }
+
+    private fun abandonSelected(quest: QuestInfo) {
+        if (!canAct()) return
+        questDetailView.hide()
+        playerCallToActionView.hideActions()
+        confirmDialogView.display(
+            message = texts[UiText.QUEST_ABANDON_QUESTION, "quest" to quest.name],
+            cancelLabel = texts[UiText.QUEST_DETAIL_BACK],
+            confirmLabel = texts[UiText.QUEST_ABANDON],
+            onCancelled = { if (canAct()) keepQuest(quest) },
+            onConfirmed = { if (canAct()) abandonQuest(quest) },
+        )
+        confirmDialogView.visible = true
     }
 
     private fun keepQuest(quest: QuestInfo) {
@@ -272,7 +285,7 @@ class QuestPresenter(
         val quests = listedQuests()
         if (quests.any { listed -> !listed.isMain }) {
             confirmDialogView.visible = false
-            questJournalView.display(quests)
+            displayJournal(quests)
         } else {
             partyApi.closeQuest()
         }

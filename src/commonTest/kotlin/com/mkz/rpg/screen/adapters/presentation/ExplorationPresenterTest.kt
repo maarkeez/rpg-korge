@@ -111,6 +111,7 @@ class ExplorationPresenterTest {
             ConfirmDialogView(),
             FakeQuestAnnouncementView(),
             FakeBattlefieldView(),
+            playerCallToActionView,
             apis.questApi,
             apis.partyApi,
             apis.npcApi,
@@ -412,6 +413,7 @@ class ExplorationPresenterTest {
                 ConfirmDialogView(),
                 FakeQuestAnnouncementView(),
                 FakeBattlefieldView(),
+                playerCallToActionView,
                 apis.questApi,
                 apis.partyApi,
                 apis.npcApi,
@@ -1017,12 +1019,54 @@ class ExplorationPresenterTest {
         startExploring()
         tapTracker()
         // When
-        questPresenter.questDetailBackSelected()
+        playerCallToActionView.chooseAction("Back")
         eventBus.dispatch()
         // Then
         isReadingQuest().shouldBeFalse()
         questDetailView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeTrue()
+        playerCallToActionView.displayedActions shouldBe null
+        playerCallToActionView.visible.shouldBeFalse()
+    }
+
+    @Test
+    fun `ExplorationPresenter should display the row while the quest is read`() {
+        // Given
+        createPresenter()
+        startExploring()
+        // When
+        tapTracker()
+        // Then
+        playerCallToActionView.actionLabels().shouldContainExactly("Back")
+        playerCallToActionView.visible.shouldBeTrue()
+    }
+
+    @Test
+    fun `ExplorationPresenter should hide the row when a battle starts with a panel open`() {
+        // Given
+        createPresenter()
+        startExploring()
+        tapTracker()
+        // When
+        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.dispatch()
+        // Then
+        questDetailView.visible.shouldBeFalse()
+        playerCallToActionView.displayedActions shouldBe null
+    }
+
+    @Test
+    fun `ExplorationPresenter should hide the row when the player wins`() {
+        // Given
+        createPresenter()
+        startExploring()
+        tapTracker()
+        // When
+        eventBus.publish(PlayerVictory(playerId = "human"))
+        eventBus.dispatch()
+        // Then
+        questDetailView.visible.shouldBeFalse()
+        playerCallToActionView.displayedActions shouldBe null
     }
 
     @Test

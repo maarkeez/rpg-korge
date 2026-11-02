@@ -354,4 +354,85 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             isDismissed.shouldBeTrue()
             playerCallToActionView.isDisplayingNothing().shouldBeTrue()
         }
+
+    private val backAction = ActionRowView.Action("Back") {}
+    private val abandonAction = ActionRowView.Action("Abandon") {}
+
+    @Test
+    fun `DisplayActions should display every action, sharing the width of Finish turn, when they are displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            addChild(playerCallToActionView)
+            // When
+            playerCallToActionView.displayActions(listOf(backAction, abandonAction))
+            // Then
+            playerCallToActionView.isDisplayingActions().shouldBeTrue()
+            playerCallToActionView.actionLabels().shouldContainExactly("Back", "Abandon")
+            playerCallToActionView.width shouldBe FinishTurnView(TextsMother.texts()) {}.width
+        }
+
+    @Test
+    fun `DisplayActions should keep the row displayed when an action is clicked`() =
+        sharedViewsTest {
+            // Given
+            var isSelected = false
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            addChild(playerCallToActionView)
+            playerCallToActionView.displayActions(listOf(ActionRowView.Action("Back") { isSelected = true }))
+            // When
+            clickAction(playerCallToActionView, "Back")
+            // Then
+            isSelected.shouldBeTrue()
+            playerCallToActionView.isDisplayingActions().shouldBeTrue()
+        }
+
+    @Test
+    fun `DisplayActions should make the view visible when it is hidden`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            playerCallToActionView.visible = false
+            // When
+            playerCallToActionView.displayActions(listOf(backAction))
+            // Then
+            playerCallToActionView.visible.shouldBeTrue()
+        }
+
+    @Test
+    fun `HideActions should display the finish turn again when the battle has one`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            playerCallToActionView.displayFinishTurn(onTurnFinished = {})
+            playerCallToActionView.displayActions(listOf(backAction))
+            // When
+            playerCallToActionView.hideActions()
+            // Then
+            playerCallToActionView.isDisplayingFinishTurn().shouldBeTrue()
+        }
+
+    @Test
+    fun `HideActions should display nothing when no battle is on`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            playerCallToActionView.displayActions(listOf(backAction))
+            // When
+            playerCallToActionView.hideActions()
+            // Then
+            playerCallToActionView.isDisplayingNothing().shouldBeTrue()
+        }
+
+    @Test
+    fun `HideActions should keep the inventory full displayed when no row is displayed`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
+            playerCallToActionView.displayInventoryFull(foundItemName = "Health potion", foundItemPrice = 25, foundItemId = "health-potion", onLeft = {})
+            // When
+            playerCallToActionView.hideActions()
+            // Then
+            playerCallToActionView.isDisplayingInventoryFull().shouldBeTrue()
+        }
 }

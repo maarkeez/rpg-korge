@@ -2,6 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.isFaded
+import korlibs.image.color.RGBA
 import korlibs.korge.tests.ViewsForTesting
 
 // Page object of [PlayerCallToActionView]. Uses the page objects of the call to action it displays.
@@ -74,3 +75,16 @@ fun PlayerCallToActionView.isDisplayingGiveGoldRefusal(): Boolean = visible && c
 fun PlayerCallToActionView.giveGoldRefusalMessage(): String = (callToAction as GiveGoldRefusalView).messageView.nameText()
 
 suspend fun ViewsForTesting.clickGiveGoldRefusalOk(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveGoldRefusalView).okButton)
+
+fun PlayerCallToActionView.isDisplayingActions(): Boolean = visible && callToAction is ActionRowView
+
+/** The labels of the buttons in the row, e.g.: Back and Abandon. */
+fun PlayerCallToActionView.actionLabels(): List<String> = (callToAction as ActionRowView).buttons.map { button -> button.text }
+
+/** The colour of the button of the row with the label, not pressed. */
+fun PlayerCallToActionView.actionColor(label: String): RGBA = (callToAction as ActionRowView).buttons.single { button -> button.text == label }.bgColorOut
+
+suspend fun ViewsForTesting.clickAction(
+    playerCallToActionView: PlayerCallToActionView,
+    label: String,
+) = clickOn((playerCallToActionView.callToAction as ActionRowView).buttons.single { button -> button.text == label })

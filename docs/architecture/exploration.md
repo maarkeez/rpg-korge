@@ -137,7 +137,7 @@ While exploring, Start opens the pause screen in place of the pad:
    [`PauseView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PauseView.kt) in place of the pad:
    Resume, Save and Quit to menu.
 3. Resume explores again ([`ClosePause`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/ClosePause.kt),
-   `PauseClosed`), and the pad is displayed again.
+   `PauseClosed`), and the pad is displayed again. Displaying or hiding the pad also removes the row (`hideActions`), so a battle starting never leaves an old Back on the screen: Finish turn is displayed again when the battle has one.
 4. Save lists the save slots, and saves the game into one (see [Save and load](save-and-load.md#saving)).
 5. Quit to menu asks to confirm, in [`ConfirmDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ConfirmDialogView.kt),
    as the progress since the last save is lost, and goes back to the menu.
@@ -148,7 +148,7 @@ While exploring, tapping the [tracker](quests.md#the-tracker) opens the [journal
 
 1. The tap only counts once the timeline is idle, and while the pad is displayed: a tap at any other moment is ignored, not kept as a press of the pad is. So it does nothing while a dialog, the shop, the formation, the pause screen or the battle HUD has the place of the pad.
 2. [`OpenQuest`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/OpenQuest.kt) only reads when the party can walk (`QuestOpened`). Time stops meanwhile, as in the formation and the pause: the party is `READING_QUEST`, so it does not walk, no second starts, the CPU battle units do not wander, no terrain effect is applied, and tapping the battlefield does nothing. It can not be saved mid-reading, as saving asks for `PAUSED`, and the mode is not saved.
-3. [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt) displays the journal or [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with the battlefield still in sight above it.
+3. [`QuestPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt) displays the journal or [`QuestDetailView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestDetailView.kt) in place of the pad, with the battlefield still in sight above it, and their buttons in the [action row](buttons.md#the-action-row) below it.
 4. Back steps out one level at a time: from a detail view opened from the journal to the journal, keeping its scroll, with nothing published, and from the journal, or a detail view opened directly, it explores again ([`CloseQuest`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseQuest.kt), `QuestClosed`), and the pad is displayed again.
 
 ## Inventory

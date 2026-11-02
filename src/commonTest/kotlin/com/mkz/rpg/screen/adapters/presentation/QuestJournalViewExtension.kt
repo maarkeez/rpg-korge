@@ -1,7 +1,10 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.clickOn
+import com.mkz.rpg.shared.adapters.presentation.descendants
 import korlibs.korge.tests.ViewsForTesting
+import korlibs.korge.view.GraphicsRenderer
+import korlibs.korge.view.ShapeView
 
 // Page object of [QuestJournalView].
 
@@ -18,6 +21,22 @@ fun QuestJournalView.displayedCounts(): List<String?> = rows.map { row -> row.co
 
 /** How many rows are in sight, as those out of the list are hidden. */
 fun QuestJournalView.rowsInSight(): List<String> = rows.filter { row -> row.view.visible }.map { row -> row.questId }
+
+/** How far the list is scrolled down. */
+fun QuestJournalView.scrollPosition(): Double =
+    -rows
+        .first()
+        .view.parent!!
+        .y
+
+/** Whether no shape of the rows is drawn straight to the GPU, past the clip of the list. */
+fun QuestJournalView.rowsAreClippable(): Boolean =
+    rows.all { row ->
+        row.view
+            .descendants()
+            .filterIsInstance<ShapeView>()
+            .all { shape -> shape.renderer == GraphicsRenderer.SYSTEM }
+    }
 
 fun QuestJournalView.isRepeatablePillShown(questId: String): Boolean = rowOf(questId).repeatablePillView != null
 
@@ -36,8 +55,6 @@ suspend fun ViewsForTesting.clickPin(
     questJournalView: QuestJournalView,
     questId: String,
 ) = clickOn(requireNotNull(questJournalView.rowOf(questId).pin) { "The row has no pin" })
-
-suspend fun ViewsForTesting.clickBack(questJournalView: QuestJournalView) = clickCancel(questJournalView.backButton)
 
 /** Drags the list from a row in sight, by [pixels], negative to drag it up. The journal must be on the stage. */
 suspend fun ViewsForTesting.dragJournal(

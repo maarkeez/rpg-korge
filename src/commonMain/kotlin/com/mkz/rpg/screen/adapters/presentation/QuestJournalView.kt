@@ -14,9 +14,12 @@ import korlibs.image.color.Colors
 import korlibs.korge.input.onClick
 import korlibs.korge.input.onMouseDrag
 import korlibs.korge.view.Container
+import korlibs.korge.view.GraphicsRenderer
+import korlibs.korge.view.ShapeView
 import korlibs.korge.view.Text
 import korlibs.korge.view.clipContainer
 import korlibs.korge.view.container
+import korlibs.korge.view.foreachDescendant
 import korlibs.korge.view.roundRect
 import korlibs.korge.view.solidRect
 import korlibs.korge.view.text
@@ -27,7 +30,7 @@ import kotlin.math.abs
 
 /**
  * Every quest started, in place of the pad, one row per quest, each naming its section. It is dragged to scroll, keeping its
- * place when it is displayed again. Tapping a row opens the quest, tapping its pin makes the tracker name it, and Back steps out.
+ * place when it is displayed again. Tapping a row opens the quest, and tapping its pin makes the tracker name it.
  */
 class QuestJournalView(
     private val resourcesLoader: BattleSceneResourcesLoader,
@@ -44,14 +47,15 @@ class QuestJournalView(
         private const val ACTIVE_Y = 12.0
         private const val ACTIVE_SIZE = 12.0
         private const val LIST_Y = 34.0
-        private const val LIST_HEIGHT = 214.0
+        private const val LIST_HEIGHT = 261.0
         private const val FOOTER_Y = LIST_Y + LIST_HEIGHT
         private const val FOOTER_HEIGHT = HEIGHT - FOOTER_Y
-        private const val ROW_HEIGHT = 66.0
-        private const val ROW_SPACING = 4.0
-        private const val TARGET_AT = 8.0
+        private const val ROW_HEIGHT = 63.0
+        private const val ROW_SPACING = 3.0
+        private const val TARGET_X = 8.0
         private const val TARGET_SIZE = 50.0
-        private const val TARGET_TICK_AT = 44.0
+        private const val TARGET_Y = (ROW_HEIGHT - TARGET_SIZE) / 2
+        private const val TARGET_TICK_OFFSET = 36.0
         private const val TARGET_TICK_SIZE = 18.0
         private const val TEXT_X = 68.0
         private const val SECTION_Y = 6.0
@@ -72,16 +76,12 @@ class QuestJournalView(
         private const val SCROLLBAR_X = 370.0
         private const val SCROLLBAR_WIDTH = 3.0
         private const val DRAG_THRESHOLD = 4.0
-        private const val BACK_Y = 256.0
-        private const val BACK_WIDTH = 72.0
     }
 
     interface Delegate {
         fun questJournalSelected(questId: String)
 
         fun questJournalPinSelected(questId: String)
-
-        fun questJournalBackSelected()
     }
 
     /** A row of the list, as the page object of the tests reads it. */
@@ -104,7 +104,6 @@ class QuestJournalView(
     private var hasDragged = false
 
     internal var rows: List<Row> = emptyList()
-    internal val backButton: CancelButton
 
     private val activeText: Text
     private val rowsView: Container
@@ -116,8 +115,7 @@ class QuestJournalView(
         panel(Size(WIDTH, HEIGHT)).mouseEnabled = true
         rowsView = clipContainer(Size(WIDTH, LIST_HEIGHT)).xy(0.0, LIST_Y).container()
         scrollbar = container()
-        // Over the list, as the rounded rectangles of the rows are not clipped: they would show over the title and Back. They
-        // take the taps, so a row half under them can only be tapped on the part in sight.
+        // Around the list, taking the taps, so a row half out of it can only be tapped on the part in sight.
         solidRect(Size(CONTENT_WIDTH + 2, LIST_Y - 1), HudStyle.PANEL) {
             xy(PADDING - 1, 1.0)
             mouseEnabled = true
@@ -128,10 +126,6 @@ class QuestJournalView(
         }
         text(texts[UiText.QUEST_JOURNAL_TITLE], textSize = TITLE_SIZE, color = Colors.WHITE) { xy(PADDING, TITLE_Y) }
         activeText = text("", textSize = ACTIVE_SIZE, color = HudStyle.FAINT)
-        solidRect(Size(CONTENT_WIDTH, 1.0), HudStyle.STROKE) { xy(PADDING, FOOTER_Y) }
-        backButton = CancelButton(texts[UiText.QUEST_DETAIL_BACK], BACK_WIDTH) { delegate?.questJournalBackSelected() }
-        addChild(backButton)
-        backButton.xy(PADDING, BACK_Y)
         // The distance so far is measured from where the drag started, against the rows, so a tap, which does not move, keeps the scroll.
         var draggedY = 0.0
         onMouseDrag { event ->
@@ -154,7 +148,9 @@ class QuestJournalView(
     fun display(quests: List<QuestInfo>) {
         rowsView.removeChildren()
         rows = quests.mapIndexed { index, quest -> rowsView.drawRow(quest, index * (ROW_HEIGHT + ROW_SPACING)) }
-        contentHeight = quests.size * (ROW_HEIGHT + ROW_SPACING)
+        // KorGE draws its rounded shapes straight to the GPU, past the clip of the list, so the rows draw theirs as bitmaps.
+        rowsView.foreachDescendant { view -> (view as? ShapeView)?.renderer = GraphicsRenderer.SYSTEM }
+        contentHeight = (quests.size * (ROW_HEIGHT + ROW_SPACING) - ROW_SPACING).coerceAtLeast(0.0)
         val active = quests.count { quest -> !quest.isCompleted }
         activeText.text = texts.plural(UiText.QUEST_JOURNAL_ACTIVE, active, "quests" to active)
         activeText.xy(WIDTH - PADDING - widthOf(activeText.text, ACTIVE_SIZE), ACTIVE_Y)
@@ -177,10 +173,10 @@ class QuestJournalView(
     private fun moveRowsTo(y: Double) {
         rowsView.y = y.coerceIn(minOf(0.0, LIST_HEIGHT - contentHeight), 0.0)
         scrollbar.y = LIST_Y + if (contentHeight > 0.0) -rowsView.y / contentHeight * LIST_HEIGHT else 0.0
-        // The rows that would show out of the panel are hidden: the header and the footer cover the rest.
+        // The rows out of the list are hidden, so they take no taps. The one crossing its edge is clipped there.
         rows.forEach { row ->
             val top = rowsView.y + row.view.y
-            row.view.visible = top > -LIST_Y && top + ROW_HEIGHT < LIST_HEIGHT + FOOTER_HEIGHT
+            row.view.visible = top + ROW_HEIGHT > 0.0 && top < LIST_HEIGHT
         }
     }
 
@@ -199,8 +195,8 @@ class QuestJournalView(
             val body = container()
             with(body) {
                 panel(Size(CONTENT_WIDTH, ROW_HEIGHT), fill = HudStyle.PANEL_RAISED, radius = HudStyle.SLOT_RADIUS)
-                targetSlot(task, resourcesLoader, TARGET_AT, TARGET_AT, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
-                if (quest.isCompleted) tickDisc(TARGET_TICK_AT, TARGET_TICK_AT, TARGET_TICK_SIZE)
+                targetSlot(task, resourcesLoader, TARGET_X, TARGET_Y, TARGET_SIZE, portraitScale = 1.0, ring = if (quest.isCompleted) HudStyle.ALLY else ringOf(task))
+                if (quest.isCompleted) tickDisc(TARGET_X + TARGET_TICK_OFFSET, TARGET_Y + TARGET_TICK_OFFSET, TARGET_TICK_SIZE)
                 // What ends the row, from the right, up to where the texts have to stop.
                 var right = CONTENT_WIDTH - END_PADDING - CHEVRON_SIZE
                 chevron(right, (ROW_HEIGHT - CHEVRON_SIZE) / 2, CHEVRON_SIZE, HudStyle.MUTED)

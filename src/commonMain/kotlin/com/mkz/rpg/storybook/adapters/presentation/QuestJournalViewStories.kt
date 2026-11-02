@@ -7,7 +7,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row, a pin or Back logs itself. */
+/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row or a pin logs itself. */
 object QuestJournalViewStories : StoryBinding {
     private const val COUNT = "count"
     private const val SCROLL = "scroll"
@@ -15,6 +15,7 @@ object QuestJournalViewStories : StoryBinding {
     private const val MINIMUM_COUNT = 2
     private const val MAXIMUM_COUNT = 12
     private const val MAXIMUM_SCROLL = 1000
+    private const val DRAGGED_SCROLL = 100
 
     private fun story(
         id: String,
@@ -35,7 +36,7 @@ object QuestJournalViewStories : StoryBinding {
             id = "screen-quest-journal",
             group = "Screen",
             title = "Quest journal",
-            description = "Every quest started, in place of the pad, the active ones first and the completed ones ticked below them, dragged to scroll.",
+            description = "Every quest started, in place of the pad, the active ones first and the completed ones ticked below them, dragged to scroll. Its Back is in the row of the call to action.",
             controls =
                 listOf(
                     ControlDto.int(COUNT, minimum = MINIMUM_COUNT, maximum = MAXIMUM_COUNT),
@@ -49,6 +50,7 @@ object QuestJournalViewStories : StoryBinding {
                     story("six-quests", "Six quests", "More than fit: the list scrolls, with its scrollbar.", count = 6),
                     story("twelve-quests", "Twelve quests", "Active and completed, with a repeatable one in each.", count = 12),
                     story("twelve-quests-scrolled", "Twelve quests, scrolled", "At the end of the list, with the completed ones ticked.", count = 12, scroll = MAXIMUM_SCROLL),
+                    story("twelve-quests-dragged", "Twelve quests, dragged", "Halfway through a drag: the rows crossing the edges of the list are cut there.", count = 12, scroll = DRAGGED_SCROLL),
                     story("long-text", "Long text", "The longest texts, as a translation may be: cut before what ends the row.", count = 4, isLong = true),
                 ),
         )
@@ -63,8 +65,6 @@ object QuestJournalViewStories : StoryBinding {
                     override fun questJournalSelected(questId: String) = context.action("questJournalSelected", questId)
 
                     override fun questJournalPinSelected(questId: String) = context.action("questJournalPinSelected", questId)
-
-                    override fun questJournalBackSelected() = context.action("questJournalBackSelected")
                 },
             )
             display(QuestSample.journal(args.int(COUNT), args.boolean(LONG_TEXT), context.texts))

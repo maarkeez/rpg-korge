@@ -54,11 +54,19 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         private set
     var displayedGiveGoldRefusal: DisplayedGiveGoldRefusal? = null
         private set
+    var displayedActions: List<ActionRowView.Action>? = null
+        private set
     var hideCount = 0
         private set
 
     val isFinishTurnEnabled: Boolean
         get() = finishTurnEnabledChanges.lastOrNull() ?: false
+
+    /** The labels of the buttons in the row, e.g.: Back and Abandon. Empty when no row is displayed. */
+    fun actionLabels(): List<String> = displayedActions.orEmpty().map { action -> action.label }
+
+    /** Taps the button of the row with the label. */
+    fun chooseAction(label: String) = requireNotNull(displayedActions) { "It displays no row" }.single { action -> action.label == label }.onSelected()
 
     override fun hide() {
         hideCount++
@@ -78,6 +86,18 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         displayedGiveItem = null
         displayedGiveGold = null
         displayedGiveGoldRefusal = null
+        displayedActions = null
+    }
+
+    // As the real view, a tap does not dismiss it, and it is displayed also when the pad had hidden the call to action.
+    override fun displayActions(actions: List<ActionRowView.Action>) {
+        dismiss()
+        displayedActions = actions
+        visible = true
+    }
+
+    override fun hideActions() {
+        displayedActions = null
     }
 
     override fun displayGiveGold(

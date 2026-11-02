@@ -7,7 +7,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestDetailView], with each kind of quest. Back and Abandon log themselves. */
+/** The stories of [QuestDetailView], with each kind of quest. */
 object QuestDetailViewStories : StoryBinding {
     private const val QUEST = "quest"
 
@@ -21,7 +21,7 @@ object QuestDetailViewStories : StoryBinding {
             id = "screen-quest-detail",
             group = "Screen",
             title = "Quest detail",
-            description = "A quest in full, in place of the pad, led by who its current task is about.",
+            description = "A quest in full, in place of the pad, led by who its current task is about, its content evenly apart. Its buttons are in the row of the call to action.",
             controls = listOf(ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name })),
             args = mapOf(QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name)),
             stories =
@@ -46,13 +46,6 @@ object QuestDetailViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         QuestDetailView(context.resourcesLoader, context.texts).apply {
-            setDelegate(
-                object : QuestDetailView.Delegate {
-                    override fun questDetailBackSelected() = context.action("questDetailBackSelected")
-
-                    override fun questDetailAbandonSelected() = context.action("questDetailAbandonSelected")
-                },
-            )
             display(QuestSample.valueOf(args.text(QUEST)).quest(context.texts))
         }
 }
