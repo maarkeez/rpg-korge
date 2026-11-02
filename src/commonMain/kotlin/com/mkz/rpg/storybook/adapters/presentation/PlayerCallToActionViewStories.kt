@@ -16,6 +16,8 @@ import korlibs.korge.view.View
 object PlayerCallToActionViewStories : StoryBinding {
     private const val PRICE_LIMIT = 9999
     private const val DEFAULT_ITEM = "health-potion"
+    private const val GIVEN_GOLD = 25
+    private const val MAXIMUM_GIVEN_GOLD = 120
 
     private const val CALL_TO_ACTION = "callToAction"
     private const val FINISH_TURN_ENABLED = "finishTurnEnabled"
@@ -24,7 +26,7 @@ object PlayerCallToActionViewStories : StoryBinding {
     private const val ITEM = "item"
 
     /** What the player is called to do. */
-    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, INVENTORY_FULL }
+    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL }
 
     private val finishTurn =
         StoryDto(id = "screen-player-call-to-action--finish-turn", name = "Finish turn", description = "The player has nothing else to choose: the button ends the turn.", args = emptyMap())
@@ -55,6 +57,20 @@ object PlayerCallToActionViewStories : StoryBinding {
             name = "Give item",
             description = "Asks to tap the party member who receives the item, with Cancel.",
             args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_ITEM.name)),
+        )
+    private val giveGold =
+        StoryDto(
+            id = "screen-player-call-to-action--give-gold",
+            name = "Give gold",
+            description = "The panel to give gold on show: Cancel, All and Give, which reads the amount.",
+            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_GOLD.name)),
+        )
+    private val giveGoldRefusal =
+        StoryDto(
+            id = "screen-player-call-to-action--give-gold-refusal",
+            name = "Give gold refusal",
+            description = "The faded gold button tapped: why no gold can be given, with OK.",
+            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_GOLD_REFUSAL.name)),
         )
     private val inventoryFull =
         StoryDto(
@@ -88,7 +104,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                     ITEM_PRICE to ArgDto.int(25),
                     ITEM to ArgDto.text(DEFAULT_ITEM),
                 ),
-            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, inventoryFull),
+            stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull),
         )
 
     override fun render(
@@ -120,6 +136,15 @@ object PlayerCallToActionViewStories : StoryBinding {
                             },
                     )
                 CallToAction.GIVE_ITEM -> displayGiveItem(itemName = args.text(ITEM_NAME), onCancelled = { context.action("onCancelled", setArg = dismissed) })
+                CallToAction.GIVE_GOLD ->
+                    displayGiveGold(
+                        amount = GIVEN_GOLD,
+                        maximum = MAXIMUM_GIVEN_GOLD,
+                        onCancelled = { context.action("onCancelled", setArg = dismissed) },
+                        onAll = { context.action("onAll") },
+                        onGiven = { context.action("onGiven", setArg = dismissed) },
+                    )
+                CallToAction.GIVE_GOLD_REFUSAL -> displayGiveGoldRefusal(texts[UiText.GIVE_GOLD_NO_GOLD], onDismissed = { context.action("onDismissed", setArg = dismissed) })
                 CallToAction.INVENTORY_FULL ->
                     displayInventoryFull(
                         foundItemName = args.text(ITEM_NAME),

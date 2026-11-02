@@ -144,6 +144,41 @@ msgctxt "ui.giveGold.title"
 msgid "Give gold"
 msgstr ""
 
+#. Goes back to the bag with no gold moved.
+msgctxt "ui.giveGold.cancel"
+msgid "Cancel"
+msgstr ""
+
+#. Sets the amount to the most that can be given.
+msgctxt "ui.giveGold.all"
+msgid "All"
+msgstr ""
+
+#. {amount}: the amount of gold given, already written, e.g.: "25 G".
+msgctxt "ui.giveGold.give"
+msgid "Give {amount}"
+msgstr ""
+
+#. Why the giver can not give gold: it carries none.
+msgctxt "ui.giveGold.noGold"
+msgid "No gold to give"
+msgstr ""
+
+#. Why the giver can not give gold: it is alone in the party.
+msgctxt "ui.giveGold.noOne"
+msgid "No one to give gold to"
+msgstr ""
+
+#. Why the giver can not give gold: every other party member carries the most gold possible.
+msgctxt "ui.giveGold.goldFull"
+msgid "Everyone's gold is full"
+msgstr ""
+
+#. Dismisses why the giver can not give gold.
+msgctxt "ui.giveGold.ok"
+msgid "OK"
+msgstr ""
+
 msgctxt "ui.inventoryFull.title"
 msgid "Inventory full"
 msgstr ""

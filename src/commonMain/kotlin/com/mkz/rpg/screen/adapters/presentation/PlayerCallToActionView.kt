@@ -104,6 +104,38 @@ open class PlayerCallToActionView(
         display(GiveItemView(texts, itemName = itemName, onCancelled = onCancelled))
     }
 
+    /** Displays Cancel, All and Give, for the amount of the panel. They stay until something else is displayed. */
+    open fun displayGiveGold(
+        amount: Int,
+        maximum: Int,
+        onCancelled: () -> Unit,
+        onAll: () -> Unit,
+        onGiven: () -> Unit,
+    ) {
+        display(GiveGoldActionsView(texts, onCancelled = onCancelled, onAll = onAll, onGiven = onGiven).apply { displayAmount(amount, maximum) })
+    }
+
+    /** Writes the amount on Give again, without displaying the buttons again, as the amount changes on every step of the slider. */
+    open fun updateGiveGold(
+        amount: Int,
+        maximum: Int,
+    ) {
+        (callToAction as? GiveGoldActionsView)?.displayAmount(amount, maximum)
+    }
+
+    /** Displays why no gold can be given, with OK, which dismisses it. */
+    open fun displayGiveGoldRefusal(
+        message: String,
+        onDismissed: () -> Unit,
+    ) {
+        display(
+            GiveGoldRefusalView(message, texts[UiText.GIVE_GOLD_OK]) {
+                onDismissed()
+                dismiss()
+            },
+        )
+    }
+
     /** Asks the player what to do with an item found while the inventory is full. */
     open fun displayInventoryFull(
         foundItemName: String,

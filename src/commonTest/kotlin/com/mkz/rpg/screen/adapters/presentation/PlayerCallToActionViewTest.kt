@@ -318,4 +318,40 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Then
             playerCallToActionView.isDisplayingNothing().shouldBeTrue()
         }
+
+    @Test
+    fun `DisplayGiveGold should display Cancel, All and Give with the amount, and UpdateGiveGold write it again`() =
+        sharedViewsTest {
+            // Given
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            // When
+            playerCallToActionView.displayGiveGold(amount = 1, maximum = 120, onCancelled = {}, onAll = {}, onGiven = {})
+            // Then
+            playerCallToActionView.isDisplayingGiveGold().shouldBeTrue()
+            playerCallToActionView.giveGoldLabel() shouldBe "Give 1 G"
+            // When
+            playerCallToActionView.updateGiveGold(amount = 120, maximum = 120)
+            // Then
+            playerCallToActionView.giveGoldLabel() shouldBe "Give 120 G"
+            playerCallToActionView.isGiveAllEnabled().shouldBeFalse()
+        }
+
+    @Test
+    fun `DisplayGiveGoldRefusal should display why, and OK should dismiss it`() =
+        sharedViewsTest {
+            // Given
+            var isDismissed = false
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            addChild(playerCallToActionView)
+            // When
+            playerCallToActionView.displayGiveGoldRefusal("No gold to give", onDismissed = { isDismissed = true })
+            // Then
+            playerCallToActionView.isDisplayingGiveGoldRefusal().shouldBeTrue()
+            playerCallToActionView.giveGoldRefusalMessage() shouldBe "No gold to give"
+            // When
+            clickGiveGoldRefusalOk(playerCallToActionView)
+            // Then
+            isDismissed.shouldBeTrue()
+            playerCallToActionView.isDisplayingNothing().shouldBeTrue()
+        }
 }

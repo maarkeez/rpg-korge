@@ -55,3 +55,22 @@ fun PlayerCallToActionView.isDisplayingGiveItem(): Boolean = visible && callToAc
 fun PlayerCallToActionView.giveItemMessage(): String = (callToAction as GiveItemView).messageView.nameText()
 
 suspend fun ViewsForTesting.clickCancelGiving(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveItemView).cancelButton)
+
+fun PlayerCallToActionView.isDisplayingGiveGold(): Boolean = visible && callToAction is GiveGoldActionsView
+
+/** The label of Give, with the amount, e.g.: `Give 25 G`. */
+fun PlayerCallToActionView.giveGoldLabel(): String = (callToAction as GiveGoldActionsView).giveButton.text
+
+fun PlayerCallToActionView.isGiveAllEnabled(): Boolean = (callToAction as GiveGoldActionsView).allButton.enabled
+
+suspend fun ViewsForTesting.clickCancelGivingGold(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveGoldActionsView).cancelButton)
+
+suspend fun ViewsForTesting.clickGiveAll(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveGoldActionsView).allButton)
+
+suspend fun ViewsForTesting.clickGiveGold(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveGoldActionsView).giveButton)
+
+fun PlayerCallToActionView.isDisplayingGiveGoldRefusal(): Boolean = visible && callToAction is GiveGoldRefusalView
+
+fun PlayerCallToActionView.giveGoldRefusalMessage(): String = (callToAction as GiveGoldRefusalView).messageView.nameText()
+
+suspend fun ViewsForTesting.clickGiveGoldRefusalOk(playerCallToActionView: PlayerCallToActionView) = clickOn((playerCallToActionView.callToAction as GiveGoldRefusalView).okButton)
