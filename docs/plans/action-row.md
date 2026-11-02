@@ -58,7 +58,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 |----|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The row and the quests                   | Back and Abandon of the journal and the detail view are in the row, and both panels spread, in the game, approved on screenshots. The drag is decided. | ✅      | `26e872f7` |
 | M2 | The questions and the saves              | Every question and the save slots have their buttons in the row, in the game and in the main menu, approved on screenshots.                            | ✅      | `845e2240` |
-| M3 | The shop, the formation and the merchant | Their buttons are in the row and the shop spreads, approved on screenshots, with the docs up to date.                                                  | ⬜      |         |
+| M3 | The shop, the formation and the merchant | Their buttons are in the row and the shop spreads, approved on screenshots, with the docs up to date.                                                  | ✅      | `b273255b` |
 
 ### M1 commits
 
