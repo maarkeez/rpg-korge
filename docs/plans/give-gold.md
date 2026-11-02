@@ -1,6 +1,6 @@
 # Plan: Give gold between party members, from a panel in place of the bag
 
-> **Status:** to do.
+> **Status:** in progress.
 >
 > **Summary:** Each battle unit carries its own gold, and the only way to move it is not to: a knight with 20 G can not buy the 50 G hammer while the viking beside it carries 100 G, as [Giving](../architecture/inventory.md#giving) moves items only ("Gold is never given"). Instead, while exploring, the gold on the bag's title line looks like a button. Tapping it opens a panel in place of the bag, with the giver, the receiver, what each would carry and a slider, while Cancel, All and Give sit at the level of the finish turn. Giving moves the gold, goes back to the bag and flashes the receiver. A faded button reads why when no gold can be given. Chosen among the Storybook prototypes of the local branch `prototype/give-gold` (`6b7c817a`): flow C with its buttons moved down, the faded button that reads why, and the flash only. It builds on [Inventory](../architecture/inventory.md), [Exploration](../architecture/exploration.md), the [Presentation timeline](../architecture/presentation-timeline.md), [Localization](../architecture/localization.md) and the [battle HUD](battle-hud-vector-chrome.md), whose vector chrome it draws with.
 
@@ -63,7 +63,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone   | Done when                                                                                                                                                            | Status | Done in |
 |----|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The rules   | `inventoryApi.giveGold` moves the gold, and the refusal and receivers can be asked. Nothing on the screen yet.                                                       | ⬜      |         |
+| M1 | The rules   | `inventoryApi.giveGold` moves the gold, and the refusal and receivers can be asked. Nothing on the screen yet.                                                       | ✅      | `291e4175` |
 | M2 | The views   | The gold button, the panel, its buttons and the refusal have their stories and texts, and the user has approved them on screenshots. The game does not use them yet. | ⬜      |         |
 | M3 | In the game | The gold can be given while exploring, from the bag to the flash, with the docs up to date.                                                                          | ⬜      |         |
 
