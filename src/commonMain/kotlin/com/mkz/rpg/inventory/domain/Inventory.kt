@@ -395,5 +395,25 @@ data class Inventory private constructor(
             // Every other party member has no space left.
             BAGS_FULL,
         }
+
+        /** Why a battle unit can not give gold to any other party member. */
+        enum class GiveGoldRefusalDto {
+            // The battle unit is not a member of the exploring party, e.g.: in a battle, or while talking to an npc.
+            NOT_EXPLORING,
+            NO_GOLD,
+
+            // The battle unit is alone in the party.
+            NO_ONE,
+
+            // Every other party member carries the most gold it can.
+            GOLD_FULL,
+        }
+
+        /** A party member who can receive gold: the gold it carries, and how much more it can carry. */
+        data class GoldReceiverDto(
+            val battleUnitId: String,
+            val gold: Int,
+            val room: Int,
+        )
     }
 }
