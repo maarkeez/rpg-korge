@@ -35,21 +35,22 @@ class AssetOutlineArchitectureTest {
         // Given
         val silhouettesByAsset = assets.mapValues { (_, bitmap) -> bitmap.silhouette() }
         // When
-        val otherDarkOutlineColoursByAsset =
+        val otherDarkOutlinePixelsByAsset =
             silhouettesByAsset
                 .mapValues { (_, silhouette) ->
                     silhouette
-                        .filter { it.luminance() < darkLuminance }
-                        .map { it.rgb() }
-                        .filterNot { it == outlineColour }
-                        .groupingBy { it }
-                        .eachCount()
+                        .filter { it.colour.luminance() < darkLuminance }
+                        .filterNot { it.colour.rgb() == outlineColour }
+                        .groupBy { it.colour.rgb() }
                 }.filterValues { it.isNotEmpty() }
         // Then
         assets.shouldNotBeEmpty()
         val violations =
-            otherDarkOutlineColoursByAsset.map { (path, colours) ->
-                val outline = colours.entries.sortedByDescending { it.value }.joinToString { (colour, pixels) -> "${colour.hex()} ($pixels px)" }
+            otherDarkOutlinePixelsByAsset.map { (path, colours) ->
+                val outline =
+                    colours.entries.sortedByDescending { it.value.size }.joinToString { (colour, pixels) ->
+                        "${colour.hex()} (${pixels.size} px at ${pixels.joinToString { "(${it.x},${it.y})" }})"
+                    }
                 "Asset '$path' is outlined with $outline instead of ${outlineColour.hex()}"
             }
         withClue(violations.joinToString("\n")) { violations.shouldBeEmpty() }
@@ -58,7 +59,7 @@ class AssetOutlineArchitectureTest {
     private fun VfsFile.isImage(): Boolean = path.substringAfterLast("/").let { name -> !name.startsWith(".") && name.endsWith(".png") }
 
     // The opaque pixels next to a transparent pixel or to the edge of the image, diagonals included.
-    private fun Bitmap.silhouette(): List<RGBA> =
+    private fun Bitmap.silhouette(): List<Pixel> =
         (0 until height).flatMap { y ->
             (0 until width)
                 .filter { x -> getRgba(x, y).a > 0 }
@@ -66,7 +67,7 @@ class AssetOutlineArchitectureTest {
                     (-1..1).any { dy ->
                         (-1..1).any { dx -> x + dx !in 0 until width || y + dy !in 0 until height || getRgba(x + dx, y + dy).a == 0 }
                     }
-                }.map { x -> getRgba(x, y) }
+                }.map { x -> Pixel(x, y, getRgba(x, y)) }
         }
 
     private fun RGBA.luminance(): Double = 0.299 * r + 0.587 * g + 0.114 * b
@@ -74,4 +75,10 @@ class AssetOutlineArchitectureTest {
     private fun RGBA.rgb(): Int = (r shl 16) or (g shl 8) or b
 
     private fun Int.hex(): String = "#%06x".format(this)
+
+    private data class Pixel(
+        val x: Int,
+        val y: Int,
+        val colour: RGBA,
+    )
 }
