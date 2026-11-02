@@ -9,9 +9,9 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
 /**
- * The stories of [ShopView], displayed as the shop presenter does: the hint until an item is selected, then its name,
- * its price and Buy or Sell, or why the buyer can not trade it. Every callback of the shop is logged in the actions, and
- * tapping a slot selects it, as the arrows switch the buyer, through their args.
+ * The stories of [ShopView], displayed as the shop presenter does: the hint until an item is selected, then its name and
+ * price. Every callback of the shop is logged in the actions, and tapping a slot selects it, as the arrows switch the
+ * buyer, through their args. Back and Buy or Sell are in the row of the call to action.
  */
 object ShopViewStories : StoryBinding {
     private const val BAG_SIZE = 12
@@ -32,37 +32,29 @@ object ShopViewStories : StoryBinding {
     private const val SELECTED_SLOT = "selectedSlot"
     private const val REFUSAL = "refusal"
 
-    /** Why the buyer can not trade the items, which are then dimmed, and the text Buy or Sell shows instead. */
-    private enum class Refusal(
-        val text: UiText?,
-    ) {
-        NONE(null),
-        NOT_ENOUGH_GOLD(UiText.SHOP_NOT_ENOUGH_GOLD),
-        BAG_FULL(UiText.SHOP_NO_ROOM),
-        EQUIPPED(UiText.SHOP_EQUIPPED),
-        GOLD_FULL(UiText.SHOP_GOLD_FULL),
-    }
+    /** Why the buyer can not trade the items, which are then dimmed. */
+    private enum class Refusal { NONE, NOT_ENOUGH_GOLD, BAG_FULL, EQUIPPED, GOLD_FULL }
 
     private val buy = StoryDto(id = "screen-shop--buy", name = "Buy", description = "The merchant's items, before one is tapped: the hint tells what tapping one does.", args = emptyMap())
     private val buyItemSelected =
         StoryDto(
             id = "screen-shop--buy-item-selected",
             name = "Buy, item selected",
-            description = "An item tapped, framed in white, with its name, its price and Buy.",
+            description = "An item tapped, framed in white, with its name and its price.",
             args = mapOf(SELECTED_SLOT to ArgDto.text("1")),
         )
     private val buyNotEnoughGold =
         StoryDto(
             id = "screen-shop--buy-not-enough-gold",
             name = "Buy, not enough gold",
-            description = "A buyer that can not afford the items: they are dimmed, and Buy tells why, disabled.",
+            description = "A buyer that can not afford the items: they are dimmed.",
             args = mapOf(GOLD to ArgDto.int(20), REFUSAL to ArgDto.text(Refusal.NOT_ENOUGH_GOLD.name), SELECTED_SLOT to ArgDto.text("0")),
         )
     private val buyBagFull =
         StoryDto(
             id = "screen-shop--buy-bag-full",
             name = "Buy, bag full",
-            description = "A buyer with no room left in its bag: the items are dimmed, and Buy tells why, disabled.",
+            description = "A buyer with no room left in its bag: the items are dimmed.",
             args = mapOf(BAG_USED to ArgDto.int(BAG_SIZE), REFUSAL to ArgDto.text(Refusal.BAG_FULL.name), SELECTED_SLOT to ArgDto.text("0")),
         )
     private val sell = StoryDto(id = "screen-shop--sell", name = "Sell", description = "The buyer's own items, before one is tapped.", args = mapOf(MODE to ArgDto.text(ShopView.Mode.SELL.name)))
@@ -70,14 +62,14 @@ object ShopViewStories : StoryBinding {
         StoryDto(
             id = "screen-shop--sell-equipped",
             name = "Sell, equipped",
-            description = "Items the buyer wears, framed in gold: they are dimmed, and Sell tells why, disabled.",
+            description = "Items the buyer wears, framed in gold: they are dimmed.",
             args = mapOf(MODE to ArgDto.text(ShopView.Mode.SELL.name), REFUSAL to ArgDto.text(Refusal.EQUIPPED.name), SELECTED_SLOT to ArgDto.text("0")),
         )
     private val sellBagFull =
         StoryDto(
             id = "screen-shop--sell-bag-full",
             name = "Sell, bag full",
-            description = "A full bag can still sell: the last item tapped, with Sell enabled.",
+            description = "A full bag can still sell: the last item tapped, its sell price under the slots.",
             args = mapOf(MODE to ArgDto.text(ShopView.Mode.SELL.name), ITEMS to ArgDto.int(BAG_SIZE), BAG_USED to ArgDto.int(BAG_SIZE), SELECTED_SLOT to ArgDto.text("11")),
         )
     private val sellNothing =
@@ -95,7 +87,7 @@ object ShopViewStories : StoryBinding {
             title = "Shop",
             description =
                 "A merchant's shop: the party member buying or selling on top, with arrows to switch it, then the items, " +
-                    "then Back, the item tapped and Buy or Sell. refusal: why the items can not be traded.",
+                    "then the item tapped, evenly apart. Back and Buy or Sell are in the row of the call to action. refusal: why the items can not be traded.",
             controls =
                 listOf(
                     ControlDto.enum(MODE, ShopView.Mode.entries.map { mode -> mode.name }),
@@ -147,10 +139,6 @@ object ShopViewStories : StoryBinding {
                         val stepped = (buyerIndex + step).takeIf { index -> index in 0 until PARTY_SIZE }
                         context.action("shopBuyerStepped", step, setArg = stepped?.let { index -> BUYER_INDEX to ArgDto.int(index) })
                     }
-
-                    override fun shopActionSelected() = context.action("shopActionSelected")
-
-                    override fun shopBackSelected() = context.action("shopBackSelected")
                 },
             )
             display(
@@ -169,13 +157,7 @@ object ShopViewStories : StoryBinding {
                 displayHint(context.texts[hintOf(mode, items)])
             } else {
                 selectSlot(selectedSlot)
-                val (price, actionLabel) = if (mode == ShopView.Mode.BUY) BUY_PRICE to UiText.SHOP_BUY else SELL_PRICE to UiText.SHOP_SELL
-                displayItem(
-                    itemName = context.texts.lootableItemName(items[selectedSlot]),
-                    itemPrice = price,
-                    actionLabel = context.texts[refusal.text ?: actionLabel],
-                    isActionEnabled = refusal == Refusal.NONE,
-                )
+                displayItem(itemName = context.texts.lootableItemName(items[selectedSlot]), itemPrice = if (mode == ShopView.Mode.BUY) BUY_PRICE else SELL_PRICE)
             }
         }
     }

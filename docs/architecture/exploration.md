@@ -86,16 +86,16 @@ The events are dispatched in the order they are published, so the tile is vacate
 
 ## Shopping at a merchant
 
-An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave under its line, and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
+An npc with a stock in its game data is a merchant (e.g.: the blacksmith, see [Game data](game-data.md)). Its dialog is displayed as any other, with Buy, Sell and Leave in the [action row](buttons.md#the-action-row), and the party keeps talking to it, so time stays stopped, until Leave. Tapping the dialog elsewhere does nothing. The shop is screen state only: the party has no mode nor event for it.
 
-1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel: the buyer on top, 12 slots as the inventory does, and a footer with every button the player taps.
+1. Buy or Sell opens the merchant's shop in place of the dialog, to buy or to sell ([`ShopPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopPresenter.kt)). [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt) is one panel, its 300 spread evenly: the buyer on top, 12 slots as the inventory does, and a line with the hint or the item. Its buttons are in the action row.
 2. The buyer is one party member at a time, the leader when the shop opens. The header displays its name, gold and bag (e.g.: `< Knight · 20 G · Bag 11/12 >`, or `Bag full`).
 3. The arrows, or swiping the shop left or right (at least 40 px), move the buyer to the previous or next party member, in party order, and are disabled at the ends. Every tile is dimmed but the buyer's and the merchant's, and the battlefield scrolls to the buyer.
-4. Buying displays the items the merchant sells, and the footer `Tap an item to buy`. Tapping one frames it, and the footer displays its name and price with Buy (e.g.: `Hammer ........ 50 G  Buy`). When the buyer can not afford it or its bag is full, Buy is disabled and reads why: `Not enough gold` or `Bag full`. After buying, the item stays selected, to buy another one.
-5. Selling displays the buyer's items, the equipped ones framed in gold, and the footer `Tap an item to sell`, or `Nothing to sell`. Tapping one displays its sell price with Sell (e.g.: `Hammer ........ 25 G  Sell`). Sell is disabled and reads why for the only copy of an equipped item (`Equipped`), and when the buyer's gold would go above 99,999 G (`Gold full`). After selling, the selection is cleared.
+4. Buying displays the items the merchant sells, the line `Tap an item to buy`, and Back alone in the row. Tapping one frames it, the line displays its name and price (e.g.: `Hammer ........ 50 G`), and Buy shares the row with Back. When the buyer can not afford it or its bag is full, Buy is disabled and reads why: `Not enough gold` or `Bag full`. After buying, the item stays selected, to buy another one.
+5. Selling displays the buyer's items, the equipped ones framed in gold, and the line `Tap an item to sell`, or `Nothing to sell`. Tapping one displays its sell price (e.g.: `Hammer ........ 25 G`), with Sell beside Back. Sell is disabled and reads why for the only copy of an equipped item (`Equipped`), and when the buyer's gold would go above 99,999 G (`Gold full`). After selling, the selection is cleared.
 6. The items the buyer can not buy (or sell) are dimmed, so switching the buyer shows at once what it can trade.
-7. Switching the buyer, and tapping the selected item again or an empty slot, clear the selection, and the footer displays the hint again.
-8. Back, on the left of the footer, closes the shop, the tiles are no longer dimmed, and the merchant's dialog is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
+7. Switching the buyer, and tapping the selected item again or an empty slot, clear the selection: the line displays the hint again, and Back fills the row.
+8. Back closes the shop, the tiles are no longer dimmed, and the merchant's dialog is displayed again, still talking, to buy, sell, or Leave. Leave finishes the talk (`NpcTalkFinished`): the virtual pad is displayed again, and time goes on.
 
 A battle starting while shopping abandons the shop, as it abandons the dialog. See [Buying and selling](inventory.md#buying-and-selling) for the rules of each trade.
 
@@ -116,7 +116,7 @@ order, and so who leads:
    bars. Every tile but the party's is dimmed.
 3. Tapping a member selects it, framing its row and its tile. Tapping another one swaps both, and tapping the selected
    one again clears the selection.
-4. Close applies the order displayed ([`CloseFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseFormation.kt),
+4. Close, filling the action row, applies the order displayed ([`CloseFormation`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/CloseFormation.kt),
    `FormationClosed`), and the pad is displayed again. Its first member leads.
 
 Nobody moves when the order changes: the line is rebuilt from the new leader, as after a swap, unless the order is the

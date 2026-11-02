@@ -54,7 +54,9 @@ object FormationViewStories : StoryBinding {
             id = "screen-formation",
             group = "Screen",
             title = "Formation",
-            description = "Where the pad is, while the player sets the party order: a row per party member, a hint, and Close. Tap a row, then another one, to swap them.",
+            description =
+                "Where the pad is, while the player sets the party order: a row per party member and a hint, with Close in the row of the call to action. " +
+                    "Tap a row, then another one, to swap them.",
             controls =
                 listOf(
                     ControlDto.int(MEMBERS, minimum = 1, maximum = FormationView.ROWS),
@@ -87,7 +89,7 @@ object FormationViewStories : StoryBinding {
                     isLeader = index == 0,
                 )
             }
-        return FormationView(context.resourcesLoader, context.texts).apply {
+        return FormationView(context.resourcesLoader).apply {
             setDelegate(
                 object : FormationView.Delegate {
                     // Tapping the selected row selects none.
@@ -95,8 +97,6 @@ object FormationViewStories : StoryBinding {
                         val selected = index.takeIf { index != selectedRow }
                         context.action("formationRowSelected", index, setArg = SELECTED_ROW to ArgDto.text(selected?.toString() ?: NO_ROW))
                     }
-
-                    override fun formationCloseSelected() = context.action("formationCloseSelected")
                 },
             )
             display(rows)

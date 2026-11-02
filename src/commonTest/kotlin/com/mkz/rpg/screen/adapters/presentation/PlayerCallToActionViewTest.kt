@@ -388,6 +388,32 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
+    fun `DisplayActions should keep the next row tappable when an action displays it, as buying displays the row again`() =
+        sharedViewsTest {
+            // Given
+            var buys = 0
+            val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
+            addChild(playerCallToActionView)
+
+            fun displayBuy() {
+                playerCallToActionView.displayActions(
+                    listOf(
+                        ActionRowView.Action("Buy") {
+                            buys++
+                            displayBuy()
+                        },
+                    ),
+                )
+            }
+            displayBuy()
+            // When
+            clickAction(playerCallToActionView, "Buy")
+            clickAction(playerCallToActionView, "Buy")
+            // Then
+            buys shouldBe 2
+        }
+
+    @Test
     fun `DisplayActions should make the view visible when it is hidden`() =
         sharedViewsTest {
             // Given

@@ -11,9 +11,7 @@ import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
 import korlibs.korge.ui.UIContainer
 import korlibs.korge.ui.UIText
-import korlibs.korge.ui.uiSpacing
 import korlibs.korge.ui.uiText
-import korlibs.korge.ui.uiVerticalStack
 import korlibs.korge.view.Container
 import korlibs.korge.view.position
 import korlibs.korge.view.solidRect
@@ -22,8 +20,8 @@ import korlibs.math.geom.Size
 /**
  * A merchant's shop, displayed in place of its dialog once the player chooses to buy or sell, until Back. On top, the
  * buyer's name, gold and bag, between the arrows that switch the buyer, as swiping the shop left or right does. Under
- * it, the items to buy or to sell, one slot per item, as the inventory does. At the bottom, every button the player
- * taps: Back, and a hint until an item is selected, then its name and price with Buy or Sell.
+ * it, the items to buy or to sell, one slot per item, as the inventory does. At the bottom, a hint until an item is
+ * selected, then its name and price. Back and Buy or Sell are in the row of the call to action.
  */
 open class ShopView(
     resourcesLoader: BattleSceneResourcesLoader,
@@ -35,14 +33,14 @@ open class ShopView(
         private const val SLOT_SIZE = 60.0
         private const val SLOT_SPACING = 6.0
         private const val WIDTH = SLOTS_PER_ROW * SLOT_SIZE + (SLOTS_PER_ROW - 1) * SLOT_SPACING
-        private const val PADDING = 10.0
-        private const val SPACING = 8.0
         private const val BAR_HEIGHT = 32.0
         private const val ARROW_WIDTH = 40.0
-        private const val BACK_WIDTH = 64.0
-        private const val ACTION_WIDTH = 130.0
-        private const val ITEM_WIDTH = WIDTH - BACK_WIDTH - ACTION_WIDTH - 2 * SPACING
-        private const val HEIGHT = 2 * BAR_HEIGHT + 2 * SLOT_SIZE + SLOT_SPACING + 3 * PADDING
+        private const val HEIGHT = 300.0
+
+        // The even gap around the header, the slots and the line of the item.
+        private const val GAP = 27.0
+        private const val SLOTS_Y = GAP + BAR_HEIGHT + GAP
+        private const val ITEM_Y = SLOTS_Y + 2 * SLOT_SIZE + SLOT_SPACING + GAP
 
         // How far the shop is dragged left or right to switch the buyer.
         const val SWIPE_THRESHOLD = 40.0
@@ -73,11 +71,6 @@ open class ShopView(
 
         /** The buyer was switched to the party member on its left ([step] -1) or right ([step] 1), with an arrow or a swipe. */
         fun shopBuyerStepped(step: Int)
-
-        /** Buy or Sell was tapped. */
-        fun shopActionSelected()
-
-        fun shopBackSelected()
     }
 
     private var delegate: Delegate? = null
@@ -85,25 +78,29 @@ open class ShopView(
     internal lateinit var nextBuyerButton: GameButton
     internal lateinit var buyerText: UIText
     internal val slotViews: List<InventorySlotView> = List(SLOTS) { InventorySlotView(Size(SLOT_SIZE, SLOT_SIZE), resourcesLoader) }
-    internal lateinit var backButton: GameButton
     internal lateinit var itemNameText: UIText
     internal lateinit var itemPriceText: UIText
-    internal lateinit var actionButton: GameButton
 
     init {
         // The whole shop can be swiped, also between its slots and buttons.
         solidRect(Size(WIDTH, HEIGHT), Colors.TRANSPARENT)
-        uiVerticalStack(padding = PADDING) {
-            addChild(header())
-            slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
-                if (rowIndex > 0) uiSpacing(Size(0.0, SLOT_SPACING - PADDING))
-                val row = UIContainer(Size(WIDTH, SLOT_SIZE))
-                rowSlots.forEachIndexed { columnIndex, slotView -> slotView.x = columnIndex * (SLOT_SIZE + SLOT_SPACING) }
-                rowSlots.forEach(row::addChild)
-                addChild(row)
+        addChild(header().position(0.0, GAP))
+        slotViews.chunked(SLOTS_PER_ROW).forEachIndexed { rowIndex, rowSlots ->
+            rowSlots.forEachIndexed { columnIndex, slotView ->
+                addChild(slotView)
+                slotView.position(columnIndex * (SLOT_SIZE + SLOT_SPACING), SLOTS_Y + rowIndex * (SLOT_SIZE + SLOT_SPACING))
             }
-            addChild(footer())
         }
+        itemNameText =
+            uiText("", size = Size(WIDTH, BAR_HEIGHT)) {
+                styles.textAlignment = TextAlignment.MIDDLE_LEFT
+                position(0.0, ITEM_Y)
+            }
+        itemPriceText =
+            uiText("", size = Size(WIDTH, BAR_HEIGHT)) {
+                styles.textAlignment = TextAlignment.MIDDLE_RIGHT
+                position(0.0, ITEM_Y)
+            }
         slotViews.forEachIndexed { index, slotView -> slotView.setOnSelected { delegate?.shopSlotSelected(index) } }
         onSwipe(threshold = SWIPE_THRESHOLD) { swipe ->
             when (swipe.direction) {
@@ -151,28 +148,19 @@ open class ShopView(
         slotViews.forEachIndexed { slotIndex, slotView -> if (slotIndex == index) slotView.select() else slotView.unselect() }
     }
 
-    /** Displays the [hint] next to Back, e.g.: Tap an item to buy, without Buy nor Sell. */
+    /** Displays the [hint] under the slots, e.g.: Tap an item to buy. */
     open fun displayHint(hint: String) {
         itemNameText.text = hint
         itemPriceText.text = ""
-        actionButton.visible = false
     }
 
-    /**
-     * Displays the selected item's name and price next to Back, and its action, e.g.: Buy, or why it can not be done
-     * instead, disabled, e.g.: Not enough gold.
-     */
+    /** Displays the selected item's name and price under the slots. */
     open fun displayItem(
         itemName: String,
         itemPrice: Int,
-        actionLabel: String,
-        isActionEnabled: Boolean,
     ) {
         itemNameText.text = itemName
         itemPriceText.text = texts.gold(itemPrice)
-        actionButton.text = actionLabel
-        actionButton.enabled = isActionEnabled
-        actionButton.visible = true
     }
 
     // < Knight · 20 G · Bag 11/12 >
@@ -185,25 +173,6 @@ open class ShopView(
                     position(ARROW_WIDTH, 0.0)
                 }
             nextBuyerButton = button(">", ARROW_WIDTH) { delegate?.shopBuyerStepped(1) }.position(WIDTH - ARROW_WIDTH, 0.0)
-        }
-
-    // Back  Hammer ....... 50 G  Buy
-    private fun footer(): UIContainer =
-        UIContainer(Size(WIDTH, BAR_HEIGHT)).apply {
-            backButton = button(texts[UiText.SHOP_BACK], BACK_WIDTH) { delegate?.shopBackSelected() }
-            val itemX = BACK_WIDTH + SPACING
-            itemNameText =
-                uiText("", size = Size(ITEM_WIDTH, BAR_HEIGHT)) {
-                    styles.textAlignment = TextAlignment.MIDDLE_LEFT
-                    position(itemX, 0.0)
-                }
-            itemPriceText =
-                uiText("", size = Size(ITEM_WIDTH, BAR_HEIGHT)) {
-                    styles.textAlignment = TextAlignment.MIDDLE_RIGHT
-                    position(itemX, 0.0)
-                }
-            actionButton = button("", ACTION_WIDTH) { delegate?.shopActionSelected() }.position(WIDTH - ACTION_WIDTH, 0.0)
-            actionButton.visible = false
         }
 
     private fun Container.button(

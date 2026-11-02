@@ -17,13 +17,15 @@ import com.mkz.rpg.shared.domain.subscribe
 /**
  * The shop of the merchant the party talks to, where one party member at a time buys or sells. It opens to buy or to
  * sell, with the leader as buyer, and every tile dimmed but the buyer's and the merchant's. Tapping an item displays its
- * name and price with Buy, or Sell, or why the buyer can not trade it, and tapping it again clears the selection, as
- * switching the buyer does. The items the buyer can not trade are dimmed. Back is
- * handed to the listener set with [setOnBack], which returns to the merchant's dialog.
+ * name and price, and tapping it again clears the selection, as switching the buyer does. The items the buyer can not
+ * trade are dimmed. The row of the call to action holds Back, and beside it, while an item is selected, Buy, or Sell, or
+ * why the buyer can not trade it, disabled. Back is handed to the listener set with [setOnBack], which returns to the
+ * merchant's dialog.
  */
 class ShopPresenter(
     private val shopView: ShopView,
     private val battlefieldView: BattlefieldView,
+    private val playerCallToActionView: PlayerCallToActionView,
     private val partyApi: PartyApi,
     private val inventoryApi: InventoryApi,
     private val lootableItemApi: LootableItemApi,
@@ -145,7 +147,10 @@ class ShopPresenter(
                 else -> texts[UiText.SHOP_TAP_TO_SELL]
             },
         )
+        playerCallToActionView.displayActions(listOf(backAction()))
     }
+
+    private fun backAction() = ActionRowView.Action(texts[UiText.SHOP_BACK]) { whenIdle { onBack?.invoke() } }
 
     // Displays the name and price of the item with Buy, or Sell, or why the buyer can not trade it, disabled. Tapping the
     // selected item, or an empty slot, clears the selection.
@@ -162,7 +167,13 @@ class ShopPresenter(
         selectedSlotIndex = slotIndex
         shopView.selectSlot(slotIndex)
         val refusal = refusal(buyerId, lootableItemId)
-        shopView.displayItem(texts.lootableItemName(lootableItem.id), price, actionLabel = refusal?.let(::refusalText) ?: actionLabel, isActionEnabled = refusal == null)
+        shopView.displayItem(texts.lootableItemName(lootableItem.id), price)
+        playerCallToActionView.displayActions(
+            listOf(
+                backAction(),
+                ActionRowView.Action(refusal?.let(::refusalText) ?: actionLabel, isEnabled = refusal == null) { whenIdle { trade() } },
+            ),
+        )
     }
 
     private fun refusal(
@@ -225,8 +236,4 @@ class ShopPresenter(
     override fun shopSlotSelected(index: Int) = whenIdle { timeline.play { selectItem(index) } }
 
     override fun shopBuyerStepped(step: Int) = switchBuyer(buyerIndex + step)
-
-    override fun shopActionSelected() = whenIdle { trade() }
-
-    override fun shopBackSelected() = whenIdle { onBack?.invoke() }
 }

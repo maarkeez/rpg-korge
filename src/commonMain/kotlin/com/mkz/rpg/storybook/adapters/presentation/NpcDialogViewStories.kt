@@ -2,7 +2,6 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.NpcDialog
 import com.mkz.rpg.screen.adapters.presentation.NpcDialogView
-import com.mkz.rpg.screen.adapters.presentation.UiText
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
@@ -10,7 +9,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [NpcDialogView], at the size the game displays it. Tapping the dialog, or one of its choices, logs it. */
+/** The stories of [NpcDialogView], at the size the game displays it. Tapping the dialog logs it. */
 object NpcDialogViewStories : StoryBinding {
     private val SIZE = Size(390, 300)
     private const val DEFAULT_NPC = "elder"
@@ -23,7 +22,6 @@ object NpcDialogViewStories : StoryBinding {
     private const val LINE = "line"
     private const val NPC = "npc"
     private const val UNIT = "unit"
-    private const val MERCHANT = "merchant"
 
     private const val ELDER_LINE = "Long ago a goat chewed up a wizard's spellbook and swallowed its magic."
 
@@ -47,8 +45,8 @@ object NpcDialogViewStories : StoryBinding {
         StoryDto(
             id = "screen-npc-dialog--merchant",
             name = "Merchant",
-            description = "A merchant offers Buy, Sell and Leave along the bottom, and tapping the dialog does not close it.",
-            args = mapOf(NAME to ArgDto.text("Merchant"), LINE to ArgDto.text("Fine wares, for fine adventurers!"), NPC to ArgDto.text("merchant"), MERCHANT to ArgDto.boolean(true)),
+            description = "A merchant, whose line has the whole panel: its Buy, Sell and Leave are in the row of the call to action.",
+            args = mapOf(NAME to ArgDto.text("Merchant"), LINE to ArgDto.text("Fine wares, for fine adventurers!"), NPC to ArgDto.text("merchant")),
         )
     private val recruitable =
         StoryDto(
@@ -72,14 +70,13 @@ object NpcDialogViewStories : StoryBinding {
             title = "NPC dialog",
             description =
                 "What an npc says when the party talks to it, in place of the pad. " +
-                    "npc: the npc whose portrait is drawn. unit: the unit of a recruitable npc, whose portrait wins over the npc's. merchant: its choices.",
+                    "npc: the npc whose portrait is drawn. unit: the unit of a recruitable npc, whose portrait wins over the npc's.",
             controls =
                 listOf(
                     ControlDto.text(NAME),
                     ControlDto.text(LINE),
                     ControlDto.pick(NPC, listOf(NONE) + context.npcIds()),
                     ControlDto.pick(UNIT, listOf(NONE) + context.unitIds()),
-                    ControlDto.boolean(MERCHANT),
                 ),
             args =
                 mapOf(
@@ -87,7 +84,6 @@ object NpcDialogViewStories : StoryBinding {
                     LINE to ArgDto.text(ELDER_LINE),
                     NPC to ArgDto.text(DEFAULT_NPC),
                     UNIT to ArgDto.text(NONE),
-                    MERCHANT to ArgDto.boolean(false),
                 ),
             stories = listOf(elder, longLine, merchant, recruitable, noPortrait),
         )
@@ -95,25 +91,11 @@ object NpcDialogViewStories : StoryBinding {
     override fun render(
         args: Args,
         context: StoryContext,
-    ): View {
-        val texts = context.texts
-        val choices =
-            if (args.boolean(MERCHANT)) {
-                listOf(UiText.NPC_DIALOG_BUY, UiText.NPC_DIALOG_SELL, UiText.NPC_DIALOG_LEAVE).map { text ->
-                    val label = texts[text]
-                    NpcDialogView.Choice(label) { context.action("onSelected", label) }
-                }
-            } else {
-                emptyList()
-            }
-        return NpcDialogView(SIZE, context.resourcesLoader).apply {
+    ): View =
+        NpcDialogView(SIZE, context.resourcesLoader).apply {
             setOnTapped { context.action("onTapped") }
-            display(
-                npc = NpcDialog(npcId = args.text(NPC), unitId = args.text(UNIT).takeIf { unitId -> unitId != NONE }, name = args.text(NAME), line = args.text(LINE)),
-                choices = choices,
-            )
+            display(NpcDialog(npcId = args.text(NPC), unitId = args.text(UNIT).takeIf { unitId -> unitId != NONE }, name = args.text(NAME), line = args.text(LINE)))
             // The presenter shows it when the party talks.
             visible = true
         }
-    }
 }

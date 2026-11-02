@@ -90,7 +90,7 @@ class BattleScene(
     val virtualPadView = VirtualPadView(VirtualPadView.SIZE)
     val npcDialogView = NpcDialogView(Size(390, 300), resourcesLoader)
     val shopView = ShopView(resourcesLoader, texts)
-    val formationView = FormationView(resourcesLoader, texts)
+    val formationView = FormationView(resourcesLoader)
     val pauseView = PauseView(texts)
     val saveSlotsView = SaveSlotsView(texts)
     val confirmDialogView = ConfirmDialogView()
@@ -284,6 +284,7 @@ class BattleScene(
                     ShopPresenter(
                         shopView,
                         battlefieldView,
+                        playerCallToActionView,
                         partyApi,
                         inventoryApi,
                         lootableItemApi,
@@ -293,7 +294,7 @@ class BattleScene(
                         timeline,
                         eventBus,
                     )
-                val formationPresenter = FormationPresenter(formationView, battlefieldView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
+                val formationPresenter = FormationPresenter(formationView, battlefieldView, playerCallToActionView, partyApi, battleUnitApi, battlefieldApi, texts, timeline)
                 val pausePresenter =
                     PausePresenter(pauseView, saveSlotsView, confirmDialogView, playerCallToActionView, partyApi, saveApi, texts, timeline) {
                         launchImmediately { sceneContainer.changeTo { MenuScene(localizationApi, storage, random) } }

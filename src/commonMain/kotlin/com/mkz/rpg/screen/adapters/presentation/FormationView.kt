@@ -1,14 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import korlibs.image.color.Colors
 import korlibs.image.color.RGBA
 import korlibs.image.text.TextAlignment
 import korlibs.korge.input.onClick
 import korlibs.korge.style.styles
 import korlibs.korge.style.textAlignment
-import korlibs.korge.ui.UIButton
 import korlibs.korge.ui.UIText
-import korlibs.korge.ui.uiButton
 import korlibs.korge.ui.uiText
 import korlibs.korge.view.Container
 import korlibs.korge.view.Image
@@ -20,12 +17,12 @@ import korlibs.math.geom.Size
 
 /**
  * The party formation, displayed in place of the pad while the player sets the party order. A row per party member, in
- * party order: the crown on the leader, the portrait, the name, and the health and mana bars. At the bottom, a hint and
- * Close. Tapping a row is handed to the delegate, which selects it, or swaps it with the selected one.
+ * party order: the crown on the leader, the portrait, the name, and the health and mana bars. At the bottom, a hint. Close
+ * is in the row of the call to action. Tapping a row is handed to the delegate, which selects it, or swaps it with the
+ * selected one.
  */
 open class FormationView(
     private val resourcesLoader: BattleSceneResourcesLoader,
-    private val texts: Texts,
 ) : Container() {
     companion object {
         /** The party members displayed: the rows that fit in place of the pad. */
@@ -38,8 +35,6 @@ open class FormationView(
         private const val ROW_HEIGHT = 44.0
         private const val ROW_SPACING = 4.0
         private const val BAR_HEIGHT = 32.0
-        private const val CLOSE_WIDTH = 90.0
-        private const val SPACING = 8.0
     }
 
     /** A party member, from the leader, with its health and mana left out of their maximum. */
@@ -56,14 +51,11 @@ open class FormationView(
     interface Delegate {
         /** The row of the party member at [index] in the party order was tapped. */
         fun formationRowSelected(index: Int)
-
-        fun formationCloseSelected()
     }
 
     private var delegate: Delegate? = null
     internal val rowViews: List<FormationRowView> = List(ROWS) { FormationRowView(Size(WIDTH - 2 * PADDING, ROW_HEIGHT), resourcesLoader) }
     internal lateinit var hintText: UIText
-    internal lateinit var closeButton: UIButton
 
     init {
         rowViews.forEachIndexed { index, rowView ->
@@ -73,17 +65,9 @@ open class FormationView(
         }
         val footerY = HEIGHT - PADDING - BAR_HEIGHT
         hintText =
-            uiText("", size = Size(WIDTH - 2 * PADDING - CLOSE_WIDTH - SPACING, BAR_HEIGHT)) {
+            uiText("", size = Size(WIDTH - 2 * PADDING, BAR_HEIGHT)) {
                 styles.textAlignment = TextAlignment.MIDDLE_LEFT
                 position(PADDING, footerY)
-            }
-        closeButton =
-            uiButton(texts[UiText.FORMATION_CLOSE], size = Size(CLOSE_WIDTH, BAR_HEIGHT)) {
-                bgColorOut = Colors.DIMGRAY
-                bgColorOver = RGBA(85, 85, 85)
-                background.borderColor = Colors.LIGHTGRAY
-                position(WIDTH - PADDING - CLOSE_WIDTH, footerY)
-                onClick { delegate?.formationCloseSelected() }
             }
     }
 
@@ -105,7 +89,7 @@ open class FormationView(
         rowViews.forEachIndexed { rowIndex, rowView -> rowView.isSelected = rowIndex == index }
     }
 
-    /** Displays the [hint] next to Close, e.g.: Tap a member, then another one, to swap them. */
+    /** Displays the [hint] under the rows, e.g.: Tap a member, then another one, to swap them. */
     open fun displayHint(hint: String) {
         hintText.text = hint
     }

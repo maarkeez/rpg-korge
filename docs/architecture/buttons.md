@@ -39,7 +39,7 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
 - [`InventoryView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/InventoryView.kt): the arrows
   that switch the party member, disabled at the ends of the party, and Close.
 - [`ShopView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ShopView.kt): the arrows that switch
-  the buyer, Back, and Buy or Sell, disabled with the reason it can not, e.g.: `Not enough gold`.
+  the buyer. Back and Buy or Sell are in the action row.
 - [`ItemActionsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ItemActionsView.kt): the
   actions on the selected item, e.g.: Give, disabled as `No one` or `Bags full`.
 - [`MapBuilderHudView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/MapBuilderHudView.kt): the
@@ -47,7 +47,9 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
 - [`FinishTurnView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt): Finish
   turn, blue, disabled while the turn can not be ended.
 - [`ActionRowView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/ActionRowView.kt): Back and
-  Abandon of the quest journal and the detail view, Back of the save slots, and both choices of every question.
+  Abandon of the quest journal and the detail view, Back of the save slots, both choices of every question, Close of the
+  formation, Back and Buy or Sell of the shop, disabled with the reason it can not, e.g.: `Not enough gold`, and Buy, Sell
+  and Leave of a merchant.
 
 A new button of a view is a `gameButton`, so a disabled one looks disabled. The buttons drawn with images (e.g.: the
 abilities, the bag, the virtual pad, the terrains of the map builder) and the Storybook's own buttons are not.

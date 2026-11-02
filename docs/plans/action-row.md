@@ -1,6 +1,6 @@
 # Plan: Every action at the level of Finish turn, in a row below the panels
 
-> **Status:** in progress.
+> **Status:** built on `main`. The screenshots of the three milestones are still to be approved.
 >
 > **Summary:** Finish turn and give gold's Cancel, All and Give sit in the call to action, below the 300 of the battle HUD, but the other panels keep their buttons inside. The journal's Back is at y 256 of its panel, a 72 wide button in the bottom left, Quit to the menu asks with its buttons at y 190, and the shop's Back and Buy share a line with the item's name, so a thumb has no one place to go. Instead, every one of those buttons sits in one row at the level of Finish turn, as tall as it: a lone button fills the row, two share it in halves and the merchant's three in thirds. The panels stay 300 tall and spread their content evenly over the space the buttons leave, so the journal shows 4 quests instead of 3. Chosen among the Storybook prototypes of the local branch `prototype/action-row` (`e32c4870`): option 1, Spread. It builds on [Give gold](give-gold.md), whose buttons set the level, the [side quests on the screen](side-quest-ui.md), two of whose decisions it replaces, [Buttons](../architecture/buttons.md), [Exploration](../architecture/exploration.md) and [Quests](../architecture/quests.md).
 
@@ -57,7 +57,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 | #  | Milestone                                | Done when                                                                                                                                              | Status | Done in |
 |----|------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|--------|---------|
 | M1 | The row and the quests                   | Back and Abandon of the journal and the detail view are in the row, and both panels spread, in the game, approved on screenshots. The drag is decided. | ✅      | `26e872f7` |
-| M2 | The questions and the saves              | Every question and the save slots have their buttons in the row, in the game and in the main menu, approved on screenshots.                            | ⬜      |         |
+| M2 | The questions and the saves              | Every question and the save slots have their buttons in the row, in the game and in the main menu, approved on screenshots.                            | ✅      | `845e2240` |
 | M3 | The shop, the formation and the merchant | Their buttons are in the row and the shop spreads, approved on screenshots, with the docs up to date.                                                  | ⬜      |         |
 
 ### M1 commits
@@ -197,4 +197,6 @@ Each milestone is a few commits straight on `main`, green on CI.
 ## Known limitations
 
 - Tapping Abandon twice abandons the quest without its question being read, as decided in [Double tap](#decisions).
-- The line through the buttons in the screenshots of `prototype/action-row` comes from the software renderer. The same kind of mark is on today's Back under it, and neither has been checked on a phone, which M1's screenshots do not settle.
+- ✅ on a milestone means built, green and pushed: "approved on screenshots" is still open for all three.
+- The rows of the quests, the formation, the save slots, the question and the main menu were played in the real game in a browser. The shop and the merchant's row were not, as the merchants stand far from where a new game starts: they are checked by `ExplorationPresenterTest`, `ShopPresenterTest` and their stories.
+- The line through the buttons in the screenshots of `prototype/action-row` comes from the software renderer. The same kind of mark is on Resume and Quit to menu of the pause screen, which this plan does not touch, and none of them has been checked on a phone, which the screenshots do not settle.

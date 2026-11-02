@@ -116,7 +116,6 @@ Tapping the tracker while exploring opens [`QuestJournalView`](../../src/commonM
 - Each row names its section (MAIN QUEST, SIDE QUEST, COMPLETED), and holds the target's portrait, the name, the current task, its count and bar only when it counts above 1, the Repeatable pill, and on an active quest its pin, gold when pinned.
 - Tapping a pin makes the tracker name that quest, and tapping the gold pin returns it to the main quest. See [Pinning](#pinning). The pin takes its own taps in the 32 around it, so the row does not open.
 - It holds any number of quests, dragged to scroll. A drag above 4 points does not select the row under it, and the list keeps its place when coming back from a detail view.
-- KorGE's `clipContainer` does not clip rounded rectangles, so the rows that would show out of the panel are hidden, and the header and the footer are drawn over the others.
 - Tapping a row opens its detail view, and Back, filling the action row, steps out one level at a time.
 - 4 rows of 63 fit its list of 261. While dragging, the list clips the rows crossing its edges: they draw their rounded shapes as bitmaps (`GraphicsRenderer.SYSTEM`), as KorGE draws them straight to the GPU otherwise, past the clip.
 

@@ -53,10 +53,12 @@ class ShopPresenterTest {
     private val shopView = ShopView(BattleSceneResourcesLoader(), TextsMother.texts())
     private val battlefieldView = FakeBattlefieldView()
     private val timeline = battleSceneTimeline()
+    private val callToActionView = FakePlayerCallToActionView()
     private val presenter =
         ShopPresenter(
             shopView,
             battlefieldView,
+            callToActionView,
             apis.partyApi,
             apis.inventoryApi,
             apis.lootableItemApi,
@@ -93,9 +95,12 @@ class ShopPresenterTest {
     }
 
     private fun trade() {
-        presenter.shopActionSelected()
+        callToActionView.displayedActions!!.last().onSelected()
         eventBus.dispatch()
     }
+
+    // The label of Buy or Sell, beside Back, and whether it is enabled, or `null` while only Back is displayed.
+    private fun action(): Pair<String, Boolean>? = callToActionView.displayedActions?.getOrNull(1)?.let { action -> action.label to action.isEnabled }
 
     @Test
     fun `Init should hide the shop when is created`() {
@@ -114,7 +119,7 @@ class ShopPresenterTest {
         shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
         shopView.arrowsEnabled() shouldBe (false to true)
         shopView.footerText() shouldBe "Tap an item to buy"
-        shopView.action().shouldBeNull()
+        action().shouldBeNull()
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, merchantTile)
         battlefieldView.scrolledToTiles.last() shouldBe knightTile
     }
@@ -129,7 +134,7 @@ class ShopPresenterTest {
         shopView.selectedSlotIndexes().shouldContainExactly(1)
         shopView.footerText() shouldBe "Hammer"
         shopView.footerPrice() shouldBe "50 G"
-        shopView.action() shouldBe ("Not enough gold" to false)
+        action() shouldBe ("Not enough gold" to false)
     }
 
     @Test
@@ -154,7 +159,7 @@ class ShopPresenterTest {
         // Then
         shopView.selectedSlotIndexes().shouldBeEmpty()
         shopView.footerText() shouldBe "Tap an item to buy"
-        shopView.action().shouldBeNull()
+        action().shouldBeNull()
     }
 
     @Test
@@ -184,7 +189,7 @@ class ShopPresenterTest {
         shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
         shopView.arrowsEnabled() shouldBe (true to false)
         shopView.selectedSlotIndexes().shouldBeEmpty()
-        shopView.action().shouldBeNull()
+        action().shouldBeNull()
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(vikingTile, merchantTile)
         battlefieldView.scrolledToTiles.last() shouldBe vikingTile
     }
@@ -215,12 +220,12 @@ class ShopPresenterTest {
         // Then
         shopView.buyerText() shouldBe "Viking · 50 G · Bag 1/12"
         shopView.selectedSlotIndexes().shouldContainExactly(1)
-        shopView.action() shouldBe ("Buy" to true)
+        action() shouldBe ("Buy" to true)
         // When
         trade()
         // Then
         shopView.buyerText() shouldBe "Viking · 0 G · Bag 2/12"
-        shopView.action() shouldBe ("Not enough gold" to false)
+        action() shouldBe ("Not enough gold" to false)
         shopView.dimmedSlotIndexes().shouldContainExactly(0, 1)
     }
 
@@ -263,7 +268,7 @@ class ShopPresenterTest {
         presenter.shopSlotSelected(0)
         // Then
         shopView.footerPrice() shouldBe "25 G"
-        shopView.action() shouldBe ("Sell" to true)
+        action() shouldBe ("Sell" to true)
         // When
         trade()
         // Then
@@ -284,7 +289,7 @@ class ShopPresenterTest {
         // Then
         shopView.equippedSlotIndexes().shouldContainExactly(0)
         shopView.dimmedSlotIndexes().shouldContainExactly(0)
-        shopView.action() shouldBe ("Equipped" to false)
+        action() shouldBe ("Equipped" to false)
     }
 
     @Test
@@ -305,7 +310,7 @@ class ShopPresenterTest {
         presenter.setOnBack { backs++ }
         openTheShop()
         // When
-        presenter.shopBackSelected()
+        callToActionView.chooseAction("Back")
         eventBus.dispatch()
         // Then
         backs shouldBe 1
@@ -324,5 +329,42 @@ class ShopPresenterTest {
         presenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
         battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
+    }
+
+    @Test
+    fun `open should display Back alone when nothing is selected`() {
+        // When
+        openTheShop()
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back")
+    }
+
+    @Test
+    fun `Selecting an item should display Back and the action when it can be traded`() {
+        // Given
+        openTheShop()
+        presenter.shopBuyerStepped(1)
+        // When
+        presenter.shopSlotSelected(1)
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back", "Buy")
+        callToActionView.displayedActions!!
+            .last()
+            .isEnabled
+            .shouldBeTrue()
+    }
+
+    @Test
+    fun `Selecting an item should display the action disabled with why when it can not be traded`() {
+        // Given
+        openTheShop()
+        // When
+        presenter.shopSlotSelected(1)
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Back", "Not enough gold")
+        callToActionView.displayedActions!!
+            .last()
+            .isEnabled
+            .shouldBeFalse()
     }
 }

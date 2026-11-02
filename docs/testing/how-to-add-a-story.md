@@ -92,7 +92,7 @@ setDelegate(
         override fun shopSlotSelected(index: Int) =
             context.action("shopSlotSelected", index, setArg = SELECTED_SLOT to ArgDto.text("$index"))
 
-        override fun shopBackSelected() = context.action("shopBackSelected")
+        override fun shopBuyerStepped(step: Int) = context.action("shopBuyerStepped", step)
     },
 )
 ```

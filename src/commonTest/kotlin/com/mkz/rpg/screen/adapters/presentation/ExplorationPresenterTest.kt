@@ -74,6 +74,7 @@ class ExplorationPresenterTest {
         ShopPresenter(
             shopView,
             battlefieldView,
+            playerCallToActionView,
             apis.partyApi,
             apis.inventoryApi,
             apis.lootableItemApi,
@@ -84,8 +85,8 @@ class ExplorationPresenterTest {
             eventBus,
         )
 
-    private val formationView = FormationView(BattleSceneResourcesLoader(), TextsMother.texts())
-    private val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+    private val formationView = FormationView(BattleSceneResourcesLoader())
+    private val formationPresenter = FormationPresenter(formationView, battlefieldView, playerCallToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
     private val pauseView = PauseView(TextsMother.texts())
     private val saveSlotsView = SaveSlotsView(TextsMother.texts())
     private val confirmDialogView = ConfirmDialogView()
@@ -375,6 +376,7 @@ class ExplorationPresenterTest {
             ShopPresenter(
                 shopView,
                 battlefieldView,
+                playerCallToActionView,
                 apis.partyApi,
                 apis.inventoryApi,
                 apis.lootableItemApi,
@@ -384,7 +386,7 @@ class ExplorationPresenterTest {
                 timeline,
                 apis.eventBus,
             )
-        val formationPresenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+        val formationPresenter = FormationPresenter(formationView, battlefieldView, playerCallToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
         val pausePresenter =
             PausePresenter(
                 pauseView,
@@ -666,30 +668,30 @@ class ExplorationPresenterTest {
     // ... and chooses to buy.
     private fun openTheShop() {
         talkToTheMerchant()
-        npcDialogView.selectChoice("Buy")
+        playerCallToActionView.chooseAction("Buy")
         eventBus.dispatch()
     }
 
     @Test
-    fun `TalkToAdjacentNpc should display Buy, Sell and Leave on the dialog of a merchant`() {
+    fun `ExplorationPresenter should display Buy, Sell and Leave when a merchant talks`() {
         // Given
         createPresenter()
         startExploring()
         // When
         talkToTheMerchant()
         // Then
-        npcDialogView.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
+        playerCallToActionView.actionLabels().shouldContainExactly("Buy", "Sell", "Leave")
     }
 
     @Test
-    fun `TalkToAdjacentNpc should display no choices on the dialog of an npc that is no merchant`() {
+    fun `ExplorationPresenter should display no row when an npc with no choices talks`() {
         // Given
         createPresenter()
         startExploring()
         // When
         talk()
         // Then
-        npcDialogView.choiceLabels().shouldBeEmpty()
+        playerCallToActionView.displayedActions shouldBe null
     }
 
     @Test
@@ -714,7 +716,7 @@ class ExplorationPresenterTest {
         startExploring()
         talkToTheMerchant()
         // When
-        npcDialogView.selectChoice("Buy")
+        playerCallToActionView.chooseAction("Buy")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeTrue()
@@ -722,7 +724,8 @@ class ExplorationPresenterTest {
         shopView.footerText() shouldBe "Tap an item to buy"
         npcDialogView.visible.shouldBeFalse()
         virtualPadView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeTrue()
+        playerCallToActionView.actionLabels().shouldContainExactly("Back")
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
@@ -733,7 +736,7 @@ class ExplorationPresenterTest {
         startExploring()
         talkToTheMerchant()
         // When
-        npcDialogView.selectChoice("Sell")
+        playerCallToActionView.chooseAction("Sell")
         eventBus.dispatch()
         // Then
         shopView.visible.shouldBeTrue()
@@ -748,7 +751,7 @@ class ExplorationPresenterTest {
         talkToTheMerchant()
         timeline.playLongStep()
         // When
-        npcDialogView.selectChoice("Buy")
+        playerCallToActionView.chooseAction("Buy")
         // Then
         shopPresenter.isOpen.shouldBeFalse()
     }
@@ -760,7 +763,7 @@ class ExplorationPresenterTest {
         startExploring()
         talkToTheMerchant()
         // When
-        npcDialogView.selectChoice("Leave")
+        playerCallToActionView.chooseAction("Leave")
         eventBus.dispatch()
         // Then
         npcDialogView.visible.shouldBeFalse()
@@ -779,15 +782,15 @@ class ExplorationPresenterTest {
         openTheShop()
         shopPresenter.shopSlotSelected(0)
         // When
-        shopPresenter.shopBackSelected()
+        playerCallToActionView.chooseAction("Back")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeFalse()
         shopView.visible.shouldBeFalse()
         npcDialogView.visible.shouldBeTrue()
-        npcDialogView.choiceLabels().shouldContainExactly("Buy", "Sell", "Leave")
+        playerCallToActionView.actionLabels().shouldContainExactly("Buy", "Sell", "Leave")
         virtualPadView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeTrue()
         apis.partyApi.searchParty()!!.talkingNpcId shouldBe "merchant"
     }
 
@@ -797,10 +800,10 @@ class ExplorationPresenterTest {
         createPresenter()
         startExploring()
         openTheShop()
-        shopPresenter.shopBackSelected()
+        playerCallToActionView.chooseAction("Back")
         eventBus.dispatch()
         // When
-        npcDialogView.selectChoice("Sell")
+        playerCallToActionView.chooseAction("Sell")
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeTrue()
@@ -843,7 +846,8 @@ class ExplorationPresenterTest {
         formationView.crownedRowIndexes().shouldContainExactly(0)
         virtualPadView.visible.shouldBeFalse()
         battleHudView.visible.shouldBeFalse()
-        playerCallToActionView.visible.shouldBeFalse()
+        playerCallToActionView.visible.shouldBeTrue()
+        playerCallToActionView.actionLabels().shouldContainExactly("Close")
         apis.partyApi
             .searchParty()!!
             .isInFormation
@@ -909,7 +913,7 @@ class ExplorationPresenterTest {
         startExploring()
         openFormation()
         // When
-        formationPresenter.formationCloseSelected()
+        playerCallToActionView.chooseAction("Close")
         eventBus.dispatch()
         // Then
         formationView.visible.shouldBeFalse()

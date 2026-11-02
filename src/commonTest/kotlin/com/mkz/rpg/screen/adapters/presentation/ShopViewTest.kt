@@ -7,7 +7,6 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.doubles.plusOrMinus
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
@@ -27,14 +26,6 @@ class ShopViewTest : ViewsForTesting() {
         override fun shopBuyerStepped(step: Int) {
             steps += step
         }
-
-        override fun shopActionSelected() {
-            actions++
-        }
-
-        override fun shopBackSelected() {
-            isBackSelected = true
-        }
     }
 
     // The second of three party members, with 20 G and 11 of its 12 storage spaces used.
@@ -46,7 +37,7 @@ class ShopViewTest : ViewsForTesting() {
     ) = display(slots = slots, buyer = buyer)
 
     @Test
-    fun `Init should display 12 empty slots, under the header and above the footer, without Buy nor Sell`() =
+    fun `Init should display 12 empty slots, under the header and above the line of the item, spread over the panel`() =
         sharedViewsTest {
             // When
             val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
@@ -54,7 +45,7 @@ class ShopViewTest : ViewsForTesting() {
             shopView.slotCount() shouldBe 12
             shopView.slotBitmaps().all { bitmap -> bitmap == null }.shouldBeTrue()
             shopView.isLaidOut().shouldBeTrue()
-            shopView.action().shouldBeNull()
+            shopView.footerBottom() shouldBe 271.0
         }
 
     @Test
@@ -149,23 +140,20 @@ class ShopViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayItem should display the item's name, price and action, and DisplayHint the hint without action`() =
+    fun `DisplayItem should display the item's name and price, and DisplayHint the hint`() =
         sharedViewsTest {
             // Given
             val shopView = ShopView(loadedResourcesLoader(), TextsMother.texts())
             // When
-            shopView.displayItem(itemName = "Hammer", itemPrice = 50, actionLabel = "Not enough gold", isActionEnabled = false)
+            shopView.displayItem(itemName = "Hammer", itemPrice = 50)
             // Then
             shopView.footerText() shouldBe "Hammer"
             shopView.footerPrice() shouldBe "50 G"
-            shopView.action() shouldBe ("Not enough gold" to false)
-            shopView.isActionFaded().shouldBeTrue()
             // When
             shopView.displayHint("Tap an item to buy")
             // Then
             shopView.footerText() shouldBe "Tap an item to buy"
             shopView.footerPrice() shouldBe ""
-            shopView.action().shouldBeNull()
         }
 
     private suspend fun ViewsForTesting.newShopView(delegate: RecordingDelegate): ShopView {
@@ -177,23 +165,18 @@ class ShopViewTest : ViewsForTesting() {
     }
 
     @Test
-    fun `Click should notify the delegate of the selected slot, the arrows, the action and Back`() =
+    fun `Click should notify the delegate of the selected slot and the arrows`() =
         sharedViewsTest {
             // Given
             val delegate = RecordingDelegate()
             val shopView = newShopView(delegate)
-            shopView.displayItem(itemName = "Hammer", itemPrice = 50, actionLabel = "Buy", isActionEnabled = true)
             // When
             clickSlot(shopView, 1)
             clickPreviousBuyer(shopView)
             clickNextBuyer(shopView)
-            clickAction(shopView)
-            clickBack(shopView)
             // Then
             delegate.selectedSlots.shouldContainExactly(1)
             delegate.steps.shouldContainExactly(-1, 1)
-            delegate.actions shouldBe 1
-            delegate.isBackSelected.shouldBeTrue()
         }
 
     @Test

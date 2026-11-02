@@ -34,27 +34,23 @@ fun ShopView.arrowsEnabled(): Pair<Boolean, Boolean> = previousBuyerButton.enabl
 /** Whether each arrow is displayed faded, as a disabled one. */
 fun ShopView.arrowsFaded(): Pair<Boolean, Boolean> = previousBuyerButton.isFaded() to nextBuyerButton.isFaded()
 
-/** What the footer displays next to Back: the hint, or the selected item's name, and its price. */
+/** What the line under the slots displays: the hint, or the selected item's name, and its price. */
 fun ShopView.footerText(): String = itemNameText.text
 
 fun ShopView.footerPrice(): String = itemPriceText.text
 
-/** The label of Buy or Sell, and whether it is enabled, or `null` while it is hidden. */
-fun ShopView.action(): Pair<String, Boolean>? = if (actionButton.visible) actionButton.text to actionButton.enabled else null
+/** Where the line under the slots ends, within the view. */
+fun ShopView.footerBottom(): Double = itemNameText.y + itemNameText.height
 
-/** Whether Buy or Sell is displayed faded, as a disabled one. */
-fun ShopView.isActionFaded(): Boolean = actionButton.isFaded()
-
-/** Whether the header, the slots and the footer are stacked in this order, the arrows on each side of the buyer. */
+/** Whether the header, the slots and the line of the item are stacked in this order, the arrows on each side of the buyer. */
 fun ShopView.isLaidOut(): Boolean {
     val header = buyerText.getGlobalBounds()
     val slots = slotViews.first().getGlobalBounds()
-    val footer = backButton.getGlobalBounds()
+    val footer = itemNameText.getGlobalBounds()
     return header.bottom <= slots.top &&
         slotViews.last().getGlobalBounds().bottom <= footer.top &&
         previousBuyerButton.getGlobalBounds().right <= header.left &&
-        nextBuyerButton.getGlobalBounds().left >= header.right &&
-        backButton.getGlobalBounds().top == actionButton.getGlobalBounds().top
+        nextBuyerButton.getGlobalBounds().left >= header.right
 }
 
 suspend fun ViewsForTesting.clickSlot(
@@ -65,10 +61,6 @@ suspend fun ViewsForTesting.clickSlot(
 suspend fun ViewsForTesting.clickPreviousBuyer(shopView: ShopView) = clickOn(shopView.previousBuyerButton)
 
 suspend fun ViewsForTesting.clickNextBuyer(shopView: ShopView) = clickOn(shopView.nextBuyerButton)
-
-suspend fun ViewsForTesting.clickAction(shopView: ShopView) = clickOn(shopView.actionButton)
-
-suspend fun ViewsForTesting.clickBack(shopView: ShopView) = clickOn(shopView.backButton)
 
 /** Drags the mouse across the shop, starting on its first slot, [dx] pixels to the right (negative to the left). */
 suspend fun ViewsForTesting.swipeShop(

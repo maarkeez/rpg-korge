@@ -158,6 +158,12 @@ While exploring, the gold button opens [`GiveGoldView`](../../src/commonMain/kot
 - Give only acts while the timeline is idle, as Cancel does. `GoldGiven` displays the bag again in timeline order, redrawn with the new gold, and `GoldReceived` flashes the receiver alongside the timeline, so the next give can start straight away.
 - Taking the bag off the stage ends no swipe, so the inventory ignores a swipe that started before it was last displayed: the tap on the gold button would otherwise end as a swipe on the tap on Give.
 
+### The panels and their row
+
+The panels that take the place of the pad (the quests, the save slots, a question, the formation, the shop and the merchant's dialog) keep their buttons in the [action row](buttons.md#the-action-row) of the call to action. Their presenters display it while the panel is displayed, in timeline order, and each tap only acts while the timeline is idle, as the panel's own taps do.
+
+`ExplorationPresenter` clears it: displaying or hiding the pad calls `hideActions()`, as does `PlayerVictory`, so a battle starting never leaves an old Back on the screen, and Finish turn is displayed again when the battle has one. `hideActions()` removes only the row, so the step waiting for the player to choose with an inventory full is not disturbed.
+
 ### Inventory full
 
 When an item is found while the inventory is full (`InventoryFull`), a step opens the inventory and the call to action displays "Inventory full", the found item icon and a "Leave it" button. **The step waits for the player to choose**, so the timeline keeps playing and the player can not move, cast, close the inventory or finish the turn meanwhile:

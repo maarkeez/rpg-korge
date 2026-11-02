@@ -34,10 +34,11 @@ class FormationPresenterTest {
                 ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus
-    private val formationView = FormationView(BattleSceneResourcesLoader(), TextsMother.texts())
+    private val formationView = FormationView(BattleSceneResourcesLoader())
     private val battlefieldView = FakeBattlefieldView()
     private val timeline = battleSceneTimeline()
-    private val presenter = FormationPresenter(formationView, battlefieldView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
+    private val callToActionView = FakePlayerCallToActionView()
+    private val presenter = FormationPresenter(formationView, battlefieldView, callToActionView, apis.partyApi, apis.battleUnitApi, apis.battlefieldApi, TextsMother.texts(), timeline)
 
     private val knightTile = TilePosition(row = 1, column = 1)
     private val vikingTile = TilePosition(row = 2, column = 1)
@@ -134,7 +135,7 @@ class FormationPresenterTest {
         val closed = mutableListOf<PartyEvent.FormationClosed>()
         eventBus.subscribe<PartyEvent.FormationClosed> { event -> closed += event }
         // When
-        presenter.formationCloseSelected()
+        callToActionView.chooseAction("Close")
         eventBus.dispatch()
         // Then
         val party = apis.partyApi.searchParty()!!
@@ -155,5 +156,20 @@ class FormationPresenterTest {
         presenter.isOpen.shouldBeFalse()
         formationView.visible.shouldBeFalse()
         battlefieldView.resetTilesCount shouldBe resetTilesCount + 1
+    }
+
+    @Test
+    fun `open should display Close, which closes the formation`() {
+        // When
+        openTheFormation()
+        // Then
+        callToActionView.actionLabels().shouldContainExactly("Close")
+        // When
+        callToActionView.chooseAction("Close")
+        // Then
+        apis.partyApi
+            .searchParty()!!
+            .isExploring
+            .shouldBeTrue()
     }
 }

@@ -27,21 +27,19 @@ fun FormationView.selectedRowIndexes(): List<Int> = rowViews.indices.filter { in
 
 fun FormationView.hint(): String = hintText.text
 
-/** Whether the rows are stacked in order above the hint and Close, inside the panel. */
+/** Whether the rows are stacked in order above the hint, inside the panel. */
 fun FormationView.isLaidOut(): Boolean {
     val rows = rowViews.map { rowView -> rowView.getGlobalBounds() }
-    val footer = closeButton.getGlobalBounds()
-    return rows.zipWithNext().all { (above, below) -> above.bottom <= below.top } &&
-        rows.last().bottom <= footer.top &&
-        hintText.getGlobalBounds().right <= footer.left
+    return rows.zipWithNext().all { (above, below) -> above.bottom <= below.top } && rows.last().bottom <= hintText.getGlobalBounds().top
 }
+
+/** How wide the hint can be, as Close is no longer beside it. */
+fun FormationView.hintWidth(): Double = hintText.width
 
 suspend fun ViewsForTesting.clickRow(
     formationView: FormationView,
     index: Int,
 ) = clickOn(formationView.rowViews[index].healthBarView)
-
-suspend fun ViewsForTesting.clickClose(formationView: FormationView) = clickOn(formationView.closeButton)
 
 suspend fun ViewsForTesting.clickPortrait(
     formationView: FormationView,

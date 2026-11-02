@@ -39,8 +39,8 @@ import kotlin.time.Duration.Companion.seconds
  *
  * Pressing A talks to the npc next to the leader: its dialog takes the place of the pad until it is tapped. Time stops
  * meanwhile, as the party neither walks nor starts a second while talking. The dialog of a merchant is not closed by
- * tapping it, but by its Leave choice. Its Buy and Sell choices open its shop in place of the dialog (see
- * [ShopPresenter]), until Back displays the dialog again.
+ * tapping it, but by its Leave choice, in the row of the call to action. Its Buy and Sell choices open its shop in place
+ * of the dialog (see [ShopPresenter]), until Back displays the dialog again.
  *
  * Pressing B opens the party formation in place of the pad (see [FormationPresenter]), where the player sets the party
  * order, and who leads. Time stops meanwhile too, until Close displays the pad again.
@@ -314,23 +314,19 @@ class ExplorationPresenter(
         playerCallToActionView.visible = !isDisplayed
     }
 
-    // The dialog takes the place of the pad, with Buy, Sell and Leave for a merchant.
+    // The dialog takes the place of the pad, with Buy, Sell and Leave in the row for a merchant.
     private fun displayNpcDialog(npc: Npc.Dto) {
-        val choices =
-            if (npcApi.searchIsMerchant(npc.id)) {
-                listOf(
-                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_BUY]) { openShop(Mode.BUY) },
-                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
-                    NpcDialogView.Choice(texts[UiText.NPC_DIALOG_LEAVE]) { leaveMerchant() },
-                )
-            } else {
-                emptyList()
-            }
-        npcDialogView.display(
-            npc = NpcDialog(npcId = npc.id, unitId = npc.unitId, name = texts.npcName(npc.id), line = texts.npcLine(npc.id)),
-            choices = choices,
-        )
+        npcDialogView.display(NpcDialog(npcId = npc.id, unitId = npc.unitId, name = texts.npcName(npc.id), line = texts.npcLine(npc.id)))
         virtualPadView.visible = false
         npcDialogView.visible = true
+        if (npcApi.searchIsMerchant(npc.id)) {
+            playerCallToActionView.displayActions(
+                listOf(
+                    ActionRowView.Action(texts[UiText.NPC_DIALOG_BUY]) { openShop(Mode.BUY) },
+                    ActionRowView.Action(texts[UiText.NPC_DIALOG_SELL]) { openShop(Mode.SELL) },
+                    ActionRowView.Action(texts[UiText.NPC_DIALOG_LEAVE]) { leaveMerchant() },
+                ),
+            )
+        }
     }
 }

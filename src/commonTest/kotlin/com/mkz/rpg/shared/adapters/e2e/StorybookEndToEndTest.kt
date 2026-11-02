@@ -1,12 +1,13 @@
 package com.mkz.rpg.shared.adapters.e2e
 
 import com.mkz.rpg.STORYBOOK_WINDOW_SIZE
+import com.mkz.rpg.screen.adapters.presentation.ActionRowView
 import com.mkz.rpg.screen.adapters.presentation.HealthBarView
 import com.mkz.rpg.screen.adapters.presentation.ShopView
-import com.mkz.rpg.screen.adapters.presentation.action
-import com.mkz.rpg.screen.adapters.presentation.clickBack
 import com.mkz.rpg.screen.adapters.presentation.clickSlot
+import com.mkz.rpg.screen.adapters.presentation.footerPrice
 import com.mkz.rpg.screen.adapters.presentation.selectedSlotIndexes
+import com.mkz.rpg.shared.adapters.presentation.clickOn
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.startStorybook
@@ -38,7 +39,6 @@ import com.mkz.rpg.storybook.adapters.presentation.zoomText
 import com.mkz.rpg.storybook.adapters.presentation.zoomView
 import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -168,26 +168,26 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
             // Then
             waitUntil { displayedShopView()?.selectedSlotIndexes() == listOf(2) }
             displayedShopView()?.selectedSlotIndexes().shouldContainExactly(2)
-            displayedShopView()?.action() shouldBe ("Buy" to true)
+            displayedShopView()?.footerPrice() shouldBe "50 G"
             stage.actionsView()?.actionTexts().shouldContainExactly("shopSlotSelected(2)")
             stage.controlsView()?.displayedValue("selectedSlot") shouldBe "2"
             storyLocation.keptLocations.last().args shouldBe mapOf("selectedSlot" to "2")
         }
 
     @Test
-    fun `should only log a callback that changes no arg, the newest first, when Back is tapped`() =
+    fun `should only log a callback that changes no arg, the newest first, when a button of the action row is tapped`() =
         sharedViewsTest {
             // Given
-            startStorybook(FakeStoryLocation(requestedStoryId = "screen-shop--buy-item-selected"))
-            waitUntil { displayedShopView() != null }
-            clickSlot(requireNotNull(displayedShopView()), 1)
-            waitUntil { displayedShopView()?.selectedSlotIndexes()?.isEmpty() == true }
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--two-actions"))
+            waitUntil { stage.phoneFrameView()?.displayedView() is ActionRowView }
+            val rowView = stage.phoneFrameView()?.displayedView() as ActionRowView
             // When
-            clickBack(requireNotNull(displayedShopView()))
+            clickOn(rowView.buttons.first())
+            clickOn(rowView.buttons.last())
             // Then
             waitUntil { stage.actionsView()?.actionTexts()?.size == 2 }
-            stage.actionsView()?.actionTexts().shouldContainExactly("shopBackSelected()", "shopSlotSelected(1)")
-            displayedShopView()?.selectedSlotIndexes()?.shouldBeEmpty()
+            stage.actionsView()?.actionTexts().shouldContainExactly("onSelected(Buy)", "onSelected(Back)")
+            stage.phoneFrameView()?.displayedView() shouldBe rowView
         }
 
     @Test
