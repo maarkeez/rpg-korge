@@ -59,16 +59,16 @@ class ExportCommand : CliktCommand("export") {
         """
         Exports the composite of a sprite, or one of its layers, to PNG.
 
-        A sprite under art/ is exported to the same path under resources/ unless told otherwise. It is also exported every time it is saved, so this is only needed to export elsewhere or a single layer.
+        A sprite under art/, except a draft under art/drafts/, is exported to the same path under resources/ unless told otherwise. It is also exported every time it is saved, so this is only needed to export elsewhere or a single layer.
         """.trimIndent()
 
     private val file by argument("FILE", help = "The .aseprite file.").file()
-    private val out by option("--out", "-o", help = "The PNG to write (default: the same path under resources/, for a sprite under art/).").file(canBeDir = false)
+    private val out by option("--out", "-o", help = "The PNG to write (default: the same path under resources/, for a sprite under art/ that is not a draft under art/drafts/).").file(canBeDir = false)
     private val layer by option("--layer", "-l", help = "Only this layer, even when hidden (default: the composite of the visible layers).")
 
     override fun run() {
         val sprite = SpriteFiles.readSprite(file)
-        val png = out ?: SpriteFiles.exportedPng(file) ?: throw PixelArtException("$file is not under an art/ folder: tell where to export it with --out.")
+        val png = out ?: SpriteFiles.exportedPng(file) ?: throw PixelArtException("$file is not under an art/ folder or is a draft under art/drafts/: tell where to export it with --out.")
         Png.write(sprite.pixels(layer), png)
         echo("Exported ${layer?.let { "layer '$it' of " } ?: ""}$file to $png")
     }

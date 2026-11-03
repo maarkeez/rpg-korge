@@ -2,7 +2,7 @@
 
 > **Status:** in use, rewritten for the top-down view. The game displays 16x16 and 32x32 units and npcs side by side,
 > each filling its 64px tile (see [Assets](../architecture/assets.md)). The sprites of this brief are drafted in
-> `art-drafts/`, then moved to `art/` once reviewed. The elf is the first character drawn with this version; the rest
+> `art/drafts/`, then moved to `art/unit/` or `art/npc/` once reviewed. The elf is the first character drawn with this version; the rest
 > of the cast is to be redrawn with it, see [Redrawing the cast](#redrawing-the-cast).
 >
 > **Summary:** Humanoids (humans, orcs, elves, and later dwarves or goblins) are drawn in the style of *The Legend of
@@ -24,10 +24,10 @@ they differ (the size and the folder).
 
 ## Look at the reference first
 
-`art-drafts/reference/` holds standing frames of Link, snapped to the FamiCube colours, on 32x32 canvases anchored as our
+`art/drafts/reference/` holds standing frames of Link, snapped to the FamiCube colours, on 32x32 canvases anchored as our
 sprites are: `link-front` (front) and `link-side` (three-quarter, facing right). They are Nintendo's art, from a sheet
-ripped by Mister Man for The Spriters Resource: they are there to study, never to copy into an asset. They are not
-under `art/`, so they are never exported to the game.
+ripped by Mister Man for The Spriters Resource: they are there to study, never to copy into an asset. They are
+under `art/drafts/`, so they are never exported to the game.
 
 Before drawing, `pixel preview` them and `pixel grid` them, and read how they are built: the rest of this brief describes
 them. A drawing that follows every rule below but does not look like them is wrong; one that looks like them and breaks
@@ -83,8 +83,8 @@ its back views, and its animations.
 
 | Asset    | Size  | File                                          | Framing                                                       |
 |----------|-------|-----------------------------------------------|---------------------------------------------------------------|
-| Sprite   | 32x32 | `art-drafts/humanoid/<id>.aseprite`           | The whole character, its gear and its shadow                  |
-| Portrait | 32x32 | `art-drafts/humanoid/<id>_portrait.aseprite`  | Head and shoulders, cut by the bottom edge                    |
+| Sprite   | 32x32 | `art/drafts/humanoid/<id>.aseprite`           | The whole character, its gear and its shadow                  |
+| Portrait | 32x32 | `art/drafts/humanoid/<id>_portrait.aseprite`  | Head and shoulders, cut by the bottom edge                    |
 
 - `<id>` is the unit or npc id of the cast below, e.g. `knight`. A character that is both an npc and a unit (the
   herbalist) has one sprite.
@@ -93,9 +93,9 @@ its back views, and its animations.
 - **Anchor:** the shadow's bottom row is row 31; the feet stand on row 30, centred on columns 15-16. The whole canvas
   is the tile the character stands on, drawn at 2x where 16x16 art is drawn at 4x: nothing overlaps the neighbouring
   tiles. Gear may use the whole canvas.
-- Sources outside `art/` are not exported. Export the PNG next to the source after every change:
-  `tools/pixel-art/pixel export art-drafts/humanoid/<id>.aseprite --out art-drafts/humanoid/<id>.png`.
-- The architecture tests do not see `art-drafts/`, so check their rules by hand (see [Checklist](#checklist)).
+- Sources under `art/drafts/` are not exported. Export the PNG next to the source after every change:
+  `tools/pixel-art/pixel export art/drafts/humanoid/<id>.aseprite --out art/drafts/humanoid/<id>.png`.
+- The architecture tests do not see `art/drafts/`, so check their rules by hand (see [Checklist](#checklist)).
 - Once reviewed, a draft moves to `art/unit/` or `art/npc/`, replacing the sprite of its character, and its PNG is
   exported to `resources/` by the tool; the PNGs next to the drafts are removed. The other 16x16 sprites stay until
   they are redrawn.
@@ -152,7 +152,7 @@ not count long ears (an elf's) nor gear.
 | Child                | ~16 rows | ~10 rows                          | ~6 rows                                                    |
 | Orc                  | ~28 rows | ~11 rows, small for the body      | ~17 rows, ~23 columns wide, hunched: the shoulders reach the jaw |
 
-`art-drafts/humanoid/template.aseprite` is a villager, front facing, on its `base` layer only, drawn over `link-front`
+`art/drafts/humanoid/template.aseprite` is a villager, front facing, on its `base` layer only, drawn over `link-front`
 (see [Look at the reference first](#look-at-the-reference-first)). It shows the proportions and the reading of a human
 at this scale; draw over it as a hidden `sketch`, and change the build, the hair and the clothes for every character.
 
@@ -338,8 +338,8 @@ The skill's stack, plus the shadow:
 | `sketch`    | Optional, hidden: the template or a reference to draw over            |
 
 Start a sprite with
-`tools/pixel-art/pixel new art-drafts/humanoid/<id>.aseprite --size 32x32 --layer outline --layer highlight --layer shade --layer base --layer shadow --layer sketch`,
-then `copy --from art-drafts/humanoid/template.aseprite --from-layer base --region 0,0,32x32 --layer sketch --at 0,0`
+`tools/pixel-art/pixel new art/drafts/humanoid/<id>.aseprite --size 32x32 --layer outline --layer highlight --layer shade --layer base --layer shadow --layer sketch`,
+then `copy --from art/drafts/humanoid/template.aseprite --from-layer base --region 0,0,32x32 --layer sketch --at 0,0`
 (or from a reference) and `layer hide sketch`.
 Drawing the whole character flat on `base` first, then splitting it, works too: copy `base` onto the other layers
 (`copy --from-layer base`), keep only each layer's colours on it (`replace <colour> .`), and turn the shades and
@@ -352,7 +352,7 @@ leather's base) belongs to a different layer in each region: clear it by region 
 The rules are easy to pass with a drawing that still does not look like A Link to the Past. Before showing a draft,
 review it against the reference:
 
-1. `pixel preview` the draft and `art-drafts/reference/link-front.png` (or `link-side`) at the same scale, and read both.
+1. `pixel preview` the draft and `art/drafts/reference/link-front.png` (or `link-side`) at the same scale, and read both.
 2. Write down, for each, what differs from the reference: the **camera** (how much of the head is its top, where the
    eyes sit, how short the body is, the shadow), the **face** (whites, pupils, fringe, shade, expression), the
    **light** (volumes or stripes, cast shades, shades that shift hue), the **lines** (`W` splitting the big shapes).
@@ -393,7 +393,7 @@ changes: each keeps the design of its row in the [Cast](#cast) (look, gear, ramp
 | `princess`                                  | 32x32, with the first version                       | `art/npc/princess.aseprite`, `princess_portrait` |
 | `hero`                                      | A hand drawn draft (mage v2), its portrait a 2x crop | `art/unit/hero.aseprite`, `hero_portrait`     |
 | `knight`                                    | 32x32, with the first version                       | `art/unit/knight.aseprite`, `knight_portrait` |
-| `mage`, `orc`                               | Drafts with the first version, not in the game      | `art-drafts/humanoid/<id>.aseprite`           |
+| `mage`, `orc`                               | Drafts with the first version, not in the game      | `art/drafts/humanoid/<id>.aseprite`           |
 | `herbalist`, `viking`, `viking-warrior`     | 16x16, before this brief                            | `art/unit/<id>.aseprite`, `<id>_portrait`     |
 | `merchant`, `farmer`, `elder`, `blacksmith`, `alchemist` | 16x16, before this brief               | `art/npc/<id>.aseprite`, `<id>_portrait`      |
 
@@ -402,7 +402,7 @@ For each character:
 1. Read the [`pixel-art` skill](../../.claude/skills/pixel-art/SKILL.md) and this whole brief, then
    [look at the reference](#look-at-the-reference-first) and at the elf.
 2. Look at the character's current sprite and portrait for its design only (`pixel preview`), never as a starting
-   point: start a draft in `art-drafts/humanoid/<id>.aseprite` and `<id>_portrait.aseprite` with the template as its
+   point: start a draft in `art/drafts/humanoid/<id>.aseprite` and `<id>_portrait.aseprite` with the template as its
    hidden `sketch` (see [Layers](#layers)).
 3. Draw it, do the [review](#review) for real, and go through the [checklist](#checklist).
 4. Replace the game's sources by the drafts (`art/unit/` or `art/npc/`, the same file names), `pixel export` both so

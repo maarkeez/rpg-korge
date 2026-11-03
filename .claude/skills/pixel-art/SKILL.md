@@ -7,7 +7,8 @@ description: Draws and edits the game's pixel art (units, npcs, portraits, items
 
 Every image of the game has a layered Aseprite source under `art/`, mirroring `resources/`:
 `art/unit/knight.aseprite` is exported to `resources/unit/knight.png`. Draw on the sources with
-`tools/pixel-art/pixel`, never on the PNGs: every command that saves a source also exports its PNG.
+`tools/pixel-art/pixel`, never on the PNGs: every command that saves a source also exports its PNG. Drafts under
+`art/drafts/` are the exception: they are never exported.
 
 Run `tools/pixel-art/pixel --help`, and `--help` on any command, for the exact options.
 
@@ -63,7 +64,7 @@ exported.
 
 1. **Read the design brief** for the asset, under `docs/design/` (e.g. [humanoid characters](../../../docs/design/humanoid-characters.md)),
    and look at the assets it must match: `pixel preview` them (e.g. for a humanoid, the A Link to the Past references
-   under `art-drafts/reference/`) and read the PNG it prints.
+   under `art/drafts/reference/`) and read the PNG it prints.
 2. **Start the source**: `pixel new art/unit/goblin.aseprite --size 16x16 --layer outline --layer shade --layer base`,
    or `pixel layer add` on an existing one. Its PNG is exported right away, so the game can display it.
 3. **Draw** layer by layer, most of it in one `pixel apply` script, which saves once and only when every line

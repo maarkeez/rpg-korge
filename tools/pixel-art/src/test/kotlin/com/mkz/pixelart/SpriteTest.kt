@@ -35,4 +35,19 @@ class SpriteTest {
     fun `should not be exported when is not under art`() {
         SpriteFiles.exportedPng(File("/project/sketches/knight.aseprite")) shouldBe null
     }
+
+    @Test
+    fun `should not be exported when is a draft under art`() {
+        SpriteFiles.exportedPng(File("/project/art/drafts/humanoid/orc.aseprite")) shouldBe null
+    }
+
+    @Test
+    fun `should not be exported when is directly under the drafts of art`() {
+        SpriteFiles.exportedPng(File("/project/art/drafts/reference.aseprite")) shouldBe null
+    }
+
+    @Test
+    fun `should be exported when only its name is drafts`() {
+        SpriteFiles.exportedPng(File("/project/art/unit/drafts.aseprite")) shouldBe File("/project/resources/unit/drafts.png")
+    }
 }

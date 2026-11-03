@@ -19,7 +19,7 @@ yet and stop.
 
 Before talking design, read the whole humanoid brief and the `pixel-art` skill, and look at the reference and at the
 characters already drawn with this version (the "Drawn now" column of "Redrawing the cast"): `pixel preview` them and
-read the PNGs. Keep their files in mind: `art-drafts/reference/link-front` and `link-side`, and
+read the PNGs. Keep their files in mind: `art/drafts/reference/link-front` and `link-side`, and
 `art/npc/elf`.
 
 ## 2. Interview
@@ -56,13 +56,13 @@ another model or effort. Run it in the foreground, and keep its agent id for lat
    Silhouette and pose, Proportions, Face, Species, Lines and light, Colours, Gear, Portraits, Layers, Review and
    Checklist.
 3. The approved design card, pasted in full.
-4. Draw the sprite at `art-drafts/humanoid/<id>.aseprite` and the portrait at `art-drafts/humanoid/<id>_portrait.aseprite`,
+4. Draw the sprite at `art/drafts/humanoid/<id>.aseprite` and the portrait at `art/drafts/humanoid/<id>_portrait.aseprite`,
    both 32x32, each PNG exported next to its source. Start from scratch: never from the character's current files nor
    any other character's; the elf only to match scale and finish.
 5. Do the brief's Review step for real, beside the reference at the same scale and at 1x, and iterate. Then the
    Checklist, with a script for the outline rule (every silhouette pixel, diagonals and image edges included, with a
    luminance under 60 must be `W`).
-6. Do not touch `art/`, `resources/` or the brief, and do not commit.
+6. Do not touch the rest of `art/`, `resources/` or the brief, and do not commit.
 7. Report: the two PNG paths, the final `pixel grid` of both, their colour counts, what the review found and how it was
    fixed or why it was kept, and anything in the brief that was unclear, contradictory or hard to follow.
 

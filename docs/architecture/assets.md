@@ -34,6 +34,8 @@ source of `resources/unit/knight.png`. Sources are kept out of `resources`, so t
   source. A PNG whose pixels did not change is left as it is.
 - Sources are indexed with the colours of the palette below, so they can only hold valid pixels.
 - `famicube-palette.png` has no source: it is the palette itself.
+- Drafts under `art/drafts` are the exception to the same path: the tool never exports them, as everything under
+  `resources` ships with the game. They stay there, with any PNG next to them, until they are reviewed.
 
 ## Adding an asset
 

@@ -5,6 +5,8 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 
 object SpriteFiles {
+    private const val DRAFTS_FOLDER = "drafts"
+
     fun readSprite(file: File): Sprite {
         if (!file.isFile) throw PixelArtException("$file does not exist. Create it with 'pixel new' or 'pixel import'.")
         return Aseprite.read(file.readBytes(), file.path)
@@ -21,7 +23,7 @@ object SpriteFiles {
         replace(temporary, file)
     }
 
-    /** Writes the sprite and, when it is under art/ and [export] is set, its PNG under resources/, which is returned. */
+    /** Writes the sprite and, when it has a PNG to export to and [export] is set, its PNG under resources/, which is returned. */
     fun save(
         sprite: Sprite,
         file: File,
@@ -42,7 +44,8 @@ object SpriteFiles {
 
     /**
      * The PNG a source under an `art` folder is exported to: the same path under the `resources` folder next to it,
-     * e.g.: `art/unit/knight.aseprite` to `resources/unit/knight.png`. `null` when the source is not under `art`.
+     * e.g.: `art/unit/knight.aseprite` to `resources/unit/knight.png`. `null` when the source is not under `art`, or is a
+     * draft under `art/drafts`, as everything under `resources` ships with the game.
      */
     fun exportedPng(source: File): File? {
         val absolute = source.absoluteFile.normalize()
@@ -53,6 +56,7 @@ object SpriteFiles {
             folder = folder.parentFile
         }
         val root = folder?.parentFile ?: return null
+        if (relative.first() == DRAFTS_FOLDER) return null
         return relative.fold(File(root, "resources")) { path, part -> File(path, part) }
     }
 }

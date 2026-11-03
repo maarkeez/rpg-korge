@@ -17,7 +17,7 @@ class Pixel : CliktCommand("pixel") {
 
         Layers are listed from the top one. Without --layer, the read commands show the composite: what the visible layers display together, the topmost opaque pixel winning.
 
-        A sprite under an art/ folder is exported to the same path under resources/ every time it is saved, e.g. art/unit/knight.aseprite to resources/unit/knight.png.
+        A sprite under an art/ folder is exported to the same path under resources/ every time it is saved, e.g. art/unit/knight.aseprite to resources/unit/knight.png. Drafts under art/drafts/ are not exported.
         """.trimIndent()
 
     override fun run() = Unit
