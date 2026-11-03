@@ -154,7 +154,6 @@ class StorySmokeTest : ViewsForTesting() {
                     "screen-gold-button--default",
                     "screen-gold-button--faded",
                     "screen-item-actions",
-                    "screen-item-actions--merchant-item",
                     "screen-item-actions--consumable",
                     "screen-item-actions--can-not-consume",
                     "screen-item-actions--equippable",

@@ -27,7 +27,6 @@ object ItemActionsViewStories : StoryBinding {
     private enum class Kind(
         val actions: List<Pair<UiText, Boolean>>,
     ) {
-        MERCHANT_ITEM(emptyList()),
         CONSUMABLE(listOf(UiText.ITEM_ACTIONS_CANCEL to true, UiText.ITEM_ACTIONS_DISCARD to true, UiText.ITEM_ACTIONS_GIVE to true, UiText.ITEM_ACTIONS_CONSUME to true)),
         CAN_NOT_CONSUME(listOf(UiText.ITEM_ACTIONS_CANCEL to true, UiText.ITEM_ACTIONS_DISCARD to true, UiText.ITEM_ACTIONS_GIVE to true, UiText.ITEM_ACTIONS_CONSUME to false)),
         EQUIPPABLE(listOf(UiText.ITEM_ACTIONS_CANCEL to true, UiText.ITEM_ACTIONS_DISCARD to true, UiText.ITEM_ACTIONS_GIVE to true, UiText.ITEM_ACTIONS_EQUIP to true)),
@@ -36,13 +35,6 @@ object ItemActionsViewStories : StoryBinding {
         BAGS_FULL(listOf(UiText.ITEM_ACTIONS_CANCEL to true, UiText.ITEM_ACTIONS_DISCARD to true, UiText.ITEM_ACTIONS_BAGS_FULL to false, UiText.ITEM_ACTIONS_EQUIP to true)),
     }
 
-    private val merchantItem =
-        StoryDto(
-            id = "screen-item-actions--merchant-item",
-            name = "Merchant item",
-            description = "An item a merchant sells: only its name and price, with no actions.",
-            args = mapOf(ACTIONS to ArgDto.text(Kind.MERCHANT_ITEM.name)),
-        )
     private val consumable = StoryDto(id = "screen-item-actions--consumable", name = "Consumable", description = "An item to consume, e.g.: a potion.", args = emptyMap())
     private val canNotConsume =
         StoryDto(
@@ -88,7 +80,7 @@ object ItemActionsViewStories : StoryBinding {
                     ControlDto.enum(ACTIONS, Kind.entries.map { kind -> kind.name }),
                 ),
             args = mapOf(ITEM_NAME to ArgDto.text("Health potion"), ITEM_PRICE to ArgDto.int(25), ACTIONS to ArgDto.text(Kind.CONSUMABLE.name)),
-            stories = listOf(merchantItem, consumable, canNotConsume, equippable, equipped, noOneToGiveTo, bagsFull),
+            stories = listOf(consumable, canNotConsume, equippable, equipped, noOneToGiveTo, bagsFull),
         )
 
     override fun render(

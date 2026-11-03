@@ -12,8 +12,7 @@ import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
 /**
- * The name and price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel. Without
- * actions (e.g.: an item a merchant sells), only its name and price are displayed.
+ * The name and price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel.
  */
 class ItemActionsView(
     texts: Texts,
@@ -47,17 +46,15 @@ class ItemActionsView(
             itemPriceView.alignTextToRight()
             nameLine.addChild(itemPriceView)
             addChild(nameLine)
-            if (actions.isNotEmpty()) {
-                uiHorizontalStack(padding = SPACING) {
-                    val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
-                    actionButtons =
-                        actions.map { action ->
-                            gameButton(action.label, Size(buttonWidth, UIButton.DEFAULT_SIZE.height), action.color, action.pressedColor) {
-                                enabled = action.isEnabled
-                                onClick { action.onSelected() }
-                            }
+            uiHorizontalStack(padding = SPACING) {
+                val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
+                actionButtons =
+                    actions.map { action ->
+                        gameButton(action.label, Size(buttonWidth, UIButton.DEFAULT_SIZE.height), action.color, action.pressedColor) {
+                            enabled = action.isEnabled
+                            onClick { action.onSelected() }
                         }
-                }
+                    }
             }
         }
         itemNameView.display(itemName)
