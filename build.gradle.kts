@@ -6,6 +6,8 @@ import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.kotlin.dsl.register
 import org.jmailen.gradle.kotlinter.tasks.ConfigurableKtLintTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin
+import org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootExtension
 import resourcesbundle.ResourcesBundleTask
 import testcatalogs.TestCatalogsTask
 
@@ -62,6 +64,11 @@ korge {
     //targetAndroid()
 
     serializationJson()
+}
+
+// Keeps the yarn.lock of the JS target with the other build files, instead of a `kotlin-js-store` folder in the root.
+plugins.withType<YarnPlugin> {
+    extensions.getByType<YarnRootExtension>().lockFileDirectory = file("gradle/kotlin-js-store")
 }
 
 dependencies {
