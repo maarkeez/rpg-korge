@@ -99,7 +99,7 @@ gets its case in the mapper and its `ui.abilityInfo.effect.*` text in the catalo
 
 An item a battle unit can loot. Its effects must exist and suit its type: a consumable's effects can not be `WHILE_EQUIPPED`, and an equippable item's effects must all be `WHILE_EQUIPPED`.
 
-Its `price` is what it is worth in gold, from 0 to 999. It is displayed as `10 G` in the inventory.
+Its `price` is what a merchant charges for it, from 0 to 999. Its sell price, what a merchant pays, is half of it rounded down, and is what the inventory displays, e.g.: `5 G`.
 
 ```toml
 price = 10

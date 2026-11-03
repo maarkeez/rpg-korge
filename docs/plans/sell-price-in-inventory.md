@@ -1,6 +1,6 @@
 # Plan: The sell price in the inventory
 
-> **Status:** planned. Nothing is built yet.
+> **Status:** built on `main`. The screenshots are still to be approved.
 >
 > **Summary:** The inventory displays the price of an item, but a merchant pays half of it, so a Hammer reads `50 G` in the bag and `25 G` in the shop's Sell line. Instead, the inventory displays the sell price, with no label, exactly as the shop's Sell line does: on the line of a selected item, and in the message asking what to do with an item found with a full bag, so the two compare directly. The price is then only displayed when buying. The rule does not change, and no subdomain gains a dependency. It builds on [Buying and selling](../architecture/inventory.md#buying-and-selling) and [Game data](../architecture/game-data.md).
 
@@ -45,7 +45,7 @@ Each milestone is a few commits straight on `main`, green on CI.
 
 | #  | Milestone                     | Done when                                                                                                           | Status | Done in |
 |----|-------------------------------|---------------------------------------------------------------------------------------------------------------------|--------|---------|
-| M1 | The sell price in the inventory | The item line and the full-bag message display the sell price in the game, approved on screenshots, with the docs up to date. |        |         |
+| M1 | The sell price in the inventory | The item line and the full-bag message display the sell price in the game, approved on screenshots, with the docs up to date. | ✅      | `f72f3e7c` |
 
 ### M1 commits
 
@@ -82,7 +82,8 @@ msgid "Tap an item to swap it for: {item} ({sellPrice})"
 
 ## Storybook
 
-- `ItemActionsViewStories`: `merchantItem` and `Kind.MERCHANT_ITEM` go. The arg `itemPrice` becomes `itemSellPrice`, and `PRICE_LIMIT` becomes `SELL_PRICE_LIMIT`. The description of the component says sell price.
+- `ItemActionsViewStories`: `merchantItem` and `Kind.MERCHANT_ITEM` go. The arg `itemPrice` becomes `itemSellPrice`. The description of the component says sell price.
+- `PRICE_LIMIT` becomes `SELL_PRICE_LIMIT` in these three bindings.
 - `PlayerCallToActionViewStories`: the arg `itemPrice` becomes `itemSellPrice`, and **› Item actions** says sell price.
 - `InventoryFullViewStories`: the arg `foundItemPrice` becomes `foundItemSellPrice`. **› Expensive** (`screen-inventory-full--expensive`) keeps its id and its 9999, the widest text it tests, though the largest real sell price is 499 G, and says sell price.
 - `StorySmokeTest` no longer lists `screen-item-actions--merchant-item`.
@@ -111,3 +112,6 @@ msgid "Tap an item to swap it for: {item} ({sellPrice})"
 
 - A Hammer bought for 50 G reads 25 G in the bag straight away, with nothing telling that the number is what a merchant pays.
 - Old Storybook links setting `itemPrice` or `foundItemPrice` still open, ignoring that arg, and links to **Merchant item** stop working.
+- ✅ on the milestone means built, green and pushed: "approved on screenshots" is still open.
+- The item line was checked in the real game, through a local snapshot test with items added to a save: the Hammer reads `25 G` and the Health Elixir `12 G`. The full-bag message was not played in the real game: it is checked by `InventoryPresenterTest`, `PlayerCallToActionViewTest` and its stories.
+- In the stories of `ItemActionsView`, `InventoryFullView` and `PlayerCallToActionView`, the first letter of the line is cut at the left edge of the phone. It was already so before this plan, this plan does not touch it, and the real game displays the whole line.

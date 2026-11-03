@@ -85,7 +85,7 @@ Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equippe
 
 The battle scene draws the dropped items on their tiles, and opens the inventory of the selected battle unit behind its bag, where the player consumes, equips, unequips, swaps and discards items, and chooses what to do with an item found while the inventory is full. While an ability of the battle unit is on show, read-only or with its cast range, the bag is hidden, as the battle unit info collapses its header to a strip of what a cast spends; tapping the ability again or a tile brings it back, so the inventory never opens over a dimmed battlefield. See [Presentation timeline](presentation-timeline.md#loot) and [Inventory on the screen](presentation-timeline.md#inventory).
 
-The price of an item is displayed in gold: on the line of its name, aligned to the right, when it is selected (e.g.: `Health Potion ........ 10 G`), and at the end of the message asking what to do with it when it is found while the inventory is full (e.g.: `Tap an item to swap it for the Hammer (50 G)`).
+The sell price of an item is displayed in gold, with no label: on the line of its name, aligned to the right, when it is selected (e.g.: `Health Potion ........ 5 G`), and at the end of the message asking what to do with it when it is found while the inventory is full (e.g.: `Tap an item to swap it for: Hammer (25 G)`). It is displayed in every context, also during a battle and on an equipped item, even when the item can not be sold right now. The price is only displayed when buying. See [Buying and selling](#buying-and-selling).
 
 ## Gold
 
