@@ -16,7 +16,7 @@ import korlibs.korge.view.View
  * the call to action and displays the finish turn again, through its args.
  */
 object PlayerCallToActionViewStories : StoryBinding {
-    private const val PRICE_LIMIT = 9999
+    private const val SELL_PRICE_LIMIT = 9999
     private const val DEFAULT_ITEM = "health-potion"
     private const val GIVEN_GOLD = 25
     private const val MAXIMUM_GIVEN_GOLD = 120
@@ -24,7 +24,7 @@ object PlayerCallToActionViewStories : StoryBinding {
     private const val CALL_TO_ACTION = "callToAction"
     private const val FINISH_TURN_ENABLED = "finishTurnEnabled"
     private const val ITEM_NAME = "itemName"
-    private const val ITEM_PRICE = "itemPrice"
+    private const val ITEM_SELL_PRICE = "itemSellPrice"
     private const val ITEM = "item"
 
     /** What the player is called to do. */
@@ -50,7 +50,7 @@ object PlayerCallToActionViewStories : StoryBinding {
         StoryDto(
             id = "screen-player-call-to-action--item-actions",
             name = "Item actions",
-            description = "An item selected in the inventory: its name and price, and what to do with it.",
+            description = "An item selected in the inventory: its name and sell price, and what to do with it.",
             args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.ITEM_ACTIONS.name)),
         )
     private val giveItem =
@@ -110,7 +110,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                     ControlDto.enum(CALL_TO_ACTION, CallToAction.entries.map { callToAction -> callToAction.name }),
                     ControlDto.boolean(FINISH_TURN_ENABLED),
                     ControlDto.text(ITEM_NAME),
-                    ControlDto.int(ITEM_PRICE, minimum = 0, maximum = PRICE_LIMIT),
+                    ControlDto.int(ITEM_SELL_PRICE, minimum = 0, maximum = SELL_PRICE_LIMIT),
                     ControlDto.pick(ITEM, context.lootableItemIds()),
                 ),
             args =
@@ -118,7 +118,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                     CALL_TO_ACTION to ArgDto.text(CallToAction.FINISH_TURN.name),
                     FINISH_TURN_ENABLED to ArgDto.boolean(true),
                     ITEM_NAME to ArgDto.text("Health potion"),
-                    ITEM_PRICE to ArgDto.int(25),
+                    ITEM_SELL_PRICE to ArgDto.int(25),
                     ITEM to ArgDto.text(DEFAULT_ITEM),
                 ),
             stories = listOf(finishTurn, finishTurnDisabled, cancelAndConfirm, itemActions, giveItem, giveGold, giveGoldRefusal, inventoryFull, actions, confirmation),
@@ -145,7 +145,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                 CallToAction.ITEM_ACTIONS ->
                     displayItemActions(
                         itemName = args.text(ITEM_NAME),
-                        itemPrice = args.int(ITEM_PRICE),
+                        itemSellPrice = args.int(ITEM_SELL_PRICE),
                         actions =
                             listOf(UiText.ITEM_ACTIONS_CANCEL, UiText.ITEM_ACTIONS_DISCARD, UiText.ITEM_ACTIONS_CONSUME).map { text ->
                                 val label = texts[text]
@@ -170,7 +170,7 @@ object PlayerCallToActionViewStories : StoryBinding {
                 CallToAction.INVENTORY_FULL ->
                     displayInventoryFull(
                         foundItemName = args.text(ITEM_NAME),
-                        foundItemPrice = args.int(ITEM_PRICE),
+                        foundItemSellPrice = args.int(ITEM_SELL_PRICE),
                         foundItemId = args.text(ITEM),
                         onLeft = { context.action("onLeft", setArg = dismissed) },
                     )

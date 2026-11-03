@@ -17,7 +17,7 @@ import korlibs.math.geom.Size
 class InventoryFullView(
     texts: Texts,
     foundItemName: String,
-    foundItemPrice: Int,
+    foundItemSellPrice: Int,
     foundItemId: String,
     resourcesLoader: BattleSceneResourcesLoader,
     onLeft: () -> Unit,
@@ -61,6 +61,6 @@ class InventoryFullView(
                 }
         }
         titleView.display(texts[UiText.INVENTORY_FULL_TITLE])
-        messageView.display(texts[UiText.INVENTORY_FULL_MESSAGE, "item" to foundItemName, "price" to texts.gold(foundItemPrice)])
+        messageView.display(texts[UiText.INVENTORY_FULL_MESSAGE, "item" to foundItemName, "sellPrice" to texts.gold(foundItemSellPrice)])
     }
 }

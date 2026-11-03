@@ -90,7 +90,7 @@ class InventoryPresenter(
     private data class FoundItem(
         val event: InventoryFull,
         val name: String,
-        val price: Int,
+        val sellPrice: Int,
     )
 
     /** The item of the slot being given, and the tile of each party member that can receive it. */
@@ -185,8 +185,8 @@ class InventoryPresenter(
             eventBus.subscribe<ExplorationPaused> { timeline.play { abandonGivingGold() } },
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingGoldOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
-                val foundItem = lootableItemApi.searchLootableItemById(event.lootableItemId) ?: return@subscribe
-                timeline.play { askWhatToDoWith(FoundItem(event, name = texts.lootableItemName(foundItem.id), price = foundItem.price)) }
+                val sellPrice = lootableItemApi.searchSellPrice(event.lootableItemId) ?: return@subscribe
+                timeline.play { askWhatToDoWith(FoundItem(event, name = texts.lootableItemName(event.lootableItemId), sellPrice = sellPrice)) }
             },
         )
 
@@ -297,7 +297,7 @@ class InventoryPresenter(
     private fun displayFoundItem(found: FoundItem) {
         playerCallToActionView.displayInventoryFull(
             foundItemName = found.name,
-            foundItemPrice = found.price,
+            foundItemSellPrice = found.sellPrice,
             foundItemId = found.event.lootableItemId,
             onLeft = { completeChoice() },
         )
@@ -351,6 +351,7 @@ class InventoryPresenter(
         val slot = displayedSlots.getOrNull(slotIndex) ?: return
         if (!canUseInventoryOf(battleUnitId)) return
         val lootableItem = lootableItemApi.searchLootableItemById(slot.lootableItemId) ?: return
+        val sellPrice = lootableItemApi.searchSellPrice(slot.lootableItemId) ?: return
         val isItemEquipped = displayedSlots.any { displayedSlot -> displayedSlot.lootableItemId == slot.lootableItemId && displayedSlot.isEquipped }
         val actions =
             buildList {
@@ -389,7 +390,7 @@ class InventoryPresenter(
         timeline.play {
             selectedSlotIndex = slotIndex
             inventoryView.selectSlot(slotIndex)
-            playerCallToActionView.displayItemActions(itemName = texts.lootableItemName(lootableItem.id), itemPrice = lootableItem.price, actions = actions)
+            playerCallToActionView.displayItemActions(itemName = texts.lootableItemName(lootableItem.id), itemSellPrice = sellPrice, actions = actions)
         }
     }
 

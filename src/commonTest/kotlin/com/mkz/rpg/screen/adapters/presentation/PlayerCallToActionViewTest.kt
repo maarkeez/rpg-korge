@@ -154,7 +154,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayItemActions should display the item name, its price and its actions when the item actions are displayed`() =
+    fun `DisplayItemActions should display the item name, its sell price and its actions when the item actions are displayed`() =
         sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
@@ -166,11 +166,11 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
                     ItemActionsView.Action(label = "Cancel") {},
                 )
             // When
-            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = actions)
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemSellPrice = 50, actions = actions)
             // Then
             playerCallToActionView.isDisplayingItemActions().shouldBeTrue()
             playerCallToActionView.itemName() shouldBe "Hammer"
-            playerCallToActionView.itemPrice() shouldBe "50 G"
+            playerCallToActionView.itemSellPrice() shouldBe "50 G"
             playerCallToActionView.itemActionLabels().shouldContainExactly("Equip", "Discard", "Cancel")
             playerCallToActionView.enabledItemActionLabels().shouldContainExactly("Equip", "Cancel")
             playerCallToActionView.fadedItemActionLabels().shouldContainExactly("Discard")
@@ -183,7 +183,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             var consumed = false
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
+            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemSellPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") { consumed = true }))
             addChild(playerCallToActionView)
             // When
             clickItemAction(playerCallToActionView, "Consume")
@@ -199,7 +199,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             val give = ItemActionsView.Action(label = "Give") { playerCallToActionView.displayGiveItem(itemName = "Hammer", onCancelled = {}) }
-            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(give))
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemSellPrice = 50, actions = listOf(give))
             addChild(playerCallToActionView)
             // When
             clickItemAction(playerCallToActionView, "Give")
@@ -231,7 +231,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // When
             playerCallToActionView.displayItemActions(
                 itemName = "Health Potion",
-                itemPrice = 10,
+                itemSellPrice = 10,
                 actions =
                     listOf(
                         ItemActionsView.Action(label = "Cancel") {},
@@ -274,13 +274,13 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `DisplayInventoryFull should display the found item with its price and leave it when leave it is clicked`() =
+    fun `DisplayInventoryFull should display the found item with its sell price and leave it when leave it is clicked`() =
         sharedViewsTest {
             // Given
             var left = false
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
             addChild(playerCallToActionView)
-            playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemPrice = 10, foundItemId = "health-potion", onLeft = { left = true })
+            playerCallToActionView.displayInventoryFull(foundItemName = "Health Potion", foundItemSellPrice = 10, foundItemId = "health-potion", onLeft = { left = true })
             // When
             clickLeaveIt(playerCallToActionView)
             // Then
@@ -296,7 +296,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Given
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemSellPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
             playerCallToActionView.dismiss()
             // Then
@@ -308,7 +308,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
-            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemSellPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
             playerCallToActionView.dismiss()
             // Then
@@ -333,7 +333,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             // Given
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
-            playerCallToActionView.displayItemActions(itemName = "Hammer", itemPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
+            playerCallToActionView.displayItemActions(itemName = "Hammer", itemSellPrice = 50, actions = listOf(ItemActionsView.Action(label = "Cancel") {}))
             // When
             playerCallToActionView.hideFinishTurn()
             // Then
@@ -347,7 +347,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts())
             playerCallToActionView.displayFinishTurn(onTurnFinished = {})
             playerCallToActionView.hideFinishTurn()
-            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") {}))
+            playerCallToActionView.displayItemActions(itemName = "Health Potion", itemSellPrice = 10, actions = listOf(ItemActionsView.Action(label = "Consume") {}))
             addChild(playerCallToActionView)
             // When
             clickItemAction(playerCallToActionView, "Consume")
@@ -518,7 +518,7 @@ class PlayerCallToActionViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val playerCallToActionView = PlayerCallToActionView(TextsMother.texts(), loadedResourcesLoader())
-            playerCallToActionView.displayInventoryFull(foundItemName = "Health potion", foundItemPrice = 25, foundItemId = "health-potion", onLeft = {})
+            playerCallToActionView.displayInventoryFull(foundItemName = "Health potion", foundItemSellPrice = 25, foundItemId = "health-potion", onLeft = {})
             // When
             playerCallToActionView.hideActions()
             // Then

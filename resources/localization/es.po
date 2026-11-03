@@ -193,10 +193,10 @@ msgctxt "ui.inventoryFull.title"
 msgid "Inventory full"
 msgstr "Inventario lleno"
 
-#. {item}: the name of the item found. {price}: its price, e.g.: 10 G.
+#. {item}: the name of the item found. {sellPrice}: its sell price, e.g.: 5 G.
 msgctxt "ui.inventoryFull.message"
-msgid "Tap an item to swap it for: {item} ({price})"
-msgstr "Toca un objeto para cambiarlo por: {item} ({price})"
+msgid "Tap an item to swap it for: {item} ({sellPrice})"
+msgstr "Toca un objeto para cambiarlo por: {item} ({sellPrice})"
 
 #. Leaves the item found on the ground.
 msgctxt "ui.inventoryFull.leave"

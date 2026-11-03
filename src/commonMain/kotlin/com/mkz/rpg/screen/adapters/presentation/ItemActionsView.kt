@@ -12,12 +12,12 @@ import korlibs.korge.view.Container
 import korlibs.math.geom.Size
 
 /**
- * The name and price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel.
+ * The name and sell price of the selected item and what the player can do with it, e.g.: Consume, Discard or Cancel.
  */
 class ItemActionsView(
     texts: Texts,
     itemName: String,
-    itemPrice: Int,
+    itemSellPrice: Int,
     actions: List<Action>,
 ) : Container() {
     companion object {
@@ -35,16 +35,16 @@ class ItemActionsView(
     )
 
     internal val itemNameView = UnitNameView(Size(WIDTH, 16))
-    internal val itemPriceView = UnitNameView(Size(WIDTH, 16))
+    internal val itemSellPriceView = UnitNameView(Size(WIDTH, 16))
     internal var actionButtons: List<GameButton> = emptyList()
 
     init {
         uiVerticalStack(padding = 4.0) {
-            // The price shares the line of the name, aligned to the right.
+            // The sell price shares the line of the name, aligned to the right.
             val nameLine = UIContainer(Size(WIDTH, 16))
             nameLine.addChild(itemNameView)
-            itemPriceView.alignTextToRight()
-            nameLine.addChild(itemPriceView)
+            itemSellPriceView.alignTextToRight()
+            nameLine.addChild(itemSellPriceView)
             addChild(nameLine)
             uiHorizontalStack(padding = SPACING) {
                 val buttonWidth = (WIDTH - SPACING * (actions.size - 1)) / actions.size
@@ -58,6 +58,6 @@ class ItemActionsView(
             }
         }
         itemNameView.display(itemName)
-        itemPriceView.display(texts.gold(itemPrice))
+        itemSellPriceView.display(texts.gold(itemSellPrice))
     }
 }

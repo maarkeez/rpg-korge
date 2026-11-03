@@ -74,12 +74,12 @@ open class PlayerCallToActionView(
     }
 
     /**
-     * Displays the name and price of the selected item and its actions, e.g.: Consume. It is dismissed once an action is
+     * Displays the name and sell price of the selected item and its actions, e.g.: Consume. It is dismissed once an action is
      * selected, unless the action displayed something else instead, e.g.: Give asks for the receiver.
      */
     open fun displayItemActions(
         itemName: String,
-        itemPrice: Int,
+        itemSellPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
         lateinit var itemActionsView: ItemActionsView
@@ -92,7 +92,7 @@ open class PlayerCallToActionView(
                     },
                 )
             }
-        itemActionsView = ItemActionsView(texts, itemName = itemName, itemPrice = itemPrice, actions = itemActions)
+        itemActionsView = ItemActionsView(texts, itemName = itemName, itemSellPrice = itemSellPrice, actions = itemActions)
         display(itemActionsView)
     }
 
@@ -177,11 +177,11 @@ open class PlayerCallToActionView(
     /** Asks the player what to do with an item found while the inventory is full. */
     open fun displayInventoryFull(
         foundItemName: String,
-        foundItemPrice: Int,
+        foundItemSellPrice: Int,
         foundItemId: String,
         onLeft: () -> Unit,
     ) {
-        display(InventoryFullView(texts, foundItemName = foundItemName, foundItemPrice = foundItemPrice, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
+        display(InventoryFullView(texts, foundItemName = foundItemName, foundItemSellPrice = foundItemSellPrice, foundItemId = foundItemId, resourcesLoader = resourcesLoader, onLeft = onLeft))
     }
 
     internal val callToAction: View?

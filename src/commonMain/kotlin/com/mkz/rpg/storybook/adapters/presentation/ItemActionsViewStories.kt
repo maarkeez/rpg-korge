@@ -14,10 +14,10 @@ import korlibs.korge.view.View
  * the ones the inventory gives each kind of item while exploring: Cancel, Discard, Give, and Consume or Equip.
  */
 object ItemActionsViewStories : StoryBinding {
-    private const val PRICE_LIMIT = 9999
+    private const val SELL_PRICE_LIMIT = 9999
 
     private const val ITEM_NAME = "itemName"
-    private const val ITEM_PRICE = "itemPrice"
+    private const val ITEM_SELL_PRICE = "itemSellPrice"
     private const val ACTIONS = "actions"
 
     // In blue, as in the inventory.
@@ -72,14 +72,14 @@ object ItemActionsViewStories : StoryBinding {
             id = "screen-item-actions",
             group = "Screen",
             title = "Item actions",
-            description = "The name and price of the item selected in the inventory, and what the player can do with it. actions: the kind of item.",
+            description = "The name and sell price of the item selected in the inventory, and what the player can do with it. actions: the kind of item.",
             controls =
                 listOf(
                     ControlDto.text(ITEM_NAME),
-                    ControlDto.int(ITEM_PRICE, minimum = 0, maximum = PRICE_LIMIT),
+                    ControlDto.int(ITEM_SELL_PRICE, minimum = 0, maximum = SELL_PRICE_LIMIT),
                     ControlDto.enum(ACTIONS, Kind.entries.map { kind -> kind.name }),
                 ),
-            args = mapOf(ITEM_NAME to ArgDto.text("Health potion"), ITEM_PRICE to ArgDto.int(25), ACTIONS to ArgDto.text(Kind.CONSUMABLE.name)),
+            args = mapOf(ITEM_NAME to ArgDto.text("Health potion"), ITEM_SELL_PRICE to ArgDto.int(25), ACTIONS to ArgDto.text(Kind.CONSUMABLE.name)),
             stories = listOf(consumable, canNotConsume, equippable, equipped, noOneToGiveTo, bagsFull),
         )
 
@@ -90,7 +90,7 @@ object ItemActionsViewStories : StoryBinding {
         ItemActionsView(
             context.texts,
             itemName = args.text(ITEM_NAME),
-            itemPrice = args.int(ITEM_PRICE),
+            itemSellPrice = args.int(ITEM_SELL_PRICE),
             actions =
                 Kind.valueOf(args.text(ACTIONS)).actions.map { (text, isEnabled) ->
                     val label = context.texts[text]

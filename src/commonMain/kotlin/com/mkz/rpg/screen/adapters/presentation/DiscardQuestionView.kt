@@ -5,7 +5,7 @@ import korlibs.korge.view.xy
 import korlibs.math.geom.Size
 
 /**
- * Asks the player whether to discard an item, in place of its actions: the question takes the line of its name and price,
+ * Asks the player whether to discard an item, in place of its actions: the question takes the line of its name and sell price,
  * and Back and Discard, in red, the row below.
  */
 class DiscardQuestionView(

@@ -275,7 +275,7 @@ class InventoryPresenterTest {
     }
 
     @Test
-    fun `SelectItem should frame the item and display its price and actions when a consumable is selected`() {
+    fun `SelectItem should frame the item and display its sell price and actions when a consumable is selected`() {
         // Given
         loot("knight-1", "health-potion")
         openKnightInventory()
@@ -285,7 +285,7 @@ class InventoryPresenterTest {
         inventoryView.selectedSlot shouldBe 0
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
         itemActions.itemName shouldBe "Health Potion"
-        itemActions.itemPrice shouldBe 10
+        itemActions.itemSellPrice shouldBe 5
         itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Consume" to true)
     }
 
@@ -323,6 +323,18 @@ class InventoryPresenterTest {
         // Then
         val itemActions = playerCallToActionView.displayedItemActions.shouldNotBeNull()
         itemActions.actions.map { action -> action.label to action.isEnabled }.shouldContainExactly("Cancel" to true, "Discard" to true, "Equip" to true)
+    }
+
+    @Test
+    fun `SelectItem should display its sell price when the item is equipped`() {
+        // Given
+        loot("knight-1", "hammer")
+        apis.inventoryApi.equipItem(battleUnitId = "knight-1", lootableItemId = "hammer")
+        openKnightInventory()
+        // When
+        clickSlot(0)
+        // Then
+        playerCallToActionView.displayedItemActions.shouldNotBeNull().itemSellPrice shouldBe 25
     }
 
     @Test
@@ -542,7 +554,7 @@ class InventoryPresenterTest {
         inventoryView.displayedSlots.last().size shouldBe 12
         val inventoryFull = playerCallToActionView.displayedInventoryFull.shouldNotBeNull()
         inventoryFull.foundItemName shouldBe "Hammer"
-        inventoryFull.foundItemPrice shouldBe 50
+        inventoryFull.foundItemSellPrice shouldBe 25
         inventoryFull.foundItemId shouldBe "hammer"
         timeline.isPlaying.shouldBeTrue()
     }

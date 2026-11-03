@@ -14,7 +14,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
 
     data class DisplayedItemActions(
         val itemName: String,
-        val itemPrice: Int,
+        val itemSellPrice: Int,
         val actions: List<ItemActionsView.Action>,
     )
 
@@ -26,7 +26,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
 
     data class DisplayedInventoryFull(
         val foundItemName: String,
-        val foundItemPrice: Int,
+        val foundItemSellPrice: Int,
         val foundItemId: String,
         val onLeft: () -> Unit,
     )
@@ -143,7 +143,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
     // As the real view, it is dismissed once an action is selected, unless the action displayed something else (e.g.: Give).
     override fun displayItemActions(
         itemName: String,
-        itemPrice: Int,
+        itemSellPrice: Int,
         actions: List<ItemActionsView.Action>,
     ) {
         displayedDiscardQuestion = null
@@ -154,7 +154,7 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
         itemActions =
             DisplayedItemActions(
                 itemName = itemName,
-                itemPrice = itemPrice,
+                itemSellPrice = itemSellPrice,
                 actions =
                     actions.map { action ->
                         action.copy(onSelected = {
@@ -187,14 +187,14 @@ class FakePlayerCallToActionView : PlayerCallToActionView(TextsMother.texts()) {
 
     override fun displayInventoryFull(
         foundItemName: String,
-        foundItemPrice: Int,
+        foundItemSellPrice: Int,
         foundItemId: String,
         onLeft: () -> Unit,
     ) {
         displayedItemActions = null
         displayedDiscardQuestion = null
         displayedGiveItem = null
-        displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemPrice, foundItemId, onLeft)
+        displayedInventoryFull = DisplayedInventoryFull(foundItemName, foundItemSellPrice, foundItemId, onLeft)
     }
 
     override fun setFinishTurnEnabled(enabled: Boolean) {

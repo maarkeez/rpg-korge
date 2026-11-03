@@ -193,9 +193,9 @@ msgctxt "ui.inventoryFull.title"
 msgid "Inventory full"
 msgstr ""
 
-#. {item}: the name of the item found. {price}: its price, e.g.: 10 G.
+#. {item}: the name of the item found. {sellPrice}: its sell price, e.g.: 5 G.
 msgctxt "ui.inventoryFull.message"
-msgid "Tap an item to swap it for: {item} ({price})"
+msgid "Tap an item to swap it for: {item} ({sellPrice})"
 msgstr ""
 
 #. Leaves the item found on the ground.
