@@ -1,6 +1,6 @@
 # Plan: Rename the code of the battle subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the battle subdomain uses words the [glossary](../../GLOSSARY.md) rejects, and some names say
 > less or more than they do. E.g.: the Knight defeats the only Rat in a battle and `BattleFinished` is published, but
@@ -135,3 +135,14 @@
 - `screen`: `announceBattleEnd`, while the word is "finished". `displayPlayerWin` and `ui.battleInfo.playerWins`, while "win"
   is to be avoided, though players keep reading "wins!". Bare "turn": `FinishTurnView`, `announceTurn` and
   `isHumanTurnDisplayed`.
+
+## Changes while building
+
+- `BattleTest`: `IsBattleFinished should be finished when only one player remains` and its opposite are `HasWinner should be
+  true when only one player remains` and `HasWinner should be false when more than one player remains`, as "be finished"
+  no longer reads. They assert the same.
+- The `newTurnQueue` local of `Battle.defeatPlayer` is also `newTurnOrder`.
+- The docs keep bare "turn", e.g.: "during the human turn" in [Exploration](../architecture/exploration.md), as only the
+  battle package changes it. `BattleMother` keeps "in turns", which is plain English there.
+- The tests' comments on the player turn of the CPU and of the human also say "player turn", in `FinishPlayerTurnTest` and
+  `DefeatPlayerTest`.
