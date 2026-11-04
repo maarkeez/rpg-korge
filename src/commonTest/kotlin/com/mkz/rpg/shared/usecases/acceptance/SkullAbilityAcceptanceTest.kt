@@ -78,7 +78,7 @@ class SkullAbilityAcceptanceTest {
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
         val venomEffect = EffectMother.decreaseHealthEffect(id = venomEffectId, damage = 3, applicationType = "ON_TURN_STARTED")
-        val skullEffect = EffectMother.applyEffectOnNearbyAlliesEffect(id = skullEffectId, effectId = venomEffectId)
+        val skullEffect = EffectMother.applyEffectOnAdjacentAlliesEffect(id = skullEffectId, effectId = venomEffectId)
         val swordDamageEffect = EffectMother.decreaseHealthEffect(id = swordDamageEffectId, damage = 10, applicationType = "IMMEDIATELY")
         val healEffect = EffectMother.increaseHealthEffect(id = healEffectId, healing = 20)
         effectApi.requestEffectCreation(venomEffect.toDto())
@@ -89,26 +89,26 @@ class SkullAbilityAcceptanceTest {
         val skullAbility =
             AbilityMother.ability(
                 id = skullAbilityId,
-                cost = 0,
+                manaCost = 0,
                 cooldown = 0,
-                effectSpecs = listOf(AbilityMother.effectSpec(effectId = skullEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = skullEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val swordAbility =
             AbilityMother.ability(
                 id = swordAbilityId,
-                cost = 0,
+                manaCost = 0,
                 cooldown = 0,
-                effectSpecs = listOf(AbilityMother.effectSpec(effectId = swordDamageEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = swordDamageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val healAbility =
             AbilityMother.ability(
                 id = healAbilityId,
-                cost = 10,
+                manaCost = 10,
                 cooldown = 2,
-                effectSpecs = listOf(AbilityMother.effectSpec(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
-                targeting = Ability.Dto.TargetingDto.SELF,
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
+                targeting = Ability.Dto.TargetingDto.CASTER,
             )
         abilityApi.requestAbilityCreation(skullAbility.toDto())
         abilityApi.requestAbilityCreation(swordAbility.toDto())
@@ -184,7 +184,7 @@ class SkullAbilityAcceptanceTest {
     }
 
     @Test
-    fun `should apply the effect to the nearby allies when the battle unit with the on defeated effect is defeated`() =
+    fun `should apply the effect to the adjacent allies when the battle unit with the on defeated effect is defeated`() =
         scenarioTest(::setUp) {
             // Given
             require(battlefieldApi.searchOccupant(row = 1, column = 1) == skullBattleUnitId)

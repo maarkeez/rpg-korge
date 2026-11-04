@@ -2,15 +2,15 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnNearbyAlliesEffect
+import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnAdjacentAlliesEffect
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -41,16 +41,16 @@ class PreviewCastOngoingEffectsTest {
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
         queries.effectRepository.create(Effect.create(decreaseHealthEffect(id = "venom", applicationType = "ON_TURN_STARTED").toDto()))
-        queries.effectRepository.create(Effect.create(applyEffectOnNearbyAlliesEffect(id = "curse", effectId = "venom").toDto()))
+        queries.effectRepository.create(Effect.create(applyEffectOnAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto()))
         queries.effectRepository.create(Effect.create(decreaseHealthEffect(id = "slash", applicationType = "IMMEDIATELY").toDto()))
     }
 
     private fun givenAbility(
         targeting: TargetingDto,
-        vararg effectSpecs: Pair<String, TargetExpressionDto.Type>,
+        vararg abilityEffects: Pair<String, TargetExpressionDto.Type>,
     ) {
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = targeting, effectSpecs = effectSpecs.map { (effectId, target) -> effectSpec(effectId = effectId, target = target) }),
+            ability(id = "ability-1", targeting = targeting, abilityEffects = abilityEffects.map { (effectId, target) -> abilityEffect(effectId = effectId, target = target) }),
         )
     }
 
@@ -58,7 +58,7 @@ class PreviewCastOngoingEffectsTest {
     fun `should list the effects that stay on the target when the ability is cast on it`() {
         // Given
         givenBattle("C E")
-        givenAbility(TargetingDto.ADJACENT_ENEMY, "venom" to SELECTED_TARGET, "curse" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ADJACENT_ENEMY, "venom" to TARGETED_BATTLE_UNIT, "curse" to TARGETED_BATTLE_UNIT)
         // When
         val ongoingEffects = previewCastOngoingEffects(battleUnitId = "caster", abilityId = "ability-1", castGroup = listOf(PositionDto(0, 1)))
         // Then
@@ -69,7 +69,7 @@ class PreviewCastOngoingEffectsTest {
     fun `should not list the effects applied immediately when the ability is cast`() {
         // Given
         givenBattle("C E")
-        givenAbility(TargetingDto.ADJACENT_ENEMY, "slash" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ADJACENT_ENEMY, "slash" to TARGETED_BATTLE_UNIT)
         // When
         val ongoingEffects = previewCastOngoingEffects(battleUnitId = "caster", abilityId = "ability-1", castGroup = listOf(PositionDto(0, 1)))
         // Then
@@ -80,7 +80,7 @@ class PreviewCastOngoingEffectsTest {
     fun `should list the effects of each target when the ability is cast on a cast group of several tiles`() {
         // Given
         givenBattle("C E\nF .")
-        givenAbility(TargetingDto.ALL_ADJACENT_ENEMIES, "venom" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ALL_ADJACENT_ENEMIES, "venom" to TARGETED_BATTLE_UNIT)
         // When
         val ongoingEffects =
             previewCastOngoingEffects(battleUnitId = "caster", abilityId = "ability-1", castGroup = listOf(PositionDto(0, 1), PositionDto(1, 0)))

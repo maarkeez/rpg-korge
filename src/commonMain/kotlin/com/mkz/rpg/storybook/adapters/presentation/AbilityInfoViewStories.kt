@@ -27,15 +27,15 @@ object AbilityInfoViewStories : StoryBinding {
         listOf(
             AbilityInfo("sword", manaCost = 0, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10))),
             AbilityInfo("skull", manaCost = 10, cooldown = 0, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(10), Effect.OnDefeatedPoisonAllies(damage = 3, turns = 5))),
-            AbilityInfo("bat", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_SELF, listOf(Effect.Summon(unitId = "bat", turns = 5, healthPoints = 10))),
-            AbilityInfo("mending", manaCost = 10, cooldown = 2, Targeting.SELF, listOf(Effect.HealSelf(15), Effect.HealNearbyAllies(15))),
-            AbilityInfo("teleport", manaCost = 5, cooldown = 1, Targeting.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, listOf(Effect.Teleport)),
+            AbilityInfo("bat", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bat", turns = 5, healthPoints = 10))),
+            AbilityInfo("mending", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealSelf(15), Effect.HealAdjacentAllies(15))),
+            AbilityInfo("teleport", manaCost = 5, cooldown = 1, Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, listOf(Effect.Teleport)),
             AbilityInfo("cleave", manaCost = 5, cooldown = 1, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.Damage(15))),
             AbilityInfo("venom-strike", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.Damage(5), Effect.DamageEachTurn(damage = 3, turns = 5))),
             AbilityInfo("poisoned-sword", manaCost = 5, cooldown = 1, Targeting.ADJACENT_ENEMY, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
             AbilityInfo("mushroom", manaCost = 10, cooldown = 0, Targeting.ALL_ADJACENT_ENEMIES, listOf(Effect.DamageEachTurn(damage = 3, turns = 5))),
-            AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.SELF, listOf(Effect.HealSelf(20))),
-            AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_SELF, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
+            AbilityInfo("heal", manaCost = 10, cooldown = 2, Targeting.CASTER, listOf(Effect.HealSelf(20))),
+            AbilityInfo("bee", manaCost = 10, cooldown = 0, Targeting.VACANT_TILE_ADJACENT_TO_CASTER, listOf(Effect.Summon(unitId = "bee", turns = 5, healthPoints = 10))),
         ).associateBy(AbilityInfo::abilityId)
 
     private val sword = StoryDto(id = "screen-ability-info--sword", name = "Sword", description = "One effect, free and with no cooldown: no cooldown pill.", args = emptyMap())
@@ -106,7 +106,7 @@ object AbilityInfoViewStories : StoryBinding {
         val reason =
             when {
                 cooldownTurnsLeft > 0 -> Reason.Cooldown(cooldownTurnsLeft)
-                remainingMana < ability.manaCost -> Reason.NotEnoughMana(cost = ability.manaCost, remainingMana = remainingMana)
+                remainingMana < ability.manaCost -> Reason.NotEnoughMana(manaCost = ability.manaCost, remainingMana = remainingMana)
                 else -> null
             }
         return ability.copy(reason = reason)

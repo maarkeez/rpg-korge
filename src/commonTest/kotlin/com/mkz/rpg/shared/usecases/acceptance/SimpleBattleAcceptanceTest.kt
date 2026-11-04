@@ -84,11 +84,11 @@ class SimpleBattleAcceptanceTest {
         val sword =
             Ability.Dto(
                 id = swordAbilityId,
-                cost = 0,
+                manaCost = 0,
                 cooldown = 0,
-                effectSpecs = listOf(Ability.Dto.EffectSpecDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.SELECTED_TARGET))),
+                abilityEffects = listOf(Ability.Dto.AbilityEffectDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT))),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                turnsDuration = null,
+                summonDuration = null,
             )
         abilityApi.requestAbilityCreation(sword)
 

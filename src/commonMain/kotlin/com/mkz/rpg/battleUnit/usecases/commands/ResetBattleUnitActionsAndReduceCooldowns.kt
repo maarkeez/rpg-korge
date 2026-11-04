@@ -15,7 +15,7 @@ class ResetBattleUnitActionsAndReduceCooldowns(
             .searchByPlayerId(playerId)
             .filter { battleUnit -> battleUnit.toDto().id in battleUnitIds }
             .map(BattleUnit::resetActions)
-            .map(BattleUnit::reduceCoolDowns)
+            .map(BattleUnit::reduceCooldowns)
             .forEach(battleUnitRepository::update)
     }
 }

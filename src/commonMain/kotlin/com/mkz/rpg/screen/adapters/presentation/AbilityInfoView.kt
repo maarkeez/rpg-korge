@@ -72,11 +72,11 @@ open class AbilityInfoView(
         val reason: Reason? = null,
     ) {
         enum class Targeting {
-            SELF,
+            CASTER,
             ADJACENT_ENEMY,
             ALL_ADJACENT_ENEMIES,
-            VACANT_TILE_ADJACENT_TO_SELF,
-            VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
+            VACANT_TILE_ADJACENT_TO_CASTER,
+            VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
         }
 
         sealed interface Effect {
@@ -93,7 +93,7 @@ open class AbilityInfoView(
                 val healing: Int,
             ) : Effect
 
-            data class HealNearbyAllies(
+            data class HealAdjacentAllies(
                 val healing: Int,
             ) : Effect
 
@@ -117,7 +117,7 @@ open class AbilityInfoView(
             ) : Reason
 
             data class NotEnoughMana(
-                val cost: Int,
+                val manaCost: Int,
                 val remainingMana: Int,
             ) : Reason
         }
@@ -235,18 +235,18 @@ open class AbilityInfoView(
     private fun reason(reason: AbilityInfo.Reason?): Pair<String, RGBA>? =
         when (reason) {
             is AbilityInfo.Reason.Cooldown -> texts.plural(UiText.ABILITY_INFO_READY_IN, reason.turnsLeft, "turns" to reason.turnsLeft) to COOLDOWN_COLOR
-            is AbilityInfo.Reason.NotEnoughMana -> texts[UiText.ABILITY_INFO_NOT_ENOUGH_MANA, "cost" to reason.cost, "mana" to reason.remainingMana] to MANA_COLOR
+            is AbilityInfo.Reason.NotEnoughMana -> texts[UiText.ABILITY_INFO_NOT_ENOUGH_MANA, "manaCost" to reason.manaCost, "mana" to reason.remainingMana] to MANA_COLOR
             null -> null
         }
 
     private fun targeting(targeting: AbilityInfo.Targeting): String =
         texts[
             when (targeting) {
-                AbilityInfo.Targeting.SELF -> UiText.ABILITY_INFO_TARGETING_SELF
+                AbilityInfo.Targeting.CASTER -> UiText.ABILITY_INFO_TARGETING_CASTER
                 AbilityInfo.Targeting.ADJACENT_ENEMY -> UiText.ABILITY_INFO_TARGETING_ADJACENT_ENEMY
                 AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES -> UiText.ABILITY_INFO_TARGETING_ALL_ADJACENT_ENEMIES
-                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_SELF -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_SELF
-                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_UNIT
+                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_CASTER -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_CASTER
+                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> UiText.ABILITY_INFO_TARGETING_TILE_NEXT_TO_ANOTHER_UNIT
             },
         ]
 
@@ -255,7 +255,7 @@ open class AbilityInfoView(
             is AbilityInfo.Effect.Damage -> texts[UiText.ABILITY_INFO_DAMAGE, "damage" to effect.damage]
             is AbilityInfo.Effect.DamageEachTurn -> texts.plural(UiText.ABILITY_INFO_DAMAGE_EACH_TURN, effect.turns, "damage" to effect.damage, "turns" to effect.turns)
             is AbilityInfo.Effect.HealSelf -> texts[UiText.ABILITY_INFO_HEAL_SELF, "healing" to effect.healing]
-            is AbilityInfo.Effect.HealNearbyAllies -> texts[UiText.ABILITY_INFO_HEAL_NEARBY_ALLIES, "healing" to effect.healing]
+            is AbilityInfo.Effect.HealAdjacentAllies -> texts[UiText.ABILITY_INFO_HEAL_ADJACENT_ALLIES, "healing" to effect.healing]
             is AbilityInfo.Effect.Summon ->
                 texts.plural(UiText.ABILITY_INFO_SUMMON, effect.turns, "unit" to texts.unitName(effect.unitId), "turns" to effect.turns, "health" to effect.healthPoints)
             is AbilityInfo.Effect.Teleport -> texts[UiText.ABILITY_INFO_TELEPORT]
@@ -296,7 +296,7 @@ open class AbilityInfoView(
         top: Double,
     ) {
         marks = marks(abilityInfo)
-        isOneOfTheNeighbours = abilityInfo.targeting != AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES && abilityInfo.targeting != AbilityInfo.Targeting.SELF
+        isOneOfTheNeighbours = abilityInfo.targeting != AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES && abilityInfo.targeting != AbilityInfo.Targeting.CASTER
         val diagramX = panelWidth - PADDING - DIAGRAM_SIZE
         val radius = CELL_SIZE * 0.22
         marks.forEachIndexed { index, mark ->
@@ -324,12 +324,12 @@ open class AbilityInfoView(
 
     // The caster in the middle, and its four orthogonal neighbours marked by who the ability reaches there.
     private fun marks(abilityInfo: AbilityInfo): List<Mark> {
-        val healsAllies = abilityInfo.effects.any { effect -> effect is AbilityInfo.Effect.HealNearbyAllies }
+        val healsAllies = abilityInfo.effects.any { effect -> effect is AbilityInfo.Effect.HealAdjacentAllies }
         val (caster, neighbour) =
             when (abilityInfo.targeting) {
-                AbilityInfo.Targeting.SELF -> Mark.ALLY to if (healsAllies) Mark.ALLY else Mark.NONE
+                AbilityInfo.Targeting.CASTER -> Mark.ALLY to if (healsAllies) Mark.ALLY else Mark.NONE
                 AbilityInfo.Targeting.ADJACENT_ENEMY, AbilityInfo.Targeting.ALL_ADJACENT_ENEMIES -> Mark.CASTER to Mark.ENEMY
-                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_SELF, AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> Mark.CASTER to Mark.EMPTY_TILE
+                AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_CASTER, AbilityInfo.Targeting.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> Mark.CASTER to Mark.EMPTY_TILE
             }
         return List(9) { index ->
             when (index) {

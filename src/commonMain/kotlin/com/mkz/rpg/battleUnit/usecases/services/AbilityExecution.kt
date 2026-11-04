@@ -1,11 +1,11 @@
 package com.mkz.rpg.battleUnit.usecases.services
 
 import com.mkz.rpg.ability.domain.Ability
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.ADJACENT_ALLIES
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER_TILE
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.NEARBY_ALLIES
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToResolveEffectTarget
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
@@ -31,9 +31,9 @@ class AbilityExecution(
     ): List<EffectApplicationDto> {
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToResolveEffectTarget()
         validateTargeting(ability = ability, caster = caster, selectedRow = selectedRow, selectedColumn = selectedColumn)
-        return ability.effectSpecs.flatMap { effectSpec ->
+        return ability.abilityEffects.flatMap { abilityEffect ->
             resolveTargets(
-                effectSpec = effectSpec,
+                abilityEffect = abilityEffect,
                 caster = caster,
                 selectedRow = selectedRow,
                 selectedColumn = selectedColumn,
@@ -41,8 +41,8 @@ class AbilityExecution(
                 EffectApplicationDto(
                     source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId = casterId, abilityId = ability.id),
                     target = target,
-                    effectId = effectSpec.effectId,
-                    destination = destinationFor(effectId = effectSpec.effectId, selectedRow = selectedRow, selectedColumn = selectedColumn),
+                    effectId = abilityEffect.effectId,
+                    destination = destinationFor(effectId = abilityEffect.effectId, selectedRow = selectedRow, selectedColumn = selectedColumn),
                 )
             }
         }
@@ -62,28 +62,28 @@ class AbilityExecution(
                 val occupant = battleUnitRepository.searchById(occupantId) ?: throw FailedToResolveEffectTarget()
                 if (caster.isSamePlayer(occupant)) throw FailedToResolveEffectTarget()
             }
-            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF,
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
             -> {
                 if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
             }
-            Ability.Dto.TargetingDto.SELF -> Unit
+            Ability.Dto.TargetingDto.CASTER -> Unit
         }
     }
 
     private fun resolveTargets(
-        effectSpec: Ability.Dto.EffectSpecDto,
+        abilityEffect: Ability.Dto.AbilityEffectDto,
         caster: BattleUnit,
         selectedRow: Int,
         selectedColumn: Int,
     ): List<EffectTargetDto> =
-        when (effectSpec.target.type) {
+        when (abilityEffect.target.type) {
             CASTER -> listOf(EffectTargetDto.battleUnit(caster.toDto().id))
-            SELECTED_TARGET -> {
+            TARGETED_BATTLE_UNIT -> {
                 val occupantId = searchOccupant(selectedRow, selectedColumn) ?: throw FailedToResolveEffectTarget()
                 listOf(EffectTargetDto.battleUnit(occupantId))
             }
-            SELECTED_TILE -> {
+            TARGETED_TILE -> {
                 if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
                 listOf(EffectTargetDto.position(row = selectedRow, column = selectedColumn))
             }
@@ -91,7 +91,7 @@ class AbilityExecution(
                 val position = searchPosition(caster.toDto().id) ?: throw FailedToResolveEffectTarget()
                 listOf(EffectTargetDto.position(row = position.row, column = position.column))
             }
-            NEARBY_ALLIES -> searchNearbyAllies(caster = caster).map { ally -> EffectTargetDto.battleUnit(ally.toDto().id) }
+            ADJACENT_ALLIES -> searchAdjacentAllies(caster = caster).map { ally -> EffectTargetDto.battleUnit(ally.toDto().id) }
         }
 
     private fun destinationFor(
@@ -107,7 +107,7 @@ class AbilityExecution(
         }
     }
 
-    private fun searchNearbyAllies(caster: BattleUnit): List<BattleUnit> =
+    private fun searchAdjacentAllies(caster: BattleUnit): List<BattleUnit> =
         buildList {
             val position = searchPosition(caster.toDto().id) ?: return@buildList
             for (row in position.row - 1..position.row + 1) {

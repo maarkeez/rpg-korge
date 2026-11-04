@@ -113,7 +113,7 @@ class RequestAbilityCreationTest {
         // Given
         val effect = decreaseHealthEffect()
         effectRepository.create(effect)
-        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id))).toDto()
+        val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id))).toDto()
         // When
         requestAbilityCreation(abilityDto = ability)
         // Then

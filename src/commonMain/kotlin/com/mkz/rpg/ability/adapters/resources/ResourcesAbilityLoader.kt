@@ -1,7 +1,7 @@
 package com.mkz.rpg.ability.adapters.resources
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.EffectSpecDto
+import com.mkz.rpg.ability.domain.Ability.Dto.AbilityEffectDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.usecases.services.AbilityLoader
@@ -29,30 +29,30 @@ class ResourcesAbilityLoader(
 
     @Serializable
     data class AbilityDefinition(
-        val cost: Int,
+        val manaCost: Int,
         val cooldown: Int,
         val targeting: String,
-        val effects: List<EffectSpecDefinition>,
-        val turnsDuration: Int? = null,
+        val effects: List<AbilityEffectDefinition>,
+        val summonDuration: Int? = null,
     ) {
         fun toDto(abilityId: String): Ability.Dto =
             Ability.Dto(
                 id = abilityId,
-                cost = cost,
+                manaCost = manaCost,
                 cooldown = cooldown,
                 targeting = enumOf<TargetingDto>("targeting", targeting),
-                effectSpecs = effects.map { it.toDto() },
-                turnsDuration = turnsDuration,
+                abilityEffects = effects.map { it.toDto() },
+                summonDuration = summonDuration,
             )
     }
 
     @Serializable
-    data class EffectSpecDefinition(
+    data class AbilityEffectDefinition(
         val effectId: String,
         val target: String,
     ) {
-        fun toDto(): EffectSpecDto =
-            EffectSpecDto(
+        fun toDto(): AbilityEffectDto =
+            AbilityEffectDto(
                 effectId = effectId,
                 target = TargetExpressionDto(type = enumOf<TargetExpressionDto.Type>("effects.target", target)),
             )

@@ -34,7 +34,7 @@ object AbilityButtonViewStories : StoryBinding {
         StoryDto(
             id = "screen-ability-button--not-enough-mana",
             name = "Not enough mana",
-            description = "An ability that costs more mana than the battle unit has: its icon in shades of blue, as the mana bar, with its cost in a blue badge.",
+            description = "An ability that costs more mana than the battle unit has: its icon in shades of blue, as the mana bar, with its mana cost in a blue badge.",
             args = mapOf(HAS_ENOUGH_MANA to ArgDto.boolean(false)),
         )
 

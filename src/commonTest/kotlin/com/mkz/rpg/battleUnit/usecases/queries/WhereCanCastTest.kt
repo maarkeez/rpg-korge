@@ -34,7 +34,7 @@ class WhereCanCastTest {
     @Test
     fun `should return own position when the ability targets self`() {
         // Given
-        storeAbility(targeting = Ability.Dto.TargetingDto.SELF)
+        storeAbility(targeting = Ability.Dto.TargetingDto.CASTER)
         battlefieldWith(
             """
             . . .
@@ -129,7 +129,7 @@ class WhereCanCastTest {
     @Test
     fun `should return vacant tiles adjacent to other battle units when the ability targets vacant adjacent tiles`() {
         // Given
-        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT)
+        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT)
         battlefieldWith(
             """
             C . .
@@ -176,7 +176,7 @@ class WhereCanCastTest {
     @Test
     fun `should return adjacent vacant tiles when the ability targets vacant adjacent tiles to self`() {
         // Given
-        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF)
+        storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER)
         // The diagonal tile can be occupied too, but it is not adjacent.
         battlefieldWith(
             """

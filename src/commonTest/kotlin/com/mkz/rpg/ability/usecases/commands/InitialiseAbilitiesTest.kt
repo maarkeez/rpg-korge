@@ -5,7 +5,7 @@ import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectDoesNotExist
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
@@ -29,7 +29,7 @@ class InitialiseAbilitiesTest {
     fun `should create every loaded ability when abilities are initialised`() {
         // Given
         effectRepository.create(decreaseHealthEffect(id = "damage"))
-        val sword = ability(id = "sword", effectSpecs = listOf(effectSpec(effectId = "damage"))).toDto()
+        val sword = ability(id = "sword", abilityEffects = listOf(abilityEffect(effectId = "damage"))).toDto()
         val initialiseAbilities = initialiseAbilities(loadedAbilities = listOf(sword))
         // When
         initialiseAbilities()
@@ -41,7 +41,7 @@ class InitialiseAbilitiesTest {
     @Test
     fun `should fail when an ability effect does not exist`() {
         // Given
-        val sword = ability(id = "sword", effectSpecs = listOf(effectSpec(effectId = "missing-effect"))).toDto()
+        val sword = ability(id = "sword", abilityEffects = listOf(abilityEffect(effectId = "missing-effect"))).toDto()
         val initialiseAbilities = initialiseAbilities(loadedAbilities = listOf(sword))
         // When
         val initialisation = { initialiseAbilities() }

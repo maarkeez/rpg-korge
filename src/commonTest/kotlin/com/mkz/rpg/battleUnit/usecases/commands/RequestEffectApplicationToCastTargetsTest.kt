@@ -3,7 +3,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilityDoesNotExists
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
@@ -52,7 +52,7 @@ class RequestEffectApplicationToCastTargetsTest {
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.SELF, effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
+            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
         )
         queries.effectRepository.create(Effect.create(effect))
         queries.battlefieldRepository.create(battlefield("C .", occupants = mapOf('C' to battleUnitId)))
@@ -86,8 +86,8 @@ class RequestEffectApplicationToCastTargetsTest {
         queries.abilityRepository.create(
             ability(
                 id = "ability-1",
-                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-                effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.SELECTED_TILE)),
+                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_TILE)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -127,7 +127,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
-                effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -163,7 +163,7 @@ class RequestEffectApplicationToCastTargetsTest {
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.SELF, effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
+            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
         )
         queries.effectRepository.create(Effect.create(effect))
         queries.battlefieldRepository.create(battlefield("C .", occupants = mapOf('C' to battleUnitId)))
@@ -197,8 +197,8 @@ class RequestEffectApplicationToCastTargetsTest {
         queries.abilityRepository.create(
             ability(
                 id = "ability-1",
-                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-                effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.CASTER)),
+                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -235,7 +235,11 @@ class RequestEffectApplicationToCastTargetsTest {
         val battleUnitId = battleUnit.toDto().id
         val enemyBattleUnitId = enemyBattleUnit.toDto().id
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY, effectSpecs = listOf(effectSpec(effectId = effectId, target = TargetExpressionDto.Type.SELECTED_TARGET))),
+            ability(
+                id = "ability-1",
+                targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+            ),
         )
         queries.effectRepository.create(Effect.create(effect))
         queries.battlefieldRepository.create(battlefield("C .\n. E", occupants = mapOf('C' to battleUnitId, 'E' to enemyBattleUnitId)))
@@ -302,10 +306,10 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs =
+                abilityEffects =
                     listOf(
-                        effectSpec(effectId = enemyDamageEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET),
-                        effectSpec(effectId = casterDamageEffectId, target = TargetExpressionDto.Type.CASTER),
+                        abilityEffect(effectId = enemyDamageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT),
+                        abilityEffect(effectId = casterDamageEffectId, target = TargetExpressionDto.Type.CASTER),
                     ),
             ),
         )
@@ -357,7 +361,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs = listOf(effectSpec(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
+                abilityEffects = listOf(abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
             ),
         )
         queries.effectRepository.create(Effect.create(healEffect))
@@ -402,10 +406,10 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                effectSpecs =
+                abilityEffects =
                     listOf(
-                        effectSpec(effectId = damageEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET),
-                        effectSpec(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER),
+                        abilityEffect(effectId = damageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT),
+                        abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER),
                     ),
             ),
         )

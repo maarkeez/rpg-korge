@@ -33,9 +33,9 @@ class WhereCanCast(
                 val positions = searchAdjacentEnemyPositions(battleUnit, currentPosition)
                 if (positions.isEmpty()) emptyList() else listOf(CastGroup(positions))
             }
-            Ability.Dto.TargetingDto.SELF -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
-            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
-            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF ->
+            Ability.Dto.TargetingDto.CASTER -> listOf(CastGroup(listOf(PositionDto(row = currentPosition.row, column = currentPosition.column))))
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
+            Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER ->
                 searchTilesThatCanBeOccupied(occupantId = battleUnit.toDto().id, distance = 1)
                     .filterNot { tilePosition ->
                         distanceService.manhattanDistance(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = tilePosition.row, toColumn = tilePosition.column) >

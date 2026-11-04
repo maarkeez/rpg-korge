@@ -1,6 +1,6 @@
-cost = 10
+manaCost = 10
 cooldown = 2
-targeting = "SELF"
+targeting = "CASTER"
 
 [[effects]]
 effectId = "mending-heal"
@@ -8,4 +8,4 @@ target = "CASTER"
 
 [[effects]]
 effectId = "mending-heal"
-target = "NEARBY_ALLIES"
+target = "ADJACENT_ALLIES"

@@ -1,7 +1,7 @@
-cost = 5
+manaCost = 5
 cooldown = 1
 targeting = "ALL_ADJACENT_ENEMIES"
 
 [[effects]]
 effectId = "heavy-physical-damage"
-target = "SELECTED_TARGET"
+target = "TARGETED_BATTLE_UNIT"

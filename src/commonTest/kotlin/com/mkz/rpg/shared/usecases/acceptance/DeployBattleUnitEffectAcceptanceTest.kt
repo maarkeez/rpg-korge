@@ -74,11 +74,11 @@ class DeployBattleUnitEffectAcceptanceTest {
         val deployAbility =
             AbilityMother.ability(
                 id = deployAbilityId,
-                cost = 0,
+                manaCost = 0,
                 cooldown = 0,
-                effectSpecs = listOf(AbilityMother.effectSpec(effectId = deployEffectId, target = TargetExpressionDto.Type.SELECTED_TILE)),
-                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-                turnsDuration = 5,
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = deployEffectId, target = TargetExpressionDto.Type.TARGETED_TILE)),
+                targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+                summonDuration = 5,
             )
         abilityApi.requestAbilityCreation(deployAbility.toDto())
 

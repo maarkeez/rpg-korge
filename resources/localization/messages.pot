@@ -458,13 +458,13 @@ msgid_plural "Ready in {turns} turns"
 msgstr[0] ""
 msgstr[1] ""
 
-#. Why an ability can not be cast. {cost}: the mana it costs. {mana}: the mana the battle unit has left.
+#. Why an ability can not be cast. {manaCost}: the mana it costs. {mana}: the mana the battle unit has left.
 msgctxt "ui.abilityInfo.notEnoughMana"
-msgid "Needs {cost} mana, has {mana}"
+msgid "Needs {manaCost} mana, has {mana}"
 msgstr ""
 
 #. Who an ability is cast on: the caster.
-msgctxt "ui.abilityInfo.targeting.self"
+msgctxt "ui.abilityInfo.targeting.caster"
 msgid "Yourself"
 msgstr ""
 
@@ -479,13 +479,13 @@ msgid "All adjacent enemies"
 msgstr ""
 
 #. Where an ability is cast: an empty tile next to the caster.
-msgctxt "ui.abilityInfo.targeting.tileNextToSelf"
+msgctxt "ui.abilityInfo.targeting.tileNextToCaster"
 msgid "An empty tile next to you"
 msgstr ""
 
-#. Where an ability is cast: an empty tile next to any battle unit.
-msgctxt "ui.abilityInfo.targeting.tileNextToUnit"
-msgid "An empty tile next to any unit"
+#. Where an ability is cast: an empty tile next to another battle unit.
+msgctxt "ui.abilityInfo.targeting.tileNextToAnotherUnit"
+msgid "An empty tile next to another unit"
 msgstr ""
 
 #. {damage}: the health points the target loses.
@@ -506,7 +506,7 @@ msgid "Heals you {healing} HP."
 msgstr ""
 
 #. {healing}: the health points each ally next to the caster recovers.
-msgctxt "ui.abilityInfo.effect.healNearbyAllies"
+msgctxt "ui.abilityInfo.effect.healAdjacentAllies"
 msgid "Heals adjacent allies {healing} HP."
 msgstr ""
 

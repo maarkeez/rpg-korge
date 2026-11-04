@@ -1,8 +1,8 @@
-cost = 10
+manaCost = 10
 cooldown = 0
-targeting = "VACANT_TILE_ADJACENT_TO_SELF"
-turnsDuration = 5
+targeting = "VACANT_TILE_ADJACENT_TO_CASTER"
+summonDuration = 5
 
 [[effects]]
 effectId = "deploy-bee"
-target = "SELECTED_TILE"
+target = "TARGETED_TILE"

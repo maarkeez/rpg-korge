@@ -16,8 +16,8 @@ class SearchAbilityAvailabilitiesTest {
     @Test
     fun `should return each ability castable when none is in cooldown and the mana is enough`() {
         // Given
-        queries.abilityRepository.create(ability(id = "sword", cost = 0, cooldown = 0))
-        queries.abilityRepository.create(ability(id = "heal", cost = 10, cooldown = 2))
+        queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0))
+        queries.abilityRepository.create(ability(id = "heal", manaCost = 10, cooldown = 2))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("sword", "heal"), manaPoints = 10).toDto()))
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
@@ -31,10 +31,10 @@ class SearchAbilityAvailabilitiesTest {
     @Test
     fun `should return the cooldown turns left of the cast ability only, ignoring the remaining casts`() {
         // Given
-        queries.abilityRepository.create(ability(id = "sword", cost = 0, cooldown = 0))
-        queries.abilityRepository.create(ability(id = "heal", cost = 0, cooldown = 2))
+        queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0))
+        queries.abilityRepository.create(ability(id = "heal", manaCost = 0, cooldown = 2))
         val knight = battleUnit(id = "knight-1", unit = unit(abilities = listOf("sword", "heal"), manaPoints = 10).toDto())
-        queries.battleUnitRepository.create(knight.castAbility(abilityId = "heal", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList()))
+        queries.battleUnitRepository.create(knight.castAbility(abilityId = "heal", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList()))
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
@@ -47,9 +47,9 @@ class SearchAbilityAvailabilitiesTest {
     @Test
     fun `should return the cooldown turns left reduced when its next turn starts`() {
         // Given
-        queries.abilityRepository.create(ability(id = "heal", cost = 0, cooldown = 1))
+        queries.abilityRepository.create(ability(id = "heal", manaCost = 0, cooldown = 1))
         val knight = battleUnit(id = "knight-1", unit = unit(abilities = listOf("heal"), manaPoints = 10).toDto())
-        queries.battleUnitRepository.create(knight.castAbility(abilityId = "heal", abilityCooldown = 1, abilityCost = 0, castGroup = emptyList()).reduceCoolDowns())
+        queries.battleUnitRepository.create(knight.castAbility(abilityId = "heal", abilityCooldown = 1, abilityManaCost = 0, castGroup = emptyList()).reduceCooldowns())
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
@@ -57,9 +57,9 @@ class SearchAbilityAvailabilitiesTest {
     }
 
     @Test
-    fun `should return not enough mana when the cost is above the remaining mana`() {
+    fun `should return not enough mana when the mana cost is above the remaining mana`() {
         // Given
-        queries.abilityRepository.create(ability(id = "heal", cost = 15, cooldown = 0))
+        queries.abilityRepository.create(ability(id = "heal", manaCost = 15, cooldown = 0))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("heal"), manaPoints = 10).toDto()))
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")

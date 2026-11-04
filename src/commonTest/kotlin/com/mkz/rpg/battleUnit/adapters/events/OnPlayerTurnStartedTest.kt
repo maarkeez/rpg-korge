@@ -43,7 +43,7 @@ class OnPlayerTurnStartedTest {
         // The knight has cast the sword in its previous turn, and is poisoned.
         queries.battleUnitRepository.create(
             battleUnit(id = "knight-1", unit = knight.toDto(), player = player(id = "human").toDto())
-                .castAbility(abilityId = "sword", abilityCooldown = 2, abilityCost = 15, castGroup = listOf(PositionDto(row = 0, column = 1)))
+                .castAbility(abilityId = "sword", abilityCooldown = 2, abilityManaCost = 15, castGroup = listOf(PositionDto(row = 0, column = 1)))
                 .receiveOnTurnStartedEffect(effectId = "venom", turnsLeft = 2)
                 .pullEvents()
                 .second,

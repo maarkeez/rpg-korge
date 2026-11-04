@@ -71,20 +71,20 @@ class SummonVanishingAcceptanceTest {
             AbilityMother
                 .ability(
                     id = "summon",
-                    cost = 0,
+                    manaCost = 0,
                     cooldown = 0,
-                    effectSpecs = listOf(AbilityMother.effectSpec(effectId = "deploy-summon", target = TargetExpressionDto.Type.SELECTED_TILE)),
-                    targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_SELF,
-                    turnsDuration = 2,
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = TargetExpressionDto.Type.TARGETED_TILE)),
+                    targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
+                    summonDuration = 2,
                 ).toDto(),
         )
         abilityApi.requestAbilityCreation(
             AbilityMother
                 .ability(
                     id = "deadly-strike",
-                    cost = 0,
+                    manaCost = 0,
                     cooldown = 0,
-                    effectSpecs = listOf(AbilityMother.effectSpec(effectId = "deadly-damage", target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deadly-damage", target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
                     targeting = TargetingDto.ADJACENT_ENEMY,
                 ).toDto(),
         )
@@ -115,7 +115,7 @@ class SummonVanishingAcceptanceTest {
     }
 
     @Test
-    fun `should summon a battle unit lasting the turns duration of the ability`() =
+    fun `should summon a battle unit lasting the summon duration of the ability`() =
         scenarioTest(::setUp) {
             // When
             val tile = summon()

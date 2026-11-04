@@ -88,11 +88,11 @@ class SummonLootingAcceptanceTest {
             AbilityMother
                 .ability(
                     id = "summon",
-                    cost = 0,
+                    manaCost = 0,
                     cooldown = 0,
-                    effectSpecs = listOf(AbilityMother.effectSpec(effectId = "deploy-summon", target = TargetExpressionDto.Type.SELECTED_TILE)),
-                    targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_SELF,
-                    turnsDuration = 5,
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = TargetExpressionDto.Type.TARGETED_TILE)),
+                    targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
+                    summonDuration = 5,
                 ).toDto(),
         )
         unitApi.requestUnitCreation(UnitMother.unit(id = "knight", healthPoints = 20, manaPoints = 10, abilities = listOf("summon"), movementRange = 3).toDto())

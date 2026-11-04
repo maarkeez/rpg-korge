@@ -51,9 +51,9 @@ class ProcessAbilitySelectedTest {
         currentPlayer: String = "human",
         battleState: BattleState = BattleState.IN_PROGRESS,
     ) {
-        queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY))
-        queries.abilityRepository.create(ability(id = "ability-2", cost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
-        queries.abilityRepository.create(ability(id = "ability-3", cost = 10, cooldown = 0, targeting = Ability.Dto.TargetingDto.SELF))
+        queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY))
+        queries.abilityRepository.create(ability(id = "ability-2", manaCost = 0, cooldown = 0, targeting = Ability.Dto.TargetingDto.CASTER))
+        queries.abilityRepository.create(ability(id = "ability-3", manaCost = 10, cooldown = 0, targeting = Ability.Dto.TargetingDto.CASTER))
         val human = player(id = "human", type = HUMAN).also(queries.playerRepository::create).toDto()
         val cpu = player(id = "cpu", type = CPU).also(queries.playerRepository::create).toDto()
         val battle = battle(players = listOf(currentPlayer) + (listOf("human", "cpu") - currentPlayer), battleUnitIds = setOf("battle-unit-1", "rat-1", "rat-2"))
@@ -124,7 +124,7 @@ class ProcessAbilitySelectedTest {
         battlefieldHudRepository.create(displayMovementRange(tile = tile(0, 0), battleUnitId = "battle-unit-1"))
         givenKnightBetweenRats(knightAbilities = listOf("ability-1"))
         val knight = queries.battleUnitRepository.searchById("battle-unit-1")!!
-        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList()))
+        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList()))
         // When
         processAbilitySelected("ability-1")
         // Then
@@ -297,7 +297,7 @@ class ProcessAbilitySelectedTest {
         battlefieldHudRepository.create(hud)
         givenKnightBetweenRats(knightAbilities = listOf("ability-1", "ability-2"))
         val knight = queries.battleUnitRepository.searchById("battle-unit-1")!!
-        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-2", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList()))
+        queries.battleUnitRepository.update(knight.castAbility(abilityId = "ability-2", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList()))
         // When
         processAbilitySelected("ability-2")
         // Then

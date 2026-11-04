@@ -1,6 +1,6 @@
 package com.mkz.rpg.effect.adapters.resources
 
-import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnNearbyAlliesEffect
+import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnAdjacentAlliesEffect
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
@@ -26,7 +26,7 @@ class ResourcesEffectLoaderTest {
                     "effect/venom.toml" to "[outcome]\ntype = \"DECREASE_HEALTH\"\ndamage = 3\n\n[application]\ntype = \"ON_TURN_STARTED\"\nduration = 5\n",
                     "effect/heal.toml" to "[outcome]\ntype = \"INCREASE_HEALTH\"\nhealing = 7\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                     "effect/teleport.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
-                    "effect/curse.toml" to "[outcome]\ntype = \"APPLY_EFFECT_ON_NEARBY_ALLIES\"\neffectId = \"venom\"\n\n[application]\ntype = \"ON_DEFEATED\"\n",
+                    "effect/curse.toml" to "[outcome]\ntype = \"APPLY_EFFECT_ON_ADJACENT_ALLIES\"\neffectId = \"venom\"\n\n[application]\ntype = \"ON_DEFEATED\"\n",
                     "effect/summon.toml" to "[outcome]\ntype = \"DEPLOY_BATTLE_UNIT\"\nunitId = \"bee\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                     "effect/ether.toml" to "[outcome]\ntype = \"INCREASE_MANA\"\nmana = 15\n\n[application]\ntype = \"IMMEDIATELY\"\n",
                     "effect/sturdy.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_HEALTH\"\nhealthPoints = 20\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
@@ -38,7 +38,7 @@ class ResourcesEffectLoaderTest {
             loader.initResources()
             // Then
             loader.loadEffects().shouldContainExactly(
-                applyEffectOnNearbyAlliesEffect(id = "curse", effectId = "venom").toDto(),
+                applyEffectOnAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto(),
                 increaseManaEffect(id = "ether", mana = 15).toDto(),
                 increaseHealthEffect(id = "heal", healing = 7).toDto(),
                 learnAbilityEffect(id = "learn-teleport", abilityId = "teleport").toDto(),

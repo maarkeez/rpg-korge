@@ -1,11 +1,11 @@
-cost = 10
+manaCost = 10
 cooldown = 0
 targeting = "ADJACENT_ENEMY"
 
 [[effects]]
 effectId = "low-physical-damage"
-target = "SELECTED_TARGET"
+target = "TARGETED_BATTLE_UNIT"
 
 [[effects]]
 effectId = "venom-on-death"
-target = "SELECTED_TARGET"
+target = "TARGETED_BATTLE_UNIT"

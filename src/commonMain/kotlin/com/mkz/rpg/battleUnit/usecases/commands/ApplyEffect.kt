@@ -55,7 +55,7 @@ class ApplyEffect(
                 playerId = caster.toDto().playerId,
                 deployAtRow = target.row,
                 deployAtColumn = target.column,
-                remainingTurns = ability.turnsDuration,
+                remainingTurns = ability.summonDuration,
             )
         eventBus.publish(events)
     }

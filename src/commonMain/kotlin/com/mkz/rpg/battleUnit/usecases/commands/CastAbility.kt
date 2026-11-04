@@ -31,7 +31,7 @@ class CastAbility(
                 .castAbility(
                     abilityId = abilityId,
                     abilityCooldown = ability.cooldown,
-                    abilityCost = ability.cost,
+                    abilityManaCost = ability.manaCost,
                     castGroup = castGroup.positions.map { position -> Battlefield.Dto.PositionDto(row = position.row, column = position.column) },
                 ).pullEvents()
         battleUnitRepository.update(updatedBattleUnit)

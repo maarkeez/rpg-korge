@@ -5,7 +5,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
@@ -340,19 +340,19 @@ class EffectTest {
     }
 
     @Test
-    fun `Create should fail when the apply effect on nearby allies outcome is missing its details`() {
+    fun `Create should fail when the apply effect on adjacent allies outcome is missing its details`() {
         // Given
         val effectDto =
             EffectMother
-                .applyEffectOnNearbyAlliesEffect()
+                .applyEffectOnAdjacentAlliesEffect()
                 .toDto()
                 .copy(
                     outcome =
                         EffectMother
-                            .applyEffectOnNearbyAlliesEffect()
+                            .applyEffectOnAdjacentAlliesEffect()
                             .toDto()
                             .outcome
-                            .copy(applyEffectOnNearbyAllies = null),
+                            .copy(applyEffectOnAdjacentAllies = null),
                 )
         // When
         val result = runCatching { Effect.create(effectDto) }
@@ -533,14 +533,14 @@ class EffectTest {
     }
 
     @Test
-    fun `ToDto should expose the apply effect on nearby allies outcome when converted to dto`() {
+    fun `ToDto should expose the apply effect on adjacent allies outcome when converted to dto`() {
         // Given
-        val effect = EffectMother.applyEffectOnNearbyAlliesEffect(effectId = "venom-damage")
+        val effect = EffectMother.applyEffectOnAdjacentAlliesEffect(effectId = "venom-damage")
         // When
         val result = effect.toDto()
         // Then
-        result.outcome.type shouldBe APPLY_EFFECT_ON_NEARBY_ALLIES
-        result.outcome.applyEffectOnNearbyAllies!!.effectId shouldBe "venom-damage"
+        result.outcome.type shouldBe APPLY_EFFECT_ON_ADJACENT_ALLIES
+        result.outcome.applyEffectOnAdjacentAllies!!.effectId shouldBe "venom-damage"
     }
 
     @Test

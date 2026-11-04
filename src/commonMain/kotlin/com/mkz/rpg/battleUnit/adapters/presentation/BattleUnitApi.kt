@@ -23,7 +23,7 @@ import com.mkz.rpg.battleUnit.adapters.save.BattleUnitSnapshottable
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
-import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToNearbyAllies
+import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToAdjacentAllies
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
@@ -198,8 +198,8 @@ class BattleUnitApi(
             battleUnitDeployment,
             abilityApi.searchAbilityById,
         )
-    val applyOnDefeatedEffectsToNearbyAllies =
-        ApplyOnDefeatedEffectsToNearbyAllies(
+    val applyOnDefeatedEffectsToAdjacentAllies =
+        ApplyOnDefeatedEffectsToAdjacentAllies(
             battleUnitRepository,
             effectApi.searchEffectById,
             battlefieldApi.searchOccupant,
@@ -238,7 +238,7 @@ class BattleUnitApi(
     private val onBattleFinished = OnBattleFinished(vanishSummonedBattleUnits, eventBus)
     private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(requestBattleJoin, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToNearbyAllies, requestBattleLeave, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToAdjacentAllies, requestBattleLeave, eventBus)
     private val onBattleUnitVanished = OnBattleUnitVanished(requestBattleLeave, eventBus)
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)

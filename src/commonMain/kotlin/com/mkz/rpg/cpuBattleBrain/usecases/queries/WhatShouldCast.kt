@@ -90,7 +90,7 @@ class WhatShouldCast(
         enemiesWithinReach: List<BattleUnit.Dto>,
     ): UtilityEvaluationData {
         val effects = effectsOf(ability)
-        val damage = expectedAmount(effects, target = TargetExpressionDto.Type.SELECTED_TARGET, outcome = TypeDto.DECREASE_HEALTH)
+        val damage = expectedAmount(effects, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DECREASE_HEALTH)
         val healing = expectedAmount(effects, target = TargetExpressionDto.Type.CASTER, outcome = TypeDto.INCREASE_HEALTH)
         val deployedUnitId = effects.firstNotNullOfOrNull { (_, effect) -> effect.outcome.deployBattleUnit?.unitId }
         return when {
@@ -102,7 +102,7 @@ class WhatShouldCast(
     }
 
     private fun effectsOf(ability: Ability.Dto): List<Pair<TargetExpressionDto.Type, Effect.Dto>> =
-        ability.effectSpecs.mapNotNull { spec -> searchEffectById(spec.effectId)?.let { effect -> spec.target.type to effect } }
+        ability.abilityEffects.mapNotNull { abilityEffect -> searchEffectById(abilityEffect.effectId)?.let { effect -> abilityEffect.target.type to effect } }
 
     // Removing more of what is left of the targets is better, e.g.: finishing off a weak enemy. Only the enemies within
     // reach count. A badly hurt caster attacks less eagerly, as it does when it moves towards enemies.
@@ -150,7 +150,7 @@ class WhatShouldCast(
         val damage =
             deployedUnit.abilities
                 .mapNotNull { abilityId -> searchAbilityById(abilityId) }
-                .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = TargetExpressionDto.Type.SELECTED_TARGET, outcome = TypeDto.DECREASE_HEALTH) }
+                .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DECREASE_HEALTH) }
                 ?: 0.0
         val tile = castGroup.positions.firstOrNull() ?: return 0.0
         val nearestEnemy =

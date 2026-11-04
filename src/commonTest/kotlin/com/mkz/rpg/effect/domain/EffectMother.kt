@@ -121,14 +121,14 @@ object EffectMother {
             ).pullEvents()
             .second
 
-    fun applyEffectOnNearbyAlliesEffect(
+    fun applyEffectOnAdjacentAlliesEffect(
         id: String = effectId(),
-        effectId: String = "effect-nearby",
+        effectId: String = "effect-adjacent",
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = effectId),
+                outcome = Effect.Dto.EffectOutcomeDto.applyEffectOnAdjacentAllies(effectId = effectId),
                 application =
                     ApplicationDto(
                         type = ApplicationTypeDto.ON_DEFEATED,

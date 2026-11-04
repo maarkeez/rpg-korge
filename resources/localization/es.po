@@ -458,13 +458,13 @@ msgid_plural "Ready in {turns} turns"
 msgstr[0] "Disponible en {turns} turno"
 msgstr[1] "Disponible en {turns} turnos"
 
-#. Why an ability can not be cast. {cost}: the mana it costs. {mana}: the mana the battle unit has left.
+#. Why an ability can not be cast. {manaCost}: the mana it costs. {mana}: the mana the battle unit has left.
 msgctxt "ui.abilityInfo.notEnoughMana"
-msgid "Needs {cost} mana, has {mana}"
-msgstr "Necesita {cost} de maná, tiene {mana}"
+msgid "Needs {manaCost} mana, has {mana}"
+msgstr "Necesita {manaCost} de maná, tiene {mana}"
 
 #. Who an ability is cast on: the caster.
-msgctxt "ui.abilityInfo.targeting.self"
+msgctxt "ui.abilityInfo.targeting.caster"
 msgid "Yourself"
 msgstr "Tú mismo"
 
@@ -479,14 +479,14 @@ msgid "All adjacent enemies"
 msgstr "Todos los enemigos adyacentes"
 
 #. Where an ability is cast: an empty tile next to the caster.
-msgctxt "ui.abilityInfo.targeting.tileNextToSelf"
+msgctxt "ui.abilityInfo.targeting.tileNextToCaster"
 msgid "An empty tile next to you"
 msgstr "Una casilla vacía junto a ti"
 
-#. Where an ability is cast: an empty tile next to any battle unit.
-msgctxt "ui.abilityInfo.targeting.tileNextToUnit"
-msgid "An empty tile next to any unit"
-msgstr "Una casilla vacía junto a cualquier unidad"
+#. Where an ability is cast: an empty tile next to another battle unit.
+msgctxt "ui.abilityInfo.targeting.tileNextToAnotherUnit"
+msgid "An empty tile next to another unit"
+msgstr "Una casilla vacía junto a otra unidad"
 
 #. {damage}: the health points the target loses.
 msgctxt "ui.abilityInfo.effect.damage"
@@ -506,7 +506,7 @@ msgid "Heals you {healing} HP."
 msgstr "Te cura {healing} PV."
 
 #. {healing}: the health points each ally next to the caster recovers.
-msgctxt "ui.abilityInfo.effect.healNearbyAllies"
+msgctxt "ui.abilityInfo.effect.healAdjacentAllies"
 msgid "Heals adjacent allies {healing} HP."
 msgstr "Cura {healing} PV a los aliados adyacentes."
 

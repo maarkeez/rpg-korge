@@ -1,6 +1,6 @@
-cost = 10
+manaCost = 10
 cooldown = 2
-targeting = "SELF"
+targeting = "CASTER"
 
 [[effects]]
 effectId = "low-damage-heal"

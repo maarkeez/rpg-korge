@@ -1,9 +1,9 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
@@ -44,7 +44,7 @@ class ManageCpuBattleUnitTest {
         queries.playerRepository.create(player(id = "cpu", type = CPU))
         queries.playerRepository.create(player(id = "human"))
         queries.effectRepository.create(decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY"))
-        queries.abilityRepository.create(ability(id = "sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("damage", SELECTED_TARGET))))
+        queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT))))
     }
 
     // Stores the CPU rats (`R` is unit-1 and `S` is unit-2), that know the given abilities, and the human knight `K`, standing on the battlefield map.

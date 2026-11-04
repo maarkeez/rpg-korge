@@ -1,36 +1,36 @@
 package com.mkz.rpg.ability.domain
 
 import com.mkz.rpg.ability.domain.AbilityError.AbilityCooldownAboveLimit
-import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
+import com.mkz.rpg.ability.domain.AbilityError.AbilityManaCostAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
-import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
+import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityManaCost
 import com.mkz.rpg.ability.domain.AbilityEvent.AbilityCreated
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
 data class Ability private constructor(
     private val id: Id,
-    private val cost: Cost,
+    private val manaCost: ManaCost,
     private val cooldown: Cooldown,
-    private val turnsDuration: TurnsDuration?,
+    private val summonDuration: SummonDuration?,
     private val targeting: Targeting,
-    private val effectSpecs: EffectSpecs,
+    private val abilityEffects: AbilityEffects,
     private val events: Set<AbilityEvent>,
 ) {
     companion object {
         fun create(dto: Dto): Ability =
             Ability(
                 id = Id(dto.id),
-                cost = Cost(dto.cost),
+                manaCost = ManaCost(dto.manaCost),
                 cooldown = Cooldown(dto.cooldown),
-                turnsDuration = dto.turnsDuration?.let(::TurnsDuration),
+                summonDuration = dto.summonDuration?.let(::SummonDuration),
                 targeting = Targeting(dto.targeting),
-                effectSpecs = EffectSpecs.fromDtos(dto.effectSpecs),
+                abilityEffects = AbilityEffects.fromDtos(dto.abilityEffects),
                 events = setOf(AbilityCreated(abilityId = dto.id)),
             )
     }
@@ -38,11 +38,11 @@ data class Ability private constructor(
     fun toDto() =
         Dto(
             id = id.value,
-            cost = cost.value,
+            manaCost = manaCost.value,
             cooldown = cooldown.value,
             targeting = targeting.toDto(),
-            effectSpecs = effectSpecs.toDto(),
-            turnsDuration = turnsDuration?.value,
+            abilityEffects = abilityEffects.toDto(),
+            summonDuration = summonDuration?.value,
         )
 
     fun pullEvents() = events to copy(events = emptySet())
@@ -55,12 +55,12 @@ data class Ability private constructor(
         }
     }
 
-    @JvmInline private value class Cost(
+    @JvmInline private value class ManaCost(
         val value: Int,
     ) {
         init {
-            if (value < 0) throw NegativeAbilityCost()
-            if (value > 999) throw AbilityCostAboveLimit()
+            if (value < 0) throw NegativeAbilityManaCost()
+            if (value > 999) throw AbilityManaCostAboveLimit()
         }
     }
 
@@ -74,17 +74,17 @@ data class Ability private constructor(
     }
 
     // How many turns of its player the battle unit the ability deploys lasts.
-    @JvmInline private value class TurnsDuration(
+    @JvmInline private value class SummonDuration(
         val value: Int,
     ) {
         init {
-            if (value < 1) throw AbilityTurnsDurationBelowMinimum()
-            if (value > 99) throw AbilityTurnsDurationAboveLimit()
+            if (value < 1) throw AbilitySummonDurationBelowMinimum()
+            if (value > 99) throw AbilitySummonDurationAboveLimit()
         }
     }
 
-    private data class EffectSpecs(
-        val value: List<EffectSpec>,
+    private data class AbilityEffects(
+        val value: List<AbilityEffect>,
     ) {
         init {
             if (value.isEmpty()) throw AbilityEmptyEffects()
@@ -92,18 +92,18 @@ data class Ability private constructor(
         }
 
         companion object {
-            fun fromDtos(dtos: List<Dto.EffectSpecDto>): EffectSpecs = EffectSpecs(dtos.map { effectSpec -> EffectSpec(effectSpec) })
+            fun fromDtos(dtos: List<Dto.AbilityEffectDto>): AbilityEffects = AbilityEffects(dtos.map { abilityEffect -> AbilityEffect(abilityEffect) })
         }
 
-        fun toDto(): List<Dto.EffectSpecDto> = value.map { effectSpec -> effectSpec.toDto() }
+        fun toDto(): List<Dto.AbilityEffectDto> = value.map { abilityEffect -> abilityEffect.toDto() }
 
-        private data class EffectSpec(
+        private data class AbilityEffect(
             val effectId: EffectId,
             val target: TargetExpression,
         ) {
-            constructor(dto: Dto.EffectSpecDto) : this(EffectId(dto.effectId), TargetExpression(dto.target))
+            constructor(dto: Dto.AbilityEffectDto) : this(EffectId(dto.effectId), TargetExpression(dto.target))
 
-            fun toDto() = Dto.EffectSpecDto(effectId = effectId.value, target = TargetExpression.of(target))
+            fun toDto() = Dto.AbilityEffectDto(effectId = effectId.value, target = TargetExpression.of(target))
 
             @JvmInline private value class EffectId(
                 val value: String,
@@ -114,22 +114,22 @@ data class Ability private constructor(
     sealed interface TargetExpression {
         data object Caster : TargetExpression
 
-        data object SelectedTarget : TargetExpression
+        data object TargetedBattleUnit : TargetExpression
 
-        data object SelectedTile : TargetExpression
+        data object TargetedTile : TargetExpression
 
         data object CasterTile : TargetExpression
 
-        data object NearbyAllies : TargetExpression
+        data object AdjacentAllies : TargetExpression
 
         companion object {
             operator fun invoke(dto: Dto.TargetExpressionDto): TargetExpression =
                 when (dto.type) {
                     Dto.TargetExpressionDto.Type.CASTER -> Caster
-                    Dto.TargetExpressionDto.Type.SELECTED_TARGET -> SelectedTarget
-                    Dto.TargetExpressionDto.Type.SELECTED_TILE -> SelectedTile
+                    Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT -> TargetedBattleUnit
+                    Dto.TargetExpressionDto.Type.TARGETED_TILE -> TargetedTile
                     Dto.TargetExpressionDto.Type.CASTER_TILE -> CasterTile
-                    Dto.TargetExpressionDto.Type.NEARBY_ALLIES -> NearbyAllies
+                    Dto.TargetExpressionDto.Type.ADJACENT_ALLIES -> AdjacentAllies
                 }
 
             fun of(expression: TargetExpression): Dto.TargetExpressionDto =
@@ -137,61 +137,61 @@ data class Ability private constructor(
                     type =
                         when (expression) {
                             is Caster -> Dto.TargetExpressionDto.Type.CASTER
-                            is SelectedTarget -> Dto.TargetExpressionDto.Type.SELECTED_TARGET
-                            is SelectedTile -> Dto.TargetExpressionDto.Type.SELECTED_TILE
+                            is TargetedBattleUnit -> Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+                            is TargetedTile -> Dto.TargetExpressionDto.Type.TARGETED_TILE
                             is CasterTile -> Dto.TargetExpressionDto.Type.CASTER_TILE
-                            is NearbyAllies -> Dto.TargetExpressionDto.Type.NEARBY_ALLIES
+                            is AdjacentAllies -> Dto.TargetExpressionDto.Type.ADJACENT_ALLIES
                         },
                 )
         }
     }
 
     private enum class Targeting {
-        SELF,
+        CASTER,
         ADJACENT_ENEMY,
         ALL_ADJACENT_ENEMIES,
-        VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-        VACANT_TILE_ADJACENT_TO_SELF,
+        VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+        VACANT_TILE_ADJACENT_TO_CASTER,
         ;
 
         companion object {
             operator fun invoke(targeting: Dto.TargetingDto): Targeting =
                 when (targeting) {
-                    Dto.TargetingDto.SELF -> SELF
+                    Dto.TargetingDto.CASTER -> CASTER
                     Dto.TargetingDto.ADJACENT_ENEMY -> ADJACENT_ENEMY
                     Dto.TargetingDto.ALL_ADJACENT_ENEMIES -> ALL_ADJACENT_ENEMIES
-                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
-                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF -> VACANT_TILE_ADJACENT_TO_SELF
+                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT
+                    Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER -> VACANT_TILE_ADJACENT_TO_CASTER
                 }
         }
 
         fun toDto() =
             when (this) {
-                SELF -> Dto.TargetingDto.SELF
+                CASTER -> Dto.TargetingDto.CASTER
                 ADJACENT_ENEMY -> Dto.TargetingDto.ADJACENT_ENEMY
                 ALL_ADJACENT_ENEMIES -> Dto.TargetingDto.ALL_ADJACENT_ENEMIES
-                VACANT_TILE_ADJACENT_TO_BATTLE_UNIT -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
-                VACANT_TILE_ADJACENT_TO_SELF -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+                VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT
+                VACANT_TILE_ADJACENT_TO_CASTER -> Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
             }
     }
 
     data class Dto(
         val id: String,
-        val cost: Int,
+        val manaCost: Int,
         val cooldown: Int,
         val targeting: TargetingDto,
-        val effectSpecs: List<EffectSpecDto>,
-        val turnsDuration: Int?,
+        val abilityEffects: List<AbilityEffectDto>,
+        val summonDuration: Int?,
     ) {
         enum class TargetingDto {
-            SELF,
+            CASTER,
             ADJACENT_ENEMY,
             ALL_ADJACENT_ENEMIES,
-            VACANT_TILE_ADJACENT_TO_BATTLE_UNIT,
-            VACANT_TILE_ADJACENT_TO_SELF,
+            VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
+            VACANT_TILE_ADJACENT_TO_CASTER,
         }
 
-        data class EffectSpecDto(
+        data class AbilityEffectDto(
             val effectId: String,
             val target: TargetExpressionDto,
         )
@@ -201,10 +201,10 @@ data class Ability private constructor(
         ) {
             enum class Type {
                 CASTER,
-                SELECTED_TARGET,
-                SELECTED_TILE,
+                TARGETED_BATTLE_UNIT,
+                TARGETED_TILE,
                 CASTER_TILE,
-                NEARBY_ALLIES,
+                ADJACENT_ALLIES,
             }
         }
     }

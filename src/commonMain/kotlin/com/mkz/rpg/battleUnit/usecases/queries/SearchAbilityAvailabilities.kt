@@ -14,12 +14,12 @@ class SearchAbilityAvailabilities(
     operator fun invoke(battleUnitId: String): List<AbilityAvailability> {
         val battleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto() ?: return emptyList()
         return battleUnit.abilityCooldowns.map { (abilityId, cooldownTurnsLeft) ->
-            val cost = searchAbilityById(abilityId)?.cost ?: 0
+            val manaCost = searchAbilityById(abilityId)?.manaCost ?: 0
             AbilityAvailability(
                 abilityId = abilityId,
                 cooldownTurnsLeft = cooldownTurnsLeft,
-                hasEnoughMana = battleUnit.remainingManaPoints >= cost,
-                manaCost = cost,
+                hasEnoughMana = battleUnit.remainingManaPoints >= manaCost,
+                manaCost = manaCost,
             )
         }
     }

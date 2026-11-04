@@ -1,7 +1,7 @@
-cost = 0
+manaCost = 0
 cooldown = 0
 targeting = "ADJACENT_ENEMY"
 
 [[effects]]
 effectId = "low-physical-damage"
-target = "SELECTED_TARGET"
+target = "TARGETED_BATTLE_UNIT"

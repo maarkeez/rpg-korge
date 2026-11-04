@@ -1,6 +1,6 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.BattleUnitDoesNotExists
@@ -32,7 +32,7 @@ class CastAbilityTest {
     @Test
     fun `should cast ability when the position is a valid cast position`() {
         // Given
-        queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = SELF))
+        queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = CASTER))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto()))
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         val castGroup = WhereCanCast.CastGroup(listOf(WhereCanCast.PositionDto(0, 0)))
@@ -85,7 +85,7 @@ class CastAbilityTest {
     @Test
     fun `should throw invalid cast position error when the position is not a valid cast position`() {
         // Given
-        queries.abilityRepository.create(ability(id = "ability-1", cost = 0, cooldown = 0, targeting = SELF))
+        queries.abilityRepository.create(ability(id = "ability-1", manaCost = 0, cooldown = 0, targeting = CASTER))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(abilities = listOf("ability-1"), manaPoints = 10).toDto()))
         // The ability can only be cast on the knight own tile.
         queries.battlefieldRepository.create(battlefield(". K", occupants = mapOf('K' to "knight-1")))

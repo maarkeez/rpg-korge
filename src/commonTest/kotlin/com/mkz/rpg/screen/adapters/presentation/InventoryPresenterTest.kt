@@ -1,9 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
@@ -62,10 +62,10 @@ class InventoryPresenterTest {
                 listOf(
                     ability(
                         id = "bee",
-                        cost = 0,
-                        effectSpecs = listOf(effectSpec(effectId = "summon-bee", target = SELECTED_TILE)),
-                        targeting = VACANT_TILE_ADJACENT_TO_SELF,
-                        turnsDuration = 5,
+                        manaCost = 0,
+                        abilityEffects = listOf(abilityEffect(effectId = "summon-bee", target = TARGETED_TILE)),
+                        targeting = VACANT_TILE_ADJACENT_TO_CASTER,
+                        summonDuration = 5,
                     ).toDto(),
                 ),
             lootableItems =

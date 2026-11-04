@@ -74,9 +74,9 @@ class MushroomAbilityAcceptanceTest {
         val mushroomAbility =
             AbilityMother.ability(
                 id = mushroomAbilityId,
-                cost = 10,
+                manaCost = 10,
                 cooldown = 0,
-                effectSpecs = listOf(AbilityMother.effectSpec(effectId = venomEffectId, target = TargetExpressionDto.Type.SELECTED_TARGET)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = venomEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
             )
         abilityApi.requestAbilityCreation(mushroomAbility.toDto())

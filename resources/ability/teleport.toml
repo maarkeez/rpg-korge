@@ -1,6 +1,6 @@
-cost = 5
+manaCost = 5
 cooldown = 1
-targeting = "VACANT_TILE_ADJACENT_TO_BATTLE_UNIT"
+targeting = "VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT"
 
 [[effects]]
 effectId = "teleport"

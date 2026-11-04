@@ -96,7 +96,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display the cost badge when there is not enough mana`() =
+    fun `Display should display the mana cost badge when there is not enough mana`() =
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())
@@ -107,7 +107,7 @@ class AbilityButtonViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `Display should display no cost badge when there is enough mana`() =
+    fun `Display should display no mana cost badge when there is enough mana`() =
         sharedViewsTest {
             // Given
             val abilityButtonView = AbilityButtonView(Size(width = 54, height = 54), loadedResourcesLoader())

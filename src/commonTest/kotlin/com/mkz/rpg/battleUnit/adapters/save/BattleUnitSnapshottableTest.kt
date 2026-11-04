@@ -44,7 +44,7 @@ class BattleUnitSnapshottableTest {
         battleUnit(id = "knight-1", unit = knight, player = human, maximumAbilities = 4, remainingHealthPoints = 18)
             .applyEquippedEffect("iron-helmet", effectRepository.searchById("iron-helmet")!!.toDto())
             .receiveOnTurnStartedEffect("regeneration", turnsLeft = 2)
-            .castAbility(abilityId = "slash", abilityCooldown = 2, abilityCost = 0, castGroup = emptyList())
+            .castAbility(abilityId = "slash", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList())
             .pullEvents()
             .second
 

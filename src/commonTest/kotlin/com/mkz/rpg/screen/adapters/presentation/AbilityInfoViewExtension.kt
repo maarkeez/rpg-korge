@@ -4,7 +4,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 fun AbilityInfoView.abilityName(): String = nameText.text
 
-/** The mana cost, as told by its pill. */
+/** The mana manaCost, as told by its pill. */
 fun AbilityInfoView.manaCost(): String? = manaCostPill.labelText()
 
 /** The cooldown, as told by its pill, or null when no cooldown pill is displayed. */

@@ -2,10 +2,10 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
@@ -58,10 +58,10 @@ class PreviewCastRemainingHealthTest {
 
     private fun givenAbility(
         targeting: TargetingDto,
-        vararg effectSpecs: Pair<String, TargetExpressionDto.Type>,
+        vararg abilityEffects: Pair<String, TargetExpressionDto.Type>,
     ) {
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = targeting, effectSpecs = effectSpecs.map { (effectId, target) -> effectSpec(effectId = effectId, target = target) }),
+            ability(id = "ability-1", targeting = targeting, abilityEffects = abilityEffects.map { (effectId, target) -> abilityEffect(effectId = effectId, target = target) }),
         )
     }
 
@@ -71,7 +71,7 @@ class PreviewCastRemainingHealthTest {
     fun `should subtract the damage dealt immediately when the ability is cast on the target`() {
         // Given
         givenBattle("C E")
-        givenAbility(TargetingDto.ADJACENT_ENEMY, "slash" to SELECTED_TARGET, "slash" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ADJACENT_ENEMY, "slash" to TARGETED_BATTLE_UNIT, "slash" to TARGETED_BATTLE_UNIT)
         // When
         val remainingHealth = preview(PositionDto(0, 1))
         // Then
@@ -82,7 +82,7 @@ class PreviewCastRemainingHealthTest {
     fun `should not leave less than no health when the damage is higher than the health left`() {
         // Given
         givenBattle("C E")
-        givenAbility(TargetingDto.ADJACENT_ENEMY, "smash" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ADJACENT_ENEMY, "smash" to TARGETED_BATTLE_UNIT)
         // When
         val remainingHealth = preview(PositionDto(0, 1))
         // Then
@@ -93,7 +93,7 @@ class PreviewCastRemainingHealthTest {
     fun `should add the healing when the ability heals the caster`() {
         // Given
         givenBattle("C")
-        givenAbility(TargetingDto.SELF, "cure" to CASTER)
+        givenAbility(TargetingDto.CASTER, "cure" to CASTER)
         // When
         val remainingHealth = preview(PositionDto(0, 0))
         // Then
@@ -104,7 +104,7 @@ class PreviewCastRemainingHealthTest {
     fun `should not heal over the maximum health when the healing is higher than the health lost`() {
         // Given
         givenBattle("C")
-        givenAbility(TargetingDto.SELF, "elixir" to CASTER)
+        givenAbility(TargetingDto.CASTER, "elixir" to CASTER)
         // When
         val remainingHealth = preview(PositionDto(0, 0))
         // Then
@@ -115,7 +115,7 @@ class PreviewCastRemainingHealthTest {
     fun `should list the health of each target when the ability is cast on a cast group of several tiles`() {
         // Given
         givenBattle("C E\nF .")
-        givenAbility(TargetingDto.ALL_ADJACENT_ENEMIES, "slash" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ALL_ADJACENT_ENEMIES, "slash" to TARGETED_BATTLE_UNIT)
         // When
         val remainingHealth = preview(PositionDto(0, 1), PositionDto(1, 0))
         // Then
@@ -126,7 +126,7 @@ class PreviewCastRemainingHealthTest {
     fun `should not list the battle units whose health the cast does not change immediately`() {
         // Given
         givenBattle("C E")
-        givenAbility(TargetingDto.ADJACENT_ENEMY, "venom" to SELECTED_TARGET, "ether" to SELECTED_TARGET)
+        givenAbility(TargetingDto.ADJACENT_ENEMY, "venom" to TARGETED_BATTLE_UNIT, "ether" to TARGETED_BATTLE_UNIT)
         // When
         val remainingHealth = preview(PositionDto(0, 1))
         // Then

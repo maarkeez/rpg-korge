@@ -4,7 +4,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
@@ -74,7 +74,7 @@ data class Effect private constructor(
                     INCREASE_HEALTH -> IncreaseHealth(dto.increaseHealth!!.healing)
                     NEGATE_INCREASE_HEALTH -> NegateIncreaseHealth
                     TELEPORT -> Teleport
-                    APPLY_EFFECT_ON_NEARBY_ALLIES -> ApplyEffectOnNearbyAllies(dto.applyEffectOnNearbyAllies!!.effectId)
+                    APPLY_EFFECT_ON_ADJACENT_ALLIES -> ApplyEffectOnAdjacentAllies(dto.applyEffectOnAdjacentAllies!!.effectId)
                     DEPLOY_BATTLE_UNIT -> DeployBattleUnit(dto.deployBattleUnit!!.unitId)
                     INCREASE_MANA -> IncreaseMana(dto.increaseMana!!.mana)
                     INCREASE_MAXIMUM_HEALTH -> IncreaseMaximumHealth(dto.increaseMaximumHealth!!.healthPoints)
@@ -95,7 +95,7 @@ data class Effect private constructor(
                 is IncreaseHealth -> Dto.EffectOutcomeDto.increaseHealth(healing = healing)
                 NegateIncreaseHealth -> Dto.EffectOutcomeDto.negateIncreaseHealth()
                 Teleport -> Dto.EffectOutcomeDto.teleport()
-                is ApplyEffectOnNearbyAllies -> Dto.EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = effectId)
+                is ApplyEffectOnAdjacentAllies -> Dto.EffectOutcomeDto.applyEffectOnAdjacentAllies(effectId = effectId)
                 is DeployBattleUnit -> Dto.EffectOutcomeDto.deployBattleUnit(unitId = unitId)
                 is IncreaseMana -> Dto.EffectOutcomeDto.increaseMana(mana = mana)
                 is IncreaseMaximumHealth -> Dto.EffectOutcomeDto.increaseMaximumHealth(healthPoints = healthPoints)
@@ -148,7 +148,7 @@ data class Effect private constructor(
             }
         }
 
-        @JvmInline private value class ApplyEffectOnNearbyAllies(
+        @JvmInline private value class ApplyEffectOnAdjacentAllies(
             val effectId: String,
         ) : Outcome
 
@@ -319,7 +319,7 @@ data class Effect private constructor(
             val type: TypeDto,
             val decreaseHealth: DecreaseHealthDto?,
             val increaseHealth: IncreaseHealthDto?,
-            val applyEffectOnNearbyAllies: ApplyEffectOnNearbyAlliesDto?,
+            val applyEffectOnAdjacentAllies: ApplyEffectOnAdjacentAlliesDto?,
             val deployBattleUnit: DeployBattleUnitDto?,
             val increaseMana: IncreaseManaDto?,
             val increaseMaximumHealth: IncreaseMaximumHealthDto?,
@@ -335,8 +335,8 @@ data class Effect private constructor(
 
                 fun teleport() = withoutDetails(TypeDto.TELEPORT)
 
-                fun applyEffectOnNearbyAllies(effectId: String) =
-                    withoutDetails(TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES).copy(applyEffectOnNearbyAllies = ApplyEffectOnNearbyAlliesDto(effectId = effectId))
+                fun applyEffectOnAdjacentAllies(effectId: String) =
+                    withoutDetails(TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES).copy(applyEffectOnAdjacentAllies = ApplyEffectOnAdjacentAlliesDto(effectId = effectId))
 
                 fun deployBattleUnit(unitId: String) = withoutDetails(TypeDto.DEPLOY_BATTLE_UNIT).copy(deployBattleUnit = DeployBattleUnitDto(unitId = unitId))
 
@@ -354,7 +354,7 @@ data class Effect private constructor(
                         type = type,
                         decreaseHealth = null,
                         increaseHealth = null,
-                        applyEffectOnNearbyAllies = null,
+                        applyEffectOnAdjacentAllies = null,
                         deployBattleUnit = null,
                         increaseMana = null,
                         increaseMaximumHealth = null,
@@ -368,7 +368,7 @@ data class Effect private constructor(
                 INCREASE_HEALTH,
                 NEGATE_INCREASE_HEALTH,
                 TELEPORT,
-                APPLY_EFFECT_ON_NEARBY_ALLIES,
+                APPLY_EFFECT_ON_ADJACENT_ALLIES,
                 DEPLOY_BATTLE_UNIT,
                 INCREASE_MANA,
                 INCREASE_MAXIMUM_HEALTH,
@@ -384,7 +384,7 @@ data class Effect private constructor(
                 val healing: Int,
             )
 
-            data class ApplyEffectOnNearbyAlliesDto(
+            data class ApplyEffectOnAdjacentAlliesDto(
                 val effectId: String,
             )
 

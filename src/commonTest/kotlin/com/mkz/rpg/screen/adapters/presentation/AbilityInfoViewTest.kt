@@ -33,8 +33,8 @@ class AbilityInfoViewTest : ViewsForTesting() {
             abilityId = "mending",
             manaCost = 10,
             cooldown = 2,
-            targeting = Targeting.SELF,
-            effects = listOf(Effect.HealSelf(15), Effect.HealNearbyAllies(15)),
+            targeting = Targeting.CASTER,
+            effects = listOf(Effect.HealSelf(15), Effect.HealAdjacentAllies(15)),
         )
 
     private suspend fun abilityInfoView() = AbilityInfoView(AbilityInfoView.WIDTH, loadedResourcesLoader(), TextsMother.texts())
@@ -111,7 +111,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             // Given
             val abilityInfoView = abilityInfoView()
             // When
-            abilityInfoView.display(skull.copy(reason = Reason.NotEnoughMana(cost = 10, remainingMana = 4)))
+            abilityInfoView.display(skull.copy(reason = Reason.NotEnoughMana(manaCost = 10, remainingMana = 4)))
             // Then
             abilityInfoView.reason() shouldBe "Needs 10 mana, has 4"
         }
@@ -138,7 +138,7 @@ class AbilityInfoViewTest : ViewsForTesting() {
             abilityInfoView.display(
                 skull.copy(
                     effects = skull.effects + Effect.DamageEachTurn(damage = 3, turns = 5),
-                    reason = Reason.NotEnoughMana(cost = 10, remainingMana = 4),
+                    reason = Reason.NotEnoughMana(manaCost = 10, remainingMana = 4),
                 ),
             )
             // Then

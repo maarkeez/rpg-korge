@@ -485,7 +485,7 @@ class BattlefieldPresenter(
             attackPreviewView.display(
                 abilityId = event.abilityId,
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
-                manaCost = ability.cost,
+                manaCost = ability.manaCost,
                 receivers = emptyList(),
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
@@ -514,7 +514,7 @@ class BattlefieldPresenter(
             attackPreviewView.display(
                 abilityId = event.abilityId,
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
-                manaCost = ability.cost,
+                manaCost = ability.manaCost,
                 receivers = receivers,
                 casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),

@@ -3,7 +3,7 @@ package com.mkz.rpg.battleUnit.adapters.events
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
@@ -31,7 +31,7 @@ class OnAbilityCastedTest {
     fun `should request the effects for the whole cast group when an ability is casted`() {
         // Given
         queries.effectRepository.create(increaseHealthEffect(id = "healing"))
-        queries.abilityRepository.create(ability(id = "heal", targeting = TargetingDto.SELF, effectSpecs = listOf(effectSpec(effectId = "healing", target = TargetExpressionDto.Type.CASTER))))
+        queries.abilityRepository.create(ability(id = "heal", targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = "healing", target = TargetExpressionDto.Type.CASTER))))
         queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         eventBus.publish(BattleUnitEvent.AbilityCasted(battleUnitId = "knight-1", abilityId = "heal", castGroup = listOf(PositionDto(row = 0, column = 0))))

@@ -2,13 +2,13 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
@@ -106,12 +106,18 @@ class BattlefieldPresenterTest {
                 listOf(
                     ability(
                         id = "mushroom",
-                        cost = 10,
-                        effectSpecs = listOf(effectSpec(effectId = "poison", target = SELECTED_TARGET), effectSpec(effectId = "venom", target = SELECTED_TARGET)),
+                        manaCost = 10,
+                        abilityEffects = listOf(abilityEffect(effectId = "poison", target = TARGETED_BATTLE_UNIT), abilityEffect(effectId = "venom", target = TARGETED_BATTLE_UNIT)),
                         targeting = ALL_ADJACENT_ENEMIES,
                     ).toDto(),
-                    ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto(),
-                    ability(id = "bee", cost = 10, effectSpecs = listOf(effectSpec(effectId = "summon", target = SELECTED_TILE)), targeting = VACANT_TILE_ADJACENT_TO_SELF, turnsDuration = 5).toDto(),
+                    ability(id = "heal", manaCost = 10, abilityEffects = listOf(abilityEffect(effectId = "cure", target = CASTER)), targeting = TargetingDto.CASTER).toDto(),
+                    ability(
+                        id = "bee",
+                        manaCost = 10,
+                        abilityEffects = listOf(abilityEffect(effectId = "summon", target = TARGETED_TILE)),
+                        targeting = VACANT_TILE_ADJACENT_TO_CASTER,
+                        summonDuration = 5,
+                    ).toDto(),
                 ),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
             tiles = List(4) { List(4) { "sand" } },
@@ -963,7 +969,7 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         // Then
         battleUnitInfoView.selectedAbilities.shouldContainExactly(0)
-        battleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(cost = 10, remainingMana = 4)
+        battleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(manaCost = 10, remainingMana = 4)
         battlefieldView.tilesNotDimmed.shouldContainExactly(listOf(setOf(position(1, 1))))
     }
 
@@ -984,7 +990,7 @@ class BattlefieldPresenterTest {
         val exploringApis =
             exploringApis(
                 effects = listOf(increaseHealthEffect(id = "cure", healing = 5).toDto()),
-                abilities = listOf(ability(id = "heal", cost = 10, effectSpecs = listOf(effectSpec(effectId = "cure", target = CASTER)), targeting = SELF).toDto()),
+                abilities = listOf(ability(id = "heal", manaCost = 10, abilityEffects = listOf(abilityEffect(effectId = "cure", target = CASTER)), targeting = TargetingDto.CASTER).toDto()),
             )
         val exploringBattleUnitInfoView = FakeBattleUnitInfoView()
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -997,7 +1003,7 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattleUnitInfoView.selectedAbilities.shouldContainExactly(0)
-        exploringBattleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(cost = 10, remainingMana = 4)
+        exploringBattleUnitInfoView.displayedAbilityInfos.single().reason shouldBe AbilityInfoView.AbilityInfo.Reason.NotEnoughMana(manaCost = 10, remainingMana = 4)
         exploringBattlefieldView.tilesNotDimmed.last() shouldBe setOf(position(1, 1))
     }
 

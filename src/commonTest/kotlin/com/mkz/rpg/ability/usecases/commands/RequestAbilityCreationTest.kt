@@ -1,11 +1,11 @@
 package com.mkz.rpg.ability.usecases.commands
 
 import com.mkz.rpg.ability.adapters.storage.InMemoryAbilityRepository
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationMissing
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationNotAllowed
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationMissing
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationNotAllowed
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
@@ -33,7 +33,7 @@ class RequestAbilityCreationTest {
         // Given
         val effect = decreaseHealthEffect()
         effectRepository.create(effect)
-        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id))).toDto()
+        val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id))).toDto()
         // When
         requestAbilityCreation(abilityDto = ability)
         // Then
@@ -43,40 +43,40 @@ class RequestAbilityCreationTest {
     }
 
     @Test
-    fun `should create an ability deploying a battle unit with its turns duration`() {
+    fun `should create an ability deploying a battle unit with its summon duration`() {
         // Given
         val effect = deployBattleUnitEffect()
         effectRepository.create(effect)
-        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id)), turnsDuration = 5).toDto()
+        val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = 5).toDto()
         // When
         requestAbilityCreation(abilityDto = ability)
         // Then
-        abilityRepository.searchById(ability.id)?.toDto()?.turnsDuration shouldBe 5
+        abilityRepository.searchById(ability.id)?.toDto()?.summonDuration shouldBe 5
     }
 
     @Test
-    fun `should fail when an ability deploying a battle unit has no turns duration`() {
+    fun `should fail when an ability deploying a battle unit has no summon duration`() {
         // Given
         val effect = deployBattleUnitEffect()
         effectRepository.create(effect)
-        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id)), turnsDuration = null).toDto()
+        val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = null).toDto()
         // When
         val creation = { requestAbilityCreation(abilityDto = ability) }
         // Then
-        shouldThrow<AbilityTurnsDurationMissing> { creation() }
+        shouldThrow<AbilitySummonDurationMissing> { creation() }
         abilityRepository.searchById(ability.id).shouldBeNull()
     }
 
     @Test
-    fun `should fail when an ability deploying no battle unit has a turns duration`() {
+    fun `should fail when an ability deploying no battle unit has a summon duration`() {
         // Given
         val effect = decreaseHealthEffect()
         effectRepository.create(effect)
-        val ability = ability(effectSpecs = listOf(effectSpec(effectId = effect.toDto().id)), turnsDuration = 5).toDto()
+        val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = 5).toDto()
         // When
         val creation = { requestAbilityCreation(abilityDto = ability) }
         // Then
-        shouldThrow<AbilityTurnsDurationNotAllowed> { creation() }
+        shouldThrow<AbilitySummonDurationNotAllowed> { creation() }
         abilityRepository.searchById(ability.id).shouldBeNull()
     }
 }

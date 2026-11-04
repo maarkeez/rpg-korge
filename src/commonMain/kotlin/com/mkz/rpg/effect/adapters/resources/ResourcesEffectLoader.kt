@@ -63,7 +63,7 @@ class ResourcesEffectLoader(
                 TypeDto.INCREASE_HEALTH -> EffectOutcomeDto.increaseHealth(healing = required("outcome.healing", healing))
                 TypeDto.NEGATE_INCREASE_HEALTH -> EffectOutcomeDto.negateIncreaseHealth()
                 TypeDto.TELEPORT -> EffectOutcomeDto.teleport()
-                TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES -> EffectOutcomeDto.applyEffectOnNearbyAllies(effectId = required("outcome.effectId", effectId))
+                TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES -> EffectOutcomeDto.applyEffectOnAdjacentAllies(effectId = required("outcome.effectId", effectId))
                 TypeDto.DEPLOY_BATTLE_UNIT -> EffectOutcomeDto.deployBattleUnit(unitId = required("outcome.unitId", unitId))
                 TypeDto.INCREASE_MANA -> EffectOutcomeDto.increaseMana(mana = required("outcome.mana", mana))
                 TypeDto.INCREASE_MAXIMUM_HEALTH -> EffectOutcomeDto.increaseMaximumHealth(healthPoints = required("outcome.healthPoints", healthPoints))

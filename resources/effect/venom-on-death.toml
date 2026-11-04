@@ -1,5 +1,5 @@
 [outcome]
-type = "APPLY_EFFECT_ON_NEARBY_ALLIES"
+type = "APPLY_EFFECT_ON_ADJACENT_ALLIES"
 effectId = "venom-damage"
 
 [application]

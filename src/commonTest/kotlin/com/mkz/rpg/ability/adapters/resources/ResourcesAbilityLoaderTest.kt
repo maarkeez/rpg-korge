@@ -1,12 +1,12 @@
 package com.mkz.rpg.ability.adapters.resources
 
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.string.shouldContain
@@ -23,13 +23,13 @@ class ResourcesAbilityLoaderTest {
                 MemoryVfsMix(
                     "ability/skull.toml" to
                         """
-                        cost = 10
+                        manaCost = 10
                         cooldown = 1
                         targeting = "ADJACENT_ENEMY"
 
                         [[effects]]
                         effectId = "damage"
-                        target = "SELECTED_TARGET"
+                        target = "TARGETED_BATTLE_UNIT"
 
                         [[effects]]
                         effectId = "heal"
@@ -43,30 +43,30 @@ class ResourcesAbilityLoaderTest {
             loader.loadAbilities().shouldContainExactly(
                 ability(
                     id = "skull",
-                    cost = 10,
+                    manaCost = 10,
                     cooldown = 1,
                     targeting = ADJACENT_ENEMY,
-                    effectSpecs = listOf(effectSpec(effectId = "damage", target = SELECTED_TARGET), effectSpec(effectId = "heal", target = CASTER)),
+                    abilityEffects = listOf(abilityEffect(effectId = "damage", target = TARGETED_BATTLE_UNIT), abilityEffect(effectId = "heal", target = CASTER)),
                 ).toDto(),
             )
         }
 
     @Test
-    fun `should load the turns duration of an ability deploying a battle unit`() =
+    fun `should load the summon duration of an ability deploying a battle unit`() =
         runTest {
             // Given
             val abilityRoot =
                 MemoryVfsMix(
                     "ability/bat.toml" to
                         """
-                        cost = 10
+                        manaCost = 10
                         cooldown = 0
-                        targeting = "VACANT_TILE_ADJACENT_TO_SELF"
-                        turnsDuration = 5
+                        targeting = "VACANT_TILE_ADJACENT_TO_CASTER"
+                        summonDuration = 5
 
                         [[effects]]
                         effectId = "deploy-bat"
-                        target = "SELECTED_TILE"
+                        target = "TARGETED_TILE"
                         """.trimIndent(),
                 )["ability"]
             val loader = ResourcesAbilityLoader(abilityRoot = abilityRoot)
@@ -76,11 +76,11 @@ class ResourcesAbilityLoaderTest {
             loader.loadAbilities().shouldContainExactly(
                 ability(
                     id = "bat",
-                    cost = 10,
+                    manaCost = 10,
                     cooldown = 0,
-                    targeting = VACANT_TILE_ADJACENT_TO_SELF,
-                    effectSpecs = listOf(effectSpec(effectId = "deploy-bat", target = SELECTED_TILE)),
-                    turnsDuration = 5,
+                    targeting = VACANT_TILE_ADJACENT_TO_CASTER,
+                    abilityEffects = listOf(abilityEffect(effectId = "deploy-bat", target = TARGETED_TILE)),
+                    summonDuration = 5,
                 ).toDto(),
             )
         }
@@ -91,7 +91,7 @@ class ResourcesAbilityLoaderTest {
             // Given
             val abilityRoot =
                 MemoryVfsMix(
-                    "ability/skull.toml" to "cost = 10\ncooldown = 1\ntargeting = \"ANYWHERE\"\n\n[[effects]]\neffectId = \"damage\"\ntarget = \"SELECTED_TARGET\"\n",
+                    "ability/skull.toml" to "manaCost = 10\ncooldown = 1\ntargeting = \"ANYWHERE\"\n\n[[effects]]\neffectId = \"damage\"\ntarget = \"TARGETED_BATTLE_UNIT\"\n",
                 )["ability"]
             val loader = ResourcesAbilityLoader(abilityRoot = abilityRoot)
             // When

@@ -8,35 +8,35 @@ import kotlin.random.Random
 object AbilityMother {
     fun ability(
         id: String = id(),
-        cost: Int = cost(),
+        manaCost: Int = manaCost(),
         cooldown: Int = cooldown(),
-        effectSpecs: List<Ability.Dto.EffectSpecDto> = effectSpecs(),
+        abilityEffects: List<Ability.Dto.AbilityEffectDto> = abilityEffects(),
         targeting: Ability.Dto.TargetingDto = targeting(),
-        turnsDuration: Int? = null,
+        summonDuration: Int? = null,
     ) = Ability.create(
         dto =
             Ability.Dto(
                 id = id,
-                cost = cost,
+                manaCost = manaCost,
                 cooldown = cooldown,
-                effectSpecs = effectSpecs,
+                abilityEffects = abilityEffects,
                 targeting = targeting,
-                turnsDuration = turnsDuration,
+                summonDuration = summonDuration,
             ),
     )
 
     fun id() = "ability-${UUID.randomUUID()}"
 
-    fun cost() = Random.nextInt(0, 999)
+    fun manaCost() = Random.nextInt(0, 999)
 
     fun cooldown() = Random.nextInt(0, 99)
 
-    fun effectSpecs() = List(Random.nextInt(1, 4)) { effectSpec() }
+    fun abilityEffects() = List(Random.nextInt(1, 4)) { abilityEffect() }
 
-    fun effectSpec(
+    fun abilityEffect(
         effectId: String = effectId(),
         target: TargetExpressionDto.Type = targetExpression(),
-    ) = Ability.Dto.EffectSpecDto(effectId = effectId, target = TargetExpressionDto(type = target))
+    ) = Ability.Dto.AbilityEffectDto(effectId = effectId, target = TargetExpressionDto(type = target))
 
     fun targetExpression() = TargetExpressionDto.Type.values().random()
 

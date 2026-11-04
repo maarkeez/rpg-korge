@@ -157,12 +157,12 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ReduceCoolDowns should reduce the ability cooldowns when the turn passes`() {
+    fun `ReduceCooldowns should reduce the ability cooldowns when the turn passes`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1")).toDto())
-        val battleUnitWithCooldown = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+        val battleUnitWithCooldown = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         // When
-        val updatedBattleUnit = battleUnitWithCooldown.reduceCoolDowns()
+        val updatedBattleUnit = battleUnitWithCooldown.reduceCooldowns()
         // Then
         updatedBattleUnit.toDto().abilityCooldowns.shouldContain("ability-1", 2)
     }
@@ -174,7 +174,7 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         // When
         val replenishedBattleUnit = battleUnit.replenishMana()
         // Then
@@ -227,7 +227,7 @@ class BattleUnitTest {
     @Test
     fun `CanCastAbility should be true when the battle unit has actions, no cooldown and enough mana`() {
         // Given
-        val ability = AbilityMother.ability(id = "ability-1", cost = 3, cooldown = 5).toDto()
+        val ability = AbilityMother.ability(id = "ability-1", manaCost = 3, cooldown = 5).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
         // When
         val result = battleUnit.canCastAbility(ability = ability)
@@ -238,11 +238,11 @@ class BattleUnitTest {
     @Test
     fun `CanCastAbility should be false when the ability is on cooldown`() {
         // Given
-        val ability = AbilityMother.ability(id = "ability-1", cost = 3, cooldown = 5).toDto()
+        val ability = AbilityMother.ability(id = "ability-1", manaCost = 3, cooldown = 5).toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
-                .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         // When
         val result = battleUnit.canCastAbility(ability = ability)
         // Then
@@ -252,11 +252,11 @@ class BattleUnitTest {
     @Test
     fun `CanCastAbility should be false when the battle unit has no remaining casts`() {
         // Given
-        val ability = AbilityMother.ability(id = "ability-1", cost = 3, cooldown = 5).toDto()
+        val ability = AbilityMother.ability(id = "ability-1", manaCost = 3, cooldown = 5).toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1", "ability-2"), manaPoints = 10).toDto())
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         // When
         val result = battleUnit.canCastAbility(ability = ability)
         // Then
@@ -266,7 +266,7 @@ class BattleUnitTest {
     @Test
     fun `CanCastAbility should be false when the ability is not in the battle unit`() {
         // Given
-        val ability = AbilityMother.ability(id = "ability-2", cost = 3, cooldown = 5).toDto()
+        val ability = AbilityMother.ability(id = "ability-2", manaCost = 3, cooldown = 5).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
         // When
         val result = battleUnit.canCastAbility(ability = ability)
@@ -277,7 +277,7 @@ class BattleUnitTest {
     @Test
     fun `CanCastAbility should not be able to cast when the battle unit has no enough mana`() {
         // Given
-        val ability = AbilityMother.ability(cost = 3).toDto()
+        val ability = AbilityMother.ability(manaCost = 3).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf(ability.id), manaPoints = 0).toDto())
         // When
         val result = battleUnit.canCastAbility(ability = ability)
@@ -321,7 +321,7 @@ class BattleUnitTest {
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("ability-1"), manaPoints = 10).toDto())
         // When
         val castGroup = listOf(Battlefield.Dto.PositionDto(1, 1))
-        val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 3, castGroup = castGroup)
+        val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 3, castGroup = castGroup)
         // Then
         val battleUnitDto = updatedBattleUnit.toDto()
         battleUnitDto.remainingManaPoints shouldBe 7
@@ -507,7 +507,7 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 7, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 7, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         val manaEffect = EffectMother.increaseManaEffect(mana = 5).toDto()
@@ -531,7 +531,7 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
         val manaEffect = EffectMother.increaseManaEffect(mana = 20).toDto()
         // When
         val updatedBattleUnit =
@@ -568,7 +568,7 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(abilities = listOf("sword")).toDto())
-                .castAbility(abilityId = "sword", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "sword", abilityCooldown = 2, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
@@ -950,7 +950,7 @@ class BattleUnitTest {
         val unit = UnitMother.unit(healthPoints = healthPoints, manaPoints = manaPoints).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealthPoints = remainingHealthPoints)
         if (spentManaPoints == 0) return battleUnit
-        return battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = spentManaPoints, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+        return battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = spentManaPoints, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
     }
 
     @Test
@@ -1137,7 +1137,7 @@ class BattleUnitTest {
         val defeatedBattleUnit =
             BattleUnitMother
                 .battleUnit(id = "rat-1", unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
                 .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 40, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
@@ -1161,7 +1161,7 @@ class BattleUnitTest {
             BattleUnitMother
                 .battleUnit(unit = unit)
                 .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
-                .castAbility(abilityId = "teleport", abilityCooldown = 2, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "teleport", abilityCooldown = 2, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 20, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second

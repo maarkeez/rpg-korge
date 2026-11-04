@@ -22,7 +22,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
                 .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
-                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(exhaustedBattleUnit)
@@ -44,7 +44,7 @@ class ResetBattleUnitActionsAndReduceCooldownsTest {
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
                 .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
-                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 3, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(exhaustedBattleUnit)

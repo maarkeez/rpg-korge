@@ -29,7 +29,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestMoveOccupant
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestOccupyTile
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestRemoveOccupant
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_NEARBY_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
@@ -325,8 +325,8 @@ data class BattleUnit private constructor(
         return copy(remainingTurnActions = remainingTurnActions)
     }
 
-    fun reduceCoolDowns(): BattleUnit {
-        val abilityCooldowns = abilityCooldowns.reduceCoolDowns()
+    fun reduceCooldowns(): BattleUnit {
+        val abilityCooldowns = abilityCooldowns.reduceCooldowns()
         return copy(abilityCooldowns = abilityCooldowns)
     }
 
@@ -391,17 +391,17 @@ data class BattleUnit private constructor(
     fun canCastAbility(ability: Ability.Dto): Boolean =
         remainingTurnActions.canCastAbility() &&
             abilityCooldowns.canCastAbility(ability.id) &&
-            remainingManaPoints.value >= ability.cost
+            remainingManaPoints.value >= ability.manaCost
 
     fun castAbility(
         abilityId: String,
         abilityCooldown: Int,
-        abilityCost: Int,
+        abilityManaCost: Int,
         castGroup: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
         val remainingTurnActions = remainingTurnActions.reduceRemainingCasts()
         val abilityCooldowns = abilityCooldowns.setAbilityCooldown(abilityId, abilityCooldown)
-        val remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityCost)
+        val remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityManaCost)
         val abilityCastedEvent =
             BattleUnitEvent.AbilityCasted(
                 battleUnitId = id.value,
@@ -502,7 +502,7 @@ data class BattleUnit private constructor(
             }
             LEARN_ABILITY -> copy(ongoingEffects = ongoingEffects).learnAbility(effect.outcome.learnAbility!!.abilityId)
             NEGATE_INCREASE_HEALTH,
-            APPLY_EFFECT_ON_NEARBY_ALLIES,
+            APPLY_EFFECT_ON_ADJACENT_ALLIES,
             DEPLOY_BATTLE_UNIT,
             INCREASE_MAXIMUM_HEALTH,
             INCREASE_MAXIMUM_MANA,
@@ -812,7 +812,7 @@ data class BattleUnit private constructor(
             return AbilityCooldowns(abilityCooldowns)
         }
 
-        fun reduceCoolDowns(): AbilityCooldowns {
+        fun reduceCooldowns(): AbilityCooldowns {
             val abilityCooldowns =
                 buildMap {
                     value.entries.forEach { (abilityId, cooldownTurnsLeft) ->

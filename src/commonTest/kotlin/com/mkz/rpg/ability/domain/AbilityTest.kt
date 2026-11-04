@@ -1,14 +1,14 @@
 package com.mkz.rpg.ability.domain
 
 import com.mkz.rpg.ability.domain.AbilityError.AbilityCooldownAboveLimit
-import com.mkz.rpg.ability.domain.AbilityError.AbilityCostAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectsAboveLimit
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEmptyEffects
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationAboveLimit
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationBelowMinimum
+import com.mkz.rpg.ability.domain.AbilityError.AbilityManaCostAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationAboveLimit
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationBelowMinimum
 import com.mkz.rpg.ability.domain.AbilityError.EmptyAbilityId
 import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCooldown
-import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityCost
+import com.mkz.rpg.ability.domain.AbilityError.NegativeAbilityManaCost
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -41,55 +41,55 @@ class AbilityTest {
     }
 
     @Test
-    fun `Create should fail when the cost is negative`() {
+    fun `Create should fail when the mana cost is negative`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(cost = -1)
+                .copy(manaCost = -1)
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<NegativeAbilityCost>()
+        createdAbility.exceptionOrNull().shouldBeTypeOf<NegativeAbilityManaCost>()
     }
 
     @Test
-    fun `Create should create ability when the cost is zero`() {
+    fun `Create should create ability when the mana cost is zero`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(cost = 0)
+                .copy(manaCost = 0)
         // When
         val createdAbility = Ability.create(dto = dto)
         // Then
-        createdAbility.toDto().cost shouldBe 0
+        createdAbility.toDto().manaCost shouldBe 0
     }
 
     @Test
-    fun `Create should create ability when the cost is at the limit`() {
+    fun `Create should create ability when the mana cost is at the limit`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(cost = 999)
+                .copy(manaCost = 999)
         // When
         val createdAbility = Ability.create(dto = dto)
         // Then
-        createdAbility.toDto().cost shouldBe 999
+        createdAbility.toDto().manaCost shouldBe 999
     }
 
     @Test
-    fun `Create should fail when the cost is above the limit`() {
+    fun `Create should fail when the mana cost is above the limit`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(cost = 1000)
+                .copy(manaCost = 1000)
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityCostAboveLimit>()
+        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityManaCostAboveLimit>()
     }
 
     @Test
@@ -145,55 +145,55 @@ class AbilityTest {
     }
 
     @Test
-    fun `Create should create ability when the turns duration is at the minimum`() {
+    fun `Create should create ability when the summon duration is at the minimum`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(turnsDuration = 1)
+                .copy(summonDuration = 1)
         // When
         val createdAbility = Ability.create(dto = dto)
         // Then
-        createdAbility.toDto().turnsDuration shouldBe 1
+        createdAbility.toDto().summonDuration shouldBe 1
     }
 
     @Test
-    fun `Create should create ability when the turns duration is at the limit`() {
+    fun `Create should create ability when the summon duration is at the limit`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(turnsDuration = 99)
+                .copy(summonDuration = 99)
         // When
         val createdAbility = Ability.create(dto = dto)
         // Then
-        createdAbility.toDto().turnsDuration shouldBe 99
+        createdAbility.toDto().summonDuration shouldBe 99
     }
 
     @Test
-    fun `Create should fail when the turns duration is below the minimum`() {
+    fun `Create should fail when the summon duration is below the minimum`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(turnsDuration = 0)
+                .copy(summonDuration = 0)
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityTurnsDurationBelowMinimum>()
+        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilitySummonDurationBelowMinimum>()
     }
 
     @Test
-    fun `Create should fail when the turns duration is above the limit`() {
+    fun `Create should fail when the summon duration is above the limit`() {
         // Given
         val dto =
             ability()
                 .toDto()
-                .copy(turnsDuration = 100)
+                .copy(summonDuration = 100)
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
-        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilityTurnsDurationAboveLimit>()
+        createdAbility.exceptionOrNull().shouldBeTypeOf<AbilitySummonDurationAboveLimit>()
     }
 
     @Test
@@ -202,7 +202,7 @@ class AbilityTest {
         val dto =
             ability()
                 .toDto()
-                .copy(effectSpecs = emptyList())
+                .copy(abilityEffects = emptyList())
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
@@ -215,7 +215,7 @@ class AbilityTest {
         val dto =
             ability()
                 .toDto()
-                .copy(effectSpecs = List(4) { "effect-$it" }.map { effectId -> AbilityMother.effectSpec(effectId = effectId) })
+                .copy(abilityEffects = List(4) { "effect-$it" }.map { effectId -> AbilityMother.abilityEffect(effectId = effectId) })
         // When
         val createdAbility = runCatching { Ability.create(dto = dto) }
         // Then
@@ -239,13 +239,13 @@ class AbilityTest {
     fun `ToDto should expose the targeting as its dto representation`() {
         // Given
         val dto =
-            ability(targeting = Ability.Dto.TargetingDto.SELF)
+            ability(targeting = Ability.Dto.TargetingDto.CASTER)
                 .toDto()
         val createdAbility = Ability.create(dto = dto)
         // When
         val result = createdAbility.toDto()
         // Then
-        result.targeting shouldBe Ability.Dto.TargetingDto.SELF
+        result.targeting shouldBe Ability.Dto.TargetingDto.CASTER
     }
 
     @Test

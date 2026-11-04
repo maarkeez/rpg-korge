@@ -96,6 +96,6 @@ no asset per size or state:
 - The portraits are ringed with their team's colour in a battle: green `#5AD25A` for the human player's battle units,
   red `#FF375F` for the CPU's.
 - The selected ability is ringed in gold `#FFD84A`, with a faint glow. An ability in cooldown is darkened under a dark
-  overlay with the turns left in its middle; one short of mana is tinted blue, with its cost in a blue
+  overlay with the turns left in its middle; one short of mana is tinted blue, with its mana cost in a blue
   [`PillView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PillView.kt).
 - A stroke is drawn half outside its shape, which cuts it, so the rings are inset by half their thickness.

@@ -2,15 +2,15 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TARGET
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.SELECTED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.SELF
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_BATTLE_UNIT
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_SELF
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
-import com.mkz.rpg.ability.domain.AbilityMother.effectSpec
+import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast.CastGroup
@@ -42,22 +42,22 @@ class WhatShouldCastTest {
     private val human = player(id = "human").also(queries.playerRepository::create).toDto()
     private val knightUnit = unit(id = "knight", healthPoints = 100).toDto()
 
-    private val sword = ability(id = "sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("damage", SELECTED_TARGET)))
-    private val bigSword = ability(id = "big-sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("big-damage", SELECTED_TARGET)))
-    private val poisonedSword = ability(id = "poisoned-sword", cost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, effectSpecs = listOf(effectSpec("venom", SELECTED_TARGET)))
-    private val whirlwind = ability(id = "whirlwind", cost = 0, cooldown = 0, targeting = ALL_ADJACENT_ENEMIES, effectSpecs = listOf(effectSpec("damage", SELECTED_TARGET)))
-    private val heal = ability(id = "heal", cost = 0, cooldown = 0, targeting = SELF, effectSpecs = listOf(effectSpec("heal", CASTER)))
-    private val teleport = ability(id = "teleport", cost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_BATTLE_UNIT, effectSpecs = listOf(effectSpec("teleport", CASTER)))
+    private val sword = ability(id = "sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT)))
+    private val bigSword = ability(id = "big-sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("big-damage", TARGETED_BATTLE_UNIT)))
+    private val poisonedSword = ability(id = "poisoned-sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("venom", TARGETED_BATTLE_UNIT)))
+    private val whirlwind = ability(id = "whirlwind", manaCost = 0, cooldown = 0, targeting = ALL_ADJACENT_ENEMIES, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT)))
+    private val heal = ability(id = "heal", manaCost = 0, cooldown = 0, targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("heal", CASTER)))
+    private val teleport = ability(id = "teleport", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, abilityEffects = listOf(abilityEffect("teleport", CASTER)))
 
     // The bat (sword dealing 10, walking 2 tiles per turn) is deployed on a vacant tile next to the caster.
-    private val deployBat = ability(id = "deploy-bat", cost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_SELF, effectSpecs = listOf(effectSpec("deploy-bat", SELECTED_TILE)))
+    private val deployBat = ability(id = "deploy-bat", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-bat", TARGETED_TILE)))
 
     // The scarecrow has no attack.
     private val deployScarecrow =
-        ability(id = "deploy-scarecrow", cost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_SELF, effectSpecs = listOf(effectSpec("deploy-scarecrow", SELECTED_TILE)))
+        ability(id = "deploy-scarecrow", manaCost = 0, cooldown = 0, targeting = VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-scarecrow", TARGETED_TILE)))
 
     // It costs more mana than the rat has.
-    private val unaffordableHeal = ability(id = "heal", cost = 100, cooldown = 0, targeting = SELF, effectSpecs = listOf(effectSpec("heal", CASTER)))
+    private val unaffordableHeal = ability(id = "heal", manaCost = 100, cooldown = 0, targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("heal", CASTER)))
 
     init {
         queries.effectRepository.create(decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY"))
@@ -98,7 +98,7 @@ class WhatShouldCastTest {
         val ratUnit = unit(id = "rat", healthPoints = 20, manaPoints = 10, abilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
         val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealthPoints = remainingHealthPoints)
         // A rat with no casts left has already cast an ability this turn.
-        val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityCost = 0, castGroup = emptyList()).pullEvents().second else rat
+        val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityManaCost = 0, castGroup = emptyList()).pullEvents().second else rat
         queries.battleUnitRepository.create(castRat)
         place(ratId, casterPosition)
     }

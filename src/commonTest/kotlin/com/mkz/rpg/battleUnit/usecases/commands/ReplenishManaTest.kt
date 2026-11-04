@@ -24,7 +24,7 @@ class ReplenishManaTest {
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)
@@ -43,7 +43,7 @@ class ReplenishManaTest {
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)
@@ -62,7 +62,7 @@ class ReplenishManaTest {
         val depletedBattleUnit =
             com.mkz.rpg.battleUnit.domain.BattleUnitMother
                 .battleUnit(unit = unit, player = player)
-                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+                .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 15, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
         battleUnitRepository.create(depletedBattleUnit)

@@ -2,8 +2,8 @@ package com.mkz.rpg.ability.usecases.services
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.AbilityError.AbilityEffectDoesNotExist
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationMissing
-import com.mkz.rpg.ability.domain.AbilityError.AbilityTurnsDurationNotAllowed
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationMissing
+import com.mkz.rpg.ability.domain.AbilityError.AbilitySummonDurationNotAllowed
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.ability.domain.AbilityRepository
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
@@ -19,10 +19,10 @@ class AbilityCreation(
 ) {
     fun create(abilityDto: Ability.Dto): Set<AbilityEvent> {
         if (abilityRepository.searchById(abilityDto.id) != null) return emptySet()
-        val effects = abilityDto.effectSpecs.map { effectSpec -> searchEffectById(effectSpec.effectId) ?: throw AbilityEffectDoesNotExist() }
+        val effects = abilityDto.abilityEffects.map { abilityEffect -> searchEffectById(abilityEffect.effectId) ?: throw AbilityEffectDoesNotExist() }
         val deploysBattleUnit = effects.any { effect -> effect.outcome.type == DEPLOY_BATTLE_UNIT }
-        if (deploysBattleUnit && abilityDto.turnsDuration == null) throw AbilityTurnsDurationMissing()
-        if (!deploysBattleUnit && abilityDto.turnsDuration != null) throw AbilityTurnsDurationNotAllowed()
+        if (deploysBattleUnit && abilityDto.summonDuration == null) throw AbilitySummonDurationMissing()
+        if (!deploysBattleUnit && abilityDto.summonDuration != null) throw AbilitySummonDurationNotAllowed()
         val (events, ability) = Ability.create(abilityDto).pullEvents()
         abilityRepository.create(ability)
         return events
