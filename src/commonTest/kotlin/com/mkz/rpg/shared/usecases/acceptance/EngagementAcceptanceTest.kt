@@ -141,7 +141,7 @@ class EngagementAcceptanceTest {
     }
 
     @Test
-    fun `should explore again straight away, without finishing the turn, when the last cpu battle unit engaged is defeated`() =
+    fun `should explore again straight away, without finishing the turn, when the last cpu battle unit in the battle is defeated`() =
         scenarioTest(::setUp) {
             // Given
             engageRat()
@@ -155,7 +155,7 @@ class EngagementAcceptanceTest {
         }
 
     @Test
-    fun `should have a cpu battle unit within reach join the battle, which goes on, when the last cpu battle unit engaged is defeated`() =
+    fun `should have a cpu battle unit within reach join the battle, which goes on, when the last cpu battle unit in the battle is defeated`() =
         scenarioTest(::setUp) {
             // Given
             engageRat()
@@ -180,7 +180,7 @@ class EngagementAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             val winners = mutableListOf<String>().also { winners -> eventBus.subscribe<BattleEvent.PlayerVictory> { winners += it.playerId } }
-            val finishedBattles = mutableListOf<BattleEvent.BattleFinished>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinished> { finished += it } }
+            val finishedBattles = mutableListOf<BattleEvent.BattleFinishedWithoutWinner>().also { finished -> eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> { finished += it } }
             engageRat()
             // The rat-2, out of the battle, is defeated first, which leaves the battle engaged.
             defeatRat("rat-2")

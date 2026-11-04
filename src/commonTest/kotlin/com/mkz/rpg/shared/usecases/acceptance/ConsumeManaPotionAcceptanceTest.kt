@@ -82,7 +82,7 @@ class ConsumeManaPotionAcceptanceTest {
     fun `should restore the knight mana when the knight consumes a looted mana potion`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingManaPoints == 20)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "mana-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion", row = 6, column = 7)

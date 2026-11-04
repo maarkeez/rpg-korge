@@ -47,7 +47,7 @@ class ReengageEnemiesTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
-            BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2")),
+            BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2")),
         )
     }
 
@@ -60,7 +60,7 @@ class ReengageEnemiesTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
-            BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
+            BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
         )
     }
 
@@ -73,7 +73,7 @@ class ReengageEnemiesTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
-            BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
+            BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
         )
     }
 
@@ -84,7 +84,7 @@ class ReengageEnemiesTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
-            BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = null, joiningBattleUnitIds = emptyList()),
+            BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = null, joiningBattleUnitIds = emptyList()),
         )
     }
 }

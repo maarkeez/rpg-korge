@@ -253,7 +253,7 @@ class FinishTurnPresenterTest {
         playerCallToActionView.onTurnFinished.shouldNotBeNull().invoke()
         apis.eventBus.dispatch()
         // Then
-        apis.battleApi.searchBattle()?.currentPlayerTurn shouldBe "cpu"
+        apis.battleApi.searchBattle()?.currentPlayerId shouldBe "cpu"
     }
 }
 ```

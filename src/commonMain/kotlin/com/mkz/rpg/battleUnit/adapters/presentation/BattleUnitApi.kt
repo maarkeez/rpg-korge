@@ -2,7 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.presentation
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.battleUnit.adapters.events.OnAbilityCasted
-import com.mkz.rpg.battleUnit.adapters.events.OnBattleFinished
+import com.mkz.rpg.battleUnit.adapters.events.OnBattleFinishedWithoutWinner
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.battleUnit.adapters.events.OnBattleUnitVanished
@@ -235,7 +235,7 @@ class BattleUnitApi(
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
     private val onPlayerTurnFinished = OnPlayerTurnFinished(finishSummonedBattleUnitsTurn, eventBus)
-    private val onBattleFinished = OnBattleFinished(vanishSummonedBattleUnits, eventBus)
+    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummonedBattleUnits, eventBus)
     private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(requestBattleJoin, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToAdjacentAllies, requestBattleLeave, eventBus)

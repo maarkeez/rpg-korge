@@ -148,7 +148,7 @@ class BattlefieldPresenter(
                 selectPartyLeader(event)
             },
             // The selection is cleared when the battle finishes, as the party explores again.
-            eventBus.subscribe<BattleEvent.BattleFinished> {
+            eventBus.subscribe<BattleEvent.BattleFinishedWithoutWinner> {
                 timeline.play { clearSelection() }
                 battlefieldHudApi.deselectBattleUnit()
             },

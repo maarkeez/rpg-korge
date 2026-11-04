@@ -22,7 +22,7 @@ class OnRequestStartBattleTest {
         eventBus.dispatch()
         // Then
         val battle = battleRepository.search()!!.toDto()
-        battle.currentPlayerTurn shouldBe "cpu"
+        battle.currentPlayerId shouldBe "cpu"
         battle.battleUnitIds shouldBe setOf("rat-1", "knight-1")
     }
 }

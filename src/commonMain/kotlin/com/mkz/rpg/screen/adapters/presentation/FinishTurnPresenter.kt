@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
@@ -31,7 +31,7 @@ class FinishTurnPresenter(
                 timeline.playNext { playerCallToActionView.displayFinishTurn(onTurnFinished = { finishTurn() }) }
             },
             // E.g.: during the human player turn, once the last CPU battle unit is defeated.
-            eventBus.subscribe<BattleFinished> {
+            eventBus.subscribe<BattleFinishedWithoutWinner> {
                 timeline.play {
                     isHumanTurnDisplayed = false
                     playerCallToActionView.hideFinishTurn()

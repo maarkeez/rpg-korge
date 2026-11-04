@@ -136,7 +136,7 @@ class BattleInfoPresenterTest {
     fun `AnnounceBattleEnd should announce the end of the battle when it finishes`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN)
-        apis.eventBus.publish(BattleEvent.BattleFinished)
+        apis.eventBus.publish(BattleEvent.BattleFinishedWithoutWinner)
         // When
         apis.eventBus.dispatch()
         // Then

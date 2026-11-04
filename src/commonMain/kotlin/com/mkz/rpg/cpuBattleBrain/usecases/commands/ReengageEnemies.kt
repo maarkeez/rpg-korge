@@ -9,7 +9,7 @@ import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Once the battle is disengaged during a round (e.g.: the last CPU battle unit engaged was defeated), the CPU battle units
+ * Once the battle is disengaged during a round (e.g.: the last CPU battle unit in the battle was defeated), the CPU battle units
  * out of the battle with an enemy within reach join it, as when the engagement is updated after a round, but without
  * wandering first, so the battle goes on. They play from the next round. Nobody leaves it. The battle is requested to
  * finish right after, unless they re-engage it.
@@ -33,7 +33,7 @@ class ReengageEnemies(
         eventBus.publish(
             setOf(
                 CpuBattleBrainEvent.EngagementUpdated(playerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = emptyList()),
-                BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds),
+                BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds),
             ),
         )
     }

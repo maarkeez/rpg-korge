@@ -3,13 +3,13 @@ package com.mkz.rpg.cpuWanderBrain.adapters.presentation
 import com.mkz.rpg.battleUnit.adapters.presentation.BattleUnitApi
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
-import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleRoundFinished
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitRespawned
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnExplorationSecondStarted
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnPartyWalked
+import com.mkz.rpg.cpuWanderBrain.adapters.events.OnRoundFinished
 import com.mkz.rpg.cpuWanderBrain.adapters.save.CpuWanderBrainSnapshottable
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
@@ -64,7 +64,7 @@ class CpuWanderBrainApi(
     private val onBattleUnitDeployed = OnBattleUnitDeployed(claimHome, eventBus)
     private val onExplorationSecondStarted = OnExplorationSecondStarted(wanderWhileExploring, eventBus)
     private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveWanderingStep, eventBus)
-    private val onBattleRoundFinished = OnBattleRoundFinished(wanderAfterRound, eventBus)
+    private val onRoundFinished = OnRoundFinished(wanderAfterRound, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(awaitRespawn, eventBus)
     private val onPartyWalked = OnPartyWalked(respawnDefeatedBattleUnits, eventBus)
     private val onBattleUnitRespawned = OnBattleUnitRespawned(resolveRespawn, eventBus)

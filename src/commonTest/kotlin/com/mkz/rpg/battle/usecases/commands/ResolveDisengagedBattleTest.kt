@@ -12,11 +12,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class FinishDisengagedBattleTest {
+class ResolveDisengagedBattleTest {
     private val players = listOf("cpu", "human")
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val finishDisengagedBattle = FinishDisengagedBattle(battleRepository, eventBus)
+    private val resolveDisengagedBattle = ResolveDisengagedBattle(battleRepository, eventBus)
 
     // The rat-1, of the cpu, was defeated, which left the knight-1, of the human, alone in the battle. The rat-2, of the cpu, is out of the battle.
     private fun givenDisengagedBattle() {
@@ -28,14 +28,14 @@ class FinishDisengagedBattleTest {
         // Given
         givenDisengagedBattle()
         // When
-        finishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
+        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
         // Then
         battleRepository
             .search()!!
             .toDto()
             .isFinished
             .shouldBeTrue()
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
     }
 
     @Test
@@ -43,7 +43,7 @@ class FinishDisengagedBattleTest {
         // Given
         givenDisengagedBattle()
         // When
-        finishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"))
+        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"))
         // Then
         val battle = battleRepository.search()!!.toDto()
         battle.isFinished.shouldBeFalse()
@@ -63,7 +63,7 @@ class FinishDisengagedBattleTest {
                 .second
         battleRepository.create(defeatedBattle)
         // When
-        finishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
+        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
         // Then
         battleRepository.search() shouldBe defeatedBattle
         eventBus.shouldNotHavePublishedEvents()
@@ -75,7 +75,7 @@ class FinishDisengagedBattleTest {
         val finishedBattle = battle(players, battleUnits = mapOf("knight-1" to "human")).finishWithoutWinner().pullEvents().second
         battleRepository.create(finishedBattle)
         // When
-        finishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
+        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
         // Then
         battleRepository.search() shouldBe finishedBattle
         eventBus.shouldNotHavePublishedEvents()
@@ -84,7 +84,7 @@ class FinishDisengagedBattleTest {
     @Test
     fun `should do nothing when no battle exists`() {
         // When
-        finishDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
+        resolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList())
         // Then
         battleRepository.search().shouldBeNull()
         eventBus.shouldNotHavePublishedEvents()

@@ -82,7 +82,7 @@ class LootDroppedItemsAcceptanceTest {
     fun `should store the dropped item in the inventory and clear its tile when the knight walks across it`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 2, column = 1))
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
@@ -97,7 +97,7 @@ class LootDroppedItemsAcceptanceTest {
     fun `should store the dropped item in the inventory and clear its tile when the knight stops on it`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
             // When
@@ -141,7 +141,7 @@ class LootDroppedItemsAcceptanceTest {
     fun `should leave the dropped item on its tile when the knight inventory is full`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2) }
             battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 2)
             // When

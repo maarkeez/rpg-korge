@@ -1,6 +1,5 @@
 package com.mkz.rpg.battlefield.adapters.presentation
 
-import com.mkz.rpg.battlefield.adapters.events.OnBattleRoundStarted
 import com.mkz.rpg.battlefield.adapters.events.OnRequestEffectApplicationToOccupants
 import com.mkz.rpg.battlefield.adapters.events.OnRequestInitialiseBattlefield
 import com.mkz.rpg.battlefield.adapters.events.OnRequestMoveOccupant
@@ -8,6 +7,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTile
 import com.mkz.rpg.battlefield.adapters.events.OnRequestOccupyTiles
 import com.mkz.rpg.battlefield.adapters.events.OnRequestRemoveOccupant
 import com.mkz.rpg.battlefield.adapters.events.OnRequestSwapOccupants
+import com.mkz.rpg.battlefield.adapters.events.OnRoundStarted
 import com.mkz.rpg.battlefield.adapters.save.BattlefieldSnapshottable
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
@@ -103,7 +103,7 @@ class BattlefieldApi(
     private val onRequestRemoveOccupant = OnRequestRemoveOccupant(removeOccupant, eventBus)
     private val onRequestSwapOccupants = OnRequestSwapOccupants(swapOccupants, eventBus)
     private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)
-    private val onBattleRoundStarted = OnBattleRoundStarted(triggerTerrainEffects, eventBus)
+    private val onRoundStarted = OnRoundStarted(triggerTerrainEffects, eventBus)
     private val onRequestEffectApplicationToOccupants = OnRequestEffectApplicationToOccupants(triggerTerrainEffects, eventBus)
 
     suspend fun init() {

@@ -5,12 +5,12 @@ import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattleRoundStarted(
+class OnRoundStarted(
     private val triggerTerrainEffects: TriggerTerrainEffects,
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattleEvent.BattleRoundStarted> { event ->
+        eventBus.subscribe<BattleEvent.RoundStarted> { event ->
             triggerTerrainEffects(event.battleUnitIds)
         }
 }

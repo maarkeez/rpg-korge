@@ -96,7 +96,7 @@ class CpuDeployingAcceptanceTest {
             deployments.last() shouldBe BattleUnitEvent.BattleUnitDeployed(playerId = cpuPlayerId, battleUnitId = deployedBattleUnitId, row = 0, column = 1)
             // The bat joins the battle, so it plays the next CPU turns.
             battleApi.searchBattle()!!.battleUnitIds shouldContain deployedBattleUnitId
-            battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
+            battleApi.searchBattle()!!.currentPlayerId shouldBe humanPlayerId
         }
 
     @Test
@@ -126,6 +126,6 @@ class CpuDeployingAcceptanceTest {
             val batId = (battleUnitApi.searchBattleUnitsByPlayerId(cpuPlayerId).map { it.id } - goatBattleUnitId).single()
             battlefieldApi.searchPosition(batId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 2)
             battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
-            battleApi.searchBattle()!!.currentPlayerTurn shouldBe humanPlayerId
+            battleApi.searchBattle()!!.currentPlayerId shouldBe humanPlayerId
         }
 }

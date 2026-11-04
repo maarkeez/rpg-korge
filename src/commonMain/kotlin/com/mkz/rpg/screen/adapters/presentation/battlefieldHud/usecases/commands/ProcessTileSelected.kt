@@ -164,7 +164,7 @@ class ProcessTileSelected(
         tile: TileDto,
     ) {
         val casterBattleUnit = searchBattleUnitById(battlefieldHud.battleUnitId)!!
-        val currentPlayerId = searchBattle()?.currentPlayerTurn ?: return
+        val currentPlayerId = searchBattle()?.currentPlayerId ?: return
 
         val selectedCastGroup = battlefieldHud.castGroupsWhereCanCast.firstOrNull { castGroup -> castGroup.tiles.contains(tile) }
         val isPlayerBattleUnit = currentPlayerId == casterBattleUnit.playerId

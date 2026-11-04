@@ -155,13 +155,13 @@ class SimpleBattleAcceptanceTest {
             // Given
             battleApi.finishPlayerTurn()
             val battle = battleApi.searchBattle()!!
-            require(battle.currentPlayerTurn == cpuPlayerId)
+            require(battle.currentPlayerId == cpuPlayerId)
             require(battle.currentRound == 1)
             // When
             eventBus.dispatch()
             // Then
             val storedBattle = battleApi.searchBattle()!!
-            storedBattle.currentPlayerTurn shouldBe humanPlayerId
+            storedBattle.currentPlayerId shouldBe humanPlayerId
             storedBattle.currentRound shouldBe 2
         }
 
@@ -228,6 +228,6 @@ class SimpleBattleAcceptanceTest {
             // Then
             val battle = battleApi.searchBattle()!!
             battle.isFinished.shouldBeTrue()
-            battle.currentPlayerTurn shouldBe humanPlayerId
+            battle.currentPlayerId shouldBe humanPlayerId
         }
 }

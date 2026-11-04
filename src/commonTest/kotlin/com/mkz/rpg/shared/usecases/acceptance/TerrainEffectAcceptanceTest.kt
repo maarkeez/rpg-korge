@@ -132,7 +132,7 @@ class TerrainEffectAcceptanceTest {
     }
 
     @Test
-    fun `should apply the terrain effect to the occupants of the terrain tiles when a new battle round starts`() =
+    fun `should apply the terrain effect to the occupants of the terrain tiles when a new round starts`() =
         scenarioTest(::setUp) {
             // Given
             battleApi.searchBattle()!!.currentRound shouldBe 1

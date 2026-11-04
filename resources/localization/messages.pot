@@ -46,7 +46,7 @@ msgctxt "ui.battleInfo.battleOver"
 msgid "Battle over!"
 msgstr ""
 
-#. {round}: the number of the battle round, e.g.: 3.
+#. {round}: the number of the round, e.g.: 3.
 msgctxt "ui.battleInfo.round"
 msgid "Round {round}"
 msgstr ""

@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
@@ -37,7 +37,7 @@ class BattleInfoPresenter(
             eventBus.subscribe<BattleStarted> {
                 timeline.play { battleInfoView.announceBattle() }
             },
-            eventBus.subscribe<BattleFinished> {
+            eventBus.subscribe<BattleFinishedWithoutWinner> {
                 timeline.play { battleInfoView.announceBattleEnd() }
             },
             eventBus.subscribe<ExplorationResumed> {
@@ -56,7 +56,7 @@ class BattleInfoPresenter(
     // The header pops while the battlefield is tinted with the turn colour.
     fun announceTurn() {
         val battle = battleApi.searchBattle()!!
-        val player = playerApi.searchPlayerById(battle.currentPlayerTurn)!!
+        val player = playerApi.searchPlayerById(battle.currentPlayerId)!!
         val turnColor =
             when (player.type) {
                 PlayerTypeDto.HUMAN -> BattleInfoView.HUMAN_TURN_COLOR

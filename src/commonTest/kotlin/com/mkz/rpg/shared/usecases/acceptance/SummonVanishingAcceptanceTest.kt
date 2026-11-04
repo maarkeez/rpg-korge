@@ -152,7 +152,7 @@ class SummonVanishingAcceptanceTest {
             val battle = battleApi.searchBattle()!!
             battle.battleUnitIds shouldNotContain summonedBattleUnitId
             battle.isFinished shouldBe false
-            battle.currentPlayerTurn shouldBe enemyPlayerId
+            battle.currentPlayerId shouldBe enemyPlayerId
         }
 
     @Test

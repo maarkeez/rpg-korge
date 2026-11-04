@@ -12,12 +12,12 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-class OnBattleRoundFinishedTest {
+class OnRoundFinishedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries(random = FixedDoublesRandom(0.0))
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val onBattleRoundFinished =
-        OnBattleRoundFinished(
+    private val onRoundFinished =
+        OnRoundFinished(
             WanderAfterRound(
                 cpuWanderBrainRepository,
                 WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus),
@@ -30,9 +30,9 @@ class OnBattleRoundFinishedTest {
         mutableListOf<CpuWanderBrainEvent.BattleUnitsWanderedAfterRound>().also { wandered -> eventBus.subscribe<CpuWanderBrainEvent.BattleUnitsWanderedAfterRound> { wandered += it } }
 
     @Test
-    fun `should wander the cpu battle units out of the battle when a battle round finishes`() {
+    fun `should wander the cpu battle units out of the battle when a round finishes`() {
         // Given
-        eventBus.publish(BattleEvent.BattleRoundFinished(round = 1, battleUnitIds = setOf("knight-1", "rat-1")))
+        eventBus.publish(BattleEvent.RoundFinished(round = 1, battleUnitIds = setOf("knight-1", "rat-1")))
         // When
         eventBus.dispatch()
         // Then

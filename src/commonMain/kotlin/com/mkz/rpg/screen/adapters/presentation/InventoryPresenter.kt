@@ -705,7 +705,7 @@ class InventoryPresenter(
     private fun canUseInventoryOf(battleUnitId: String): Boolean {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return false
         val battle = battleApi.searchBattle()?.takeIf { battle -> !battle.isFinished } ?: return true
-        return battle.currentPlayerTurn == battleUnit.playerId
+        return battle.currentPlayerId == battleUnit.playerId
     }
 
     // The player can only act once the scene shows the current state of the battle, has chosen what to do with the found

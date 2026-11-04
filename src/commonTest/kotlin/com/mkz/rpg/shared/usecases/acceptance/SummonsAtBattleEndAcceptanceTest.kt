@@ -112,7 +112,7 @@ class SummonsAtBattleEndAcceptanceTest {
             // Given
             val beeId = summonBee()
             val beeTile = battlefieldApi.searchPosition(beeId)!!
-            // When: the rat-1 is the only CPU battle unit engaged, so the battle ends without finishing the turn.
+            // When: the rat-1 is the only CPU battle unit in the battle, so the battle ends without finishing the turn.
             defeat("rat-1")
             // Then
             battleApi.searchBattle()!!.isFinished.shouldBeTrue()
@@ -130,7 +130,7 @@ class SummonsAtBattleEndAcceptanceTest {
             defeat("knight-1")
             defeat("knight-2")
             require(winners.isEmpty())
-            // When: the rat-1 is the only CPU battle unit engaged, so the battle ends without finishing the turn.
+            // When: the rat-1 is the only CPU battle unit in the battle, so the battle ends without finishing the turn.
             defeat("rat-1")
             // Then
             winners.shouldContainExactly(cpuPlayerId)

@@ -2,28 +2,28 @@ package com.mkz.rpg.battle.domain
 
 import com.mkz.rpg.battle.domain.BattleError.MinimumTwoPlayersRequired
 import com.mkz.rpg.battle.domain.BattleEvent.BattleDisengaged
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
-import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundFinished
-import com.mkz.rpg.battle.domain.BattleEvent.BattleRoundStarted
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerDefeated
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnFinished
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
+import com.mkz.rpg.battle.domain.BattleEvent.RoundFinished
+import com.mkz.rpg.battle.domain.BattleEvent.RoundStarted
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
 data class Battle private constructor(
-    private val turnQueue: TurnQueue,
+    private val turnOrder: TurnOrder,
     private val battleUnits: BattleUnits,
     private val currentRound: CurrentRound,
-    private val currentPlayerTurn: CurrentPlayerTurn,
+    private val currentPlayerId: CurrentPlayerId,
     private val isFinished: IsFinished,
     private val events: Set<BattleEvent>,
 ) {
     companion object {
         /**
-         * Players: in the order they play each round. Battle units: those in the battle, which the turns and rounds
+         * Players: in the order they play each round. Battle units: those in the battle, which the player turns and rounds
          * affect, each with the id of its player.
          */
         fun startFirstRound(
@@ -33,10 +33,10 @@ data class Battle private constructor(
             if (players.size < 2) throw MinimumTwoPlayersRequired()
             val battleUnitIds = battleUnits.keys
             return Battle(
-                turnQueue = TurnQueue(players),
+                turnOrder = TurnOrder(players),
                 battleUnits = BattleUnits(battleUnits),
                 currentRound = CurrentRound(1),
-                currentPlayerTurn = CurrentPlayerTurn(players.first()),
+                currentPlayerId = CurrentPlayerId(players.first()),
                 isFinished = IsFinished(false),
                 events = setOf(BattleStarted, PlayerTurnStarted(players.first(), battleUnitIds)),
             )
@@ -51,10 +51,10 @@ data class Battle private constructor(
             winnerPlayerId: String,
         ): Battle =
             Battle(
-                turnQueue = TurnQueue(listOf(winnerPlayerId)),
+                turnOrder = TurnOrder(listOf(winnerPlayerId)),
                 battleUnits = BattleUnits(emptyMap()),
                 currentRound = CurrentRound(0),
-                currentPlayerTurn = CurrentPlayerTurn(winnerPlayerId),
+                currentPlayerId = CurrentPlayerId(winnerPlayerId),
                 isFinished = IsFinished(false),
                 events = setOf(PlayerDefeated(defeatedPlayerId)),
             )
@@ -62,7 +62,7 @@ data class Battle private constructor(
 
     fun toDto() =
         Dto(
-            currentPlayerTurn = currentPlayerTurn.value,
+            currentPlayerId = currentPlayerId.value,
             currentRound = currentRound.value,
             isFinished = isFinished.value,
             battleUnitIds = battleUnits.value.keys,
@@ -70,33 +70,33 @@ data class Battle private constructor(
 
     fun startNextRound(): Battle {
         val nextRound = CurrentRound(currentRound.value + 1)
-        val nextPlayerTurn = CurrentPlayerTurn(turnQueue.value.first())
+        val nextPlayerId = CurrentPlayerId(turnOrder.value.first())
         return copy(
             currentRound = nextRound,
-            currentPlayerTurn = CurrentPlayerTurn(turnQueue.value.first()),
+            currentPlayerId = CurrentPlayerId(turnOrder.value.first()),
             events =
                 events +
                     setOf(
-                        BattleRoundStarted(nextRound.value, battleUnits.value.keys),
-                        PlayerTurnStarted(nextPlayerTurn.value, battleUnits.value.keys),
+                        RoundStarted(nextRound.value, battleUnits.value.keys),
+                        PlayerTurnStarted(nextPlayerId.value, battleUnits.value.keys),
                     ),
         )
     }
 
     fun finishPlayerTurn(): Battle {
-        val currentPlayerTurnIndex = turnQueue.value.indexOf(currentPlayerTurn.value)
-        val nextPlayerTurnIndex = currentPlayerTurnIndex + 1
-        val roundFinished = nextPlayerTurnIndex >= turnQueue.value.size
-        val turnFinished = PlayerTurnFinished(currentPlayerTurn.value, battleUnits.value.keys)
+        val currentPlayerIndex = turnOrder.value.indexOf(currentPlayerId.value)
+        val nextPlayerIndex = currentPlayerIndex + 1
+        val roundFinished = nextPlayerIndex >= turnOrder.value.size
+        val playerTurnFinished = PlayerTurnFinished(currentPlayerId.value, battleUnits.value.keys)
         if (roundFinished) {
             return copy(
-                events = events + setOf(turnFinished, BattleRoundFinished(currentRound.value, battleUnits.value.keys)),
+                events = events + setOf(playerTurnFinished, RoundFinished(currentRound.value, battleUnits.value.keys)),
             )
         } else {
-            val nextPlayerTurn = turnQueue.value[nextPlayerTurnIndex]
+            val nextPlayerId = turnOrder.value[nextPlayerIndex]
             return copy(
-                currentPlayerTurn = CurrentPlayerTurn(nextPlayerTurn),
-                events = events + setOf(turnFinished, PlayerTurnStarted(nextPlayerTurn, battleUnits.value.keys)),
+                currentPlayerId = CurrentPlayerId(nextPlayerId),
+                events = events + setOf(playerTurnFinished, PlayerTurnStarted(nextPlayerId, battleUnits.value.keys)),
             )
         }
     }
@@ -112,53 +112,53 @@ data class Battle private constructor(
 
     /**
      * Removes the battle unit from the battle during a round, e.g.: when it is defeated. The battle is disengaged when it
-     * leaves the last battle units of a player, e.g.: the last CPU battle unit engaged is defeated. Nothing is recorded once
+     * leaves the last battle units of a player, e.g.: the last CPU battle unit in the battle is defeated. Nothing is recorded once
      * the battle is finished, nor for a battle unit out of it.
      */
     fun leaveDuringRound(battleUnitId: String): Battle {
         val leftBattle = leave(battleUnitId)
-        val isEngaged = !isFinished.value && !isDisengaged()
-        val disengages = isEngaged && battleUnitId in battleUnits.value && leftBattle.isDisengaged()
+        val canDisengage = !isFinished.value && !isDisengaged()
+        val disengages = canDisengage && battleUnitId in battleUnits.value && leftBattle.isDisengaged()
         return if (disengages) leftBattle.copy(events = events + BattleDisengaged(leftBattle.battleUnits.value.keys)) else leftBattle
     }
 
-    fun isBattleFinished(): Boolean = turnQueue.value.size == 1
+    fun hasWinner(): Boolean = turnOrder.value.size == 1
 
     /** It is disengaged when fewer than two of its players are left with battle units in it. */
     fun isDisengaged(): Boolean {
         val playersInBattle = battleUnits.value.values.toSet()
-        return turnQueue.value.count { playerId -> playerId in playersInBattle } < 2
+        return turnOrder.value.count { playerId -> playerId in playersInBattle } < 2
     }
 
     /** Finishes the battle without a winner, e.g.: when it is disengaged. */
     fun finishWithoutWinner(): Battle =
         copy(
             isFinished = IsFinished(true),
-            events = events + BattleFinished,
+            events = events + BattleFinishedWithoutWinner,
         )
 
-    fun finishBattle(): Battle =
+    fun finishWithWinner(): Battle =
         copy(
             isFinished = IsFinished(true),
-            events = events + PlayerVictory(turnQueue.value.single()),
+            events = events + PlayerVictory(turnOrder.value.single()),
         )
 
     fun defeatPlayer(playerId: String): Battle {
-        val newTurnQueue =
+        val newTurnOrder =
             buildList {
-                addAll(turnQueue.value)
+                addAll(turnOrder.value)
                 remove(playerId)
             }
-        val battleWithPlayerTurnUpdated: Battle = if (currentPlayerTurn.value == playerId) finishPlayerTurn() else this
+        val battleWithPlayerTurnUpdated: Battle = if (currentPlayerId.value == playerId) finishPlayerTurn() else this
         return battleWithPlayerTurnUpdated.copy(
-            turnQueue = TurnQueue(newTurnQueue),
+            turnOrder = TurnOrder(newTurnOrder),
             events = events + setOf(PlayerDefeated(playerId)),
         )
     }
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    @JvmInline private value class TurnQueue(
+    @JvmInline private value class TurnOrder(
         val value: List<String>,
     )
 
@@ -171,7 +171,7 @@ data class Battle private constructor(
         val value: Int,
     )
 
-    @JvmInline private value class CurrentPlayerTurn(
+    @JvmInline private value class CurrentPlayerId(
         val value: String,
     )
 
@@ -180,7 +180,7 @@ data class Battle private constructor(
     )
 
     data class Dto(
-        val currentPlayerTurn: String,
+        val currentPlayerId: String,
         val currentRound: Int,
         val isFinished: Boolean,
         val battleUnitIds: Set<String>,

@@ -23,7 +23,7 @@ class StartBattleTest {
         // Then
         val battle = battleRepository.search()?.toDto()
         battle?.currentRound shouldBe 1
-        battle?.currentPlayerTurn shouldBe "cpu"
+        battle?.currentPlayerId shouldBe "cpu"
         eventBus.shouldHavePublishedEvents(BattleStarted, PlayerTurnStarted("cpu", setOf("rat-1", "knight-1")))
     }
 
@@ -43,7 +43,7 @@ class StartBattleTest {
         // When
         startBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1"))
         // Then
-        battleRepository.search()?.toDto()?.currentPlayerTurn shouldBe "human"
+        battleRepository.search()?.toDto()?.currentPlayerId shouldBe "human"
         eventBus.shouldNotHavePublishedEvents()
     }
 
@@ -56,7 +56,7 @@ class StartBattleTest {
         // Then
         val battle = battleRepository.search()!!.toDto()
         battle.isFinished shouldBe false
-        battle.currentPlayerTurn shouldBe "cpu"
+        battle.currentPlayerId shouldBe "cpu"
         battle.battleUnitIds shouldBe setOf("rat-2", "knight-1")
         eventBus.shouldHavePublishedEvents(BattleStarted, PlayerTurnStarted("cpu", setOf("rat-2", "knight-1")))
     }

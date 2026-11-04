@@ -20,7 +20,7 @@ class StartNextRound(
         leavingBattleUnitIds: List<String>,
     ) {
         val storedBattle = battleRepository.search() ?: return
-        if (storedBattle.toDto().isFinished || storedBattle.isBattleFinished()) return
+        if (storedBattle.toDto().isFinished || storedBattle.hasWinner()) return
         val joinedBattle =
             joiningPlayerId
                 ?.let { playerId -> joiningBattleUnitIds.fold(storedBattle) { battle, battleUnitId -> battle.join(battleUnitId, playerId) } }

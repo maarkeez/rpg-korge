@@ -128,7 +128,7 @@ class CpuTurnAcceptanceTest {
             eventBus.dispatch()
             // Then
             val battle = battleApi.searchBattle()!!
-            battle.currentPlayerTurn shouldBe humanPlayerId
+            battle.currentPlayerId shouldBe humanPlayerId
             battle.currentRound shouldBe 2
         }
 }

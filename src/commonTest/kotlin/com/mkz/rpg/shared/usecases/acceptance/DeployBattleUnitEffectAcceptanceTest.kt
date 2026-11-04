@@ -125,7 +125,7 @@ class DeployBattleUnitEffectAcceptanceTest {
             // Given
             require(battlefieldApi.searchOccupant(row = 2, column = 2) == casterBattleUnitId)
             require(battlefieldApi.searchOccupant(row = 2, column = 3) == supportBattleUnitId)
-            require(battleApi.searchBattle()!!.currentPlayerTurn == humanPlayerId)
+            require(battleApi.searchBattle()!!.currentPlayerId == humanPlayerId)
             val castGroup = battleUnitApi.whereCanCast(casterBattleUnitId, deployAbilityId).first()
             val target = castGroup.positions.first()
             val humanUnitsBefore = battleUnitApi.searchBattleUnitsByPlayerId(humanPlayerId).size

@@ -93,7 +93,7 @@ class ConsumeHealthPotionAcceptanceTest {
     fun `should heal the knight when the knight consumes a looted health potion`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints == 80)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion", row = 6, column = 7)

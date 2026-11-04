@@ -8,16 +8,16 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class OnBattleFinishedTest {
+class OnBattleFinishedWithoutWinnerTest {
     private val eventBus = InMemoryEventBus()
     private val partyRepository = InMemoryPartyRepository()
-    private val onBattleFinished = OnBattleFinished(ResumeExploration(partyRepository, eventBus), eventBus)
+    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(ResumeExploration(partyRepository, eventBus), eventBus)
 
     @Test
     fun `should explore again when a battle finishes`() {
         // Given
         partyRepository.save(party().pause().pullEvents().second)
-        eventBus.publish(BattleEvent.BattleFinished)
+        eventBus.publish(BattleEvent.BattleFinishedWithoutWinner)
         // When
         eventBus.dispatch()
         // Then

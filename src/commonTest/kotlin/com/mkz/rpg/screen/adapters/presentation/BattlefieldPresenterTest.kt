@@ -9,7 +9,7 @@ import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityCastResolved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
@@ -1036,7 +1036,7 @@ class BattlefieldPresenterTest {
         val resetTilesCount = battlefieldView.resetTilesCount
         val hideCount = battleUnitInfoView.hideCount
         // When
-        publish(BattleFinished)
+        publish(BattleFinishedWithoutWinner)
         // Then
         battlefieldView.resetTilesCount shouldBeGreaterThan resetTilesCount
         battleUnitInfoView.hideCount shouldBeGreaterThan hideCount

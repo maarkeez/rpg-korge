@@ -134,7 +134,7 @@ class MushroomAbilityAcceptanceTest {
             require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
             require(battlefieldApi.searchOccupant(row = 1, column = 0) == firstRatBattleUnitId)
             require(battlefieldApi.searchOccupant(row = 0, column = 1) == secondRatBattleUnitId)
-            require(battleApi.searchBattle()!!.currentPlayerTurn == humanPlayerId)
+            require(battleApi.searchBattle()!!.currentPlayerId == humanPlayerId)
             val castGroup = battleUnitApi.whereCanCast(humanBattleUnitId, mushroomAbilityId).single()
             battleUnitApi.castAbility(
                 battleUnitId = humanBattleUnitId,

@@ -17,7 +17,7 @@ class OnBattleDisengagedTest {
             eventBus,
         )
     private val requests =
-        mutableListOf<BattleEvent.RequestFinishDisengagedBattle>().also { requested -> eventBus.subscribe<BattleEvent.RequestFinishDisengagedBattle> { requested += it } }
+        mutableListOf<BattleEvent.RequestResolveDisengagedBattle>().also { requested -> eventBus.subscribe<BattleEvent.RequestResolveDisengagedBattle> { requested += it } }
 
     @Test
     fun `should re-engage the enemies when the battle is disengaged`() {
@@ -26,6 +26,6 @@ class OnBattleDisengagedTest {
         // When
         eventBus.dispatch()
         // Then
-        requests.shouldContainExactly(BattleEvent.RequestFinishDisengagedBattle(joiningPlayerId = null, joiningBattleUnitIds = emptyList()))
+        requests.shouldContainExactly(BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = null, joiningBattleUnitIds = emptyList()))
     }
 }

@@ -89,7 +89,7 @@ class SetupBattleAcceptanceTest {
             // Given
             val currentPosition = battlefieldApi.searchPosition(playerOneKnightBattleUnitId)!!
             require(currentPosition.row == 2 && currentPosition.column == 1)
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             battleUnitApi.moveBattleUnit(
                 battleUnitId = playerOneKnightBattleUnitId,
                 moveToRow = 2,

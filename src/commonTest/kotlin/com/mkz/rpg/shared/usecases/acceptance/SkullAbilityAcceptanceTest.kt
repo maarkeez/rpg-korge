@@ -191,7 +191,7 @@ class SkullAbilityAcceptanceTest {
             require(battlefieldApi.searchOccupant(row = 2, column = 2) == swordBattleUnitId)
             require(battlefieldApi.searchOccupant(row = 1, column = 2) == enemyBattleUnitId)
             require(battlefieldApi.searchOccupant(row = 0, column = 2) == allyBattleUnitId)
-            require(battleApi.searchBattle()!!.currentPlayerTurn == humanPlayerId)
+            require(battleApi.searchBattle()!!.currentPlayerId == humanPlayerId)
             val skullCastGroup = battleUnitApi.whereCanCast(skullBattleUnitId, skullAbilityId).single()
             val swordCastGroup = battleUnitApi.whereCanCast(swordBattleUnitId, swordAbilityId).single()
             battleUnitApi.castAbility(

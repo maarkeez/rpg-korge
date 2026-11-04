@@ -3,7 +3,7 @@ package com.mkz.rpg.battle.adapters.events
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother.battle
-import com.mkz.rpg.battle.usecases.commands.FinishBattle
+import com.mkz.rpg.battle.usecases.commands.FinishBattleWithWinner
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -14,7 +14,7 @@ class OnPlayerDefeatedTest {
     private val onPlayerDefeated =
         OnPlayerDefeated(
             eventBus = eventBus,
-            finishBattle = FinishBattle(battleRepository, eventBus),
+            finishBattleWithWinner = FinishBattleWithWinner(battleRepository, eventBus),
         )
 
     @Test

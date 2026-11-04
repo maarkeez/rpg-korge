@@ -16,6 +16,6 @@ class PlayerTurnRule(
     fun requirePlayerTurn(battleUnitId: String) {
         val party = searchParty()?.takeIf { party -> battleUnitId in party.battleUnitIds } ?: throw NotAPartyMember()
         val battle = searchBattle()?.takeIf { battle -> !battle.isFinished } ?: return
-        if (battle.currentPlayerTurn != party.playerId) throw NotTheBattleUnitPlayerTurn()
+        if (battle.currentPlayerId != party.playerId) throw NotTheBattleUnitPlayerTurn()
     }
 }

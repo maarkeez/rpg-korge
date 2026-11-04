@@ -15,7 +15,7 @@ const val RESPAWN_STEPS = 50
 
 /**
  * The CPU battle units wandering around their home, the tile each one was deployed on, while they are out of a battle:
- * every second while the player explores, and when a battle round finishes.
+ * every second while the player explores, and when a round finishes.
  *
  * The battle units wander one after another: each one rests or steps to a tile next to it, and its step is awaited
  * until it occupies its tile, so the next one decides with the battlefield as it is then (e.g.: two battle units never

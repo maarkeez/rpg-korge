@@ -3,7 +3,7 @@ package com.mkz.rpg.battle.usecases.commands
 import com.mkz.rpg.battle.domain.BattleRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Finishes the current player turn. Nothing happens once the battle is finished, e.g.: during the CPU turn, as its last battle unit engaged was defeated. */
+/** Finishes the current player turn. Nothing happens once the battle is finished, e.g.: during the player turn of the CPU, as its last battle unit in the battle was defeated. */
 class FinishPlayerTurn(
     private val battleRepository: BattleRepository,
     private val eventBus: EventBus,

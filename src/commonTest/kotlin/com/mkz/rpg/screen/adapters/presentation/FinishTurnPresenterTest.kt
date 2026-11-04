@@ -1,6 +1,6 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.battle.domain.BattleEvent.BattleFinished
+import com.mkz.rpg.battle.domain.BattleEvent.BattleFinishedWithoutWinner
 import com.mkz.rpg.battle.domain.BattleEvent.BattleStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerTurnStarted
 import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
@@ -44,7 +44,7 @@ class FinishTurnPresenterTest {
         eventBus.dispatch()
     }
 
-    private fun currentPlayerTurn() = apis.battleApi.searchBattle()?.currentPlayerTurn
+    private fun currentPlayerId() = apis.battleApi.searchBattle()?.currentPlayerId
 
     @Test
     fun `Init should not display finish turn when is created, as a new game starts exploring`() {
@@ -71,7 +71,7 @@ class FinishTurnPresenterTest {
         createPresenter()
         publish(BattleStarted)
         // When
-        publish(BattleFinished)
+        publish(BattleFinishedWithoutWinner)
         // Then
         playerCallToActionView.onTurnFinished.shouldBeNull()
     }
@@ -83,7 +83,7 @@ class FinishTurnPresenterTest {
         publish(BattleStarted)
         startTurnOf("human")
         // When
-        publish(BattleFinished)
+        publish(BattleFinishedWithoutWinner)
         // Then
         playerCallToActionView.isFinishTurnEnabled.shouldBeFalse()
     }
@@ -151,7 +151,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        currentPlayerTurn() shouldBe "cpu"
+        currentPlayerId() shouldBe "cpu"
     }
 
     @Test
@@ -176,7 +176,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        currentPlayerTurn() shouldBe "human"
+        currentPlayerId() shouldBe "human"
     }
 
     @Test
@@ -188,7 +188,7 @@ class FinishTurnPresenterTest {
         // When
         clickFinishTurn()
         // Then
-        currentPlayerTurn() shouldBe "human"
+        currentPlayerId() shouldBe "human"
     }
 
     @Test

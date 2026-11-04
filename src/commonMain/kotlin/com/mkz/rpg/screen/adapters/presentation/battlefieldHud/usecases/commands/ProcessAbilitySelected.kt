@@ -77,7 +77,7 @@ class ProcessAbilitySelected(
     ): Boolean {
         val battleUnit = searchBattleUnitById(battleUnitId) ?: return false
         val isHuman = searchPlayerById(battleUnit.playerId)?.type == Player.Dto.PlayerTypeDto.HUMAN
-        val isItsTurn = searchBattle()?.takeIf { battle -> !battle.isFinished }?.currentPlayerTurn == battleUnit.playerId
+        val isItsTurn = searchBattle()?.takeIf { battle -> !battle.isFinished }?.currentPlayerId == battleUnit.playerId
         return isHuman && isItsTurn && canCastAbility(battleUnitId, abilityId)
     }
 

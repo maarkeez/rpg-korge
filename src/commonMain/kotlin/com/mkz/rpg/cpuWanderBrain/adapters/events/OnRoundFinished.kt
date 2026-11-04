@@ -5,12 +5,12 @@ import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderAfterRound
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattleRoundFinished(
+class OnRoundFinished(
     wanderAfterRound: WanderAfterRound,
     eventBus: EventBus,
 ) {
     private val subscription =
-        eventBus.subscribe<BattleEvent.BattleRoundFinished> { event ->
+        eventBus.subscribe<BattleEvent.RoundFinished> { event ->
             wanderAfterRound(battleUnitIds = event.battleUnitIds)
         }
 }

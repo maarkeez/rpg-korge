@@ -21,7 +21,7 @@ class BattleTest {
         // When
         val battle = Battle.startFirstRound(players, battleUnits)
         // Then
-        battle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        battle.toDto() shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
     }
 
     @Test
@@ -53,7 +53,7 @@ class BattleTest {
         // When
         val result = battle.toDto()
         // Then
-        result shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        result shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
     }
 
     @Test
@@ -70,7 +70,7 @@ class BattleTest {
     fun `ToDto should expose the finished state as true when the battle has finished`() {
         // Given
         val players = listOf("player-1", "player-2")
-        val battle = battle(players, battleUnitIds).defeatPlayer(players[1]).finishBattle()
+        val battle = battle(players, battleUnitIds).defeatPlayer(players[1]).finishWithWinner()
         // When
         val result = battle.toDto().isFinished
         // Then
@@ -85,9 +85,9 @@ class BattleTest {
         // When
         val nextBattle = battle.startNextRound()
         // Then
-        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.BattleRoundStarted(2, battleUnitIds), BattleEvent.PlayerTurnStarted(players.first(), battleUnitIds))
+        events.shouldContainExactly(BattleEvent.RoundStarted(2, battleUnitIds), BattleEvent.PlayerTurnStarted(players.first(), battleUnitIds))
     }
 
     @Test
@@ -98,7 +98,7 @@ class BattleTest {
         // When
         val nextBattle = battle.finishPlayerTurn()
         // Then
-        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerId = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
         events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[0], battleUnitIds), BattleEvent.PlayerTurnStarted(players[1], battleUnitIds))
     }
@@ -115,29 +115,29 @@ class BattleTest {
         // When
         val nextBattle = battle.finishPlayerTurn()
         // Then
-        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerId = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[1], battleUnitIds), BattleEvent.BattleRoundFinished(1, battleUnitIds))
+        events.shouldContainExactly(BattleEvent.PlayerTurnFinished(players[1], battleUnitIds), BattleEvent.RoundFinished(1, battleUnitIds))
     }
 
     @Test
-    fun `IsBattleFinished should be finished when only one player remains`() {
+    fun `HasWinner should be true when only one player remains`() {
         // Given
         val players = listOf("player-1", "player-2")
         val battle = battle(players, battleUnitIds).defeatPlayer(players[1])
         // When
-        val result = battle.isBattleFinished()
+        val result = battle.hasWinner()
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `IsBattleFinished should not be finished when more than one player remains`() {
+    fun `HasWinner should be false when more than one player remains`() {
         // Given
         val players = listOf("player-1", "player-2")
         val battle = battle(players, battleUnitIds)
         // When
-        val result = battle.isBattleFinished()
+        val result = battle.hasWinner()
         // Then
         result.shouldBeFalse()
     }
@@ -174,17 +174,17 @@ class BattleTest {
         // Then
         finishedBattle.toDto().isFinished.shouldBeTrue()
         val (events, _) = finishedBattle.pullEvents()
-        events.shouldContainExactly(BattleEvent.BattleFinished)
+        events.shouldContainExactly(BattleEvent.BattleFinishedWithoutWinner)
     }
 
     @Test
-    fun `FinishBattle should publish the player victory when a single player remains`() {
+    fun `FinishWithWinner should publish the player victory when a single player remains`() {
         // Given
         val players = listOf("player-1", "player-2")
         val winner = players[1]
         val battle = finishedBattle(players)
         // When
-        val finishedBattle = battle.finishBattle()
+        val finishedBattle = battle.finishWithWinner()
         // Then
         val (events, _) = finishedBattle.pullEvents()
         events.shouldContainExactly(BattleEvent.PlayerVictory(winner))
@@ -199,7 +199,7 @@ class BattleTest {
         // When
         val nextBattle = battle.defeatPlayer(defeatedPlayer)
         // Then
-        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
         events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
@@ -213,7 +213,7 @@ class BattleTest {
         // When
         val nextBattle = battle.defeatPlayer(defeatedPlayer)
         // Then
-        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerTurn = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        nextBattle.toDto() shouldBe Battle.Dto(currentPlayerId = players[1], currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         val (events, _) = nextBattle.pullEvents()
         events.shouldContainExactly(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
@@ -353,7 +353,7 @@ class BattleTest {
         val joinedBattleUnitIds = setOf("battle-unit-1", "battle-unit-2", "battle-unit-3")
         val (events, _) = nextBattle.pullEvents()
         events.shouldContainExactly(
-            BattleEvent.BattleRoundStarted(2, joinedBattleUnitIds),
+            BattleEvent.RoundStarted(2, joinedBattleUnitIds),
             BattleEvent.PlayerTurnStarted(players.first(), joinedBattleUnitIds),
         )
     }
@@ -363,12 +363,12 @@ class BattleTest {
         // When
         val battle = Battle.defeatWhileExploring(defeatedPlayerId = "player-1", winnerPlayerId = "player-2")
         // Then
-        battle.isBattleFinished().shouldBeTrue()
+        battle.hasWinner().shouldBeTrue()
         battle.toDto().isFinished.shouldBeFalse()
         battle.toDto().battleUnitIds.shouldBeEmpty()
         val (events, defeatedBattle) = battle.pullEvents()
         events.shouldContainExactly(BattleEvent.PlayerDefeated("player-1"))
-        val (victoryEvents, _) = defeatedBattle.finishBattle().pullEvents()
+        val (victoryEvents, _) = defeatedBattle.finishWithWinner().pullEvents()
         victoryEvents.shouldContainExactly(BattleEvent.PlayerVictory("player-2"))
     }
 }

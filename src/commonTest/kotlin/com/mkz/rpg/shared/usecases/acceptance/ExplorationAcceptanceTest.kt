@@ -115,7 +115,7 @@ class ExplorationAcceptanceTest {
             // When
             walk(DirectionDto.NORTH)
             // Then
-            battleApi.searchBattle().shouldNotBeNull().currentPlayerTurn shouldBe humanPlayerId
+            battleApi.searchBattle().shouldNotBeNull().currentPlayerId shouldBe humanPlayerId
             partyApi.searchParty()!!.isExploring.shouldBeFalse()
             walk(DirectionDto.NORTH)
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 5, column = 1)

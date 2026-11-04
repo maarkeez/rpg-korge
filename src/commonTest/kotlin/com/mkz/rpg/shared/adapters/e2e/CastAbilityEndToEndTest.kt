@@ -70,7 +70,7 @@ class CastAbilityEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should explore again when the human player defeats the bat, the only cpu battle unit engaged, with the sword`() =
+    fun `should explore again when the human player defeats the bat, the only cpu battle unit in the battle, with the sword`() =
         sharedViewsTest {
             // Given
             startNewBattle()

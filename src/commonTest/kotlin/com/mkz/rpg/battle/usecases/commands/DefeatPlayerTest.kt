@@ -37,7 +37,7 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = defeatedPlayer)
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
+        storedBattle shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 1, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated(defeatedPlayer))
     }
 
@@ -50,8 +50,8 @@ class DefeatPlayerTest {
         defeatPlayer(playerId = "cpu")
         // Then
         val storedBattle = battleRepository.search()!!
-        storedBattle.isBattleFinished() shouldBe true
-        storedBattle.toDto().currentPlayerTurn shouldBe "human"
+        storedBattle.hasWinner() shouldBe true
+        storedBattle.toDto().currentPlayerId shouldBe "human"
         eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated("cpu"))
     }
 
@@ -60,7 +60,7 @@ class DefeatPlayerTest {
         // Given
         playerRepository.create(player(id = "human"))
         playerRepository.create(player(id = "cpu"))
-        // The battle finished once the human turn, the last one of the round, finished.
+        // The battle finished once the player turn of the human, the last one of the round, finished.
         battleRepository.create(
             BattleMother
                 .battle(listOf("cpu", "human"))
@@ -72,7 +72,7 @@ class DefeatPlayerTest {
         // When
         defeatPlayer(playerId = "human")
         // Then
-        battleRepository.search()!!.toDto().currentPlayerTurn shouldBe "cpu"
+        battleRepository.search()!!.toDto().currentPlayerId shouldBe "cpu"
         eventBus.shouldHavePublishedEvents(BattleEvent.PlayerDefeated("human"))
     }
 }

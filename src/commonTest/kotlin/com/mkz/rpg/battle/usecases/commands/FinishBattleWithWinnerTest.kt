@@ -9,11 +9,11 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 
-class FinishBattleTest {
+class FinishBattleWithWinnerTest {
     private val battleRepository = InMemoryBattleRepository()
     private val eventBus = FakeEventBus()
-    private val finishBattle =
-        FinishBattle(
+    private val finishBattleWithWinner =
+        FinishBattleWithWinner(
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
@@ -25,7 +25,7 @@ class FinishBattleTest {
         val winner = players[1]
         battleRepository.create(finishedBattle(players))
         // When
-        finishBattle()
+        finishBattleWithWinner()
         // Then
         eventBus.shouldHavePublishedEvents(BattleEvent.PlayerVictory(winner))
     }
@@ -36,7 +36,7 @@ class FinishBattleTest {
         val players = listOf("player-1", "player-2")
         battleRepository.create(battle(players))
         // When
-        finishBattle()
+        finishBattleWithWinner()
         // Then
         eventBus.publishedEvents.shouldBeEmpty()
     }

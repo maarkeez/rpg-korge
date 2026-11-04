@@ -98,7 +98,7 @@ class EquipHammerAcceptanceTest {
     fun `should raise the knight maximum health and mana without changing the remaining ones when the knight equips the hammer`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleApi.searchBattle()!!.currentPlayerTurn == playerOneId)
+            require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             // When
             inventoryApi.equipItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "hammer")
             eventBus.dispatch()

@@ -37,9 +37,9 @@ class StartNextRoundTest {
         startNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList())
         // Then
         val storedBattle = battleRepository.search()?.toDto()
-        storedBattle shouldBe Battle.Dto(currentPlayerTurn = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
+        storedBattle shouldBe Battle.Dto(currentPlayerId = players.first(), currentRound = 2, isFinished = false, battleUnitIds = battleUnitIds)
         eventBus.shouldHavePublishedEvents(
-            BattleEvent.BattleRoundStarted(2, battleUnitIds),
+            BattleEvent.RoundStarted(2, battleUnitIds),
             BattleEvent.PlayerTurnStarted(players.first(), battleUnitIds),
         )
     }
@@ -54,7 +54,7 @@ class StartNextRoundTest {
         val joinedBattleUnitIds = battleUnitIds + "rat-2"
         battleRepository.search()?.toDto()?.battleUnitIds shouldBe joinedBattleUnitIds
         eventBus.shouldHavePublishedEvents(
-            BattleEvent.BattleRoundStarted(2, joinedBattleUnitIds),
+            BattleEvent.RoundStarted(2, joinedBattleUnitIds),
             BattleEvent.PlayerTurnStarted(players.first(), joinedBattleUnitIds),
         )
     }
@@ -69,7 +69,7 @@ class StartNextRoundTest {
         val updatedBattleUnitIds = setOf("rat-2", "knight-1")
         battleRepository.search()?.toDto()?.battleUnitIds shouldBe updatedBattleUnitIds
         eventBus.shouldHavePublishedEvents(
-            BattleEvent.BattleRoundStarted(2, updatedBattleUnitIds),
+            BattleEvent.RoundStarted(2, updatedBattleUnitIds),
             BattleEvent.PlayerTurnStarted(players.first(), updatedBattleUnitIds),
         )
     }
@@ -85,7 +85,7 @@ class StartNextRoundTest {
         storedBattle.isFinished.shouldBeTrue()
         storedBattle.currentRound shouldBe 1
         storedBattle.battleUnitIds shouldBe setOf("knight-1")
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
     }
 
     @Test
@@ -101,7 +101,7 @@ class StartNextRoundTest {
             .toDto()
             .isFinished
             .shouldBeTrue()
-        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinished)
+        eventBus.shouldHavePublishedEvents(BattleEvent.BattleFinishedWithoutWinner)
     }
 
     @Test
