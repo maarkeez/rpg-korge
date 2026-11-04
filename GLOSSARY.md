@@ -73,3 +73,65 @@ The effect target that is the tile the caster stands on.
 **Adjacent allies**:
 The effect target that is the caster's living allies on adjacent tiles, not including the caster.
 _Avoid_: Nearby allies
+
+### Battle
+
+**Battle**:
+A fight on the battlefield between the battle units of two players, played in rounds.
+_Avoid_: Combat, fight
+
+**In the battle**:
+Said of a battle unit taking part in a battle.
+_Avoid_: Engaged
+
+**Out of the battle**:
+Said of a battle unit not taking part in the battle in progress.
+
+**Join**:
+A battle unit going into a battle in progress.
+
+**Leave**:
+A battle unit going out of a battle in progress.
+
+**Engaging player**:
+The player whose battle units start a battle.
+
+**Engaged player**:
+The player a battle is started against.
+
+#### Rounds and player turns
+
+**Round**:
+One pass through the player turns of every player in a battle.
+_Avoid_: Battle round
+
+**Player turn**:
+A player's part of a round.
+_Avoid_: Turn
+
+**Turn order**:
+The order in which the players of a battle take their player turns.
+_Avoid_: Turn queue
+
+**Current player**:
+The player whose player turn it is.
+_Avoid_: Current player turn
+
+#### How a battle ends
+
+**Disengaged**:
+Said of a battle with fewer than two of its players left with battle units in it.
+
+**Finished battle**:
+A battle that is over, with or without a winner.
+
+**Player defeat**:
+A player losing all their battle units, which gives their enemy the victory.
+_Avoid_: Loss
+
+**Victory**:
+The end of the game, when only one player is left after the defeat of the other.
+_Avoid_: Win, game over
+
+**Winner**:
+The player who gets the victory.
