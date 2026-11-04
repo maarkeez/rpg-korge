@@ -1,6 +1,6 @@
 # Plan: Rename the code of the ability subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the ability subdomain uses words the [glossary](../../GLOSSARY.md) rejects. E.g.: the mana
 > Mushroom spends is `cost` in `Ability` and its TOML, but `manaCost` in `AbilityInfo`, and Mending heals its
@@ -119,3 +119,14 @@
 - `battlefield`: the exact meaning of Vacant and Adjacent is still to be defined.
 - `cpuBattleBrain`: `CastKind.ATTACK`, while "attack" is to be avoided.
 - `screen`: `AttackPreviewView` also previews heals, while "attack" is to be avoided.
+
+## Changes while building
+
+- The `{cost}` placeholder of `ui.abilityInfo.notEnoughMana` is also `{manaCost}`, in both catalogs, as it is the same word.
+  Players read the same sentence.
+- [Assets](../architecture/assets.md) and [How to add a new test](../testing/how-to-add-a-new-test.md) also used these
+  words, so they changed too.
+- `WhatShouldCastTest` and `BattlefieldPresenterTest` write `TargetingDto.CASTER`, as importing it would collide with
+  `TargetExpressionDto.Type.CASTER`, which they also use.
+- `SELECTED_TILE` in `BattlefieldViewStories` and `selectedTile` in `ProcessTileSelected` stay: they are the tile selected
+  on the battlefield, not the effect target.
