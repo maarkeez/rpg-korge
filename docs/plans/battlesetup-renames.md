@@ -1,6 +1,6 @@
 # Plan: Rename the code of the battlesetup subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code says a battle is set up, while the [glossary](../../GLOSSARY.md) says a game is. E.g.: picking "Play
 > new game" runs `SetupBattle`, and the Knight then explores with no battle at all, until the CPU engages. And `startGame`
@@ -79,3 +79,8 @@
 - `save`: Saved game and Load are still to be defined, including `isLoadingASavedGame` of `SetUpGame`.
 - `screen`: `BattleScene` holds the whole game, not a battle. New game is still to be defined, with `onNewGameSelected` and
   `ui.menu.playNewGame`.
+
+## Changes while building
+
+- More comments than the plan named say "game setup" for "battle setup", as the glossary avoids it: `EndToEndExtension`,
+  `ExploreEndToEndTest`, `FinishTurnEndToEndTest`, `FormationEndToEndTest` and `SaveAndLoadEndToEndTest`.
