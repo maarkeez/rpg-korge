@@ -1,6 +1,6 @@
 # Plan: Rename the code of the battleUnit subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the battle unit says what the [glossary](../../GLOSSARY.md) avoids, and one word often means
 > several things. E.g.: `MoveBattleUnit` only walks in a battle, while `BattleUnitMoved` also fires for a walk while exploring,
@@ -165,7 +165,9 @@ No TOML key changes: `resources/battleUnit/*.toml` only holds `unitId`, `playerI
 
 - `effect`: Apply is still to be defined. `OnTurnStartedEffectApplied`, `ApplyOnTurnStartedEffects`, `receiveOnTurnStartedEffect`,
   `hasOnTurnStartedEffects`, `applyOnTurnStartedEffect`, the saved `ON_TURN_STARTED` and `turnsLeft` mirror `OnTurnStarted` and
-  `duration`, so they change with them. The saved ones bump `SAVE_VERSION` again.
+  `duration`, so they change with them. The saved ones bump `SAVE_VERSION` again. `Bonus.MaximumHealth.healthPoints`,
+  `Bonus.MaximumMana.manaPoints` and the saved `points` of an equipped effect mirror `increaseMaximumHealth.healthPoints` and
+  `increaseMaximumMana.manaPoints`, so they also wait.
 - `unit`: Unit is still to be defined. `healthPoints`, `manaPoints` and `movementRange`, which are TOML keys, while "points" and
   "movement range" are to be avoided here. Maximum steps may fit `movementRange`.
 - `player`: only the enemy player is left to define (`SearchEnemyPlayer`), as Enemy is a battle unit here. The battle section's
@@ -174,5 +176,21 @@ No TOML key changes: `resources/battleUnit/*.toml` only holds `unitId`, `playerI
 - `cpuBattleBrain`: `WhereShouldMove`, while it picks a tile to walk to.
 - `cpuWanderBrain`: Wandering is still to be defined, as Recover mentions it. `WANDERING_RECOVERY_PERCENTAGE` already fits.
 - `lootableItem`: Equip and Consume are still to be defined, as Equipped effect and Learned ability mention them.
-- `screen`: names of its own that repeat the old words: `RemainingTurnsView`, `RefreshMovementRange`, `MovementService`, and the
-  fields of `BattleUnitInfo` and `AbilityButtonView`, such as `remainingHealthPoints` and `cooldownTurnsLeft`.
+- `screen`: names of its own that repeat the old words: `RemainingTurnsView`, `RefreshMovementRange`, `MovementService`,
+  `tilesWhereCanMove`, and the fields of `BattleUnitInfo` and `AbilityButtonView`, such as `remainingHealthPoints` and
+  `cooldownTurnsLeft`.
+
+## Changes while building
+
+- `BattlefieldView.moveBattleUnit` keeps its name, as it plays any move, and `MovementService.tilesWhereCanMove` waits for the
+  `screen` section. Only `BattleUnitApi.moveBattleUnit` became `walkBattleUnitInBattle`.
+- The `storybook` and `StorybookApi` needed no change: the stories build a `BattleUnitInfo`, which waits for the `screen`
+  section, and none builds a `BattleUnit.Dto`.
+- [Game data](../architecture/game-data.md) needed no change, as it only names the `movementRange` TOML key of a unit, which
+  waits for the `unit` section. [Inventory](../architecture/inventory.md) also changed, as it named `maximumHealthPoints`,
+  `maximumManaPoints` and "turn action".
+- `Bonus.MaximumHealth.healthPoints`, `Bonus.MaximumMana.manaPoints` and the saved `points` of an equipped effect stay, and are
+  added to what waits for the `effect` section.
+- Names the plan left out follow the table: `RemainingActions.walk`, `RemainingSummonDuration.reduce`, the local
+  `manaIncreasedEvent`, and `spentMana` and the test names of `BattleUnitTest`, which say walk, health and mana.
+- `WhereCanCast` filters with `isAdjacent`, instead of excluding what is above a distance of 1.
