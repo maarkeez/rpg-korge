@@ -136,6 +136,145 @@ _Avoid_: Win, game over
 **Winner**:
 The player who gets the victory.
 
+### Battle unit
+
+**Battle unit**:
+A player's piece on the battlefield, deployed from a unit, in a battle or not.
+_Avoid_: Unit, character
+
+**Ally**:
+Another battle unit of the same player.
+
+**Enemy**:
+A battle unit of another player.
+
+**Deploy**:
+A battle unit being put on the battlefield for the first time.
+
+**Defeated**:
+Said of a battle unit with no health left.
+_Avoid_: Dead, killed, KO
+
+**Respawn**:
+A defeated battle unit coming back on the battlefield.
+_Avoid_: Revive
+
+#### Summons
+
+**Summon**:
+A battle unit an ability deploys for its summon duration.
+_Avoid_: Summoned battle unit, deployed unit
+
+**Remaining summon duration**:
+How much of its summon duration a summon has left.
+_Avoid_: Remaining turns
+
+**Vanish**:
+A summon going off the battlefield with no defeat.
+_Avoid_: Despawn
+
+#### Health and mana
+
+**Health**:
+What a battle unit loses to damage, and is defeated without.
+_Avoid_: Health points, HP
+
+**Mana**:
+What a battle unit spends to cast abilities.
+_Avoid_: Mana points, MP
+
+**Remaining health**:
+The health a battle unit has left.
+
+**Remaining mana**:
+The mana a battle unit has left.
+
+**Maximum health**:
+The most health a battle unit can have, equipped effects included.
+
+**Maximum mana**:
+The most mana a battle unit can have, equipped effects included.
+
+**Base maximum health**:
+A battle unit's maximum health without equipped effects.
+
+**Base maximum mana**:
+A battle unit's maximum mana without equipped effects.
+
+**Damage**:
+The health a battle unit loses to an effect.
+
+**Heal**:
+A battle unit getting health back from an effect.
+
+**Replenish**:
+A battle unit getting mana back when its player turn starts.
+
+**Recover**:
+A battle unit getting back a share of its maximum health and mana while wandering out of the battles.
+
+#### Moving
+
+**Move**:
+A battle unit going from its tile to another: a walk, a swap or a teleport.
+
+**Walk**:
+A battle unit going along a path, in a battle or not.
+
+**Step**:
+One tile of a walk.
+
+**Teleport**:
+A battle unit going to a tile without walking there.
+
+#### Actions
+
+**Action**:
+A step or a cast a battle unit has each player turn.
+_Avoid_: Turn action
+
+**Maximum steps**:
+The steps a battle unit has each player turn.
+_Avoid_: Movement range
+
+**Remaining steps**:
+The steps a battle unit has left this player turn.
+
+**Remaining casts**:
+The casts a battle unit has left this player turn.
+
+#### Casting
+
+**Cast**:
+A battle unit using an ability, aimed at a tile or a cast group.
+
+**Cast group**:
+The tiles one cast is aimed at together.
+
+**Known ability**:
+An ability a battle unit can cast, from its unit or learned.
+
+**Learned ability**:
+A known ability gained during the game, kept on respawn.
+
+**Maximum abilities**:
+The most abilities a battle unit can know.
+
+**Remaining cooldown**:
+How much of a cooldown is left on a known ability.
+_Avoid_: Cooldown turns left
+
+#### Effects on a battle unit
+
+**Receive**:
+A battle unit getting an effect.
+
+**Ongoing effect**:
+An effect a battle unit has received and that has not finished.
+
+**Equipped effect**:
+An effect that lasts while its item is equipped.
+
 ### Battlefield
 
 **Battlefield**:
