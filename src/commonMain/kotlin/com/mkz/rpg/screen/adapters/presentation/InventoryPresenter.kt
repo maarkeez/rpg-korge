@@ -697,7 +697,7 @@ class InventoryPresenter(
     // Only the battle units of the human player have an inventory, the summoned ones excluded.
     private fun hasInventory(battleUnitId: String): Boolean {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return false
-        return playerApi.searchPlayerById(battleUnit.playerId)?.type == PlayerTypeDto.HUMAN && battleUnit.remainingTurns == null
+        return playerApi.searchPlayerById(battleUnit.playerId)?.type == PlayerTypeDto.HUMAN && battleUnit.remainingSummonDuration == null
     }
 
     // In a battle, the inventory can only be used during the turn of its battle unit player. Out of the battles (e.g.:
@@ -752,7 +752,7 @@ class InventoryPresenter(
                 battleUnitInfoView.display(
                     battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isAlly = true),
                     turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
-                    remainingTurns = battleUnit.remainingTurns,
+                    remainingTurns = battleUnit.remainingSummonDuration,
                     abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
                 )
                 battleHudView.displayBattleUnitInfoView()

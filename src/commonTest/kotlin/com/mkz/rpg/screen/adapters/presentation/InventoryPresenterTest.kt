@@ -508,7 +508,7 @@ class InventoryPresenterTest {
         clickItemAction("Equip")
         // Then
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("hammer", isEquipped = true))
-        apis.battleUnitApi.searchBattleUnitById("knight-1")?.maximumHealthPoints shouldBe 120
+        apis.battleUnitApi.searchBattleUnitById("knight-1")?.maximumHealth shouldBe 120
     }
 
     @Test

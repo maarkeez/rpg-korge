@@ -96,7 +96,7 @@ class CpuTurnAcceptanceTest {
             eventBus.dispatch()
             // Then
             distanceToKnight("cpu-rat") shouldBe 1
-            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealth shouldBe 90
         }
 
     @Test
@@ -114,7 +114,7 @@ class CpuTurnAcceptanceTest {
             battlefieldApi.searchPosition("cpu-rat-1") shouldNotBe battlefieldApi.searchPosition("cpu-rat-2")
             distanceToKnight("cpu-rat-1") shouldBe 1
             distanceToKnight("cpu-rat-2") shouldBe 1
-            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 80
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealth shouldBe 80
         }
 
     @Test

@@ -4,7 +4,7 @@ import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
-import com.mkz.rpg.battleUnit.usecases.services.DistanceService
+import com.mkz.rpg.battleUnit.usecases.services.AdjacencyService
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
@@ -17,7 +17,7 @@ class WhereCanCast(
     private val searchAbilityById: SearchAbilityById,
     private val searchOccupant: SearchOccupant,
     private val searchVacantTiles: SearchVacantTiles,
-    private val distanceService: DistanceService,
+    private val adjacencyService: AdjacencyService,
     private val isTileVacant: IsTileVacant,
 ) {
     operator fun invoke(
@@ -37,9 +37,8 @@ class WhereCanCast(
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT -> searchVacantTilesAdjacentToBattleUnitsExcluding(battleUnit.toDto().id)
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER ->
                 searchVacantTiles(occupantId = battleUnit.toDto().id, tilesAround = 1)
-                    .filterNot { tilePosition ->
-                        distanceService.manhattanDistance(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = tilePosition.row, toColumn = tilePosition.column) >
-                            1
+                    .filter { tilePosition ->
+                        adjacencyService.isAdjacent(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = tilePosition.row, toColumn = tilePosition.column)
                     }.map { tilePosition -> CastGroup(listOf(PositionDto(row = tilePosition.row, column = tilePosition.column))) }
         }
     }
@@ -88,21 +87,14 @@ class WhereCanCast(
         currentPosition: Battlefield.Dto.PositionDto,
     ): List<PositionDto> =
         buildList {
-            val distance = 1
-            for (row in currentPosition.row - distance..currentPosition.row + distance) {
-                for (column in currentPosition.column - distance..currentPosition.column + distance) {
+            val tilesAround = 1
+            for (row in currentPosition.row - tilesAround..currentPosition.row + tilesAround) {
+                for (column in currentPosition.column - tilesAround..currentPosition.column + tilesAround) {
                     val occupantId = searchOccupant(row = row, column = column) ?: continue
                     val occupantBattleUnit = battleUnitRepository.searchById(occupantId) ?: continue
                     if (occupantBattleUnit.isSamePlayer(battleUnit)) continue
                     val enemyPosition = searchPosition(occupantBattleUnit.toDto().id)!!
-                    val enemyDistance =
-                        distanceService.manhattanDistance(
-                            fromRow = currentPosition.row,
-                            fromColumn = currentPosition.column,
-                            toRow = row,
-                            toColumn = column,
-                        )
-                    if (enemyDistance > 1) continue
+                    if (!adjacencyService.isAdjacent(fromRow = currentPosition.row, fromColumn = currentPosition.column, toRow = row, toColumn = column)) continue
                     add(PositionDto(row = enemyPosition.row, column = enemyPosition.column))
                 }
             }

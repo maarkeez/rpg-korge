@@ -7,7 +7,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Walks both battle units onto each other's tile at once, outside a battle (e.g.: the leader of the party and the party
- * member on its next tile), spending no turn action. Nothing happens when any of them is not on the battlefield.
+ * member on its next tile), spending no step. Nothing happens when any of them is not on the battlefield.
  */
 class SwapBattleUnits(
     private val battleUnitRepository: BattleUnitRepository,

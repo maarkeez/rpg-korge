@@ -122,7 +122,7 @@ class SummonLootingAcceptanceTest {
 
     // The bee walks from (1,2) to (1,5), over the potion.
     private fun walkBeeOverThePotion(beeId: String) {
-        battleUnitApi.moveBattleUnit(battleUnitId = beeId, moveToRow = 1, moveToColumn = 5)
+        battleUnitApi.walkBattleUnitInBattle(battleUnitId = beeId, walkToRow = 1, walkToColumn = 5)
         eventBus.dispatch()
         require(battlefieldApi.searchPosition(beeId) == PositionDto(row = 1, column = 5))
     }
@@ -145,7 +145,7 @@ class SummonLootingAcceptanceTest {
             // Given
             walkBeeOverThePotion(summonBee())
             // When
-            battleUnitApi.moveBattleUnit(battleUnitId = knightId, moveToRow = potionTile.row, moveToColumn = potionTile.column)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = knightId, walkToRow = potionTile.row, walkToColumn = potionTile.column)
             eventBus.dispatch()
             // Then
             inventoryApi.searchInventoryByBattleUnitId(knightId)!!.storedItems shouldBe listOf("health-potion")

@@ -28,12 +28,12 @@ class PreviewCastRemainingHealthTest {
             searchEffectById = queries.searchEffectById,
             battleUnitRepository = queries.battleUnitRepository,
             searchPosition = queries.searchPosition,
-            abilityExecution = queries.abilityExecution,
+            castResolution = queries.castResolution,
         )
 
     /**
-     * Stores the battle units standing on the battlefield map, with 20 health points, and the effects:
-     * - `C` is the caster, of player-1, with 10 health points left. `E` and `F` are enemy-1 and enemy-2, of player-2.
+     * Stores the battle units standing on the battlefield map, with 20 health, and the effects:
+     * - `C` is the caster, of player-1, with 10 health left. `E` and `F` are enemy-1 and enemy-2, of player-2.
      * - "slash" deals 6 damage and "smash" 30 immediately, "cure" heals 4 and "elixir" 50 immediately, "venom" deals
      *   3 damage on every turn started, and "ether" restores 5 mana immediately.
      */
@@ -41,7 +41,7 @@ class PreviewCastRemainingHealthTest {
         val player = player(id = "player-1").toDto()
         val enemyPlayer = player(id = "player-2").toDto()
         val unit = unit(healthPoints = 20).toDto()
-        queries.battleUnitRepository.create(battleUnit(id = "caster", unit = unit, player = player, remainingHealthPoints = 10))
+        queries.battleUnitRepository.create(battleUnit(id = "caster", unit = unit, player = player, remainingHealth = 10))
         queries.battleUnitRepository.create(battleUnit(id = "enemy-1", unit = unit, player = enemyPlayer))
         queries.battleUnitRepository.create(battleUnit(id = "enemy-2", unit = unit, player = enemyPlayer))
         val occupants = mapOf('C' to "caster", 'E' to "enemy-1", 'F' to "enemy-2").filterKeys { letter -> letter in map }

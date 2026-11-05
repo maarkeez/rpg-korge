@@ -15,7 +15,7 @@ class MovementServiceTest {
         MovementService(
             searchBattleUnitById = queries.searchBattleUnitById,
             searchVacantTiles = queries.searchVacantTiles,
-            canMoveTo = queries.canMoveTo,
+            canWalkTo = queries.canWalkTo,
         )
 
     @Test

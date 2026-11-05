@@ -14,11 +14,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class FinishSummonedBattleUnitsTurnTest {
+class ReduceRemainingSummonDurationsTest {
     private val queries = InMemoryQueries()
     private val battleUnitRepository = queries.battleUnitRepository
     private val eventBus = FakeEventBus()
-    private val finishSummonedBattleUnitsTurn = FinishSummonedBattleUnitsTurn(battleUnitRepository, queries.searchPosition, eventBus)
+    private val reduceRemainingSummonDurations = ReduceRemainingSummonDurations(battleUnitRepository, queries.searchPosition, eventBus)
     private val human = player(id = "human").toDto()
     private val cpu = player(id = "cpu").toDto()
     private val bee = unit(id = "bee").toDto()
@@ -37,27 +37,27 @@ class FinishSummonedBattleUnitsTurnTest {
     }
 
     @Test
-    fun `should leave the summons of the player in the battle with one turn fewer`() {
+    fun `should leave the summons of the player in the battle with one player turn fewer`() {
         // Given
         givenBattlefield()
-        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingTurns = 3))
+        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingSummonDuration = 3))
         // When
-        finishSummonedBattleUnitsTurn(playerId = "human", battleUnitIds = setOf("bee-1"))
+        reduceRemainingSummonDurations(playerId = "human", battleUnitIds = setOf("bee-1"))
         // Then
-        battleUnitRepository.searchById("bee-1")!!.toDto().remainingTurns shouldBe 2
+        battleUnitRepository.searchById("bee-1")!!.toDto().remainingSummonDuration shouldBe 2
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should vanish and delete the summons of the player that finish their last turn`() {
+    fun `should vanish and delete the summons of the player that finish their last player turn`() {
         // Given
         givenBattlefield()
-        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingTurns = 3))
-        battleUnitRepository.create(battleUnit(id = "bee-2", unit = bee, player = human, remainingTurns = 1))
+        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingSummonDuration = 3))
+        battleUnitRepository.create(battleUnit(id = "bee-2", unit = bee, player = human, remainingSummonDuration = 1))
         // When
-        finishSummonedBattleUnitsTurn(playerId = "human", battleUnitIds = setOf("bee-1", "bee-2"))
+        reduceRemainingSummonDurations(playerId = "human", battleUnitIds = setOf("bee-1", "bee-2"))
         // Then
-        battleUnitRepository.searchById("bee-1")!!.toDto().remainingTurns shouldBe 2
+        battleUnitRepository.searchById("bee-1")!!.toDto().remainingSummonDuration shouldBe 2
         battleUnitRepository.searchById("bee-2").shouldBeNull()
         eventBus.shouldHavePublishedEvents(
             BattleUnitVanished(playerId = "human", battleUnitId = "bee-2", unitId = "bee", row = 0, column = 2),
@@ -72,7 +72,7 @@ class FinishSummonedBattleUnitsTurnTest {
         val knight = battleUnit(id = "knight-1", player = human)
         battleUnitRepository.create(knight)
         // When
-        finishSummonedBattleUnitsTurn(playerId = "human", battleUnitIds = setOf("knight-1"))
+        reduceRemainingSummonDurations(playerId = "human", battleUnitIds = setOf("knight-1"))
         // Then
         battleUnitRepository.searchById("knight-1") shouldBe knight
         eventBus.shouldNotHavePublishedEvents()
@@ -82,11 +82,11 @@ class FinishSummonedBattleUnitsTurnTest {
     fun `should not count the turn of the summons of the other players`() {
         // Given
         givenBattlefield()
-        battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu, remainingTurns = 1))
+        battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu, remainingSummonDuration = 1))
         // When
-        finishSummonedBattleUnitsTurn(playerId = "human", battleUnitIds = setOf("bat-1"))
+        reduceRemainingSummonDurations(playerId = "human", battleUnitIds = setOf("bat-1"))
         // Then
-        battleUnitRepository.searchById("bat-1")!!.toDto().remainingTurns shouldBe 1
+        battleUnitRepository.searchById("bat-1")!!.toDto().remainingSummonDuration shouldBe 1
         eventBus.shouldNotHavePublishedEvents()
     }
 
@@ -94,11 +94,11 @@ class FinishSummonedBattleUnitsTurnTest {
     fun `should not count the turn of the summons out of the battle`() {
         // Given
         givenBattlefield()
-        battleUnitRepository.create(battleUnit(id = "bee-3", unit = bee, player = human, remainingTurns = 1))
+        battleUnitRepository.create(battleUnit(id = "bee-3", unit = bee, player = human, remainingSummonDuration = 1))
         // When
-        finishSummonedBattleUnitsTurn(playerId = "human", battleUnitIds = emptySet())
+        reduceRemainingSummonDurations(playerId = "human", battleUnitIds = emptySet())
         // Then
-        battleUnitRepository.searchById("bee-3")!!.toDto().remainingTurns shouldBe 1
+        battleUnitRepository.searchById("bee-3")!!.toDto().remainingSummonDuration shouldBe 1
         eventBus.shouldNotHavePublishedEvents()
     }
 }

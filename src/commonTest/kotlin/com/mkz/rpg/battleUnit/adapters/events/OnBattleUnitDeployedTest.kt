@@ -2,7 +2,7 @@ package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.battleUnit.usecases.commands.RequestBattleJoin
+import com.mkz.rpg.battleUnit.usecases.commands.RequestJoinBattle
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import io.kotest.matchers.collections.shouldContainExactly
@@ -10,7 +10,7 @@ import kotlin.test.Test
 
 class OnBattleUnitDeployedTest {
     private val eventBus = InMemoryEventBus()
-    private val onBattleUnitDeployed = OnBattleUnitDeployed(RequestBattleJoin(eventBus), eventBus)
+    private val onBattleUnitDeployed = OnBattleUnitDeployed(RequestJoinBattle(eventBus), eventBus)
     private val joinRequests = mutableListOf<BattleEvent.RequestJoinBattle>().also { requests -> eventBus.subscribe<BattleEvent.RequestJoinBattle> { requests += it } }
 
     @Test

@@ -40,7 +40,7 @@ class CastAbilityTest {
         castAbility(battleUnitId = "knight-1", abilityId = "ability-1", castGroup = castGroup)
         // Then
         val storedBattleUnit = queries.battleUnitRepository.searchById("knight-1")?.toDto()
-        storedBattleUnit!!.remainingTurnActions.remainingCasts shouldBe 0
+        storedBattleUnit!!.remainingActions.remainingCasts shouldBe 0
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.AbilityCasted("knight-1", "ability-1", listOf(Battlefield.Dto.PositionDto(0, 0))),
         )

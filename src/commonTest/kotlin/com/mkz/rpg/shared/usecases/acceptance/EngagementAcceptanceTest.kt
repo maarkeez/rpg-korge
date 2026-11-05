@@ -114,7 +114,7 @@ class EngagementAcceptanceTest {
             // Given
             engageRat()
             // The leader walks to (5,4), 5 tiles away from the rat-2.
-            battleUnitApi.moveBattleUnit(battleUnitId = "knight-1", moveToRow = 5, moveToColumn = 4)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = "knight-1", walkToRow = 5, walkToColumn = 4)
             eventBus.dispatch()
             // When
             battleApi.finishPlayerTurn()
@@ -160,7 +160,7 @@ class EngagementAcceptanceTest {
             // Given
             engageRat()
             // The leader walks to (5,4), 5 tiles away from the rat-2.
-            battleUnitApi.moveBattleUnit(battleUnitId = "knight-1", moveToRow = 5, moveToColumn = 4)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = "knight-1", walkToRow = 5, walkToColumn = 4)
             eventBus.dispatch()
             // When
             defeatRat()

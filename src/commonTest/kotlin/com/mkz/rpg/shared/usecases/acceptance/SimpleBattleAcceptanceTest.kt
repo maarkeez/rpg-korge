@@ -170,7 +170,7 @@ class SimpleBattleAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
-            battleUnitApi.moveBattleUnit(battleUnitId = humanBattleUnitId, moveToRow = 2, moveToColumn = 1)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = humanBattleUnitId, walkToRow = 2, walkToColumn = 1)
             // When
             eventBus.dispatch()
             // Then
@@ -201,7 +201,7 @@ class SimpleBattleAcceptanceTest {
             eventBus.dispatch()
             // Then
             val cpuBattleUnit = battleUnitApi.searchBattleUnitById(cpuBattleUnitId)!!
-            cpuBattleUnit.remainingHealthPoints shouldBe 0
+            cpuBattleUnit.remainingHealth shouldBe 0
             val cpuBattleUnitPosition = battlefieldApi.searchPosition(cpuBattleUnitId)
             cpuBattleUnitPosition.shouldBeNull()
         }

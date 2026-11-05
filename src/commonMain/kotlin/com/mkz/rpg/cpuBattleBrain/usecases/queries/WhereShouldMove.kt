@@ -2,7 +2,7 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
+import com.mkz.rpg.battleUnit.usecases.queries.WhereCanWalk
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.cpuBattleBrain.usecases.services.MINIMUM_UTILITY_GAIN
@@ -11,7 +11,7 @@ import kotlin.math.abs
 
 class WhereShouldMove(
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
-    private val whereCanMove: WhereCanMove,
+    private val whereCanWalk: WhereCanWalk,
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
     private val searchEnemiesWithinReach: SearchEnemiesWithinReach,
@@ -23,10 +23,10 @@ class WhereShouldMove(
         val currentPosition = searchPosition(occupantId = battleUnitId)!!
         val candidatePositions =
             buildList {
-                addAll(whereCanMove(battleUnitId = battleUnit.id))
+                addAll(whereCanWalk(battleUnitId = battleUnit.id))
                 add(currentPosition)
             }
-        val enemyPreference = battleUnit.remainingHealthPoints.toDouble() / battleUnit.maximumHealthPoints.toDouble()
+        val enemyPreference = battleUnit.remainingHealth.toDouble() / battleUnit.maximumHealth.toDouble()
         val allyPreference = 1 - enemyPreference
 
         // Only the enemies within reach attract the battle unit: the others are ignored.
@@ -135,7 +135,7 @@ class WhereShouldMove(
                 terrainHealthContribution(
                     terrainHealthEffect = evaluationData.terrainHealthEffect ?: 0,
                     healingNeed = currentHealingNeed,
-                    maxHealth = battleUnit.maximumHealthPoints,
+                    maxHealth = battleUnit.maximumHealth,
                 )
             utilityData[position] =
                 evaluationData.copy(

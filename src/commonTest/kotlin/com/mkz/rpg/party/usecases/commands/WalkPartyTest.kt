@@ -47,7 +47,7 @@ class WalkPartyTest {
         // When
         walkParty(DirectionDto.NORTH)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
         partyRepository
             .search()!!
             .toDto()
@@ -67,7 +67,7 @@ class WalkPartyTest {
         // When
         walkParty(DirectionDto.EAST)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 1))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 1))
     }
 
     @Test
@@ -181,7 +181,7 @@ class WalkPartyTest {
         // When
         walkParty(DirectionDto.EAST)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
     }
 
     @Test

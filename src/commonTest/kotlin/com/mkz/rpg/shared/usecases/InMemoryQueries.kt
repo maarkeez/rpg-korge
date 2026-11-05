@@ -5,17 +5,17 @@ import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
+import com.mkz.rpg.battleUnit.usecases.queries.AreAllBattleUnitsDefeated
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
-import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
-import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.CanWalkTo
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
-import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
-import com.mkz.rpg.battleUnit.usecases.services.DistanceService
+import com.mkz.rpg.battleUnit.usecases.queries.WhereCanWalk
+import com.mkz.rpg.battleUnit.usecases.services.AdjacencyService
+import com.mkz.rpg.battleUnit.usecases.services.CastResolution
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
 import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
@@ -123,12 +123,12 @@ class InMemoryQueries(
     val searchWalkingDistance = SearchWalkingDistance(isTileVacant)
 
     // Battle unit
-    val distanceService = DistanceService()
+    val adjacencyService = AdjacencyService()
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
-    val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
-    val canMoveTo = CanMoveTo(battleUnitRepository, searchPosition, searchShortestPath)
-    val whereCanMove = WhereCanMove(battleUnitRepository, searchVacantTiles, canMoveTo)
+    val areAllBattleUnitsDefeated = AreAllBattleUnitsDefeated(battleUnitRepository)
+    val canWalkTo = CanWalkTo(battleUnitRepository, searchPosition, searchShortestPath)
+    val whereCanWalk = WhereCanWalk(battleUnitRepository, searchVacantTiles, canWalkTo)
     val canCastAbility = CanCastAbility(battleUnitRepository, searchAbilityById)
     val searchAbilityAvailabilities = SearchAbilityAvailabilities(battleUnitRepository, searchAbilityById)
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
@@ -140,10 +140,10 @@ class InMemoryQueries(
             searchAbilityById,
             searchOccupant,
             searchVacantTiles,
-            distanceService,
+            adjacencyService,
             isTileVacant,
         )
-    val abilityExecution = AbilityExecution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, distanceService)
+    val castResolution = CastResolution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, adjacencyService)
 
     // CPU battle brain
     val healingNeed = HealingNeed(searchBattleUnitById)
@@ -168,7 +168,7 @@ class InMemoryQueries(
     val whereShouldMove =
         WhereShouldMove(
             searchBattleUnitsByPlayerId,
-            whereCanMove,
+            whereCanWalk,
             searchBattleUnitById,
             searchPosition,
             searchEnemiesWithinReach,

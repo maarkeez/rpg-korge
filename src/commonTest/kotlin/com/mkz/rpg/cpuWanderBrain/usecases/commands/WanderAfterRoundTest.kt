@@ -54,7 +54,7 @@ class WanderAfterRoundTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
         )
     }
 

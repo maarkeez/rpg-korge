@@ -98,7 +98,7 @@ class WanderingAcceptanceTest {
 
         fun ratPosition() = battlefieldApi.searchPosition("rat-1")
 
-        fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealthPoints
+        fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealth
 
         // The sword hits the rat: 10 damage.
         fun hitRat() {
@@ -173,7 +173,7 @@ class WanderingAcceptanceTest {
         // Given: the rat is deployed at (0,7), and left 5 tiles away from home, at (5,7), e.g.: after chasing the party.
         val game = Game(0.0)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 7, knightRow = 6) }) {
-            game.battleUnitApi.walkBattleUnit(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 7)
+            game.battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 7)
             game.eventBus.dispatch()
             // When
             val positions =
@@ -200,7 +200,7 @@ class WanderingAcceptanceTest {
         val tiles = List(8) { row -> List(8) { column -> if (row == 3 && column in 1..3) "lava" else "sand" } }
         val game = Game(0.9)
         scenarioTest({ game.start(ratRow = 0, ratColumn = 2, knightRow = 6, knightColumn = 7, tiles = tiles) }) {
-            game.battleUnitApi.walkBattleUnit(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 2)
+            game.battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 5, walkToColumn = 2)
             game.eventBus.dispatch()
             // When
             val positions =

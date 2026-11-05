@@ -85,7 +85,7 @@ class LootDroppedItemsAcceptanceTest {
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 2, column = 1))
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 3)
             // When
             eventBus.dispatch()
             // Then
@@ -99,7 +99,7 @@ class LootDroppedItemsAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 3)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 3)
             // When
             eventBus.dispatch()
             // Then
@@ -127,9 +127,9 @@ class LootDroppedItemsAcceptanceTest {
             eventBus.publish(RequestGrantReward(playerOneKnightBattleUnitId, gold = 0, lootableItemIds = List(13) { "health-potion" }, row = 2, column = 1))
             eventBus.dispatch()
             inventoryApi.discardItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 2)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
             eventBus.dispatch()
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 1)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 1)
             // When
             eventBus.dispatch()
             // Then
@@ -143,7 +143,7 @@ class LootDroppedItemsAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2) }
-            battleUnitApi.moveBattleUnit(battleUnitId = playerOneKnightBattleUnitId, moveToRow = 2, moveToColumn = 2)
+            battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
             // When
             eventBus.dispatch()
             // Then

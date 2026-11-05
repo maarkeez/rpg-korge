@@ -62,7 +62,7 @@ msgid "{player} wins!"
 msgstr "¡{player} gana!"
 
 #. How many turns a summon has left, the current one included. {turns}: the number of turns.
-msgctxt "ui.remainingTurns.vanishes"
+msgctxt "ui.remainingSummonDuration.vanishes"
 msgid "Vanishes in {turns} turn"
 msgid_plural "Vanishes in {turns} turns"
 msgstr[0] "Desaparece en {turns} turno"

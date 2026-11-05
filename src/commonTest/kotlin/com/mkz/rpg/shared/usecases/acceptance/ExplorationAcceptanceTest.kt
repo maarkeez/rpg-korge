@@ -94,8 +94,8 @@ class ExplorationAcceptanceTest {
             // Then
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 6, column = 2)
             battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 6, column = 1)
-            battleUnitApi.searchBattleUnitById("knight-1")!!.remainingTurnActions.remainingSteps shouldBe 3
-            battleUnitApi.searchBattleUnitById("knight-2")!!.remainingTurnActions.remainingSteps shouldBe 3
+            battleUnitApi.searchBattleUnitById("knight-1")!!.remainingActions.remainingSteps shouldBe 3
+            battleUnitApi.searchBattleUnitById("knight-2")!!.remainingActions.remainingSteps shouldBe 3
         }
 
     @Test

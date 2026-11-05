@@ -130,7 +130,7 @@ class NpcAcceptanceTest {
             // Then
             val vikingBattleUnit = battleUnitApi.searchBattleUnitById("viking")!!
             vikingBattleUnit.playerId shouldBe "human"
-            vikingBattleUnit.remainingHealthPoints shouldBe 150
+            vikingBattleUnit.remainingHealth shouldBe 150
             battlefieldApi.searchOccupant(row = 0, column = 3) shouldBe "viking"
             partyApi.searchParty()!!.battleUnitIds shouldBe listOf("knight-1", "knight-2", "viking")
             npcApi.searchNpcById("viking").shouldBeNull()
@@ -241,7 +241,7 @@ class NpcAcceptanceTest {
             repeat(2) { waitASecond() }
             // Then
             battlefieldApi.searchOccupant(row = 0, column = 0) shouldBe "the-guy"
-            battleUnitApi.searchBattleUnitById("knight-1")!!.remainingHealthPoints shouldBe 100
+            battleUnitApi.searchBattleUnitById("knight-1")!!.remainingHealth shouldBe 100
         }
 
     @Test

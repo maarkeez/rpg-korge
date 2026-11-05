@@ -18,7 +18,7 @@ enum class UiText(
     BATTLE_INFO_ROUND("ui.battleInfo.round"),
     BATTLE_INFO_PLAYER_TURN("ui.battleInfo.playerTurn"),
     BATTLE_INFO_PLAYER_WINS("ui.battleInfo.playerWins"),
-    REMAINING_TURNS("ui.remainingTurns.vanishes", isPlural = true),
+    REMAINING_SUMMON_DURATION("ui.remainingSummonDuration.vanishes", isPlural = true),
     FINISH_TURN("ui.finishTurn.finishTurn"),
     CALL_TO_ACTION_CANCEL("ui.callToAction.cancel"),
     CALL_TO_ACTION_CONFIRM("ui.callToAction.confirm"),

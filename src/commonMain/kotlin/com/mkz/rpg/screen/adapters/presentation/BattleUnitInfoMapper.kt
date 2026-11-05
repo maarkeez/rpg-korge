@@ -11,27 +11,27 @@ internal object BattleUnitInfoMapper {
     ): BattleUnitInfo =
         BattleUnitInfo(
             unitId = battleUnit.unitId,
-            remainingHealthPoints = battleUnit.remainingHealthPoints,
-            maximumHealthPoints = battleUnit.maximumHealthPoints,
-            remainingManaPoints = battleUnit.remainingManaPoints,
-            maximumManaPoints = battleUnit.maximumManaPoints,
+            remainingHealthPoints = battleUnit.remainingHealth,
+            maximumHealthPoints = battleUnit.maximumHealth,
+            remainingManaPoints = battleUnit.remainingMana,
+            maximumManaPoints = battleUnit.maximumMana,
             effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
             isAlly = isAlly,
         )
 
     fun turnActions(battleUnit: BattleUnit.Dto): BattleUnitInfoView.TurnActions =
         BattleUnitInfoView.TurnActions(
-            remainingSteps = battleUnit.remainingTurnActions.remainingSteps,
-            maximumSteps = battleUnit.remainingTurnActions.maximumSteps,
-            remainingCasts = battleUnit.remainingTurnActions.remainingCasts,
-            maximumCasts = battleUnit.remainingTurnActions.maximumCasts,
+            remainingSteps = battleUnit.remainingActions.remainingSteps,
+            maximumSteps = battleUnit.remainingActions.maximumSteps,
+            remainingCasts = battleUnit.remainingActions.remainingCasts,
+            maximumCasts = battleUnit.remainingActions.maximumCasts,
         )
 
     fun abilities(abilityAvailabilities: List<AbilityAvailability>): List<BattleUnitInfoView.Ability> =
         abilityAvailabilities.map { abilityAvailability ->
             BattleUnitInfoView.Ability(
                 abilityId = abilityAvailability.abilityId,
-                cooldownTurnsLeft = abilityAvailability.cooldownTurnsLeft,
+                cooldownTurnsLeft = abilityAvailability.remainingCooldown,
                 hasEnoughMana = abilityAvailability.hasEnoughMana,
                 manaCost = abilityAvailability.manaCost,
             )

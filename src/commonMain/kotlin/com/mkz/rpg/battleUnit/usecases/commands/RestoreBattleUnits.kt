@@ -29,7 +29,7 @@ class RestoreBattleUnits(
     private fun requireKnownIds(battleUnit: BattleUnit.Dto.SnapshotDto) {
         requireNotNull(searchUnitById(battleUnit.unitId)) { "Unknown unit ${battleUnit.unitId}" }
         requireNotNull(searchPlayerById(battleUnit.playerId)) { "Unknown player ${battleUnit.playerId}" }
-        battleUnit.abilityCooldowns.keys.forEach { abilityId -> requireNotNull(searchAbilityById(abilityId)) { "Unknown ability $abilityId" } }
+        battleUnit.knownAbilities.keys.forEach { abilityId -> requireNotNull(searchAbilityById(abilityId)) { "Unknown ability $abilityId" } }
         (battleUnit.equippedEffects.map(EquippedEffectSnapshotDto::effectId) + battleUnit.ongoingEffects.map(OngoingEffectSnapshotDto::effectId)).forEach { effectId ->
             requireNotNull(searchEffectById(effectId)) { "Unknown effect $effectId" }
         }

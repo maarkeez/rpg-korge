@@ -79,7 +79,7 @@ class ExploringTerrainEffectAcceptanceTest {
         eventBus.dispatch()
     }
 
-    private fun healthOf(battleUnitId: String) = battleUnitApi.searchBattleUnitById(battleUnitId)!!.remainingHealthPoints
+    private fun healthOf(battleUnitId: String) = battleUnitApi.searchBattleUnitById(battleUnitId)!!.remainingHealth
 
     @Test
     fun `should hurt the battle units standing on lava, the cpu ones included, every second while exploring`() =

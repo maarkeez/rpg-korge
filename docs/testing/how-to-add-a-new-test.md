@@ -304,7 +304,7 @@ class SimpleBattleAcceptanceTest {
     fun `should occupy a tile when unit was moved`() = scenarioTest(::setUp) {
         // Given
         require(battlefieldApi.searchOccupant(row = 1, column = 1) == humanBattleUnitId)
-        battleUnitApi.moveBattleUnit(battleUnitId = humanBattleUnitId, moveToRow = 2, moveToColumn = 1)
+        battleUnitApi.walkBattleUnitInBattle(battleUnitId = humanBattleUnitId, walkToRow = 2, walkToColumn = 1)
         // When
         eventBus.dispatch()
         // Then

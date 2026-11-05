@@ -3,7 +3,7 @@ package com.mkz.rpg.battleUnit.adapters.save
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.EquippedEffectSnapshotDto
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.OngoingEffectSnapshotDto
-import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.RemainingTurnActionsDto
+import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.RemainingActionsDto
 import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
@@ -29,19 +29,19 @@ private data class BattleUnitSnapshot(
     val id: String,
     val unitId: String,
     val playerId: String,
-    val remainingHealthPoints: Int,
-    val remainingManaPoints: Int,
-    val baseMaximumHealthPoints: Int,
-    val baseMaximumManaPoints: Int,
+    val remainingHealth: Int,
+    val remainingMana: Int,
+    val baseMaximumHealth: Int,
+    val baseMaximumMana: Int,
     val equippedEffects: List<EquippedEffect>,
-    val movementRange: Int,
+    val maximumSteps: Int,
     val remainingSteps: Int,
     val remainingCasts: Int,
-    val abilityCooldowns: Map<String, Int>,
+    val knownAbilities: Map<String, Int>,
     val learnedAbilityIds: List<String>,
     val maximumAbilities: Int,
     val ongoingEffects: List<OngoingEffect>,
-    val remainingTurns: Int?,
+    val remainingSummonDuration: Int?,
 ) {
     companion object {
         fun from(dto: BattleUnit.Dto.SnapshotDto) =
@@ -49,19 +49,19 @@ private data class BattleUnitSnapshot(
                 id = dto.id,
                 unitId = dto.unitId,
                 playerId = dto.playerId,
-                remainingHealthPoints = dto.remainingHealthPoints,
-                remainingManaPoints = dto.remainingManaPoints,
-                baseMaximumHealthPoints = dto.baseMaximumHealthPoints,
-                baseMaximumManaPoints = dto.baseMaximumManaPoints,
+                remainingHealth = dto.remainingHealth,
+                remainingMana = dto.remainingMana,
+                baseMaximumHealth = dto.baseMaximumHealth,
+                baseMaximumMana = dto.baseMaximumMana,
                 equippedEffects = dto.equippedEffects.map { effect -> EquippedEffect(effect.lootableItemId, effect.effectId, effect.bonus.name, effect.points) },
-                movementRange = dto.remainingTurnActions.maximumSteps,
-                remainingSteps = dto.remainingTurnActions.remainingSteps,
-                remainingCasts = dto.remainingTurnActions.remainingCasts,
-                abilityCooldowns = dto.abilityCooldowns,
+                maximumSteps = dto.remainingActions.maximumSteps,
+                remainingSteps = dto.remainingActions.remainingSteps,
+                remainingCasts = dto.remainingActions.remainingCasts,
+                knownAbilities = dto.knownAbilities,
                 learnedAbilityIds = dto.learnedAbilityIds,
                 maximumAbilities = dto.maximumAbilities,
                 ongoingEffects = dto.ongoingEffects.map { effect -> OngoingEffect(effect.effectId, effect.application.name, effect.turnsLeft) },
-                remainingTurns = dto.remainingTurns,
+                remainingSummonDuration = dto.remainingSummonDuration,
             )
     }
 
@@ -70,21 +70,21 @@ private data class BattleUnitSnapshot(
             id = id,
             unitId = unitId,
             playerId = playerId,
-            remainingHealthPoints = remainingHealthPoints,
-            remainingManaPoints = remainingManaPoints,
-            baseMaximumHealthPoints = baseMaximumHealthPoints,
-            baseMaximumManaPoints = baseMaximumManaPoints,
+            remainingHealth = remainingHealth,
+            remainingMana = remainingMana,
+            baseMaximumHealth = baseMaximumHealth,
+            baseMaximumMana = baseMaximumMana,
             equippedEffects =
                 equippedEffects.map { effect ->
                     EquippedEffectSnapshotDto(effect.lootableItemId, effect.effectId, EquippedEffectSnapshotDto.BonusDto.valueOf(effect.bonus), effect.points)
                 },
-            // The casts of a turn are not saved, as they are the same for every battle unit.
-            remainingTurnActions = RemainingTurnActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = movementRange, maximumCasts = 1),
-            abilityCooldowns = abilityCooldowns,
+            // The casts of a player turn are not saved, as they are the same for every battle unit.
+            remainingActions = RemainingActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = maximumSteps, maximumCasts = 1),
+            knownAbilities = knownAbilities,
             learnedAbilityIds = learnedAbilityIds,
             maximumAbilities = maximumAbilities,
             ongoingEffects = ongoingEffects.map { effect -> OngoingEffectSnapshotDto(effect.effectId, OngoingEffectSnapshotDto.ApplicationDto.valueOf(effect.application), effect.turnsLeft) },
-            remainingTurns = remainingTurns,
+            remainingSummonDuration = remainingSummonDuration,
         )
 
     // Bonus: MAXIMUM_HEALTH or MAXIMUM_MANA.

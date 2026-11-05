@@ -120,7 +120,7 @@ class SummonVanishingAcceptanceTest {
             // When
             val tile = summon()
             // Then
-            battleUnitApi.searchBattleUnitById(summonedBattleUnitId(tile))!!.remainingTurns shouldBe 2
+            battleUnitApi.searchBattleUnitById(summonedBattleUnitId(tile))!!.remainingSummonDuration shouldBe 2
         }
 
     @Test
@@ -133,7 +133,7 @@ class SummonVanishingAcceptanceTest {
             finishPlayerTurn()
             // Then
             battleApi.searchBattle()!!.currentRound shouldBe 2
-            battleUnitApi.searchBattleUnitById(summonedBattleUnitId)!!.remainingTurns shouldBe 1
+            battleUnitApi.searchBattleUnitById(summonedBattleUnitId)!!.remainingSummonDuration shouldBe 1
         }
 
     @Test
@@ -168,7 +168,7 @@ class SummonVanishingAcceptanceTest {
                 }
             battleUnitApi.castAbility(battleUnitId = enemyId, abilityId = "deadly-strike", castGroup = strike)
             eventBus.dispatch()
-            require(battleUnitApi.searchBattleUnitById(summonerId)!!.remainingHealthPoints == 0)
+            require(battleUnitApi.searchBattleUnitById(summonerId)!!.remainingHealth == 0)
             finishPlayerTurn()
             require(!battleApi.searchBattle()!!.isFinished)
             // When

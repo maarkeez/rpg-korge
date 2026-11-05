@@ -11,13 +11,13 @@ class RecoverBattleUnitsTest {
     private val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
     private val rat = unit(id = "rat", healthPoints = 20).toDto()
 
-    private fun healthOf(battleUnitId: String) = battleUnitRepository.searchById(battleUnitId)!!.toDto().remainingHealthPoints
+    private fun healthOf(battleUnitId: String) = battleUnitRepository.searchById(battleUnitId)!!.toDto().remainingHealth
 
     @Test
     fun `should recover the percentage of the maximum health of each battle unit`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealthPoints = 10))
-        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat, remainingHealthPoints = 5))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealth = 10))
+        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat, remainingHealth = 5))
         // When
         recoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10)
         // Then
@@ -28,8 +28,8 @@ class RecoverBattleUnitsTest {
     @Test
     fun `should leave the other battle units as they are`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealthPoints = 10))
-        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat, remainingHealthPoints = 5))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealth = 10))
+        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat, remainingHealth = 5))
         // When
         recoverBattleUnits(battleUnitIds = listOf("rat-1"), percentage = 10)
         // Then
@@ -39,7 +39,7 @@ class RecoverBattleUnitsTest {
     @Test
     fun `should keep a defeated battle unit defeated`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealthPoints = 0))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealth = 0))
         // When
         recoverBattleUnits(battleUnitIds = listOf("rat-1"), percentage = 10)
         // Then
@@ -49,7 +49,7 @@ class RecoverBattleUnitsTest {
     @Test
     fun `should ignore the battle units that do not exist`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealthPoints = 10))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat, remainingHealth = 10))
         // When
         recoverBattleUnits(battleUnitIds = listOf("ghost", "rat-1"), percentage = 10)
         // Then

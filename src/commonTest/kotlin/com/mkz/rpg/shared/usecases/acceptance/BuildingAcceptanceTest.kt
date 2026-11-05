@@ -113,6 +113,6 @@ class BuildingAcceptanceTest {
             // When
             val result = runCatching { setUp() }
             // Then
-            result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.BattlefieldTileCanNotBeOccupied>()
+            result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.TileIsNotVacant>()
         }
 }

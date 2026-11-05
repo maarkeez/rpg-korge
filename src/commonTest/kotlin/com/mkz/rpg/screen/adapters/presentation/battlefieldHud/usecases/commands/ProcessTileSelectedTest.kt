@@ -42,7 +42,7 @@ class ProcessTileSelectedTest {
             searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canMoveTo),
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canWalkTo),
         )
 
     /**
@@ -157,10 +157,10 @@ class ProcessTileSelectedTest {
         // Then
         battlefieldHudRepository.search() shouldBe hud
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.RequestMoveBattleUnit(
+            BattleUnitEvent.RequestWalkBattleUnitInBattle(
                 battleUnitId = "battle-unit-1",
-                moveToRow = 0,
-                moveToColumn = 2,
+                walkToRow = 0,
+                walkToColumn = 2,
             ),
         )
     }

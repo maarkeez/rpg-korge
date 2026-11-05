@@ -93,7 +93,7 @@ class SummonsAtBattleEndAcceptanceTest {
 
     // The battle unit receives a low physical damage, of 10, until it is defeated.
     private fun defeat(battleUnitId: String) {
-        while (battleUnitApi.searchBattleUnitById(battleUnitId)!!.remainingHealthPoints > 0) {
+        while (battleUnitApi.searchBattleUnitById(battleUnitId)!!.remainingHealth > 0) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
                     source = ApplicationSourceDto.terrain("lava"),

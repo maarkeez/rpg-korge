@@ -1,7 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
-import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
+import com.mkz.rpg.battleUnit.usecases.services.CastResolution
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
@@ -14,7 +14,7 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 class PreviewCastOngoingEffects(
     private val searchAbilityById: SearchAbilityById,
     private val searchEffectById: SearchEffectById,
-    private val abilityExecution: AbilityExecution,
+    private val castResolution: CastResolution,
 ) {
     companion object {
         val ONGOING_APPLICATION_TYPES = setOf(ApplicationTypeDto.ON_TURN_STARTED, ApplicationTypeDto.ON_DEFEATED)
@@ -28,7 +28,7 @@ class PreviewCastOngoingEffects(
         val ability = searchAbilityById(abilityId) ?: return emptyMap()
         // The same applications as the cast, which applies the ability on each tile of the cast group.
         return castGroup
-            .flatMap { position -> abilityExecution(casterId = battleUnitId, ability = ability, selectedRow = position.row, selectedColumn = position.column) }
+            .flatMap { position -> castResolution(casterId = battleUnitId, ability = ability, targetedRow = position.row, targetedColumn = position.column) }
             .filter { application -> searchEffectById(application.effectId)?.application?.type in ONGOING_APPLICATION_TYPES }
             .mapNotNull { application -> application.target.battleUnitId?.let { battleUnitId -> battleUnitId to application.effectId } }
             .groupBy(keySelector = { (targetId, _) -> targetId }, valueTransform = { (_, effectId) -> effectId })

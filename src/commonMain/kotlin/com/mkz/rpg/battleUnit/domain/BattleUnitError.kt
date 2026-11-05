@@ -7,11 +7,11 @@ sealed class BattleUnitError(
 
     class PlayerNotFound : BattleUnitError("Player not found")
 
-    class BattlefieldTileCanNotBeOccupied : BattleUnitError("Battlefield tile can not be occupied")
+    class TileIsNotVacant : BattleUnitError("Tile is not vacant")
 
-    class MovementDistanceExceedsRemainingSteps : BattleUnitError("Movement distance exceeds remaining steps")
+    class WalkingDistanceExceedsRemainingSteps : BattleUnitError("Walking distance exceeds remaining steps")
 
-    class MovementDistanceMustBeGreaterThanZero : BattleUnitError("Movement distance must be greater than zero")
+    class WalkingDistanceMustBeGreaterThanZero : BattleUnitError("Walking distance must be greater than zero")
 
     class BattleUnitCanNotCastAbility : BattleUnitError("Battle unit can not cast ability")
 
@@ -23,7 +23,7 @@ sealed class BattleUnitError(
 
     class FailedToResolveEffectTarget : BattleUnitError("Failed to resolve effect target")
 
-    class RemainingManaPointsBelowZero : BattleUnitError("Remaining mana points must be greater than zero")
+    class RemainingManaBelowZero : BattleUnitError("Remaining mana must be greater than zero")
 
     class EffectNotFound : BattleUnitError("Effect not found")
 

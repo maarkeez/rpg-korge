@@ -50,7 +50,7 @@ half loaded:
 {
   "summary": { "version": 1, "savedAt": 1.79338572E12, "leaderUnitId": "knight", "partySize": 1 },
   "snapshots": {
-    "battleUnit": [ { "id": "knight-1", "remainingHealthPoints": 30, "...": "..." } ],
+    "battleUnit": [ { "id": "knight-1", "remainingHealth": 30, "...": "..." } ],
     "battlefield": [ { "occupantId": "knight-1", "row": 1, "column": 1 } ],
     "...": "..."
   }
@@ -82,7 +82,7 @@ tables, players, the battlefield and its buildings, and the definition of each q
 
 | #  | Subdomain        | Saved                                                                 | Reset on load                                  |
 |----|------------------|-----------------------------------------------------------------------|------------------------------------------------|
-| 1  | `battleUnit`     | Every battle unit as it is: health, mana, equipped effects, cooldowns, learned abilities, maximum abilities, ongoing effects, remaining turns | -                                              |
+| 1  | `battleUnit`     | Every battle unit as it is: health, mana, equipped effects, known abilities, learned abilities, maximum abilities, ongoing effects, remaining summon duration | -                                              |
 | 2  | `battlefield`    | The occupant of each tile                                             | -                                              |
 | 3  | `npc`            | The npcs left (a recruited npc is gone), their tiles and stocks      | -                                              |
 | 4  | `lootDrop`       | The dropped items on each tile                                        | -                                              |

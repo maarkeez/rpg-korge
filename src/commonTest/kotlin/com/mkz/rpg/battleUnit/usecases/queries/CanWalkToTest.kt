@@ -8,9 +8,9 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class CanMoveToTest {
+class CanWalkToTest {
     private val queries = InMemoryQueries()
-    private val canMoveTo = queries.canMoveTo
+    private val canWalkTo = queries.canWalkTo
 
     @Test
     fun `should return true when the shortest path is within the remaining steps`() {
@@ -28,7 +28,7 @@ class CanMoveToTest {
             ),
         )
         // When
-        val result = canMoveTo(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 0)
+        val result = canWalkTo(battleUnitId = "knight-1", walkToRow = 3, walkToColumn = 0)
         // Then
         result.shouldBeTrue()
     }
@@ -49,7 +49,7 @@ class CanMoveToTest {
             ),
         )
         // When
-        val result = canMoveTo(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 0)
+        val result = canWalkTo(battleUnitId = "knight-1", walkToRow = 3, walkToColumn = 0)
         // Then
         result.shouldBeFalse()
     }
@@ -70,7 +70,7 @@ class CanMoveToTest {
             ),
         )
         // When
-        val result = canMoveTo(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 0)
+        val result = canWalkTo(battleUnitId = "knight-1", walkToRow = 3, walkToColumn = 0)
         // Then
         result.shouldBeFalse()
     }
@@ -80,7 +80,7 @@ class CanMoveToTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". ."))
         // When
-        val result = canMoveTo(battleUnitId = "unknown-battle-unit", moveToRow = 0, moveToColumn = 1)
+        val result = canWalkTo(battleUnitId = "unknown-battle-unit", walkToRow = 0, walkToColumn = 1)
         // Then
         result.shouldBeFalse()
     }
@@ -91,7 +91,7 @@ class CanMoveToTest {
         queries.battleUnitRepository.create(battleUnit(id = "knight-1"))
         queries.battlefieldRepository.create(battlefield(". ."))
         // When
-        val result = canMoveTo(battleUnitId = "knight-1", moveToRow = 0, moveToColumn = 1)
+        val result = canWalkTo(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 1)
         // Then
         result.shouldBeFalse()
     }

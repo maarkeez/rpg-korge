@@ -62,7 +62,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0),
         )
         cpuWanderBrainRepository
             .search()!!
@@ -80,7 +80,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
         )
     }
 
@@ -107,7 +107,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1),
         )
     }
 
@@ -120,7 +120,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 3),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 3),
         )
         cpuWanderBrainRepository.search()!!.isReturning("rat-1").shouldBeTrue()
     }
@@ -134,7 +134,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 1),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 1),
         )
         cpuWanderBrainRepository.search()!!.isReturning("rat-1").shouldBeTrue()
     }
@@ -163,7 +163,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 2),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 0, walkToColumn = 2),
         )
         cpuWanderBrainRepository
             .search()!!

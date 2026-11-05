@@ -16,13 +16,13 @@ class TranslatePluralTest {
         // Given
         localizationRepository.save(localization(selectedLanguageCode = "es"))
         // When
-        val text = translatePlural("ui.remainingTurns.vanishes", 2, mapOf("turns" to "2"))
+        val text = translatePlural("ui.remainingSummonDuration.vanishes", 2, mapOf("turns" to "2"))
         // Then
         text shouldBe "Desaparece en 2 turnos"
     }
 
     @Test
     fun `should fail when the localization is not initialised`() {
-        shouldThrow<LocalizationNotFound> { translatePlural("ui.remainingTurns.vanishes", 2) }
+        shouldThrow<LocalizationNotFound> { translatePlural("ui.remainingSummonDuration.vanishes", 2) }
     }
 }

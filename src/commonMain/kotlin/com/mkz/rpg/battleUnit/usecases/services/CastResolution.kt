@@ -16,33 +16,33 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
-class AbilityExecution(
+class CastResolution(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val searchOccupant: SearchOccupant,
     private val searchEffectById: SearchEffectById,
-    private val distanceService: DistanceService,
+    private val adjacencyService: AdjacencyService,
 ) {
     operator fun invoke(
         casterId: String,
         ability: Ability.Dto,
-        selectedRow: Int,
-        selectedColumn: Int,
+        targetedRow: Int,
+        targetedColumn: Int,
     ): List<EffectApplicationDto> {
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToResolveEffectTarget()
-        validateTargeting(ability = ability, caster = caster, selectedRow = selectedRow, selectedColumn = selectedColumn)
+        validateTargeting(ability = ability, caster = caster, targetedRow = targetedRow, targetedColumn = targetedColumn)
         return ability.abilityEffects.flatMap { abilityEffect ->
             resolveTargets(
                 abilityEffect = abilityEffect,
                 caster = caster,
-                selectedRow = selectedRow,
-                selectedColumn = selectedColumn,
+                targetedRow = targetedRow,
+                targetedColumn = targetedColumn,
             ).map { target ->
                 EffectApplicationDto(
                     source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId = casterId, abilityId = ability.id),
                     target = target,
                     effectId = abilityEffect.effectId,
-                    destination = destinationFor(effectId = abilityEffect.effectId, selectedRow = selectedRow, selectedColumn = selectedColumn),
+                    destination = destinationFor(effectId = abilityEffect.effectId, targetedRow = targetedRow, targetedColumn = targetedColumn),
                 )
             }
         }
@@ -51,21 +51,21 @@ class AbilityExecution(
     private fun validateTargeting(
         ability: Ability.Dto,
         caster: BattleUnit,
-        selectedRow: Int,
-        selectedColumn: Int,
+        targetedRow: Int,
+        targetedColumn: Int,
     ) {
         when (ability.targeting) {
             Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
             -> {
-                val occupantId = searchOccupant(selectedRow, selectedColumn) ?: throw FailedToResolveEffectTarget()
+                val occupantId = searchOccupant(targetedRow, targetedColumn) ?: throw FailedToResolveEffectTarget()
                 val occupant = battleUnitRepository.searchById(occupantId) ?: throw FailedToResolveEffectTarget()
                 if (caster.isSamePlayer(occupant)) throw FailedToResolveEffectTarget()
             }
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
             Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
             -> {
-                if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
+                if (searchOccupant(targetedRow, targetedColumn) != null) throw FailedToResolveEffectTarget()
             }
             Ability.Dto.TargetingDto.CASTER -> Unit
         }
@@ -74,18 +74,18 @@ class AbilityExecution(
     private fun resolveTargets(
         abilityEffect: Ability.Dto.AbilityEffectDto,
         caster: BattleUnit,
-        selectedRow: Int,
-        selectedColumn: Int,
+        targetedRow: Int,
+        targetedColumn: Int,
     ): List<EffectTargetDto> =
         when (abilityEffect.target.type) {
             CASTER -> listOf(EffectTargetDto.battleUnit(caster.toDto().id))
             TARGETED_BATTLE_UNIT -> {
-                val occupantId = searchOccupant(selectedRow, selectedColumn) ?: throw FailedToResolveEffectTarget()
+                val occupantId = searchOccupant(targetedRow, targetedColumn) ?: throw FailedToResolveEffectTarget()
                 listOf(EffectTargetDto.battleUnit(occupantId))
             }
             TARGETED_TILE -> {
-                if (searchOccupant(selectedRow, selectedColumn) != null) throw FailedToResolveEffectTarget()
-                listOf(EffectTargetDto.position(row = selectedRow, column = selectedColumn))
+                if (searchOccupant(targetedRow, targetedColumn) != null) throw FailedToResolveEffectTarget()
+                listOf(EffectTargetDto.position(row = targetedRow, column = targetedColumn))
             }
             CASTER_TILE -> {
                 val position = searchPosition(caster.toDto().id) ?: throw FailedToResolveEffectTarget()
@@ -96,12 +96,12 @@ class AbilityExecution(
 
     private fun destinationFor(
         effectId: String,
-        selectedRow: Int,
-        selectedColumn: Int,
+        targetedRow: Int,
+        targetedColumn: Int,
     ): EffectTargetDto? {
         val effect = searchEffectById(effectId) ?: return null
         return if (effect.outcome.type == TELEPORT) {
-            EffectTargetDto.position(row = selectedRow, column = selectedColumn)
+            EffectTargetDto.position(row = targetedRow, column = targetedColumn)
         } else {
             null
         }
@@ -112,8 +112,7 @@ class AbilityExecution(
             val position = searchPosition(caster.toDto().id) ?: return@buildList
             for (row in position.row - 1..position.row + 1) {
                 for (column in position.column - 1..position.column + 1) {
-                    val distance = distanceService.manhattanDistance(fromRow = position.row, fromColumn = position.column, toRow = row, toColumn = column)
-                    if (distance > 1) continue
+                    if (!adjacencyService.isAdjacent(fromRow = position.row, fromColumn = position.column, toRow = row, toColumn = column)) continue
                     val occupantId = searchOccupant(row, column) ?: continue
                     val occupant = battleUnitRepository.searchById(occupantId) ?: continue
                     if (occupant.toDto().id == caster.toDto().id) continue

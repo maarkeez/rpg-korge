@@ -101,16 +101,16 @@ The selected battle unit stays selected while the player casts an ability with i
 - Confirming the cast keeps the preview displayed while the cast is played, e.g.: the target blinking. Once the cast has been resolved (`AbilityCastResolved`), the caster is displayed selected again, with its movement range read after the cast (e.g.: its mana spent, or its new tile when teleported).
 - Cancelling the cast goes back to choosing where to cast the same ability.
 
-## Remaining turn actions
+## Remaining actions
 
-The selected battle unit info displays its remaining turn actions without text, with a [`PointsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PointsView.kt) per action: one rounded pip per point, 14x7, filled while it remains and tinted with an outline once it has been spent.
+The selected battle unit info displays its remaining actions without text, with a [`PointsView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/PointsView.kt) per action: one rounded pip per point, 14x7, filled while it remains and tinted with an outline once it has been spent.
 
 | Points | Colour (FamiCube palette) | Maximum                          |
 |--------|---------------------------|----------------------------------|
 | Steps  | White `#FFFFFF`           | The unit movement range          |
 | Casts  | Gold `#FFBB31`            | The casts per turn (currently 1) |
 
-For example, a knight that walked 1 of its 3 steps and has not cast yet displays ▬▬▭ ▬. Both maximums come from the battle unit (`RemainingTurnActionsDto`).
+For example, a knight that walked 1 of its 3 steps and has not cast yet displays ▬▬▭ ▬. Both maximums come from the battle unit (`RemainingActionsDto`).
 
 ## Loot
 

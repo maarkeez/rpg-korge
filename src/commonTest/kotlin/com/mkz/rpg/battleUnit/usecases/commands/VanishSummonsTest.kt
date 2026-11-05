@@ -13,11 +13,11 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class VanishSummonedBattleUnitsTest {
+class VanishSummonsTest {
     private val queries = InMemoryQueries()
     private val battleUnitRepository = queries.battleUnitRepository
     private val eventBus = FakeEventBus()
-    private val vanishSummonedBattleUnits = VanishSummonedBattleUnits(battleUnitRepository, queries.searchPosition, eventBus)
+    private val vanishSummons = VanishSummons(battleUnitRepository, queries.searchPosition, eventBus)
     private val human = player(id = "human").toDto()
     private val bee = unit(id = "bee").toDto()
 
@@ -34,12 +34,12 @@ class VanishSummonedBattleUnitsTest {
     }
 
     @Test
-    fun `should vanish and delete every summon left, whatever turns it has left`() {
+    fun `should vanish and delete every summon left, whatever summon duration it has left`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingTurns = 4))
-        battleUnitRepository.create(battleUnit(id = "bee-2", unit = bee, player = human, remainingTurns = 1))
+        battleUnitRepository.create(battleUnit(id = "bee-1", unit = bee, player = human, remainingSummonDuration = 4))
+        battleUnitRepository.create(battleUnit(id = "bee-2", unit = bee, player = human, remainingSummonDuration = 1))
         // When
-        vanishSummonedBattleUnits()
+        vanishSummons()
         // Then
         battleUnitRepository.searchById("bee-1").shouldBeNull()
         battleUnitRepository.searchById("bee-2").shouldBeNull()
@@ -55,11 +55,11 @@ class VanishSummonedBattleUnitsTest {
     fun `should keep the battle units that never vanish and the defeated summons`() {
         // Given
         val knight = battleUnit(id = "knight-1", player = human)
-        val defeatedBee = battleUnit(id = "bee-3", unit = bee, player = human, remainingHealthPoints = 0, remainingTurns = 4)
+        val defeatedBee = battleUnit(id = "bee-3", unit = bee, player = human, remainingHealth = 0, remainingSummonDuration = 4)
         battleUnitRepository.create(knight)
         battleUnitRepository.create(defeatedBee)
         // When
-        vanishSummonedBattleUnits()
+        vanishSummons()
         // Then
         battleUnitRepository.searchById("knight-1") shouldBe knight
         battleUnitRepository.searchById("bee-3") shouldBe defeatedBee

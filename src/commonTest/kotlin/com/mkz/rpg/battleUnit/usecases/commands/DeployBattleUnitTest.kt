@@ -51,7 +51,7 @@ class DeployBattleUnitTest {
         storedBattleUnit.shouldNotBeNull()
         storedBattleUnit.playerId shouldBe player.id
         storedBattleUnit.unitId shouldBe unit.id
-        storedBattleUnit.remainingHealthPoints shouldBe unit.healthPoints
+        storedBattleUnit.remainingHealth shouldBe unit.healthPoints
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.BattleUnitDeployed(playerId = player.id, battleUnitId = "battle-unit-1", row = 0, column = 0),
             BattlefieldEvent.RequestOccupyTile(occupantId = "battle-unit-1", row = 0, column = 0),
@@ -84,7 +84,7 @@ class DeployBattleUnitTest {
     }
 
     @Test
-    fun `should throw tile error when the battlefield tile can not be occupied`() {
+    fun `should throw tile error when the tile is not vacant`() {
         // Given
         val unit = unit().also(queries.unitRepository::create).toDto()
         val player = player().also(queries.playerRepository::create).toDto()
@@ -95,6 +95,6 @@ class DeployBattleUnitTest {
                 deployBattleUnit("battle-unit-1", unit.id, player.id, 0, 0)
             }
         // Then
-        error.shouldBeInstanceOf<BattleUnitError.BattlefieldTileCanNotBeOccupied>()
+        error.shouldBeInstanceOf<BattleUnitError.TileIsNotVacant>()
     }
 }

@@ -8,9 +8,9 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class HasAllBattleUnitsDefeatedTest {
+class AreAllBattleUnitsDefeatedTest {
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
+    private val areAllBattleUnitsDefeated = AreAllBattleUnitsDefeated(battleUnitRepository)
 
     @Test
     fun `should return true when all player battle units are defeated`() {
@@ -28,7 +28,7 @@ class HasAllBattleUnitsDefeatedTest {
             )
         }
         // When
-        val result = hasAllBattleUnitsDefeated("player-1")
+        val result = areAllBattleUnitsDefeated("player-1")
         // Then
         result.shouldBeTrue()
     }
@@ -50,7 +50,7 @@ class HasAllBattleUnitsDefeatedTest {
             ),
         )
         // When
-        val result = hasAllBattleUnitsDefeated("player-1")
+        val result = areAllBattleUnitsDefeated("player-1")
         // Then
         result.shouldBeFalse()
     }
@@ -59,7 +59,7 @@ class HasAllBattleUnitsDefeatedTest {
     fun `should return true when the player has no battle units`() {
         // Given
         // When
-        val result = hasAllBattleUnitsDefeated("player-1")
+        val result = areAllBattleUnitsDefeated("player-1")
         // Then
         result.shouldBeTrue()
     }

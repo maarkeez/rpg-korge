@@ -90,10 +90,10 @@ class SetUpGameAcceptanceTest {
             val currentPosition = battlefieldApi.searchPosition(playerOneKnightBattleUnitId)!!
             require(currentPosition.row == 2 && currentPosition.column == 1)
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
-            battleUnitApi.moveBattleUnit(
+            battleUnitApi.walkBattleUnitInBattle(
                 battleUnitId = playerOneKnightBattleUnitId,
-                moveToRow = 2,
-                moveToColumn = 2,
+                walkToRow = 2,
+                walkToColumn = 2,
             )
             // When
             eventBus.dispatch()

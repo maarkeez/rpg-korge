@@ -102,10 +102,10 @@ class ProcessTileSelected(
             } else {
                 if (selectedTileInMovementRange) {
                     eventBus.publish(
-                        BattleUnitEvent.RequestMoveBattleUnit(
+                        BattleUnitEvent.RequestWalkBattleUnitInBattle(
                             battleUnitId = battleUnit.id,
-                            moveToRow = tile.row,
-                            moveToColumn = tile.column,
+                            walkToRow = tile.row,
+                            walkToColumn = tile.column,
                         ),
                     )
                 } else {

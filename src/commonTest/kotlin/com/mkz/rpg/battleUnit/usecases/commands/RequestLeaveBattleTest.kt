@@ -9,17 +9,17 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import kotlin.test.Test
 
-class RequestBattleLeaveTest {
+class RequestLeaveBattleTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val requestBattleLeave = RequestBattleLeave(queries.hasAllBattleUnitsDefeated, eventBus)
+    private val requestLeaveBattle = RequestLeaveBattle(queries.areAllBattleUnitsDefeated, eventBus)
 
     @Test
     fun `should request the battle unit to leave the battle and its player to be defeated when all their battle units are defeated`() {
         // Given
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
         // When
-        requestBattleLeave(playerId = "cpu", battleUnitId = "rat-1")
+        requestLeaveBattle(playerId = "cpu", battleUnitId = "rat-1")
         // Then
         eventBus.shouldHavePublishedEvents(BattleEvent.RequestLeaveBattle(battleUnitId = "rat-1"), BattleEvent.RequestDefeatPlayer(playerId = "cpu"))
     }
@@ -30,7 +30,7 @@ class RequestBattleLeaveTest {
         queries.battleUnitRepository.create(battleUnit(id = "rat-1", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 0).toDto()))
         queries.battleUnitRepository.create(battleUnit(id = "rat-2", player = player(id = "cpu").toDto(), unit = unit(healthPoints = 10).toDto()))
         // When
-        requestBattleLeave(playerId = "cpu", battleUnitId = "rat-1")
+        requestLeaveBattle(playerId = "cpu", battleUnitId = "rat-1")
         // Then
         eventBus.shouldHavePublishedEvents(BattleEvent.RequestLeaveBattle(battleUnitId = "rat-1"))
     }

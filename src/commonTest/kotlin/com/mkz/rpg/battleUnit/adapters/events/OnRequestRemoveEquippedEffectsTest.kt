@@ -29,7 +29,7 @@ class OnRequestRemoveEquippedEffectsTest {
         eventBus.dispatch()
         // Then
         val battleUnit = battleUnitRepository.searchById("knight-1")?.toDto()
-        battleUnit?.maximumHealthPoints shouldBe 100
+        battleUnit?.maximumHealth shouldBe 100
         battleUnit?.equippedEffects shouldBe emptyMap()
     }
 }

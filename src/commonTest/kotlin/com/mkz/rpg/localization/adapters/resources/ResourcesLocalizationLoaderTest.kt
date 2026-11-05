@@ -21,7 +21,7 @@ class ResourcesLocalizationLoaderTest {
         msgid "Buy"
         msgstr ""
 
-        msgctxt "ui.remainingTurns.vanishes"
+        msgctxt "ui.remainingSummonDuration.vanishes"
         msgid "Vanishes in {turns} turn"
         msgid_plural "Vanishes in {turns} turns"
         msgstr[0] ""
@@ -38,7 +38,7 @@ class ResourcesLocalizationLoaderTest {
         msgid "Buy"
         msgstr "Comprar"
 
-        msgctxt "ui.remainingTurns.vanishes"
+        msgctxt "ui.remainingSummonDuration.vanishes"
         msgid "Vanishes in {turns} turn"
         msgid_plural "Vanishes in {turns} turns"
         msgstr[0] "Desaparece en {turns} turno"
@@ -69,7 +69,7 @@ class ResourcesLocalizationLoaderTest {
                     messages =
                         listOf(
                             MessageDto(key = "ui.shop.buy", forms = listOf("Buy")),
-                            MessageDto(key = "ui.remainingTurns.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
+                            MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
                         ),
                 )
             localization.translations.map(CatalogDto::languageCode).shouldContainExactly("es", "pt_BR")

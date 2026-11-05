@@ -31,11 +31,11 @@ class OnRequestRespawnBattleUnitTest {
         val rat = unit(id = "rat", healthPoints = 20)
         unitRepository.create(rat)
         battlefieldRepository.create(battlefield(". . ."))
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat.toDto(), remainingHealthPoints = 0))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat.toDto(), remainingHealth = 0))
         eventBus.publish(BattleUnitEvent.RequestRespawnBattleUnit(battleUnitId = "rat-1", row = 0, column = 2))
         // When
         eventBus.dispatch()
         // Then
-        battleUnitRepository.searchById("rat-1")!!.toDto().remainingHealthPoints shouldBe 20
+        battleUnitRepository.searchById("rat-1")!!.toDto().remainingHealth shouldBe 20
     }
 }

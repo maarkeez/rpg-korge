@@ -33,7 +33,13 @@ class OnExplorationSecondStartedTest {
             ),
             eventBus,
         )
-    private val walkRequests = mutableListOf<BattleUnitEvent.RequestWalkBattleUnit>().also { requests -> eventBus.subscribe<BattleUnitEvent.RequestWalkBattleUnit> { requests += it } }
+    private val walkRequests =
+        mutableListOf<BattleUnitEvent.RequestWalkBattleUnitOutOfBattle>().also { requests ->
+            eventBus.subscribe<BattleUnitEvent.RequestWalkBattleUnitOutOfBattle> {
+                requests +=
+                    it
+            }
+        }
 
     @Test
     fun `should wander the cpu battle units when a second starts while exploring`() {
@@ -48,6 +54,6 @@ class OnExplorationSecondStartedTest {
         // When
         eventBus.dispatch()
         // Then
-        walkRequests.shouldContainExactly(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0))
+        walkRequests.shouldContainExactly(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-1", walkToRow = 1, walkToColumn = 0))
     }
 }

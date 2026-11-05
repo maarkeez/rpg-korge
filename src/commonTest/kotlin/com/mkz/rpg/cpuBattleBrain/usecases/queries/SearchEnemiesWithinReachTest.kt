@@ -25,7 +25,7 @@ class SearchEnemiesWithinReachTest {
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = knightUnit, player = human))
         queries.battleUnitRepository.create(battleUnit(id = "knight-2", unit = knightUnit, player = human))
         queries.battleUnitRepository.create(battleUnit(id = "ally", unit = knightUnit, player = cpu))
-        queries.battleUnitRepository.create(battleUnit(id = "bat", unit = knightUnit, player = cpu, remainingTurns = 5))
+        queries.battleUnitRepository.create(battleUnit(id = "bat", unit = knightUnit, player = cpu, remainingSummonDuration = 5))
     }
 
     private fun enemyIdsWithinReach(

@@ -20,14 +20,14 @@ sealed interface BattleUnitEvent : DomainEvent {
         val castGroup: List<Battlefield.Dto.PositionDto>,
     ) : BattleUnitEvent
 
-    data class RequestMoveBattleUnit(
+    data class RequestWalkBattleUnitInBattle(
         val battleUnitId: String,
-        val moveToRow: Int,
-        val moveToColumn: Int,
+        val walkToRow: Int,
+        val walkToColumn: Int,
     ) : BattleUnitEvent
 
-    // Requested outside a battle (e.g.: while exploring), so the walk spends no turn action.
-    data class RequestWalkBattleUnit(
+    // Requested outside a battle (e.g.: while exploring), so the walk spends no step.
+    data class RequestWalkBattleUnitOutOfBattle(
         val battleUnitId: String,
         val walkToRow: Int,
         val walkToColumn: Int,
@@ -114,7 +114,7 @@ sealed interface BattleUnitEvent : DomainEvent {
         val battleUnitId: String,
     ) : BattleUnitEvent
 
-    data class BattleUnitManaRestored(
+    data class BattleUnitManaIncreased(
         val battleUnitId: String,
     ) : BattleUnitEvent
 
@@ -133,7 +133,7 @@ sealed interface BattleUnitEvent : DomainEvent {
         val abilityId: String,
     ) : BattleUnitEvent
 
-    // A summon whose turns are over: it is gone, not defeated. It carries its unit and its tile, as it is deleted.
+    // A summon whose summon duration is over: it is gone, not defeated. It carries its unit and its tile, as it is deleted.
     data class BattleUnitVanished(
         val playerId: String,
         val battleUnitId: String,

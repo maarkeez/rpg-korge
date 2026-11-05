@@ -60,10 +60,10 @@ class FormationPresenter(
                 FormationView.Row(
                     unitId = battleUnit.unitId,
                     name = texts.unitName(battleUnit.unitId),
-                    remainingHealth = battleUnit.remainingHealthPoints,
-                    maximumHealth = battleUnit.maximumHealthPoints,
-                    remainingMana = battleUnit.remainingManaPoints,
-                    maximumMana = battleUnit.maximumManaPoints,
+                    remainingHealth = battleUnit.remainingHealth,
+                    maximumHealth = battleUnit.maximumHealth,
+                    remainingMana = battleUnit.remainingMana,
+                    maximumMana = battleUnit.maximumMana,
                     isLeader = index == 0,
                 )
             }

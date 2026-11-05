@@ -4,15 +4,15 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 
-class CanMoveTo(
+class CanWalkTo(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val searchShortestPath: SearchShortestPath,
 ) {
     operator fun invoke(
         battleUnitId: String,
-        moveToRow: Int,
-        moveToColumn: Int,
+        walkToRow: Int,
+        walkToColumn: Int,
     ): Boolean {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return false
         val currentPosition = searchPosition(battleUnitId) ?: return false
@@ -20,9 +20,9 @@ class CanMoveTo(
             searchShortestPath(
                 fromRow = currentPosition.row,
                 fromColumn = currentPosition.column,
-                toRow = moveToRow,
-                toColumn = moveToColumn,
+                toRow = walkToRow,
+                toColumn = walkToColumn,
             ) ?: return false
-        return battleUnit.canMoveDistance(path.size)
+        return battleUnit.canWalkDistance(path.size)
     }
 }

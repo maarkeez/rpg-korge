@@ -13,12 +13,12 @@ class SearchAbilityAvailabilities(
 ) {
     operator fun invoke(battleUnitId: String): List<AbilityAvailability> {
         val battleUnit = battleUnitRepository.searchById(battleUnitId)?.toDto() ?: return emptyList()
-        return battleUnit.abilityCooldowns.map { (abilityId, cooldownTurnsLeft) ->
+        return battleUnit.knownAbilities.map { (abilityId, remainingCooldown) ->
             val manaCost = searchAbilityById(abilityId)?.manaCost ?: 0
             AbilityAvailability(
                 abilityId = abilityId,
-                cooldownTurnsLeft = cooldownTurnsLeft,
-                hasEnoughMana = battleUnit.remainingManaPoints >= manaCost,
+                remainingCooldown = remainingCooldown,
+                hasEnoughMana = battleUnit.remainingMana >= manaCost,
                 manaCost = manaCost,
             )
         }
@@ -27,7 +27,7 @@ class SearchAbilityAvailabilities(
     data class AbilityAvailability(
         val abilityId: String,
         // The turns of its player left until it can be cast again, e.g.: 1 when it can be cast on its next turn.
-        val cooldownTurnsLeft: Int,
+        val remainingCooldown: Int,
         val hasEnoughMana: Boolean,
         // The mana a cast costs, e.g.: told on the ability while there is not enough of it.
         val manaCost: Int,

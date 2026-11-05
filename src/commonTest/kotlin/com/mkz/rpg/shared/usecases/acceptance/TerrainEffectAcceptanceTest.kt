@@ -136,9 +136,9 @@ class TerrainEffectAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             battleApi.searchBattle()!!.currentRound shouldBe 1
-            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints shouldBe 20
-            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints shouldBe 40
-            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints shouldBe 30
+            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealth shouldBe 20
+            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealth shouldBe 40
+            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealth shouldBe 30
             // When
             battleApi.finishPlayerTurn()
             eventBus.dispatch()
@@ -146,8 +146,8 @@ class TerrainEffectAcceptanceTest {
             eventBus.dispatch()
             // Then
             battleApi.searchBattle()!!.currentRound shouldBe 2
-            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealthPoints shouldBe 13
-            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealthPoints shouldBe 33
-            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealthPoints shouldBe 30
+            battleUnitApi.searchBattleUnitById(sandBattleUnitId)!!.remainingHealth shouldBe 13
+            battleUnitApi.searchBattleUnitById(secondSandBattleUnitId)!!.remainingHealth shouldBe 33
+            battleUnitApi.searchBattleUnitById(forestBattleUnitId)!!.remainingHealth shouldBe 30
         }
 }

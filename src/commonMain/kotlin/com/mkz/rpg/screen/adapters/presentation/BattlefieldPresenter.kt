@@ -368,8 +368,8 @@ class BattlefieldPresenter(
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
         val previewOption =
             BattlefieldHealthBarPreviewView.PreviewOption.of(
-                remaining = battleUnit.remainingHealthPoints,
-                maximum = battleUnit.maximumHealthPoints,
+                remaining = battleUnit.remainingHealth,
+                maximum = battleUnit.maximumHealth,
             )
         timeline.playAlongside { battlefieldView.flashHealth(row = position.row, column = position.column, previewOption = previewOption) }
     }
@@ -386,7 +386,7 @@ class BattlefieldPresenter(
             battleUnitInfoView.display(
                 battleUnit = BattleUnitInfoMapper.battleUnitInfo(battleUnit, isAlly = !isCpuBattleUnit(battleUnit)),
                 turnActions = BattleUnitInfoMapper.turnActions(battleUnit),
-                remainingTurns = battleUnit.remainingTurns,
+                remainingTurns = battleUnit.remainingSummonDuration,
                 abilities = BattleUnitInfoMapper.abilities(abilityAvailabilities),
             )
             battleHudView.displayBattleUnitInfoView()
@@ -417,7 +417,7 @@ class BattlefieldPresenter(
 
     private fun displayAbilitySelected(event: BattlefieldHudEvent.SelectedBattleUnitAbility): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
-        val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
+        val abilityIndex = battleUnit.knownAbilities.keys.indexOf(event.abilityId)
         // A castable ability: no reason to tell.
         val abilityInfo = abilityInfo(event.abilityId)
         return {
@@ -441,7 +441,7 @@ class BattlefieldPresenter(
     // An ability only read: framed, with why it can not be cast, and the battlefield dimmed but the caster.
     private fun displayAbilityInfo(event: BattlefieldHudEvent.AbilityInfoDisplayed): suspend () -> Unit {
         val battleUnit = battleUnitApi.searchBattleUnitById(event.battleUnitId)!!
-        val abilityIndex = battleUnit.abilityCooldowns.keys.indexOf(event.abilityId)
+        val abilityIndex = battleUnit.knownAbilities.keys.indexOf(event.abilityId)
         val ability = abilityApi.searchAbilityById(event.abilityId)!!
         // The CPU's abilities are never the player's to cast, so they tell no reason.
         val reason =
@@ -450,8 +450,8 @@ class BattlefieldPresenter(
             } else {
                 AbilityInfoMapper.reason(
                     ability = ability,
-                    cooldownTurnsLeft = battleUnit.abilityCooldowns[event.abilityId] ?: 0,
-                    remainingMana = battleUnit.remainingManaPoints,
+                    cooldownTurnsLeft = battleUnit.knownAbilities[event.abilityId] ?: 0,
+                    remainingMana = battleUnit.remainingMana,
                 )
             }
         val abilityInfo = abilityInfo(event.abilityId, reason)
@@ -487,7 +487,7 @@ class BattlefieldPresenter(
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.manaCost,
                 receivers = emptyList(),
-                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
+                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealth,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
             displayCastGroup(castGroupTiles)
@@ -506,7 +506,7 @@ class BattlefieldPresenter(
                 val enemyBattleUnit = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
                 AttackPreviewView.Receiver(
                     battleUnit = BattleUnitInfoMapper.battleUnitInfo(enemyBattleUnit, isAlly = !isCpuBattleUnit(enemyBattleUnit)),
-                    remainingHealthPoints = remainingHealth[enemyBattleUnitId] ?: enemyBattleUnit.remainingHealthPoints,
+                    remainingHealthPoints = remainingHealth[enemyBattleUnitId] ?: enemyBattleUnit.remainingHealth,
                     newEffectIds = newEffectIds[enemyBattleUnitId].orEmpty(),
                 )
             }
@@ -516,7 +516,7 @@ class BattlefieldPresenter(
                 casterBattleUnit = BattleUnitInfoMapper.battleUnitInfo(casterBattleUnit, isAlly = !isCpuBattleUnit(casterBattleUnit)),
                 manaCost = ability.manaCost,
                 receivers = receivers,
-                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealthPoints,
+                casterRemainingHealthPoints = remainingHealth[casterBattleUnit.id] ?: casterBattleUnit.remainingHealth,
                 casterNewEffectIds = newEffectIds[casterBattleUnit.id].orEmpty(),
             )
             displayCastGroup(castGroupTiles)
@@ -553,8 +553,8 @@ class BattlefieldPresenter(
             val healthPreview =
                 battleUnit?.let {
                     BattlefieldHealthBarPreviewView.PreviewOption.of(
-                        remaining = remainingHealth[battleUnit.id] ?: battleUnit.remainingHealthPoints,
-                        maximum = battleUnit.maximumHealthPoints,
+                        remaining = remainingHealth[battleUnit.id] ?: battleUnit.remainingHealth,
+                        maximum = battleUnit.maximumHealth,
                     )
                 }
             CastGroupTile(row = tile.row, column = tile.column, healthPreview = healthPreview)

@@ -83,14 +83,14 @@ class ConsumeManaPotionAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
-            require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingManaPoints == 20)
+            require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingMana == 20)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "mana-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion")
             eventBus.dispatch()
             // Then
-            battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingManaPoints shouldBe 30
+            battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingMana shouldBe 30
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems.shouldBeEmpty()
         }
 }

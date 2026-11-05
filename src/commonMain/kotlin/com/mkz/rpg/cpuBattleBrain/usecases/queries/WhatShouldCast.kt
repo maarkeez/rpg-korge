@@ -41,11 +41,11 @@ class WhatShouldCast(
 ) {
     operator fun invoke(battleUnitId: String): CastDecision? {
         val caster = searchBattleUnitById(id = battleUnitId) ?: return null
-        if (caster.remainingTurnActions.remainingCasts <= 0) return null
-        val casterMaxHealth = caster.maximumHealthPoints
+        if (caster.remainingActions.remainingCasts <= 0) return null
+        val casterMaxHealth = caster.maximumHealth
         val enemiesWithinReach = searchEnemiesWithinReach(battleUnitId = caster.id)
         val candidates =
-            caster.abilityCooldowns.keys
+            caster.knownAbilities.keys
                 .filter { abilityId -> canCastAbility(battleUnitId = caster.id, abilityId = abilityId) }
                 .mapNotNull { abilityId -> searchAbilityById(abilityId) }
                 .flatMap { ability ->
@@ -119,9 +119,9 @@ class WhatShouldCast(
                 .mapNotNull { position -> searchOccupant(row = position.row, column = position.column) }
                 .filter { targetId -> targetId in enemyIdsWithinReach }
                 .mapNotNull { targetId -> searchBattleUnitById(id = targetId) }
-                .sumOf { target -> min(damage, target.remainingHealthPoints.toDouble()) / target.remainingHealthPoints }
+                .sumOf { target -> min(damage, target.remainingHealth.toDouble()) / target.remainingHealth }
                 .coerceAtMost(1.0)
-        val casterHealthRatio = caster.remainingHealthPoints.toDouble() / casterMaxHealth
+        val casterHealthRatio = caster.remainingHealth.toDouble() / casterMaxHealth
         return casterHealthRatio * targetsUtility
     }
 
@@ -131,7 +131,7 @@ class WhatShouldCast(
         caster: BattleUnit.Dto,
         casterMaxHealth: Int,
     ): Double {
-        val missingHealth = (casterMaxHealth - caster.remainingHealthPoints).toDouble()
+        val missingHealth = (casterMaxHealth - caster.remainingHealth).toDouble()
         val usefulHealing = min(healing, missingHealth)
         return healingNeed(battleUnitId = caster.id) * usefulHealing / healing
     }
@@ -164,8 +164,8 @@ class WhatShouldCast(
         if (tilesToWalk > 0 && deployedUnit.movementRange <= 0) return 0.0
         // It moves and attacks in the same turn, so it attacks in the turn it walks its last tile.
         val turnsToAttack = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.movementRange - 1) / deployedUnit.movementRange
-        val casterHealthRatio = caster.remainingHealthPoints.toDouble() / casterMaxHealth
-        return casterHealthRatio * TURN_DISCOUNT.pow(turnsToAttack) * min(damage, enemy.remainingHealthPoints.toDouble()) / enemy.remainingHealthPoints
+        val casterHealthRatio = caster.remainingHealth.toDouble() / casterMaxHealth
+        return casterHealthRatio * TURN_DISCOUNT.pow(turnsToAttack) * min(damage, enemy.remainingHealth.toDouble()) / enemy.remainingHealth
     }
 
     // Immediate effects count in full. Effects applied each turn count their total, discounted for every turn they wait.

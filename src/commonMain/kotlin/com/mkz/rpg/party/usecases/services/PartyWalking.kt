@@ -28,7 +28,7 @@ class PartyWalking(
                 continue
             }
             walkingParty = walkingParty.awaitNextStep()
-            walkRequests += BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = step.battleUnitId, walkToRow = step.row, walkToColumn = step.column)
+            walkRequests += BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = step.battleUnitId, walkToRow = step.row, walkToColumn = step.column)
             break
         }
         val (events, updatedParty) = walkingParty.pullEvents()

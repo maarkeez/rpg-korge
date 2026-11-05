@@ -90,7 +90,7 @@ class LearnTeleportAcceptanceTest {
             require(
                 battleUnitApi
                     .searchBattleUnitById(vikingBattleUnitId)!!
-                    .abilityCooldowns.keys
+                    .knownAbilities.keys
                     .toList() == listOf("sword"),
             )
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "teleport-essence", row = vikingRow, column = vikingColumn)
@@ -101,7 +101,7 @@ class LearnTeleportAcceptanceTest {
             // Then
             val viking = battleUnitApi.searchBattleUnitById(vikingBattleUnitId)!!
             // Teleport is at the end of the ability bar, ready to be cast.
-            viking.abilityCooldowns.toList().shouldContainExactly("sword" to 0, "teleport" to 0)
+            viking.knownAbilities.toList().shouldContainExactly("sword" to 0, "teleport" to 0)
             inventoryApi.searchInventoryByBattleUnitId(vikingBattleUnitId)!!.storedItems.shouldBeEmpty()
         }
 }

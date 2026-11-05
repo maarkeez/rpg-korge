@@ -7,16 +7,16 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.EffectNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectAlreadyApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectsNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidEffectApplicationStatus
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceExceedsRemainingSteps
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.MovementDistanceMustBeGreaterThanZero
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotOnTurnStarted
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.RemainingManaPointsBelowZero
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.RemainingManaBelowZero
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.WalkingDistanceExceedsRemainingSteps
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.WalkingDistanceMustBeGreaterThanZero
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.AbilityLearned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDamaged
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaIncreased
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
@@ -51,17 +51,17 @@ data class BattleUnit private constructor(
     private val id: Id,
     private val unitId: UnitId,
     private val playerId: PlayerId,
-    private val remainingHealthPoints: RemainingHealthPoints,
-    private val remainingManaPoints: RemainingManaPoints,
-    private val baseMaximumHealthPoints: BaseMaximumHealthPoints,
-    private val baseMaximumManaPoints: BaseMaximumManaPoints,
+    private val remainingHealth: RemainingHealth,
+    private val remainingMana: RemainingMana,
+    private val baseMaximumHealth: BaseMaximumHealth,
+    private val baseMaximumMana: BaseMaximumMana,
     private val equippedEffects: EquippedEffects,
-    private val remainingTurnActions: RemainingTurnActions,
-    private val abilityCooldowns: AbilityCooldowns,
+    private val remainingActions: RemainingActions,
+    private val knownAbilities: KnownAbilities,
     private val learnedAbilities: LearnedAbilities,
     private val maximumAbilities: MaximumAbilities,
     private val ongoingEffects: OngoingEffects,
-    private val remainingTurns: RemainingTurns?,
+    private val remainingSummonDuration: RemainingSummonDuration?,
     // Its own events, each followed by the battlefield request it needs (e.g.: occupying the tile it was deployed on),
     // published together so the battlefield is up to date before anything reacting to the next events.
     private val events: Set<DomainEvent>,
@@ -74,23 +74,23 @@ data class BattleUnit private constructor(
             maximumAbilities: Int,
             deployAtRow: Int,
             deployAtColumn: Int,
-            remainingTurns: Int? = null,
+            remainingSummonDuration: Int? = null,
         ): BattleUnit =
             BattleUnit(
                 Id(id),
                 UnitId(unit.id),
                 PlayerId(player.id),
-                RemainingHealthPoints(unit.healthPoints),
-                RemainingManaPoints(unit.manaPoints),
-                BaseMaximumHealthPoints(unit.healthPoints),
-                BaseMaximumManaPoints(unit.manaPoints),
+                RemainingHealth(unit.healthPoints),
+                RemainingMana(unit.manaPoints),
+                BaseMaximumHealth(unit.healthPoints),
+                BaseMaximumMana(unit.manaPoints),
                 EquippedEffects(),
-                RemainingTurnActions(unit.movementRange),
-                AbilityCooldowns(unit.abilities),
+                RemainingActions(unit.movementRange),
+                KnownAbilities(unit.abilities),
                 LearnedAbilities(),
                 MaximumAbilities(maximumAbilities),
                 OngoingEffects(),
-                remainingTurns?.let(::RemainingTurns),
+                remainingSummonDuration?.let(::RemainingSummonDuration),
                 events =
                     setOf(
                         BattleUnitDeployed(playerId = player.id, battleUnitId = id, row = deployAtRow, column = deployAtColumn),
@@ -104,20 +104,20 @@ data class BattleUnit private constructor(
                 Id(snapshot.id),
                 UnitId(snapshot.unitId),
                 PlayerId(snapshot.playerId),
-                RemainingHealthPoints(snapshot.remainingHealthPoints),
-                RemainingManaPoints(snapshot.remainingManaPoints),
-                BaseMaximumHealthPoints(snapshot.baseMaximumHealthPoints),
-                BaseMaximumManaPoints(snapshot.baseMaximumManaPoints),
+                RemainingHealth(snapshot.remainingHealth),
+                RemainingMana(snapshot.remainingMana),
+                BaseMaximumHealth(snapshot.baseMaximumHealth),
+                BaseMaximumMana(snapshot.baseMaximumMana),
                 EquippedEffects.restore(snapshot.equippedEffects),
-                RemainingTurnActions(snapshot.remainingTurnActions.maximumSteps).restore(
-                    remainingSteps = snapshot.remainingTurnActions.remainingSteps,
-                    remainingCasts = snapshot.remainingTurnActions.remainingCasts,
+                RemainingActions(snapshot.remainingActions.maximumSteps).restore(
+                    remainingSteps = snapshot.remainingActions.remainingSteps,
+                    remainingCasts = snapshot.remainingActions.remainingCasts,
                 ),
-                AbilityCooldowns.restore(snapshot.abilityCooldowns),
+                KnownAbilities.restore(snapshot.knownAbilities),
                 LearnedAbilities(snapshot.learnedAbilityIds),
                 MaximumAbilities(snapshot.maximumAbilities),
                 OngoingEffects.restore(snapshot.ongoingEffects),
-                snapshot.remainingTurns?.let(::RemainingTurns),
+                snapshot.remainingSummonDuration?.let(::RemainingSummonDuration),
                 events = emptySet(),
             )
     }
@@ -128,16 +128,16 @@ data class BattleUnit private constructor(
         Dto(
             id = id.value,
             playerId = playerId.value,
-            remainingHealthPoints = remainingHealthPoints.value,
-            remainingManaPoints = remainingManaPoints.value,
-            maximumHealthPoints = maximumHealthPoints(),
-            maximumManaPoints = maximumManaPoints(),
+            remainingHealth = remainingHealth.value,
+            remainingMana = remainingMana.value,
+            maximumHealth = maximumHealth(),
+            maximumMana = maximumMana(),
             equippedEffects = equippedEffects.toDto(),
-            remainingTurnActions = remainingTurnActions.toDto(),
-            abilityCooldowns = abilityCooldowns.toDto(),
+            remainingActions = remainingActions.toDto(),
+            knownAbilities = knownAbilities.toDto(),
             unitId = unitId.value,
             ongoingEffects = ongoingEffects.toDto(),
-            remainingTurns = remainingTurns?.value,
+            remainingSummonDuration = remainingSummonDuration?.value,
         )
 
     /** Its whole state, to save the game: [restore] rebuilds it as it is. */
@@ -146,28 +146,28 @@ data class BattleUnit private constructor(
             id = id.value,
             unitId = unitId.value,
             playerId = playerId.value,
-            remainingHealthPoints = remainingHealthPoints.value,
-            remainingManaPoints = remainingManaPoints.value,
-            baseMaximumHealthPoints = baseMaximumHealthPoints.value,
-            baseMaximumManaPoints = baseMaximumManaPoints.value,
+            remainingHealth = remainingHealth.value,
+            remainingMana = remainingMana.value,
+            baseMaximumHealth = baseMaximumHealth.value,
+            baseMaximumMana = baseMaximumMana.value,
             equippedEffects = equippedEffects.toSnapshot(),
-            remainingTurnActions = remainingTurnActions.toDto(),
-            abilityCooldowns = abilityCooldowns.toDto(),
+            remainingActions = remainingActions.toDto(),
+            knownAbilities = knownAbilities.toDto(),
             learnedAbilityIds = learnedAbilities.value,
             maximumAbilities = maximumAbilities.value,
             ongoingEffects = ongoingEffects.toSnapshot(),
-            remainingTurns = remainingTurns?.value,
+            remainingSummonDuration = remainingSummonDuration?.value,
         )
 
     /**
      * Path: the tiles walked from the origin (excluded) to the destination (included). Each tile costs one step.
      */
-    fun move(
+    fun walkInBattle(
         fromRow: Int,
         fromColumn: Int,
         path: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
-        val remainingTurnActions = remainingTurnActions.move(path.size)
+        val remainingActions = remainingActions.walk(path.size)
         val destination = path.last()
         val movedEvent =
             BattleUnitMoved(
@@ -179,16 +179,16 @@ data class BattleUnit private constructor(
                 path = path,
             )
         return copy(
-            remainingTurnActions = remainingTurnActions,
+            remainingActions = remainingActions,
             events = events + movedEvent + movedEvent.occupantMoveRequest(),
         )
     }
 
     /**
-     * Walks outside a battle (e.g.: while exploring), so it spends no turn action.
+     * Walks outside a battle (e.g.: while exploring), so it spends no step.
      * Path: the tiles walked from the origin (excluded) to the destination (included).
      */
-    fun walk(
+    fun walkOutOfBattle(
         fromRow: Int,
         fromColumn: Int,
         path: List<Battlefield.Dto.PositionDto>,
@@ -248,7 +248,7 @@ data class BattleUnit private constructor(
                 path = listOf(Battlefield.Dto.PositionDto(row = toRow, column = toColumn)),
             )
         return copy(
-            remainingTurnActions = remainingTurnActions,
+            remainingActions = remainingActions,
             events = events + movedEvent + movedEvent.occupantMoveRequest(),
         )
     }
@@ -256,29 +256,29 @@ data class BattleUnit private constructor(
     private fun BattleUnitMoved.occupantMoveRequest() = RequestMoveOccupant(occupantId = battleUnitId, toRow = toRow, toColumn = toColumn)
 
     /**
-     * A summon counts the turns of its player: once the turn it is on finishes, it has one turn fewer, and it vanishes
+     * A summon counts the player turns of its player: once the one it is on finishes, it has one fewer, and it vanishes
      * when none is left. Nothing changes for the other battle units, nor once defeated.
      */
-    fun finishTurn(
+    fun reduceRemainingSummonDuration(
         row: Int,
         column: Int,
     ): BattleUnit {
-        if (remainingTurns == null || isDefeated()) return this
-        val turnsLeft = remainingTurns.finishTurn()
-        return if (turnsLeft.isOver()) vanish(row = row, column = column) else copy(remainingTurns = turnsLeft)
+        if (remainingSummonDuration == null || isDefeated()) return this
+        val reduced = remainingSummonDuration.reduce()
+        return if (reduced.isOver()) vanish(row = row, column = column) else copy(remainingSummonDuration = reduced)
     }
 
     /**
-     * A summon vanishes from its tile, whatever turns it has left (e.g.: when the battle ends). Nothing changes for the
+     * A summon vanishes from its tile, whatever summon duration it has left (e.g.: when the battle ends). Nothing changes for the
      * other battle units, nor once defeated.
      */
     fun vanish(
         row: Int,
         column: Int,
     ): BattleUnit {
-        if (remainingTurns == null || isDefeated()) return this
+        if (remainingSummonDuration == null || isDefeated()) return this
         return copy(
-            remainingTurns = RemainingTurns(0),
+            remainingSummonDuration = RemainingSummonDuration(0),
             events =
                 events +
                     BattleUnitVanished(
@@ -305,13 +305,13 @@ data class BattleUnit private constructor(
         if (!isDefeated()) return this
         return copy(
             unitId = UnitId(unit.id),
-            remainingHealthPoints = RemainingHealthPoints(unit.healthPoints),
-            remainingManaPoints = RemainingManaPoints(unit.manaPoints),
-            baseMaximumHealthPoints = BaseMaximumHealthPoints(unit.healthPoints),
-            baseMaximumManaPoints = BaseMaximumManaPoints(unit.manaPoints),
+            remainingHealth = RemainingHealth(unit.healthPoints),
+            remainingMana = RemainingMana(unit.manaPoints),
+            baseMaximumHealth = BaseMaximumHealth(unit.healthPoints),
+            baseMaximumMana = BaseMaximumMana(unit.manaPoints),
             equippedEffects = EquippedEffects(),
-            remainingTurnActions = RemainingTurnActions(unit.movementRange),
-            abilityCooldowns = AbilityCooldowns(unit.abilities + learnedAbilities.value),
+            remainingActions = RemainingActions(unit.movementRange),
+            knownAbilities = KnownAbilities(unit.abilities + learnedAbilities.value),
             ongoingEffects = OngoingEffects(),
             events =
                 events +
@@ -321,18 +321,18 @@ data class BattleUnit private constructor(
     }
 
     fun resetActions(): BattleUnit {
-        val remainingTurnActions = remainingTurnActions.reset()
-        return copy(remainingTurnActions = remainingTurnActions)
+        val remainingActions = remainingActions.reset()
+        return copy(remainingActions = remainingActions)
     }
 
     fun reduceCooldowns(): BattleUnit {
-        val abilityCooldowns = abilityCooldowns.reduceCooldowns()
-        return copy(abilityCooldowns = abilityCooldowns)
+        val knownAbilities = knownAbilities.reduceCooldowns()
+        return copy(knownAbilities = knownAbilities)
     }
 
     fun replenishMana(): BattleUnit {
-        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + 10, maximumManaPoints()))
-        return copy(remainingManaPoints = remainingManaPoints)
+        val remainingMana = RemainingMana(min(remainingMana.value + 10, maximumMana()))
+        return copy(remainingMana = remainingMana)
     }
 
     /**
@@ -341,9 +341,9 @@ data class BattleUnit private constructor(
      */
     fun recover(percentage: Int): BattleUnit {
         if (isDefeated()) return this
-        val remainingHealthPoints = RemainingHealthPoints(min(remainingHealthPoints.value + shareOf(maximumHealthPoints(), percentage), maximumHealthPoints()))
-        val remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value + shareOf(maximumManaPoints(), percentage), maximumManaPoints()))
-        return copy(remainingHealthPoints = remainingHealthPoints, remainingManaPoints = remainingManaPoints)
+        val remainingHealth = RemainingHealth(min(remainingHealth.value + shareOf(maximumHealth(), percentage), maximumHealth()))
+        val remainingMana = RemainingMana(min(remainingMana.value + shareOf(maximumMana(), percentage), maximumMana()))
+        return copy(remainingHealth = remainingHealth, remainingMana = remainingMana)
     }
 
     // The percentage of the maximum, rounded up, so any maximum gives at least 1.
@@ -353,10 +353,10 @@ data class BattleUnit private constructor(
     ): Int = (maximum * percentage + 99) / 100
 
     /** The unit's maximum health, raised by the effects of the equipped items. */
-    private fun maximumHealthPoints(): Int = baseMaximumHealthPoints.value + equippedEffects.maximumHealthBonus()
+    private fun maximumHealth(): Int = baseMaximumHealth.value + equippedEffects.maximumHealthBonus()
 
     /** The unit's maximum mana, raised by the effects of the equipped items. */
-    private fun maximumManaPoints(): Int = baseMaximumManaPoints.value + equippedEffects.maximumManaBonus()
+    private fun maximumMana(): Int = baseMaximumMana.value + equippedEffects.maximumManaBonus()
 
     /** Raises a maximum stat while the item is equipped. The remaining health and mana do not change. */
     fun applyEquippedEffect(
@@ -375,23 +375,23 @@ data class BattleUnit private constructor(
     fun removeEquippedEffects(lootableItemId: String): BattleUnit {
         val unequipped = copy(equippedEffects = equippedEffects.remove(lootableItemId))
         return unequipped.copy(
-            remainingHealthPoints = RemainingHealthPoints(min(remainingHealthPoints.value, unequipped.maximumHealthPoints())),
-            remainingManaPoints = RemainingManaPoints(min(remainingManaPoints.value, unequipped.maximumManaPoints())),
+            remainingHealth = RemainingHealth(min(remainingHealth.value, unequipped.maximumHealth())),
+            remainingMana = RemainingMana(min(remainingMana.value, unequipped.maximumMana())),
             events = events + EquippedEffectsRemoved(battleUnitId = id.value, lootableItemId = lootableItemId),
         )
     }
 
-    fun canMoveDistance(distance: Int) = remainingTurnActions.canMoveDistance(distance)
+    fun canWalkDistance(distance: Int) = remainingActions.canWalkDistance(distance)
 
     fun isSamePlayer(battleUnit: BattleUnit): Boolean = battleUnit.playerId == playerId
 
     /** Whether it can learn the ability for good: it does not know it yet, and knows fewer abilities than the most it can. */
-    fun canLearnAbility(abilityId: String): Boolean = !abilityCooldowns.knows(abilityId) && abilityCooldowns.value.size < maximumAbilities.value
+    fun canLearnAbility(abilityId: String): Boolean = !knownAbilities.knows(abilityId) && knownAbilities.value.size < maximumAbilities.value
 
     fun canCastAbility(ability: Ability.Dto): Boolean =
-        remainingTurnActions.canCastAbility() &&
-            abilityCooldowns.canCastAbility(ability.id) &&
-            remainingManaPoints.value >= ability.manaCost
+        remainingActions.canCastAbility() &&
+            knownAbilities.canCastAbility(ability.id) &&
+            remainingMana.value >= ability.manaCost
 
     fun castAbility(
         abilityId: String,
@@ -399,9 +399,9 @@ data class BattleUnit private constructor(
         abilityManaCost: Int,
         castGroup: List<Battlefield.Dto.PositionDto>,
     ): BattleUnit {
-        val remainingTurnActions = remainingTurnActions.reduceRemainingCasts()
-        val abilityCooldowns = abilityCooldowns.setAbilityCooldown(abilityId, abilityCooldown)
-        val remainingManaPoints = RemainingManaPoints(remainingManaPoints.value - abilityManaCost)
+        val remainingActions = remainingActions.reduceRemainingCasts()
+        val knownAbilities = knownAbilities.setAbilityCooldown(abilityId, abilityCooldown)
+        val remainingMana = RemainingMana(remainingMana.value - abilityManaCost)
         val abilityCastedEvent =
             BattleUnitEvent.AbilityCasted(
                 battleUnitId = id.value,
@@ -409,9 +409,9 @@ data class BattleUnit private constructor(
                 castGroup = castGroup,
             )
         return copy(
-            remainingManaPoints = remainingManaPoints,
-            remainingTurnActions = remainingTurnActions,
-            abilityCooldowns = abilityCooldowns,
+            remainingMana = remainingMana,
+            remainingActions = remainingActions,
+            knownAbilities = knownAbilities,
             events = events + abilityCastedEvent,
         )
     }
@@ -458,7 +458,7 @@ data class BattleUnit private constructor(
         )
     }
 
-    fun isDefeated(): Boolean = remainingHealthPoints.value <= 0
+    fun isDefeated(): Boolean = remainingHealth.value <= 0
 
     fun applyOnDefeatedEffects(): BattleUnit {
         val ongoingEffects = ongoingEffects.clearOnDefeatedEffects()
@@ -476,23 +476,23 @@ data class BattleUnit private constructor(
                 applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
             }
             INCREASE_HEALTH -> {
-                val remainingHealthPoints =
-                    RemainingHealthPoints(min(maximumHealthPoints(), remainingHealthPoints.value + effect.outcome.increaseHealth!!.healing))
+                val remainingHealth =
+                    RemainingHealth(min(maximumHealth(), remainingHealth.value + effect.outcome.increaseHealth!!.healing))
                 val healedEvent = BattleUnitHealed(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
-                    remainingHealthPoints = remainingHealthPoints,
+                    remainingHealth = remainingHealth,
                     events = events + healedEvent,
                 )
             }
             INCREASE_MANA -> {
-                val remainingManaPoints =
-                    RemainingManaPoints(min(maximumManaPoints(), remainingManaPoints.value + effect.outcome.increaseMana!!.mana))
-                val manaRestoredEvent = BattleUnitManaRestored(id.value)
+                val remainingMana =
+                    RemainingMana(min(maximumMana(), remainingMana.value + effect.outcome.increaseMana!!.mana))
+                val manaIncreasedEvent = BattleUnitManaIncreased(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
-                    remainingManaPoints = remainingManaPoints,
-                    events = events + manaRestoredEvent,
+                    remainingMana = remainingMana,
+                    events = events + manaIncreasedEvent,
                 )
             }
             TELEPORT -> {
@@ -512,10 +512,10 @@ data class BattleUnit private constructor(
 
     /** Learns the ability for good, after the abilities it knows, ready to be cast. */
     private fun learnAbility(abilityId: String): BattleUnit {
-        if (abilityCooldowns.knows(abilityId)) throw AbilityAlreadyKnown()
+        if (knownAbilities.knows(abilityId)) throw AbilityAlreadyKnown()
         if (!canLearnAbility(abilityId)) throw AbilitiesAboveLimit()
         return copy(
-            abilityCooldowns = abilityCooldowns.learn(abilityId),
+            knownAbilities = knownAbilities.learn(abilityId),
             learnedAbilities = learnedAbilities.learn(abilityId),
             events = events + AbilityLearned(battleUnitId = id.value, abilityId = abilityId),
         )
@@ -543,11 +543,11 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val remainingHealthPoints = RemainingHealthPoints(max(0, remainingHealthPoints.value - effect.outcome.decreaseHealth!!.damage))
+        val remainingHealth = RemainingHealth(max(0, remainingHealth.value - effect.outcome.decreaseHealth!!.damage))
         val newEvents =
             buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))
-                if (remainingHealthPoints.value <= 0) {
+                if (remainingHealth.value <= 0) {
                     add(
                         BattleUnitDefeated(
                             playerId = playerId.value,
@@ -562,7 +562,7 @@ data class BattleUnit private constructor(
             }
         return copy(
             ongoingEffects = ongoingEffects,
-            remainingHealthPoints = remainingHealthPoints,
+            remainingHealth = remainingHealth,
             events = events + newEvents,
         )
     }
@@ -579,32 +579,32 @@ data class BattleUnit private constructor(
         val value: String,
     )
 
-    /** The turns a summon has left, counting the one it is on. */
-    @JvmInline private value class RemainingTurns(
+    /** The player turns a summon has left, counting the one it is on. */
+    @JvmInline private value class RemainingSummonDuration(
         val value: Int,
     ) {
-        fun finishTurn() = RemainingTurns(max(0, value - 1))
+        fun reduce() = RemainingSummonDuration(max(0, value - 1))
 
         fun isOver() = value == 0
     }
 
-    @JvmInline private value class RemainingHealthPoints(
+    @JvmInline private value class RemainingHealth(
         val value: Int,
     )
 
-    @JvmInline private value class RemainingManaPoints(
+    @JvmInline private value class RemainingMana(
         val value: Int,
     ) {
         init {
-            if (value < 0) throw RemainingManaPointsBelowZero()
+            if (value < 0) throw RemainingManaBelowZero()
         }
     }
 
-    @JvmInline private value class BaseMaximumHealthPoints(
+    @JvmInline private value class BaseMaximumHealth(
         val value: Int,
     )
 
-    @JvmInline private value class BaseMaximumManaPoints(
+    @JvmInline private value class BaseMaximumMana(
         val value: Int,
     )
 
@@ -705,18 +705,18 @@ data class BattleUnit private constructor(
         }
     }
 
-    private data class RemainingTurnActions(
-        private val movementRange: MovementRange,
+    private data class RemainingActions(
+        private val maximumSteps: MaximumSteps,
         private val remainingSteps: RemainingSteps,
         private val remainingCasts: RemainingCasts,
     ) {
-        constructor(movementRange: Int) : this(MovementRange(movementRange), RemainingSteps(movementRange), RemainingCasts(CASTS_PER_TURN))
+        constructor(maximumSteps: Int) : this(MaximumSteps(maximumSteps), RemainingSteps(maximumSteps), RemainingCasts(CASTS_PER_PLAYER_TURN))
 
         private companion object {
-            const val CASTS_PER_TURN = 1
+            const val CASTS_PER_PLAYER_TURN = 1
         }
 
-        @JvmInline private value class MovementRange(
+        @JvmInline private value class MaximumSteps(
             val value: Int,
         )
 
@@ -729,25 +729,25 @@ data class BattleUnit private constructor(
         )
 
         fun toDto() =
-            Dto.RemainingTurnActionsDto(
+            Dto.RemainingActionsDto(
                 remainingSteps = remainingSteps.value,
                 remainingCasts = remainingCasts.value,
-                maximumSteps = movementRange.value,
-                maximumCasts = CASTS_PER_TURN,
+                maximumSteps = maximumSteps.value,
+                maximumCasts = CASTS_PER_PLAYER_TURN,
             )
 
-        fun canMoveDistance(distance: Int): Boolean = distance <= remainingSteps.value
+        fun canWalkDistance(distance: Int): Boolean = distance <= remainingSteps.value
 
-        fun move(distance: Int): RemainingTurnActions {
-            if (distance <= 0) throw MovementDistanceMustBeGreaterThanZero()
-            if (!canMoveDistance(distance)) throw MovementDistanceExceedsRemainingSteps()
+        fun walk(distance: Int): RemainingActions {
+            if (distance <= 0) throw WalkingDistanceMustBeGreaterThanZero()
+            if (!canWalkDistance(distance)) throw WalkingDistanceExceedsRemainingSteps()
             return copy(remainingSteps = RemainingSteps(remainingSteps.value - distance))
         }
 
-        fun reset(): RemainingTurnActions =
+        fun reset(): RemainingActions =
             copy(
-                remainingSteps = RemainingSteps(movementRange.value),
-                remainingCasts = RemainingCasts(CASTS_PER_TURN),
+                remainingSteps = RemainingSteps(maximumSteps.value),
+                remainingCasts = RemainingCasts(CASTS_PER_PLAYER_TURN),
             )
 
         fun canCastAbility(): Boolean = remainingCasts.value > 0
@@ -760,27 +760,33 @@ data class BattleUnit private constructor(
         ) = copy(remainingSteps = RemainingSteps(remainingSteps), remainingCasts = RemainingCasts(remainingCasts))
     }
 
-    @JvmInline private value class AbilityCooldowns(
-        val value: Map<AbilityId, CooldownTurnsLeft>,
+    @JvmInline private value class KnownAbilities(
+        val value: Map<AbilityId, RemainingCooldown>,
     ) {
         constructor(abilities: List<String>) : this(
             abilities.associate { abilityId ->
-                AbilityId(abilityId) to CooldownTurnsLeft(0)
+                AbilityId(abilityId) to RemainingCooldown(0)
             },
         )
 
         companion object {
-            fun restore(cooldowns: Map<String, Int>) = AbilityCooldowns(cooldowns.entries.associate { (abilityId, turnsLeft) -> AbilityId(abilityId) to CooldownTurnsLeft(turnsLeft) })
+            fun restore(remainingCooldowns: Map<String, Int>) =
+                KnownAbilities(
+                    remainingCooldowns.entries.associate { (abilityId, remainingCooldown) ->
+                        AbilityId(abilityId) to
+                            RemainingCooldown(remainingCooldown)
+                    },
+                )
         }
 
         @JvmInline private value class AbilityId(
             val value: String,
         )
 
-        @JvmInline private value class CooldownTurnsLeft(
+        @JvmInline private value class RemainingCooldown(
             val value: Int,
         ) {
-            fun reduce() = CooldownTurnsLeft(max(0, value - 1))
+            fun reduce() = RemainingCooldown(max(0, value - 1))
         }
 
         fun toDto(): Map<String, Int> = value.entries.associate { it.key.value to it.value.value }
@@ -788,38 +794,38 @@ data class BattleUnit private constructor(
         fun knows(abilityId: String): Boolean = AbilityId(abilityId) in value
 
         // The ability is added after the known ones, with no cooldown.
-        fun learn(abilityId: String) = AbilityCooldowns(value + (AbilityId(abilityId) to CooldownTurnsLeft(0)))
+        fun learn(abilityId: String) = KnownAbilities(value + (AbilityId(abilityId) to RemainingCooldown(0)))
 
         fun canCastAbility(abilityId: String): Boolean {
-            val cooldownTurnsLeft = value[AbilityId(abilityId)] ?: return false
-            return cooldownTurnsLeft.value == 0
+            val remainingCooldown = value[AbilityId(abilityId)] ?: return false
+            return remainingCooldown.value == 0
         }
 
         fun setAbilityCooldown(
             abilityId: String,
             abilityCooldown: Int,
-        ): AbilityCooldowns {
-            val abilityCooldowns =
+        ): KnownAbilities {
+            val knownAbilities =
                 buildMap {
                     value.entries.forEach {
                         if (it.key.value == abilityId) {
-                            put(AbilityId(abilityId), CooldownTurnsLeft(abilityCooldown))
+                            put(AbilityId(abilityId), RemainingCooldown(abilityCooldown))
                         } else {
                             put(it.key, it.value)
                         }
                     }
                 }
-            return AbilityCooldowns(abilityCooldowns)
+            return KnownAbilities(knownAbilities)
         }
 
-        fun reduceCooldowns(): AbilityCooldowns {
-            val abilityCooldowns =
+        fun reduceCooldowns(): KnownAbilities {
+            val knownAbilities =
                 buildMap {
-                    value.entries.forEach { (abilityId, cooldownTurnsLeft) ->
-                        put(abilityId, cooldownTurnsLeft.reduce())
+                    value.entries.forEach { (abilityId, remainingCooldown) ->
+                        put(abilityId, remainingCooldown.reduce())
                     }
                 }
-            return AbilityCooldowns(abilityCooldowns)
+            return KnownAbilities(knownAbilities)
         }
     }
 
@@ -978,21 +984,21 @@ data class BattleUnit private constructor(
     data class Dto(
         val id: String,
         val playerId: String,
-        val remainingHealthPoints: Int,
-        val remainingManaPoints: Int,
+        val remainingHealth: Int,
+        val remainingMana: Int,
         // Including the effects of the equipped items.
-        val maximumHealthPoints: Int,
-        val maximumManaPoints: Int,
+        val maximumHealth: Int,
+        val maximumMana: Int,
         // The effect ids applied by each equipped lootable item id.
         val equippedEffects: Map<String, List<String>>,
-        val remainingTurnActions: RemainingTurnActionsDto,
-        val abilityCooldowns: Map<String, Int>,
+        val remainingActions: RemainingActionsDto,
+        val knownAbilities: Map<String, Int>,
         val unitId: String,
         val ongoingEffects: OngoingEffectsDto,
-        // The turns a summon has left, counting the one it is on. None for the battle units that never vanish.
-        val remainingTurns: Int?,
+        // The player turns a summon has left, counting the one it is on. None for the battle units that never vanish.
+        val remainingSummonDuration: Int?,
     ) {
-        data class RemainingTurnActionsDto(
+        data class RemainingActionsDto(
             val remainingCasts: Int,
             val remainingSteps: Int,
             val maximumSteps: Int,
@@ -1006,24 +1012,24 @@ data class BattleUnit private constructor(
 
         /**
          * The whole state of a battle unit, to save the game. Base maximums: without the bonuses of the equipped items.
-         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the cooldowns, up to its
+         * Learned abilities: the ones learned for good (e.g.: by consuming an item), also listed in the known abilities, up to its
          * maximum abilities.
          */
         data class SnapshotDto(
             val id: String,
             val unitId: String,
             val playerId: String,
-            val remainingHealthPoints: Int,
-            val remainingManaPoints: Int,
-            val baseMaximumHealthPoints: Int,
-            val baseMaximumManaPoints: Int,
+            val remainingHealth: Int,
+            val remainingMana: Int,
+            val baseMaximumHealth: Int,
+            val baseMaximumMana: Int,
             val equippedEffects: List<EquippedEffectSnapshotDto>,
-            val remainingTurnActions: RemainingTurnActionsDto,
-            val abilityCooldowns: Map<String, Int>,
+            val remainingActions: RemainingActionsDto,
+            val knownAbilities: Map<String, Int>,
             val learnedAbilityIds: List<String>,
             val maximumAbilities: Int,
             val ongoingEffects: List<OngoingEffectSnapshotDto>,
-            val remainingTurns: Int?,
+            val remainingSummonDuration: Int?,
         )
 
         /** An effect of an equipped item, with the points its bonus adds to the maximum health or mana. */

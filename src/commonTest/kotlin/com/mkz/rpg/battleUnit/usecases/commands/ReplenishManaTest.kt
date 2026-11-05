@@ -32,7 +32,7 @@ class ReplenishManaTest {
         replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        storedBattleUnit!!.remainingManaPoints shouldBe 15
+        storedBattleUnit!!.remainingMana shouldBe 15
     }
 
     @Test
@@ -51,7 +51,7 @@ class ReplenishManaTest {
         replenishMana("player-1", setOf(depletedBattleUnit.toDto().id))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        storedBattleUnit!!.remainingManaPoints shouldBe 12
+        storedBattleUnit!!.remainingMana shouldBe 12
     }
 
     @Test
@@ -70,7 +70,7 @@ class ReplenishManaTest {
         replenishMana("player-1", setOf("another-battle-unit"))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(depletedBattleUnit.toDto().id)?.toDto()
-        storedBattleUnit!!.remainingManaPoints shouldBe 5
+        storedBattleUnit!!.remainingMana shouldBe 5
     }
 
     @Test

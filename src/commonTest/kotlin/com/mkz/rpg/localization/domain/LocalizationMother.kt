@@ -19,7 +19,7 @@ object LocalizationMother {
                     MessageDto(key = "ui.shop.buy", forms = listOf("Buy")),
                     MessageDto(key = "ui.shop.sell", forms = listOf("Sell")),
                     MessageDto(key = "ui.battleInfo.round", forms = listOf("Round {round}")),
-                    MessageDto(key = "ui.remainingTurns.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
+                    MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
                 ),
         )
 
@@ -32,7 +32,7 @@ object LocalizationMother {
                     MessageDto(key = Localization.LANGUAGE_NAME_KEY, forms = listOf("Español")),
                     MessageDto(key = "ui.shop.buy", forms = listOf("Comprar")),
                     MessageDto(key = "ui.battleInfo.round", forms = listOf("Ronda {round}")),
-                    MessageDto(key = "ui.remainingTurns.vanishes", forms = listOf("Desaparece en {turns} turno", "Desaparece en {turns} turnos")),
+                    MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Desaparece en {turns} turno", "Desaparece en {turns} turnos")),
                 ),
         )
 
@@ -42,7 +42,7 @@ object LocalizationMother {
             pluralForms = POLISH_PLURAL_FORMS,
             messages =
                 listOf(
-                    MessageDto(key = "ui.remainingTurns.vanishes", forms = listOf("Znika za {turns} turę", "Znika za {turns} tury", "Znika za {turns} tur")),
+                    MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Znika za {turns} turę", "Znika za {turns} tury", "Znika za {turns} tur")),
                 ),
         )
 

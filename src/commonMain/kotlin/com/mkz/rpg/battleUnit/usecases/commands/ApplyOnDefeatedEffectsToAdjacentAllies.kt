@@ -3,7 +3,7 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
-import com.mkz.rpg.battleUnit.usecases.services.DistanceService
+import com.mkz.rpg.battleUnit.usecases.services.AdjacencyService
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
@@ -15,7 +15,7 @@ class ApplyOnDefeatedEffectsToAdjacentAllies(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchEffectById: SearchEffectById,
     private val searchOccupant: SearchOccupant,
-    private val distanceService: DistanceService,
+    private val adjacencyService: AdjacencyService,
     private val eventBus: EventBus,
 ) {
     operator fun invoke(
@@ -58,8 +58,7 @@ class ApplyOnDefeatedEffectsToAdjacentAllies(
         buildList {
             for (row in defeatedAtRow - 1..defeatedAtRow + 1) {
                 for (column in defeatedAtColumn - 1..defeatedAtColumn + 1) {
-                    val distance = distanceService.manhattanDistance(fromRow = defeatedAtRow, fromColumn = defeatedAtColumn, toRow = row, toColumn = column)
-                    if (distance > 1) continue
+                    if (!adjacencyService.isAdjacent(fromRow = defeatedAtRow, fromColumn = defeatedAtColumn, toRow = row, toColumn = column)) continue
                     val occupantId = searchOccupant(row, column) ?: continue
                     val occupant = battleUnitRepository.searchById(occupantId) ?: continue
                     if (occupant.toDto().id == battleUnit.toDto().id) continue

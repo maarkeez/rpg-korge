@@ -208,7 +208,7 @@ class SkullAbilityAcceptanceTest {
             eventBus.dispatch()
             // Then
             val enemy = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
-            enemy.remainingHealthPoints shouldBe 0
+            enemy.remainingHealth shouldBe 0
             val ally = battleUnitApi.searchBattleUnitById(allyBattleUnitId)!!
             ally.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
         }

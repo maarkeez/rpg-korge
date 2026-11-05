@@ -50,12 +50,12 @@ class ApplyEffect(
         // Deployed right away, as the other effects are applied, so the battlefield is occupied before the cast is resolved.
         val events =
             battleUnitDeployment.deploy(
-                battleUnitId = "deployed-unit-${Random.nextLong()}",
+                battleUnitId = "summon-${Random.nextLong()}",
                 unitId = effect.outcome.deployBattleUnit!!.unitId,
                 playerId = caster.toDto().playerId,
                 deployAtRow = target.row,
                 deployAtColumn = target.column,
-                remainingTurns = ability.summonDuration,
+                remainingSummonDuration = ability.summonDuration,
             )
         eventBus.publish(events)
     }

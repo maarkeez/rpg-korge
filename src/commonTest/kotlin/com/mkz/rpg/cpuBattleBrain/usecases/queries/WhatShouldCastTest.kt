@@ -90,13 +90,13 @@ class WhatShouldCastTest {
     }
 
     private fun givenRat(
-        remainingHealthPoints: Int,
+        remainingHealth: Int,
         abilities: List<Ability>,
         remainingCasts: Int = 1,
     ) {
         abilities.forEach(queries.abilityRepository::create)
         val ratUnit = unit(id = "rat", healthPoints = 20, manaPoints = 10, abilities = abilities.map { it.toDto().id }).also(queries.unitRepository::create)
-        val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealthPoints = remainingHealthPoints)
+        val rat = battleUnit(id = ratId, unit = ratUnit.toDto(), player = cpu, remainingHealth = remainingHealth)
         // A rat with no casts left has already cast an ability this turn.
         val castRat = if (remainingCasts == 0) rat.castAbility(abilityId = "sword", abilityCooldown = 0, abilityManaCost = 0, castGroup = emptyList()).pullEvents().second else rat
         queries.battleUnitRepository.create(castRat)
@@ -106,17 +106,17 @@ class WhatShouldCastTest {
     private fun givenKnight(
         id: String,
         position: WhereCanCast.PositionDto,
-        remainingHealthPoints: Int,
+        remainingHealth: Int,
     ) {
-        queries.battleUnitRepository.create(battleUnit(id = id, unit = knightUnit, player = human, remainingHealthPoints = remainingHealthPoints))
+        queries.battleUnitRepository.create(battleUnit(id = id, unit = knightUnit, player = human, remainingHealth = remainingHealth))
         place(id, position)
     }
 
     @Test
     fun `should attack the adjacent enemy when the caster is healthy`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, heal))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -126,8 +126,8 @@ class WhatShouldCastTest {
     @Test
     fun `should heal when the caster is badly hurt`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(sword, heal))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 4, abilities = listOf(sword, heal))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -137,7 +137,7 @@ class WhatShouldCastTest {
     @Test
     fun `should not cast when the caster is at full health and no enemy is adjacent`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
+        givenRat(remainingHealth = 20, abilities = listOf(sword, heal))
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -147,9 +147,9 @@ class WhatShouldCastTest {
     @Test
     fun `should attack the enemy it can finish off when several enemies are adjacent`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal))
-        givenKnight(id = "healthy-knight", position = east, remainingHealthPoints = 100)
-        givenKnight(id = "weak-knight", position = south, remainingHealthPoints = 8)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, heal))
+        givenKnight(id = "healthy-knight", position = east, remainingHealth = 100)
+        givenKnight(id = "weak-knight", position = south, remainingHealth = 8)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -159,8 +159,8 @@ class WhatShouldCastTest {
     @Test
     fun `should heal instead of finishing off an enemy when the caster is close to dying`() {
         // Given
-        givenRat(remainingHealthPoints = 6, abilities = listOf(sword, heal))
-        givenKnight(id = "weak-knight", position = east, remainingHealthPoints = 10)
+        givenRat(remainingHealth = 6, abilities = listOf(sword, heal))
+        givenKnight(id = "weak-knight", position = east, remainingHealth = 10)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -170,8 +170,8 @@ class WhatShouldCastTest {
     @Test
     fun `should prefer damage over time when its discounted total is higher than the immediate damage`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, poisonedSword))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, poisonedSword))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -181,8 +181,8 @@ class WhatShouldCastTest {
     @Test
     fun `should prefer immediate damage when the discounted total of the damage over time is lower`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(bigSword, poisonedSword))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(bigSword, poisonedSword))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -192,9 +192,9 @@ class WhatShouldCastTest {
     @Test
     fun `should prefer hitting several enemies when the ability hits all the adjacent enemies`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, whirlwind))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
-        givenKnight(id = "knight-2", position = south, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, whirlwind))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
+        givenKnight(id = "knight-2", position = south, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -204,9 +204,9 @@ class WhatShouldCastTest {
     @Test
     fun `should cast another ability when no attack or heal is worth it`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal, teleport))
+        givenRat(remainingHealth = 20, abilities = listOf(sword, heal, teleport))
         // The knight is too far to attack, but the rat can teleport next to it.
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -216,7 +216,7 @@ class WhatShouldCastTest {
     @Test
     fun `should not heal when the heal can not be cast`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(sword, unaffordableHeal))
+        givenRat(remainingHealth = 4, abilities = listOf(sword, unaffordableHeal))
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -226,7 +226,7 @@ class WhatShouldCastTest {
     @Test
     fun `should not cast when the caster has no casts left`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(sword, heal), remainingCasts = 0)
+        givenRat(remainingHealth = 4, abilities = listOf(sword, heal), remainingCasts = 0)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -236,8 +236,8 @@ class WhatShouldCastTest {
     @Test
     fun `should deploy a battle unit instead of casting another ability when the deployed battle unit can reach an enemy`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(heal, deployBat, teleport))
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(heal, deployBat, teleport))
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -247,8 +247,8 @@ class WhatShouldCastTest {
     @Test
     fun `should deploy the battle unit on the tile nearest to the enemy when several tiles are vacant`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(deployBat))
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(deployBat))
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -258,8 +258,8 @@ class WhatShouldCastTest {
     @Test
     fun `should attack the adjacent enemy instead of deploying when the attack is worth more`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, deployBat))
-        givenKnight(id = "knight-1", position = east, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, deployBat))
+        givenKnight(id = "knight-1", position = east, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -269,8 +269,8 @@ class WhatShouldCastTest {
     @Test
     fun `should heal instead of deploying when the caster is badly hurt`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(heal, deployBat))
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
+        givenRat(remainingHealth = 4, abilities = listOf(heal, deployBat))
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -280,8 +280,8 @@ class WhatShouldCastTest {
     @Test
     fun `should not deploy a battle unit when the deployed battle unit can not attack`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(deployScarecrow))
-        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(deployScarecrow))
+        givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -291,7 +291,7 @@ class WhatShouldCastTest {
     @Test
     fun `should not deploy a battle unit when there are no enemies`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(deployBat))
+        givenRat(remainingHealth = 20, abilities = listOf(deployBat))
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -304,8 +304,8 @@ class WhatShouldCastTest {
     @Test
     fun `should not deploy a battle unit when the enemy is out of reach`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(deployBat))
-        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(deployBat))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -315,8 +315,8 @@ class WhatShouldCastTest {
     @Test
     fun `should not cast another ability when the enemy is out of reach`() {
         // Given
-        givenRat(remainingHealthPoints = 20, abilities = listOf(sword, heal, teleport))
-        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 20, abilities = listOf(sword, heal, teleport))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then
@@ -326,8 +326,8 @@ class WhatShouldCastTest {
     @Test
     fun `should heal when the caster is badly hurt and the enemy is out of reach`() {
         // Given
-        givenRat(remainingHealthPoints = 4, abilities = listOf(heal, deployBat, teleport))
-        givenKnight(id = "knight-1", position = outOfReach, remainingHealthPoints = 100)
+        givenRat(remainingHealth = 4, abilities = listOf(heal, deployBat, teleport))
+        givenKnight(id = "knight-1", position = outOfReach, remainingHealth = 100)
         // When
         val decision = whatShouldCast(ratId)
         // Then

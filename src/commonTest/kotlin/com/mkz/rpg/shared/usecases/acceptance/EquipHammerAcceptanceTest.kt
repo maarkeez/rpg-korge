@@ -104,10 +104,10 @@ class EquipHammerAcceptanceTest {
             eventBus.dispatch()
             // Then
             val knight = battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!
-            knight.maximumHealthPoints shouldBe 120
-            knight.maximumManaPoints shouldBe 50
-            knight.remainingHealthPoints shouldBe 100
-            knight.remainingManaPoints shouldBe 30
+            knight.maximumHealth shouldBe 120
+            knight.maximumMana shouldBe 50
+            knight.remainingHealth shouldBe 100
+            knight.remainingMana shouldBe 30
             knight.equippedEffects shouldBe mapOf("hammer" to listOf("maximum-health-20", "maximum-mana-20"))
             val inventory = inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!
             inventory.equippedItems shouldBe mapOf(WEAPON to "hammer")
@@ -124,16 +124,16 @@ class EquipHammerAcceptanceTest {
             repeat(2) { applyFromItem(lootableItemId = "mana-potion", effectId = "mana-potion-restore") }
             eventBus.dispatch()
             val healedKnight = battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!
-            require(healedKnight.remainingHealthPoints == 120 && healedKnight.remainingManaPoints == 50)
+            require(healedKnight.remainingHealth == 120 && healedKnight.remainingMana == 50)
             // When
             inventoryApi.unequipItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "hammer")
             eventBus.dispatch()
             // Then
             val knight = battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!
-            knight.maximumHealthPoints shouldBe 100
-            knight.maximumManaPoints shouldBe 30
-            knight.remainingHealthPoints shouldBe 100
-            knight.remainingManaPoints shouldBe 30
+            knight.maximumHealth shouldBe 100
+            knight.maximumMana shouldBe 30
+            knight.remainingHealth shouldBe 100
+            knight.remainingMana shouldBe 30
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.equippedItems shouldBe emptyMap()
         }
 }

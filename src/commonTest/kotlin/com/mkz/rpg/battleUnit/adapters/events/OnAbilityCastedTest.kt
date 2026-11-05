@@ -22,7 +22,7 @@ class OnAbilityCastedTest {
     private val onAbilityCasted =
         OnAbilityCasted(
             requestEffectApplicationToCastTargets =
-                RequestEffectApplicationToCastTargets(queries.searchAbilityById, queries.battleUnitRepository, queries.abilityExecution, eventBus),
+                RequestEffectApplicationToCastTargets(queries.searchAbilityById, queries.battleUnitRepository, queries.castResolution, eventBus),
             eventBus = eventBus,
         )
     private val resolvedCasts = mutableListOf<BattleUnitEvent.AbilityCastResolved>().also { resolved -> eventBus.subscribe<BattleUnitEvent.AbilityCastResolved> { resolved += it } }

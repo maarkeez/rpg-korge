@@ -5,14 +5,14 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import kotlin.test.Test
 
-class RequestBattleJoinTest {
+class RequestJoinBattleTest {
     private val eventBus = FakeEventBus()
-    private val requestBattleJoin = RequestBattleJoin(eventBus)
+    private val requestJoinBattle = RequestJoinBattle(eventBus)
 
     @Test
     fun `should request the battle unit to join the battle with its player`() {
         // When
-        requestBattleJoin(playerId = "human", battleUnitId = "knight-1")
+        requestJoinBattle(playerId = "human", battleUnitId = "knight-1")
         // Then
         eventBus.shouldHavePublishedEvents(BattleEvent.RequestJoinBattle(battleUnitId = "knight-1", playerId = "human"))
     }

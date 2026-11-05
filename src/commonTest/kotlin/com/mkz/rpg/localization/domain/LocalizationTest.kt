@@ -90,7 +90,7 @@ class LocalizationTest {
 
     @Test
     fun `Translate should return the singular when the message is a plural`() {
-        localization().translate("ui.remainingTurns.vanishes") shouldBe "Vanishes in {turns} turn"
+        localization().translate("ui.remainingSummonDuration.vanishes") shouldBe "Vanishes in {turns} turn"
     }
 
     @Test
@@ -98,7 +98,7 @@ class LocalizationTest {
         // Given
         val localization = localization(translations = listOf(polish()), selectedLanguageCode = "pl")
         // When
-        val texts = listOf(1, 2, 5, 12, 22, 25).map { count -> localization.translatePlural("ui.remainingTurns.vanishes", count, mapOf("turns" to "$count")) }
+        val texts = listOf(1, 2, 5, 12, 22, 25).map { count -> localization.translatePlural("ui.remainingSummonDuration.vanishes", count, mapOf("turns" to "$count")) }
         // Then
         texts.shouldContainExactly("Znika za 1 turę", "Znika za 2 tury", "Znika za 5 tur", "Znika za 12 tur", "Znika za 22 tury", "Znika za 25 tur")
     }
@@ -108,7 +108,7 @@ class LocalizationTest {
         // Given
         val localization = localization()
         // When
-        val texts = listOf(0, 1, 2).map { count -> localization.translatePlural("ui.remainingTurns.vanishes", count, mapOf("turns" to "$count")) }
+        val texts = listOf(0, 1, 2).map { count -> localization.translatePlural("ui.remainingSummonDuration.vanishes", count, mapOf("turns" to "$count")) }
         // Then
         texts.shouldContainExactly("Vanishes in 0 turns", "Vanishes in 1 turn", "Vanishes in 2 turns")
     }
@@ -120,10 +120,10 @@ class LocalizationTest {
             CatalogDto(
                 languageCode = "fr",
                 pluralForms = "nplurals=2; plural=(n > 1);",
-                messages = listOf(MessageDto(key = "ui.remainingTurns.vanishes", forms = listOf("Disparaît dans {turns} tour"))),
+                messages = listOf(MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Disparaît dans {turns} tour"))),
             )
         // When
-        val text = localization(translations = listOf(french), selectedLanguageCode = "fr").translatePlural("ui.remainingTurns.vanishes", 3)
+        val text = localization(translations = listOf(french), selectedLanguageCode = "fr").translatePlural("ui.remainingSummonDuration.vanishes", 3)
         // Then
         text shouldBe "Vanishes in {turns} turns"
     }

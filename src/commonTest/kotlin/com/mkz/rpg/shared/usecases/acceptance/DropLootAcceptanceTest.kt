@@ -103,7 +103,7 @@ class DropLootAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battlefieldApi.searchPosition(playerTwoGoatWizardBattleUnitId) == PositionDto(row = 2, column = 2))
-            require(battleUnitApi.searchBattleUnitById(playerTwoGoatWizardBattleUnitId)!!.remainingHealthPoints == 150)
+            require(battleUnitApi.searchBattleUnitById(playerTwoGoatWizardBattleUnitId)!!.remainingHealth == 150)
             defeatTheGoatWizard()
             // When
             eventBus.dispatch()
@@ -118,7 +118,7 @@ class DropLootAcceptanceTest {
             defeatTheGoatWizard()
             eventBus.dispatch()
             require(lootDropApi.searchDroppedItems() == mapOf(LootDrop.Dto.PositionDto(row = 2, column = 2) to listOf("bee-essence")))
-            battleUnitApi.walkBattleUnit(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
+            battleUnitApi.walkBattleUnitOutOfBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
             // When
             eventBus.dispatch()
             // Then

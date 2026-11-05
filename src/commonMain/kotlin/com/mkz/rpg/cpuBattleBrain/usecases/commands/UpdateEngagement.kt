@@ -32,7 +32,7 @@ class UpdateEngagement(
         val joiningBattleUnitIds = cpuBattleUnitsOutOfBattle.map { battleUnit -> battleUnit.id }.filter { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
         val leavingBattleUnitIds =
             cpuBattleUnitsInBattle
-                .filter { battleUnit -> battleUnit.remainingTurns == null }
+                .filter { battleUnit -> battleUnit.remainingSummonDuration == null }
                 .map { battleUnit -> battleUnit.id }
                 .filterNot { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
         eventBus.publish(

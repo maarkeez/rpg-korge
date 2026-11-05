@@ -76,7 +76,7 @@ class CpuRespawnAcceptanceTest {
         eventBus.dispatch()
     }
 
-    private fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealthPoints
+    private fun ratHealth() = battleUnitApi.searchBattleUnitById("rat-1")!!.remainingHealth
 
     // The sword hits the rat: 10 damage.
     private fun hitRat() {
@@ -116,7 +116,7 @@ class CpuRespawnAcceptanceTest {
             walkBackAndForth(RESPAWN_STEPS)
             // Then
             val rat = battleUnitApi.searchBattleUnitById("rat-1")!!
-            rat.remainingHealthPoints shouldBe rat.maximumHealthPoints
+            rat.remainingHealth shouldBe rat.maximumHealth
             battlefieldApi.searchPosition("rat-1") shouldBe ratHome
         }
 

@@ -82,12 +82,12 @@ class CpuCastingBadlyHurtRatAcceptanceTest {
     fun `should heal instead of attacking when the cpu rat is badly hurt`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealthPoints == 10)
+            require(battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealth == 10)
             battleApi.finishPlayerTurn()
             // When
             eventBus.dispatch()
             // Then
-            battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealthPoints shouldBe 20
-            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 100
+            battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealth shouldBe 20
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealth shouldBe 100
         }
 }

@@ -32,10 +32,10 @@ class RespawnBattleUnitTest {
     fun setUp() {
         unitRepository.create(rat)
         battlefieldRepository.create(battlefield(". . ."))
-        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat.toDto(), player = cpu, remainingHealthPoints = 0))
+        battleUnitRepository.create(battleUnit(id = "rat-1", unit = rat.toDto(), player = cpu, remainingHealth = 0))
     }
 
-    private fun healthOf(battleUnitId: String) = battleUnitRepository.searchById(battleUnitId)!!.toDto().remainingHealthPoints
+    private fun healthOf(battleUnitId: String) = battleUnitRepository.searchById(battleUnitId)!!.toDto().remainingHealth
 
     @Test
     fun `should bring the defeated battle unit back on the tile`() {
@@ -64,7 +64,7 @@ class RespawnBattleUnitTest {
     @Test
     fun `should not respawn a battle unit that is not defeated`() {
         // Given
-        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat.toDto(), player = cpu, remainingHealthPoints = 5))
+        battleUnitRepository.create(battleUnit(id = "rat-2", unit = rat.toDto(), player = cpu, remainingHealth = 5))
         // When
         respawnBattleUnit(battleUnitId = "rat-2", row = 0, column = 2)
         // Then

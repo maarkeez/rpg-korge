@@ -54,7 +54,7 @@ class PoFileTest {
         // Given
         val content =
             """
-            msgctxt "ui.remainingTurns.vanishes"
+            msgctxt "ui.remainingSummonDuration.vanishes"
             msgid "Vanishes in {turns} turn"
             msgid_plural "Vanishes in {turns} turns"
             msgstr[0] "Desaparece en {turns} turno"

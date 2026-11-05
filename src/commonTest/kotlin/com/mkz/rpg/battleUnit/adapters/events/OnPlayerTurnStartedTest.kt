@@ -53,9 +53,9 @@ class OnPlayerTurnStartedTest {
         eventBus.dispatch()
         // Then
         val updatedKnight = queries.battleUnitRepository.searchById("knight-1")!!.toDto()
-        updatedKnight.remainingTurnActions.remainingCasts shouldBe 1
-        updatedKnight.abilityCooldowns["sword"] shouldBe 1
-        updatedKnight.remainingHealthPoints shouldBe 17
-        updatedKnight.remainingManaPoints shouldBe 25
+        updatedKnight.remainingActions.remainingCasts shouldBe 1
+        updatedKnight.knownAbilities["sword"] shouldBe 1
+        updatedKnight.remainingHealth shouldBe 17
+        updatedKnight.remainingMana shouldBe 25
     }
 }

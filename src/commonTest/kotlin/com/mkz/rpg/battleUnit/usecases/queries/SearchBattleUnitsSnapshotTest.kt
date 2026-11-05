@@ -14,7 +14,7 @@ class SearchBattleUnitsSnapshotTest {
     @Test
     fun `should return the snapshot of every battle unit`() {
         // Given
-        val battleUnits = listOf(battleUnit(id = "knight-1"), battleUnit(id = "knight-2", unit = unit(healthPoints = 10).toDto(), remainingHealthPoints = 3))
+        val battleUnits = listOf(battleUnit(id = "knight-1"), battleUnit(id = "knight-2", unit = unit(healthPoints = 10).toDto(), remainingHealth = 3))
         battleUnits.forEach(battleUnitRepository::create)
         // When
         val result = searchBattleUnitsSnapshot()

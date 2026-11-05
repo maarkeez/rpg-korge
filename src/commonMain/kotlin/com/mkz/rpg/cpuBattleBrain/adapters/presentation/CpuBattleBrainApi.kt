@@ -84,7 +84,7 @@ class CpuBattleBrainApi(
     val whereShouldMove =
         WhereShouldMove(
             battleUnitApi.searchBattleUnitsByPlayerId,
-            battleUnitApi.whereCanMove,
+            battleUnitApi.whereCanWalk,
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
             searchEnemiesWithinReach,

@@ -19,8 +19,8 @@ class JoinCpuTurnTest {
     init {
         val human = player(id = "human", type = PlayerTypeDto.HUMAN).toDto()
         val cpu = player(id = "cpu", type = PlayerTypeDto.CPU).toDto()
-        queries.battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu, remainingTurns = 5))
-        queries.battleUnitRepository.create(battleUnit(id = "bee-1", player = human, remainingTurns = 5))
+        queries.battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu, remainingSummonDuration = 5))
+        queries.battleUnitRepository.create(battleUnit(id = "bee-1", player = human, remainingSummonDuration = 5))
     }
 
     @Test

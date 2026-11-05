@@ -32,7 +32,7 @@ class BattlefieldHudApi(
         MovementService(
             searchBattleUnitById = battleUnitApi.searchBattleUnitById,
             searchVacantTiles = battlefieldApi.searchVacantTiles,
-            canMoveTo = battleUnitApi.canMoveTo,
+            canWalkTo = battleUnitApi.canWalkTo,
         )
 
     // Commands

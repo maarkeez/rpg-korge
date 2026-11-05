@@ -26,7 +26,7 @@ class ClaimHome(
         column: Int,
     ) {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return
-        if (battleUnit.remainingTurns != null) return
+        if (battleUnit.remainingSummonDuration != null) return
         val player = searchPlayerById(id = battleUnit.playerId) ?: return
         if (player.type != PlayerTypeDto.CPU) return
         val cpuWanderBrain = cpuWanderBrainRepository.search() ?: CpuWanderBrain.create()

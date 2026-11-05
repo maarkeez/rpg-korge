@@ -34,7 +34,7 @@ class SelectBattleUnitTest {
             searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canMoveTo),
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canWalkTo),
         )
     private val battleUnitTile = tile(0, 1)
     private val tilesWhereCanBeMoved = setOf(tile(0, 0), tile(0, 2))

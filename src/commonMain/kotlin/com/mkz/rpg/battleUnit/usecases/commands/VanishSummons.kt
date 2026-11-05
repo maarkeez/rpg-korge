@@ -5,10 +5,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Once the battle ends, every summon left vanishes, whatever turns it has left, as the summons never explore. They are
+ * Once the battle ends, every summon left vanishes, whatever summon duration it has left, as the summons never explore. They are
  * deleted, so nothing counts them anymore.
  */
-class VanishSummonedBattleUnits(
+class VanishSummons(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val eventBus: EventBus,

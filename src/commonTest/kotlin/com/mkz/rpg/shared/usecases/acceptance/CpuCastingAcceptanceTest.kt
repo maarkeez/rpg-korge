@@ -72,11 +72,11 @@ class CpuCastingAcceptanceTest {
     fun `should attack the adjacent knight when the cpu rat is healthy`() =
         scenarioTest(::setUp) {
             // Given
-            require(battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealthPoints == 20)
+            require(battleUnitApi.searchBattleUnitById(ratBattleUnitId)!!.remainingHealth == 20)
             battleApi.finishPlayerTurn()
             // When
             eventBus.dispatch()
             // Then
-            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealth shouldBe 90
         }
 }

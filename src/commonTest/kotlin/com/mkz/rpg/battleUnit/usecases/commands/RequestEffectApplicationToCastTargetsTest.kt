@@ -37,7 +37,7 @@ class RequestEffectApplicationToCastTargetsTest {
         RequestEffectApplicationToCastTargets(
             searchAbilityById = queries.searchAbilityById,
             battleUnitRepository = battleUnitRepository,
-            abilityExecution = queries.abilityExecution,
+            castResolution = queries.castResolution,
             eventBus = eventBus,
         )
 

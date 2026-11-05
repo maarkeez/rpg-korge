@@ -12,12 +12,12 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestApplyEffect
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestCastAbility
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestDeployBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestInitialiseBattleUnits
-import com.mkz.rpg.battleUnit.adapters.events.OnRequestMoveBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRecoverBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRemoveEquippedEffects
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestSwapBattleUnits
-import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnit
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnitInBattle
+import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnitOutOfBattle
 import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
 import com.mkz.rpg.battleUnit.adapters.save.BattleUnitSnapshottable
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
@@ -27,25 +27,25 @@ import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToAdjacent
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
-import com.mkz.rpg.battleUnit.usecases.commands.FinishSummonedBattleUnitsTurn
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
-import com.mkz.rpg.battleUnit.usecases.commands.MoveBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RecoverBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.ReduceRemainingSummonDurations
 import com.mkz.rpg.battleUnit.usecases.commands.RemoveEquippedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.ReplenishMana
-import com.mkz.rpg.battleUnit.usecases.commands.RequestBattleJoin
-import com.mkz.rpg.battleUnit.usecases.commands.RequestBattleLeave
 import com.mkz.rpg.battleUnit.usecases.commands.RequestEffectApplicationToCastTargets
+import com.mkz.rpg.battleUnit.usecases.commands.RequestJoinBattle
+import com.mkz.rpg.battleUnit.usecases.commands.RequestLeaveBattle
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.SwapBattleUnits
-import com.mkz.rpg.battleUnit.usecases.commands.VanishSummonedBattleUnits
-import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnit
+import com.mkz.rpg.battleUnit.usecases.commands.VanishSummons
+import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitInBattle
+import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitOutOfBattle
+import com.mkz.rpg.battleUnit.usecases.queries.AreAllBattleUnitsDefeated
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
 import com.mkz.rpg.battleUnit.usecases.queries.CanLearnAbility
-import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
-import com.mkz.rpg.battleUnit.usecases.queries.HasAllBattleUnitsDefeated
+import com.mkz.rpg.battleUnit.usecases.queries.CanWalkTo
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastOngoingEffects
 import com.mkz.rpg.battleUnit.usecases.queries.PreviewCastRemainingHealth
 import com.mkz.rpg.battleUnit.usecases.queries.SearchAbilityAvailabilities
@@ -53,11 +53,11 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
-import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
-import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
+import com.mkz.rpg.battleUnit.usecases.queries.WhereCanWalk
+import com.mkz.rpg.battleUnit.usecases.services.AdjacencyService
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader
-import com.mkz.rpg.battleUnit.usecases.services.DistanceService
+import com.mkz.rpg.battleUnit.usecases.services.CastResolution
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -83,7 +83,7 @@ class BattleUnitApi(
     val snapshottable: Snapshottable = BattleUnitSnapshottable(searchBattleUnitsSnapshot, restoreBattleUnits)
 
     // Services
-    private val distanceService = DistanceService()
+    private val adjacencyService = AdjacencyService()
     private val battleUnitDeployment =
         BattleUnitDeployment(
             battleUnitRepository,
@@ -95,17 +95,17 @@ class BattleUnitApi(
 
     // Queries
     val searchBattleUnitById = SearchBattleUnitById(battleUnitRepository)
-    val canMoveTo =
-        CanMoveTo(
+    val canWalkTo =
+        CanWalkTo(
             battleUnitRepository,
             battlefieldApi.searchPosition,
             battlefieldApi.searchShortestPath,
         )
-    val whereCanMove =
-        WhereCanMove(
+    val whereCanWalk =
+        WhereCanWalk(
             battleUnitRepository,
             battlefieldApi.searchVacantTiles,
-            canMoveTo,
+            canWalkTo,
         )
     val whereCanCast =
         WhereCanCast(
@@ -114,7 +114,7 @@ class BattleUnitApi(
             abilityApi.searchAbilityById,
             battlefieldApi.searchOccupant,
             battlefieldApi.searchVacantTiles,
-            distanceService,
+            adjacencyService,
             battlefieldApi.isTileVacant,
         )
     val canCastAbility =
@@ -130,19 +130,19 @@ class BattleUnitApi(
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
 
     // Services
-    val abilityExecution =
-        AbilityExecution(
+    val castResolution =
+        CastResolution(
             battleUnitRepository,
             battlefieldApi.searchPosition,
             battlefieldApi.searchOccupant,
             effectApi.searchEffectById,
-            distanceService,
+            adjacencyService,
         )
     val previewCastOngoingEffects =
         PreviewCastOngoingEffects(
             abilityApi.searchAbilityById,
             effectApi.searchEffectById,
-            abilityExecution,
+            castResolution,
         )
     val previewCastRemainingHealth =
         PreviewCastRemainingHealth(
@@ -150,7 +150,7 @@ class BattleUnitApi(
             effectApi.searchEffectById,
             battleUnitRepository,
             battlefieldApi.searchPosition,
-            abilityExecution,
+            castResolution,
         )
 
     // Commands
@@ -166,15 +166,15 @@ class BattleUnitApi(
             battleUnitDeployment,
             eventBus,
         )
-    val moveBattleUnit =
-        MoveBattleUnit(
+    val walkBattleUnitInBattle =
+        WalkBattleUnitInBattle(
             battleUnitRepository,
             eventBus,
             battlefieldApi.searchPosition,
             battlefieldApi.searchShortestPath,
         )
-    val walkBattleUnit =
-        WalkBattleUnit(
+    val walkBattleUnitOutOfBattle =
+        WalkBattleUnitOutOfBattle(
             battleUnitRepository,
             eventBus,
             battlefieldApi.searchPosition,
@@ -203,17 +203,17 @@ class BattleUnitApi(
             battleUnitRepository,
             effectApi.searchEffectById,
             battlefieldApi.searchOccupant,
-            distanceService,
+            adjacencyService,
             eventBus,
         )
     val requestEffectApplicationToCastTargets =
         RequestEffectApplicationToCastTargets(
             abilityApi.searchAbilityById,
             battleUnitRepository,
-            abilityExecution,
+            castResolution,
             eventBus,
         )
-    val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
+    val areAllBattleUnitsDefeated = AreAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
     val applyOnTurnStartedEffects =
         ApplyOnTurnStartedEffects(
@@ -227,22 +227,22 @@ class BattleUnitApi(
     val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
     val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, unitApi.searchUnitById, battlefieldApi.isTileVacant, eventBus)
     val removeEquippedEffects = RemoveEquippedEffects(battleUnitRepository, eventBus)
-    val finishSummonedBattleUnitsTurn = FinishSummonedBattleUnitsTurn(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
-    val vanishSummonedBattleUnits = VanishSummonedBattleUnits(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
-    val requestBattleJoin = RequestBattleJoin(eventBus)
-    val requestBattleLeave = RequestBattleLeave(hasAllBattleUnitsDefeated, eventBus)
+    val reduceRemainingSummonDurations = ReduceRemainingSummonDurations(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
+    val vanishSummons = VanishSummons(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
+    val requestJoinBattle = RequestJoinBattle(eventBus)
+    val requestLeaveBattle = RequestLeaveBattle(areAllBattleUnitsDefeated, eventBus)
 
     // Events
     private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
-    private val onPlayerTurnFinished = OnPlayerTurnFinished(finishSummonedBattleUnitsTurn, eventBus)
-    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummonedBattleUnits, eventBus)
+    private val onPlayerTurnFinished = OnPlayerTurnFinished(reduceRemainingSummonDurations, eventBus)
+    private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummons, eventBus)
     private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
-    private val onBattleUnitDeployed = OnBattleUnitDeployed(requestBattleJoin, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToAdjacentAllies, requestBattleLeave, eventBus)
-    private val onBattleUnitVanished = OnBattleUnitVanished(requestBattleLeave, eventBus)
+    private val onBattleUnitDeployed = OnBattleUnitDeployed(requestJoinBattle, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToAdjacentAllies, requestLeaveBattle, eventBus)
+    private val onBattleUnitVanished = OnBattleUnitVanished(requestLeaveBattle, eventBus)
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
-    private val onRequestMoveBattleUnit = OnRequestMoveBattleUnit(moveBattleUnit, eventBus)
-    private val onRequestWalkBattleUnit = OnRequestWalkBattleUnit(walkBattleUnit, eventBus)
+    private val onRequestWalkBattleUnitInBattle = OnRequestWalkBattleUnitInBattle(walkBattleUnitInBattle, eventBus)
+    private val onRequestWalkBattleUnitOutOfBattle = OnRequestWalkBattleUnitOutOfBattle(walkBattleUnitOutOfBattle, eventBus)
     private val onRequestSwapBattleUnits = OnRequestSwapBattleUnits(swapBattleUnits, eventBus)
     private val onRequestRecoverBattleUnits = OnRequestRecoverBattleUnits(recoverBattleUnits, eventBus)
     private val onRequestRespawnBattleUnit = OnRequestRespawnBattleUnit(respawnBattleUnit, eventBus)

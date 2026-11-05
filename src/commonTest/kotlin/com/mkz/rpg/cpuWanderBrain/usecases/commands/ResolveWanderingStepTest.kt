@@ -49,7 +49,7 @@ class ResolveWanderingStepTest {
         // When
         resolveWanderingStep(battleUnitId = "rat-1", row = 1, column = 0)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "rat-2", walkToRow = 2, walkToColumn = 1))
     }
 
     @Test

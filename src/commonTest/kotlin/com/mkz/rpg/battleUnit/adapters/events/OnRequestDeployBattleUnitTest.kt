@@ -36,7 +36,7 @@ class OnRequestDeployBattleUnitTest {
         // Then
         val viking = queries.battleUnitRepository.searchById("viking")!!.toDto()
         viking.playerId shouldBe "human"
-        viking.remainingHealthPoints shouldBe 150
-        viking.remainingTurns.shouldBeNull()
+        viking.remainingHealth shouldBe 150
+        viking.remainingSummonDuration.shouldBeNull()
     }
 }

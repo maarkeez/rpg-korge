@@ -46,7 +46,7 @@ class WanderingSteps(
                 continue
             }
             currentCpuWanderBrain = currentCpuWanderBrain.requestStep(battleUnitId = battleUnitId, row = step.row, column = step.column)
-            walkRequests += BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = battleUnitId, walkToRow = step.row, walkToColumn = step.column)
+            walkRequests += BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = battleUnitId, walkToRow = step.row, walkToColumn = step.column)
             break
         }
         val (events, updatedCpuWanderBrain) = currentCpuWanderBrain.pullEvents()

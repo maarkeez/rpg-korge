@@ -24,7 +24,7 @@ class PreviewCastOngoingEffectsTest {
         PreviewCastOngoingEffects(
             searchAbilityById = queries.searchAbilityById,
             searchEffectById = queries.searchEffectById,
-            abilityExecution = queries.abilityExecution,
+            castResolution = queries.castResolution,
         )
 
     /**

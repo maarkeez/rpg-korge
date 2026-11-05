@@ -34,7 +34,7 @@ class RefreshMovementRangeTest {
             searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canMoveTo),
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canWalkTo),
         )
 
     @Test

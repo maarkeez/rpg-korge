@@ -71,7 +71,7 @@ class WhereShouldWander(
                     terrainHealthContribution(
                         terrainHealthEffect = terrainHealthEffect(step),
                         healingNeed = currentHealingNeed,
-                        maxHealth = battleUnit.maximumHealthPoints,
+                        maxHealth = battleUnit.maximumHealth,
                     )
                 step to (roamPreference * furtherFromHome + homePreference * nearerToHome + terrainContribution).coerceAtLeast(0.0)
             }

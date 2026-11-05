@@ -52,12 +52,12 @@ class WhereShouldWanderTest {
     // Stores the battle units of the CPU player, of a unit with 10 health points.
     private fun givenBattleUnits(
         vararg ids: String,
-        remainingHealthPoints: Int = 10,
+        remainingHealth: Int = 10,
     ) {
         givens += { queries ->
             val unit = unit(id = "unit-rat", healthPoints = 10).also(queries.unitRepository::create)
             ids.forEach { id ->
-                queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player(id = "player-2").toDto(), remainingHealthPoints = remainingHealthPoints))
+                queries.battleUnitRepository.create(battleUnit(id = id, unit = unit.toDto(), player = player(id = "player-2").toDto(), remainingHealth = remainingHealth))
             }
         }
     }
@@ -391,7 +391,7 @@ class WhereShouldWanderTest {
     @Test
     fun `should prefer healing terrain when it is hurt`() {
         // Given: water heals 10 of its 10 health points and it misses half of them, so the water is worth 1.5 and the sand 1.
-        givenBattleUnits("rat-1", remainingHealthPoints = 5)
+        givenBattleUnits("rat-1", remainingHealth = 5)
         givenBattlefield("water sand sand", occupants = mapOf("rat-1" to (0 to 1)))
         // When
         val step = whereShouldWander(0.5, 0.41, homeRow = 0, homeColumn = 1)

@@ -27,7 +27,7 @@ class TextsTest {
     @Test
     fun `plural should return the singular when the count is one`() {
         // When
-        val text = texts.plural(UiText.REMAINING_TURNS, 1, "turns" to 1)
+        val text = texts.plural(UiText.REMAINING_SUMMON_DURATION, 1, "turns" to 1)
         // Then
         text shouldBe "Vanishes in 1 turn"
     }
@@ -35,7 +35,7 @@ class TextsTest {
     @Test
     fun `plural should return the plural when the count is not one`() {
         // When
-        val text = texts.plural(UiText.REMAINING_TURNS, 3, "turns" to 3)
+        val text = texts.plural(UiText.REMAINING_SUMMON_DURATION, 3, "turns" to 3)
         // Then
         text shouldBe "Vanishes in 3 turns"
     }
@@ -70,7 +70,7 @@ class TextsTest {
         texts.selectLanguage("es")
         // Then
         texts[UiText.SHOP_NOT_ENOUGH_GOLD] shouldBe "No hay suficiente oro"
-        texts.plural(UiText.REMAINING_TURNS, 3, "turns" to 3) shouldBe "Desaparece en 3 turnos"
+        texts.plural(UiText.REMAINING_SUMMON_DURATION, 3, "turns" to 3) shouldBe "Desaparece en 3 turnos"
         texts.unitName("bat") shouldBe "Murciélago"
         texts.npcLine("viking") shouldBe "¡Esas bestias me tuvieron aquí atrapado durante días! Por el Valhalla, lucharé a vuestro lado."
     }

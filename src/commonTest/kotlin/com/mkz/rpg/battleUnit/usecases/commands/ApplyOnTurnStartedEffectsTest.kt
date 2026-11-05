@@ -44,7 +44,7 @@ class ApplyOnTurnStartedEffectsTest {
         applyOnTurnStartedEffects("player-1", setOf("knight-1"))
         // Then
         val storedBattleUnit = battleUnitRepository.searchById(battleUnit.toDto().id)?.toDto()
-        storedBattleUnit!!.remainingHealthPoints shouldBe 7
+        storedBattleUnit!!.remainingHealth shouldBe 7
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = battleUnit.toDto().id, effectId = effectId),
             BattleUnitEvent.BattleUnitDamaged(battleUnit.toDto().id),
@@ -86,7 +86,7 @@ class ApplyOnTurnStartedEffectsTest {
         // When
         applyOnTurnStartedEffects("player-1", setOf("another-battle-unit"))
         // Then
-        battleUnitRepository.searchById("knight-1")!!.toDto().remainingHealthPoints shouldBe 10
+        battleUnitRepository.searchById("knight-1")!!.toDto().remainingHealth shouldBe 10
         eventBus.publishedEvents.shouldBeEmpty()
     }
 }

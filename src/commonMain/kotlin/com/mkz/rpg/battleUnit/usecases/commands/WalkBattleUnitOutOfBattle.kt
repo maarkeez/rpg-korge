@@ -5,8 +5,8 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Walks the battle unit along the shortest path to the tile outside a battle (e.g.: while exploring), spending no turn action. */
-class WalkBattleUnit(
+/** Walks the battle unit along the shortest path to the tile outside a battle (e.g.: while exploring), spending no step. */
+class WalkBattleUnitOutOfBattle(
     private val battleUnitRepository: BattleUnitRepository,
     private val eventBus: EventBus,
     private val searchPosition: SearchPosition,
@@ -29,7 +29,7 @@ class WalkBattleUnit(
         if (path.isEmpty()) return
         val (events, battleUnit) =
             storedBattleUnit
-                .walk(
+                .walkOutOfBattle(
                     fromRow = currentPosition.row,
                     fromColumn = currentPosition.column,
                     path = path,

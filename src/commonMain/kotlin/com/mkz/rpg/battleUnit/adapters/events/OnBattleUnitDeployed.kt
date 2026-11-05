@@ -1,16 +1,16 @@
 package com.mkz.rpg.battleUnit.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
-import com.mkz.rpg.battleUnit.usecases.commands.RequestBattleJoin
+import com.mkz.rpg.battleUnit.usecases.commands.RequestJoinBattle
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
 class OnBattleUnitDeployed(
-    requestBattleJoin: RequestBattleJoin,
+    requestJoinBattle: RequestJoinBattle,
     eventBus: EventBus,
 ) {
     val subscription =
         eventBus.subscribe<BattleUnitEvent.BattleUnitDeployed> { event ->
-            requestBattleJoin(playerId = event.playerId, battleUnitId = event.battleUnitId)
+            requestJoinBattle(playerId = event.playerId, battleUnitId = event.battleUnitId)
         }
 }

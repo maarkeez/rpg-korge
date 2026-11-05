@@ -5,10 +5,10 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Once a player finishes its turn, its summons in the battle have one turn fewer. Those with no turn left vanish: they
+ * Once a player finishes its player turn, its summons in the battle have one fewer. Those with none left vanish: they
  * are deleted, so nothing counts them anymore. Battle units: those in the battle.
  */
-class FinishSummonedBattleUnitsTurn(
+class ReduceRemainingSummonDurations(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchPosition: SearchPosition,
     private val eventBus: EventBus,
@@ -22,7 +22,7 @@ class FinishSummonedBattleUnitsTurn(
             .filter { battleUnit -> battleUnit.toDto().id in battleUnitIds }
             .forEach { battleUnit ->
                 val position = searchPosition(occupantId = battleUnit.toDto().id) ?: return@forEach
-                val (events, updatedBattleUnit) = battleUnit.finishTurn(row = position.row, column = position.column).pullEvents()
+                val (events, updatedBattleUnit) = battleUnit.reduceRemainingSummonDuration(row = position.row, column = position.column).pullEvents()
                 if (events.isEmpty()) {
                     battleUnitRepository.update(updatedBattleUnit)
                 } else {

@@ -21,7 +21,7 @@ class RemainingTurnsView(
     }
 
     fun display(remainingTurns: Int) {
-        pill.display(texts.plural(UiText.REMAINING_TURNS, remainingTurns, "turns" to remainingTurns))
+        pill.display(texts.plural(UiText.REMAINING_SUMMON_DURATION, remainingTurns, "turns" to remainingTurns))
         visible = true
     }
 

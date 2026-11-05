@@ -23,13 +23,13 @@ class SearchAbilityAvailabilitiesTest {
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
         result.shouldContainExactly(
-            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0),
-            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 10),
+            AbilityAvailability(abilityId = "sword", remainingCooldown = 0, hasEnoughMana = true, manaCost = 0),
+            AbilityAvailability(abilityId = "heal", remainingCooldown = 0, hasEnoughMana = true, manaCost = 10),
         )
     }
 
     @Test
-    fun `should return the cooldown turns left of the cast ability only, ignoring the remaining casts`() {
+    fun `should return the remaining cooldown of the cast ability only, ignoring the remaining casts`() {
         // Given
         queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0))
         queries.abilityRepository.create(ability(id = "heal", manaCost = 0, cooldown = 2))
@@ -39,13 +39,13 @@ class SearchAbilityAvailabilitiesTest {
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
         result.shouldContainExactly(
-            AbilityAvailability(abilityId = "sword", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0),
-            AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 2, hasEnoughMana = true, manaCost = 0),
+            AbilityAvailability(abilityId = "sword", remainingCooldown = 0, hasEnoughMana = true, manaCost = 0),
+            AbilityAvailability(abilityId = "heal", remainingCooldown = 2, hasEnoughMana = true, manaCost = 0),
         )
     }
 
     @Test
-    fun `should return the cooldown turns left reduced when its next turn starts`() {
+    fun `should return the remaining cooldown reduced when its next player turn starts`() {
         // Given
         queries.abilityRepository.create(ability(id = "heal", manaCost = 0, cooldown = 1))
         val knight = battleUnit(id = "knight-1", unit = unit(abilities = listOf("heal"), manaPoints = 10).toDto())
@@ -53,7 +53,7 @@ class SearchAbilityAvailabilitiesTest {
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
-        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = true, manaCost = 0))
+        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", remainingCooldown = 0, hasEnoughMana = true, manaCost = 0))
     }
 
     @Test
@@ -64,7 +64,7 @@ class SearchAbilityAvailabilitiesTest {
         // When
         val result = searchAbilityAvailabilities(battleUnitId = "knight-1")
         // Then
-        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", cooldownTurnsLeft = 0, hasEnoughMana = false, manaCost = 15))
+        result.shouldContainExactly(AbilityAvailability(abilityId = "heal", remainingCooldown = 0, hasEnoughMana = false, manaCost = 15))
     }
 
     @Test

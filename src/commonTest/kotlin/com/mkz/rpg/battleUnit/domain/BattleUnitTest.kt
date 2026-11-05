@@ -30,12 +30,12 @@ class BattleUnitTest {
         battleUnitDto.id shouldBe battleUnitId
         battleUnitDto.unitId shouldBe unit.id
         battleUnitDto.playerId shouldBe player.id
-        battleUnitDto.remainingHealthPoints shouldBe 10
-        battleUnitDto.remainingManaPoints shouldBe 5
-        battleUnitDto.maximumHealthPoints shouldBe 10
-        battleUnitDto.maximumManaPoints shouldBe 5
+        battleUnitDto.remainingHealth shouldBe 10
+        battleUnitDto.remainingMana shouldBe 5
+        battleUnitDto.maximumHealth shouldBe 10
+        battleUnitDto.maximumMana shouldBe 5
         battleUnitDto.equippedEffects shouldBe emptyMap()
-        battleUnitDto.remainingTurnActions shouldBe BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
+        battleUnitDto.remainingActions shouldBe BattleUnit.Dto.RemainingActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
     }
 
     @Test
@@ -55,14 +55,14 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `Move should reduce the remaining steps and publish the moved event when the battle unit moves`() {
+    fun `WalkInBattle should reduce the remaining steps and publish the moved event when the battle unit walks`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
         val path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2))
         // When
-        val movedBattleUnit = battleUnit.move(fromRow = 0, fromColumn = 0, path = path)
+        val movedBattleUnit = battleUnit.walkInBattle(fromRow = 0, fromColumn = 0, path = path)
         // Then
-        movedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 1
+        movedBattleUnit.toDto().remainingActions.remainingSteps shouldBe 1
         val (events, _) = movedBattleUnit.pullEvents()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitMoved(
@@ -78,35 +78,35 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `Move should fail when the movement distance is not greater than zero`() {
+    fun `WalkInBattle should fail when the walking distance is not greater than zero`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit()
         // When
-        val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = emptyList()) }
+        val result = runCatching { battleUnit.walkInBattle(fromRow = 0, fromColumn = 0, path = emptyList()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.MovementDistanceMustBeGreaterThanZero>()
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.WalkingDistanceMustBeGreaterThanZero>()
     }
 
     @Test
-    fun `Move should fail when the movement distance exceeds the remaining steps`() {
+    fun `WalkInBattle should fail when the walking distance exceeds the remaining steps`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
         // When
         val path = (1..4).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
-        val result = runCatching { battleUnit.move(fromRow = 0, fromColumn = 0, path = path) }
+        val result = runCatching { battleUnit.walkInBattle(fromRow = 0, fromColumn = 0, path = path) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.MovementDistanceExceedsRemainingSteps>()
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.WalkingDistanceExceedsRemainingSteps>()
     }
 
     @Test
-    fun `Walk should publish the moved event and keep the remaining steps when the battle unit walks out of a battle`() {
+    fun `WalkOutOfBattle should publish the moved event and keep the remaining steps when the battle unit walks out of a battle`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
         val path = (1..5).map { column -> Battlefield.Dto.PositionDto(row = 0, column = column) }
         // When
-        val walkedBattleUnit = battleUnit.walk(fromRow = 0, fromColumn = 0, path = path)
+        val walkedBattleUnit = battleUnit.walkOutOfBattle(fromRow = 0, fromColumn = 0, path = path)
         // Then
-        walkedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 3
+        walkedBattleUnit.toDto().remainingActions.remainingSteps shouldBe 3
         val (events, _) = walkedBattleUnit.pullEvents()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitMoved(
@@ -128,7 +128,7 @@ class BattleUnitTest {
         // When
         val teleportedBattleUnit = battleUnit.teleport(fromRow = 0, fromColumn = 0, toRow = 2, toColumn = 2)
         // Then
-        teleportedBattleUnit.toDto().remainingTurnActions.remainingSteps shouldBe 3
+        teleportedBattleUnit.toDto().remainingActions.remainingSteps shouldBe 3
         val (events, _) = teleportedBattleUnit.pullEvents()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitMoved(
@@ -144,16 +144,16 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ResetActions should restore the remaining steps and casts when the turn actions are reset`() {
+    fun `ResetActions should restore the remaining steps and casts when the actions are reset`() {
         // Given
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
-                .move(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
+                .walkInBattle(fromRow = 0, fromColumn = 0, path = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1), Battlefield.Dto.PositionDto(row = 0, column = 2)))
         // When
         val resetBattleUnit = battleUnit.resetActions()
         // Then
-        resetBattleUnit.toDto().remainingTurnActions shouldBe BattleUnit.Dto.RemainingTurnActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
+        resetBattleUnit.toDto().remainingActions shouldBe BattleUnit.Dto.RemainingActionsDto(remainingCasts = 1, remainingSteps = 3, maximumSteps = 3, maximumCasts = 1)
     }
 
     @Test
@@ -164,11 +164,11 @@ class BattleUnitTest {
         // When
         val updatedBattleUnit = battleUnitWithCooldown.reduceCooldowns()
         // Then
-        updatedBattleUnit.toDto().abilityCooldowns.shouldContain("ability-1", 2)
+        updatedBattleUnit.toDto().knownAbilities.shouldContain("ability-1", 2)
     }
 
     @Test
-    fun `ReplenishMana should replenish the remaining mana points up to the unit maximum when mana is replenished`() {
+    fun `ReplenishMana should replenish the remaining mana up to the unit maximum when mana is replenished`() {
         // Given
         val unit = UnitMother.unit(manaPoints = 10).toDto()
         val battleUnit =
@@ -178,25 +178,25 @@ class BattleUnitTest {
         // When
         val replenishedBattleUnit = battleUnit.replenishMana()
         // Then
-        replenishedBattleUnit.toDto().remainingManaPoints shouldBe 10
+        replenishedBattleUnit.toDto().remainingMana shouldBe 10
     }
 
     @Test
-    fun `CanMoveDistance should be true when the distance is within the remaining steps`() {
+    fun `CanWalkDistance should be true when the distance is within the remaining steps`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
         // When
-        val result = battleUnit.canMoveDistance(distance = 2)
+        val result = battleUnit.canWalkDistance(distance = 2)
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `CanMoveDistance should be false when the distance exceeds the remaining steps`() {
+    fun `CanWalkDistance should be false when the distance exceeds the remaining steps`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(movementRange = 3).toDto())
         // When
-        val result = battleUnit.canMoveDistance(distance = 4)
+        val result = battleUnit.canWalkDistance(distance = 4)
         // Then
         result.shouldBeFalse()
     }
@@ -324,9 +324,9 @@ class BattleUnitTest {
         val updatedBattleUnit = battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 3, castGroup = castGroup)
         // Then
         val battleUnitDto = updatedBattleUnit.toDto()
-        battleUnitDto.remainingManaPoints shouldBe 7
-        battleUnitDto.remainingTurnActions.remainingCasts shouldBe 0
-        battleUnitDto.abilityCooldowns.shouldContain("ability-1", 2)
+        battleUnitDto.remainingMana shouldBe 7
+        battleUnitDto.remainingActions.remainingCasts shouldBe 0
+        battleUnitDto.knownAbilities.shouldContain("ability-1", 2)
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.AbilityCasted(battleUnitId = battleUnitDto.id, abilityId = "ability-1", castGroup = castGroup))
     }
@@ -364,7 +364,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `IsDefeated should be false when the battle unit still has health points`() {
+    fun `IsDefeated should be false when the battle unit still has health`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(healthPoints = 10).toDto())
         // When
@@ -374,7 +374,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `IsDefeated should be true when the battle unit has no health points left`() {
+    fun `IsDefeated should be true when the battle unit has no health left`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 1).toDto()
         val battleUnit =
@@ -426,7 +426,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should reduce the health points and publish the damaged event when the effect decreases health`() {
+    fun `ApplyImmediateEffect should reduce the health and publish the damaged event when the effect decreases health`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = unit)
@@ -438,13 +438,13 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 7
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id))
     }
 
     @Test
-    fun `ApplyImmediateEffect should publish the defeated event and request its loot drop when the battle unit health points reach zero`() {
+    fun `ApplyImmediateEffect should publish the defeated event and request its loot drop when the battle unit health reaches zero`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 3).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
@@ -458,7 +458,7 @@ class BattleUnitTest {
                 currentColumn = defeatedAtPosition.column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 0
+        updatedBattleUnit.toDto().remainingHealth shouldBe 0
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
@@ -474,7 +474,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the health points up to the unit maximum and publish the healed event when the effect increases health`() {
+    fun `ApplyImmediateEffect should increase the health up to the unit maximum and publish the healed event when the effect increases health`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val battleUnit =
@@ -495,13 +495,13 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 10
+        updatedBattleUnit.toDto().remainingHealth shouldBe 10
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.BattleUnitHealed(battleUnitId = updatedBattleUnit.toDto().id))
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana points and publish the mana restored event when the effect increases mana`() {
+    fun `ApplyImmediateEffect should increase the mana and publish the mana increased event when the effect increases mana`() {
         // Given
         val unit = UnitMother.unit(manaPoints = 10).toDto()
         val battleUnit =
@@ -519,13 +519,13 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingManaPoints shouldBe 8
+        updatedBattleUnit.toDto().remainingMana shouldBe 8
         val (events, _) = updatedBattleUnit.pullEvents()
-        events.shouldContainExactly(BattleUnitEvent.BattleUnitManaRestored(battleUnitId = updatedBattleUnit.toDto().id))
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitManaIncreased(battleUnitId = updatedBattleUnit.toDto().id))
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana points up to the unit maximum when the effect restores more mana than spent`() {
+    fun `ApplyImmediateEffect should increase the mana up to the unit maximum when the effect gives more mana than spent`() {
         // Given
         val unit = UnitMother.unit(manaPoints = 10).toDto()
         val battleUnit =
@@ -541,7 +541,7 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingManaPoints shouldBe 10
+        updatedBattleUnit.toDto().remainingMana shouldBe 10
     }
 
     @Test
@@ -578,7 +578,7 @@ class BattleUnitTest {
         // Then
         updatedBattleUnit
             .toDto()
-            .abilityCooldowns
+            .knownAbilities
             .toList()
             .shouldContainExactly("sword" to 2, "teleport" to 0)
         events.shouldContainExactly(BattleUnitEvent.AbilityLearned(battleUnitId = updatedBattleUnit.toDto().id, abilityId = "teleport"))
@@ -637,7 +637,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyDelayedEffect should reduce the health points and remove the on turn started effect when the effect decreases health`() {
+    fun `ApplyDelayedEffect should reduce the health and remove the on turn started effect when the effect decreases health`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
@@ -655,7 +655,7 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
             .ongoingEffects.onTurnStarted
@@ -709,7 +709,7 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
             .ongoingEffects.onTurnStarted
@@ -759,7 +759,7 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
             .ongoingEffects.onTurnStarted
@@ -784,7 +784,7 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 7
+        updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
             .ongoingEffects.onTurnStarted
@@ -794,7 +794,7 @@ class BattleUnitTest {
     @Test
     fun `ApplyEquippedEffect should raise the maximums without changing the remaining health and mana when the item effects are applied`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealthPoints = 80)
+        val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealth = 80)
         val maximumHealthEffect = EffectMother.increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto()
         val maximumManaEffect = EffectMother.increaseMaximumManaEffect(id = "maximum-mana-20", manaPoints = 20).toDto()
         // When
@@ -804,10 +804,10 @@ class BattleUnitTest {
                 .applyEquippedEffect(lootableItemId = "hammer", effect = maximumManaEffect)
         // Then
         val battleUnitDto = updatedBattleUnit.toDto()
-        battleUnitDto.maximumHealthPoints shouldBe 120
-        battleUnitDto.maximumManaPoints shouldBe 50
-        battleUnitDto.remainingHealthPoints shouldBe 80
-        battleUnitDto.remainingManaPoints shouldBe 30
+        battleUnitDto.maximumHealth shouldBe 120
+        battleUnitDto.maximumMana shouldBe 50
+        battleUnitDto.remainingHealth shouldBe 80
+        battleUnitDto.remainingMana shouldBe 30
         battleUnitDto.equippedEffects shouldBe mapOf("hammer" to listOf("maximum-health-20", "maximum-mana-20"))
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(
@@ -838,11 +838,11 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the health points up to the maximum with the equipped effects when the effect increases health`() {
+    fun `ApplyImmediateEffect should increase the health up to the maximum with the equipped effects when the effect increases health`() {
         // Given
         val battleUnit =
             BattleUnitMother
-                .battleUnit(unit = UnitMother.unit(healthPoints = 100).toDto(), remainingHealthPoints = 90)
+                .battleUnit(unit = UnitMother.unit(healthPoints = 100).toDto(), remainingHealth = 90)
                 .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
         // When
         val updatedBattleUnit =
@@ -852,11 +852,11 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingHealthPoints shouldBe 120
+        updatedBattleUnit.toDto().remainingHealth shouldBe 120
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana points up to the maximum with the equipped effects when the effect increases mana`() {
+    fun `ApplyImmediateEffect should increase the mana up to the maximum with the equipped effects when the effect increases mana`() {
         // Given
         val battleUnit =
             BattleUnitMother
@@ -870,11 +870,11 @@ class BattleUnitTest {
                 currentColumn = position().column,
             )
         // Then
-        updatedBattleUnit.toDto().remainingManaPoints shouldBe 50
+        updatedBattleUnit.toDto().remainingMana shouldBe 50
     }
 
     @Test
-    fun `ReplenishMana should replenish the remaining mana points up to the maximum with the equipped effects when mana is replenished`() {
+    fun `ReplenishMana should replenish the remaining mana up to the maximum with the equipped effects when mana is replenished`() {
         // Given
         val battleUnit =
             BattleUnitMother
@@ -883,7 +883,7 @@ class BattleUnitTest {
         // When
         val replenishedBattleUnit = battleUnit.replenishMana()
         // Then
-        replenishedBattleUnit.toDto().remainingManaPoints shouldBe 35
+        replenishedBattleUnit.toDto().remainingMana shouldBe 35
     }
 
     @Test
@@ -898,15 +898,15 @@ class BattleUnitTest {
                 .applyImmediateEffect(effect = EffectMother.increaseManaEffect(mana = 20).toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second
-        require(battleUnit.toDto().remainingHealthPoints == 120 && battleUnit.toDto().remainingManaPoints == 50)
+        require(battleUnit.toDto().remainingHealth == 120 && battleUnit.toDto().remainingMana == 50)
         // When
         val updatedBattleUnit = battleUnit.removeEquippedEffects(lootableItemId = "hammer")
         // Then
         val battleUnitDto = updatedBattleUnit.toDto()
-        battleUnitDto.maximumHealthPoints shouldBe 100
-        battleUnitDto.maximumManaPoints shouldBe 30
-        battleUnitDto.remainingHealthPoints shouldBe 100
-        battleUnitDto.remainingManaPoints shouldBe 30
+        battleUnitDto.maximumHealth shouldBe 100
+        battleUnitDto.maximumMana shouldBe 30
+        battleUnitDto.remainingHealth shouldBe 100
+        battleUnitDto.remainingMana shouldBe 30
         battleUnitDto.equippedEffects shouldBe emptyMap()
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.EquippedEffectsRemoved(battleUnitId = battleUnitDto.id, lootableItemId = "hammer"))
@@ -917,16 +917,16 @@ class BattleUnitTest {
         // Given
         val battleUnit =
             BattleUnitMother
-                .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealthPoints = 70)
+                .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealth = 70)
                 .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
                 .applyEquippedEffect(lootableItemId = "helmet", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 5).toDto())
         // When
         val updatedBattleUnit = battleUnit.removeEquippedEffects(lootableItemId = "hammer")
         // Then
         val battleUnitDto = updatedBattleUnit.toDto()
-        battleUnitDto.remainingHealthPoints shouldBe 70
-        battleUnitDto.remainingManaPoints shouldBe 30
-        battleUnitDto.maximumManaPoints shouldBe 35
+        battleUnitDto.remainingHealth shouldBe 70
+        battleUnitDto.remainingMana shouldBe 30
+        battleUnitDto.maximumMana shouldBe 35
         battleUnitDto.equippedEffects.keys.shouldContainExactly("helmet")
     }
 
@@ -940,78 +940,78 @@ class BattleUnitTest {
         result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.EquippedEffectsNotFound>()
     }
 
-    // A battle unit of a unit with 20 health points and 10 mana points, hurt and with some mana spent.
+    // A battle unit of a unit with 20 health and 10 mana, hurt and with some mana spent.
     private fun hurtBattleUnit(
-        remainingHealthPoints: Int,
-        spentManaPoints: Int,
+        remainingHealth: Int,
+        spentMana: Int,
         healthPoints: Int = 20,
         manaPoints: Int = 10,
     ): BattleUnit {
         val unit = UnitMother.unit(healthPoints = healthPoints, manaPoints = manaPoints).toDto()
-        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealthPoints = remainingHealthPoints)
-        if (spentManaPoints == 0) return battleUnit
-        return battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = spentManaPoints, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealth = remainingHealth)
+        if (spentMana == 0) return battleUnit
+        return battleUnit.castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = spentMana, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
     }
 
     @Test
     fun `Recover should recover the percentage of the maximum health and mana`() {
         // Given
-        val battleUnit = hurtBattleUnit(remainingHealthPoints = 10, spentManaPoints = 5)
+        val battleUnit = hurtBattleUnit(remainingHealth = 10, spentMana = 5)
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
-        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 12
-        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 6
+        recoveredBattleUnit.toDto().remainingHealth shouldBe 12
+        recoveredBattleUnit.toDto().remainingMana shouldBe 6
     }
 
     @Test
     fun `Recover should round the recovered health and mana up`() {
-        // Given: 10% of 15 health points and of 5 mana points are 1.5 and 0.5.
-        val battleUnit = hurtBattleUnit(remainingHealthPoints = 5, spentManaPoints = 5, healthPoints = 15, manaPoints = 5)
+        // Given: 10% of 15 health and of 5 mana are 1.5 and 0.5.
+        val battleUnit = hurtBattleUnit(remainingHealth = 5, spentMana = 5, healthPoints = 15, manaPoints = 5)
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
-        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 7
-        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 1
+        recoveredBattleUnit.toDto().remainingHealth shouldBe 7
+        recoveredBattleUnit.toDto().remainingMana shouldBe 1
     }
 
     @Test
     fun `Recover should not recover above the maximum health and mana`() {
         // Given
-        val battleUnit = hurtBattleUnit(remainingHealthPoints = 19, spentManaPoints = 0)
+        val battleUnit = hurtBattleUnit(remainingHealth = 19, spentMana = 0)
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
-        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 20
-        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 10
+        recoveredBattleUnit.toDto().remainingHealth shouldBe 20
+        recoveredBattleUnit.toDto().remainingMana shouldBe 10
     }
 
     @Test
     fun `Recover should recover the percentage of the maximums raised by the equipped effects`() {
         // Given: the hammer raises the maximum health from 20 to 40.
         val battleUnit =
-            hurtBattleUnit(remainingHealthPoints = 10, spentManaPoints = 0)
+            hurtBattleUnit(remainingHealth = 10, spentMana = 0)
                 .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
-        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 14
+        recoveredBattleUnit.toDto().remainingHealth shouldBe 14
     }
 
     @Test
     fun `Recover should not recover a defeated battle unit`() {
         // Given
-        val battleUnit = hurtBattleUnit(remainingHealthPoints = 0, spentManaPoints = 5)
+        val battleUnit = hurtBattleUnit(remainingHealth = 0, spentMana = 5)
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
-        recoveredBattleUnit.toDto().remainingHealthPoints shouldBe 0
-        recoveredBattleUnit.toDto().remainingManaPoints shouldBe 5
+        recoveredBattleUnit.toDto().remainingHealth shouldBe 0
+        recoveredBattleUnit.toDto().remainingMana shouldBe 5
         recoveredBattleUnit.isDefeated().shouldBeTrue()
     }
 
     @Test
-    fun `Deploy should deploy a battle unit that never vanishes when it has no remaining turns`() {
+    fun `Deploy should deploy a battle unit that never vanishes when it has no remaining summon duration`() {
         // When
         val deployedBattleUnit =
             BattleUnit.deploy(
@@ -1023,11 +1023,11 @@ class BattleUnitTest {
                 deployAtColumn = 3,
             )
         // Then
-        deployedBattleUnit.toDto().remainingTurns shouldBe null
+        deployedBattleUnit.toDto().remainingSummonDuration shouldBe null
     }
 
     @Test
-    fun `Deploy should deploy a summon with its remaining turns`() {
+    fun `Deploy should deploy a summon with its remaining summon duration`() {
         // When
         val deployedBattleUnit =
             BattleUnit.deploy(
@@ -1037,33 +1037,33 @@ class BattleUnitTest {
                 maximumAbilities = 6,
                 deployAtRow = 2,
                 deployAtColumn = 3,
-                remainingTurns = 5,
+                remainingSummonDuration = 5,
             )
         // Then
-        deployedBattleUnit.toDto().remainingTurns shouldBe 5
+        deployedBattleUnit.toDto().remainingSummonDuration shouldBe 5
     }
 
     @Test
-    fun `FinishTurn should leave a summon with one turn fewer when it has turns left`() {
+    fun `ReduceRemainingSummonDuration should leave a summon with one player turn fewer when it has more left`() {
         // Given
-        val summon = BattleUnitMother.battleUnit(remainingTurns = 5)
+        val summon = BattleUnitMother.battleUnit(remainingSummonDuration = 5)
         // When
-        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        val (events, reducedBattleUnit) = summon.reduceRemainingSummonDuration(row = 2, column = 3).pullEvents()
         // Then
-        finishedBattleUnit.toDto().remainingTurns shouldBe 4
+        reducedBattleUnit.toDto().remainingSummonDuration shouldBe 4
         events.shouldBeEmpty()
     }
 
     @Test
-    fun `FinishTurn should vanish a summon on its tile when it finishes its last turn`() {
+    fun `ReduceRemainingSummonDuration should vanish a summon on its tile when it finishes its last player turn`() {
         // Given
         val unit = UnitMother.unit().toDto()
         val player = PlayerMother.player().toDto()
-        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingTurns = 1)
+        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingSummonDuration = 1)
         // When
-        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        val (events, reducedBattleUnit) = summon.reduceRemainingSummonDuration(row = 2, column = 3).pullEvents()
         // Then
-        finishedBattleUnit.toDto().remainingTurns shouldBe 0
+        reducedBattleUnit.toDto().remainingSummonDuration shouldBe 0
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3),
             BattlefieldEvent.RequestRemoveOccupant(occupantId = "battle-unit-1"),
@@ -1071,37 +1071,37 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `FinishTurn should not change a battle unit that never vanishes`() {
+    fun `ReduceRemainingSummonDuration should not change a battle unit that never vanishes`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit()
         // When
-        val (events, finishedBattleUnit) = battleUnit.finishTurn(row = 2, column = 3).pullEvents()
+        val (events, reducedBattleUnit) = battleUnit.reduceRemainingSummonDuration(row = 2, column = 3).pullEvents()
         // Then
-        finishedBattleUnit shouldBe battleUnit
+        reducedBattleUnit shouldBe battleUnit
         events.shouldBeEmpty()
     }
 
     @Test
-    fun `FinishTurn should not vanish a defeated summon`() {
+    fun `ReduceRemainingSummonDuration should not vanish a defeated summon`() {
         // Given
-        val summon = BattleUnitMother.battleUnit(remainingHealthPoints = 0, remainingTurns = 1)
+        val summon = BattleUnitMother.battleUnit(remainingHealth = 0, remainingSummonDuration = 1)
         // When
-        val (events, finishedBattleUnit) = summon.finishTurn(row = 2, column = 3).pullEvents()
+        val (events, reducedBattleUnit) = summon.reduceRemainingSummonDuration(row = 2, column = 3).pullEvents()
         // Then
-        finishedBattleUnit.toDto().remainingTurns shouldBe 1
+        reducedBattleUnit.toDto().remainingSummonDuration shouldBe 1
         events.shouldBeEmpty()
     }
 
     @Test
-    fun `Vanish should vanish a summon on its tile, whatever turns it has left`() {
+    fun `Vanish should vanish a summon on its tile, whatever summon duration it has left`() {
         // Given
         val unit = UnitMother.unit().toDto()
         val player = PlayerMother.player().toDto()
-        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingTurns = 4)
+        val summon = BattleUnitMother.battleUnit(id = "battle-unit-1", unit = unit, player = player, remainingSummonDuration = 4)
         // When
         val (events, vanishedBattleUnit) = summon.vanish(row = 2, column = 3).pullEvents()
         // Then
-        vanishedBattleUnit.toDto().remainingTurns shouldBe 0
+        vanishedBattleUnit.toDto().remainingSummonDuration shouldBe 0
         events.shouldContainExactly(
             BattleUnitEvent.BattleUnitVanished(playerId = player.id, battleUnitId = "battle-unit-1", unitId = unit.id, row = 2, column = 3),
             BattlefieldEvent.RequestRemoveOccupant(occupantId = "battle-unit-1"),
@@ -1122,7 +1122,7 @@ class BattleUnitTest {
     @Test
     fun `Vanish should not vanish a defeated summon`() {
         // Given
-        val summon = BattleUnitMother.battleUnit(remainingHealthPoints = 0, remainingTurns = 4)
+        val summon = BattleUnitMother.battleUnit(remainingHealth = 0, remainingSummonDuration = 4)
         // When
         val (events, _) = summon.vanish(row = 2, column = 3).pullEvents()
         // Then
@@ -1171,7 +1171,7 @@ class BattleUnitTest {
         // Then
         respawnedBattleUnit
             .toDto()
-            .abilityCooldowns
+            .knownAbilities
             .toList()
             .shouldContainExactly("sword" to 0, "teleport" to 0)
     }
@@ -1203,7 +1203,7 @@ class BattleUnitTest {
     fun `Respawn should not change a battle unit that is not defeated`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 20).toDto()
-        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealthPoints = 5)
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit, remainingHealth = 5)
         // When
         val (events, respawnedBattleUnit) = battleUnit.respawn(unit = unit, row = 2, column = 3).pullEvents()
         // Then

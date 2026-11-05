@@ -51,7 +51,7 @@ class ManageCpuBattleUnit(
         val position = whereShouldMove(battleUnitId = battleUnitId)
         if (position != null) {
             save(cpuBattleBrain.requestMove(battleUnitId = battleUnitId, row = position.row, column = position.column))
-            eventBus.publish(BattleUnitEvent.RequestMoveBattleUnit(battleUnitId = battleUnitId, moveToRow = position.row, moveToColumn = position.column))
+            eventBus.publish(BattleUnitEvent.RequestWalkBattleUnitInBattle(battleUnitId = battleUnitId, walkToRow = position.row, walkToColumn = position.column))
             return
         }
         save(cpuBattleBrain.manageBattleUnit(battleUnitId))

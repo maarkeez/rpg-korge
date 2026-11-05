@@ -9,12 +9,12 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import kotlin.test.Test
 
-class WhereCanMoveTest {
+class WhereCanWalkTest {
     private val queries = InMemoryQueries()
-    private val whereCanMove = queries.whereCanMove
+    private val whereCanWalk = queries.whereCanWalk
 
     @Test
-    fun `should return positions that can be moved to when the battle unit can move`() {
+    fun `should return positions that can be walked to when the battle unit can walk`() {
         // Given
         queries.battleUnitRepository.create(battleUnit(id = "knight-1", unit = unit(movementRange = 2).toDto()))
         // The tiles behind the wall are in range, but too far to walk to.
@@ -29,7 +29,7 @@ class WhereCanMoveTest {
             ),
         )
         // When
-        val result = whereCanMove("knight-1")
+        val result = whereCanWalk("knight-1")
         // Then
         result.shouldContainExactlyInAnyOrder(PositionDto(1, 0), PositionDto(2, 0))
     }
@@ -38,7 +38,7 @@ class WhereCanMoveTest {
     fun `should return empty list when the battle unit does not exist`() {
         // Given
         // When
-        val result = whereCanMove("unknown-battle-unit")
+        val result = whereCanWalk("unknown-battle-unit")
         // Then
         result.shouldBeEmpty()
     }

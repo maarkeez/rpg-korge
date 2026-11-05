@@ -125,7 +125,7 @@ class CpuDeployingAcceptanceTest {
             // Then: the bat, summoned at (0,1), walks next to the knight and strikes it with its sword.
             val batId = (battleUnitApi.searchBattleUnitsByPlayerId(cpuPlayerId).map { it.id } - goatBattleUnitId).single()
             battlefieldApi.searchPosition(batId) shouldBe Battlefield.Dto.PositionDto(row = 0, column = 2)
-            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            battleUnitApi.searchBattleUnitById(knightBattleUnitId)!!.remainingHealth shouldBe 90
             battleApi.searchBattle()!!.currentPlayerId shouldBe humanPlayerId
         }
 }

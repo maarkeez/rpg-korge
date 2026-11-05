@@ -18,7 +18,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestMoveBattleUnit
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestWalkBattleUnitInBattle
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
@@ -853,7 +853,7 @@ class BattlefieldPresenterTest {
         apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 1)
         eventBus.dispatch()
         // When
-        publish(RequestMoveBattleUnit(battleUnitId = "knight-1", moveToRow = 3, moveToColumn = 1))
+        publish(RequestWalkBattleUnitInBattle(battleUnitId = "knight-1", walkToRow = 3, walkToColumn = 1))
         // Then
         battlefieldView.movedBattleUnits.single().path shouldBe listOf(position(2, 1), position(3, 1))
         battlefieldView.pickedUpLoot.shouldContainExactly(PickedUpLoot(row = 2, column = 1, lootableItemId = "health-potion"))
@@ -866,7 +866,7 @@ class BattlefieldPresenterTest {
         eventBus.dispatch()
         publish(PlayerTurnStarted(playerId = "cpu", battleUnitIds = emptySet()))
         // When
-        publish(RequestMoveBattleUnit(battleUnitId = "rat-1", moveToRow = 2, moveToColumn = 3))
+        publish(RequestWalkBattleUnitInBattle(battleUnitId = "rat-1", walkToRow = 2, walkToColumn = 3))
         // Then
         battlefieldView.movedBattleUnits.shouldHaveSize(1)
         battlefieldView.pickedUpLoot.shouldBeEmpty()
@@ -1094,7 +1094,7 @@ class BattlefieldPresenterTest {
             apis.battleUnitApi.searchAbilityAvailabilities("knight-1").map { availability ->
                 BattleUnitInfoView.Ability(
                     abilityId = availability.abilityId,
-                    cooldownTurnsLeft = availability.cooldownTurnsLeft,
+                    cooldownTurnsLeft = availability.remainingCooldown,
                     hasEnoughMana = availability.hasEnoughMana,
                     manaCost = availability.manaCost,
                 )
@@ -1102,7 +1102,7 @@ class BattlefieldPresenterTest {
         displayed.abilities.map { ability -> ability.abilityId } shouldBe
             apis.battleUnitApi
                 .searchBattleUnitById("knight-1")!!
-                .abilityCooldowns.keys
+                .knownAbilities.keys
                 .toList()
     }
 
@@ -1118,8 +1118,8 @@ class BattlefieldPresenterTest {
                 unitId = "knight",
                 remainingHealthPoints = 30,
                 maximumHealthPoints = 30,
-                remainingManaPoints = knight.remainingManaPoints,
-                maximumManaPoints = knight.maximumManaPoints,
+                remainingManaPoints = knight.remainingMana,
+                maximumManaPoints = knight.maximumMana,
                 effectIds = emptyList(),
                 isAlly = true,
             )
@@ -1170,8 +1170,8 @@ class BattlefieldPresenterTest {
     fun `RefreshSelectedBattleUnit should not move the previously selected battle unit when a turn starts and an empty tile is selected`() {
         // Given
         selectKnight()
-        val requestedMoves = mutableListOf<RequestMoveBattleUnit>()
-        eventBus.subscribe<RequestMoveBattleUnit> { event -> requestedMoves += event }
+        val requestedMoves = mutableListOf<RequestWalkBattleUnitInBattle>()
+        eventBus.subscribe<RequestWalkBattleUnitInBattle> { event -> requestedMoves += event }
         publish(PlayerTurnStarted(playerId = "human", battleUnitIds = emptySet()))
         // When
         battlefieldPresenter.tileSelected(row = 1, column = 2)
@@ -1426,8 +1426,8 @@ class BattlefieldPresenterTest {
                 unitId = "knight",
                 remainingHealthPoints = 30,
                 maximumHealthPoints = 30,
-                remainingManaPoints = knight.remainingManaPoints,
-                maximumManaPoints = knight.maximumManaPoints,
+                remainingManaPoints = knight.remainingMana,
+                maximumManaPoints = knight.maximumMana,
                 effectIds = emptyList(),
                 isAlly = true,
             )
@@ -1437,8 +1437,8 @@ class BattlefieldPresenterTest {
                     unitId = "rat",
                     remainingHealthPoints = 21,
                     maximumHealthPoints = 21,
-                    remainingManaPoints = rat.remainingManaPoints,
-                    maximumManaPoints = rat.maximumManaPoints,
+                    remainingManaPoints = rat.remainingMana,
+                    maximumManaPoints = rat.maximumMana,
                     effectIds = emptyList(),
                     isAlly = false,
                 )
@@ -1497,7 +1497,7 @@ class BattlefieldPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        attackPreviewView.displayedAttackPreviews.single().casterRemainingHealthPoints shouldBe knight.maximumHealthPoints - 7 + 5
+        attackPreviewView.displayedAttackPreviews.single().casterRemainingHealthPoints shouldBe knight.maximumHealth - 7 + 5
     }
 
     @Test

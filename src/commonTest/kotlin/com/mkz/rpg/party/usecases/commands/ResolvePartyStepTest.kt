@@ -47,7 +47,7 @@ class ResolvePartyStepTest {
         // When
         resolvePartyStep(battleUnitId = "knight-1", row = 0, column = 0)
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "knight-2", walkToRow = 1, walkToColumn = 0))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-2", walkToRow = 1, walkToColumn = 0))
     }
 
     @Test
@@ -66,7 +66,7 @@ class ResolvePartyStepTest {
         resolvePartyStep(battleUnitId = "knight-2", row = 1, column = 0)
         // Then
         eventBus.shouldHavePublishedEvents(
-            BattleUnitEvent.RequestWalkBattleUnit(battleUnitId = "knight-2", walkToRow = 1, walkToColumn = 0),
+            BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-2", walkToRow = 1, walkToColumn = 0),
             PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
         )
         partyRepository.search()!!.canWalk().shouldBeTrue()

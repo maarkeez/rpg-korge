@@ -94,14 +94,14 @@ class ConsumeHealthPotionAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
-            require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints == 80)
+            require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealth == 80)
             lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")
             eventBus.dispatch()
             // Then
-            battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealthPoints shouldBe 90
+            battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealth shouldBe 90
             inventoryApi.searchInventoryByBattleUnitId(playerOneKnightBattleUnitId)!!.storedItems.shouldBeEmpty()
         }
 }

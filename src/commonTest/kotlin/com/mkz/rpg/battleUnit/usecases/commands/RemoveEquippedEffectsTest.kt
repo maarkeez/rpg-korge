@@ -29,7 +29,7 @@ class RemoveEquippedEffectsTest {
         // When
         removeEquippedEffects(battleUnitId = "knight-1", lootableItemId = "hammer")
         // Then
-        battleUnitRepository.searchById("knight-1")?.toDto()?.maximumHealthPoints shouldBe 100
+        battleUnitRepository.searchById("knight-1")?.toDto()?.maximumHealth shouldBe 100
         eventBus.shouldHavePublishedEvents(EquippedEffectsRemoved(battleUnitId = "knight-1", lootableItemId = "hammer"))
     }
 

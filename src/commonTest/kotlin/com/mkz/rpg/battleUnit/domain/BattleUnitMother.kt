@@ -15,11 +15,11 @@ object BattleUnitMother {
         maximumAbilities: Int = 6,
         deployAtRow: Int = 0,
         deployAtColumn: Int = 0,
-        remainingHealthPoints: Int = unit.healthPoints,
-        remainingTurns: Int? = null,
+        remainingHealth: Int = unit.healthPoints,
+        remainingSummonDuration: Int? = null,
     ): BattleUnit {
-        val deployedBattleUnit = BattleUnit.deploy(id, unit, player, maximumAbilities, deployAtRow, deployAtColumn, remainingTurns).pullEvents().second
-        val damage = unit.healthPoints - remainingHealthPoints
+        val deployedBattleUnit = BattleUnit.deploy(id, unit, player, maximumAbilities, deployAtRow, deployAtColumn, remainingSummonDuration).pullEvents().second
+        val damage = unit.healthPoints - remainingHealth
         if (damage == 0) return deployedBattleUnit
         // A battle unit can only lose health by receiving damage.
         val damageEffect = decreaseHealthEffect(damage = damage, applicationType = "IMMEDIATELY").toDto()

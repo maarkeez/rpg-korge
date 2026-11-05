@@ -100,7 +100,7 @@ class ManageCpuBattleUnitTest {
         // When
         manageCpuBattleUnit("cpu")
         // Then
-        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestMoveBattleUnit(battleUnitId = "unit-1", moveToRow = 0, moveToColumn = 2))
+        eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitInBattle(battleUnitId = "unit-1", walkToRow = 0, walkToColumn = 2))
         cpuBattleBrainRepository
             .search()
             ?.toDto()
