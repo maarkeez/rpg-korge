@@ -1,6 +1,6 @@
 # RPG
 
-A turn-based RPG where a party explores a map and fights battles on a grid of tiles.
+A turn-based RPG where a party explores the battlefield and fights battles on its tiles.
 
 ## Language
 
@@ -43,11 +43,11 @@ Targeting where the ability is cast on one enemy adjacent to the caster.
 Targeting where the ability is cast on every enemy adjacent to the caster at once.
 
 **Vacant tile adjacent to the caster**:
-Targeting where the ability is cast on a vacant tile next to the caster.
+Targeting where the ability is cast on a vacant tile adjacent to the caster.
 _Avoid_: Vacant tile adjacent to self, empty tile
 
 **Vacant tile adjacent to another battle unit**:
-Targeting where the ability is cast on a vacant tile next to any battle unit other than the caster, ally or enemy.
+Targeting where the ability is cast on a vacant tile adjacent to any battle unit other than the caster, ally or enemy.
 _Avoid_: Vacant tile adjacent to any battle unit, empty tile
 
 #### Effect target
@@ -135,3 +135,64 @@ _Avoid_: Win, game over
 
 **Winner**:
 The player who gets the victory.
+
+### Battlefield
+
+**Battlefield**:
+The grid of tiles the game is played on, in battles and while exploring.
+_Avoid_: Map
+
+**Tile**:
+One square of the battlefield, with a terrain and at most one occupant.
+_Avoid_: Cell, square, battlefield tile
+
+**Position**:
+The row and column of a tile.
+_Avoid_: Coordinates
+
+**Adjacent**:
+Said of two tiles sharing a side: north, east, south or west, never diagonally.
+_Avoid_: Next to, neighbour, nearby
+
+**Terrain transition**:
+The border drawn on a tile where its terrain meets a different terrain on an adjacent tile.
+_Avoid_: Border, edge
+
+**Terrain effect**:
+The effect a terrain has on the occupant standing on it.
+
+#### Occupants
+
+**Occupant**:
+What stands on a tile, keeping anything else off it: a battle unit, an npc or a building.
+
+**Occupy**:
+An occupant taking a tile.
+_Avoid_: Update occupancy
+
+**Occupied**:
+Said of a tile with an occupant.
+
+**Occupiable**:
+Said of a tile an occupant can stand on, given its terrain and the terrains around it.
+_Avoid_: Walkable, can be occupied
+
+**Vacant**:
+Said of an occupiable tile with no occupant.
+_Avoid_: Empty, free
+
+**Remove**:
+An occupant going off the battlefield.
+_Avoid_: Vacate
+
+**Swap**:
+Two occupants exchanging their tiles at once.
+
+#### Walking
+
+**Path**:
+The tiles walked from one tile to another.
+
+**Walking distance**:
+How many tiles are walked from one tile to another.
+_Avoid_: Distance
