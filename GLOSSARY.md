@@ -196,3 +196,13 @@ The tiles walked from one tile to another.
 **Walking distance**:
 How many tiles are walked from one tile to another.
 _Avoid_: Distance
+
+### Game setup
+
+**Game**:
+One whole play, from when it is started new to its victory, which can be saved and loaded again.
+_Avoid_: Playthrough, run
+
+**Game setup**:
+Getting a game ready to play, new or loaded.
+_Avoid_: Battle setup
