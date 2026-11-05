@@ -16,7 +16,7 @@ import com.mkz.rpg.screen.adapters.presentation.paletteTerrainIds
 import com.mkz.rpg.screen.adapters.presentation.questAnnouncementView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
-import com.mkz.rpg.startGame
+import com.mkz.rpg.startApp
 import korlibs.korge.service.storage.IStorage
 import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.korge.tests.ViewsForTesting
@@ -45,14 +45,14 @@ suspend fun ViewsForTesting.waitUntil(condition: () -> Boolean) {
 
 /**
  * Starts the game as the player does, and plays a new game from the menu. By default, the CPU battle units always rest
- * instead of wandering, so they stand where the battle setup deploys them. The games are saved in the [storage], in
+ * instead of wandering, so they stand where the game setup deploys them. The games are saved in the [storage], in
  * memory, so no test reads the games saved by another one. It waits for the toast announcing the main quest, which fades by itself.
  */
 suspend fun ViewsForTesting.startNewGame(
     random: Random = FixedDoublesRandom(0.0),
     storage: IStorage = InmemoryStorage(),
 ) {
-    stage.startGame(random = random, storage = storage)
+    stage.startApp(random = random, storage = storage)
     waitUntil { stage.menuView() != null }
     clickPlayNewGame(requireNotNull(stage.menuView()) { "The menu is not displayed" })
     waitUntil { stage.questAnnouncementView()?.isAnnouncementShown() == true }
@@ -65,7 +65,7 @@ private data class RouteStep(
     val column: Int,
 )
 
-/** The battle setup deploys the knight, alone in the party, on the west side of the start room (rows 1 to 4). */
+/** The game setup deploys the knight, alone in the party, on the west side of the start room (rows 1 to 4). */
 const val KNIGHT_START_ROW = 2
 const val KNIGHT_START_COLUMN = 1
 
@@ -118,7 +118,7 @@ private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
 
 /** Starts the game as the player does, opens the map builder from the menu and waits until the map is displayed. */
 suspend fun ViewsForTesting.startMapBuilder() {
-    stage.startGame(storage = InmemoryStorage())
+    stage.startApp(storage = InmemoryStorage())
     waitUntil { stage.menuView() != null }
     clickBuildMap(requireNotNull(stage.menuView()) { "The menu is not displayed" })
     waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.mapBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }

@@ -10,7 +10,7 @@ import com.mkz.rpg.screen.adapters.presentation.playNewGameLabel
 import com.mkz.rpg.screen.adapters.presentation.roundText
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
-import com.mkz.rpg.startGame
+import com.mkz.rpg.startApp
 import io.kotest.matchers.shouldBe
 import korlibs.korge.service.storage.InmemoryStorage
 import korlibs.korge.tests.ViewsForTesting
@@ -21,7 +21,7 @@ class LanguageEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `should play in the language picked from the menu when the human player picks one before a new game`() =
         sharedViewsTest {
             // Given
-            stage.startGame(random = FixedDoublesRandom(0.0), storage = InmemoryStorage())
+            stage.startApp(random = FixedDoublesRandom(0.0), storage = InmemoryStorage())
             waitUntil { stage.menuView() != null }
             val menuView = requireNotNull(stage.menuView()) { "The menu is not displayed" }
             clickLanguage(menuView)

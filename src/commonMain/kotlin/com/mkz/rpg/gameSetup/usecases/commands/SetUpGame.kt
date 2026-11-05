@@ -1,4 +1,4 @@
-package com.mkz.rpg.battlesetup.usecases.commands
+package com.mkz.rpg.gameSetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
@@ -23,7 +23,7 @@ import com.mkz.rpg.unit.domain.UnitEvent
  * To load a saved game, only what never changes while playing is initialised, up to the quests: the saved game restores
  * the rest (the battle units, the npcs and the party) and how far each quest went.
  */
-class SetupBattle(
+class SetUpGame(
     private val eventBus: EventBus,
 ) {
     operator fun invoke(isLoadingASavedGame: Boolean = false) {

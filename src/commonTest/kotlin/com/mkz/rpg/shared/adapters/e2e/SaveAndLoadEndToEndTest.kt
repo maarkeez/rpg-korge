@@ -23,7 +23,7 @@ import com.mkz.rpg.screen.adapters.presentation.saveSlotsView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
 import com.mkz.rpg.shared.adapters.presentation.isShown
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.startGame
+import com.mkz.rpg.startApp
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -33,7 +33,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // Two steps east of where the battle setup deploys the hero: out of reach of the CPU battle units.
+    // Two steps east of where the game setup deploys the hero: out of reach of the CPU battle units.
     private val savedRow = KNIGHT_START_ROW
     private val savedColumn = KNIGHT_START_COLUMN + 2
 
@@ -75,7 +75,7 @@ class SaveAndLoadEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     fun `Back should display the options again, from the row directly below the save slots, when Load game is open in the menu`() =
         sharedViewsTest {
             // Given
-            stage.startGame(storage = storage)
+            stage.startApp(storage = storage)
             waitUntil { menuView() != null }
             clickLoadGame(requireNotNull(menuView()))
             waitUntil { saveSlotsView()?.isShown() == true }

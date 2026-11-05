@@ -1,6 +1,6 @@
 package com.mkz.rpg.shared.usecases.acceptance
 
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
@@ -11,17 +11,17 @@ import kotlin.test.Test
 class TerrainTransitionsAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
-    private val battleSetupApi = BattleSetupApi(eventBus)
+    private val gameSetupApi = GameSetupApi(eventBus)
 
     private suspend fun setUp() {
         terrainApi.init()
     }
 
     @Test
-    fun `should allow only the sand to void transition when the battle is set up`() =
+    fun `should allow only the sand to void transition when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
-            battleSetupApi.setupBattle()
+            gameSetupApi.setUpGame()
             // When
             eventBus.dispatch()
             // Then

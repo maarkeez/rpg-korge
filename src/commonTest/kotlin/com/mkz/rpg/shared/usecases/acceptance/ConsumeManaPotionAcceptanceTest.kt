@@ -10,9 +10,9 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
@@ -51,7 +51,7 @@ class ConsumeManaPotionAcceptanceTest {
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
-    private val battleSetupApi = BattleSetupApi(eventBus)
+    private val gameSetupApi = GameSetupApi(eventBus)
 
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "hero"
@@ -68,7 +68,7 @@ class ConsumeManaPotionAcceptanceTest {
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
-        battleSetupApi.setupBattle()
+        gameSetupApi.setUpGame()
         eventBus.dispatch()
         // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")

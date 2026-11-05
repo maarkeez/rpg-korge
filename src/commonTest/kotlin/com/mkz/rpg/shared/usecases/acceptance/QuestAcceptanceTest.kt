@@ -10,7 +10,6 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
@@ -18,6 +17,7 @@ import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSour
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
@@ -80,7 +80,7 @@ class QuestAcceptanceTest {
     private val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
     private val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
     private val questApi = QuestApi(battlefieldApi, partyApi, eventBus, ResourcesQuestLoader())
-    private val battleSetupApi = BattleSetupApi(eventBus)
+    private val gameSetupApi = GameSetupApi(eventBus)
 
     private suspend fun setUp() {
         terrainApi.init()
@@ -95,7 +95,7 @@ class QuestAcceptanceTest {
         battleUnitApi.init()
         npcApi.init()
         questApi.init()
-        battleSetupApi.setupBattle()
+        gameSetupApi.setUpGame()
         eventBus.dispatch()
     }
 

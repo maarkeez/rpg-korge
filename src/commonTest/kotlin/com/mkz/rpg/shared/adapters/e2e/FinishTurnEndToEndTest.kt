@@ -17,7 +17,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class FinishTurnEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup has a human player and a CPU player, which engages the party on its way and plays first.
+    // The game setup has a human player and a CPU player, which engages the party on its way and plays first.
 
     @Test
     fun `should disable finish turn while the cpu turn is displayed and enable it again when the human turn is announced`() =

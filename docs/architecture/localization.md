@@ -70,7 +70,7 @@ enforces. The other subdomains hold ids, never text, and their events and DTOs c
   with: `texts[UiText.SHOP_NOT_ENOUGH_GOLD]`, `texts[UiText.BATTLE_INFO_ROUND, "round" to 3]`,
   `texts.plural(UiText.REMAINING_TURNS, turns, "turns" to turns)`, and the game data from its id: `texts.unitName(unitId)`,
   `texts.npcLine(npcId)`, ... Views and presenters receive it through their constructor.
-- `startGame` creates the `LocalizationApi` once and reads the catalogs before displaying the menu, and every scene
+- `startApp` creates the `LocalizationApi` once and reads the catalogs before displaying the menu, and every scene
   receives it, so the language picked in the menu applies to every scene opened afterwards.
 
 ## Tests

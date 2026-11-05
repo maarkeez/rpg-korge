@@ -46,7 +46,7 @@ class BuildingAcceptanceTest {
     private var fortress = Building.Dto(id = "fortress", row = 0, column = 2, rows = 2, columns = 2)
     private val buildingApi by lazy { BuildingApi(battlefieldApi, eventBus, FakeBuildingLoader(listOf(fortress))) }
 
-    // The buildings are placed before the battle units are deployed, as when the battle is set up. The knight-1 leads
+    // The buildings are placed before the battle units are deployed, as when the game is set up. The knight-1 leads
     // from (0,1), west of the fortress, and the knight-2 follows it from (1,1).
     private suspend fun setUp() {
         terrainApi.init()

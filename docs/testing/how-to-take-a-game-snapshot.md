@@ -77,7 +77,7 @@ Play the game as in any end-to-end test, and call `takeSnapshot` at the step to 
 @Test
 fun `should take a snapshot of the battle scene when the knight is selected`() =
     viewsTest {
-        startGame()
+        startApp()
         waitUntil { battlefieldView()?.hasBattleUnitAt(6, 6) == true && canHumanPlayerAct() }
         val battlefieldView = requireNotNull(battlefieldView())
         clickTile(battlefieldView, 6, 6)

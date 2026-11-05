@@ -15,12 +15,12 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.EffectMother
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.adapters.resources.ResourcesPlayerLoader
@@ -55,7 +55,7 @@ class SimpleBattleAcceptanceTest {
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
-    private val battleSetupApi = BattleSetupApi(eventBus)
+    private val gameSetupApi = GameSetupApi(eventBus)
 
     private val humanPlayerId = PlayerMother.id()
     private val cpuPlayerId = PlayerMother.id()

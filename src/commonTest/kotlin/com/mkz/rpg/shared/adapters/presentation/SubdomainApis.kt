@@ -67,7 +67,7 @@ class SubdomainApis(
     npcs: List<Npc.Dto> = emptyList(),
     private val quests: List<Quest.Dto> = emptyList(),
     private val playerOrder: List<String> = emptyList(),
-    // Whether the human player explores with their battle units before the battle starts, as when the battle is set up, so they get their inventories.
+    // Whether the human player explores with their battle units before the battle starts, as when the game is set up, so they get their inventories.
     private val explore: Boolean = false,
 ) {
     val terrainApi = TerrainApi(eventBus, FakeTerrainLoader(terrains))

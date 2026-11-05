@@ -9,13 +9,13 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.building.adapters.presentation.BuildingApi
 import com.mkz.rpg.building.adapters.resources.ResourcesBuildingLoader
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.localization.adapters.presentation.LocalizationApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
@@ -129,7 +129,7 @@ class BattleScene(
         val npcApi = NpcApi(battlefieldApi, lootableItemApi, partyApi, eventBus, ResourcesNpcLoader())
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
         val questApi = QuestApi(battlefieldApi, partyApi, eventBus, ResourcesQuestLoader())
-        val battleSetupApi = BattleSetupApi(eventBus)
+        val gameSetupApi = GameSetupApi(eventBus)
         // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
         val saveApi =
             SaveApi(
@@ -158,7 +158,7 @@ class BattleScene(
                 now = { DateTime.nowUnixMillis() },
             )
 
-        // Resources: each subdomain loads its data before the battle is set up
+        // Resources: each subdomain loads its data before the game is set up
         terrainApi.init()
         effectApi.init()
         lootableItemApi.init()
@@ -325,9 +325,9 @@ class BattleScene(
         // Start game: a new one, or the one saved in the slot, restored once the content read from the resources is set
         // up. A save that can not be loaded goes back to Load game, where it is shown as incompatible.
         if (slot == null) {
-            battleSetupApi.setupBattle()
+            gameSetupApi.setUpGame()
         } else {
-            battleSetupApi.setupBattle(isLoadingASavedGame = true)
+            gameSetupApi.setUpGame(isLoadingASavedGame = true)
             eventBus.dispatch()
             try {
                 saveApi.loadGame(slot)

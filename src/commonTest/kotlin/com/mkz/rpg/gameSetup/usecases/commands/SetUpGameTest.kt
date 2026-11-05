@@ -1,4 +1,4 @@
-package com.mkz.rpg.battlesetup.usecases.commands
+package com.mkz.rpg.gameSetup.usecases.commands
 
 import com.mkz.rpg.ability.domain.AbilityEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent
@@ -18,15 +18,15 @@ import com.mkz.rpg.terrain.domain.TerrainEvent
 import com.mkz.rpg.unit.domain.UnitEvent
 import kotlin.test.Test
 
-class SetupBattleTest {
+class SetUpGameTest {
     private val eventBus = FakeEventBus()
-    private val setupBattle = SetupBattle(eventBus)
+    private val setUpGame = SetUpGame(eventBus)
 
     @Test
-    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, then the main quest, when the battle is set up`() {
+    fun `should request each subdomain initialisation after the subdomains it refers to, then exploring, then the main quest, when the game is set up`() {
         // Given
         // When
-        setupBattle()
+        setUpGame()
         // Then
         eventBus.shouldHavePublishedEvents(
             TerrainEvent.RequestInitialiseTerrains,
@@ -50,7 +50,7 @@ class SetupBattleTest {
     @Test
     fun `should stop after the quests, which the saved game is restored on, when a saved game is loaded`() {
         // When
-        setupBattle(isLoadingASavedGame = true)
+        setUpGame(isLoadingASavedGame = true)
         // Then
         eventBus.shouldHavePublishedEvents(
             TerrainEvent.RequestInitialiseTerrains,

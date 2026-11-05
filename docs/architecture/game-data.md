@@ -1,11 +1,11 @@
 # Game data
 
-The battle is defined by TOML files under [`resources`](../../resources). No game data is written in Kotlin: each subdomain loads its own data, and [`SetupBattle`](../../src/commonMain/kotlin/com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt) only decides the order in which subdomains are initialised.
+The game is defined by TOML files under [`resources`](../../resources). No game data is written in Kotlin: each subdomain loads its own data, and [`SetUpGame`](../../src/commonMain/kotlin/com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt) only decides the order in which subdomains are initialised.
 
-## How the battle is set up
+## How the game is set up
 
-1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the battle is set up.
-2. `SetupBattle` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring and the main quest:
+1. `BattleScene` calls `init()` on each subdomain API. It reads that subdomain's TOML files from the resources bundle (see [Assets](assets.md#how-resources-are-bundled)): a new TOML file is bundled without any change. Reading resources is asynchronous, so it happens before the game is set up.
+2. `SetUpGame` publishes one `RequestInitialise<Subdomain>` event per subdomain, in this order, and finally starts exploring and the main quest:
 
 | #  | Event                            | Creates                        | Requires                       |
 |----|----------------------------------|--------------------------------|--------------------------------|
@@ -27,7 +27,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 
 3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
-To load a saved game, `SetupBattle` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
+To load a saved game, `SetUpGame` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
 and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).
 
 The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsOccupied`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc is not occupiable (e.g.: void, out of the battlefield).

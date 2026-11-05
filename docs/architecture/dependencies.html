@@ -211,11 +211,11 @@ const DATA = {
     {"name": "battle", "files": 23, "fanIn": 7, "fanOut": 2, "instability": 0.22, "importsIn": 40, "importsOut": 27},
     {"name": "battleUnit", "files": 62, "fanIn": 7, "fanOut": 7, "instability": 0.5, "importsIn": 69, "importsOut": 168},
     {"name": "battlefield", "files": 44, "fanIn": 10, "fanOut": 4, "instability": 0.29, "importsIn": 110, "importsOut": 40},
-    {"name": "battlesetup", "files": 2, "fanIn": 1, "fanOut": 15, "instability": 0.94, "importsIn": 1, "importsOut": 16},
     {"name": "building", "files": 10, "fanIn": 2, "fanOut": 2, "instability": 0.5, "importsIn": 4, "importsOut": 12},
     {"name": "cpuBattleBrain", "files": 35, "fanIn": 2, "fanOut": 10, "instability": 0.83, "importsIn": 7, "importsOut": 107},
     {"name": "cpuWanderBrain", "files": 26, "fanIn": 1, "fanOut": 7, "instability": 0.88, "importsIn": 1, "importsOut": 56},
     {"name": "effect", "files": 13, "fanIn": 9, "fanOut": 1, "instability": 0.1, "importsIn": 68, "importsOut": 13},
+    {"name": "gameSetup", "files": 2, "fanIn": 1, "fanOut": 15, "instability": 0.94, "importsIn": 1, "importsOut": 16},
     {"name": "inventory", "files": 37, "fanIn": 2, "fanOut": 8, "instability": 0.8, "importsIn": 17, "importsOut": 62},
     {"name": "localization", "files": 14, "fanIn": 2, "fanOut": 1, "instability": 0.33, "importsIn": 7, "importsOut": 6},
     {"name": "lootDrop", "files": 23, "fanIn": 3, "fanOut": 4, "instability": 0.57, "importsIn": 8, "importsOut": 32},
@@ -514,52 +514,6 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "terrain.usecases.queries.SearchTerrainById"},
       {"file": "com/mkz/rpg/battlefield/usecases/services/BattlefieldCreation.kt", "layer": "usecases", "name": "terrain.usecases.queries.SearchTerrainById"}
     ]},
-    {"from": "battlesetup", "to": "ability", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "ability.domain.AbilityEvent"}
-    ]},
-    {"from": "battlesetup", "to": "battleUnit", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"}
-    ]},
-    {"from": "battlesetup", "to": "battlefield", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "battlefield.domain.BattlefieldEvent"}
-    ]},
-    {"from": "battlesetup", "to": "building", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "building.domain.BuildingEvent"}
-    ]},
-    {"from": "battlesetup", "to": "effect", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "effect.domain.EffectEvent"}
-    ]},
-    {"from": "battlesetup", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "lootDrop.domain.LootDropEvent"}
-    ]},
-    {"from": "battlesetup", "to": "lootTable", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "lootTable.domain.LootTableEvent"}
-    ]},
-    {"from": "battlesetup", "to": "lootableItem", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "lootableItem.domain.LootableItemEvent"}
-    ]},
-    {"from": "battlesetup", "to": "npc", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "npc.domain.NpcEvent"}
-    ]},
-    {"from": "battlesetup", "to": "party", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "party.domain.PartyEvent"}
-    ]},
-    {"from": "battlesetup", "to": "player", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "player.domain.PlayerEvent"}
-    ]},
-    {"from": "battlesetup", "to": "quest", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "quest.domain.QuestEvent"}
-    ]},
-    {"from": "battlesetup", "to": "shared", "weight": 2, "files": 2, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/adapters/presentation/BattleSetupApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
-    ]},
-    {"from": "battlesetup", "to": "terrain", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "terrain.domain.TerrainEvent"}
-    ]},
-    {"from": "battlesetup", "to": "unit", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/battlesetup/usecases/commands/SetupBattle.kt", "layer": "usecases", "name": "unit.domain.UnitEvent"}
-    ]},
     {"from": "building", "to": "battlefield", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/building/adapters/presentation/BuildingApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/building/domain/Building.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTiles"},
@@ -787,6 +741,52 @@ const DATA = {
       {"file": "com/mkz/rpg/effect/domain/EffectEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/effect/usecases/commands/InitialiseEffects.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/effect/usecases/commands/RequestEffectCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "gameSetup", "to": "ability", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "ability.domain.AbilityEvent"}
+    ]},
+    {"from": "gameSetup", "to": "battleUnit", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"}
+    ]},
+    {"from": "gameSetup", "to": "battlefield", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "battlefield.domain.BattlefieldEvent"}
+    ]},
+    {"from": "gameSetup", "to": "building", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "building.domain.BuildingEvent"}
+    ]},
+    {"from": "gameSetup", "to": "effect", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "effect.domain.EffectEvent"}
+    ]},
+    {"from": "gameSetup", "to": "lootDrop", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "lootDrop.domain.LootDropEvent"}
+    ]},
+    {"from": "gameSetup", "to": "lootTable", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "lootTable.domain.LootTableEvent"}
+    ]},
+    {"from": "gameSetup", "to": "lootableItem", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "lootableItem.domain.LootableItemEvent"}
+    ]},
+    {"from": "gameSetup", "to": "npc", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "npc.domain.NpcEvent"}
+    ]},
+    {"from": "gameSetup", "to": "party", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "party.domain.PartyEvent"}
+    ]},
+    {"from": "gameSetup", "to": "player", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "player.domain.PlayerEvent"}
+    ]},
+    {"from": "gameSetup", "to": "quest", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "quest.domain.QuestEvent"}
+    ]},
+    {"from": "gameSetup", "to": "shared", "weight": 2, "files": 2, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/adapters/presentation/GameSetupApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+    ]},
+    {"from": "gameSetup", "to": "terrain", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "terrain.domain.TerrainEvent"}
+    ]},
+    {"from": "gameSetup", "to": "unit", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/gameSetup/usecases/commands/SetUpGame.kt", "layer": "usecases", "name": "unit.domain.UnitEvent"}
     ]},
     {"from": "inventory", "to": "battle", "weight": 2, "files": 2, "imports": [
       {"file": "com/mkz/rpg/inventory/adapters/presentation/InventoryApi.kt", "layer": "adapters", "name": "battle.adapters.presentation.BattleApi"},
@@ -1244,9 +1244,6 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchVacantTiles"}
     ]},
-    {"from": "screen", "to": "battlesetup", "weight": 1, "files": 1, "imports": [
-      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "battlesetup.adapters.presentation.BattleSetupApi"}
-    ]},
     {"from": "screen", "to": "building", "weight": 3, "files": 2, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "building.adapters.presentation.BuildingApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "building.adapters.resources.ResourcesBuildingLoader"},
@@ -1265,6 +1262,9 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "effect.adapters.resources.ResourcesEffectLoader"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"}
+    ]},
+    {"from": "screen", "to": "gameSetup", "weight": 1, "files": 1, "imports": [
+      {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "gameSetup.adapters.presentation.GameSetupApi"}
     ]},
     {"from": "screen", "to": "inventory", "weight": 16, "files": 4, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "inventory.adapters.presentation.InventoryApi"},

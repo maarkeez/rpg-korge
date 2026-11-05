@@ -10,11 +10,11 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.adapters.resources.ResourcesBattlefieldLoader
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldDecoder
 import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
-import com.mkz.rpg.battlesetup.adapters.presentation.BattleSetupApi
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
+import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
 import com.mkz.rpg.lootDrop.adapters.resources.ResourcesLootDropLoader
 import com.mkz.rpg.lootTable.adapters.presentation.LootTableApi
@@ -42,7 +42,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.random.Random
 import kotlin.test.Test
 
-class SetupBattleAcceptanceTest {
+class SetUpGameAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
     private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())
@@ -60,7 +60,7 @@ class SetupBattleAcceptanceTest {
     private val cpuBattleBrainApi = CpuBattleBrainApi(unitApi, playerApi, battleUnitApi, battlefieldApi, terrainApi, effectApi, abilityApi, eventBus, FixedDoublesRandom(0.0))
     private val partyApi = PartyApi(playerApi, battleUnitApi, battlefieldApi, eventBus)
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
-    private val battleSetupApi = BattleSetupApi(eventBus)
+    private val gameSetupApi = GameSetupApi(eventBus)
 
     private val playerOneId = "player-one"
     private val playerOneKnightBattleUnitId = "hero"
@@ -76,7 +76,7 @@ class SetupBattleAcceptanceTest {
         playerApi.init()
         battlefieldApi.init()
         battleUnitApi.init()
-        battleSetupApi.setupBattle()
+        gameSetupApi.setUpGame()
         eventBus.dispatch()
         // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
@@ -105,7 +105,7 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
-    fun `should store the health potion when the battle is set up`() =
+    fun `should store the health potion when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             val healthPotionId = "health-potion"
@@ -118,7 +118,7 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
-    fun `should store the mana potion when the battle is set up`() =
+    fun `should store the mana potion when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             val manaPotionId = "mana-potion"
@@ -131,7 +131,7 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
-    fun `should store the hammer when the battle is set up`() =
+    fun `should store the hammer when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             val hammerId = "hammer"
@@ -144,7 +144,7 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
-    fun `should store the tier 1 loot table when the battle is set up`() =
+    fun `should store the tier 1 loot table when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             val tierOneLootTableId = "tier-1"
@@ -160,7 +160,7 @@ class SetupBattleAcceptanceTest {
         }
 
     @Test
-    fun `should store the tier 2 loot table when the battle is set up`() =
+    fun `should store the tier 2 loot table when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             val tierTwoLootTableId = "tier-2"

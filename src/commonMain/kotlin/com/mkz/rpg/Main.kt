@@ -27,7 +27,7 @@ val GAME_WINDOW_SIZE = Size(390, 844)
 val STORYBOOK_WINDOW_SIZE = Size(1280, 900)
 val STORYBOOK_BACKGROUND_COLOR = Colors["#202020"]
 
-// The same bundle starts the game, or the Storybook when it is asked for.
+// The same bundle starts the app, or the Storybook when it is asked for.
 suspend fun main() =
     if (isStorybookRequested()) {
         // Drawn on the whole screen, around the Storybook fitted in it, so it can be zoomed in to fill a portrait phone.
@@ -36,13 +36,13 @@ suspend fun main() =
         }
     } else {
         Korge(windowSize = GAME_WINDOW_SIZE, backgroundColor = Colors["#2b2b2b"]) {
-            startGame()
+            startApp()
         }
     }
 
-// Shared by `main` and the end-to-end tests, so both boot the game the same way. The tests choose the rolls of the CPU
+// Shared by `main` and the end-to-end tests, so both boot the app the same way. The tests choose the rolls of the CPU
 // battle brain, and where the games are saved (`views.storage` by default, a file on the JVM).
-suspend fun Stage.startGame(
+suspend fun Stage.startApp(
     random: Random = Random.Default,
     storage: IStorage? = null,
 ) {

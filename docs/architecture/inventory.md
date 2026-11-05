@@ -5,7 +5,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 ## Who has an inventory
 
 - Each battle unit of the human player has one, except the summoned ones (e.g.: a bee), which vanish after some turns. CPU battle units and summoned battle units have none: storing an item for them does nothing, so the item stays on its tile, and their bag is not displayed.
-- An inventory is created empty, with the starting gold of its unit, when its battle unit is deployed ([`CreateInventory`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/commands/CreateInventory.kt), on `BattleUnitDeployed`), e.g.: when the battle is set up, or an npc is recruited. `searchInventoryByBattleUnitId` returns `null` for the battle units without inventory.
+- An inventory is created empty, with the starting gold of its unit, when its battle unit is deployed ([`CreateInventory`](../../src/commonMain/kotlin/com/mkz/rpg/inventory/usecases/commands/CreateInventory.kt), on `BattleUnitDeployed`), e.g.: when the game is set up, or an npc is recruited. `searchInventoryByBattleUnitId` returns `null` for the battle units without inventory.
 - Each inventory has 12 storage spaces. Each item takes one space, so two health potions take two. An equipped item keeps taking its space.
 
 ## Using the inventory

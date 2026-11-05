@@ -27,7 +27,6 @@ class UseCaseInstantiationArchitectureTest {
             useCases.forEach { useCase ->
                 val useCasePackage = useCase.packagee?.fullyQualifiedName ?: return@forEach
                 val subdomainPackage = useCasePackage.substringBeforeLast(".usecases.")
-                // Compared ignoring case, as a package is lowercase where its Api is not, e.g.: `battlesetup` and `BattleSetupApi`.
                 val apiName = subdomainPackage.substringAfterLast(".").replaceFirstChar(Char::uppercase) + "Api"
                 val apiPackage = "$subdomainPackage.adapters.presentation"
                 // A constructor call, not a declaration nor a call on another receiver, e.g.: `BattlefieldCreation(`.
@@ -37,7 +36,7 @@ class UseCaseInstantiationArchitectureTest {
                     scope.files
                         // Only the files that see the use case, so a homonym declared elsewhere does not count.
                         .filter { file -> file.packagee?.fullyQualifiedName == useCasePackage || file.imports.any { it.name == useCase.fullyQualifiedName } }
-                        .filterNot { file -> file.packagee?.fullyQualifiedName == apiPackage && file.name.equals(apiName, ignoreCase = true) }
+                        .filterNot { file -> file.packagee?.fullyQualifiedName == apiPackage && file.name == apiName }
                         .flatMap { file -> call.findAll(file.text).map { match -> "${file.name}.kt:${file.text.lineNumberAt(match.range.first)}" } }
 
                 withClue("Use case '${useCase.name}' must only be instantiated in '$apiName', found in: $instantiations") {

@@ -25,7 +25,7 @@ A quest is a line of tasks, completed one after the other, and completing the la
 
 ## Starting
 
-The game has exactly one main quest, and fails to start without it (`MainQuestNotUnique`). `SetupBattle` requests initialising the quests after the buildings, in a new game and in a loaded one, and starts the main quest last, only in a new game. It runs once, and can not be abandoned, repeated nor failed. Completing it pays its reward and publishes its events, and exploring goes on. See [Game data](game-data.md#how-the-battle-is-set-up).
+The game has exactly one main quest, and fails to start without it (`MainQuestNotUnique`). `SetUpGame` requests initialising the quests after the buildings, in a new game and in a loaded one, and starts the main quest last, only in a new game. It runs once, and can not be abandoned, repeated nor failed. Completing it pays its reward and publishes its events, and exploring goes on. See [Game data](game-data.md#how-the-game-is-set-up).
 
 ## Side quests
 
@@ -137,7 +137,7 @@ The detail view of an active side quest has Abandon beside Back in the action ro
 
 - It takes no taps, so whatever is under it can be pressed.
 - It holds nothing: time runs, and the player can act. Toasts play one after the other, so a talk starting two quests takes 9 seconds. See [Presentation timeline](presentation-timeline.md#announcing-a-quest).
-- A loaded game announces nothing, as `SetupBattle` only starts the main quest in a new game and `RestoreQuests` publishes nothing.
+- A loaded game announces nothing, as `SetUpGame` only starts the main quest in a new game and `RestoreQuests` publishes nothing.
 
 For example, a new game, then defeating the goat wizard in a battle:
 
@@ -156,7 +156,7 @@ For example, a new game, then defeating the goat wizard in a battle:
 
 ## Dependencies
 
-`quest` depends on `shared`, `battlefield`, `battleUnit`, `party` and `inventory`, and nothing depends on it but `battlesetup` and `screen`. The game does not check the units, npcs and lootable items a quest names when it starts: `QuestResourcesTest` does, in CI. See [Package structure](package-structure.md).
+`quest` depends on `shared`, `battlefield`, `battleUnit`, `party` and `inventory`, and nothing depends on it but `gameSetup` and `screen`. The game does not check the units, npcs and lootable items a quest names when it starts: `QuestResourcesTest` does, in CI. See [Package structure](package-structure.md).
 
 ## Known limitations
 

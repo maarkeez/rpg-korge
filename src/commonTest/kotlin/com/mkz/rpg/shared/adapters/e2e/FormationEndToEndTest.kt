@@ -21,7 +21,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class FormationEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
-    // The battle setup deploys the hero, a mage, at (2,1), alone in the party, out of reach of the CPU battle units.
+    // The game setup deploys the hero, a mage, at (2,1), alone in the party, out of reach of the CPU battle units.
     private val heroRow = KNIGHT_START_ROW
     private val heroColumn = KNIGHT_START_COLUMN
 
