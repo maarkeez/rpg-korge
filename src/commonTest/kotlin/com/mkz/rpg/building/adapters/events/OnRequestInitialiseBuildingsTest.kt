@@ -18,7 +18,7 @@ class OnRequestInitialiseBuildingsTest {
     private val fortress = building(id = "fortress").toDto()
     private val onRequestInitialiseBuildings =
         OnRequestInitialiseBuildings(
-            InitialiseBuildings(FakeBuildingLoader(listOf(fortress)), buildingRepository, queries.canBattlefieldTileBeOccupied, eventBus),
+            InitialiseBuildings(FakeBuildingLoader(listOf(fortress)), buildingRepository, queries.isTileVacant, eventBus),
             eventBus,
         )
 

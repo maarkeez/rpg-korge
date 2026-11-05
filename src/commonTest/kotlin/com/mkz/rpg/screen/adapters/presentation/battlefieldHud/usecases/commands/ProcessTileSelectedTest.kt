@@ -42,7 +42,7 @@ class ProcessTileSelectedTest {
             searchBattle = queries.searchBattle,
             battlefieldHudRepository = battlefieldHudRepository,
             eventBus = eventBus,
-            movementService = MovementService(queries.searchBattleUnitById, queries.searchTilesThatCanBeOccupied, queries.canMoveTo),
+            movementService = MovementService(queries.searchBattleUnitById, queries.searchVacantTiles, queries.canMoveTo),
         )
 
     /**

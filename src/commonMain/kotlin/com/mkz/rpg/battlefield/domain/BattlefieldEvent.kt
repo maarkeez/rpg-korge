@@ -9,7 +9,7 @@ sealed interface BattlefieldEvent : DomainEvent {
     object RequestInitialiseBattlefield : BattlefieldEvent
 
     /** Requests the effect of each terrain for the given occupants standing on it, e.g.: the battle units standing still while exploring. */
-    data class RequestEffectApplicationToOccupants(
+    data class RequestTerrainEffects(
         val occupantIds: Set<String>,
     ) : BattlefieldEvent
 
@@ -52,8 +52,8 @@ sealed interface BattlefieldEvent : DomainEvent {
         val application: EffectApplicationDto,
     ) : BattlefieldEvent
 
-    // Occupant: whoever stands on the tile, e.g.: a battle unit or an npc.
-    data class BattlefieldTileOccupied(
+    // Occupant: a battle unit, an npc or a building.
+    data class TileOccupied(
         val row: Int,
         val column: Int,
         val occupantId: String,

@@ -17,7 +17,7 @@ class BuildingApi(
     private val buildingRepository: BuildingRepository = InMemoryBuildingRepository()
 
     // Commands
-    val initialiseBuildings = InitialiseBuildings(buildingLoader, buildingRepository, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
+    val initialiseBuildings = InitialiseBuildings(buildingLoader, buildingRepository, battlefieldApi.isTileVacant, eventBus)
 
     // Events
     private val onRequestInitialiseBuildings = OnRequestInitialiseBuildings(initialiseBuildings, eventBus)

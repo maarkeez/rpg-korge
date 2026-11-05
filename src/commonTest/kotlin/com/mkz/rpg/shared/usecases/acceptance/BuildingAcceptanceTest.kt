@@ -81,7 +81,7 @@ class BuildingAcceptanceTest {
             battlefieldApi.searchOccupant(row = 0, column = 3) shouldBe "fortress"
             battlefieldApi.searchOccupant(row = 1, column = 2) shouldBe "fortress"
             battlefieldApi.searchOccupant(row = 1, column = 3) shouldBe "fortress"
-            battlefieldApi.canBattlefieldTileBeOccupied(row = 1, column = 3).shouldBeFalse()
+            battlefieldApi.isTileVacant(row = 1, column = 3).shouldBeFalse()
         }
 
     @Test

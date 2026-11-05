@@ -23,7 +23,7 @@ class InitialiseNpcsTest {
     private val npcRepository = InMemoryNpcRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.canBattlefieldTileBeOccupied, queries.searchLootableItemById, eventBus)()
+    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.isTileVacant, queries.searchLootableItemById, eventBus)()
 
     @Test
     fun `should place every loaded npc on its tile, requesting the battlefield to occupy it, when the npcs are initialised`() {

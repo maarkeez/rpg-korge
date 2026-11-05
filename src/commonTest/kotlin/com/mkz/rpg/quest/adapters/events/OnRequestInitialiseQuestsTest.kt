@@ -17,7 +17,7 @@ class OnRequestInitialiseQuestsTest {
     private val questRepository = InMemoryQuestRepository()
     private val main = mainQuest(id = "defeat-the-goat-wizard").toDto()
     private val onRequestInitialiseQuests =
-        OnRequestInitialiseQuests(InitialiseQuests(FakeQuestLoader(listOf(main)), questRepository, queries.canBattlefieldTileBeOccupied), eventBus)
+        OnRequestInitialiseQuests(InitialiseQuests(FakeQuestLoader(listOf(main)), questRepository, queries.isTileVacant), eventBus)
 
     @Test
     fun `should initialise the quests when the request is dispatched`() {

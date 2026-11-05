@@ -34,7 +34,7 @@ class SearchWalkingDistanceTest {
     }
 
     @Test
-    fun `should walk around the tiles that can not be occupied when they block the straight line`() {
+    fun `should walk around the tiles that are not vacant when they block the straight line`() {
         // Given
         queries.battlefieldRepository.create(
             battlefield(
@@ -101,7 +101,7 @@ class SearchWalkingDistanceTest {
     }
 
     @Test
-    fun `should return null when the destination can only be reached jumping over tiles that can not be occupied`() {
+    fun `should return null when the destination can only be reached jumping over tiles that are not vacant`() {
         // Given
         queries.battlefieldRepository.create(battlefield("A # B", occupants))
         // When

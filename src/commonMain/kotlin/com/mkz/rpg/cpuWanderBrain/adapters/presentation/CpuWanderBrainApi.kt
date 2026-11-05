@@ -6,10 +6,10 @@ import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitRespawned
-import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnExplorationSecondStarted
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnPartyWalked
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnRoundFinished
+import com.mkz.rpg.cpuWanderBrain.adapters.events.OnTileOccupied
 import com.mkz.rpg.cpuWanderBrain.adapters.save.CpuWanderBrainSnapshottable
 import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
@@ -57,13 +57,13 @@ class CpuWanderBrainApi(
     val wanderAfterRound = WanderAfterRound(cpuWanderBrainRepository, wanderingSteps, isInSight, eventBus)
     val resolveWanderingStep = ResolveWanderingStep(cpuWanderBrainRepository, wanderingSteps)
     val awaitRespawn = AwaitRespawn(cpuWanderBrainRepository)
-    val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(cpuWanderBrainRepository, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
+    val respawnDefeatedBattleUnits = RespawnDefeatedBattleUnits(cpuWanderBrainRepository, battlefieldApi.isTileVacant, eventBus)
     val resolveRespawn = ResolveRespawn(cpuWanderBrainRepository)
 
     // Events
     private val onBattleUnitDeployed = OnBattleUnitDeployed(claimHome, eventBus)
     private val onExplorationSecondStarted = OnExplorationSecondStarted(wanderWhileExploring, eventBus)
-    private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveWanderingStep, eventBus)
+    private val onTileOccupied = OnTileOccupied(resolveWanderingStep, eventBus)
     private val onRoundFinished = OnRoundFinished(wanderAfterRound, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(awaitRespawn, eventBus)
     private val onPartyWalked = OnPartyWalked(respawnDefeatedBattleUnits, eventBus)

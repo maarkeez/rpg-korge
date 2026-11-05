@@ -18,7 +18,7 @@ class OnRequestDeployBattleUnitTest {
     private val onRequestDeployBattleUnit =
         OnRequestDeployBattleUnit(
             DeployBattleUnit(
-                BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchMaximumAbilities, queries.searchPlayerById, queries.canBattlefieldTileBeOccupied),
+                BattleUnitDeployment(queries.battleUnitRepository, queries.searchUnitById, queries.searchMaximumAbilities, queries.searchPlayerById, queries.isTileVacant),
                 eventBus,
             ),
             eventBus,

@@ -101,7 +101,7 @@ class NpcTest {
     }
 
     @Test
-    fun `Recruit should publish the npc recruited event, with its tile, then request the battlefield to vacate it, when the npc is recruitable`() {
+    fun `Recruit should publish the npc recruited event, with its tile, then request the battlefield to remove it, when the npc is recruitable`() {
         // When
         val (events, _) = npc(id = "viking", row = 12, column = 2, unitId = "viking").recruit().pullEvents()
         // Then

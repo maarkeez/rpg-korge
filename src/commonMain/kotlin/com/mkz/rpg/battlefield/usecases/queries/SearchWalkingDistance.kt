@@ -3,10 +3,10 @@ package com.mkz.rpg.battlefield.usecases.queries
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 
 class SearchWalkingDistance(
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val isTileVacant: IsTileVacant,
 ) {
     /**
-     * Returns how many tiles are walked from the origin to the destination, stepping only on tiles that can be occupied,
+     * Returns how many tiles are walked from the origin to the destination, stepping only on vacant tiles,
      * but the destination, which may be occupied (e.g.: by the battle unit walked to). Returns null when the destination
      * is further than [maximumDistance] or can not be reached.
      */
@@ -29,7 +29,7 @@ class SearchWalkingDistance(
             if (distance > maximumDistance) return null
             for (nextPosition in adjacentPositions(currentPosition)) {
                 if (nextPosition == destination) return distance
-                if (nextPosition !in distances && canBattlefieldTileBeOccupied(nextPosition.row, nextPosition.column)) {
+                if (nextPosition !in distances && isTileVacant(nextPosition.row, nextPosition.column)) {
                     distances[nextPosition] = distance
                     queue.addLast(nextPosition)
                 }

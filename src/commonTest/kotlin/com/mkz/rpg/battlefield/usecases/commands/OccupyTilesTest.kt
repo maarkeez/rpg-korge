@@ -2,7 +2,7 @@ package com.mkz.rpg.battlefield.usecases.commands
 
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldError
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.TileOccupied
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -29,21 +29,21 @@ class OccupyTilesTest {
         storedBattlefield.occupant(row = 1, column = 2) shouldBe "fortress"
         storedBattlefield.occupant(row = 0, column = 0).shouldBeNull()
         eventBus.shouldHavePublishedEvents(
-            BattlefieldTileOccupied(row = 0, column = 1, occupantId = "fortress"),
-            BattlefieldTileOccupied(row = 0, column = 2, occupantId = "fortress"),
-            BattlefieldTileOccupied(row = 1, column = 1, occupantId = "fortress"),
-            BattlefieldTileOccupied(row = 1, column = 2, occupantId = "fortress"),
+            TileOccupied(row = 0, column = 1, occupantId = "fortress"),
+            TileOccupied(row = 0, column = 2, occupantId = "fortress"),
+            TileOccupied(row = 1, column = 1, occupantId = "fortress"),
+            TileOccupied(row = 1, column = 2, occupantId = "fortress"),
         )
     }
 
     @Test
-    fun `should fail, occupying none, when any tile is not vacant`() {
+    fun `should fail, occupying none, when any tile is occupied`() {
         // Given
         battlefieldRepository.create(battlefield(". . .\n. . K", occupants = mapOf('K' to "knight")))
         // When
         val result = runCatching { occupyTiles(row = 0, column = 1, rows = 2, columns = 2, occupantId = "fortress") }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
+        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsOccupied>()
         battlefieldRepository.search()!!.occupant(row = 0, column = 1).shouldBeNull()
         eventBus.shouldNotHavePublishedEvents()
     }

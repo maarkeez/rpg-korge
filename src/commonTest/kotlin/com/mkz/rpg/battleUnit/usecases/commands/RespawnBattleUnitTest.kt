@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -23,7 +23,7 @@ class RespawnBattleUnitTest {
     private val unitRepository = InMemoryUnitRepository()
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val eventBus = FakeEventBus()
-    private val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, SearchUnitById(unitRepository), CanBattlefieldTileBeOccupied(battlefieldRepository), eventBus)
+    private val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, SearchUnitById(unitRepository), IsTileVacant(battlefieldRepository), eventBus)
     private val rat = unit(id = "rat", healthPoints = 20)
     private val cpu = player(id = "cpu").toDto()
 

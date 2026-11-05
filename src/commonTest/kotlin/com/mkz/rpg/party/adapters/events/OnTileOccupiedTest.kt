@@ -12,12 +12,12 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class OnBattlefieldTileOccupiedTest {
+class OnTileOccupiedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val partyRepository = InMemoryPartyRepository()
-    private val onBattlefieldTileOccupied =
-        OnBattlefieldTileOccupied(
+    private val onTileOccupied =
+        OnTileOccupied(
             ResolvePartyStep(partyRepository, PartyWalking(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus)),
             eventBus,
         )
@@ -31,7 +31,7 @@ class OnBattlefieldTileOccupiedTest {
                 .walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0)))
                 .awaitNextStep(),
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = "knight-1"))
+        eventBus.publish(BattlefieldEvent.TileOccupied(row = 0, column = 0, occupantId = "knight-1"))
         // When
         eventBus.dispatch()
         // Then

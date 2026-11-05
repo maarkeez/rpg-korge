@@ -46,7 +46,7 @@ class QuestApi(
     private val publishQuestProgress = PublishQuestProgress(questRepository, eventBus)
 
     // Commands
-    val initialiseQuests = InitialiseQuests(questLoader, questRepository, battlefieldApi.canBattlefieldTileBeOccupied)
+    val initialiseQuests = InitialiseQuests(questLoader, questRepository, battlefieldApi.isTileVacant)
     val startMainQuest = StartMainQuest(questRepository, eventBus)
     val progressDefeatTasks = ProgressDefeatTasks(questRepository, partyApi.searchParty, publishQuestProgress)
     val progressReachTasks = ProgressReachTasks(questRepository, partyApi.searchParty, publishQuestProgress)

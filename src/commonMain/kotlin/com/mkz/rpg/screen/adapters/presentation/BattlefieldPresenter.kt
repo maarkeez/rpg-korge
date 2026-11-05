@@ -107,7 +107,7 @@ class BattlefieldPresenter(
                 battlefieldHudApi.refreshMovementRange()
             },
             // An occupied tile (e.g.: a battle unit moved or deployed) may close paths of the selected battle unit.
-            eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> {
+            eventBus.subscribe<BattlefieldEvent.TileOccupied> {
                 battlefieldHudApi.refreshMovementRange()
             },
             // While exploring, alongside the timeline, so the party keeps walking, e.g.: while standing on water heals it.
@@ -124,11 +124,11 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.BattleUnitHealed> { event ->
                 if (!isBattling()) flashHealth(event.battleUnitId)
             },
-            // A vanished summon is deleted, so it is flashed from the event, before its tile is vacated.
+            // A vanished summon is deleted, so it is flashed from the event, before the occupant is removed.
             eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
                 timeline.play { battlefieldView.flashBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
             },
-            // A vacated tile (e.g.: a battle unit defeated) may open paths of the selected battle unit.
+            // A removed occupant (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
                 removeUnit(event.row, event.column)
                 battlefieldHudApi.refreshMovementRange()

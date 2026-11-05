@@ -90,7 +90,7 @@ class BattleUnitApi(
             unitApi.searchUnitById,
             unitApi.searchMaximumAbilities,
             playerApi.searchPlayerById,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battlefieldApi.isTileVacant,
         )
 
     // Queries
@@ -104,7 +104,7 @@ class BattleUnitApi(
     val whereCanMove =
         WhereCanMove(
             battleUnitRepository,
-            battlefieldApi.searchTilesThatCanBeOccupied,
+            battlefieldApi.searchVacantTiles,
             canMoveTo,
         )
     val whereCanCast =
@@ -113,9 +113,9 @@ class BattleUnitApi(
             battlefieldApi.searchPosition,
             abilityApi.searchAbilityById,
             battlefieldApi.searchOccupant,
-            battlefieldApi.searchTilesThatCanBeOccupied,
+            battlefieldApi.searchVacantTiles,
             distanceService,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battlefieldApi.isTileVacant,
         )
     val canCastAbility =
         CanCastAbility(
@@ -225,7 +225,7 @@ class BattleUnitApi(
         )
     val replenishMana = ReplenishMana(battleUnitRepository)
     val recoverBattleUnits = RecoverBattleUnits(battleUnitRepository)
-    val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, unitApi.searchUnitById, battlefieldApi.canBattlefieldTileBeOccupied, eventBus)
+    val respawnBattleUnit = RespawnBattleUnit(battleUnitRepository, unitApi.searchUnitById, battlefieldApi.isTileVacant, eventBus)
     val removeEquippedEffects = RemoveEquippedEffects(battleUnitRepository, eventBus)
     val finishSummonedBattleUnitsTurn = FinishSummonedBattleUnitsTurn(battleUnitRepository, battlefieldApi.searchPosition, eventBus)
     val vanishSummonedBattleUnits = VanishSummonedBattleUnits(battleUnitRepository, battlefieldApi.searchPosition, eventBus)

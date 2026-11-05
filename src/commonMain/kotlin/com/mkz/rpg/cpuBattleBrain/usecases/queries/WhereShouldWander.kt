@@ -2,7 +2,7 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.cpuBattleBrain.usecases.services.REST_CHANCE
 import com.mkz.rpg.cpuBattleBrain.usecases.services.WANDER_DISTANCE
@@ -31,7 +31,7 @@ import kotlin.random.Random
 class WhereShouldWander(
     private val searchBattleUnitById: SearchBattleUnitById,
     private val searchPosition: SearchPosition,
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val isTileVacant: IsTileVacant,
     private val healingNeed: HealingNeed,
     private val searchTerrainHealthEffect: SearchTerrainHealthEffect,
     private val random: Random = Random.Default,
@@ -51,7 +51,7 @@ class WhereShouldWander(
         // home, and within its territory otherwise.
         val steps =
             adjacentPositions(position)
-                .filter { step -> canBattlefieldTileBeOccupied(row = step.row, column = step.column) }
+                .filter { step -> isTileVacant(row = step.row, column = step.column) }
                 .filter { step -> terrainHealthEffect(step) >= 0 }
                 .mapNotNull { step -> distancesFromHome[step]?.let { distance -> step to distance } }
                 .filter { (_, distance) -> if (isHeadingHome) distance < distanceFromHome else distance <= WANDER_DISTANCE }

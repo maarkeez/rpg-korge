@@ -1049,7 +1049,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `RefreshSelectedBattleUnit should display the new paths of the selected battle unit when a tile is vacated`() {
+    fun `RefreshSelectedBattleUnit should display the new paths of the selected battle unit when an occupant is removed`() {
         // Given
         selectKnight()
         battlefieldView.potentialMovements shouldNotContain position(1, 3)
@@ -1065,7 +1065,7 @@ class BattlefieldPresenterTest {
         // Given
         selectKnight()
         battlefieldView.tilesNotDimmed.last() shouldContain position(1, 2)
-        apis.battlefieldApi.updateBattlefieldOccupancy(row = 1, column = 2, occupantId = "bee-1")
+        apis.battlefieldApi.occupyTile(row = 1, column = 2, occupantId = "bee-1")
         // When
         eventBus.dispatch()
         // Then

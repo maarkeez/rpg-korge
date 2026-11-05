@@ -44,7 +44,7 @@ When a player turn starts, two animations play together, in the colour of the pl
 
 ## Moving battle units
 
-`BattleUnitMoved` carries the `path` walked: the tiles from the origin (excluded) to the destination (included). Each tile costs one step. The path is the shortest one found by [`SearchShortestPath`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchShortestPath.kt) through tiles that can be occupied. A teleport jumps straight to its destination, so its path only has the destination.
+`BattleUnitMoved` carries the `path` walked: the tiles from the origin (excluded) to the destination (included). Each tile costs one step. The path is the shortest one found by [`SearchShortestPath`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchShortestPath.kt) through vacant tiles. A teleport jumps straight to its destination, so its path only has the destination.
 
 `BattlefieldView.moveBattleUnit` glides the image of the battle unit along the path, over the tiles, `MOVE_STEP_DURATION` (150ms) per tile, then displays it on its destination tile. A step to a tile that is not next to the previous one (a teleport) jumps to it. In a battle, before each step, it scrolls the battlefield to center the tile when the tile is out of the viewport or on its edge, and waits for the scroll. A battlefield smaller than the viewport is never scrolled.
 
@@ -80,7 +80,7 @@ When the player selects a battle unit or an ability, the tiles that can be selec
 
 `BattlefieldView.resetTiles` removes the frames and the mask, e.g.: when the selection is cleared or a battle unit moves.
 
-The movement range of the selected battle unit is refreshed (`RefreshMovementRange`) whenever it may change: when a tile is occupied (`BattlefieldTileOccupied`, e.g.: a battle unit moved or deployed) or vacated (`OccupantRemoved`, e.g.: a battle unit defeated), and when a cast has been resolved. A cast resolves before its consequences reach the battlefield (e.g.: the deployed bee, or the defeated enemy leaving its tile), so refreshing on the occupancy changes is what keeps the range right.
+The movement range of the selected battle unit is refreshed (`RefreshMovementRange`) whenever it may change: when a tile is occupied (`TileOccupied`, e.g.: a battle unit moved or deployed) or an occupant removed (`OccupantRemoved`, e.g.: a battle unit defeated), and when a cast has been resolved. A cast resolves before its consequences reach the battlefield (e.g.: the deployed bee, or the defeated enemy leaving its tile), so refreshing on the occupancy changes is what keeps the range right.
 
 When a turn starts, the selection is cleared (`DeselectBattleUnit`), so a selection from a previous turn can not be acted on.
 

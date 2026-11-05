@@ -14,7 +14,7 @@ class OnPartyWalkedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val onPartyWalked = OnPartyWalked(RespawnDefeatedBattleUnits(cpuWanderBrainRepository, queries.canBattlefieldTileBeOccupied, eventBus), eventBus)
+    private val onPartyWalked = OnPartyWalked(RespawnDefeatedBattleUnits(cpuWanderBrainRepository, queries.isTileVacant, eventBus), eventBus)
 
     @Test
     fun `should count the party step for every defeated cpu battle unit when the party walks`() {

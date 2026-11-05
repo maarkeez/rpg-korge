@@ -110,7 +110,7 @@ Likewise, `battlefield` does not depend on `battleUnit`. The `BattleUnit` aggreg
 |-----------------------------------------|----------------------------------------------------|---------------------------|
 | A battle unit is deployed, or respawns  | `RequestOccupyTile(occupantId, row, column)`       | Occupies the tile.        |
 | A battle unit moves, walks or teleports | `RequestMoveOccupant(occupantId, toRow, toColumn)` | Occupies the destination. |
-| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                | Vacates its tile.         |
+| A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                | Removes it.               |
 
 The terrain effects go the other way: `battlefield` announces `TerrainEffectTriggered(application)` for each battle unit standing on a terrain with an effect, and `battleUnit` applies it.
 
@@ -119,9 +119,9 @@ The terrain effects go the other way: `battlefield` announces `TerrainEffectTrig
 | When                     | `Npc` records                                | `battlefield`      |
 |--------------------------|----------------------------------------------|--------------------|
 | An npc is placed         | `RequestOccupyTile(occupantId, row, column)` | Occupies the tile. |
-| An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Vacates its tile.  |
+| An npc is recruited      | `RequestRemoveOccupant(occupantId)`          | Removes it.        |
 
-So the tile of a recruited npc is vacated before the battle unit it joins the party as is deployed on it.
+So a recruited npc is removed before the battle unit it joins the party as is deployed on its tile.
 
 `inventory` knows nothing of quests, and `lootDrop` knows nothing of rewards. `quest` requests the reward once `QuestCompleted` is handled, so it reads the party and the tile of the leader after the requests already waiting on the bus:
 
@@ -135,13 +135,13 @@ So the tile of a recruited npc is vacated before the battle unit it joins the pa
 
 `battlefield` does not depend on `building` either. A building is an occupant over several tiles, and the `Building` aggregate records its request right after its own event:
 
-| When                 | `Building` records                                           | `battlefield`                                                                                         |
-|----------------------|--------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
-| A building is placed | `RequestOccupyTiles(occupantId, row, column, rows, columns)` | Occupies all its tiles, or none when one is taken, publishing one `BattlefieldTileOccupied` per tile. |
+| When                 | `Building` records                                           | `battlefield`                                                                              |
+|----------------------|--------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| A building is placed | `RequestOccupyTiles(occupantId, row, column, rows, columns)` | Occupies all its tiles, or none when one is taken, publishing one `TileOccupied` per tile. |
 
 A building is never moved, removed nor swapped, so battlefield does not support it for an occupant over several tiles.
 
-`battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about loot. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `LootDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the tile is vacated. `LootFound` is published while handling `BattleUnitMoved`, so it is dispatched before the events of the occupancy update (e.g.: `BattlefieldTileOccupied`):
+`battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about loot. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `LootDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the occupant is removed. `LootFound` is published while handling `BattleUnitMoved`, so it is dispatched before the battle unit occupies its tile (`TileOccupied`):
 
 | When `battleUnit` publishes                                 | `lootDrop`                                                                            |
 |-------------------------------------------------------------|---------------------------------------------------------------------------------------|

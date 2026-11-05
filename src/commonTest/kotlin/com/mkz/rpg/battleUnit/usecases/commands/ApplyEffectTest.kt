@@ -29,7 +29,7 @@ class ApplyEffectTest {
                     queries.searchUnitById,
                     queries.searchMaximumAbilities,
                     queries.searchPlayerById,
-                    queries.canBattlefieldTileBeOccupied,
+                    queries.isTileVacant,
                 ),
             searchAbilityById = queries.searchAbilityById,
         )

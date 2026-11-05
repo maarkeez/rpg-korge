@@ -8,10 +8,10 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeFalse
 import kotlin.test.Test
 
-class OnBattlefieldTileOccupiedTest {
+class OnTileOccupiedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
-    private val listener = OnBattlefieldTileOccupied(ResolveCpuBattleUnitMove(queries.cpuBattleBrainRepository, eventBus), eventBus)
+    private val listener = OnTileOccupied(ResolveCpuBattleUnitMove(queries.cpuBattleBrainRepository, eventBus), eventBus)
 
     @Test
     fun `should resolve the cpu battle unit move when a battlefield tile is occupied is dispatched`() {
@@ -23,7 +23,7 @@ class OnBattlefieldTileOccupiedTest {
                 .pullEvents()
                 .second,
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 3, occupantId = "unit-1"))
+        eventBus.publish(BattlefieldEvent.TileOccupied(row = 2, column = 3, occupantId = "unit-1"))
         // When
         eventBus.dispatch()
         // Then

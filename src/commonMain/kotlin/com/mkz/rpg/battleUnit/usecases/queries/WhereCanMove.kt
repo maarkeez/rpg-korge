@@ -2,18 +2,18 @@ package com.mkz.rpg.battleUnit.usecases.queries
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.SearchVacantTiles
 
 class WhereCanMove(
     private val battleUnitRepository: BattleUnitRepository,
-    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied,
+    private val searchVacantTiles: SearchVacantTiles,
     private val canMoveTo: CanMoveTo,
 ) {
     operator fun invoke(battleUnitId: String): List<Battlefield.Dto.PositionDto> {
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: return emptyList()
-        return searchTilesThatCanBeOccupied(
+        return searchVacantTiles(
             occupantId = battleUnit.toDto().id,
-            distance = battleUnit.toDto().remainingTurnActions.remainingSteps,
+            tilesAround = battleUnit.toDto().remainingTurnActions.remainingSteps,
         ).filter { position ->
             canMoveTo(
                 battleUnitId = battleUnit.toDto().id,

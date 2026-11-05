@@ -33,7 +33,7 @@ class ApplyStandingTerrainEffects(
         val (events, nextSecondParty) = party.startNextSecond().pullEvents()
         partyRepository.save(nextSecondParty)
         if (standingBattleUnitIds.isNotEmpty()) {
-            eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = standingBattleUnitIds))
+            eventBus.publish(BattlefieldEvent.RequestTerrainEffects(occupantIds = standingBattleUnitIds))
         }
         // After the effects, so the battle units moving during the new second (e.g.: wandering) count as moved in it.
         eventBus.publish(events)

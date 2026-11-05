@@ -3,7 +3,7 @@ package com.mkz.rpg.battlefield.domain
 sealed class BattlefieldError(
     message: String,
 ) : Throwable(message = message) {
-    class TileIsNotVacant : BattlefieldError("Tile is not vacant")
+    class TileIsOccupied : BattlefieldError("Tile is occupied")
 
     class TileNotFound : BattlefieldError("Tile not found")
 

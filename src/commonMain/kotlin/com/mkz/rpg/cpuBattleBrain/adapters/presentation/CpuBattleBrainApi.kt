@@ -6,7 +6,6 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnAbilityCastResolved
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleDisengaged
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattleUnitDeployed
-import com.mkz.rpg.cpuBattleBrain.adapters.events.OnBattlefieldTileOccupied
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleBrainInitialized
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitActionResolved
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitManaged
@@ -15,6 +14,7 @@ import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPartyWalked
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestEngageEnemies
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestUpdateEngagement
+import com.mkz.rpg.cpuBattleBrain.adapters.events.OnTileOccupied
 import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.usecases.commands.EngageEnemies
@@ -54,7 +54,7 @@ class CpuBattleBrainApi(
     // Queries
     val healingNeed = HealingNeed(battleUnitApi.searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(battlefieldApi.searchTerrainId, terrainApi.searchTerrainById, effectApi.searchEffectById)
-    val searchDistancesFromHome = SearchDistancesFromHome(battlefieldApi.canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
+    val searchDistancesFromHome = SearchDistancesFromHome(battlefieldApi.isTileOccupiable, searchTerrainHealthEffect)
     val isOutsideTerritory = IsOutsideTerritory(battlefieldApi.searchPosition)
 
     val searchEnemiesWithinReach =
@@ -96,7 +96,7 @@ class CpuBattleBrainApi(
         WhereShouldWander(
             battleUnitApi.searchBattleUnitById,
             battlefieldApi.searchPosition,
-            battlefieldApi.canBattlefieldTileBeOccupied,
+            battlefieldApi.isTileVacant,
             healingNeed,
             searchTerrainHealthEffect,
             random,
@@ -153,7 +153,7 @@ class CpuBattleBrainApi(
     private val onCpuBattleBrainInitialized = OnCpuBattleBrainInitialized(manageCpuBattleUnit, eventBus)
     private val onCpuBattleUnitActionResolved = OnCpuBattleUnitActionResolved(manageCpuBattleUnit, eventBus)
     private val onCpuBattleUnitManaged = OnCpuBattleUnitManaged(manageCpuBattleUnit, eventBus)
-    private val onBattlefieldTileOccupied = OnBattlefieldTileOccupied(resolveCpuBattleUnitMove, eventBus)
+    private val onTileOccupied = OnTileOccupied(resolveCpuBattleUnitMove, eventBus)
     private val onAbilityCastResolved = OnAbilityCastResolved(resolveCpuBattleUnitCast, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(joinCpuTurn, eventBus)
     private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)

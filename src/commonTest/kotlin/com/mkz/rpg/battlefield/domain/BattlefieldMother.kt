@@ -22,11 +22,11 @@ object BattlefieldMother {
 
     /**
      * Creates a valid battlefield from a map, with one line per row and one character per tile, separated by spaces:
-     * - `.` is sand, which can be occupied.
-     * - `#` is void, which can not be occupied.
+     * - `.` is sand, which is occupiable.
+     * - `#` is void, which is not occupiable.
      * - A letter is sand occupied by the battle unit that [occupants] maps the letter to.
      *
-     * As in the game, sand in a corner between two void tiles (e.g.: void to the north and to the east) can not be occupied.
+     * As in the game, sand in a corner between two void tiles (e.g.: void to the north and to the east) is not occupiable.
      *
      * For example: `battlefield("K . #\n. . #", occupants = mapOf('K' to "knight-1"))`.
      */

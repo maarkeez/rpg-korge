@@ -7,12 +7,12 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import kotlin.test.Test
 
-class SearchTilesThatCanBeOccupiedTest {
+class SearchVacantTilesTest {
     private val queries = InMemoryQueries()
-    private val searchTilesThatCanBeOccupied = queries.searchTilesThatCanBeOccupied
+    private val searchVacantTiles = queries.searchVacantTiles
 
     @Test
-    fun `should return tiles that can be occupied when the battle unit is deployed`() {
+    fun `should return vacant tiles when the battle unit is deployed`() {
         // Given
         queries.battlefieldRepository.create(
             battlefield(
@@ -25,7 +25,7 @@ class SearchTilesThatCanBeOccupiedTest {
             ),
         )
         // When
-        val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 1)
+        val result = searchVacantTiles("battle-unit-1", tilesAround = 1)
         // Then
         result.shouldContainExactlyInAnyOrder(
             PositionDto(0, 0),
@@ -39,7 +39,7 @@ class SearchTilesThatCanBeOccupiedTest {
     }
 
     @Test
-    fun `should return empty list when distance is less than or equal to zero`() {
+    fun `should return empty list when tiles around is less than or equal to zero`() {
         // Given
         queries.battlefieldRepository.create(
             battlefield(
@@ -52,7 +52,7 @@ class SearchTilesThatCanBeOccupiedTest {
             ),
         )
         // When
-        val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 0)
+        val result = searchVacantTiles("battle-unit-1", tilesAround = 0)
         // Then
         result.shouldBeEmpty()
     }
@@ -61,7 +61,7 @@ class SearchTilesThatCanBeOccupiedTest {
     fun `should return empty list when no battlefield exists`() {
         // Given
         // When
-        val result = searchTilesThatCanBeOccupied("battle-unit-1", distance = 1)
+        val result = searchVacantTiles("battle-unit-1", tilesAround = 1)
         // Then
         result.shouldBeEmpty()
     }
@@ -71,7 +71,7 @@ class SearchTilesThatCanBeOccupiedTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". . ."))
         // When
-        val result = searchTilesThatCanBeOccupied("unknown-battle-unit", distance = 1)
+        val result = searchVacantTiles("unknown-battle-unit", tilesAround = 1)
         // Then
         result.shouldBeEmpty()
     }

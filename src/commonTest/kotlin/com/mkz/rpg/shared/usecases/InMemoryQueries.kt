@@ -17,15 +17,15 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanMove
 import com.mkz.rpg.battleUnit.usecases.services.AbilityExecution
 import com.mkz.rpg.battleUnit.usecases.services.DistanceService
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
+import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchBattlefieldSize
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchShortestPath
 import com.mkz.rpg.battlefield.usecases.queries.SearchTerrainId
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.SearchVacantTiles
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.HealingNeed
@@ -116,11 +116,11 @@ class InMemoryQueries(
     val searchTerrainId = SearchTerrainId(battlefieldRepository)
     val searchOccupant = SearchOccupant(battlefieldRepository)
     val searchPosition = SearchPosition(battlefieldRepository)
-    val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
-    val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)
-    val searchTilesThatCanBeOccupied = SearchTilesThatCanBeOccupied(canBattlefieldTileBeOccupied, battlefieldRepository)
-    val searchShortestPath = SearchShortestPath(canBattlefieldTileBeOccupied)
-    val searchWalkingDistance = SearchWalkingDistance(canBattlefieldTileBeOccupied)
+    val isTileVacant = IsTileVacant(battlefieldRepository)
+    val isTileOccupiable = IsTileOccupiable(battlefieldRepository)
+    val searchVacantTiles = SearchVacantTiles(isTileVacant, battlefieldRepository)
+    val searchShortestPath = SearchShortestPath(isTileVacant)
+    val searchWalkingDistance = SearchWalkingDistance(isTileVacant)
 
     // Battle unit
     val distanceService = DistanceService()
@@ -128,7 +128,7 @@ class InMemoryQueries(
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
     val hasAllBattleUnitsDefeated = HasAllBattleUnitsDefeated(battleUnitRepository)
     val canMoveTo = CanMoveTo(battleUnitRepository, searchPosition, searchShortestPath)
-    val whereCanMove = WhereCanMove(battleUnitRepository, searchTilesThatCanBeOccupied, canMoveTo)
+    val whereCanMove = WhereCanMove(battleUnitRepository, searchVacantTiles, canMoveTo)
     val canCastAbility = CanCastAbility(battleUnitRepository, searchAbilityById)
     val searchAbilityAvailabilities = SearchAbilityAvailabilities(battleUnitRepository, searchAbilityById)
     val canLearnAbility = CanLearnAbility(battleUnitRepository)
@@ -139,16 +139,16 @@ class InMemoryQueries(
             searchPosition,
             searchAbilityById,
             searchOccupant,
-            searchTilesThatCanBeOccupied,
+            searchVacantTiles,
             distanceService,
-            canBattlefieldTileBeOccupied,
+            isTileVacant,
         )
     val abilityExecution = AbilityExecution(battleUnitRepository, searchPosition, searchOccupant, searchEffectById, distanceService)
 
     // CPU battle brain
     val healingNeed = HealingNeed(searchBattleUnitById)
     val searchTerrainHealthEffect = SearchTerrainHealthEffect(searchTerrainId, searchTerrainById, searchEffectById)
-    val searchDistancesFromHome = SearchDistancesFromHome(canBattlefieldTerrainBeOccupied, searchTerrainHealthEffect)
+    val searchDistancesFromHome = SearchDistancesFromHome(isTileOccupiable, searchTerrainHealthEffect)
     val isOutsideTerritory = IsOutsideTerritory(searchPosition)
     val searchEnemiesWithinReach = SearchEnemiesWithinReach(searchBattleUnitById, searchEnemyPlayer, searchBattleUnitsByPlayerId, searchPosition, searchWalkingDistance)
     val whatShouldCast =
@@ -179,7 +179,7 @@ class InMemoryQueries(
         WhereShouldWander(
             searchBattleUnitById,
             searchPosition,
-            canBattlefieldTileBeOccupied,
+            isTileVacant,
             healingNeed,
             searchTerrainHealthEffect,
             random,

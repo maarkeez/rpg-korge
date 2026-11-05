@@ -27,7 +27,7 @@ class OnRequestInitialiseBattleUnitsTest {
                         queries.searchUnitById,
                         queries.searchMaximumAbilities,
                         queries.searchPlayerById,
-                        queries.canBattlefieldTileBeOccupied,
+                        queries.isTileVacant,
                     ),
                 eventBus = eventBus,
             ),

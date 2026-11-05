@@ -177,7 +177,7 @@ class WhereCanCastTest {
     fun `should return adjacent vacant tiles when the ability targets vacant adjacent tiles to self`() {
         // Given
         storeAbility(targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER)
-        // The diagonal tile can be occupied too, but it is not adjacent.
+        // The diagonal tile is vacant too, but it is not adjacent.
         battlefieldWith(
             """
             C .

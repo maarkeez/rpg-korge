@@ -14,11 +14,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlin.test.Test
 
-class UpdateBattlefieldOccupancyTest {
+class OccupyTileTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val eventBus = FakeEventBus()
-    private val updateBattlefieldOccupancy =
-        UpdateBattlefieldOccupancy(
+    private val occupyTile =
+        OccupyTile(
             battlefieldRepository = battlefieldRepository,
             eventBus = eventBus,
         )
@@ -29,17 +29,17 @@ class UpdateBattlefieldOccupancyTest {
         battlefieldRepository.create(battlefield())
         val occupantId = "battle-unit-1"
         // When
-        updateBattlefieldOccupancy(row = 1, column = 1, occupantId = occupantId)
+        occupyTile(row = 1, column = 1, occupantId = occupantId)
         // Then
         val storedBattlefield = battlefieldRepository.search()?.toDto()
         storedBattlefield?.tiles?.get(Battlefield.Dto.PositionDto(1, 1))?.occupantId shouldBe occupantId
         eventBus.shouldHavePublishedEvents(
-            BattlefieldEvent.BattlefieldTileOccupied(1, 1, occupantId),
+            BattlefieldEvent.TileOccupied(1, 1, occupantId),
         )
     }
 
     @Test
-    fun `should throw tile error when the tile is not vacant`() {
+    fun `should throw tile error when the tile is occupied`() {
         // Given
         val battlefield =
             battlefield()
@@ -50,17 +50,17 @@ class UpdateBattlefieldOccupancyTest {
         // When
         val error =
             shouldThrowAny {
-                updateBattlefieldOccupancy(row = 1, column = 1, occupantId = "battle-unit-1")
+                occupyTile(row = 1, column = 1, occupantId = "battle-unit-1")
             }
         // Then
-        error.shouldBeInstanceOf<BattlefieldError.TileIsNotVacant>()
+        error.shouldBeInstanceOf<BattlefieldError.TileIsOccupied>()
     }
 
     @Test
     fun `should not occupy tile when no battlefield exists`() {
         // Given
         // When
-        updateBattlefieldOccupancy(row = 1, column = 1, occupantId = "battle-unit-1")
+        occupyTile(row = 1, column = 1, occupantId = "battle-unit-1")
         // Then
         battlefieldRepository.search().shouldBeNull()
         eventBus.publishedEvents.shouldBeEmpty()

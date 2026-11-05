@@ -4,12 +4,12 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TerrainTransitionRuleDto
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.TileDto
-import com.mkz.rpg.battlefield.domain.BattlefieldError.TileIsNotVacant
+import com.mkz.rpg.battlefield.domain.BattlefieldError.TileIsOccupied
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileNotFound
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileTerrainTransitionNotAllowed
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
-import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldTileOccupied
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.OccupantRemoved
+import com.mkz.rpg.battlefield.domain.BattlefieldEvent.TileOccupied
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
@@ -50,20 +50,20 @@ data class Battlefield private constructor(
         column: Int,
         occupantId: String,
     ): Battlefield {
-        if (!tiles.isVacant(row, column)) throw TileIsNotVacant()
+        if (!tiles.hasNoOccupant(row, column)) throw TileIsOccupied()
         val updatedTiles = tiles.occupy(row, column, occupantId)
-        val battlefieldTileOccupiedEvent =
-            BattlefieldTileOccupied(
+        val tileOccupiedEvent =
+            TileOccupied(
                 row = row,
                 column = column,
                 occupantId = occupantId,
             )
-        return copy(tiles = updatedTiles, events = events + battlefieldTileOccupiedEvent)
+        return copy(tiles = updatedTiles, events = events + tileOccupiedEvent)
     }
 
     /**
-     * Occupies every tile of the area at once, from its top-left tile, e.g.: a building. Fails when any of them is not
-     * vacant or not found, occupying none. Its occupant can not be moved, removed nor swapped then.
+     * Occupies every tile of the area at once, from its top-left tile, e.g.: a building. Fails when any of them is
+     * occupied or not found, occupying none. Its occupant can not be moved, removed nor swapped then.
      */
     fun occupyTiles(
         row: Int,
@@ -73,16 +73,16 @@ data class Battlefield private constructor(
         occupantId: String,
     ): Battlefield {
         val positions = (row until row + rows).flatMap { areaRow -> (column until column + columns).map { areaColumn -> PositionDto(areaRow, areaColumn) } }
-        if (positions.any { position -> !tiles.isVacant(position.row, position.column) }) throw TileIsNotVacant()
+        if (positions.any { position -> !tiles.hasNoOccupant(position.row, position.column) }) throw TileIsOccupied()
         val occupiedEvents =
             positions.map { position ->
-                BattlefieldTileOccupied(row = position.row, column = position.column, occupantId = occupantId)
+                TileOccupied(row = position.row, column = position.column, occupantId = occupantId)
             }
         return copy(tiles = tiles.occupyTiles(positions, occupantId), events = events + occupiedEvents)
     }
 
     fun removeOccupant(occupantId: String): Battlefield {
-        if (!tiles.isDeployed(occupantId)) return this
+        if (!tiles.hasOccupant(occupantId)) return this
         val occupantPosition = tiles.position(occupantId)!!
         val updatedTiles = tiles.removeOccupant(occupantId)
         val occupantRemovedEvent =
@@ -106,8 +106,8 @@ data class Battlefield private constructor(
         val otherPosition = tiles.position(otherOccupantId) ?: return this
         val swappedEvents =
             setOf(
-                BattlefieldTileOccupied(row = otherPosition.row, column = otherPosition.column, occupantId = occupantId),
-                BattlefieldTileOccupied(row = position.row, column = position.column, occupantId = otherOccupantId),
+                TileOccupied(row = otherPosition.row, column = otherPosition.column, occupantId = occupantId),
+                TileOccupied(row = position.row, column = position.column, occupantId = otherOccupantId),
             )
         return copy(tiles = tiles.swapOccupants(position, otherPosition), events = events + swappedEvents)
     }
@@ -118,28 +118,28 @@ data class Battlefield private constructor(
     fun occupants(): List<Dto.OccupantDto> = tiles.occupants()
 
     /**
-     * Puts back the occupants of a saved game, from its [occupants], every other tile vacant, publishing no events. Fails
-     * when a tile is not found, e.g.: the map is smaller now.
+     * Puts back the occupants of a saved game, from its [occupants], no other tile with an occupant, publishing no events.
+     * Fails when a tile is not found, e.g.: the battlefield is smaller now.
      */
     fun restoreOccupants(occupants: List<Dto.OccupantDto>): Battlefield = copy(tiles = tiles.restoreOccupants(occupants))
 
-    fun canBeOccupied(
+    fun isVacant(
         row: Int,
         column: Int,
-    ): Boolean = tiles.isVacant(row, column) && tiles.isTerrainOccupiable(row, column)
+    ): Boolean = tiles.hasNoOccupant(row, column) && tiles.isOccupiable(row, column)
 
-    /** Whether the terrain of the tile can be occupied (e.g.: not void), whether an occupant stands on it or not. */
-    fun canTerrainBeOccupied(
+    /** Whether the tile is occupiable (e.g.: not void), whether an occupant stands on it or not. */
+    fun isOccupiable(
         row: Int,
         column: Int,
-    ): Boolean = tiles.isTerrainOccupiable(row, column)
+    ): Boolean = tiles.isOccupiable(row, column)
 
     fun occupant(
         row: Int,
         column: Int,
     ): String? = tiles.occupant(row, column)
 
-    fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> = tiles.effectApplicationsToOccupants(terrainEffectIds)
+    fun terrainEffectsOnOccupants(terrainEffectIds: Map<String, String>): List<Dto.TerrainEffectOnOccupantDto> = tiles.terrainEffectsOnOccupants(terrainEffectIds)
 
     fun position(occupantId: String): PositionDto? = tiles.position(occupantId)
 
@@ -171,23 +171,23 @@ data class Battlefield private constructor(
     @JvmInline private value class Tiles(
         val tiles: Map<Position, Tile>,
     ) {
-        fun isVacant(
+        fun hasNoOccupant(
             row: Int,
             column: Int,
         ): Boolean {
             val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
-            return tile.isVacant()
+            return tile.hasNoOccupant()
         }
 
-        fun isTerrainOccupiable(
+        fun isOccupiable(
             row: Int,
             column: Int,
         ): Boolean {
             val tile = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
-            return tile.isTerrainOccupiable()
+            return tile.isOccupiable()
         }
 
-        fun isDeployed(occupantId: String) = tiles.values.any { tile -> tile.isOccupiedBy(occupantId) }
+        fun hasOccupant(occupantId: String) = tiles.values.any { tile -> tile.isOccupiedBy(occupantId) }
 
         fun occupy(
             row: Int,
@@ -197,13 +197,13 @@ data class Battlefield private constructor(
             val tileToBeOccupied = tiles[Position(row = row, column = column)] ?: throw TileNotFound()
             val occupiedTile = tileToBeOccupied.occupy(occupantId)
             val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(occupantId) }
-            val vacantTile = previousOccupiedTile?.removeOccupant()
+            val tileLeft = previousOccupiedTile?.removeOccupant()
             val updatedTiles =
                 buildMap {
                     putAll(tiles)
                     put(Position(row, column), occupiedTile)
-                    vacantTile?.let {
-                        put(Position(row = vacantTile.row(), column = vacantTile.column()), vacantTile)
+                    tileLeft?.let {
+                        put(Position(row = tileLeft.row(), column = tileLeft.column()), tileLeft)
                     }
                 }
             return Tiles(updatedTiles)
@@ -238,12 +238,12 @@ data class Battlefield private constructor(
 
         fun removeOccupant(occupantId: String): Tiles {
             val previousOccupiedTile = tiles.values.firstOrNull { tile -> tile.isOccupiedBy(occupantId) }
-            val vacantTile = previousOccupiedTile?.removeOccupant()
+            val tileLeft = previousOccupiedTile?.removeOccupant()
             val updatedTiles =
                 buildMap {
                     putAll(tiles)
-                    vacantTile?.let {
-                        put(Position(row = vacantTile.row(), column = vacantTile.column()), vacantTile)
+                    tileLeft?.let {
+                        put(Position(row = tileLeft.row(), column = tileLeft.column()), tileLeft)
                     }
                 }
             return Tiles(updatedTiles)
@@ -253,14 +253,14 @@ data class Battlefield private constructor(
             tiles.values.mapNotNull { tile -> tile.occupantId()?.let { occupantId -> Dto.OccupantDto(occupantId = occupantId, row = tile.row(), column = tile.column()) } }
 
         fun restoreOccupants(occupants: List<Dto.OccupantDto>): Tiles {
-            val vacantTiles = tiles.mapValues { (_, tile) -> tile.removeOccupant() }
+            val tilesWithNoOccupant = tiles.mapValues { (_, tile) -> tile.removeOccupant() }
             val occupiedTiles =
                 occupants.associate { occupant ->
                     val position = Position(row = occupant.row, column = occupant.column)
-                    val tile = vacantTiles[position] ?: throw TileNotFound()
+                    val tile = tilesWithNoOccupant[position] ?: throw TileNotFound()
                     position to tile.occupy(occupant.occupantId)
                 }
-            return Tiles(vacantTiles + occupiedTiles)
+            return Tiles(tilesWithNoOccupant + occupiedTiles)
         }
 
         fun toDto(): Map<PositionDto, TileDto> =
@@ -279,14 +279,14 @@ data class Battlefield private constructor(
             column: Int,
         ): String? = tiles[Position(row = row, column = column)]?.terrainIdValue()
 
-        fun effectApplicationsToOccupants(terrainEffectIds: Map<String, String>): List<Dto.EffectApplicationToOccupantDto> =
+        fun terrainEffectsOnOccupants(terrainEffectIds: Map<String, String>): List<Dto.TerrainEffectOnOccupantDto> =
             tiles.values
                 .sortedWith(compareBy({ it.row() }, { it.column() }))
                 .mapNotNull { tile ->
                     val terrainId = tile.terrainIdValue()
                     val occupantId = tile.occupantId()
                     if (occupantId != null && terrainId in terrainEffectIds) {
-                        Dto.EffectApplicationToOccupantDto(
+                        Dto.TerrainEffectOnOccupantDto(
                             occupantId = occupantId,
                             terrainId = terrainId,
                             effectId = terrainEffectIds.getValue(terrainId),
@@ -318,8 +318,8 @@ data class Battlefield private constructor(
                                     Tile.create(
                                         position = position,
                                         terrainId = terrainId,
-                                        terrainCanBeOccupied =
-                                            isTerrainOccupiable(
+                                        occupiable =
+                                            isOccupiable(
                                                 tiles = tiles,
                                                 terrainCanBeOccupied = terrainCanBeOccupied,
                                                 row = rowIndex,
@@ -406,7 +406,7 @@ data class Battlefield private constructor(
                 return adjacentTerrainId == terrainId
             }
 
-            private fun isTerrainOccupiable(
+            private fun isOccupiable(
                 tiles: List<List<String>>,
                 terrainCanBeOccupied: Map<String, Boolean>,
                 row: Int,
@@ -461,29 +461,29 @@ data class Battlefield private constructor(
             private val position: Position,
             private val occupant: OccupantId?,
             private val terrainId: TerrainId,
-            private val terrainCanBeOccupied: TerrainCanBeOccupied,
+            private val occupiable: Occupiable,
             private val terrainTransition: TerrainTransition?,
         ) {
             companion object {
                 fun create(
                     position: Position,
                     terrainId: String,
-                    terrainCanBeOccupied: Boolean,
+                    occupiable: Boolean,
                     terrainTransition: TerrainTransition?,
                 ) = Tile(
                     position = position,
                     occupant = null,
                     terrainId = TerrainId(terrainId),
-                    terrainCanBeOccupied = TerrainCanBeOccupied(terrainCanBeOccupied),
+                    occupiable = Occupiable(occupiable),
                     terrainTransition = terrainTransition,
                 )
             }
 
-            fun isVacant() = occupant == null
+            fun hasNoOccupant() = occupant == null
 
             fun isOccupied() = occupant != null
 
-            fun isTerrainOccupiable() = terrainCanBeOccupied.value
+            fun isOccupiable() = occupiable.value
 
             fun occupy(occupantId: String) = copy(occupant = OccupantId(occupantId))
 
@@ -535,7 +535,7 @@ data class Battlefield private constructor(
             val value: String,
         )
 
-        @JvmInline private value class TerrainCanBeOccupied(
+        @JvmInline private value class Occupiable(
             val value: Boolean,
         )
     }
@@ -579,7 +579,7 @@ data class Battlefield private constructor(
             val column: Int,
         )
 
-        data class EffectApplicationToOccupantDto(
+        data class TerrainEffectOnOccupantDto(
             val occupantId: String,
             val terrainId: String,
             val effectId: String,

@@ -26,18 +26,18 @@ class TriggerTerrainEffects(
                 .associateWith { terrainId -> searchTerrainById(terrainId)?.effectId }
                 .filterValues { it != null }
                 .mapValues { it.value!! }
-        val applications =
+        val terrainEffects =
             battlefield
-                .effectApplicationsToOccupants(terrainEffectIds)
-                .filter { application -> application.occupantId in occupantIds }
-        applications.forEach { application ->
+                .terrainEffectsOnOccupants(terrainEffectIds)
+                .filter { terrainEffect -> terrainEffect.occupantId in occupantIds }
+        terrainEffects.forEach { terrainEffect ->
             eventBus.publish(
                 BattlefieldEvent.TerrainEffectTriggered(
                     application =
                         EffectApplicationDto(
-                            source = ApplicationSourceDto.terrain(application.terrainId),
-                            target = EffectTargetDto.battleUnit(application.occupantId),
-                            effectId = application.effectId,
+                            source = ApplicationSourceDto.terrain(terrainEffect.terrainId),
+                            target = EffectTargetDto.battleUnit(terrainEffect.occupantId),
+                            effectId = terrainEffect.effectId,
                             destination = null,
                         ),
                 ),

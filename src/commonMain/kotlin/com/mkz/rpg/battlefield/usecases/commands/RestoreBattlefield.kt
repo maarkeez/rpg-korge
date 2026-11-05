@@ -4,8 +4,8 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 
 /**
- * Puts back the occupants a save took, every other tile vacant, publishing no events. Fails when the battlefield is not
- * created yet, or when a tile is no longer on its map.
+ * Puts back the occupants a save took, no other tile with an occupant, publishing no events. Fails when the battlefield
+ * is not created yet, or when a tile is no longer on it.
  */
 class RestoreBattlefield(
     private val battlefieldRepository: BattlefieldRepository,

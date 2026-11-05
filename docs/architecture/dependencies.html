@@ -327,7 +327,7 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/MoveBattleUnit.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/MoveBattleUnit.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchShortestPath"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/RequestEffectApplicationToCastTargets.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RespawnBattleUnit.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/commands/RespawnBattleUnit.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/SwapBattleUnits.kt", "layer": "usecases", "name": "battlefield.domain.BattlefieldEvent.RequestSwapOccupants"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/SwapBattleUnits.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/battleUnit/usecases/commands/VanishSummonedBattleUnits.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
@@ -339,15 +339,15 @@ const DATA = {
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/PreviewCastRemainingHealth.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchOccupant"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchTilesThatCanBeOccupied"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanCast.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchVacantTiles"},
       {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanMove.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanMove.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchTilesThatCanBeOccupied"},
+      {"file": "com/mkz/rpg/battleUnit/usecases/queries/WhereCanMove.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchVacantTiles"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchOccupant"},
       {"file": "com/mkz/rpg/battleUnit/usecases/services/AbilityExecution.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
-      {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
+      {"file": "com/mkz/rpg/battleUnit/usecases/services/BattleUnitDeployment.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"}
     ]},
     {"from": "battleUnit", "to": "effect", "weight": 37, "files": 10, "imports": [
       {"file": "com/mkz/rpg/battleUnit/adapters/presentation/BattleUnitApi.kt", "layer": "adapters", "name": "effect.adapters.presentation.EffectApi"},
@@ -476,8 +476,6 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "effect.domain.Effect.Dto.EffectTargetDto"}
     ]},
     {"from": "battlefield", "to": "shared", "weight": 32, "files": 20, "imports": [
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestEffectApplicationToOccupants.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestInitialiseBattlefield.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestInitialiseBattlefield.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestMoveOccupant.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -490,6 +488,8 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestRemoveOccupant.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestSwapOccupants.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestSwapOccupants.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestTerrainEffects.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/battlefield/adapters/events/OnRequestTerrainEffects.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRoundStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/adapters/events/OnRoundStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/battlefield/adapters/presentation/BattlefieldApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -502,12 +502,12 @@ const DATA = {
       {"file": "com/mkz/rpg/battlefield/adapters/save/BattlefieldSnapshottable.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/battlefield/domain/BattlefieldEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/InitialiseBattlefield.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/battlefield/usecases/commands/OccupyTile.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/OccupyTiles.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/RemoveOccupant.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/RequestBattlefieldCreation.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/battlefield/usecases/commands/SwapOccupants.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/battlefield/usecases/commands/UpdateBattlefieldOccupancy.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+      {"file": "com/mkz/rpg/battlefield/usecases/commands/TriggerTerrainEffects.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "battlefield", "to": "terrain", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/battlefield/adapters/presentation/BattlefieldApi.kt", "layer": "adapters", "name": "terrain.adapters.presentation.TerrainApi"},
@@ -563,7 +563,7 @@ const DATA = {
     {"from": "building", "to": "battlefield", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/building/adapters/presentation/BuildingApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/building/domain/Building.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTiles"},
-      {"file": "com/mkz/rpg/building/usecases/commands/InitialiseBuildings.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"}
+      {"file": "com/mkz/rpg/building/usecases/commands/InitialiseBuildings.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"}
     ]},
     {"from": "building", "to": "shared", "weight": 9, "files": 6, "imports": [
       {"file": "com/mkz/rpg/building/adapters/events/OnRequestInitialiseBuildings.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -616,13 +616,13 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt", "layer": "usecases", "name": "battleUnit.usecases.queries.SearchBattleUnitById"}
     ]},
     {"from": "cpuBattleBrain", "to": "battlefield", "weight": 17, "files": 10, "imports": [
-      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/presentation/CpuBattleBrainApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/ManageCpuBattleUnit.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/IsOutsideTerritory.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/IsOutsideTerritory.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchDistancesFromHome.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
-      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchDistancesFromHome.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchDistancesFromHome.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileOccupiable"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchEnemiesWithinReach.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchEnemiesWithinReach.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchWalkingDistance"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchTerrainHealthEffect.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchTerrainId"},
@@ -631,7 +631,7 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldMove.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldMove.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
-      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "cpuBattleBrain", "to": "effect", "weight": 8, "files": 3, "imports": [
@@ -666,8 +666,6 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleDisengaged.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnCpuBattleBrainInitialized.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnCpuBattleBrainInitialized.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnCpuBattleUnitActionResolved.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -684,6 +682,8 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnRequestEngageEnemies.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnRequestUpdateEngagement.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnRequestUpdateEngagement.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/cpuBattleBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/presentation/CpuBattleBrainApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuBattleBrain/domain/CpuBattleBrainEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/cpuBattleBrain/usecases/commands/EngageEnemies.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
@@ -718,10 +718,10 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuWanderBrain/usecases/services/WanderingSteps.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"}
     ]},
     {"from": "cpuWanderBrain", "to": "battlefield", "weight": 8, "files": 6, "imports": [
-      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
+      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/presentation/CpuWanderBrainApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/cpuWanderBrain/domain/CpuWanderBrain.kt", "layer": "domain", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
-      {"file": "com/mkz/rpg/cpuWanderBrain/usecases/commands/RespawnDefeatedBattleUnits.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/cpuWanderBrain/usecases/commands/RespawnDefeatedBattleUnits.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/cpuWanderBrain/usecases/queries/IsInSight.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchBattlefieldSize"},
       {"file": "com/mkz/rpg/cpuWanderBrain/usecases/queries/IsInSight.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/cpuWanderBrain/usecases/services/WanderingSteps.kt", "layer": "usecases", "name": "battlefield.domain.Battlefield.Dto.PositionDto"},
@@ -753,14 +753,14 @@ const DATA = {
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattleUnitDeployed.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattleUnitRespawned.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattleUnitRespawned.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnExplorationSecondStarted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnExplorationSecondStarted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnPartyWalked.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnPartyWalked.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnRoundFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnRoundFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/cpuWanderBrain/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/presentation/CpuWanderBrainApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/presentation/CpuWanderBrainApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/cpuWanderBrain/adapters/save/CpuWanderBrainSnapshottable.kt", "layer": "adapters", "name": "shared.adapters.save.SnapshotJson"},
@@ -973,7 +973,7 @@ const DATA = {
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTile"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestRemoveOccupant"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "npc", "to": "lootableItem", "weight": 3, "files": 3, "imports": [
@@ -1026,7 +1026,7 @@ const DATA = {
       {"file": "com/mkz/rpg/party/usecases/services/PartyWalking.kt", "layer": "usecases", "name": "battleUnit.domain.BattleUnitEvent"}
     ]},
     {"from": "party", "to": "battlefield", "weight": 9, "files": 6, "imports": [
-      {"file": "com/mkz/rpg/party/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
+      {"file": "com/mkz/rpg/party/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt", "layer": "usecases", "name": "battlefield.domain.BattlefieldEvent"},
       {"file": "com/mkz/rpg/party/usecases/commands/ApplyStandingTerrainEffects.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchBattlefield"},
@@ -1054,8 +1054,6 @@ const DATA = {
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleUnitDefeated.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/events/OnBattleUnitMoved.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/party/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/party/adapters/events/OnBattlefieldTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestApplyMemberEffect.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestApplyMemberEffect.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestJoinParty.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1068,6 +1066,8 @@ const DATA = {
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartExploration.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartTalk.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/events/OnRequestStartTalk.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/party/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/party/adapters/events/OnTileOccupied.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/party/adapters/presentation/PartyApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/party/adapters/save/PartySnapshottable.kt", "layer": "adapters", "name": "shared.adapters.save.SnapshotJson"},
@@ -1113,7 +1113,7 @@ const DATA = {
     ]},
     {"from": "quest", "to": "battlefield", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
-      {"file": "com/mkz/rpg/quest/usecases/commands/InitialiseQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.CanBattlefieldTileBeOccupied"},
+      {"file": "com/mkz/rpg/quest/usecases/commands/InitialiseQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "quest", "to": "inventory", "weight": 1, "files": 1, "imports": [
@@ -1242,7 +1242,7 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/ProcessTileSelected.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchOccupant"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/RefreshMovementRange.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchPosition"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/commands/SelectBattleUnit.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchPosition"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchTilesThatCanBeOccupied"}
+      {"file": "com/mkz/rpg/screen/adapters/presentation/battlefieldHud/usecases/services/MovementService.kt", "layer": "adapters", "name": "battlefield.usecases.queries.SearchVacantTiles"}
     ]},
     {"from": "screen", "to": "battlesetup", "weight": 1, "files": 1, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleScene.kt", "layer": "adapters", "name": "battlesetup.adapters.presentation.BattleSetupApi"}

@@ -5,12 +5,12 @@ import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattlefieldTileOccupied(
+class OnTileOccupied(
     resolvePartyStep: ResolvePartyStep,
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> { event ->
+        eventBus.subscribe<BattlefieldEvent.TileOccupied> { event ->
             resolvePartyStep(battleUnitId = event.occupantId, row = event.row, column = event.column)
         }
 }

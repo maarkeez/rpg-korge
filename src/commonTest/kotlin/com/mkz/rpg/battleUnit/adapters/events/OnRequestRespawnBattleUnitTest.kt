@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -21,7 +21,7 @@ class OnRequestRespawnBattleUnitTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val onRequestRespawnBattleUnit =
         OnRequestRespawnBattleUnit(
-            RespawnBattleUnit(battleUnitRepository, SearchUnitById(unitRepository), CanBattlefieldTileBeOccupied(battlefieldRepository), eventBus),
+            RespawnBattleUnit(battleUnitRepository, SearchUnitById(unitRepository), IsTileVacant(battlefieldRepository), eventBus),
             eventBus,
         )
 

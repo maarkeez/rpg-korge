@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuWanderBrain.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestRespawnBattleUnit
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTileBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -12,7 +12,7 @@ import com.mkz.rpg.shared.domain.EventBus
  */
 class RespawnDefeatedBattleUnits(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val isTileVacant: IsTileVacant,
     private val eventBus: EventBus,
 ) {
     operator fun invoke() {
@@ -20,7 +20,7 @@ class RespawnDefeatedBattleUnits(
         cpuWanderBrainRepository.save(cpuWanderBrain)
         cpuWanderBrain
             .dueRespawns()
-            .filter { home -> canBattlefieldTileBeOccupied(row = home.row, column = home.column) }
+            .filter { home -> isTileVacant(row = home.row, column = home.column) }
             .forEach { home -> eventBus.publish(RequestRespawnBattleUnit(battleUnitId = home.battleUnitId, row = home.row, column = home.column)) }
     }
 }

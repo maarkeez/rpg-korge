@@ -3,27 +3,27 @@ package com.mkz.rpg.battlefield.usecases.queries
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 
-class SearchTilesThatCanBeOccupied(
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+class SearchVacantTiles(
+    private val isTileVacant: IsTileVacant,
     private val battlefieldRepository: BattlefieldRepository,
 ) {
     operator fun invoke(
         occupantId: String,
-        distance: Int,
+        tilesAround: Int,
     ): List<PositionDto> {
-        if (distance <= 0) return emptyList()
+        if (tilesAround <= 0) return emptyList()
         val battlefield = battlefieldRepository.search() ?: return emptyList()
         val position = battlefield.position(occupantId) ?: return emptyList()
-        val tilesThatCanBeOccupied =
+        val vacantTiles =
             buildList {
-                for (row in position.row - distance..position.row + distance) {
-                    for (column in position.column - distance..position.column + distance) {
-                        if (canBattlefieldTileBeOccupied(row, column)) {
+                for (row in position.row - tilesAround..position.row + tilesAround) {
+                    for (column in position.column - tilesAround..position.column + tilesAround) {
+                        if (isTileVacant(row, column)) {
                             add(PositionDto(row, column))
                         }
                     }
                 }
             }
-        return tilesThatCanBeOccupied
+        return vacantTiles
     }
 }

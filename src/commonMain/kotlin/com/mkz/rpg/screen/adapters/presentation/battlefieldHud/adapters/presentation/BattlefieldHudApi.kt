@@ -31,7 +31,7 @@ class BattlefieldHudApi(
     private val movementService =
         MovementService(
             searchBattleUnitById = battleUnitApi.searchBattleUnitById,
-            searchTilesThatCanBeOccupied = battlefieldApi.searchTilesThatCanBeOccupied,
+            searchVacantTiles = battlefieldApi.searchVacantTiles,
             canMoveTo = battleUnitApi.canMoveTo,
         )
 

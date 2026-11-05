@@ -15,7 +15,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Displays again the selected battle unit with its current tile and movement range, e.g.: after it moves or casts,
- * or after a tile is occupied or vacated, since that may open or close paths.
+ * or after a tile is occupied or an occupant removed, since that may open or close paths.
  *
  * Out of the battles (e.g.: while exploring), the selected battle unit has no movement range, so it is only displayed
  * again when its tile changes. Otherwise, the CPU battle units wandering every second would display its info again in

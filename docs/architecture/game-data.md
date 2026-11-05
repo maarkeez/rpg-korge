@@ -30,7 +30,7 @@ The battle is defined by TOML files under [`resources`](../../resources). No gam
 To load a saved game, `SetupBattle` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
 and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).
 
-The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsNotVacant`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc can not be occupied (e.g.: void, out of the battlefield).
+The battlefield tiles are occupied by events: once `BuildingPlaced` is handled, then once `BattleUnitDeployed` is, then once `NpcPlaced` is. So a battle unit on a tile of a building, or an npc on the tile of a battle unit or a building, fails to occupy it (`TileIsOccupied`), and the game fails to start, as it does when the tile of a building, a battle unit or an npc is not occupiable (e.g.: void, out of the battlefield).
 
 Each subdomain follows the same structure:
 
@@ -171,7 +171,7 @@ tiles = [
 
 Only sand can be next to another terrain, north, east, south or west, as the terrain transitions are only drawn from sand (`terrain/transitions/sand_to_<terrain>.png`): the game fails to start otherwise (`TileTerrainTransitionNotAllowed`).
 
-A tile next to void on two sides that meet (a corner) or on three sides (a dead end) can not be occupied, whatever its terrain: it is drawn as the edge of the void. Void on one side, or on two opposite sides (a corridor 1 tile wide), leaves it walkable. So a corridor 1 tile wide can not turn nor end: it turns in a room at least 3 tiles wide, and ends at the edge of the battlefield or in a room.
+A tile next to void on two sides that meet (a corner) or on three sides (a dead end) is not occupiable, whatever its terrain: it is drawn as the edge of the void. Void on one side, or on two opposite sides (a corridor 1 tile wide), leaves it occupiable. So a corridor 1 tile wide can not turn nor end: it turns in a room at least 3 tiles wide, and ends at the edge of the battlefield or in a room.
 
 ### `battleUnit/<battle unit id>.toml`
 
@@ -195,7 +195,7 @@ rows = 4
 columns = 4
 ```
 
-The game fails to start when its size is not positive (`BuildingSizeNotPositive`), or when any of its tiles is out of the battlefield, can not be occupied (`BuildingTileCanNotBeOccupied`), or is taken (`TileIsNotVacant`). Its image must be its size: [`BuildingImageResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/building/adapters/resources/BuildingImageResourcesTest.kt) fails otherwise.
+The game fails to start when its size is not positive (`BuildingSizeNotPositive`), or when any of its tiles is out of the battlefield, is not occupiable (`BuildingTileCanNotBeOccupied`), or is occupied (`TileIsOccupied`). Its image must be its size: [`BuildingImageResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/building/adapters/resources/BuildingImageResourcesTest.kt) fails otherwise.
 
 ### `npc/<npc id>.toml`
 
@@ -224,7 +224,7 @@ stock = ["health-potion", "mana-potion", "hammer"]
 
 ### `quest/<quest id>.toml`
 
-A line of tasks, completed one after the other, and the reward paid to the party leader. See [Quests](quests.md). The game needs exactly one `MAIN` quest, and fails to start on a quest with no tasks, an empty reward, negative gold, an empty tile group, a tile that can not be occupied or a `count` below 1, on a `SIDE` quest with no `giverNpcId`, and on a `MAIN` quest with a `giverNpcId` or `repeatable`. The units, npcs and lootable items it names are checked in CI by `QuestResourcesTest`, which also fails on a recruitable npc as a giver or a talk task, as recruiting deletes the npc.
+A line of tasks, completed one after the other, and the reward paid to the party leader. See [Quests](quests.md). The game needs exactly one `MAIN` quest, and fails to start on a quest with no tasks, an empty reward, negative gold, an empty tile group, a tile that is not vacant or a `count` below 1, on a `SIDE` quest with no `giverNpcId`, and on a `MAIN` quest with a `giverNpcId` or `repeatable`. The units, npcs and lootable items it names are checked in CI by `QuestResourcesTest`, which also fails on a recruitable npc as a giver or a talk task, as recruiting deletes the npc.
 
 ```toml
 type = "MAIN"                    # MAIN, SIDE
@@ -259,12 +259,12 @@ The shipped side quests are examples of each: [`bats-in-the-meadow`](../../resou
 
 ## How to add a building
 
-1. Add `resources/building/<building id>.toml`, on tiles that can be occupied, where no battle unit is deployed and no npc stands.
+1. Add `resources/building/<building id>.toml`, on vacant tiles, where no battle unit is deployed and no npc stands.
 2. Add its image, following the [asset conventions](assets.md): `building/<building id>.png`, of 16 pixels per tile.
 
 ## How to add an npc
 
-1. Add `resources/npc/<npc id>.toml`, on a tile that can be occupied, where no battle unit is deployed and no building stands. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
+1. Add `resources/npc/<npc id>.toml`, on a vacant tile, where no battle unit is deployed and no building stands. A merchant only sells [lootable items that exist](#how-to-add-a-lootable-item).
 2. Add its name and line to `resources/localization/messages.pot`, as `npc.<npc id>.name` and `npc.<npc id>.line`.
 3. Add its images, following the [asset conventions](assets.md): `npc/<npc id>.png` and `npc/<npc id>_portrait.png`. A recruitable npc needs none: it is displayed with the images of its unit, which [is added](#how-to-add-a-unit) instead.
 

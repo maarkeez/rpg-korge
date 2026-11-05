@@ -250,7 +250,7 @@ class NpcAcceptanceTest {
             // When
             val result = runCatching { setUp() }
             // Then
-            result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
+            result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsOccupied>()
         }
 
     @Test

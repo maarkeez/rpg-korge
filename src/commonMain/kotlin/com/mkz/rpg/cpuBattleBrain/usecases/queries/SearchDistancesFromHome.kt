@@ -1,11 +1,11 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
 
 /**
- * How many tiles a wandering battle unit walks from its home to each tile: it only walks over the tiles whose terrain
- * can be occupied (e.g.: not void) and is not harmful (e.g.: not lava), as it never steps on harmful terrain while it
+ * How many tiles a wandering battle unit walks from its home to each tile: it only walks over the occupiable tiles
+ * (e.g.: not void) whose terrain is not harmful (e.g.: not lava), as it never steps on harmful terrain while it
  * wanders. The battle units standing on them do not count, as they walk around. Home is 0 tiles away, even on harmful
  * terrain. The tiles it can not walk to from home are left out.
  *
@@ -16,7 +16,7 @@ import com.mkz.rpg.battlefield.usecases.queries.CanBattlefieldTerrainBeOccupied
  * heading home never gets stuck behind harmful terrain.
  */
 class SearchDistancesFromHome(
-    private val canBattlefieldTerrainBeOccupied: CanBattlefieldTerrainBeOccupied,
+    private val isTileOccupiable: IsTileOccupiable,
     private val searchTerrainHealthEffect: SearchTerrainHealthEffect,
 ) {
     operator fun invoke(
@@ -30,7 +30,7 @@ class SearchDistancesFromHome(
             val currentPosition = queue.removeFirst()
             val distance = distances.getValue(currentPosition) + 1
             adjacentPositions(currentPosition)
-                .filter { nextPosition -> nextPosition !in distances && canBattlefieldTerrainBeOccupied(row = nextPosition.row, column = nextPosition.column) }
+                .filter { nextPosition -> nextPosition !in distances && isTileOccupiable(row = nextPosition.row, column = nextPosition.column) }
                 .forEach { nextPosition ->
                     distances[nextPosition] = distance
                     if (!isHarmful(nextPosition)) queue.addLast(nextPosition)

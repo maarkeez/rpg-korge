@@ -14,7 +14,7 @@ class MovementServiceTest {
     private val movementService =
         MovementService(
             searchBattleUnitById = queries.searchBattleUnitById,
-            searchTilesThatCanBeOccupied = queries.searchTilesThatCanBeOccupied,
+            searchVacantTiles = queries.searchVacantTiles,
             canMoveTo = queries.canMoveTo,
         )
 
@@ -42,7 +42,7 @@ class MovementServiceTest {
     }
 
     @Test
-    fun `should return an empty set when there are no tiles that can be occupied`() {
+    fun `should return an empty set when there are no vacant tiles`() {
         // Given
         queries.battleUnitRepository.create(battleUnit(id = "battle-unit-1"))
         queries.battlefieldRepository.create(battlefield("K #", occupants = mapOf('K' to "battle-unit-1")))

@@ -12,12 +12,12 @@ import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-class OnRequestEffectApplicationToOccupantsTest {
+class OnRequestTerrainEffectsTest {
     private val eventBus = InMemoryEventBus()
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val terrainRepository = InMemoryTerrainRepository()
-    private val onRequestEffectApplicationToOccupants =
-        OnRequestEffectApplicationToOccupants(
+    private val onRequestTerrainEffects =
+        OnRequestTerrainEffects(
             TriggerTerrainEffects(battlefieldRepository, SearchTerrainById(terrainRepository), eventBus),
             eventBus,
         )
@@ -31,7 +31,7 @@ class OnRequestEffectApplicationToOccupantsTest {
         // Given
         battlefieldRepository.create(battlefield("K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2")))
         terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
-        eventBus.publish(BattlefieldEvent.RequestEffectApplicationToOccupants(occupantIds = setOf("knight-2")))
+        eventBus.publish(BattlefieldEvent.RequestTerrainEffects(occupantIds = setOf("knight-2")))
         // When
         eventBus.dispatch()
         // Then

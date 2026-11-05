@@ -41,7 +41,7 @@ class NpcApi(
     val searchIsMerchant = SearchIsMerchant(npcRepository)
 
     // Commands
-    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.canBattlefieldTileBeOccupied, lootableItemApi.searchLootableItemById, eventBus)
+    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.isTileVacant, lootableItemApi.searchLootableItemById, eventBus)
     val recruitNpc = RecruitNpc(npcRepository, eventBus)
     val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchNpcNextTo, eventBus)
 

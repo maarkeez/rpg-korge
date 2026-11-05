@@ -25,7 +25,7 @@ class BattlefieldCreation(
         return events
     }
 
-    /** Builds the battlefield the same way, without storing it, e.g.: to display a map being designed. */
+    /** Builds the battlefield the same way, without storing it, e.g.: to display a battlefield being designed. */
     fun preview(tiles: List<List<String>>): Battlefield.Dto = build(rows = tiles.size, columns = tiles.firstOrNull()?.size ?: 0, tiles = tiles).toDto()
 
     private fun build(

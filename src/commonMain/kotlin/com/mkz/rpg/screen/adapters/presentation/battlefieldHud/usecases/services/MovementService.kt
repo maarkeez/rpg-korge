@@ -2,20 +2,20 @@ package com.mkz.rpg.screen.adapters.presentation.battlefieldHud.usecases.service
 
 import com.mkz.rpg.battleUnit.usecases.queries.CanMoveTo
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
-import com.mkz.rpg.battlefield.usecases.queries.SearchTilesThatCanBeOccupied
+import com.mkz.rpg.battlefield.usecases.queries.SearchVacantTiles
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHud.Dto.TileDto
 
 class MovementService(
     private val searchBattleUnitById: SearchBattleUnitById,
-    private val searchTilesThatCanBeOccupied: SearchTilesThatCanBeOccupied,
+    private val searchVacantTiles: SearchVacantTiles,
     private val canMoveTo: CanMoveTo,
 ) {
     fun tilesWhereCanMove(battleUnitId: String): Set<TileDto> {
         val battleUnit = searchBattleUnitById(battleUnitId)!!
         val tilesWhereCanBeMoved =
-            searchTilesThatCanBeOccupied(
+            searchVacantTiles(
                 occupantId = battleUnit.id,
-                distance = battleUnit.remainingTurnActions.remainingSteps,
+                tilesAround = battleUnit.remainingTurnActions.remainingSteps,
             ).filter { tilePosition ->
                 canMoveTo(
                     battleUnitId = battleUnit.id,

@@ -5,12 +5,12 @@ import com.mkz.rpg.cpuBattleBrain.usecases.commands.ResolveCpuBattleUnitMove
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattlefieldTileOccupied(
+class OnTileOccupied(
     resolveCpuBattleUnitMove: ResolveCpuBattleUnitMove,
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> { event ->
+        eventBus.subscribe<BattlefieldEvent.TileOccupied> { event ->
             resolveCpuBattleUnitMove(battleUnitId = event.occupantId, row = event.row, column = event.column)
         }
 }

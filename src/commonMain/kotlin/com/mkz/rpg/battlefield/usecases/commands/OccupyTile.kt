@@ -3,7 +3,7 @@ package com.mkz.rpg.battlefield.usecases.commands
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-class UpdateBattlefieldOccupancy(
+class OccupyTile(
     private val battlefieldRepository: BattlefieldRepository,
     private val eventBus: EventBus,
 ) {

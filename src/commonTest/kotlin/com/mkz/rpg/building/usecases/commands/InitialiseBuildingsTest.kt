@@ -22,7 +22,7 @@ class InitialiseBuildingsTest {
     private val buildingRepository = InMemoryBuildingRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseBuildings(vararg buildings: Building.Dto) = InitialiseBuildings(FakeBuildingLoader(buildings.toList()), buildingRepository, queries.canBattlefieldTileBeOccupied, eventBus)()
+    private fun initialiseBuildings(vararg buildings: Building.Dto) = InitialiseBuildings(FakeBuildingLoader(buildings.toList()), buildingRepository, queries.isTileVacant, eventBus)()
 
     @Test
     fun `should place every loaded building on its tiles, requesting the battlefield to occupy them, when the buildings are initialised`() {

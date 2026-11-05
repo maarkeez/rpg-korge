@@ -94,7 +94,7 @@ class RequestBattlefieldCreationTest {
     }
 
     @Test
-    fun `should create battlefield tiles that can not be occupied when the tile terrain can not be occupied`() {
+    fun `should create battlefield tiles that are not vacant when the tile terrain can not be occupied`() {
         // Given
         val rows = 1
         val columns = 2
@@ -109,7 +109,7 @@ class RequestBattlefieldCreationTest {
         // Then
         val storedBattlefield = battlefieldRepository.search()
         storedBattlefield.shouldNotBeNull()
-        storedBattlefield!!.canBeOccupied(row = 0, column = 0).shouldBeFalse()
-        storedBattlefield.canBeOccupied(row = 0, column = 1).shouldBeTrue()
+        storedBattlefield!!.isVacant(row = 0, column = 0).shouldBeFalse()
+        storedBattlefield.isVacant(row = 0, column = 1).shouldBeTrue()
     }
 }

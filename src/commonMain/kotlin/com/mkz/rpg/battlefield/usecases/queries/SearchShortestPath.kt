@@ -3,11 +3,11 @@ package com.mkz.rpg.battlefield.usecases.queries
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 
 class SearchShortestPath(
-    private val canBattlefieldTileBeOccupied: CanBattlefieldTileBeOccupied,
+    private val isTileVacant: IsTileVacant,
 ) {
     /**
-     * Returns the tiles walked from the origin (excluded) to the destination (included), stepping only on tiles that
-     * can be occupied, or null when the destination can not be reached.
+     * Returns the tiles walked from the origin (excluded) to the destination (included), stepping only on vacant
+     * tiles, or null when the destination can not be reached.
      */
     operator fun invoke(
         fromRow: Int,
@@ -23,7 +23,7 @@ class SearchShortestPath(
             val currentPosition = queue.removeFirst()
             if (currentPosition == destination) return pathTo(destination, previousPositions)
             for (nextPosition in adjacentPositions(currentPosition)) {
-                if (nextPosition !in previousPositions && canBattlefieldTileBeOccupied(nextPosition.row, nextPosition.column)) {
+                if (nextPosition !in previousPositions && isTileVacant(nextPosition.row, nextPosition.column)) {
                     previousPositions[nextPosition] = currentPosition
                     queue.addLast(nextPosition)
                 }

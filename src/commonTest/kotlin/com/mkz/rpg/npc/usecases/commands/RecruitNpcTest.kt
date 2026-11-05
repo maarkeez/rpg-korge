@@ -18,7 +18,7 @@ class RecruitNpcTest {
     private val recruitNpc = RecruitNpc(npcRepository, eventBus)
 
     @Test
-    fun `should vacate its tile, and then request the party to recruit its battle unit there, when the npc is recruitable`() {
+    fun `should remove the occupant, and then request the party to recruit its battle unit there, when the npc is recruitable`() {
         // Given
         npcRepository.save(npc(id = "viking", row = 12, column = 2, unitId = "viking"))
         // When

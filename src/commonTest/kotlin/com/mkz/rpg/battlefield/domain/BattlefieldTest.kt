@@ -220,7 +220,7 @@ class BattlefieldTest {
         // Then
         occupiedBattlefield.occupant(row = 0, column = 0) shouldBe occupantId
         val (events, _) = occupiedBattlefield.pullEvents()
-        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = occupantId))
+        events.shouldContainExactly(BattlefieldEvent.TileOccupied(row = 0, column = 0, occupantId = occupantId))
     }
 
     @Test
@@ -236,13 +236,13 @@ class BattlefieldTest {
     }
 
     @Test
-    fun `Occupy should fail when the tile is not vacant`() {
+    fun `Occupy should fail when the tile is occupied`() {
         // Given
         val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
         val result = runCatching { battlefield.occupy(row = 0, column = 0, occupantId = "battle-unit-2") }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
+        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsOccupied>()
     }
 
     @Test
@@ -270,10 +270,10 @@ class BattlefieldTest {
         occupiedBattlefield.occupant(row = 1, column = 2).shouldBeNull()
         val (events, _) = occupiedBattlefield.pullEvents()
         events.shouldContainExactly(
-            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 0, occupantId = "fortress"),
-            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 1, occupantId = "fortress"),
-            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 0, occupantId = "fortress"),
-            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 1, occupantId = "fortress"),
+            BattlefieldEvent.TileOccupied(row = 1, column = 0, occupantId = "fortress"),
+            BattlefieldEvent.TileOccupied(row = 1, column = 1, occupantId = "fortress"),
+            BattlefieldEvent.TileOccupied(row = 2, column = 0, occupantId = "fortress"),
+            BattlefieldEvent.TileOccupied(row = 2, column = 1, occupantId = "fortress"),
         )
     }
 
@@ -288,7 +288,7 @@ class BattlefieldTest {
     }
 
     @Test
-    fun `OccupyTiles should fail, occupying none, when any tile is not vacant`() {
+    fun `OccupyTiles should fail, occupying none, when any tile is occupied`() {
         // Given
         val battlefield =
             BattlefieldMother
@@ -299,7 +299,7 @@ class BattlefieldTest {
         // When
         val result = runCatching { battlefield.occupyTiles(row = 0, column = 0, rows = 2, columns = 2, occupantId = "fortress") }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsNotVacant>()
+        result.exceptionOrNull().shouldBeTypeOf<BattlefieldError.TileIsOccupied>()
         battlefield.occupant(row = 0, column = 0).shouldBeNull()
     }
 
@@ -357,8 +357,8 @@ class BattlefieldTest {
         updatedBattlefield.occupant(row = 1, column = 1) shouldBe "knight-2"
         updatedBattlefield.occupant(row = 2, column = 1) shouldBe "knight-1"
         updatedBattlefield.pullEvents().first.shouldContainExactly(
-            BattlefieldEvent.BattlefieldTileOccupied(row = 2, column = 1, occupantId = "knight-1"),
-            BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 1, occupantId = "knight-2"),
+            BattlefieldEvent.TileOccupied(row = 2, column = 1, occupantId = "knight-1"),
+            BattlefieldEvent.TileOccupied(row = 1, column = 1, occupantId = "knight-2"),
         )
     }
 
@@ -378,27 +378,27 @@ class BattlefieldTest {
     }
 
     @Test
-    fun `CanBeOccupied should be true when the tile is vacant`() {
+    fun `IsVacant should be true when the tile is vacant`() {
         // Given
         val battlefield = BattlefieldMother.battlefield()
         // When
-        val result = battlefield.canBeOccupied(row = 0, column = 0)
+        val result = battlefield.isVacant(row = 0, column = 0)
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `CanBeOccupied should be false when the tile is occupied`() {
+    fun `IsVacant should be false when the tile is occupied`() {
         // Given
         val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
-        val result = battlefield.canBeOccupied(row = 0, column = 0)
+        val result = battlefield.isVacant(row = 0, column = 0)
         // Then
         result.shouldBeFalse()
     }
 
     @Test
-    fun `CanBeOccupied should be true when the tile terrain can be occupied and has a single non occupiable adjacent terrain`() {
+    fun `IsVacant should be true when the tile terrain can be occupied and has a single non occupiable adjacent terrain`() {
         // Given
         val tiles =
             listOf(
@@ -409,13 +409,13 @@ class BattlefieldTest {
             BattlefieldMother
                 .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
         // When
-        val result = battlefield.canBeOccupied(row = 1, column = 0)
+        val result = battlefield.isVacant(row = 1, column = 0)
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `CanBeOccupied should be false when the tile terrain can not be occupied`() {
+    fun `IsVacant should be false when the tile terrain can not be occupied`() {
         // Given
         val battlefield =
             BattlefieldMother.battlefield(
@@ -424,13 +424,13 @@ class BattlefieldTest {
                 tiles = listOf(listOf("void")),
             )
         // When
-        val result = battlefield.canBeOccupied(row = 0, column = 0)
+        val result = battlefield.isVacant(row = 0, column = 0)
         // Then
         result.shouldBeFalse()
     }
 
     @Test
-    fun `CanBeOccupied should be false when the tile terrain transition can not be occupied`() {
+    fun `IsVacant should be false when the terrain transition leaves the tile not occupiable`() {
         // Given
         val tiles =
             listOf(
@@ -441,7 +441,7 @@ class BattlefieldTest {
             BattlefieldMother
                 .battlefield(rows = 2, columns = 2, tiles = tiles, terrainTransitionRules = BattlefieldMother.terrainTransitionRules(tiles))
         // When
-        val result = battlefield.canBeOccupied(row = 1, column = 0)
+        val result = battlefield.isVacant(row = 1, column = 0)
         // Then
         result.shouldBeFalse()
     }
@@ -518,7 +518,7 @@ class BattlefieldTest {
     }
 
     @Test
-    fun `EffectApplicationsToOccupants should return an application per occupied tile when the tile terrain has an effect assigned`() {
+    fun `TerrainEffectsOnOccupants should return an application per occupied tile when the tile terrain has an effect assigned`() {
         // Given
         val battlefield =
             BattlefieldMother
@@ -526,36 +526,36 @@ class BattlefieldTest {
                 .occupy(row = 0, column = 0, occupantId = "battle-unit-1")
                 .occupy(row = 2, column = 1, occupantId = "battle-unit-2")
         // When
-        val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+        val result = battlefield.terrainEffectsOnOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
         // Then
         result.shouldContainExactly(
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.TerrainEffectOnOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.TerrainEffectOnOccupantDto(occupantId = "battle-unit-2", terrainId = "sand", effectId = "effect-1"),
         )
     }
 
     @Test
-    fun `EffectApplicationsToOccupants should not return an application when the tile is vacant`() {
+    fun `TerrainEffectsOnOccupants should not return a terrain effect when the tile is vacant`() {
         // Given
         val battlefield = BattlefieldMother.battlefield()
         // When
-        val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+        val result = battlefield.terrainEffectsOnOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
         // Then
         result.shouldBeEmpty()
     }
 
     @Test
-    fun `EffectApplicationsToOccupants should not return an application when the tile terrain has no effect assigned`() {
+    fun `TerrainEffectsOnOccupants should not return a terrain effect when the tile terrain has no effect assigned`() {
         // Given
         val battlefield = BattlefieldMother.battlefield().occupy(row = 0, column = 0, occupantId = "battle-unit-1")
         // When
-        val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = emptyMap())
+        val result = battlefield.terrainEffectsOnOccupants(terrainEffectIds = emptyMap())
         // Then
         result.shouldBeEmpty()
     }
 
     @Test
-    fun `EffectApplicationsToOccupants should return only the applications of the tiles on the terrains with an effect assigned when the battlefield has multiple terrains`() {
+    fun `TerrainEffectsOnOccupants should return only the applications of the tiles on the terrains with an effect assigned when the battlefield has multiple terrains`() {
         // Given
         val tiles = listOf(listOf("sand", "forest"), listOf("sand", "forest"))
         val battlefield =
@@ -564,10 +564,10 @@ class BattlefieldTest {
                 .occupy(row = 0, column = 0, occupantId = "battle-unit-1")
                 .occupy(row = 0, column = 1, occupantId = "battle-unit-2")
         // When
-        val result = battlefield.effectApplicationsToOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
+        val result = battlefield.terrainEffectsOnOccupants(terrainEffectIds = mapOf("sand" to "effect-1"))
         // Then
         result.shouldContainExactly(
-            Battlefield.Dto.EffectApplicationToOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
+            Battlefield.Dto.TerrainEffectOnOccupantDto(occupantId = "battle-unit-1", terrainId = "sand", effectId = "effect-1"),
         )
     }
 
@@ -608,7 +608,7 @@ class BattlefieldTest {
         // When
         val (events, clearedBattlefield) = battlefield.pullEvents()
         // Then
-        events.shouldContainExactly(BattlefieldEvent.BattlefieldTileOccupied(row = 0, column = 0, occupantId = "battle-unit-1"))
+        events.shouldContainExactly(BattlefieldEvent.TileOccupied(row = 0, column = 0, occupantId = "battle-unit-1"))
         clearedBattlefield.pullEvents().first.shouldBeEmpty()
     }
 

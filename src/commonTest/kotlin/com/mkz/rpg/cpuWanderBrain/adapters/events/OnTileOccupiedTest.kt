@@ -13,12 +13,12 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-class OnBattlefieldTileOccupiedTest {
+class OnTileOccupiedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries(random = FixedDoublesRandom(0.9))
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val onBattlefieldTileOccupied =
-        OnBattlefieldTileOccupied(
+    private val onTileOccupied =
+        OnTileOccupied(
             ResolveWanderingStep(cpuWanderBrainRepository, WanderingSteps(cpuWanderBrainRepository, queries.whereShouldWander, queries.isOutsideTerritory, queries.searchPosition, eventBus)),
             eventBus,
         )
@@ -33,7 +33,7 @@ class OnBattlefieldTileOccupiedTest {
                 .startWhileExploring(exploringPlayerId = "human", battleUnitIds = listOf("rat-1"))
                 .requestStep(battleUnitId = "rat-1", row = 1, column = 0),
         )
-        eventBus.publish(BattlefieldEvent.BattlefieldTileOccupied(row = 1, column = 0, occupantId = "rat-1"))
+        eventBus.publish(BattlefieldEvent.TileOccupied(row = 1, column = 0, occupantId = "rat-1"))
         // When
         eventBus.dispatch()
         // Then

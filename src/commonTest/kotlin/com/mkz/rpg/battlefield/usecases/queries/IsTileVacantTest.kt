@@ -7,9 +7,9 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class CanBattlefieldTileBeOccupiedTest {
+class IsTileVacantTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val canBattlefieldTileBeOccupied = CanBattlefieldTileBeOccupied(battlefieldRepository)
+    private val isTileVacant = IsTileVacant(battlefieldRepository)
 
     @Test
     fun `should return true when the tile is vacant and within boundaries`() {
@@ -18,7 +18,7 @@ class CanBattlefieldTileBeOccupiedTest {
             battlefield(),
         )
         // When
-        val result = canBattlefieldTileBeOccupied(1, 1)
+        val result = isTileVacant(1, 1)
         // Then
         result.shouldBeTrue()
     }
@@ -33,7 +33,7 @@ class CanBattlefieldTileBeOccupiedTest {
                 .second
         battlefieldRepository.create(battlefield)
         // When
-        val result = canBattlefieldTileBeOccupied(1, 1)
+        val result = isTileVacant(1, 1)
         // Then
         result.shouldBeFalse()
     }
@@ -45,7 +45,7 @@ class CanBattlefieldTileBeOccupiedTest {
             battlefield(),
         )
         // When
-        val result = canBattlefieldTileBeOccupied(5, 5)
+        val result = isTileVacant(5, 5)
         // Then
         result.shouldBeFalse()
     }
@@ -66,7 +66,7 @@ class CanBattlefieldTileBeOccupiedTest {
             ),
         )
         // When
-        val result = canBattlefieldTileBeOccupied(1, 0)
+        val result = isTileVacant(1, 0)
         // Then
         result.shouldBeTrue()
     }
@@ -82,13 +82,13 @@ class CanBattlefieldTileBeOccupiedTest {
             ),
         )
         // When
-        val result = canBattlefieldTileBeOccupied(0, 0)
+        val result = isTileVacant(0, 0)
         // Then
         result.shouldBeFalse()
     }
 
     @Test
-    fun `should return false when the tile terrain transition can not be occupied`() {
+    fun `should return false when the terrain transition leaves the tile not occupiable`() {
         // Given
         battlefieldRepository.create(
             battlefield(
@@ -103,7 +103,7 @@ class CanBattlefieldTileBeOccupiedTest {
             ),
         )
         // When
-        val result = canBattlefieldTileBeOccupied(1, 0)
+        val result = isTileVacant(1, 0)
         // Then
         result.shouldBeFalse()
     }

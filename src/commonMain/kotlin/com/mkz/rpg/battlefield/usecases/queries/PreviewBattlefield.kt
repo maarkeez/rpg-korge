@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 
 /**
  * The battlefield the terrain id of each tile would make, with the terrain transitions and the occupancy of the battle,
- * without storing it. E.g.: to display a map being designed. Throws `TileTerrainTransitionNotAllowed` when two
+ * without storing it. E.g.: to display a battlefield being designed. Throws `TileTerrainTransitionNotAllowed` when two
  * terrains without a transition between them are next to each other.
  */
 class PreviewBattlefield(

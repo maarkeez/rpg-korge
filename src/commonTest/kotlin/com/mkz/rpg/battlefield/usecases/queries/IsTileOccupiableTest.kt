@@ -6,26 +6,26 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class CanBattlefieldTerrainBeOccupiedTest {
+class IsTileOccupiableTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val canBattlefieldTerrainBeOccupied = CanBattlefieldTerrainBeOccupied(battlefieldRepository)
+    private val isTileOccupiable = IsTileOccupiable(battlefieldRepository)
 
     @Test
-    fun `should return true when the terrain can be occupied and a battle unit stands on it`() {
+    fun `should return true when the tile is occupiable and a battle unit stands on it`() {
         // Given
         battlefieldRepository.create(battlefield("A .", occupants = mapOf('A' to "battle-unit-a")))
         // When
-        val result = canBattlefieldTerrainBeOccupied(0, 0)
+        val result = isTileOccupiable(0, 0)
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `should return false when the terrain can not be occupied`() {
+    fun `should return false when the tile is not occupiable`() {
         // Given
         battlefieldRepository.create(battlefield(". #"))
         // When
-        val result = canBattlefieldTerrainBeOccupied(0, 1)
+        val result = isTileOccupiable(0, 1)
         // Then
         result.shouldBeFalse()
     }
@@ -35,7 +35,7 @@ class CanBattlefieldTerrainBeOccupiedTest {
         // Given
         battlefieldRepository.create(battlefield(". ."))
         // When
-        val result = canBattlefieldTerrainBeOccupied(0, 2)
+        val result = isTileOccupiable(0, 2)
         // Then
         result.shouldBeFalse()
     }
@@ -43,7 +43,7 @@ class CanBattlefieldTerrainBeOccupiedTest {
     @Test
     fun `should return false when there is no battlefield`() {
         // When
-        val result = canBattlefieldTerrainBeOccupied(0, 0)
+        val result = isTileOccupiable(0, 0)
         // Then
         result.shouldBeFalse()
     }

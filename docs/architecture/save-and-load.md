@@ -78,7 +78,7 @@ never knows their shapes:
   [Package structure](package-structure.md#use-cases).
 
 Only runtime state is saved. What never changes while playing (terrains, effects, abilities, units, lootable items, loot
-tables, players, the map and its buildings, and the definition of each quest) is read from the resources again. Short-lived state is reset.
+tables, players, the battlefield and its buildings, and the definition of each quest) is read from the resources again. Short-lived state is reset.
 
 | #  | Subdomain        | Saved                                                                 | Reset on load                                  |
 |----|------------------|-----------------------------------------------------------------------|------------------------------------------------|

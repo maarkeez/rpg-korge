@@ -2,8 +2,7 @@ package com.mkz.rpg.battlefield.usecases.queries
 
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 
-/** Whether the terrain of the tile can be occupied (e.g.: not void), whether an occupant stands on it or not. */
-class CanBattlefieldTerrainBeOccupied(
+class IsTileVacant(
     private val battlefieldRepository: BattlefieldRepository,
 ) {
     operator fun invoke(
@@ -11,6 +10,6 @@ class CanBattlefieldTerrainBeOccupied(
         column: Int,
     ): Boolean {
         val battlefield = battlefieldRepository.search() ?: return false
-        return battlefield.isInBoundaries(row, column) && battlefield.canTerrainBeOccupied(row, column)
+        return battlefield.isInBoundaries(row, column) && battlefield.isVacant(row, column)
     }
 }

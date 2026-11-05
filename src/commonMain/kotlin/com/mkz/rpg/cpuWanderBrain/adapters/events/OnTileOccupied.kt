@@ -5,12 +5,12 @@ import com.mkz.rpg.cpuWanderBrain.usecases.commands.ResolveWanderingStep
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnBattlefieldTileOccupied(
+class OnTileOccupied(
     resolveWanderingStep: ResolveWanderingStep,
     eventBus: EventBus,
 ) {
     private val subscription =
-        eventBus.subscribe<BattlefieldEvent.BattlefieldTileOccupied> { event ->
+        eventBus.subscribe<BattlefieldEvent.TileOccupied> { event ->
             resolveWanderingStep(battleUnitId = event.occupantId, row = event.row, column = event.column)
         }
 }

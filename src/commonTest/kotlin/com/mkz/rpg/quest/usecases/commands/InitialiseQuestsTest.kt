@@ -19,7 +19,7 @@ class InitialiseQuestsTest {
     private val queries = InMemoryQueries()
     private val questRepository = InMemoryQuestRepository()
 
-    private fun initialiseQuests(vararg quests: Quest.Dto) = InitialiseQuests(FakeQuestLoader(quests.toList()), questRepository, queries.canBattlefieldTileBeOccupied).invoke()
+    private fun initialiseQuests(vararg quests: Quest.Dto) = InitialiseQuests(FakeQuestLoader(quests.toList()), questRepository, queries.isTileVacant).invoke()
 
     @BeforeTest
     fun setUp() {

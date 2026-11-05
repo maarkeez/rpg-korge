@@ -3,7 +3,7 @@ package com.mkz.rpg.battlefield.adapters.events
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.battlefield.usecases.commands.UpdateBattlefieldOccupancy
+import com.mkz.rpg.battlefield.usecases.commands.OccupyTile
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -13,7 +13,7 @@ class OnRequestMoveOccupantTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val onRequestMoveOccupant =
         OnRequestMoveOccupant(
-            updateBattlefieldOccupancy = UpdateBattlefieldOccupancy(battlefieldRepository, eventBus),
+            occupyTile = OccupyTile(battlefieldRepository, eventBus),
             eventBus = eventBus,
         )
 

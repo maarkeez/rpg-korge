@@ -16,7 +16,7 @@ A CPU turn is played one action at a time by the [`CpuBattleBrain`](../../src/co
 
 | Action | Ends with                         | Published when                                             |
 |--------|-----------------------------------|------------------------------------------------------------|
-| Move   | `BattlefieldTileOccupied`          | The battlefield occupancy has been updated                 |
+| Move   | `TileOccupied`                    | The tile has been occupied                                 |
 | Cast   | `AbilityCastResolved`              | Every effect of the cast has been applied to its targets   |
 
 The CPU battle brain only resolves the exact action it awaits (the same battle unit and tile, or the same battle unit and ability), so events of other battle units or actions are ignored.
@@ -36,7 +36,7 @@ An option must beat doing nothing by more than `MINIMUM_UTILITY_GAIN` (0.05), de
 
 A battle unit only engages the enemies **within reach**: the ones it can walk to in `ENGAGEMENT_DISTANCE` (5) tiles or fewer, counting their tile, found by [`SearchEnemiesWithinReach`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchEnemiesWithinReach.kt). The other enemies are ignored, so the CPU battle units wait until the human battle units come close.
 
-- The walk only steps on tiles the battle unit could stand on: other battle units (allies included) and terrains that can not be occupied (e.g.: void) block it, while terrains that hurt (e.g.: lava) do not. It is counted by the battlefield [`SearchWalkingDistance`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchWalkingDistance.kt).
+- The walk only steps on tiles the battle unit could stand on: other battle units (allies included) and tiles that are not occupiable (e.g.: void) block it, while terrains that hurt (e.g.: lava) do not. It is counted by the battlefield [`SearchWalkingDistance`](../../src/commonMain/kotlin/com/mkz/rpg/battlefield/usecases/queries/SearchWalkingDistance.kt).
 - It is checked at every decision, with the battlefield as it is then, and nothing is remembered: an enemy walking out of reach is no longer followed.
 - Without an enemy within reach, the battle unit does not approach, attack, deploy or cast its other abilities (e.g.: teleport). It still heals, and still falls back towards its allies and healing terrain when hurt.
 
@@ -105,14 +105,14 @@ The unit moves to the best tile, unless it is worth no more than `MINIMUM_UTILIT
 
 ## Wandering
 
-While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on. The summons (e.g.: a bat deployed by a goat) have none, as they never wander (see [Summons](#summons)). Their **territory** is the tiles walkable from home in `WANDER_DISTANCE` (3) tiles or fewer, without stepping on harmful terrain (e.g.: lava), as they never step on it while they wander. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
+While the human player explores, the CPU battle units wander around their **home**: the tile each one was deployed on. The summons (e.g.: a bat deployed by a goat) have none, as they never wander (see [Summons](#summons)). Their **territory** is the occupiable tiles walked to from home in `WANDER_DISTANCE` (3) tiles or fewer, without stepping on harmful terrain (e.g.: lava), as they never step on it while they wander. Only the terrain bounds it (e.g.: void), not the battle units, so it does not change as they walk around.
 
 The [`cpuWanderBrain`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain) subdomain remembers the homes, and walks the CPU battle units every second, while the CPU battle brain decides where each one steps:
 
 1. [`ClaimHome`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/ClaimHome.kt) remembers the tile of every CPU battle unit deployed (`BattleUnitDeployed`), but the summons, with how far each tile is from it ([`SearchDistancesFromHome`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/queries/SearchDistancesFromHome.kt)). They are computed once, as the terrain never changes while playing.
 2. Every second while exploring (`ExplorationSecondStarted`), [`WanderWhileExploring`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/WanderWhileExploring.kt) lets each CPU battle unit [in sight](#in-sight) rest or take one step, one after another, in their deployment order.
 3. [`WhereShouldWander`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/queries/WhereShouldWander.kt) decides it, from the distances from home the CPU wander brain remembers. Each step is requested with `RequestWalkBattleUnit`, as the party steps, so it spends no turn action.
-4. Each step is awaited until its battle unit occupies its tile (`BattlefieldTileOccupied`, see [`ResolveWanderingStep`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/ResolveWanderingStep.kt)), so the next battle unit decides with the battlefield as it is then: two battle units never step on the same tile.
+4. Each step is awaited until its battle unit occupies its tile (`TileOccupied`, see [`ResolveWanderingStep`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/ResolveWanderingStep.kt)), so the next battle unit decides with the battlefield as it is then: two battle units never step on the same tile.
 5. Once every CPU battle unit has wandered (`BattleUnitsWanderedWhileExploring`), the CPU wander brain requests the engagement (`RequestEngageEnemies`), and [`EngageEnemies`](../../src/commonMain/kotlin/com/mkz/rpg/cpuBattleBrain/usecases/commands/EngageEnemies.kt) engages the party when a CPU battle unit wandered within its reach (`CombatEngaged`), and requests the battle start (`RequestStartBattle`).
 
 Within its territory, a CPU battle unit rests at random (`REST_CHANCE`, 0.5), but on harmful terrain. Otherwise, every free tile next to it that is not harmful (e.g.: lava) and within its territory, or nearer to home, is a candidate. It steps to one of them at random, each one as likely as its utility, which adds up three contributions:
