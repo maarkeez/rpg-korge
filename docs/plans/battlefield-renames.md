@@ -1,6 +1,6 @@
 # Plan: Rename the code of the battlefield subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the battlefield subdomain uses words the [glossary](../../GLOSSARY.md) rejects, and "vacant" says
 > something else than it does in the glossary. E.g.: `Tile.isVacant()` is true for an empty void tile, while Teleport can't
@@ -133,8 +133,8 @@
   players' "Map Builder" and "Build a map" use it. `canBeNeighbours` and `neighbourTerrainIds`, while "neighbour" is to be
   avoided. `ParseBattlefield`, while players read "import".
 - `battleUnit`: Walk, Step, Move and Deployed are still to be defined. `DistanceService.manhattanDistance`, only a programmer's
-  word, for what `WhereCanCast` uses to tell adjacent tiles. `BattlefieldTileCanNotBeOccupied`, while "can be occupied" is to be
-  avoided.
+  word, for what `WhereCanCast` uses to tell adjacent tiles. The local `distance` in `WhereCanCast`, a square around the battle
+  unit like `tilesAround`. `BattlefieldTileCanNotBeOccupied`, while "can be occupied" is to be avoided.
 - `cpuBattleBrain`: `manhattanDistance` in `WhereShouldMove`, while the glossary only has a walking distance.
 - `building`: `BuildingTileCanNotBeOccupied`, while "can be occupied" is to be avoided.
 - `effect`: Trigger and Apply, as the terrain effect is "triggered" and carries an `EffectApplicationDto`.
@@ -142,3 +142,23 @@
 - `quest`: `QuestTileCanNotBeOccupied`, while "can be occupied" is to be avoided.
 - `screen`: `battlefieldGrid` in `BattlefieldView`. `UiText` and `ui.mapBuilder.forbiddenNeighbours`, while "neighbour" is to be
   avoided.
+
+## Changes while building
+
+- `Battlefield`: the locals `vacantTile` and `vacantTiles` are `tileLeft` and `tilesWithNoOccupant`, as they can be void tiles,
+  which are never vacant. "Every other tile vacant" in `Battlefield.restoreOccupants` and `RestoreBattlefield` says no other
+  tile has an occupant, for the same reason.
+- `TriggerTerrainEffects`: the locals `applications` and `application` are `terrainEffects` and `terrainEffect`, as they hold
+  `TerrainEffectOnOccupantDto`. Its `application` parameter of `TerrainEffectTriggered` stays.
+- More comments than the plan named say "vacant" or "occupiable" for "can be occupied": `RespawnBattleUnit`,
+  `InitialiseBuildings`, `InitialiseNpcs`, `InitialiseQuests`, `SearchDistancesFromHome`, `WhereCanCastTest` and
+  `BattlefieldMother`.
+- Test names say the same words, asserting the same, e.g.: `Occupy should fail when the tile is occupied`, and `should walk
+  around the tiles that are not vacant`. A transition test says `the terrain transition leaves the tile not occupiable`.
+- Test names keep "can be occupied" where it is a terrain's own setting (`IsVacant should be false when the tile terrain can not
+  be occupied`) or goes with an error of its kind (`DeployBattleUnitTest`, `InitialiseQuestsTest`), as both wait for their
+  sections.
+- Docs: [CPU battle brain](../architecture/cpu-battle-brain.md) says "The tile has been occupied" for "The battlefield
+  occupancy has been updated", and [Package structure](../architecture/package-structure.md) says the battle unit occupies its
+  tile for "the events of the occupancy update", as "update occupancy" is to be avoided.
+- `WhereCanCast` keeps its local `distance`, which the plan did not name: it now waits for the `battleUnit` section, above.
