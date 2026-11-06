@@ -1,6 +1,6 @@
 # Plan: Rename the code of the cpuWanderBrain subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the cpuWanderBrain subdomain gives Respawn a second meaning. In the
 > [glossary](../../GLOSSARY.md), a defeated battle unit respawns when it comes back on the battlefield. E.g.: when the
@@ -119,3 +119,12 @@
   `startWhileExploring`, `Purpose.Exploring` and `exploringPlayerId`.
 - `player`: CPU player and CPU battle unit are still to be defined, as every term of this section uses them.
 - `screen`: `VIEW_TILES` mirrors `BattlefieldView.VISIBLE_TILES`. The camera and what it shows are still to be defined.
+
+## Changes while building
+
+- More comments than the plan named say the same words: `CpuWanderBrain.awaitRespawn`'s comment says the battle unit
+  "awaits its respawn", and the inline comment of `WhereShouldWander` also says "the vacant adjacent tiles".
+- [CPU battle brain](../architecture/cpu-battle-brain.md) also says "the player turn it is summoned in" for "the turn", in
+  Summons, and that the CPU battle units out of a battle recover "on the wandering after" each round.
+- `SearchCpuWanderBrainSnapshotTest` and `OnBattleUnitRespawnedTest` keep their names, as "until each respawns" and "a cpu
+  battle unit respawns" use the verb, which keeps its meaning.
