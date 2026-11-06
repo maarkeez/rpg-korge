@@ -1,6 +1,6 @@
 # Plan: Rename the code of the inventory subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** built on `main`, its screenshots still to be approved.
 >
 > **Summary:** The code and the player text of the inventory subdomain use words the [glossary](../../GLOSSARY.md)
 > rejects. E.g.: players read "Inventory" on the title of the panel and "Inventory full" when an item found does not fit,
@@ -144,3 +144,21 @@
 - `storybook`: `BAG_USED`, `BAG_SIZE`, `buyBagFull`, `sellBagFull` and `bagsFull` in `ShopViewStories` and
   `ItemActionsViewStories`, the stories **Buy, bag full**, **Sell, bag full** and **Bags full**, and "no room left in its
   bag".
+
+## Changes while building
+
+- The Give button reads "No space" ("Sin espacio"), not "Inventories full", in `ui.itemActions.bagsFull`: **Screen / Item
+  actions › Bags full** showed "Inventories …" and "Inventarios …" cut on the button, a quarter of the row. It says storage
+  space, the glossary's word, and fits like "No one" beside it. [Buttons](../architecture/buttons.md),
+  [Presentation timeline](../architecture/presentation-timeline.md) and [Exploration](../architecture/exploration.md) say
+  `No space`, and its translator comment says the other members have no storage space left.
+- The screen tests that read the player text follow it: `ShopPresenterTest`, `ShopViewTest` and `ShopViewExtension` say
+  `Inventory 0/12` and `Inventory full`, and `InventoryPresenterGiveTest` says `No space`.
+- More test names and comments than the plan named say the same words: `UnequipItemTest` and `PlayerTurnRuleTest` say
+  player turn, `StoreLootedItemTest` says the bee is a summon, the comment of `GiveItemTest` says stores and inventory,
+  and the domain tests of giving an item are `GiveItem`, `ReceiveItem` and `GiveItemRefusal`.
+- [Inventory](../architecture/inventory.md) says the bag button where it means the button that opens the inventory, as
+  it waits for the `screen` section with `BagButtonView`.
+- `InventoryPresenterGiveGoldTest` keeps "at the limit" and "the bag" in its test names, as it is the screen's and waits
+  for its section.
+
