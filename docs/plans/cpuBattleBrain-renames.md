@@ -1,6 +1,6 @@
 # Plan: Rename the code of the cpuBattleBrain subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the cpuBattleBrain subdomain uses words the [glossary](../../GLOSSARY.md) avoids or gives
 > another meaning. E.g.: when a rat two tiles away from a knight walks next to it, `ManageCpuBattleUnit` asks
@@ -241,3 +241,17 @@
   `terrainHealthContribution`.
 - `unit`: `movementRange` in `WhatShouldCast.deployUtility`, which may become Maximum steps, as the battleUnit section
   already waits for.
+
+## Changes while building
+
+- Names the plan left out follow the table: `CpuBattleBrain.isPlayingTurn` is `isPlayingPlayerTurn`, the local
+  `managedBattleUnitIds` of `PlayPlayerTurn` is `pendingBattleUnitIds`, the `action` parameter of `requestDecision` is
+  `decision`, and the local `managing` of `CpuBattleBrainTest` is `markingDone`.
+- `WhatShouldCast`'s comment on the summon scoring no longer says the summon "acts from the next turn", which contradicted
+  [CPU battle brain](../architecture/cpu-battle-brain.md): it acts in the player turn it is summoned in. Its locals
+  `deployedUnitId` and `deployedUnit` stay, as that unit is deployed.
+- The wandering part of [CPU battle brain](../architecture/cpu-battle-brain.md) also says "option" for "candidate", and
+  `WhereShouldWander`'s comments say it "returns" for "heads home", as the glossary avoids both.
+- `InMemoryCpuBattleBrainRepository`'s comment also says "player turn".
+- `EngagementAcceptanceTest` and the `engagements` locals of the listener tests keep their names: the acceptance tests keep
+  theirs, as planned, and the locals collect the times the CPU battle units engage.
