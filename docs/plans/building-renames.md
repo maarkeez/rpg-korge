@@ -1,6 +1,6 @@
 # Plan: Rename the code of the building subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the building subdomain says the buildings are initialised, while the
 > [glossary](../../GLOSSARY.md) says they are placed. E.g.: setting up a game publishes `RequestInitialiseBuildings`, and
@@ -93,3 +93,8 @@
 - `lootDrop`: whether `PlaceDroppedItem` and `LootDrop.place` are the same Place as a building's.
 - `screen`: the piece of a building's image drawn on each of its tiles, in `BattlefieldView.displayBuilding` and
   [Assets](../architecture/assets.md), is still to be defined.
+
+## Changes while building
+
+- [Game data](../architecture/game-data.md) also says "Each `Initialise<Subdomain>` command, and `PlaceBuildings`, creates all
+  its data synchronously", as placing the buildings no longer follows the `Initialise<Subdomain>` pattern.
