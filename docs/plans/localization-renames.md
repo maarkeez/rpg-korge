@@ -1,6 +1,6 @@
 # Plan: Rename the code of the localization subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code and the docs of the localization subdomain use words the [glossary](../../GLOSSARY.md) rejects.
 > E.g.: "translation" is a whole catalog in `Localization.translations` and in the docs ("`es.po`: a translation"), but
@@ -105,3 +105,15 @@
   (e.g.: How to add a UI text), while Message is the glossary's word. `MenuView`'s comment "Picking one translates",
   while Select is the glossary's word.
 - `storybook`: the story descriptions "as translations may be" already fit, as they mean a message's translation.
+
+## Changes while building
+
+- Names the plan left out follow the table: `LocalizationMother.POLISH_PLURAL_RULE`, the `definition` parameter of
+  `PluralRule.parse` and its local `formCount`, and the parameters `sourceCatalog` and `translationCatalogs` of
+  `LocalizationMother.localization`.
+- `ResourcesLocalizationLoaderTest` names say the same words, asserting the same: `should load the source catalog in
+  English, and a catalog per po file sorted by code`, and `should fail with the file when a translation catalog has no
+  plural rule`. `LocalizationResourcesTest` says `should only have the source entries in the translation catalogs`.
+- `Localization`'s comment says a message falls back to English "when it is untranslated there".
+- `TextsTest`'s `languages should return English first, then the translations, named in their language` keeps its name,
+  as it is the screen's and waits for its section.
