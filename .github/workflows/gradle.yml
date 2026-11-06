@@ -3,8 +3,14 @@
 
 name: "🧪 Testing"
 
+# Skipped when a push only changes documentation; it can still be run by hand from the Actions tab
 on:
-  push
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "GLOSSARY.md"
+      - "README.md"
+  workflow_dispatch:
 
 env:
   JAVA_DISTRIBUTION: zulu

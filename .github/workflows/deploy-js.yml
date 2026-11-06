@@ -4,6 +4,14 @@ name: "🚀 Deploy JS"
 on:
   push:
     branches: [ "main" ]
+    # Skipped when a push only changes documentation, except the dependency report, which is deployed. The last
+    # matching pattern wins, so the report is listed after the docs it is excluded from
+    paths:
+      - "**"
+      - "!docs/**"
+      - "!GLOSSARY.md"
+      - "!README.md"
+      - "docs/architecture/dependencies.html"
   workflow_dispatch:
 
 env:
