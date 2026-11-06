@@ -277,6 +277,10 @@ An effect a battle unit has received and that has not finished.
 **Equipped effect**:
 An effect that lasts while its item is equipped.
 
+**Remaining duration**:
+How much of its duration an ongoing effect has left.
+_Avoid_: Turns left
+
 ### Battlefield
 
 **Battlefield**:
@@ -462,6 +466,65 @@ Said of a defeated CPU battle unit counting the party steps until it respawns on
 
 **Respawn steps**:
 The party steps a defeated CPU battle unit waits before it respawns.
+
+### Effect
+
+**Effect**:
+What a source applies to a recipient: an outcome and its timing, defined once and shared by every source that applies it.
+_Avoid_: Status, buff, debuff
+
+**Outcome**:
+What an effect does to its recipient, such as damage, heal, restore, teleport or summon.
+_Avoid_: Effect type
+
+**Amount**:
+How much an outcome does, such as the 15 damage of Cleave or the 10 mana of a mana potion.
+_Avoid_: Power, points, health points, mana points
+
+**Restore**:
+A battle unit getting mana back from an effect.
+_Avoid_: Increase mana
+
+#### Applying
+
+**Apply**:
+A source giving an effect to a recipient.
+
+**Source**:
+What applies an effect: a battle unit casting an ability, a terrain, or an item consumed or equipped.
+
+**Recipient**:
+The battle unit or tile an effect is applied to.
+_Avoid_: Target, effect target
+
+**Destination**:
+The tile a teleport takes its recipient to.
+
+#### Timing
+
+**Timing**:
+When the outcome of an applied effect triggers.
+_Avoid_: Application
+
+**Trigger**:
+The outcome of an effect taking place on its recipient.
+_Avoid_: Apply, tick
+
+**Immediately**:
+The timing of an effect whose outcome triggers as soon as it is applied.
+
+**On player turn started**:
+The timing of an effect whose outcome triggers each time its recipient's player turn starts, for its duration.
+_Avoid_: On turn started
+
+**On defeated**:
+The timing of an effect whose outcome triggers when its recipient is defeated.
+
+**While equipped**:
+The timing of an effect whose outcome lasts while the item that applied it is equipped.
+
+**Duration**:
+How many player turns an effect timed on player turn started triggers for.
 
 ### Game setup
 
