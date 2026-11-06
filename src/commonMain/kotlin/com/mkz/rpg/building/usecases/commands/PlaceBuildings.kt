@@ -2,7 +2,7 @@ package com.mkz.rpg.building.usecases.commands
 
 import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
 import com.mkz.rpg.building.domain.Building
-import com.mkz.rpg.building.domain.BuildingError.BuildingTileCanNotBeOccupied
+import com.mkz.rpg.building.domain.BuildingError.BuildingTileNotVacant
 import com.mkz.rpg.building.domain.BuildingRepository
 import com.mkz.rpg.building.usecases.services.BuildingLoader
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -13,7 +13,7 @@ import com.mkz.rpg.shared.domain.EventBus
  * vacant (e.g.: void, out of the battlefield). Each building requests the battlefield to occupy its tiles, right
  * after `BuildingPlaced`.
  */
-class InitialiseBuildings(
+class PlaceBuildings(
     private val buildingLoader: BuildingLoader,
     private val buildingRepository: BuildingRepository,
     private val isTileVacant: IsTileVacant,
@@ -24,7 +24,7 @@ class InitialiseBuildings(
         buildingLoader.loadBuildings().forEach { buildingDto ->
             if (buildingRepository.searchById(buildingDto.id) != null) return@forEach
             val (buildingEvents, building) = Building.place(buildingDto).pullEvents()
-            if (!areTilesVacant(buildingDto)) throw BuildingTileCanNotBeOccupied()
+            if (!areTilesVacant(buildingDto)) throw BuildingTileNotVacant()
             buildingRepository.save(building)
             events += buildingEvents
         }

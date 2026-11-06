@@ -17,21 +17,21 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
-class InitialiseBuildingsTest {
+class PlaceBuildingsTest {
     private val queries = InMemoryQueries()
     private val buildingRepository = InMemoryBuildingRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseBuildings(vararg buildings: Building.Dto) = InitialiseBuildings(FakeBuildingLoader(buildings.toList()), buildingRepository, queries.isTileVacant, eventBus)()
+    private fun placeBuildings(vararg buildings: Building.Dto) = PlaceBuildings(FakeBuildingLoader(buildings.toList()), buildingRepository, queries.isTileVacant, eventBus)()
 
     @Test
-    fun `should place every loaded building on its tiles, requesting the battlefield to occupy them, when the buildings are initialised`() {
+    fun `should place every loaded building on its tiles, requesting the battlefield to occupy them, when the buildings are placed`() {
         // Given
         queries.battlefieldRepository.create(battlefield(". . .\n. . .\n. . ."))
         val fortress = building(id = "fortress", row = 0, column = 0, rows = 2, columns = 2).toDto()
         val tower = building(id = "tower", row = 2, column = 2).toDto()
         // When
-        initialiseBuildings(fortress, tower)
+        placeBuildings(fortress, tower)
         // Then
         buildingRepository.searchById("fortress")?.toDto() shouldBe fortress
         buildingRepository.searchById("tower")?.toDto() shouldBe tower
@@ -49,7 +49,7 @@ class InitialiseBuildingsTest {
         queries.battlefieldRepository.create(battlefield(". . ."))
         buildingRepository.save(building(id = "fortress", row = 0, column = 0))
         // When
-        initialiseBuildings(building(id = "fortress", row = 0, column = 2).toDto())
+        placeBuildings(building(id = "fortress", row = 0, column = 2).toDto())
         // Then
         buildingRepository.searchById("fortress")?.toDto()?.column shouldBe 0
         eventBus.shouldNotHavePublishedEvents()
@@ -60,9 +60,9 @@ class InitialiseBuildingsTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". . .\n. . #"))
         // When
-        val result = runCatching { initialiseBuildings(building(id = "fortress", row = 0, column = 1, rows = 2, columns = 2).toDto()) }
+        val result = runCatching { placeBuildings(building(id = "fortress", row = 0, column = 1, rows = 2, columns = 2).toDto()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BuildingError.BuildingTileCanNotBeOccupied>()
+        result.exceptionOrNull().shouldBeTypeOf<BuildingError.BuildingTileNotVacant>()
         buildingRepository.searchById("fortress").shouldBeNull()
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -72,9 +72,9 @@ class InitialiseBuildingsTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". .\n. ."))
         // When
-        val result = runCatching { initialiseBuildings(building(id = "fortress", row = 1, column = 0, rows = 2, columns = 2).toDto()) }
+        val result = runCatching { placeBuildings(building(id = "fortress", row = 1, column = 0, rows = 2, columns = 2).toDto()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BuildingError.BuildingTileCanNotBeOccupied>()
+        result.exceptionOrNull().shouldBeTypeOf<BuildingError.BuildingTileNotVacant>()
         buildingRepository.searchById("fortress").shouldBeNull()
     }
 }

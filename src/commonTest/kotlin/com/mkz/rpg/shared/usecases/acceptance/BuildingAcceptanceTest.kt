@@ -60,7 +60,7 @@ class BuildingAcceptanceTest {
         playerApi.requestPlayerCreation("human", HUMAN)
         battlefieldApi.requestBattlefieldCreation(4, 5, List(4) { List(5) { "sand" } })
         eventBus.dispatch()
-        buildingApi.initialiseBuildings()
+        buildingApi.placeBuildings()
         eventBus.dispatch()
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 0, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("knight-2", "knight", "human", deployAtRow = 1, deployAtColumn = 1)

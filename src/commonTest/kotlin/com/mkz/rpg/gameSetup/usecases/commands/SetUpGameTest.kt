@@ -38,7 +38,7 @@ class SetUpGameTest {
             LootDropEvent.RequestInitialiseLootDrops,
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
-            BuildingEvent.RequestInitialiseBuildings,
+            BuildingEvent.RequestPlaceBuildings,
             QuestEvent.RequestInitialiseQuests,
             BattleUnitEvent.RequestInitialiseBattleUnits,
             NpcEvent.RequestInitialiseNpcs,
@@ -62,7 +62,7 @@ class SetUpGameTest {
             LootDropEvent.RequestInitialiseLootDrops,
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
-            BuildingEvent.RequestInitialiseBuildings,
+            BuildingEvent.RequestPlaceBuildings,
             QuestEvent.RequestInitialiseQuests,
         )
     }

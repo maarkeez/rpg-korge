@@ -517,18 +517,18 @@ const DATA = {
     {"from": "building", "to": "battlefield", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/building/adapters/presentation/BuildingApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/building/domain/Building.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTiles"},
-      {"file": "com/mkz/rpg/building/usecases/commands/InitialiseBuildings.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"}
+      {"file": "com/mkz/rpg/building/usecases/commands/PlaceBuildings.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"}
     ]},
     {"from": "building", "to": "shared", "weight": 9, "files": 6, "imports": [
-      {"file": "com/mkz/rpg/building/adapters/events/OnRequestInitialiseBuildings.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/building/adapters/events/OnRequestInitialiseBuildings.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/building/adapters/events/OnRequestPlaceBuildings.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/building/adapters/events/OnRequestPlaceBuildings.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/building/adapters/presentation/BuildingApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/building/adapters/resources/ResourcesBuildingLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
       {"file": "com/mkz/rpg/building/adapters/resources/ResourcesBuildingLoader.kt", "layer": "adapters", "name": "shared.adapters.toml.readTomlFiles"},
       {"file": "com/mkz/rpg/building/domain/Building.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/building/domain/BuildingEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/building/usecases/commands/InitialiseBuildings.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/building/usecases/commands/InitialiseBuildings.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
+      {"file": "com/mkz/rpg/building/usecases/commands/PlaceBuildings.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/building/usecases/commands/PlaceBuildings.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},
     {"from": "cpuBattleBrain", "to": "ability", "weight": 4, "files": 2, "imports": [
       {"file": "com/mkz/rpg/cpuBattleBrain/adapters/presentation/CpuBattleBrainApi.kt", "layer": "adapters", "name": "ability.adapters.presentation.AbilityApi"},

@@ -36,7 +36,7 @@ class SetUpGame(
         eventBus.publish(LootDropEvent.RequestInitialiseLootDrops)
         eventBus.publish(PlayerEvent.RequestInitialisePlayers)
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
-        eventBus.publish(BuildingEvent.RequestInitialiseBuildings)
+        eventBus.publish(BuildingEvent.RequestPlaceBuildings)
         eventBus.publish(QuestEvent.RequestInitialiseQuests)
         if (isLoadingASavedGame) return
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)

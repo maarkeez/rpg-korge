@@ -99,7 +99,7 @@ class SubdomainApis(
         playerApi.initialisePlayers()
         if (tiles.isNotEmpty()) battlefieldApi.initialiseBattlefield()
         eventBus.dispatch()
-        buildingApi.initialiseBuildings()
+        buildingApi.placeBuildings()
         eventBus.dispatch()
         // Only with quests, as the game needs exactly one main quest once it has any.
         if (quests.isNotEmpty()) questApi.initialiseQuests()

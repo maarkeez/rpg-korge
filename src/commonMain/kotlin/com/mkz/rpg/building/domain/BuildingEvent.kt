@@ -10,5 +10,5 @@ sealed interface BuildingEvent : DomainEvent {
         val column: Int,
     ) : BuildingEvent
 
-    object RequestInitialiseBuildings : BuildingEvent
+    object RequestPlaceBuildings : BuildingEvent
 }

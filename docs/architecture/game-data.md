@@ -18,14 +18,14 @@ The game is defined by TOML files under [`resources`](../../resources). No game 
 | 7  | `RequestInitialiseLootDrops`     | Loot drops                     | Their units and loot tables    |
 | 8  | `RequestInitialisePlayers`       | Players                        | -                              |
 | 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
-| 10 | `RequestInitialiseBuildings`     | The placed buildings           | Their tiles                    |
+| 10 | `RequestPlaceBuildings`          | The placed buildings           | Their tiles                    |
 | 11 | `RequestInitialiseQuests`        | The quests, not started yet    | The tiles they name            |
 | 12 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
 | 13 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
 | 14 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
 | 15 | `RequestStartMainQuest`          | The main quest, active         | The quests                     |
 
-3. Each `Initialise<Subdomain>` command creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
+3. Each `Initialise<Subdomain>` command, and `PlaceBuildings`, creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
 To load a saved game, `SetUpGame` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
 and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).
@@ -195,7 +195,7 @@ rows = 4
 columns = 4
 ```
 
-The game fails to start when its size is not positive (`BuildingSizeNotPositive`), or when any of its tiles is out of the battlefield, is not occupiable (`BuildingTileCanNotBeOccupied`), or is occupied (`TileIsOccupied`). Its image must be its size: [`BuildingImageResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/building/adapters/resources/BuildingImageResourcesTest.kt) fails otherwise.
+The game fails to start when its size is not positive (`BuildingSizeNotPositive`), or when any of its tiles is not vacant (`BuildingTileNotVacant`), e.g.: void or out of the battlefield, or is taken by another building (`TileIsOccupied`). Its image must be its size: [`BuildingImageResourcesTest`](../../src/commonTest/kotlin/com/mkz/rpg/building/adapters/resources/BuildingImageResourcesTest.kt) fails otherwise.
 
 ### `npc/<npc id>.toml`
 
