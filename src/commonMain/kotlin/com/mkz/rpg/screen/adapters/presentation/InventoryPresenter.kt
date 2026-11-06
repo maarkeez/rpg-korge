@@ -7,7 +7,7 @@ import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveGoldRefusalDto
-import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveItemRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryEvent
 import com.mkz.rpg.inventory.domain.InventoryEvent.GoldGiven
 import com.mkz.rpg.inventory.domain.InventoryEvent.GoldReceived
@@ -363,7 +363,7 @@ class InventoryPresenter(
                 )
                 // Only while exploring: the battle actions stay as they are.
                 if (isExploring()) {
-                    val refusal = inventoryApi.searchGiveRefusal(battleUnitId, slot.lootableItemId)
+                    val refusal = inventoryApi.searchGiveItemRefusal(battleUnitId, slot.lootableItemId)
                     add(
                         ItemActionsView.Action(label = giveLabel(refusal), isEnabled = refusal == null) {
                             if (!timeline.isPlaying) startGiving(battleUnitId, slotIndex, slot.lootableItemId, texts.lootableItemName(lootableItem.id))
@@ -439,10 +439,10 @@ class InventoryPresenter(
     }
 
     // A disabled Give reads why when no party member can receive the item.
-    private fun giveLabel(refusal: GiveRefusalDto?): String =
+    private fun giveLabel(refusal: GiveItemRefusalDto?): String =
         when (refusal) {
-            GiveRefusalDto.NO_ONE -> texts[UiText.ITEM_ACTIONS_NO_ONE]
-            GiveRefusalDto.BAGS_FULL -> texts[UiText.ITEM_ACTIONS_BAGS_FULL]
+            GiveItemRefusalDto.NO_ONE -> texts[UiText.ITEM_ACTIONS_NO_ONE]
+            GiveItemRefusalDto.INVENTORIES_FULL -> texts[UiText.ITEM_ACTIONS_BAGS_FULL]
             else -> texts[UiText.ITEM_ACTIONS_GIVE]
         }
 
@@ -455,7 +455,7 @@ class InventoryPresenter(
     ) {
         val receivers =
             inventoryApi
-                .searchGiveReceivers(giverBattleUnitId)
+                .searchItemReceivers(giverBattleUnitId)
                 .mapNotNull { receiverId -> battlefieldApi.searchPosition(receiverId)?.let { position -> position to receiverId } }
                 .toMap()
         if (receivers.isEmpty()) return

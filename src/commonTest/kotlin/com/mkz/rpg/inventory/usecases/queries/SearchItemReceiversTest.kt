@@ -8,9 +8,9 @@ import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class SearchGiveReceiversTest {
+class SearchItemReceiversTest {
     private val give = GiveMother()
-    private val searchGiveReceivers = SearchGiveReceivers(give.inventoryRepository, give.giveRule)
+    private val searchItemReceivers = SearchItemReceivers(give.inventoryRepository, give.giveRule)
 
     @BeforeTest
     fun setUp() {
@@ -22,7 +22,7 @@ class SearchGiveReceiversTest {
     @Test
     fun `should find the other party members with space left, in party order`() {
         // Then
-        searchGiveReceivers("viking-1").shouldContainExactly("knight-1", "mage-1")
+        searchItemReceivers("viking-1").shouldContainExactly("knight-1", "mage-1")
     }
 
     @Test
@@ -30,16 +30,16 @@ class SearchGiveReceiversTest {
         // Given
         give.inventoryRepository.create(fullInventory(battleUnitId = "knight-1"))
         // Then
-        searchGiveReceivers("viking-1").shouldContainExactly("mage-1")
+        searchItemReceivers("viking-1").shouldContainExactly("mage-1")
     }
 
     @Test
     fun `should find no one when the party does not explore, or the giver is no party member`() {
         // Then
-        searchGiveReceivers("rat-1").shouldBeEmpty()
+        searchItemReceivers("rat-1").shouldBeEmpty()
         // Given
         give.talkTo("merchant")
         // Then
-        searchGiveReceivers("viking-1").shouldBeEmpty()
+        searchItemReceivers("viking-1").shouldBeEmpty()
     }
 }

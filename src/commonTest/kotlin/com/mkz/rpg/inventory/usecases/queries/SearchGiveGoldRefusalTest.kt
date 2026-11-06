@@ -48,7 +48,7 @@ class SearchGiveGoldRefusalTest {
     }
 
     @Test
-    fun `should answer gold full when every other member is at the limit`() {
+    fun `should answer gold full when every other member is at its maximum gold`() {
         // Given
         give.inventoryRepository.create(inventory(battleUnitId = "viking-1", gold = 99_999))
         give.inventoryRepository.create(inventory(battleUnitId = "mage-1", gold = 99_999))

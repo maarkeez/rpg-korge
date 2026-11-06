@@ -123,7 +123,7 @@ class InventoryPresenterGiveTest {
         playerCallToActionView.displayedItemActions
             .shouldNotBeNull()
             .actions
-            .single { action -> action.label in setOf("Give", "No one", "Bags full") }
+            .single { action -> action.label in setOf("Give", "No one", "No space") }
 
     private fun clickGive() {
         giveAction().onSelected()
@@ -181,7 +181,7 @@ class InventoryPresenterGiveTest {
         // When
         selectKnightFirstItem()
         // Then
-        giveAction().label shouldBe "Bags full"
+        giveAction().label shouldBe "No space"
         giveAction().isEnabled.shouldBeFalse()
     }
 

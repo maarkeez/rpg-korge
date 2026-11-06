@@ -1,15 +1,15 @@
 package com.mkz.rpg.inventory.domain
 
-import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveItemRefusalDto
 import com.mkz.rpg.inventory.domain.Inventory.Dto.TradeRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeGiven
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
-import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
+import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveMaximum
 import com.mkz.rpg.inventory.domain.InventoryError.InvalidGoldAmount
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.ItemAlreadyEquipped
 import com.mkz.rpg.inventory.domain.InventoryError.ItemNotEquipped
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.NegativeGold
 import com.mkz.rpg.inventory.domain.InventoryError.NoStorageSpaceLeft
 import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
@@ -57,7 +57,7 @@ class InventoryTest {
         // Then
         Inventory.create("knight-1", gold = 99_999).toDto().gold shouldBe 99_999
         runCatching { Inventory.create("knight-1", gold = -1) }.exceptionOrNull().shouldBeTypeOf<NegativeGold>()
-        runCatching { Inventory.create("knight-1", gold = 100_000) }.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+        runCatching { Inventory.create("knight-1", gold = 100_000) }.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
     }
 
     @Test
@@ -101,8 +101,8 @@ class InventoryTest {
         // Then
         inventory(gold = 50).buyRefusal(price = 50).shouldBeNull()
         inventory(gold = 49).buyRefusal(price = 50) shouldBe TradeRefusalDto.NOT_ENOUGH_GOLD
-        fullInventory(gold = 100).buyRefusal(price = 50) shouldBe TradeRefusalDto.BAG_FULL
-        fullInventory(gold = 0).buyRefusal(price = 50) shouldBe TradeRefusalDto.BAG_FULL
+        fullInventory(gold = 100).buyRefusal(price = 50) shouldBe TradeRefusalDto.INVENTORY_FULL
+        fullInventory(gold = 0).buyRefusal(price = 50) shouldBe TradeRefusalDto.INVENTORY_FULL
     }
 
     @Test
@@ -110,11 +110,11 @@ class InventoryTest {
         // Given
         val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("hammer", "hammer"), gold = 50)
         // When
-        val (events, updatedInventory) = inventory.sell("hammer", price = 25).pullEvents()
+        val (events, updatedInventory) = inventory.sell("hammer", sellPrice = 25).pullEvents()
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
         updatedInventory.toDto().gold shouldBe 75
-        events.shouldContainExactly(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", price = 25))
+        events.shouldContainExactly(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", sellPrice = 25))
     }
 
     @Test
@@ -122,7 +122,7 @@ class InventoryTest {
         // Given
         val inventory = inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
         // When
-        val updatedInventory = inventory.sell("hammer", price = 25)
+        val updatedInventory = inventory.sell("hammer", sellPrice = 25)
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
         updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
@@ -131,7 +131,7 @@ class InventoryTest {
     @Test
     fun `Sell should fail when the only stored copy is equipped`() {
         // When
-        val result = runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sell("hammer", price = 25) }
+        val result = runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sell("hammer", sellPrice = 25) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<EquippedItemCanNotBeSold>()
     }
@@ -139,35 +139,35 @@ class InventoryTest {
     @Test
     fun `Sell should fail when the item is not stored`() {
         // When
-        val result = runCatching { inventory().sell("hammer", price = 25) }
+        val result = runCatching { inventory().sell("hammer", sellPrice = 25) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
     }
 
     @Test
     fun `Sell should fail when the price takes the gold above 99,999`() {
         // When
-        val result = runCatching { inventory(storedItems = listOf("hammer"), gold = 99_990).sell("hammer", price = 25) }
+        val result = runCatching { inventory(storedItems = listOf("hammer"), gold = 99_990).sell("hammer", sellPrice = 25) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+        result.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
     }
 
     @Test
     fun `SellRefusal should tell whether no copy that is not equipped is stored, or the gold goes above 99,999`() {
         // Then
-        inventory(storedItems = listOf("hammer"), gold = 99_974).sellRefusal("hammer", price = 25).shouldBeNull()
-        inventory(storedItems = listOf("hammer"), gold = 99_975).sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.GOLD_FULL
-        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.EQUIPPED
-        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", price = 25).shouldBeNull()
-        inventory().sellRefusal("hammer", price = 25) shouldBe TradeRefusalDto.NOT_STORED
+        inventory(storedItems = listOf("hammer"), gold = 99_974).sellRefusal("hammer", sellPrice = 25).shouldBeNull()
+        inventory(storedItems = listOf("hammer"), gold = 99_975).sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.GOLD_FULL
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).sellRefusal("hammer", sellPrice = 25).shouldBeNull()
+        inventory().sellRefusal("hammer", sellPrice = 25) shouldBe TradeRefusalDto.NOT_STORED
     }
 
     @Test
-    fun `Give should remove one of the stored items, given to the receiver, when the item is stored`() {
+    fun `GiveItem should remove one of the stored items, given to the receiver, when the item is stored`() {
         // Given
         val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer"))
         // When
-        val (events, updatedInventory) = inventory.give("hammer", receiverBattleUnitId = "viking-1").pullEvents()
+        val (events, updatedInventory) = inventory.giveItem("hammer", receiverBattleUnitId = "viking-1").pullEvents()
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("hammer")
         updatedInventory.toDto().equippedItems shouldBe mapOf(WEAPON to "hammer")
@@ -175,29 +175,29 @@ class InventoryTest {
     }
 
     @Test
-    fun `Give should fail when the item is not stored, or the only stored copy is equipped`() {
+    fun `GiveItem should fail when the item is not stored, or the only stored copy is equipped`() {
         // Then
-        runCatching { inventory().give("hammer", receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
-        runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).give("hammer", receiverBattleUnitId = "viking-1") }
+        runCatching { inventory().giveItem("hammer", receiverBattleUnitId = "viking-1") }.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
+        runCatching { inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItem("hammer", receiverBattleUnitId = "viking-1") }
             .exceptionOrNull()
             .shouldBeTypeOf<EquippedItemCanNotBeGiven>()
     }
 
     @Test
-    fun `GiveRefusal should tell whether no copy that is not equipped is stored`() {
+    fun `GiveItemRefusal should tell whether no copy that is not equipped is stored`() {
         // Then
-        inventory(storedItems = listOf("hammer")).giveRefusal("hammer").shouldBeNull()
-        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveRefusal("hammer") shouldBe GiveRefusalDto.EQUIPPED
-        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveRefusal("hammer").shouldBeNull()
-        inventory().giveRefusal("hammer") shouldBe GiveRefusalDto.NOT_STORED
+        inventory(storedItems = listOf("hammer")).giveItemRefusal("hammer").shouldBeNull()
+        inventory(storedItems = listOf("hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItemRefusal("hammer") shouldBe GiveItemRefusalDto.EQUIPPED
+        inventory(storedItems = listOf("hammer", "hammer"), equippedItems = mapOf(WEAPON to "hammer")).giveItemRefusal("hammer").shouldBeNull()
+        inventory().giveItemRefusal("hammer") shouldBe GiveItemRefusalDto.NOT_STORED
     }
 
     @Test
-    fun `Receive should store the given item last when there is space left`() {
+    fun `ReceiveItem should store the given item last when there is space left`() {
         // Given
         val inventory = inventory(battleUnitId = "viking-1", storedItems = listOf("mana-potion"))
         // When
-        val (events, updatedInventory) = inventory.receive("hammer", giverBattleUnitId = "knight-1").pullEvents()
+        val (events, updatedInventory) = inventory.receiveItem("hammer", giverBattleUnitId = "knight-1").pullEvents()
         // Then
         updatedInventory.toDto().storedItems.shouldContainExactly("mana-potion", "hammer")
         updatedInventory.toDto().equippedItems shouldBe emptyMap()
@@ -205,9 +205,9 @@ class InventoryTest {
     }
 
     @Test
-    fun `Receive should fail when there is no space left`() {
+    fun `ReceiveItem should fail when there is no space left`() {
         // Then
-        runCatching { fullInventory().receive("hammer", giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
+        runCatching { fullInventory().receiveItem("hammer", giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<NoStorageSpaceLeft>()
     }
 
     @Test
@@ -248,7 +248,7 @@ class InventoryTest {
     @Test
     fun `ReceiveGold should fail when it goes above 99,999 G`() {
         // Then
-        runCatching { inventory(gold = 99_990).receiveGold(10, giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<GoldAboveLimit>()
+        runCatching { inventory(gold = 99_990).receiveGold(10, giverBattleUnitId = "knight-1") }.exceptionOrNull().shouldBeTypeOf<GoldAboveMaximum>()
     }
 
     @Test
@@ -342,7 +342,7 @@ class InventoryTest {
         // When
         val result = runCatching { inventory.consume("health-potion") }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
     }
 
     @Test
@@ -365,7 +365,7 @@ class InventoryTest {
         // When
         val result = runCatching { inventory.discard("health-potion") }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
     }
 
     @Test
@@ -423,7 +423,7 @@ class InventoryTest {
         // When
         val result = runCatching { inventory.equip("hammer", WEAPON) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<InventoryItemNotFound>()
+        result.exceptionOrNull().shouldBeTypeOf<ItemNotStored>()
     }
 
     @Test
@@ -482,7 +482,7 @@ class InventoryTest {
     }
 
     @Test
-    fun `Inventory should request dropping the items left when the bag fills up`() {
+    fun `Inventory should request dropping the items left when the inventory is full`() {
         // Given
         val storedItems = List(11) { "dagger" }
         val inventory = inventory(battleUnitId = "hero", storedItems = storedItems)

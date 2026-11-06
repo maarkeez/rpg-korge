@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeDiscarded
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemDiscarded
@@ -58,7 +58,7 @@ class DiscardItemTest {
         // When
         val discarding = { discardItem(battleUnitId = "knight-1", lootableItemId = "helmet") }
         // Then
-        shouldThrow<InventoryItemNotFound> { discarding() }
+        shouldThrow<ItemNotStored> { discarding() }
     }
 
     @Test
@@ -72,7 +72,7 @@ class DiscardItemTest {
     }
 
     @Test
-    fun `should fail when it is not the turn of the party player`() {
+    fun `should fail when it is not the player turn of the party player`() {
         // Given
         battleRepository.create(battle(players = listOf("cpu", "human")))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("helmet")))

@@ -123,10 +123,10 @@ msgctxt "ui.itemActions.noOne"
 msgid "No one"
 msgstr "Nadie"
 
-#. Why the item can not be given: the bags of the other party members are full.
+#. Why the item can not be given: the inventories of the other party members have no storage space left.
 msgctxt "ui.itemActions.bagsFull"
-msgid "Bags full"
-msgstr "Bolsas llenas"
+msgid "No space"
+msgstr "Sin espacio"
 
 msgctxt "ui.itemActions.consume"
 msgid "Consume"
@@ -154,7 +154,7 @@ msgctxt "ui.giveGold.title"
 msgid "Give gold"
 msgstr "Dar oro"
 
-#. Goes back to the bag with no gold moved.
+#. Goes back to the inventory with no gold moved.
 msgctxt "ui.giveGold.cancel"
 msgid "Cancel"
 msgstr "Cancelar"
@@ -179,7 +179,7 @@ msgctxt "ui.giveGold.noOne"
 msgid "No one to give gold to"
 msgstr "No hay nadie a quien dar oro"
 
-#. Why the giver can not give gold: every other party member carries the most gold possible.
+#. Why the giver can not give gold: every other party member is at its maximum gold.
 msgctxt "ui.giveGold.goldFull"
 msgid "Everyone's gold is full"
 msgstr "Todos llevan el máximo de oro"
@@ -218,20 +218,20 @@ msgctxt "ui.npcDialog.leave"
 msgid "Leave"
 msgstr "Salir"
 
-#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {bag}: its bag, e.g.: Bag 3/12.
+#. The party member trading. {name}: its name. {gold}: its gold, e.g.: 20 G. {bag}: its inventory, e.g.: Inventory 3/12.
 msgctxt "ui.shop.buyer"
 msgid "{name} · {gold} · {bag}"
 msgstr "{name} · {gold} · {bag}"
 
-#. {used}: the items in the bag. {maximum}: how many fit in it.
+#. {used}: the stored items. {maximum}: the storage spaces of the inventory.
 msgctxt "ui.shop.bag"
-msgid "Bag {used}/{maximum}"
-msgstr "Bolsa {used}/{maximum}"
+msgid "Inventory {used}/{maximum}"
+msgstr "Inventario {used}/{maximum}"
 
-#. The bag of the party member trading is full.
+#. The inventory of the party member trading is full.
 msgctxt "ui.shop.bagFull"
-msgid "Bag full"
-msgstr "Bolsa llena"
+msgid "Inventory full"
+msgstr "Inventario lleno"
 
 msgctxt "ui.shop.back"
 msgid "Back"
@@ -262,10 +262,10 @@ msgctxt "ui.shop.notEnoughGold"
 msgid "Not enough gold"
 msgstr "No hay suficiente oro"
 
-#. Why the item can not be bought: the bag is full.
+#. Why the item can not be bought: the inventory is full.
 msgctxt "ui.shop.noRoom"
-msgid "Bag full"
-msgstr "Bolsa llena"
+msgid "Inventory full"
+msgstr "Inventario lleno"
 
 #. Why the item can not be sold: it is equipped.
 msgctxt "ui.shop.equipped"

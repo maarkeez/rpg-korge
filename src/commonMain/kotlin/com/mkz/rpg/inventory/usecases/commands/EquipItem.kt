@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.LootableItemNotEquippable
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.PlayerTurnRule
@@ -11,8 +11,8 @@ import com.mkz.rpg.party.domain.PartyEvent.RequestRemoveMemberEquippedEffects
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Equips a stored item in its zone and applies its effects to its battle unit. When the zone already holds an item, it is a swap: the new item's
- * effects are applied before the old item's are removed, so the remaining health and mana are only lowered to the final maximums.
+ * Equips a stored item in its zone and applies its effects to its battle unit. When the zone already holds an item, it is unequipped: the new
+ * item's effects are applied before the unequipped item's are removed, so the remaining health and mana are only lowered to the final maximums.
  */
 class EquipItem(
     private val inventoryRepository: InventoryRepository,
@@ -25,7 +25,7 @@ class EquipItem(
         lootableItemId: String,
     ) {
         playerTurnRule.requirePlayerTurn(battleUnitId)
-        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw InventoryItemNotFound()
+        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw ItemNotStored()
         val lootableItem = searchLootableItemById(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
         val equippable = lootableItem.lootType.equippable ?: throw LootableItemNotEquippable()
         val unequippedItemId = inventory.toDto().equippedItems[equippable.equipmentZone]

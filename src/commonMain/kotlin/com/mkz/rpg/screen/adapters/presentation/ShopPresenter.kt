@@ -195,7 +195,7 @@ class ShopPresenter(
     private fun refusalText(refusal: TradeRefusalDto): String? =
         when (refusal) {
             TradeRefusalDto.NOT_ENOUGH_GOLD -> texts[UiText.SHOP_NOT_ENOUGH_GOLD]
-            TradeRefusalDto.BAG_FULL -> texts[UiText.SHOP_NO_ROOM]
+            TradeRefusalDto.INVENTORY_FULL -> texts[UiText.SHOP_NO_ROOM]
             TradeRefusalDto.EQUIPPED -> texts[UiText.SHOP_EQUIPPED]
             TradeRefusalDto.GOLD_FULL -> texts[UiText.SHOP_GOLD_FULL]
             TradeRefusalDto.NOT_TRADING, TradeRefusalDto.NOT_SOLD_BY_THE_MERCHANT, TradeRefusalDto.NOT_STORED -> null

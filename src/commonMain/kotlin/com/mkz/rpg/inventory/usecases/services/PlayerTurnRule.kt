@@ -6,8 +6,8 @@ import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
 import com.mkz.rpg.party.usecases.queries.SearchParty
 
 /**
- * The inventory can only be used by a party member. In a battle, only during the turn of the party player, although it does not cost any turn
- * action. Out of the battles (e.g.: while exploring), there are no turns, so it can always be used.
+ * The inventory can only be used by a party member. In a battle, only during the player turn of the party player, although it costs no
+ * action. Out of the battles (e.g.: while exploring), there are no player turns, so it can always be used.
  */
 class PlayerTurnRule(
     private val searchParty: SearchParty,

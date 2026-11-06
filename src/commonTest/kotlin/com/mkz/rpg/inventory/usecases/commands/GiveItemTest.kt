@@ -22,7 +22,7 @@ class GiveItemTest {
     private val eventBus = FakeEventBus()
     private val giveItem = GiveItem(give.inventoryRepository, give.giveRule, eventBus)
 
-    // The knight carries a hammer, equipped, and two health potions. The viking carries a mana potion, and the mage's bag is full.
+    // The knight stores a hammer, equipped, and two health potions. The viking stores a mana potion, and the mage's inventory is full.
     @BeforeTest
     fun setUp() {
         give.inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "health-potion", "health-potion"), equippedItems = mapOf(WEAPON to "hammer")))
@@ -32,7 +32,7 @@ class GiveItemTest {
     }
 
     @Test
-    fun `should move one copy of the item to the end of the receiver's bag`() {
+    fun `should move one copy of the item to the end of the receiver's inventory`() {
         // When
         giveItem(giverBattleUnitId = "knight-1", receiverBattleUnitId = "viking-1", lootableItemId = "health-potion")
         // Then
@@ -45,14 +45,14 @@ class GiveItemTest {
     }
 
     @Test
-    fun `should fail, keeping both bags, when the only stored copy is equipped`() {
+    fun `should fail, keeping both inventories, when the only stored copy is equipped`() {
         // Then
         shouldThrow<EquippedItemCanNotBeGiven> { giveItem(giverBattleUnitId = "knight-1", receiverBattleUnitId = "viking-1", lootableItemId = "hammer") }
         give.storedItems("viking-1")!!.shouldContainExactly("mana-potion")
     }
 
     @Test
-    fun `should fail, keeping both bags, when the receiver has no space left`() {
+    fun `should fail, keeping both inventories, when the receiver has no space left`() {
         // Then
         shouldThrow<NoStorageSpaceLeft> { giveItem(giverBattleUnitId = "knight-1", receiverBattleUnitId = "mage-1", lootableItemId = "health-potion") }
         give.storedItems("knight-1")!!.shouldContainExactly("hammer", "health-potion", "health-potion")

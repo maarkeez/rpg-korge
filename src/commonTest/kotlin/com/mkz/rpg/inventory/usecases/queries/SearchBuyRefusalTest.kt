@@ -38,7 +38,7 @@ class SearchBuyRefusalTest {
         // Given
         trade.inventoryRepository.create(fullInventory(battleUnitId = "viking-1", gold = 100))
         // Then
-        searchBuyRefusal(battleUnitId = "viking-1", lootableItemId = "hammer") shouldBe TradeRefusalDto.BAG_FULL
+        searchBuyRefusal(battleUnitId = "viking-1", lootableItemId = "hammer") shouldBe TradeRefusalDto.INVENTORY_FULL
     }
 
     @Test

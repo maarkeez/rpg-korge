@@ -100,7 +100,7 @@ class ShopViewTest : ViewsForTesting() {
             // When
             shopView.displayMerchant()
             // Then
-            shopView.buyerText() shouldBe "Knight · 20 G · Bag 11/12"
+            shopView.buyerText() shouldBe "Knight · 20 G · Inventory 11/12"
             shopView.arrowsEnabled() shouldBe (true to true)
         }
 
@@ -112,7 +112,7 @@ class ShopViewTest : ViewsForTesting() {
             // When
             shopView.displayMerchant(buyer = knight.copy(usedStorageSpace = 12, partyIndex = 0, partySize = 2))
             // Then
-            shopView.buyerText() shouldBe "Knight · 20 G · Bag full"
+            shopView.buyerText() shouldBe "Knight · 20 G · Inventory full"
             shopView.arrowsEnabled() shouldBe (false to true)
             shopView.arrowsFaded() shouldBe (true to false)
             // When

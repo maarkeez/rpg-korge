@@ -25,11 +25,11 @@ import com.mkz.rpg.inventory.usecases.queries.CanConsumeItem
 import com.mkz.rpg.inventory.usecases.queries.CanStoreItem
 import com.mkz.rpg.inventory.usecases.queries.SearchBuyRefusal
 import com.mkz.rpg.inventory.usecases.queries.SearchGiveGoldRefusal
-import com.mkz.rpg.inventory.usecases.queries.SearchGiveReceivers
-import com.mkz.rpg.inventory.usecases.queries.SearchGiveRefusal
+import com.mkz.rpg.inventory.usecases.queries.SearchGiveItemRefusal
 import com.mkz.rpg.inventory.usecases.queries.SearchGoldReceivers
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoriesSnapshot
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoryByBattleUnitId
+import com.mkz.rpg.inventory.usecases.queries.SearchItemReceivers
 import com.mkz.rpg.inventory.usecases.queries.SearchSellRefusal
 import com.mkz.rpg.inventory.usecases.services.ConsumptionRule
 import com.mkz.rpg.inventory.usecases.services.GiveRule
@@ -84,8 +84,8 @@ class InventoryApi(
     val canConsumeItem = CanConsumeItem(inventoryRepository, lootableItemApi.searchLootableItemById, consumptionRule)
     val searchBuyRefusal = SearchBuyRefusal(inventoryRepository, lootableItemApi.searchLootableItemById, tradeRule)
     val searchSellRefusal = SearchSellRefusal(inventoryRepository, lootableItemApi.searchSellPrice, tradeRule)
-    val searchGiveReceivers = SearchGiveReceivers(inventoryRepository, giveRule)
-    val searchGiveRefusal = SearchGiveRefusal(inventoryRepository, giveRule, searchGiveReceivers)
+    val searchItemReceivers = SearchItemReceivers(inventoryRepository, giveRule)
+    val searchGiveItemRefusal = SearchGiveItemRefusal(inventoryRepository, giveRule, searchItemReceivers)
     val searchGoldReceivers = SearchGoldReceivers(inventoryRepository, giveRule)
     val searchGiveGoldRefusal = SearchGiveGoldRefusal(inventoryRepository, giveRule, searchGoldReceivers)
 

@@ -4,7 +4,7 @@ import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.GiveRule
 
 /** The members of the exploring party, the giver excluded, that have space left to receive an item, in party order. */
-class SearchGiveReceivers(
+class SearchItemReceivers(
     private val inventoryRepository: InventoryRepository,
     private val giveRule: GiveRule,
 ) {

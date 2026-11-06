@@ -6,8 +6,8 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Pays a reward to a battle unit, requesting to drop what does not fit in its bag on the tile it stands on. A battle unit with no inventory
- * receives nothing. It is not limited to the player's turn, as a reward can be earned in a battle.
+ * Grants a reward to a battle unit, requesting to drop what does not fit in its inventory on the tile it stands on. A battle unit with no
+ * inventory receives nothing. It is not limited to the player turn, as a reward can be earned in a battle.
  */
 class GrantReward(
     private val inventoryRepository: InventoryRepository,

@@ -43,7 +43,7 @@ class GrantRewardTest {
     }
 
     @Test
-    fun `GrantReward should request dropping the items left when the bag is full`() {
+    fun `GrantReward should request dropping the items left when the inventory is full`() {
         // Given
         inventoryRepository.create(fullInventory(battleUnitId = "hero"))
         // When

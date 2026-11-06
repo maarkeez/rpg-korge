@@ -1,6 +1,6 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
+import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveMaximum
 import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotEnoughGold
 import com.mkz.rpg.inventory.domain.InventoryError.NotExploringTheParty
@@ -51,7 +51,7 @@ class GiveGoldTest {
     @Test
     fun `should fail, keeping both inventories, when the receiver has no room`() {
         // Then
-        shouldThrow<GoldAboveLimit> { giveGold(giverBattleUnitId = "knight-1", receiverBattleUnitId = "mage-1", amount = 10) }
+        shouldThrow<GoldAboveMaximum> { giveGold(giverBattleUnitId = "knight-1", receiverBattleUnitId = "mage-1", amount = 10) }
         gold("knight-1") shouldBe 120
         gold("mage-1") shouldBe 99_990
     }

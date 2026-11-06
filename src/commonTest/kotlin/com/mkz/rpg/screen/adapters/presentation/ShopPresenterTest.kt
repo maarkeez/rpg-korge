@@ -117,7 +117,7 @@ class ShopPresenterTest {
         // Then
         presenter.isOpen.shouldBeTrue()
         shopView.visible.shouldBeTrue()
-        shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Knight · 20 G · Inventory 0/12"
         shopView.arrowsEnabled() shouldBe (false to true)
         shopView.footerText() shouldBe "Tap an item to buy"
         action().shouldBeNull()
@@ -187,7 +187,7 @@ class ShopPresenterTest {
         // When
         presenter.shopBuyerStepped(1)
         // Then
-        shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Viking · 100 G · Inventory 0/12"
         shopView.arrowsEnabled() shouldBe (true to false)
         shopView.selectedSlotIndexes().shouldBeEmpty()
         action().shouldBeNull()
@@ -202,12 +202,12 @@ class ShopPresenterTest {
         // When
         presenter.shopBuyerStepped(-1)
         // Then
-        shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Knight · 20 G · Inventory 0/12"
         // When
         presenter.shopBuyerStepped(1)
         presenter.shopBuyerStepped(1)
         // Then
-        shopView.buyerText() shouldBe "Viking · 100 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Viking · 100 G · Inventory 0/12"
     }
 
     @Test
@@ -219,13 +219,13 @@ class ShopPresenterTest {
         // When
         trade()
         // Then
-        shopView.buyerText() shouldBe "Viking · 50 G · Bag 1/12"
+        shopView.buyerText() shouldBe "Viking · 50 G · Inventory 1/12"
         shopView.selectedSlotIndexes().shouldContainExactly(1)
         action() shouldBe ("Buy" to true)
         // When
         trade()
         // Then
-        shopView.buyerText() shouldBe "Viking · 0 G · Bag 2/12"
+        shopView.buyerText() shouldBe "Viking · 0 G · Inventory 2/12"
         action() shouldBe ("Not enough gold" to false)
         shopView.dimmedSlotIndexes().shouldContainExactly(0, 1)
     }
@@ -238,7 +238,7 @@ class ShopPresenterTest {
         // When
         trade()
         // Then
-        shopView.buyerText() shouldBe "Knight · 20 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Knight · 20 G · Inventory 0/12"
     }
 
     @Test
@@ -273,7 +273,7 @@ class ShopPresenterTest {
         // When
         trade()
         // Then
-        shopView.buyerText() shouldBe "Viking · 75 G · Bag 0/12"
+        shopView.buyerText() shouldBe "Viking · 75 G · Inventory 0/12"
         shopView.selectedSlotIndexes().shouldBeEmpty()
         shopView.footerText() shouldBe "Nothing to sell"
     }

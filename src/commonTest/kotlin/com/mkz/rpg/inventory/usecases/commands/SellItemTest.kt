@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.usecases.commands
 
 import com.mkz.rpg.inventory.domain.InventoryError.EquippedItemCanNotBeSold
-import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveLimit
+import com.mkz.rpg.inventory.domain.InventoryError.GoldAboveMaximum
 import com.mkz.rpg.inventory.domain.InventoryError.NotTradingWithAMerchant
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemSold
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
@@ -33,7 +33,7 @@ class SellItemTest {
         // Then
         trade.gold("viking-1") shouldBe 75
         trade.storedItems("viking-1")!!.shouldContainExactly("hammer", "mana-potion")
-        eventBus.shouldHavePublishedEvents(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", price = 25))
+        eventBus.shouldHavePublishedEvents(ItemSold(battleUnitId = "viking-1", lootableItemId = "hammer", sellPrice = 25))
     }
 
     @Test
@@ -57,7 +57,7 @@ class SellItemTest {
         // Given
         trade.inventoryRepository.create(inventory(battleUnitId = "viking-1", storedItems = listOf("mana-potion"), gold = 99_995))
         // Then
-        shouldThrow<GoldAboveLimit> { sellItem(battleUnitId = "viking-1", lootableItemId = "mana-potion") }
+        shouldThrow<GoldAboveMaximum> { sellItem(battleUnitId = "viking-1", lootableItemId = "mana-potion") }
     }
 
     @Test

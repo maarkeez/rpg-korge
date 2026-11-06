@@ -11,7 +11,7 @@ import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryError.AbilityCanNotBeLearned
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.LootableItemNotConsumable
 import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
@@ -121,7 +121,7 @@ class ConsumeItemTest {
         // When
         val consumption = { consumeItem(battleUnitId = "knight-1", lootableItemId = "health-potion") }
         // Then
-        shouldThrow<InventoryItemNotFound> { consumption() }
+        shouldThrow<ItemNotStored> { consumption() }
     }
 
     @Test
@@ -130,11 +130,11 @@ class ConsumeItemTest {
         // When
         val consumption = { consumeItem(battleUnitId = "knight-1", lootableItemId = "health-potion") }
         // Then
-        shouldThrow<InventoryItemNotFound> { consumption() }
+        shouldThrow<ItemNotStored> { consumption() }
     }
 
     @Test
-    fun `should fail when it is not the turn of the party player`() {
+    fun `should fail when it is not the player turn of the party player`() {
         // Given
         battleRepository.create(battle(players = listOf("cpu", "human")))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion")))

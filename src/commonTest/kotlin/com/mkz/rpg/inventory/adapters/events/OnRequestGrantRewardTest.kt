@@ -17,7 +17,7 @@ class OnRequestGrantRewardTest {
         OnRequestGrantReward(GrantReward(inventoryRepository, SearchLootableItemById(InMemoryLootableItemRepository()), eventBus), eventBus)
 
     @Test
-    fun `should pay the reward when it is requested`() {
+    fun `should grant the reward when it is requested`() {
         // Given
         inventoryRepository.create(inventory(battleUnitId = "hero", gold = 30))
         eventBus.publish(RequestGrantReward(battleUnitId = "hero", gold = 150, lootableItemIds = emptyList(), row = 1, column = 2))

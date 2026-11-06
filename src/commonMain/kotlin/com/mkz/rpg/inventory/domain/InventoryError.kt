@@ -5,7 +5,7 @@ sealed class InventoryError(
 ) : Throwable(message = message) {
     class InventoryLootableItemDoesNotExist : InventoryError("Inventory lootable item does not exist")
 
-    class InventoryItemNotFound : InventoryError("The item is not stored in the inventory")
+    class ItemNotStored : InventoryError("The item is not stored in the inventory")
 
     class LootableItemNotConsumable : InventoryError("The lootable item is not consumable")
 
@@ -21,7 +21,7 @@ sealed class InventoryError(
 
     class NegativeGold : InventoryError("The inventory gold is negative")
 
-    class GoldAboveLimit : InventoryError("The inventory gold is above its limit")
+    class GoldAboveMaximum : InventoryError("The inventory gold is above its maximum gold")
 
     class NotEnoughGold : InventoryError("The inventory gold is not enough to pay or give the amount")
 
@@ -41,5 +41,5 @@ sealed class InventoryError(
 
     class NotAPartyMember : InventoryError("The inventory can only be used by a party member")
 
-    class NotTheBattleUnitPlayerTurn : InventoryError("The inventory can only be used during the turn of its battle unit player")
+    class NotTheBattleUnitPlayerTurn : InventoryError("The inventory can only be used during the player turn of its battle unit's player")
 }

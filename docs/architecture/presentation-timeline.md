@@ -147,7 +147,7 @@ The selected battle unit info displays a bag (the chest icon) next to its abilit
 
 - Consume, Equip and Unequip are blue, and the others grey.
 - Discard asks first, in place of the actions: `Discard {item}? It can't be undone.` takes the line of the name and sell price, with Back and Discard, in red, below it, and the item stays framed. Back displays the item's actions again. Tapping another item, the arrows or Close drop the question, discarding nothing.
-- While exploring, Give is added after Discard (e.g.: Cancel, Discard, Give, Consume), disabled for the only copy of an equipped item, and reading `No one` or `Bags full` when no other party member can receive it. See [Inventory while exploring](exploration.md#inventory).
+- While exploring, Give is added after Discard (e.g.: Cancel, Discard, Give, Consume), disabled for the only copy of an equipped item, and reading `No one` or `No space` when no other party member can receive it. See [Inventory while exploring](exploration.md#inventory).
 - Equipping an item in a zone already used is the swap. Once an action is selected, the finish turn is displayed again in a battle, and nothing while exploring.
 - In a battle, the actions are only offered during the turn of the battle unit player. Out of the battles (e.g.: while exploring), they are always offered. They are ignored while the timeline is playing. Closing the inventory displays the battle unit info again, read again, as the items may have changed it (e.g.: healed it, or raised its maximum health).
 - The inventory is redrawn, in timeline order, when the battle unit stores, consumes, discards, equips, unequips, gives or receives an item. Selecting a battle unit or clearing the selection displays the battle unit info again.

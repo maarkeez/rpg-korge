@@ -4,7 +4,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDt
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface InventoryEvent : DomainEvent {
-    // Requested for the reward of a battle unit standing on the tile at row and column, where what does not fit in its bag drops.
+    // Requested for the reward of a battle unit standing on the tile at row and column, where what does not fit in its inventory drops.
     data class RequestGrantReward(
         val battleUnitId: String,
         val gold: Int,
@@ -13,7 +13,7 @@ sealed interface InventoryEvent : DomainEvent {
         val column: Int,
     ) : InventoryEvent
 
-    /** The reward was received: the gold that fit under the cap and the items that fit in the bag. */
+    /** The reward was granted: the gold below the maximum gold and the items that fit in the storage spaces left. */
     data class RewardGranted(
         val battleUnitId: String,
         val gold: Int,
@@ -57,7 +57,7 @@ sealed interface InventoryEvent : DomainEvent {
     data class ItemSold(
         val battleUnitId: String,
         val lootableItemId: String,
-        val price: Int,
+        val sellPrice: Int,
     ) : InventoryEvent
 
     /** The item left the inventory, given to the inventory of another party member. */

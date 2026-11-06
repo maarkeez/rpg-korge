@@ -27,7 +27,7 @@ class StoreLootedItemTest {
     private val storeLootedItem =
         StoreLootedItem(inventoryRepository, SearchLootableItemById(lootableItemRepository), eventBus)
 
-    // Only the knight has an inventory, as a party member. The rat and the summoned bee have none.
+    // Only the knight has an inventory, as a party member. The rat and the bee, a summon, have none.
     @BeforeTest
     fun setUp() {
         lootableItemRepository.create(consumableLootableItem(id = "health-potion"))
@@ -92,7 +92,7 @@ class StoreLootedItemTest {
     }
 
     @Test
-    fun `should leave the item on its tile when the battle unit has no inventory, as it is summoned`() {
+    fun `should leave the item on its tile when the battle unit has no inventory, as it is a summon`() {
         // Given
         // When
         storeLootedItem(battleUnitId = "bee-1", lootableItemId = "health-potion", row = 1, column = 2)

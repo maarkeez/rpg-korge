@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.TradeRule
 import com.mkz.rpg.lootableItem.usecases.queries.SearchSellPrice
@@ -20,7 +20,7 @@ class SellItem(
     ) {
         tradeRule.requireTrading(battleUnitId)
         val sellPrice = searchSellPrice(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
-        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw InventoryItemNotFound()
+        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw ItemNotStored()
         val (events, updatedInventory) = inventory.sell(lootableItemId, sellPrice).pullEvents()
         inventoryRepository.create(updatedInventory)
         eventBus.publish(events)

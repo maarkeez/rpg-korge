@@ -1,6 +1,6 @@
 package com.mkz.rpg.inventory.usecases.queries
 
-import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveItemRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
 import com.mkz.rpg.inventory.usecases.services.GiveMother
@@ -10,10 +10,10 @@ import io.kotest.matchers.shouldBe
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class SearchGiveRefusalTest {
+class SearchGiveItemRefusalTest {
     private val give = GiveMother()
-    private val searchGiveReceivers = SearchGiveReceivers(give.inventoryRepository, give.giveRule)
-    private val searchGiveRefusal = SearchGiveRefusal(give.inventoryRepository, give.giveRule, searchGiveReceivers)
+    private val searchItemReceivers = SearchItemReceivers(give.inventoryRepository, give.giveRule)
+    private val searchGiveItemRefusal = SearchGiveItemRefusal(give.inventoryRepository, give.giveRule, searchItemReceivers)
 
     // The knight carries a hammer, equipped, and a health potion. The viking and the mage have space left.
     @BeforeTest
@@ -28,14 +28,14 @@ class SearchGiveRefusalTest {
         // Given
         give.inventoryRepository.create(fullInventory(battleUnitId = "viking-1"))
         // Then
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion").shouldBeNull()
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion").shouldBeNull()
     }
 
     @Test
     fun `should refuse giving an item that is not stored, or the only stored copy when it is equipped`() {
         // Then
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "mana-potion") shouldBe GiveRefusalDto.NOT_STORED
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "hammer") shouldBe GiveRefusalDto.EQUIPPED
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "mana-potion") shouldBe GiveItemRefusalDto.NOT_STORED
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "hammer") shouldBe GiveItemRefusalDto.EQUIPPED
     }
 
     @Test
@@ -43,7 +43,7 @@ class SearchGiveRefusalTest {
         // Given
         give.explore(listOf("knight-1"))
         // Then
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveRefusalDto.NO_ONE
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveItemRefusalDto.NO_ONE
     }
 
     @Test
@@ -52,7 +52,7 @@ class SearchGiveRefusalTest {
         give.inventoryRepository.create(fullInventory(battleUnitId = "viking-1"))
         give.inventoryRepository.create(fullInventory(battleUnitId = "mage-1"))
         // Then
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveRefusalDto.BAGS_FULL
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveItemRefusalDto.INVENTORIES_FULL
     }
 
     @Test
@@ -60,6 +60,6 @@ class SearchGiveRefusalTest {
         // Given
         give.battle()
         // Then
-        searchGiveRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveRefusalDto.NOT_EXPLORING
+        searchGiveItemRefusal(giverBattleUnitId = "knight-1", lootableItemId = "health-potion") shouldBe GiveItemRefusalDto.NOT_EXPLORING
     }
 }

@@ -4,7 +4,7 @@ import com.mkz.rpg.battle.adapters.storage.InMemoryBattleRepository
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.queries.SearchBattle
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.LootableItemNotEquippable
 import com.mkz.rpg.inventory.domain.InventoryError.NotAPartyMember
 import com.mkz.rpg.inventory.domain.InventoryError.NotTheBattleUnitPlayerTurn
@@ -72,7 +72,7 @@ class EquipItemTest {
     }
 
     @Test
-    fun `should apply the new item effects before removing the swapped item effects when the zone already holds an item`() {
+    fun `should apply the new item effects before removing the unequipped item effects when the zone already holds an item`() {
         // Given
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer", "axe"), equippedItems = mapOf(WEAPON to "axe")))
         // When
@@ -104,11 +104,11 @@ class EquipItemTest {
         // When
         val equipping = { equipItem(battleUnitId = "knight-1", lootableItemId = "hammer") }
         // Then
-        shouldThrow<InventoryItemNotFound> { equipping() }
+        shouldThrow<ItemNotStored> { equipping() }
     }
 
     @Test
-    fun `should fail when it is not the turn of the party player`() {
+    fun `should fail when it is not the player turn of the party player`() {
         // Given
         battleRepository.create(battle(players = listOf("cpu", "human")))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("hammer")))

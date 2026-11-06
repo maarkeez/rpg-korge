@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.usecases.commands
 
-import com.mkz.rpg.inventory.domain.InventoryError.InventoryItemNotFound
 import com.mkz.rpg.inventory.domain.InventoryError.InventoryLootableItemDoesNotExist
+import com.mkz.rpg.inventory.domain.InventoryError.ItemNotStored
 import com.mkz.rpg.inventory.domain.InventoryError.LootableItemNotConsumable
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.ConsumptionRule
@@ -26,7 +26,7 @@ class ConsumeItem(
         lootableItemId: String,
     ) {
         playerTurnRule.requirePlayerTurn(battleUnitId)
-        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw InventoryItemNotFound()
+        val inventory = inventoryRepository.searchByBattleUnitId(battleUnitId) ?: throw ItemNotStored()
         val lootableItem = searchLootableItemById(lootableItemId) ?: throw InventoryLootableItemDoesNotExist()
         val consumable = lootableItem.lootType.consumable ?: throw LootableItemNotConsumable()
         consumptionRule.requireConsumable(battleUnitId, consumable)

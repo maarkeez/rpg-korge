@@ -29,7 +29,7 @@ class SearchGoldReceiversTest {
     }
 
     @Test
-    fun `should leave out the members at the limit`() {
+    fun `should leave out the members at their maximum gold`() {
         // Given
         give.inventoryRepository.create(inventory(battleUnitId = "mage-1", gold = 99_999))
         // Then

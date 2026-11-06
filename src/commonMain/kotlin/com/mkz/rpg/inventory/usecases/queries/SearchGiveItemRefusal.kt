@@ -1,6 +1,6 @@
 package com.mkz.rpg.inventory.usecases.queries
 
-import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveRefusalDto
+import com.mkz.rpg.inventory.domain.Inventory.Dto.GiveItemRefusalDto
 import com.mkz.rpg.inventory.domain.InventoryRepository
 import com.mkz.rpg.inventory.usecases.services.GiveRule
 
@@ -9,21 +9,21 @@ import com.mkz.rpg.inventory.usecases.services.GiveRule
  * the item, its only copy is equipped, it is alone in the party, or every other member has no space left. `null` when it
  * can give it to someone.
  */
-class SearchGiveRefusal(
+class SearchGiveItemRefusal(
     private val inventoryRepository: InventoryRepository,
     private val giveRule: GiveRule,
-    private val searchGiveReceivers: SearchGiveReceivers,
+    private val searchItemReceivers: SearchItemReceivers,
 ) {
     operator fun invoke(
         giverBattleUnitId: String,
         lootableItemId: String,
-    ): GiveRefusalDto? {
-        val otherMemberIds = giveRule.otherMemberIds(giverBattleUnitId) ?: return GiveRefusalDto.NOT_EXPLORING
-        val inventory = inventoryRepository.searchByBattleUnitId(giverBattleUnitId) ?: return GiveRefusalDto.NOT_STORED
-        inventory.giveRefusal(lootableItemId)?.let { refusal -> return refusal }
+    ): GiveItemRefusalDto? {
+        val otherMemberIds = giveRule.otherMemberIds(giverBattleUnitId) ?: return GiveItemRefusalDto.NOT_EXPLORING
+        val inventory = inventoryRepository.searchByBattleUnitId(giverBattleUnitId) ?: return GiveItemRefusalDto.NOT_STORED
+        inventory.giveItemRefusal(lootableItemId)?.let { refusal -> return refusal }
         return when {
-            otherMemberIds.isEmpty() -> GiveRefusalDto.NO_ONE
-            searchGiveReceivers(giverBattleUnitId).isEmpty() -> GiveRefusalDto.BAGS_FULL
+            otherMemberIds.isEmpty() -> GiveItemRefusalDto.NO_ONE
+            searchItemReceivers(giverBattleUnitId).isEmpty() -> GiveItemRefusalDto.INVENTORIES_FULL
             else -> null
         }
     }
