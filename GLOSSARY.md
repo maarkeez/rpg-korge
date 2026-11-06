@@ -535,3 +535,88 @@ _Avoid_: Playthrough, run
 **Game setup**:
 Getting a game ready to play, new or loaded.
 _Avoid_: Battle setup
+
+### Inventory
+
+**Inventory**:
+The stored items, equipped items and gold of a party member.
+_Avoid_: Bag
+
+**Store**:
+An inventory taking an item into one of its storage spaces, whether looted, bought, given or granted.
+_Avoid_: Carry, hold
+
+**Stored item**:
+An item taking a storage space of an inventory, equipped or not.
+
+**Storage space**:
+The place one stored item takes in an inventory.
+_Avoid_: Room, slot, capacity
+
+**Maximum storage space**:
+How many items an inventory can store.
+
+**Inventory full**:
+Said of an inventory with no storage space left.
+
+**Discard**:
+A party member removing a stored item from the game.
+
+**Refusal**:
+Why a party member can not buy, sell or give right now.
+
+#### Equipment
+
+**Equip**:
+A party member putting a stored item in its equipment zone, for its effects to apply while it stays there.
+
+**Unequip**:
+A party member taking an equipped item out of its equipment zone, keeping it stored.
+
+**Equipped item**:
+A stored item in its equipment zone, at most one per zone.
+
+**Consume**:
+A party member using up a stored consumable, which applies its effects.
+
+#### Gold
+
+**Gold**:
+The money a party member carries in its inventory.
+_Avoid_: Money, purse
+
+**Maximum gold**:
+The most gold an inventory can carry.
+_Avoid_: Cap, limit
+
+**Room**:
+How much more gold an inventory can carry before its maximum gold.
+
+**Gold full**:
+Said of an inventory at its maximum gold.
+
+**Grant**:
+A party member being given the gold and items of a reward, which can not fail.
+_Avoid_: Pay
+
+#### Trading
+
+**Trade**:
+A party member buying or selling with the merchant the party talks to.
+
+**Buy**:
+A party member paying the price of an item the merchant sells, to store it.
+
+**Sell**:
+A party member handing a stored item to the merchant for its sell price.
+
+#### Giving
+
+**Give**:
+A party member handing a stored item or gold to another party member, while exploring.
+
+**Giver**:
+The party member who gives.
+
+**Receiver**:
+The party member a give goes to.
