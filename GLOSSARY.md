@@ -212,7 +212,8 @@ A battle unit getting health back from an effect.
 A battle unit getting mana back when its player turn starts.
 
 **Recover**:
-A battle unit getting back a share of its maximum health and mana while wandering out of the battles.
+A CPU battle unit out of the battle getting back a share of its maximum health and mana on each wandering, in sight or
+not.
 
 #### Moving
 
@@ -426,6 +427,41 @@ A wandering CPU battle unit staying where it is instead of stepping.
 **Return**:
 A CPU battle unit walking back home after leaving its territory, without resting.
 _Avoid_: Head home
+
+### CPU wander brain
+
+**CPU wander brain**:
+What walks the CPU player's battle units around their homes while they are out of a battle, and brings the defeated ones
+back to them.
+_Avoid_: AI
+
+#### Home
+
+**Home**:
+The tile a CPU battle unit was deployed on, which it wanders around and respawns on.
+
+**Claim**:
+A CPU battle unit taking the tile it is deployed on as its home, for the whole game.
+
+#### Wandering
+
+**Wandering**:
+One pass in which the CPU battle units out of a battle wander, one after another.
+
+**Wander**:
+A CPU battle unit in sight resting or taking one step around its home during a wandering.
+
+**In sight**:
+Said of a CPU battle unit the player may see around the party leader, the only ones that wander.
+_Avoid_: Visible, on screen
+
+#### Respawning
+
+**Awaiting respawn**:
+Said of a defeated CPU battle unit counting the party steps until it respawns on its home.
+
+**Respawn steps**:
+The party steps a defeated CPU battle unit waits before it respawns.
 
 ### Game setup
 
