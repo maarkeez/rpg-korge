@@ -14,7 +14,7 @@ import kotlin.test.Test
 class InitialiseLocalizationTest {
     private val localizationRepository = InMemoryLocalizationRepository()
     private val eventBus = FakeEventBus()
-    private val dto = Localization.Dto(source = english(), translations = listOf(spanish()), selectedLanguageCode = "en")
+    private val dto = Localization.Dto(sourceCatalog = english(), translationCatalogs = listOf(spanish()), selectedLanguageCode = "en")
     private val initialiseLocalization = InitialiseLocalization(FakeLocalizationLoader(dto), localizationRepository, eventBus)
 
     @Test

@@ -1,25 +1,26 @@
 package com.mkz.rpg.localization.domain
 
 import com.mkz.rpg.localization.domain.LocalizationError.EmptyLanguageCode
-import com.mkz.rpg.localization.domain.LocalizationError.InvalidPluralForms
+import com.mkz.rpg.localization.domain.LocalizationError.InvalidPluralRule
 import com.mkz.rpg.localization.domain.LocalizationError.LanguageNotFound
 import com.mkz.rpg.localization.domain.LocalizationError.TooManyPluralForms
 import com.mkz.rpg.localization.domain.LocalizationEvent.LanguageSelected
 import com.mkz.rpg.localization.domain.LocalizationEvent.LocalizationInitialised
 
 /**
- * The text of the game in every language: the source catalog, in English, and its translations, each message keyed by
- * its key (e.g.: `ui.shop.notEnoughGold`). A message is translated into the selected language, falling back to its
- * English text when it has no translation there, and to its key when it is not in the source catalog either.
+ * The text of the game in every language: the source catalog, in English, and the catalog of every other language,
+ * each message keyed by its key (e.g.: `ui.shop.notEnoughGold`). A message is translated into the selected language,
+ * falling back to its English text when it is untranslated there, and to its key when it is not in the source catalog
+ * either.
  *
  * A message may have placeholders, e.g.: `Vanishes in {turns} turns`, replaced by the arguments of the same name. A
- * placeholder without an argument is left as it is. A plural message has one form per plural of its language, chosen
- * by the `Plural-Forms` of its catalog, e.g.: `nplurals=2; plural=(n != 1);`.
+ * placeholder without an argument is left as it is. A plural message has one plural form per plural of its
+ * language, chosen by the plural rule of its catalog, e.g.: `nplurals=2; plural=(n != 1);`.
  */
 @ConsistentCopyVisibility
 data class Localization private constructor(
-    private val source: Catalog,
-    private val translations: List<Catalog>,
+    private val sourceCatalog: Catalog,
+    private val translationCatalogs: List<Catalog>,
     private val selectedLanguageCode: String,
     private val events: Set<LocalizationEvent>,
 ) {
@@ -28,13 +29,13 @@ data class Localization private constructor(
         const val LANGUAGE_NAME_KEY = "language.name"
 
         fun create(dto: Dto): Localization {
-            val source = Catalog.of(dto.source)
-            val translations = dto.translations.map(Catalog::of).sortedBy(Catalog::languageCode)
-            val languageCodes = listOf(source.languageCode) + translations.map(Catalog::languageCode)
+            val sourceCatalog = Catalog.of(dto.sourceCatalog)
+            val translationCatalogs = dto.translationCatalogs.map(Catalog::of).sortedBy(Catalog::languageCode)
+            val languageCodes = listOf(sourceCatalog.languageCode) + translationCatalogs.map(Catalog::languageCode)
             if (dto.selectedLanguageCode !in languageCodes) throw LanguageNotFound(dto.selectedLanguageCode)
             return Localization(
-                source = source,
-                translations = translations,
+                sourceCatalog = sourceCatalog,
+                translationCatalogs = translationCatalogs,
                 selectedLanguageCode = dto.selectedLanguageCode,
                 events = setOf(LocalizationInitialised(languageCodes = languageCodes, selectedLanguageCode = dto.selectedLanguageCode)),
             )
@@ -47,8 +48,8 @@ data class Localization private constructor(
 
     fun toDto() =
         Dto(
-            source = source.toDto(),
-            translations = translations.map(Catalog::toDto),
+            sourceCatalog = sourceCatalog.toDto(),
+            translationCatalogs = translationCatalogs.map(Catalog::toDto),
             selectedLanguageCode = selectedLanguageCode,
         )
 
@@ -70,19 +71,19 @@ data class Localization private constructor(
         return copy(selectedLanguageCode = languageCode, events = events + LanguageSelected(languageCode))
     }
 
-    /** The source language first, then the translations by code, each named in its own language, e.g.: `Español`. */
+    /** The source language first, then the other languages by code, each named in its own language, e.g.: `Español`. */
     fun languages(): List<Dto.LanguageDto> =
-        (listOf(source) + translations).map { catalog ->
-            val name = catalog.message(LANGUAGE_NAME_KEY, count = null) ?: source.message(LANGUAGE_NAME_KEY, count = null) ?: catalog.languageCode
+        (listOf(sourceCatalog) + translationCatalogs).map { catalog ->
+            val name = catalog.message(LANGUAGE_NAME_KEY, count = null) ?: sourceCatalog.message(LANGUAGE_NAME_KEY, count = null) ?: catalog.languageCode
             Dto.LanguageDto(code = catalog.languageCode, name = name)
         }
 
     private fun message(
         key: String,
         count: Int?,
-    ): String? = catalog(selectedLanguageCode)?.message(key, count) ?: source.message(key, count)
+    ): String? = catalog(selectedLanguageCode)?.message(key, count) ?: sourceCatalog.message(key, count)
 
-    private fun catalog(languageCode: String): Catalog? = (listOf(source) + translations).firstOrNull { catalog -> catalog.languageCode == languageCode }
+    private fun catalog(languageCode: String): Catalog? = (listOf(sourceCatalog) + translationCatalogs).firstOrNull { catalog -> catalog.languageCode == languageCode }
 
     private fun format(
         message: String,
@@ -90,14 +91,14 @@ data class Localization private constructor(
     ): String = PLACEHOLDER.replace(message) { placeholder -> arguments[placeholder.groupValues[1]] ?: placeholder.value }
 
     data class Dto(
-        val source: CatalogDto,
-        val translations: List<CatalogDto>,
+        val sourceCatalog: CatalogDto,
+        val translationCatalogs: List<CatalogDto>,
         val selectedLanguageCode: String,
     ) {
         /** A language's messages, e.g.: `es` from `es.po`. */
         data class CatalogDto(
             val languageCode: String,
-            val pluralForms: String,
+            val pluralRule: String,
             val messages: List<MessageDto>,
         )
 
@@ -121,9 +122,9 @@ data class Localization private constructor(
         companion object {
             fun of(dto: Dto.CatalogDto): Catalog {
                 if (dto.languageCode.isEmpty()) throw EmptyLanguageCode()
-                val pluralRule = PluralRule.parse(dto.languageCode, dto.pluralForms)
+                val pluralRule = PluralRule.parse(dto.languageCode, dto.pluralRule)
                 dto.messages.forEach { message ->
-                    if (message.forms.size > pluralRule.count) throw TooManyPluralForms(dto.languageCode, message.key, pluralRule.count)
+                    if (message.forms.size > pluralRule.formCount) throw TooManyPluralForms(dto.languageCode, message.key, pluralRule.formCount)
                 }
                 return Catalog(
                     languageCode = dto.languageCode,
@@ -145,40 +146,40 @@ data class Localization private constructor(
         fun toDto() =
             Dto.CatalogDto(
                 languageCode = languageCode,
-                pluralForms = pluralRule.pluralForms,
+                pluralRule = pluralRule.definition,
                 messages = messages.map { (key, forms) -> Dto.MessageDto(key = key, forms = forms) },
             )
     }
 
     /**
-     * A catalog's `Plural-Forms`, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 ? 1 : 2);`: how many plural
-     * forms its messages have, and the C expression choosing one for a count `n`.
+     * A catalog's plural rule, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 ? 1 : 2);`: how many
+     * plural forms its messages have, and the C expression choosing one for a count `n`.
      */
     private class PluralRule(
-        val pluralForms: String,
-        val count: Int,
+        val definition: String,
+        val formCount: Int,
         private val formula: (Long) -> Long,
     ) {
         companion object {
             fun parse(
                 languageCode: String,
-                pluralForms: String,
+                definition: String,
             ): PluralRule {
                 val fields =
-                    pluralForms
+                    definition
                         .split(";")
                         .map(String::trim)
                         .filter(String::isNotEmpty)
                         .associate { field -> field.substringBefore("=").trim() to field.substringAfter("=", missingDelimiterValue = "").trim() }
-                val count = fields["nplurals"]?.toIntOrNull()?.takeIf { it > 0 } ?: throw InvalidPluralForms(languageCode, pluralForms)
-                val expression = fields["plural"]?.takeIf(String::isNotEmpty) ?: throw InvalidPluralForms(languageCode, pluralForms)
+                val formCount = fields["nplurals"]?.toIntOrNull()?.takeIf { it > 0 } ?: throw InvalidPluralRule(languageCode, definition)
+                val expression = fields["plural"]?.takeIf(String::isNotEmpty) ?: throw InvalidPluralRule(languageCode, definition)
                 val formula =
                     try {
                         Parser(expression).parse()
                     } catch (_: IllegalArgumentException) {
-                        throw InvalidPluralForms(languageCode, pluralForms)
+                        throw InvalidPluralRule(languageCode, definition)
                     }
-                return PluralRule(pluralForms, count, formula)
+                return PluralRule(definition, formCount, formula)
             }
         }
 

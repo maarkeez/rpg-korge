@@ -4,12 +4,12 @@ import com.mkz.rpg.localization.domain.Localization.Dto.CatalogDto
 import com.mkz.rpg.localization.domain.Localization.Dto.LanguageDto
 import com.mkz.rpg.localization.domain.Localization.Dto.MessageDto
 import com.mkz.rpg.localization.domain.LocalizationError.EmptyLanguageCode
-import com.mkz.rpg.localization.domain.LocalizationError.InvalidPluralForms
+import com.mkz.rpg.localization.domain.LocalizationError.InvalidPluralRule
 import com.mkz.rpg.localization.domain.LocalizationError.LanguageNotFound
 import com.mkz.rpg.localization.domain.LocalizationError.TooManyPluralForms
 import com.mkz.rpg.localization.domain.LocalizationEvent.LanguageSelected
 import com.mkz.rpg.localization.domain.LocalizationEvent.LocalizationInitialised
-import com.mkz.rpg.localization.domain.LocalizationMother.ENGLISH_PLURAL_FORMS
+import com.mkz.rpg.localization.domain.LocalizationMother.ENGLISH_PLURAL_RULE
 import com.mkz.rpg.localization.domain.LocalizationMother.english
 import com.mkz.rpg.localization.domain.LocalizationMother.localization
 import com.mkz.rpg.localization.domain.LocalizationMother.polish
@@ -24,7 +24,7 @@ class LocalizationTest {
     @Test
     fun `Create should record the languages and the selected one`() {
         // When
-        val (events, _) = localization(translations = listOf(spanish(), polish())).pullEvents()
+        val (events, _) = localization(translationCatalogs = listOf(spanish(), polish())).pullEvents()
         // Then
         events.shouldContainExactly(LocalizationInitialised(languageCodes = listOf("en", "es", "pl"), selectedLanguageCode = "en"))
     }
@@ -39,21 +39,21 @@ class LocalizationTest {
 
     @Test
     fun `Create should fail when a catalog has no language code`() {
-        shouldThrow<EmptyLanguageCode> { localization(translations = listOf(spanish().copy(languageCode = ""))) }
+        shouldThrow<EmptyLanguageCode> { localization(translationCatalogs = listOf(spanish().copy(languageCode = ""))) }
     }
 
     @Test
-    fun `Create should fail when the plural forms of a catalog are not valid`() {
+    fun `Create should fail when the plural rule of a catalog is not valid`() {
         listOf("", "nplurals=2;", "plural=(n != 1);", "nplurals=0; plural=0;", "nplurals=2; plural=(n !! 1);", "nplurals=2; plural=(n != 1;", "nplurals=2; plural=n $ 1;")
-            .forEach { pluralForms -> shouldThrow<InvalidPluralForms> { localization(translations = listOf(spanish().copy(pluralForms = pluralForms))) } }
+            .forEach { pluralRule -> shouldThrow<InvalidPluralRule> { localization(translationCatalogs = listOf(spanish().copy(pluralRule = pluralRule))) } }
     }
 
     @Test
-    fun `Create should fail when a message has more forms than the plurals of its catalog`() {
+    fun `Create should fail when a message has more plural forms than the plural rule of its catalog`() {
         // Given
-        val japanese = CatalogDto(languageCode = "ja", pluralForms = "nplurals=1; plural=0;", messages = listOf(MessageDto(key = "ui.turns", forms = listOf("a", "b"))))
+        val japanese = CatalogDto(languageCode = "ja", pluralRule = "nplurals=1; plural=0;", messages = listOf(MessageDto(key = "ui.turns", forms = listOf("a", "b"))))
         // When
-        val error = shouldThrow<TooManyPluralForms> { localization(translations = listOf(japanese)) }
+        val error = shouldThrow<TooManyPluralForms> { localization(translationCatalogs = listOf(japanese)) }
         // Then
         error.message shouldBe "Message 'ui.turns' of language 'ja' has more than 1 plural forms"
     }
@@ -94,9 +94,9 @@ class LocalizationTest {
     }
 
     @Test
-    fun `TranslatePlural should choose the form by the plural forms of the selected language`() {
+    fun `TranslatePlural should choose the form by the plural rule of the selected language`() {
         // Given
-        val localization = localization(translations = listOf(polish()), selectedLanguageCode = "pl")
+        val localization = localization(translationCatalogs = listOf(polish()), selectedLanguageCode = "pl")
         // When
         val texts = listOf(1, 2, 5, 12, 22, 25).map { count -> localization.translatePlural("ui.remainingSummonDuration.vanishes", count, mapOf("turns" to "$count")) }
         // Then
@@ -119,17 +119,17 @@ class LocalizationTest {
         val french =
             CatalogDto(
                 languageCode = "fr",
-                pluralForms = "nplurals=2; plural=(n > 1);",
+                pluralRule = "nplurals=2; plural=(n > 1);",
                 messages = listOf(MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Disparaît dans {turns} tour"))),
             )
         // When
-        val text = localization(translations = listOf(french), selectedLanguageCode = "fr").translatePlural("ui.remainingSummonDuration.vanishes", 3)
+        val text = localization(translationCatalogs = listOf(french), selectedLanguageCode = "fr").translatePlural("ui.remainingSummonDuration.vanishes", 3)
         // Then
         text shouldBe "Vanishes in {turns} turns"
     }
 
     @Test
-    fun `TranslatePlural should evaluate the operators of the plural forms`() {
+    fun `TranslatePlural should evaluate the operators of the plural rule`() {
         // Given
         val formulas =
             mapOf(
@@ -142,8 +142,8 @@ class LocalizationTest {
         // When
         val results =
             formulas.mapValues { (formula, _) ->
-                val catalog = CatalogDto(languageCode = "xx", pluralForms = "nplurals=7; plural=$formula;", messages = listOf(MessageDto(key = "k", forms = (0..6).map(Int::toString))))
-                localization(translations = listOf(catalog), selectedLanguageCode = "xx").translatePlural("k", 3).toInt()
+                val catalog = CatalogDto(languageCode = "xx", pluralRule = "nplurals=7; plural=$formula;", messages = listOf(MessageDto(key = "k", forms = (0..6).map(Int::toString))))
+                localization(translationCatalogs = listOf(catalog), selectedLanguageCode = "xx").translatePlural("k", 3).toInt()
             }
         // Then
         results shouldBe formulas
@@ -175,9 +175,9 @@ class LocalizationTest {
     }
 
     @Test
-    fun `Languages should return the source first, then the translations by code, named in their language`() {
+    fun `Languages should return the source catalog first, then the translation catalogs by code, named in their language`() {
         // When
-        val languages = localization(translations = listOf(polish(), spanish())).languages()
+        val languages = localization(translationCatalogs = listOf(polish(), spanish())).languages()
         // Then
         languages.shouldContainExactly(LanguageDto(code = "en", name = "English"), LanguageDto(code = "es", name = "Español"), LanguageDto(code = "pl", name = "English"))
     }
@@ -185,7 +185,7 @@ class LocalizationTest {
     @Test
     fun `Languages should name a language by its code when no catalog names it`() {
         // When
-        val languages = localization(source = english().copy(messages = emptyList()), translations = emptyList()).languages()
+        val languages = localization(sourceCatalog = english().copy(messages = emptyList()), translationCatalogs = emptyList()).languages()
         // Then
         languages.shouldContainExactly(LanguageDto(code = "en", name = "en"))
     }
@@ -203,11 +203,11 @@ class LocalizationTest {
     @Test
     fun `ToDto should return the catalogs and the selected language`() {
         // Given
-        val dto = Localization.Dto(source = english(), translations = listOf(spanish()), selectedLanguageCode = "es")
+        val dto = Localization.Dto(sourceCatalog = english(), translationCatalogs = listOf(spanish()), selectedLanguageCode = "es")
         // When
         val result = Localization.create(dto).toDto()
         // Then
         result shouldBe dto
-        result.source.pluralForms shouldBe ENGLISH_PLURAL_FORMS
+        result.sourceCatalog.pluralRule shouldBe ENGLISH_PLURAL_RULE
     }
 }

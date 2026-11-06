@@ -5,16 +5,16 @@ sealed class LocalizationError(
 ) : Throwable(message = message) {
     class EmptyLanguageCode : LocalizationError(message = "Language code can not be empty")
 
-    class InvalidPluralForms(
+    class InvalidPluralRule(
         languageCode: String,
-        pluralForms: String,
-    ) : LocalizationError(message = "Language '$languageCode' has invalid plural forms '$pluralForms'")
+        pluralRule: String,
+    ) : LocalizationError(message = "Language '$languageCode' has an invalid plural rule '$pluralRule'")
 
     class TooManyPluralForms(
         languageCode: String,
         key: String,
-        count: Int,
-    ) : LocalizationError(message = "Message '$key' of language '$languageCode' has more than $count plural forms")
+        formCount: Int,
+    ) : LocalizationError(message = "Message '$key' of language '$languageCode' has more than $formCount plural forms")
 
     class LanguageNotFound(
         languageCode: String,

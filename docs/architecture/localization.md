@@ -2,7 +2,7 @@
 
 The game is translated with standard [gettext PO](https://www.gnu.org/software/gettext/manual/html_node/PO-Files.html)
 files, so translators can use Weblate, Crowdin, Poedit or any other PO tool. English is the source language. The
-language is picked from the main menu, for the session: the game starts in English every time.
+language is selected from the main menu, for the session: the game starts in English every time.
 
 To translate the game, see [How to add a language](../localization/how-to-add-a-language.md).
 
@@ -10,9 +10,10 @@ To translate the game, see [How to add a language](../localization/how-to-add-a-
 
 The catalogs live in [`resources/localization`](../../resources/localization), one per language:
 
-- `messages.pot`: the template, in English. It is maintained by hand: there is no extraction tool.
-- `<language code>.po`: a translation, e.g.: `es.po`, `it.po`. The game discovers them: the file name is the language
-  code, and the `language.name` entry names the language in that language (e.g.: `Español`), in the language list.
+- `messages.pot`: the source catalog, in English. It is maintained by hand: there is no extraction tool.
+- `<language code>.po`: the catalog of a language, e.g.: `es.po`, `it.po`. The game discovers them: the file name is
+  the language code, and the `language.name` entry names the language in that language (e.g.: `Español`), in the
+  language list.
 
 Each message is keyed by its `msgctxt`, and its English text is its `msgid`, so every tool shows translators the English
 text, the key never changes, and editing the English text marks its translations as fuzzy when they are merged:
@@ -41,15 +42,15 @@ The [game data files](game-data.md) hold no text, only ids.
 
 - **Placeholders** are named, so translators can reorder them: `Vanishes in {turns} turns`, `{player} turn`. `{` and `}`
   are only used for placeholders. A placeholder without an argument is displayed as it is.
-- **Plurals** are native PO plurals (`msgid_plural`, `msgstr[n]`). The `Plural-Forms` header of each catalog is
-  evaluated at runtime, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);`,
+- **Plurals** are native PO plurals (`msgid_plural`, `msgstr[n]`). The plural rule of each catalog, its `Plural-Forms`
+  header, is evaluated at runtime, e.g.: `nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);`,
   so a new language needs no code change.
 - **Whole sentences**: the code never builds a sentence out of pieces, changes the case of a text, or puts an article
   in front of a name. `{terrain} can not be next to {neighbour}`, not `"$terrain can not be next to ${neighbour.lowercase()}"`.
 
-### Fallback
+### Untranslated messages
 
-A message without a translation (missing, empty, or fuzzy) is displayed in English. A key missing from `messages.pot`
+An untranslated message (missing, empty, or fuzzy) is shown in English. A key missing from `messages.pot`
 displays the key itself, which the tests prevent. An invalid catalog fails when the resources are read, with its path in
 the message, as an invalid TOML file does.
 
@@ -61,7 +62,7 @@ Only the presentation layer translates. The `localization` subdomain only depend
 enforces. The other subdomains hold ids, never text, and their events and DTOs carry no text either.
 
 - [`localization`](../../src/commonMain/kotlin/com/mkz/rpg/localization): the `Localization` aggregate holds the
-  catalogs and the selected language, translates the messages, and evaluates the plural forms.
+  catalogs and the selected language, translates the messages, and evaluates the plural rules.
   [`PoFile`](../../src/commonMain/kotlin/com/mkz/rpg/localization/adapters/resources/PoFile.kt) is a small PO parser,
   as no Kotlin Multiplatform gettext library is mature enough. `LocalizationApi` exposes it.
 - [`UiText`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/UiText.kt): the enum of every UI key,
@@ -71,7 +72,7 @@ enforces. The other subdomains hold ids, never text, and their events and DTOs c
   `texts.plural(UiText.REMAINING_TURNS, turns, "turns" to turns)`, and the game data from its id: `texts.unitName(unitId)`,
   `texts.npcLine(npcId)`, ... Views and presenters receive it through their constructor.
 - `startApp` creates the `LocalizationApi` once and reads the catalogs before displaying the menu, and every scene
-  receives it, so the language picked in the menu applies to every scene opened afterwards.
+  receives it, so the language selected in the menu applies to every scene opened afterwards.
 
 ## Tests
 

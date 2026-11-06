@@ -46,7 +46,7 @@ class ResourcesLocalizationLoaderTest {
         """.trimIndent()
 
     @Test
-    fun `should load the source catalog in English, and a translation per po file sorted by code`() =
+    fun `should load the source catalog in English, and a catalog per po file sorted by code`() =
         runTest {
             // Given
             val localizationRoot =
@@ -62,17 +62,17 @@ class ResourcesLocalizationLoaderTest {
             // Then
             val localization = loader.loadLocalization()
             localization.selectedLanguageCode shouldBe "en"
-            localization.source shouldBe
+            localization.sourceCatalog shouldBe
                 CatalogDto(
                     languageCode = "en",
-                    pluralForms = "nplurals=2; plural=(n != 1);",
+                    pluralRule = "nplurals=2; plural=(n != 1);",
                     messages =
                         listOf(
                             MessageDto(key = "ui.shop.buy", forms = listOf("Buy")),
                             MessageDto(key = "ui.remainingSummonDuration.vanishes", forms = listOf("Vanishes in {turns} turn", "Vanishes in {turns} turns")),
                         ),
                 )
-            localization.translations.map(CatalogDto::languageCode).shouldContainExactly("es", "pt_BR")
+            localization.translationCatalogs.map(CatalogDto::languageCode).shouldContainExactly("es", "pt_BR")
         }
 
     @Test
@@ -80,12 +80,12 @@ class ResourcesLocalizationLoaderTest {
         // When
         val localization = ResourcesLocalizationLoader.localizationOf(mapOf("messages.pot" to source, "es.po" to spanish))
         // Then
-        localization.translations.single() shouldBe
-            CatalogDto(languageCode = "es", pluralForms = "nplurals=2; plural=(n != 1);", messages = listOf(MessageDto(key = "ui.shop.buy", forms = listOf("Comprar"))))
+        localization.translationCatalogs.single() shouldBe
+            CatalogDto(languageCode = "es", pluralRule = "nplurals=2; plural=(n != 1);", messages = listOf(MessageDto(key = "ui.shop.buy", forms = listOf("Comprar"))))
     }
 
     @Test
-    fun `should fail with the file when a translation has no plural forms`() {
+    fun `should fail with the file when a translation catalog has no plural rule`() {
         // When
         val error = shouldThrow<IllegalStateException> { ResourcesLocalizationLoader.localizationOf(mapOf("messages.pot" to source, "es.po" to "msgid \"\"\nmsgstr \"\"")) }
         // Then

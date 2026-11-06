@@ -50,7 +50,7 @@ suspend fun Stage.startApp(
     ResourcesBundle.prefetch(views)
     val sceneContainer = sceneContainer()
 
-    // The texts of every scene, in the language picked for the session. The menu waits for the catalogs.
+    // The texts of every scene, in the language selected for the session. The menu waits for the catalogs.
     val eventBus = InMemoryEventBus()
     addUpdater { eventBus.dispatch() }
     val localizationApi = LocalizationApi(eventBus, ResourcesLocalizationLoader())

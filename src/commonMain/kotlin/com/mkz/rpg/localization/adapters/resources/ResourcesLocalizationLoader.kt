@@ -7,8 +7,9 @@ import com.mkz.rpg.shared.adapters.toml.fromResource
 import korlibs.io.file.VfsFile
 
 /**
- * Loads the source catalog from `localization/messages.pot`, in English, and one translation per
- * `localization/<language code>.po`, e.g.: `es.po`. Only the translated entries are kept: the others fall back to English.
+ * Loads the source catalog from `localization/messages.pot`, in English, and one catalog per
+ * `localization/<language code>.po`, e.g.: `es.po`. Only the translated messages are kept: the untranslated ones are shown in
+ * English.
  */
 class ResourcesLocalizationLoader(
     private val localizationRoot: VfsFile = ResourcesBundle.root[FOLDER],
@@ -17,27 +18,27 @@ class ResourcesLocalizationLoader(
         const val FOLDER = "localization"
         const val SOURCE_FILE_NAME = "messages.pot"
         const val SOURCE_LANGUAGE_CODE = "en"
-        const val SOURCE_PLURAL_FORMS = "nplurals=2; plural=(n != 1);"
-        const val TRANSLATION_EXTENSION = ".po"
+        const val SOURCE_PLURAL_RULE = "nplurals=2; plural=(n != 1);"
+        const val TRANSLATION_CATALOG_EXTENSION = ".po"
         private const val PLURAL_FORMS_HEADER = "Plural-Forms"
 
         /** The localization of the catalog files, keyed by file name (e.g.: `messages.pot`, `es.po`), with English selected. */
         fun localizationOf(files: Map<String, String>): Localization.Dto {
             val sourceContent = files[SOURCE_FILE_NAME] ?: throw IllegalStateException("Resource '$FOLDER/$SOURCE_FILE_NAME' not found")
-            val source = fromResource("$FOLDER/$SOURCE_FILE_NAME") { sourceCatalog(PoFile.parse(sourceContent)) }
-            val translations =
+            val sourceCatalog = fromResource("$FOLDER/$SOURCE_FILE_NAME") { sourceCatalog(PoFile.parse(sourceContent)) }
+            val translationCatalogs =
                 files
-                    .filterKeys { fileName -> fileName.endsWith(TRANSLATION_EXTENSION) }
+                    .filterKeys { fileName -> fileName.endsWith(TRANSLATION_CATALOG_EXTENSION) }
                     .entries
                     .sortedBy { (fileName, _) -> fileName }
-                    .map { (fileName, content) -> fromResource("$FOLDER/$fileName") { translationCatalog(fileName.removeSuffix(TRANSLATION_EXTENSION), PoFile.parse(content)) } }
-            return Localization.Dto(source = source, translations = translations, selectedLanguageCode = SOURCE_LANGUAGE_CODE)
+                    .map { (fileName, content) -> fromResource("$FOLDER/$fileName") { translationCatalog(fileName.removeSuffix(TRANSLATION_CATALOG_EXTENSION), PoFile.parse(content)) } }
+            return Localization.Dto(sourceCatalog = sourceCatalog, translationCatalogs = translationCatalogs, selectedLanguageCode = SOURCE_LANGUAGE_CODE)
         }
 
         private fun sourceCatalog(file: PoFile): Localization.Dto.CatalogDto =
             Localization.Dto.CatalogDto(
                 languageCode = SOURCE_LANGUAGE_CODE,
-                pluralForms = SOURCE_PLURAL_FORMS,
+                pluralRule = SOURCE_PLURAL_RULE,
                 messages = file.entries.mapNotNull { entry -> entry.context?.let { key -> Localization.Dto.MessageDto(key = key, forms = listOfNotNull(entry.id, entry.idPlural)) } },
             )
 
@@ -47,7 +48,7 @@ class ResourcesLocalizationLoader(
         ): Localization.Dto.CatalogDto =
             Localization.Dto.CatalogDto(
                 languageCode = languageCode,
-                pluralForms = file.header[PLURAL_FORMS_HEADER] ?: throw IllegalArgumentException("'$PLURAL_FORMS_HEADER' is required"),
+                pluralRule = file.header[PLURAL_FORMS_HEADER] ?: throw IllegalArgumentException("'$PLURAL_FORMS_HEADER' is required"),
                 messages =
                     file.entries
                         .filter(PoFile.Entry::isTranslated)
@@ -61,7 +62,7 @@ class ResourcesLocalizationLoader(
         val fileNames = if (localizationRoot.exists()) localizationRoot.listNames() else emptyList()
         val files =
             fileNames
-                .filter { fileName -> fileName == SOURCE_FILE_NAME || fileName.endsWith(TRANSLATION_EXTENSION) }
+                .filter { fileName -> fileName == SOURCE_FILE_NAME || fileName.endsWith(TRANSLATION_CATALOG_EXTENSION) }
                 .associateWith { fileName -> localizationRoot[fileName].readString() }
         localization = localizationOf(files)
     }

@@ -1,4 +1,4 @@
-# Spanish translation of the game, merged from messages.pot. See docs/localization/how-to-add-a-language.md.
+# The Spanish catalog of the game, merged from messages.pot. See docs/localization/how-to-add-a-language.md.
 msgid ""
 msgstr ""
 "Project-Id-Version: rpg-korge\n"

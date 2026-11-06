@@ -3,7 +3,7 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.localization.adapters.resources.PoFile
 import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader
 import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.Companion.SOURCE_FILE_NAME
-import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.Companion.TRANSLATION_EXTENSION
+import com.mkz.rpg.localization.adapters.resources.ResourcesLocalizationLoader.Companion.TRANSLATION_CATALOG_EXTENSION
 import com.mkz.rpg.localization.adapters.resources.TestCatalogs
 import com.mkz.rpg.localization.domain.Localization
 import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
@@ -21,11 +21,11 @@ import kotlin.test.Test
  * for resources/unit/bat.toml), the line of each npc, and the description and each task of each quest.
  */
 class LocalizationResourcesTest {
-    private val source = PoFile.parse(TestCatalogs.files.getValue(SOURCE_FILE_NAME))
-    private val sourceEntries = source.entries.associateBy { entry -> entry.context }
-    private val translations =
+    private val sourceCatalog = PoFile.parse(TestCatalogs.files.getValue(SOURCE_FILE_NAME))
+    private val sourceEntries = sourceCatalog.entries.associateBy { entry -> entry.context }
+    private val translationCatalogs =
         TestCatalogs.files
-            .filterKeys { fileName -> fileName.endsWith(TRANSLATION_EXTENSION) }
+            .filterKeys { fileName -> fileName.endsWith(TRANSLATION_CATALOG_EXTENSION) }
             .mapValues { (_, content) -> PoFile.parse(content) }
 
     // The game data folders whose resources are named, and the fields translated for each, e.g.: `npc.elder.line`.
@@ -77,14 +77,14 @@ class LocalizationResourcesTest {
     fun `should only have the keys the screen translates in the source catalog`() =
         runTest {
             val keys = UiText.entries.map(UiText::key).toSet() + Localization.LANGUAGE_NAME_KEY + gameDataKeys() + questTaskKeys()
-            val orphans = source.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
+            val orphans = sourceCatalog.entries.map { entry -> entry.context ?: entry.id }.filter { key -> key !in keys }
             withClue("Entries of $SOURCE_FILE_NAME the screen does not translate, or without msgctxt: $orphans") { orphans.shouldBeEmpty() }
         }
 
     @Test
-    fun `should only have the source entries in the translations`() {
+    fun `should only have the source entries in the translation catalogs`() {
         val stale =
-            translations.flatMap { (fileName, file) ->
+            translationCatalogs.flatMap { (fileName, file) ->
                 file.entries.filter { entry -> sourceEntries[entry.context]?.id != entry.id }.map { entry -> "$fileName: ${entry.context ?: entry.id}" }
             }
         withClue("Entries missing from $SOURCE_FILE_NAME, or with another English text: merge it into them, e.g.: msgmerge. $stale") { stale.shouldBeEmpty() }
@@ -93,7 +93,7 @@ class LocalizationResourcesTest {
     @Test
     fun `should have the placeholders of the source in every translation`() {
         val mismatches =
-            translations.flatMap { (fileName, file) ->
+            translationCatalogs.flatMap { (fileName, file) ->
                 file.entries.filter(PoFile.Entry::isTranslated).flatMap { entry ->
                     val expected = placeholders(entry.id) + placeholders(entry.idPlural.orEmpty())
                     entry.translations.filter { translation -> placeholders(translation) != expected }.map { translation -> "$fileName: ${entry.context} '$translation' instead of $expected" }
@@ -105,7 +105,7 @@ class LocalizationResourcesTest {
     @Test
     fun `should have one form per plural of its language in every plural translation`() {
         val mismatches =
-            translations.flatMap { (fileName, file) ->
+            translationCatalogs.flatMap { (fileName, file) ->
                 val pluralCount =
                     file.header["Plural-Forms"]?.let {
                         Regex("""nplurals\s*=\s*(\d+)""")
@@ -123,7 +123,7 @@ class LocalizationResourcesTest {
 
     @Test
     fun `should only use the characters the font draws`() {
-        val texts = source.entries.flatMap { entry -> listOfNotNull(entry.id, entry.idPlural) } + translations.values.flatMap { file -> file.entries.flatMap(PoFile.Entry::translations) }
+        val texts = sourceCatalog.entries.flatMap { entry -> listOfNotNull(entry.id, entry.idPlural) } + translationCatalogs.values.flatMap { file -> file.entries.flatMap(PoFile.Entry::translations) }
         val undrawn =
             texts
                 .flatMap { text -> text.filter { character -> character.code !in drawnCharacters }.map { character -> "'$character' in '$text'" } }

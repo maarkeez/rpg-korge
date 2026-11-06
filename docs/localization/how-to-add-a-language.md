@@ -10,7 +10,7 @@ acute, grave, circumflex or diaeresis accent (e.g.: `á à â ä`). Spanish, Cat
 
 ## Add a language
 
-1. Create the catalog from the template, [`resources/localization/messages.pot`](../../resources/localization/messages.pot),
+1. Create the catalog from the source catalog, [`resources/localization/messages.pot`](../../resources/localization/messages.pot),
    named after the language code: `resources/localization/<language code>.po`, e.g.: `it.po`.
    - With Poedit: *File* › *New from POT/PO file…*, pick `messages.pot` and the language, and save it as `it.po`.
    - With the command line:
@@ -19,13 +19,13 @@ acute, grave, circumflex or diaeresis accent (e.g.: `á à â ä`). Spanish, Cat
      msginit --input=resources/localization/messages.pot --locale=it --output-file=resources/localization/it.po --no-translator
      ```
 
-2. Check that its header has the `Plural-Forms` of the language, e.g.: `"Plural-Forms: nplurals=2; plural=(n != 1);\n"`.
-   Poedit and `msginit` fill it in. The game fails to start without it.
+2. Check that its `Plural-Forms` header has the plural rule of the language, e.g.:
+   `"Plural-Forms: nplurals=2; plural=(n != 1);\n"`. Poedit and `msginit` fill it in. The game fails to start without it.
 3. Translate `language.name` into the name of the language, in that language, e.g.: `Italiano`. It names the
    language in the game's language list.
 4. Translate the other entries. The English text is the `msgid`, and the `#.` comments tell where it is displayed. An
    entry left untranslated is displayed in English, so the translation can be finished in several steps.
-5. Run the tests, then play the game and pick the language from *Language* in the main menu:
+5. Run the tests, then play the game and select the language from *Language* in the main menu:
 
    ```shell
    ./gradlew jvmTest
@@ -56,7 +56,7 @@ The tests fail when a translation breaks one of these rules:
 - **Translate every plural form**: a plural entry (`msgid_plural`) has one `msgstr[n]` per plural of the language, as its
   `Plural-Forms` says.
 - **Only translate entries of `messages.pot`**: do not add entries, nor change a `msgctxt` or a `msgid`. Merge the
-  template again instead.
+  source catalog again instead.
 - **Only use characters the game draws**: the ones listed above, and the common punctuation (e.g.: `¿ ¡ « » ·`), but
   not `…` nor typographic quotes (`“ ” ’`).
 
