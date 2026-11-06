@@ -19,7 +19,7 @@ class OnPartyWalkedTest {
     @Test
     fun `should count the party step for every defeated cpu battle unit when the party walks`() {
         // Given
-        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).defeat("rat-1"))
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).awaitRespawn("rat-1"))
         eventBus.publish(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
         // When
         eventBus.dispatch()
@@ -27,7 +27,7 @@ class OnPartyWalkedTest {
         cpuWanderBrainRepository
             .search()!!
             .toDto()
-            .respawns
-            .shouldContainExactly(CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 1))
+            .awaitedRespawns
+            .shouldContainExactly(CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-1", partySteps = 1))
     }
 }

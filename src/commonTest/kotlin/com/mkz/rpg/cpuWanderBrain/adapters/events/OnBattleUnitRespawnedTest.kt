@@ -16,7 +16,7 @@ class OnBattleUnitRespawnedTest {
     @Test
     fun `should stop counting the party steps when a cpu battle unit respawns`() {
         // Given
-        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).defeat("rat-1"))
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).awaitRespawn("rat-1"))
         eventBus.publish(BattleUnitEvent.BattleUnitRespawned(playerId = "cpu", battleUnitId = "rat-1", row = 0, column = 0))
         // When
         eventBus.dispatch()
@@ -24,7 +24,7 @@ class OnBattleUnitRespawnedTest {
         cpuWanderBrainRepository
             .search()!!
             .toDto()
-            .respawns
+            .awaitedRespawns
             .shouldBeEmpty()
     }
 }

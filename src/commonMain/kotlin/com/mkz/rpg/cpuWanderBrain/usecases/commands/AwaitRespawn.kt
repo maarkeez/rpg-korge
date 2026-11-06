@@ -8,6 +8,6 @@ class AwaitRespawn(
 ) {
     operator fun invoke(battleUnitId: String) {
         val cpuWanderBrain = cpuWanderBrainRepository.search() ?: return
-        cpuWanderBrainRepository.save(cpuWanderBrain.defeat(battleUnitId))
+        cpuWanderBrainRepository.save(cpuWanderBrain.awaitRespawn(battleUnitId))
     }
 }

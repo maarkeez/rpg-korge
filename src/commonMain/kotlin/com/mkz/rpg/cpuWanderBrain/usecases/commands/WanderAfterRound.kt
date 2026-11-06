@@ -9,11 +9,11 @@ import com.mkz.rpg.cpuWanderBrain.usecases.services.WanderingSteps
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Once a round finishes, each CPU battle unit out of the battle in sight of the party leader ([IsInSight]) rests
- * or steps around its home, one after another, before the CPU battle units join and leave the battle. The ones out of sight stay put, as
- * while exploring. It is announced also when none wanders, as the next round starts on it.
- * Every CPU battle unit out of the battle recovers [WANDERING_RECOVERY_PERCENTAGE] of its maximum health and mana, as
- * while exploring, in sight or not.
+ * Once a round finishes, each CPU battle unit out of the battle in sight of the party leader ([IsInSight]) rests or
+ * steps around its home, one after another, before the CPU battle units join and leave the battle. The ones out of
+ * sight stay put, as while exploring. It is announced also when none wanders, as the next round starts on it.
+ * Every CPU battle unit out of the battle recovers [WANDERING_RECOVERY_PERCENTAGE] of its maximum health and mana on
+ * every wandering, as while exploring, in sight or not.
  * Battle units: those in the battle.
  */
 class WanderAfterRound(

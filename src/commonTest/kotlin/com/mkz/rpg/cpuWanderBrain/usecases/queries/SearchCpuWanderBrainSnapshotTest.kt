@@ -16,7 +16,7 @@ class SearchCpuWanderBrainSnapshotTest {
         cpuWanderBrainRepository.save(
             cpuWanderBrain()
                 .leaveTerritory("rat-1")
-                .defeat("rat-2")
+                .awaitRespawn("rat-2")
                 .let { brain -> (1..12).fold(brain) { walked, _ -> walked.walkPartyStep() } }
                 .pullEvents()
                 .second,
@@ -25,7 +25,7 @@ class SearchCpuWanderBrainSnapshotTest {
         val result = searchCpuWanderBrainSnapshot()!!
         // Then
         result.returningBattleUnitIds shouldBe setOf("rat-1")
-        result.respawns.map { respawn -> respawn.battleUnitId to respawn.partySteps } shouldBe listOf("rat-2" to 12)
+        result.awaitedRespawns.map { respawn -> respawn.battleUnitId to respawn.partySteps } shouldBe listOf("rat-2" to 12)
     }
 
     @Test

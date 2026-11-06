@@ -93,7 +93,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
             CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"),
         )
     }
@@ -148,7 +148,7 @@ class WanderWhileExploringTest {
         // Then: it rests, as any wandering battle unit at home may.
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
             CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"),
         )
         cpuWanderBrainRepository.search()!!.isReturning("rat-1").shouldBeFalse()
@@ -181,7 +181,7 @@ class WanderWhileExploringTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-1", "rat-2"), percentage = 10),
-            CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"),
             CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"),
         )
     }
@@ -203,7 +203,7 @@ class WanderWhileExploringTest {
         // When
         wanderWhileExploring(0.9)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
+        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
     }
 
     @Test

@@ -25,7 +25,7 @@ class OnBattleUnitDefeatedTest {
         cpuWanderBrainRepository
             .search()!!
             .toDto()
-            .respawns
-            .shouldContainExactly(CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 0))
+            .awaitedRespawns
+            .shouldContainExactly(CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-1", partySteps = 0))
     }
 }

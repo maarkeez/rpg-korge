@@ -27,7 +27,7 @@ class OnRoundFinishedTest {
             eventBus,
         )
     private val wanderedEvents =
-        mutableListOf<CpuWanderBrainEvent.BattleUnitsWanderedAfterRound>().also { wandered -> eventBus.subscribe<CpuWanderBrainEvent.BattleUnitsWanderedAfterRound> { wandered += it } }
+        mutableListOf<CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound>().also { wandered -> eventBus.subscribe<CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound> { wandered += it } }
 
     @Test
     fun `should wander the cpu battle units out of the battle when a round finishes`() {
@@ -36,6 +36,6 @@ class OnRoundFinishedTest {
         // When
         eventBus.dispatch()
         // Then
-        wanderedEvents.shouldContainExactly(CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
+        wanderedEvents.shouldContainExactly(CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")))
     }
 }

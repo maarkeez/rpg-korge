@@ -15,7 +15,7 @@ class RestoreCpuWanderBrainTest {
     private val cpuWanderBrain: CpuWanderBrain =
         cpuWanderBrain()
             .leaveTerritory("rat-1")
-            .defeat("rat-2")
+            .awaitRespawn("rat-2")
             .let { brain -> (1..12).fold(brain) { walked, _ -> walked.walkPartyStep() } }
             .pullEvents()
             .second

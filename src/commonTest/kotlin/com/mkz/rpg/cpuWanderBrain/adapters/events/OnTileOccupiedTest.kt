@@ -23,7 +23,7 @@ class OnTileOccupiedTest {
             eventBus,
         )
     private val wanderedEvents =
-        mutableListOf<CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring>().also { wandered -> eventBus.subscribe<CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring> { wandered += it } }
+        mutableListOf<CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring>().also { wandered -> eventBus.subscribe<CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring> { wandered += it } }
 
     @Test
     fun `should resolve the awaited step when the wandering battle unit occupies its tile`() {
@@ -37,6 +37,6 @@ class OnTileOccupiedTest {
         // When
         eventBus.dispatch()
         // Then
-        wanderedEvents.shouldContainExactly(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
+        wanderedEvents.shouldContainExactly(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"))
     }
 }

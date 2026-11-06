@@ -18,7 +18,8 @@ class CpuWanderBrainTest {
         // When
         val cpuWanderBrain = CpuWanderBrain.create()
         // Then
-        cpuWanderBrain.toDto() shouldBe CpuWanderBrain.Dto(homes = emptyList(), returningBattleUnitIds = emptySet(), pendingBattleUnitIds = emptyList(), isWandering = false, respawns = emptyList())
+        cpuWanderBrain.toDto() shouldBe
+            CpuWanderBrain.Dto(homes = emptyList(), returningBattleUnitIds = emptySet(), pendingBattleUnitIds = emptyList(), isWandering = false, awaitedRespawns = emptyList())
     }
 
     @Test
@@ -109,7 +110,7 @@ class CpuWanderBrainTest {
         // When
         val (events, cpuWanderBrain) = cpuWanderBrain().startWhileExploring(exploringPlayerId = "human", battleUnitIds = listOf("knight-1")).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         cpuWanderBrain.toDto().isWandering.shouldBeFalse()
     }
 
@@ -141,7 +142,7 @@ class CpuWanderBrainTest {
         // When
         val (events, restedCpuWanderBrain) = cpuWanderBrain.rest("rat-1").pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         restedCpuWanderBrain.toDto().isWandering.shouldBeFalse()
     }
 
@@ -205,7 +206,7 @@ class CpuWanderBrainTest {
         // When
         val (events, resolvedCpuWanderBrain) = cpuWanderBrain.resolveStep(battleUnitId = "rat-1", row = 0, column = 1).pullEvents()
         // Then
-        events shouldBe setOf(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
+        events shouldBe setOf(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
         resolvedCpuWanderBrain.toDto().isWandering.shouldBeFalse()
         resolvedCpuWanderBrain
             .resolveStep(battleUnitId = "rat-1", row = 0, column = 1)
@@ -231,7 +232,7 @@ class CpuWanderBrainTest {
         // Then
         events shouldBe
             setOf(
-                CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+                CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
                 CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
             )
     }
@@ -248,7 +249,7 @@ class CpuWanderBrainTest {
         // Then
         events shouldBe
             setOf(
-                CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")),
+                CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")),
                 CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-2")),
             )
     }
@@ -258,38 +259,38 @@ class CpuWanderBrainTest {
     private fun CpuWanderBrain.walkPartySteps(steps: Int): CpuWanderBrain = (1..steps).fold(this) { cpuWanderBrain, _ -> cpuWanderBrain.walkPartyStep() }
 
     @Test
-    fun `Defeat should start counting the party steps of a battle unit with a home`() {
+    fun `AwaitRespawn should start counting the party steps of a battle unit with a home`() {
         // When
-        val cpuWanderBrain = cpuWanderBrain().defeat("rat-1")
+        val cpuWanderBrain = cpuWanderBrain().awaitRespawn("rat-1")
         // Then
-        cpuWanderBrain.toDto().respawns.shouldContainExactly(CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 0))
+        cpuWanderBrain.toDto().awaitedRespawns.shouldContainExactly(CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-1", partySteps = 0))
     }
 
     @Test
-    fun `Defeat should ignore a battle unit without a home`() {
+    fun `AwaitRespawn should ignore a battle unit without a home`() {
         // When
-        val cpuWanderBrain = cpuWanderBrain().defeat("knight-1")
+        val cpuWanderBrain = cpuWanderBrain().awaitRespawn("knight-1")
         // Then
-        cpuWanderBrain.toDto().respawns.shouldBeEmpty()
+        cpuWanderBrain.toDto().awaitedRespawns.shouldBeEmpty()
     }
 
     @Test
     fun `WalkPartyStep should count a step for every defeated battle unit`() {
         // Given
-        val cpuWanderBrain = cpuWanderBrain().defeat("rat-1").walkPartyStep().defeat("rat-2")
+        val cpuWanderBrain = cpuWanderBrain().awaitRespawn("rat-1").walkPartyStep().awaitRespawn("rat-2")
         // When
         val walkedCpuWanderBrain = cpuWanderBrain.walkPartyStep()
         // Then
-        walkedCpuWanderBrain.toDto().respawns.shouldContainExactly(
-            CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 2),
-            CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-2", partySteps = 1),
+        walkedCpuWanderBrain.toDto().awaitedRespawns.shouldContainExactly(
+            CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-1", partySteps = 2),
+            CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-2", partySteps = 1),
         )
     }
 
     @Test
     fun `DueRespawns should be the battle units that counted the respawn steps, with their home, in their deployment order`() {
         // Given
-        val cpuWanderBrain = cpuWanderBrain().defeat("rat-2").defeat("rat-1")
+        val cpuWanderBrain = cpuWanderBrain().awaitRespawn("rat-2").awaitRespawn("rat-1")
         // When
         val dueRespawns = cpuWanderBrain.walkPartySteps(RESPAWN_STEPS).dueRespawns()
         // Then
@@ -302,7 +303,7 @@ class CpuWanderBrainTest {
     @Test
     fun `DueRespawns should not have the battle units that counted fewer steps`() {
         // Given
-        val cpuWanderBrain = cpuWanderBrain().defeat("rat-1").walkPartySteps(RESPAWN_STEPS - 1)
+        val cpuWanderBrain = cpuWanderBrain().awaitRespawn("rat-1").walkPartySteps(RESPAWN_STEPS - 1)
         // When
         val dueRespawns = cpuWanderBrain.dueRespawns()
         // Then
@@ -312,11 +313,11 @@ class CpuWanderBrainTest {
     @Test
     fun `Respawn should stop counting the party steps of the battle unit, which no longer returns`() {
         // Given
-        val cpuWanderBrain = cpuWanderBrain().leaveTerritory("rat-1").defeat("rat-1").walkPartySteps(RESPAWN_STEPS)
+        val cpuWanderBrain = cpuWanderBrain().leaveTerritory("rat-1").awaitRespawn("rat-1").walkPartySteps(RESPAWN_STEPS)
         // When
         val respawnedCpuWanderBrain = cpuWanderBrain.respawn("rat-1")
         // Then
-        respawnedCpuWanderBrain.toDto().respawns.shouldBeEmpty()
+        respawnedCpuWanderBrain.toDto().awaitedRespawns.shouldBeEmpty()
         respawnedCpuWanderBrain.isReturning("rat-1").shouldBeFalse()
     }
 }

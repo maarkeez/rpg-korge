@@ -12,14 +12,14 @@ class ResolveRespawnTest {
     @Test
     fun `should stop counting the party steps of the respawned battle unit`() {
         // Given
-        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).defeat("rat-1").walkPartyStep())
+        cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).awaitRespawn("rat-1").walkPartyStep())
         // When
         resolveRespawn(battleUnitId = "rat-1")
         // Then
         cpuWanderBrainRepository
             .search()!!
             .toDto()
-            .respawns
+            .awaitedRespawns
             .shouldBeEmpty()
     }
 }

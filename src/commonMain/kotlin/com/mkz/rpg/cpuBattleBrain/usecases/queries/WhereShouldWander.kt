@@ -15,7 +15,7 @@ import kotlin.random.Random
  * or fewer, without stepping on harmful terrain, through the battle units ([SearchDistancesFromHome]).
  *
  * Within its territory, it rests at random ([REST_CHANCE]), but on harmful terrain (e.g.: lava). Otherwise, it scores
- * the free tiles next to it that are not harmful, within its territory or nearer to home, and steps to one of them at
+ * the vacant adjacent tiles that are not harmful, within its territory or nearer to home, and steps to one of them at
  * random, weighted by their utility:
  * - Roam: how much further from home the tile is, weighted by how near home the battle unit is. Near home, it walks away.
  * - Home: how much nearer to home the tile is, weighted by how far from home the battle unit is. Far from home, it walks back.
@@ -47,7 +47,7 @@ class WhereShouldWander(
         val returns = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0
         if (!returns && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
-        // The free tiles next to it that are not harmful, with their distance from home: nearer to home when it
+        // The vacant adjacent tiles that are not harmful, with their distance from home: nearer to home when it
         // returns, and within its territory otherwise.
         val steps =
             adjacentPositions(position)

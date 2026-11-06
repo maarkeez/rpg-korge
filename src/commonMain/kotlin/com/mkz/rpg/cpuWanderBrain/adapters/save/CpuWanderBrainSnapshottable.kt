@@ -10,8 +10,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 /**
- * The home of each CPU battle unit, the ones returning home, and the party steps each defeated one has counted until it
- * respawns, see [SearchCpuWanderBrainSnapshot] and [RestoreCpuWanderBrain].
+ * The home of each CPU battle unit, the ones returning home, and the awaited respawns: the party steps each defeated
+ * one has counted until it respawns, see [SearchCpuWanderBrainSnapshot] and [RestoreCpuWanderBrain].
  */
 class CpuWanderBrainSnapshottable(
     private val searchCpuWanderBrainSnapshot: SearchCpuWanderBrainSnapshot,
@@ -28,7 +28,7 @@ class CpuWanderBrainSnapshottable(
                             HomeSnapshot(home.battleUnitId, home.row, home.column, home.distancesFromHome.map { distance -> listOf(distance.row, distance.column, distance.distance) })
                         },
                     returningBattleUnitIds = cpuWanderBrain.returningBattleUnitIds.toList(),
-                    respawns = cpuWanderBrain.respawns.associate { respawn -> respawn.battleUnitId to respawn.partySteps },
+                    awaitedRespawns = cpuWanderBrain.awaitedRespawns.associate { respawn -> respawn.battleUnitId to respawn.partySteps },
                 )
             },
         )
@@ -47,18 +47,18 @@ class CpuWanderBrainSnapshottable(
                             )
                         },
                     returningBattleUnitIds = cpuWanderBrain.returningBattleUnitIds.toSet(),
-                    respawns = cpuWanderBrain.respawns.map { (battleUnitId, partySteps) -> CpuWanderBrain.Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
+                    awaitedRespawns = cpuWanderBrain.awaitedRespawns.map { (battleUnitId, partySteps) -> CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
                 )
             },
         )
 }
 
-// Respawns: the party steps counted by each defeated battle unit.
+// Awaited respawns: the party steps counted by each battle unit awaiting its respawn.
 @Serializable
 private data class CpuWanderBrainSnapshot(
     val homes: List<HomeSnapshot>,
     val returningBattleUnitIds: List<String>,
-    val respawns: Map<String, Int>,
+    val awaitedRespawns: Map<String, Int>,
 )
 
 // Distances from home: [row, column, distance] for each tile, kept short as there is one per tile and home.

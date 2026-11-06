@@ -13,8 +13,8 @@ import com.mkz.rpg.shared.domain.EventBus
  * where each one steps takes time. The ones no longer on the battlefield (e.g.: defeated) rest. A wandering still in
  * progress is abandoned.
  *
- * Every CPU battle unit with a home recovers [WANDERING_RECOVERY_PERCENTAGE] of its maximum health and mana, whether it
- * rests, steps or is out of sight. The defeated ones do not.
+ * Every CPU battle unit with a home recovers [WANDERING_RECOVERY_PERCENTAGE] of its maximum health and mana on every
+ * wandering, whether it rests, steps or is out of sight. The defeated ones do not.
  */
 class WanderWhileExploring(
     private val cpuWanderBrainRepository: CpuWanderBrainRepository,

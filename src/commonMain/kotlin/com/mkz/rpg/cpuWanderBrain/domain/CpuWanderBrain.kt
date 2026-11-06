@@ -5,8 +5,8 @@ import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestEngageEnemie
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestJoinAndLeaveBattle
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.AlreadyAwaitingAStep
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.NotTheNextBattleUnit
-import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.BattleUnitsWanderedAfterRound
-import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound
+import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring
 import com.mkz.rpg.shared.domain.DomainEvent
 import kotlin.jvm.JvmInline
 
@@ -31,7 +31,7 @@ const val RESPAWN_STEPS = 50
 data class CpuWanderBrain private constructor(
     private val homes: Homes,
     private val returningBattleUnits: ReturningBattleUnits,
-    private val respawns: Respawns,
+    private val awaitedRespawns: AwaitedRespawns,
     private val pendingBattleUnits: PendingBattleUnits,
     private val awaitedStep: Step?,
     private val purpose: Purpose?,
@@ -42,7 +42,7 @@ data class CpuWanderBrain private constructor(
             CpuWanderBrain(
                 homes = Homes(emptyMap()),
                 returningBattleUnits = ReturningBattleUnits(emptySet()),
-                respawns = Respawns(emptyMap()),
+                awaitedRespawns = AwaitedRespawns(emptyMap()),
                 pendingBattleUnits = PendingBattleUnits(emptyList()),
                 awaitedStep = null,
                 purpose = null,
@@ -50,7 +50,7 @@ data class CpuWanderBrain private constructor(
             )
 
         /**
-         * Rebuilds the homes, the battle units returning home and the respawns as they were when the game was saved,
+         * Rebuilds the homes, the battle units returning home and the awaited respawns as they were when the game was saved,
          * from its [toSnapshot], wandering no battle unit. It publishes no events.
          */
         fun restore(snapshot: Dto.SnapshotDto): CpuWanderBrain =
@@ -67,7 +67,7 @@ data class CpuWanderBrain private constructor(
                         },
                     ),
                 returningBattleUnits = ReturningBattleUnits(snapshot.returningBattleUnitIds),
-                respawns = Respawns(snapshot.respawns.associate { respawn -> respawn.battleUnitId to respawn.partySteps }),
+                awaitedRespawns = AwaitedRespawns(snapshot.awaitedRespawns.associate { respawn -> respawn.battleUnitId to respawn.partySteps }),
                 pendingBattleUnits = PendingBattleUnits(emptyList()),
                 awaitedStep = null,
                 purpose = null,
@@ -81,10 +81,10 @@ data class CpuWanderBrain private constructor(
             returningBattleUnitIds = returningBattleUnits.value,
             pendingBattleUnitIds = pendingBattleUnits.value,
             isWandering = isWandering(),
-            respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
+            awaitedRespawns = awaitedRespawns.value.map { (battleUnitId, partySteps) -> Dto.AwaitedRespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
         )
 
-    /** What is kept when the game is saved: the homes, the battle units returning home and the respawns. */
+    /** What is kept when the game is saved: the homes, the battle units returning home and the awaited respawns. */
     fun toSnapshot() =
         Dto.SnapshotDto(
             homes =
@@ -97,7 +97,7 @@ data class CpuWanderBrain private constructor(
                     )
                 },
             returningBattleUnitIds = returningBattleUnits.value,
-            respawns = respawns.value.map { (battleUnitId, partySteps) -> Dto.RespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
+            awaitedRespawns = awaitedRespawns.value.map { (battleUnitId, partySteps) -> Dto.AwaitedRespawnDto(battleUnitId = battleUnitId, partySteps = partySteps) },
         )
 
     /**
@@ -127,25 +127,25 @@ data class CpuWanderBrain private constructor(
 
     fun isReturning(battleUnitId: String): Boolean = battleUnitId in returningBattleUnits.value
 
-    /** The battle unit is defeated: it starts counting the party steps, when it has a home. The others are ignored. */
-    fun defeat(battleUnitId: String): CpuWanderBrain {
+    /** The battle unit is defeated: it awaits its respawn, counting the party steps, when it has a home. The others are ignored. */
+    fun awaitRespawn(battleUnitId: String): CpuWanderBrain {
         if (battleUnitId !in homes.value) return this
-        return copy(respawns = Respawns(respawns.value + (battleUnitId to 0)))
+        return copy(awaitedRespawns = AwaitedRespawns(awaitedRespawns.value + (battleUnitId to 0)))
     }
 
     /** The party walked a step: every defeated battle unit counts it. */
-    fun walkPartyStep(): CpuWanderBrain = copy(respawns = Respawns(respawns.value.mapValues { (_, partySteps) -> partySteps + 1 }))
+    fun walkPartyStep(): CpuWanderBrain = copy(awaitedRespawns = AwaitedRespawns(awaitedRespawns.value.mapValues { (_, partySteps) -> partySteps + 1 }))
 
     /** The defeated battle units that have counted [RESPAWN_STEPS] party steps, with their home, in their deployment order. */
     fun dueRespawns(): List<Dto.HomeDto> =
         homes.value
-            .filterKeys { battleUnitId -> (respawns.value[battleUnitId] ?: 0) >= RESPAWN_STEPS }
+            .filterKeys { battleUnitId -> (awaitedRespawns.value[battleUnitId] ?: 0) >= RESPAWN_STEPS }
             .map { (battleUnitId, home) -> Dto.HomeDto(battleUnitId = battleUnitId, row = home.row, column = home.column) }
 
     /** The battle unit respawned on its home: it no longer counts, nor returns, as it stands at home. */
     fun respawn(battleUnitId: String): CpuWanderBrain =
         copy(
-            respawns = Respawns(respawns.value - battleUnitId),
+            awaitedRespawns = AwaitedRespawns(awaitedRespawns.value - battleUnitId),
             returningBattleUnits = ReturningBattleUnits(returningBattleUnits.value - battleUnitId),
         )
 
@@ -226,12 +226,12 @@ data class CpuWanderBrain private constructor(
             when (purpose) {
                 is Purpose.Exploring ->
                     listOf(
-                        BattleUnitsWanderedWhileExploring(exploringPlayerId = purpose.exploringPlayerId),
+                        CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = purpose.exploringPlayerId),
                         RequestEngageEnemies(exploringPlayerId = purpose.exploringPlayerId),
                     )
                 is Purpose.AfterRound ->
                     listOf(
-                        BattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle),
+                        CpuBattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle),
                         RequestJoinAndLeaveBattle(battleUnitIds = purpose.battleUnitIdsInBattle),
                     )
                 null -> return this
@@ -270,8 +270,8 @@ data class CpuWanderBrain private constructor(
         val value: Set<String>,
     )
 
-    // The party steps each defeated battle unit has counted since its defeat.
-    @JvmInline private value class Respawns(
+    // The party steps each battle unit awaiting its respawn has counted since its defeat.
+    @JvmInline private value class AwaitedRespawns(
         val value: Map<String, Int>,
     )
 
@@ -284,7 +284,7 @@ data class CpuWanderBrain private constructor(
         val returningBattleUnitIds: Set<String>,
         val pendingBattleUnitIds: List<String>,
         val isWandering: Boolean,
-        val respawns: List<RespawnDto>,
+        val awaitedRespawns: List<AwaitedRespawnDto>,
     ) {
         data class HomeDto(
             val battleUnitId: String,
@@ -292,7 +292,7 @@ data class CpuWanderBrain private constructor(
             val column: Int,
         )
 
-        data class RespawnDto(
+        data class AwaitedRespawnDto(
             val battleUnitId: String,
             val partySteps: Int,
         )
@@ -301,7 +301,7 @@ data class CpuWanderBrain private constructor(
         data class SnapshotDto(
             val homes: List<HomeSnapshotDto>,
             val returningBattleUnitIds: Set<String>,
-            val respawns: List<RespawnDto>,
+            val awaitedRespawns: List<AwaitedRespawnDto>,
         )
 
         /** A home, with how far each tile is from it. */

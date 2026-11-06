@@ -9,7 +9,7 @@ import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 
 /**
  * Remembers the tile a CPU battle unit is deployed on as its home, which it wanders around while out of a battle. The
- * summons claim none, as they never wander: they vanish once their turns are over.
+ * summons claim none, as they never wander: they vanish once their summon duration is over.
  *
  * How far each tile is from home ([SearchDistancesFromHome]) is computed once, as it claims it, since the terrain never
  * changes while playing.

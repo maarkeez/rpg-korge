@@ -26,7 +26,7 @@ class RespawnDefeatedBattleUnitsTest {
         occupants: Map<Char, String> = emptyMap(),
     ) {
         queries.battlefieldRepository.create(battlefield(map, occupants))
-        val defeatedRats = cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).defeat("rat-1").defeat("rat-2")
+        val defeatedRats = cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0), "rat-2" to (2 to 2))).awaitRespawn("rat-1").awaitRespawn("rat-2")
         cpuWanderBrainRepository.save((1..partySteps).fold(defeatedRats) { cpuWanderBrain, _ -> cpuWanderBrain.walkPartyStep() })
     }
 
@@ -37,9 +37,9 @@ class RespawnDefeatedBattleUnitsTest {
         // When
         respawnDefeatedBattleUnits()
         // Then
-        cpuWanderBrainRepository.search()!!.toDto().respawns.shouldContainExactly(
-            CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-1", partySteps = 1),
-            CpuWanderBrain.Dto.RespawnDto(battleUnitId = "rat-2", partySteps = 1),
+        cpuWanderBrainRepository.search()!!.toDto().awaitedRespawns.shouldContainExactly(
+            CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-1", partySteps = 1),
+            CpuWanderBrain.Dto.AwaitedRespawnDto(battleUnitId = "rat-2", partySteps = 1),
         )
     }
 

@@ -67,7 +67,7 @@ class WanderAfterRoundTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
-            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
             CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
@@ -81,7 +81,7 @@ class WanderAfterRoundTest {
         // Then: it still recovers.
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
-            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
             CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
@@ -94,7 +94,7 @@ class WanderAfterRoundTest {
         wanderAfterRound(0.0)
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
             CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
@@ -105,7 +105,7 @@ class WanderAfterRoundTest {
         wanderAfterRound(0.9)
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuWanderBrainEvent.CpuBattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
             CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }

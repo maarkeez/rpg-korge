@@ -59,7 +59,7 @@ class ResolveWanderingStepTest {
         // When
         resolveWanderingStep(battleUnitId = "rat-1", row = 1, column = 0)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.BattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
+        eventBus.shouldHavePublishedEvents(CpuWanderBrainEvent.CpuBattleUnitsWanderedWhileExploring(exploringPlayerId = "human"), CpuBattleBrainEvent.RequestEngageEnemies(exploringPlayerId = "human"))
     }
 
     @Test
