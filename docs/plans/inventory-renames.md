@@ -1,6 +1,6 @@
 # Plan: Rename the code of the inventory subdomain to the words of the glossary
 
-> **Status:** built on `main`, its screenshots still to be approved.
+> **Status:** done.
 >
 > **Summary:** The code and the player text of the inventory subdomain use words the [glossary](../../GLOSSARY.md)
 > rejects. E.g.: players read "Inventory" on the title of the panel and "Inventory full" when an item found does not fit,
