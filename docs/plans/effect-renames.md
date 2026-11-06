@@ -1,6 +1,6 @@
 # Plan: Rename the code of the effect subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the effect subdomain uses words the [glossary](../../GLOSSARY.md) rejects, and one word for two
 > concepts. E.g.: "application" is both when venom's damage triggers (`ApplicationDto.ON_TURN_STARTED`) and Poisoned
@@ -167,3 +167,23 @@
   say "poison", which players read, while the glossary has no Poison.
 - `lootableItem`: Consume and Equip are still to be defined, as Source mentions them.
 - `terrain`: a terrain's own `effectId`, the effect it applies.
+
+## Changes while building
+
+- Names the plan left out follow the table: `EffectMother`'s factories are `damageEffect`, `healEffect`, `restoreManaEffect`,
+  `summonEffect`, `applyEffectToAdjacentAlliesEffect` and `whileEquippedTiming`, and their `applicationType` parameter is
+  `timingType`. `CastResolution.resolveTargets` is `resolveRecipients`, the parameter of `Ability.EffectTarget.of` is
+  `effectTarget`, and the local `target` of `ApplyEffect.applyToTile` is `tile`.
+- `BattleUnit`'s `Timing.OnPlayerTurnStarted.apply()` is `trigger()`, as it counts down one trigger.
+- The error messages say timing, duration and amount, in `EffectError` and `BattleUnitError`, e.g.: "Amount cannot be
+  higher than 999".
+- Test names say the same words, asserting the same, e.g.: `TriggerOnPlayerTurnStartedEffect should remove the on player
+  turn started effect when it is triggered for its last player turn`, and the terrain tests say the terrain effect is
+  applied.
+- `applyEquippedEffect` and `DeployBattleUnitEffectAcceptanceTest` keep their names: the plan did not name the first, and
+  Deploy is still the glossary's word for putting a battle unit on the battlefield.
+- [Save and load](../architecture/save-and-load.md) needed no change, as it names none of the renamed fields. `v7.json`
+  only differs from `v6.json` in its version, as the fixture's knight has no ongoing nor equipped effect.
+- [Presentation timeline](../architecture/presentation-timeline.md) also says the effects "triggered at the start of a
+  player turn" are seen wherever the battle unit is. The ability info line of [Game data](../architecture/game-data.md)
+  says "outcome, timing and effect target".
