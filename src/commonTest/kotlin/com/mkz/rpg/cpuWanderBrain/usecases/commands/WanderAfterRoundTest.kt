@@ -68,7 +68,7 @@ class WanderAfterRoundTest {
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
             CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
-            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
 
@@ -82,7 +82,7 @@ class WanderAfterRoundTest {
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestRecoverBattleUnits(battleUnitIds = listOf("rat-2"), percentage = 10),
             CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
-            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
 
@@ -95,7 +95,7 @@ class WanderAfterRoundTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
-            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
 
@@ -106,7 +106,7 @@ class WanderAfterRoundTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
-            CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+            CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
         )
     }
 }

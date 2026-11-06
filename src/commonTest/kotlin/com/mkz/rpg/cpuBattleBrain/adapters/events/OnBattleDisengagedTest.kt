@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuBattleBrain.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
-import com.mkz.rpg.cpuBattleBrain.usecases.commands.ReengageEnemies
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.JoinDisengagedBattle
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -13,14 +13,14 @@ class OnBattleDisengagedTest {
     private val queries = InMemoryQueries()
     private val onBattleDisengaged =
         OnBattleDisengaged(
-            ReengageEnemies(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
+            JoinDisengagedBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
             eventBus,
         )
     private val requests =
         mutableListOf<BattleEvent.RequestResolveDisengagedBattle>().also { requested -> eventBus.subscribe<BattleEvent.RequestResolveDisengagedBattle> { requested += it } }
 
     @Test
-    fun `should re-engage the enemies when the battle is disengaged`() {
+    fun `should have the cpu battle units join the disengaged battle when it is disengaged`() {
         // Given
         eventBus.publish(BattleEvent.BattleDisengaged(battleUnitIds = emptySet()))
         // When

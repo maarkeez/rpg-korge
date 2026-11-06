@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
 import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitActionResolved
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitDecisionResolved
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainMother.cpuBattleBrain
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -16,17 +16,17 @@ class ResolveCpuBattleUnitCastTest {
     private val resolveCpuBattleUnitCast = ResolveCpuBattleUnitCast(cpuBattleBrainRepository, eventBus)
 
     @Test
-    fun `should continue the cpu turn when the awaited cast has been resolved`() {
+    fun `should continue the cpu player turn when the awaited cast has been resolved`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain().requestCast(battleUnitId = "unit-1", abilityId = "sword"))
         // When
         resolveCpuBattleUnitCast(battleUnitId = "unit-1", abilityId = "sword")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitDecisionResolved(playerId = "cpu", battleUnitId = "unit-1"))
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeFalse()
     }
 
@@ -41,7 +41,7 @@ class ResolveCpuBattleUnitCastTest {
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeTrue()
     }
 }

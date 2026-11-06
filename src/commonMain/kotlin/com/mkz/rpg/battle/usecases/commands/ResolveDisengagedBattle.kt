@@ -6,7 +6,7 @@ import com.mkz.rpg.shared.domain.EventBus
 /**
  * Once the battle is disengaged during a round (e.g.: the last CPU battle unit in the battle was defeated), the battle units
  * joining it (e.g.: the CPU battle units out of it with the party within reach) join it, so it goes on. It finishes
- * without a winner instead, when nobody re-engages it. Nothing happens once the battle is finished, nor when only one
+ * without a winner instead, when nobody joins it. Nothing happens once the battle is finished, nor when only one
  * player is left in it (e.g.: the player who left it is defeated), as that player wins.
  * Joining player: the player of the battle units joining, null when none joins.
  */

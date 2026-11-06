@@ -2,7 +2,7 @@ package com.mkz.rpg.cpuBattleBrain.adapters.events
 
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrain
-import com.mkz.rpg.cpuBattleBrain.usecases.commands.ResolveCpuBattleUnitMove
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.ResolveCpuBattleUnitWalk
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -11,15 +11,15 @@ import kotlin.test.Test
 class OnTileOccupiedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
-    private val listener = OnTileOccupied(ResolveCpuBattleUnitMove(queries.cpuBattleBrainRepository, eventBus), eventBus)
+    private val listener = OnTileOccupied(ResolveCpuBattleUnitWalk(queries.cpuBattleBrainRepository, eventBus), eventBus)
 
     @Test
-    fun `should resolve the cpu battle unit move when a battlefield tile is occupied is dispatched`() {
+    fun `should resolve the cpu battle unit walk when a battlefield tile is occupied is dispatched`() {
         // Given
         queries.cpuBattleBrainRepository.save(
             CpuBattleBrain
-                .startTurn(playerId = "cpu", battleUnitIds = listOf("unit-1"))
-                .requestMove(battleUnitId = "unit-1", row = 2, column = 3)
+                .startPlayerTurn(playerId = "cpu", battleUnitIds = listOf("unit-1"))
+                .requestWalk(battleUnitId = "unit-1", row = 2, column = 3)
                 .pullEvents()
                 .second,
         )
@@ -30,7 +30,7 @@ class OnTileOccupiedTest {
         queries.cpuBattleBrainRepository
             .search()!!
             .toDto()
-            .isAwaitingAction
+            .isAwaitingDecision
             .shouldBeFalse()
     }
 }

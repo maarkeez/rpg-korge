@@ -7,33 +7,33 @@ import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrain
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainRepository
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhatShouldCast
-import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldMove
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWalk
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Takes the next action of the CPU turn: the next battle unit casts or moves when it is worth it, and the CPU battle brain
- * waits for the action to be resolved before deciding again. Otherwise, the battle unit is managed and the next one follows.
- * Once every battle unit has been managed, the turn is finished.
+ * Makes the next decision of the CPU player turn: the next battle unit casts or walks when it is worth it, and the CPU
+ * battle brain waits for the decision to be resolved before making the next one. Otherwise, the battle unit is done and the
+ * next one follows. Once every battle unit is done, the player turn is finished.
  */
-class ManageCpuBattleUnit(
+class MakeNextDecision(
     private val cpuBattleBrainRepository: CpuBattleBrainRepository,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val whatShouldCast: WhatShouldCast,
-    private val whereShouldMove: WhereShouldMove,
+    private val whereShouldWalk: WhereShouldWalk,
     private val eventBus: EventBus,
 ) {
     operator fun invoke(playerId: String) {
         val cpuBattleBrain = cpuBattleBrainRepository.search() ?: return
-        if (cpuBattleBrain.toDto().playerId != playerId || cpuBattleBrain.toDto().isAwaitingAction) return
+        if (cpuBattleBrain.toDto().playerId != playerId || cpuBattleBrain.toDto().isAwaitingDecision) return
         val battleUnitId = cpuBattleBrain.nextBattleUnitId()
-        if (battleUnitId == null || cpuBattleBrain.hasReachedActionLimit()) {
-            finishTurn(cpuBattleBrain)
+        if (battleUnitId == null || cpuBattleBrain.hasReachedDecisionLimit()) {
+            finishPlayerTurn(cpuBattleBrain)
             return
         }
         val isDefeated = searchBattleUnitsByPlayerId(playerId).none { it.id == battleUnitId }
         if (isDefeated) {
-            save(cpuBattleBrain.manageBattleUnit(battleUnitId))
+            save(cpuBattleBrain.markDone(battleUnitId))
             return
         }
         val castDecision = whatShouldCast(battleUnitId = battleUnitId)
@@ -48,17 +48,17 @@ class ManageCpuBattleUnit(
             )
             return
         }
-        val position = whereShouldMove(battleUnitId = battleUnitId)
+        val position = whereShouldWalk(battleUnitId = battleUnitId)
         if (position != null) {
-            save(cpuBattleBrain.requestMove(battleUnitId = battleUnitId, row = position.row, column = position.column))
+            save(cpuBattleBrain.requestWalk(battleUnitId = battleUnitId, row = position.row, column = position.column))
             eventBus.publish(BattleUnitEvent.RequestWalkBattleUnitInBattle(battleUnitId = battleUnitId, walkToRow = position.row, walkToColumn = position.column))
             return
         }
-        save(cpuBattleBrain.manageBattleUnit(battleUnitId))
+        save(cpuBattleBrain.markDone(battleUnitId))
     }
 
-    private fun finishTurn(cpuBattleBrain: CpuBattleBrain) {
-        save(cpuBattleBrain.finishTurn(), followedBy = BattleEvent.RequestFinishPlayerTurn)
+    private fun finishPlayerTurn(cpuBattleBrain: CpuBattleBrain) {
+        save(cpuBattleBrain.finishPlayerTurn(), followedBy = BattleEvent.RequestFinishPlayerTurn)
     }
 
     private fun save(

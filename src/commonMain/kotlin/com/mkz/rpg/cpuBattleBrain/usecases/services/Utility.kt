@@ -4,7 +4,7 @@ package com.mkz.rpg.cpuBattleBrain.usecases.services
 const val MINIMUM_UTILITY_GAIN = 0.05
 
 /** How many tiles, at most, a CPU battle unit walks to an enemy battle unit to engage it: approach it and cast at it. */
-const val ENGAGEMENT_DISTANCE = 5
+const val REACH = 5
 
 /** How many tiles, at most, a CPU battle unit out of a battle wanders from its home: the tile it was deployed on. */
 const val WANDER_DISTANCE = 3

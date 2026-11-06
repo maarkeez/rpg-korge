@@ -5,11 +5,11 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitById
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
-import com.mkz.rpg.cpuBattleBrain.usecases.services.ENGAGEMENT_DISTANCE
+import com.mkz.rpg.cpuBattleBrain.usecases.services.REACH
 import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 
 /**
- * The enemy battle units a CPU battle unit engages: the ones it can walk to in [ENGAGEMENT_DISTANCE] tiles or fewer,
+ * The enemy battle units a CPU battle unit engages: the ones it can walk to in [REACH] tiles or fewer,
  * counting their tile, stepping only on tiles it could stand on. A summon reaches every enemy it can walk to, however
  * far, as it lasts only some turns, and spends them attacking.
  */
@@ -24,7 +24,7 @@ class SearchEnemiesWithinReach(
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return emptyList()
         val position = searchPosition(occupantId = battleUnitId) ?: return emptyList()
         val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId) ?: return emptyList()
-        val maximumDistance = if (battleUnit.remainingSummonDuration != null) Int.MAX_VALUE else ENGAGEMENT_DISTANCE
+        val maximumDistance = if (battleUnit.remainingSummonDuration != null) Int.MAX_VALUE else REACH
         return searchBattleUnitsByPlayerId(playerId = enemyPlayer.id)
             .filter { enemy -> enemy.remainingHealth > 0 }
             .filter { enemy ->

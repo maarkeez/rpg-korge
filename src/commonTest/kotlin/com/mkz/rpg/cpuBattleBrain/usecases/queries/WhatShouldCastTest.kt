@@ -113,7 +113,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should attack the adjacent enemy when the caster is healthy`() {
+    fun `should damage the adjacent enemy when the caster is healthy`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(sword, heal))
         givenKnight(id = "knight-1", position = east, remainingHealth = 100)
@@ -145,7 +145,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should attack the enemy it can finish off when several enemies are adjacent`() {
+    fun `should damage the enemy it can finish off when several enemies are adjacent`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(sword, heal))
         givenKnight(id = "healthy-knight", position = east, remainingHealth = 100)
@@ -202,7 +202,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should cast another ability when no attack or heal is worth it`() {
+    fun `should cast another ability when no damage or heal is worth it`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(sword, heal, teleport))
         // The knight is too far to attack, but the rat can teleport next to it.
@@ -234,7 +234,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should deploy a battle unit instead of casting another ability when the deployed battle unit can reach an enemy`() {
+    fun `should summon a battle unit instead of casting another ability when the summon can reach an enemy`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(heal, deployBat, teleport))
         givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
@@ -245,7 +245,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should deploy the battle unit on the tile nearest to the enemy when several tiles are vacant`() {
+    fun `should summon the battle unit on the tile nearest to the enemy when several tiles are vacant`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(deployBat))
         givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
@@ -256,7 +256,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should attack the adjacent enemy instead of deploying when the attack is worth more`() {
+    fun `should damage the adjacent enemy instead of summoning when the damage is worth more`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(sword, deployBat))
         givenKnight(id = "knight-1", position = east, remainingHealth = 100)
@@ -267,7 +267,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should heal instead of deploying when the caster is badly hurt`() {
+    fun `should heal instead of summoning when the caster is badly hurt`() {
         // Given
         givenRat(remainingHealth = 4, abilities = listOf(heal, deployBat))
         givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
@@ -278,7 +278,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should not deploy a battle unit when the deployed battle unit can not attack`() {
+    fun `should not summon a battle unit when the summon can not deal damage`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(deployScarecrow))
         givenKnight(id = "knight-1", position = WhereCanCast.PositionDto(row = 0, column = 3), remainingHealth = 100)
@@ -289,7 +289,7 @@ class WhatShouldCastTest {
     }
 
     @Test
-    fun `should not deploy a battle unit when there are no enemies`() {
+    fun `should not summon a battle unit when there are no enemies`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(deployBat))
         // When
@@ -302,7 +302,7 @@ class WhatShouldCastTest {
     private val outOfReach = WhereCanCast.PositionDto(row = 2, column = 5)
 
     @Test
-    fun `should not deploy a battle unit when the enemy is out of reach`() {
+    fun `should not summon a battle unit when the enemy is out of reach`() {
         // Given
         givenRat(remainingHealth = 20, abilities = listOf(deployBat))
         givenKnight(id = "knight-1", position = outOfReach, remainingHealth = 100)

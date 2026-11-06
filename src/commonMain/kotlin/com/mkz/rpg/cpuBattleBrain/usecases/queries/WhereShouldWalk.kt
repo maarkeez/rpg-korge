@@ -9,7 +9,7 @@ import com.mkz.rpg.cpuBattleBrain.usecases.services.MINIMUM_UTILITY_GAIN
 import com.mkz.rpg.cpuBattleBrain.usecases.services.terrainHealthContribution
 import kotlin.math.abs
 
-class WhereShouldMove(
+class WhereShouldWalk(
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val whereCanWalk: WhereCanWalk,
     private val searchBattleUnitById: SearchBattleUnitById,
@@ -21,7 +21,7 @@ class WhereShouldMove(
     operator fun invoke(battleUnitId: String): Battlefield.Dto.PositionDto? {
         val battleUnit = searchBattleUnitById(id = battleUnitId)!!
         val currentPosition = searchPosition(occupantId = battleUnitId)!!
-        val candidatePositions =
+        val optionTiles =
             buildList {
                 addAll(whereCanWalk(battleUnitId = battleUnit.id))
                 add(currentPosition)
@@ -42,11 +42,11 @@ class WhereShouldMove(
             }
         // Initialize
         val utilityData = mutableMapOf<Battlefield.Dto.PositionDto, UtilityEvaluationData>()
-        candidatePositions.forEach { position ->
+        optionTiles.forEach { position ->
             utilityData[position] = UtilityEvaluationData()
         }
-        // Evaluate distance from every candidate to nearest enemy
-        candidatePositions.forEach { position ->
+        // Evaluate the tiles apart from every option to the nearest enemy
+        optionTiles.forEach { position ->
             val hasDeployedEnemies = enemyBattleUnitsPositions.any { (_, position) -> position != null }
             if (!hasDeployedEnemies) {
                 utilityData[position] = utilityData[position]!!.copy(nearestEnemyDistance = null)
@@ -54,13 +54,13 @@ class WhereShouldMove(
                 val nearestEnemyDistance =
                     enemyBattleUnitsPositions
                         .filter { (_, enemyPosition) -> enemyPosition != null }
-                        .map { (_, enemyPosition) -> manhattanDistance(position, enemyPosition!!) }
+                        .map { (_, enemyPosition) -> tilesApart(position, enemyPosition!!) }
                         .min()
                 utilityData[position] = utilityData[position]!!.copy(nearestEnemyDistance = nearestEnemyDistance)
             }
         }
-        // Evaluate distance from every candidate to nearest ally
-        candidatePositions.forEach { position ->
+        // Evaluate the tiles apart from every option to the nearest ally
+        optionTiles.forEach { position ->
             val hasDeployedAllies = allyBattleUnitsPositions.any { (_, position) -> position != null }
             if (!hasDeployedAllies) {
                 utilityData[position] = utilityData[position]!!.copy(nearestAllyDistance = null)
@@ -68,7 +68,7 @@ class WhereShouldMove(
                 val nearestAllyDistance =
                     allyBattleUnitsPositions
                         .filter { (_, allyPosition) -> allyPosition != null }
-                        .map { (_, allyPosition) -> manhattanDistance(position, allyPosition!!) }
+                        .map { (_, allyPosition) -> tilesApart(position, allyPosition!!) }
                         .min()
                 utilityData[position] = utilityData[position]!!.copy(nearestAllyDistance = nearestAllyDistance)
             }
@@ -109,8 +109,8 @@ class WhereShouldMove(
                     )
             }
         }
-        // Evaluate the health effect of the terrain of every candidate
-        candidatePositions.forEach { position ->
+        // Evaluate the health effect of the terrain of every option
+        optionTiles.forEach { position ->
             utilityData[position] =
                 utilityData[position]!!.copy(
                     terrainHealthEffect = searchTerrainHealthEffect(row = position.row, column = position.column),
@@ -142,17 +142,17 @@ class WhereShouldMove(
                     enemyContribution = enemyContribution,
                     allyContribution = allyContribution,
                     terrainContribution = terrainContribution,
-                    candidateUtility = enemyContribution + allyContribution + terrainContribution,
+                    optionUtility = enemyContribution + allyContribution + terrainContribution,
                 )
         }
-        // Calculate the best candidate
-        val (bestPosition, bestEvaluationData) = utilityData.entries.maxBy { (_, evaluationData) -> evaluationData.candidateUtility!! }
-        // Check threshold to prevent movements with minimum gain
-        val currentPositionUtility = utilityData[currentPosition]!!.candidateUtility!!
-        if (abs(bestEvaluationData.candidateUtility!! - currentPositionUtility) <= MINIMUM_UTILITY_GAIN) {
+        // Calculate the best option
+        val (bestPosition, bestEvaluationData) = utilityData.entries.maxBy { (_, evaluationData) -> evaluationData.optionUtility!! }
+        // Check threshold to prevent walks with minimum gain
+        val currentPositionUtility = utilityData[currentPosition]!!.optionUtility!!
+        if (abs(bestEvaluationData.optionUtility!! - currentPositionUtility) <= MINIMUM_UTILITY_GAIN) {
             return null
         }
-        // Check if we are moving at all
+        // Check if we are walking at all
         if (bestPosition == currentPosition) {
             return null
         }
@@ -168,10 +168,10 @@ class WhereShouldMove(
         val enemyContribution: Double? = null,
         val allyContribution: Double? = null,
         val terrainContribution: Double? = null,
-        val candidateUtility: Double? = null,
+        val optionUtility: Double? = null,
     )
 
-    private fun manhattanDistance(
+    private fun tilesApart(
         from: Battlefield.Dto.PositionDto,
         to: Battlefield.Dto.PositionDto,
     ): Int = (abs(from.row - to.row) + abs(from.column - to.column))

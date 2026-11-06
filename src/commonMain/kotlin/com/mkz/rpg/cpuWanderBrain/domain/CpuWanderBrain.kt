@@ -2,7 +2,7 @@ package com.mkz.rpg.cpuWanderBrain.domain
 
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestEngageEnemies
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestUpdateEngagement
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.RequestJoinAndLeaveBattle
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.AlreadyAwaitingAStep
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainError.NotTheNextBattleUnit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainEvent.BattleUnitsWanderedAfterRound
@@ -219,7 +219,7 @@ data class CpuWanderBrain private constructor(
     }
 
     // Once every battle unit has wandered, it announces it, and requests what follows from the CPU battle brain right
-    // after: engaging the exploring player, or updating the engagement of the battle.
+    // after: engaging the exploring player, or having the CPU battle units join and leave the battle.
     private fun finishWhenDone(): CpuWanderBrain {
         if (isWandering()) return this
         val finishedEvents =
@@ -232,7 +232,7 @@ data class CpuWanderBrain private constructor(
                 is Purpose.AfterRound ->
                     listOf(
                         BattleUnitsWanderedAfterRound(battleUnitIds = purpose.battleUnitIdsInBattle),
-                        RequestUpdateEngagement(battleUnitIds = purpose.battleUnitIdsInBattle),
+                        RequestJoinAndLeaveBattle(battleUnitIds = purpose.battleUnitIdsInBattle),
                     )
                 null -> return this
             }

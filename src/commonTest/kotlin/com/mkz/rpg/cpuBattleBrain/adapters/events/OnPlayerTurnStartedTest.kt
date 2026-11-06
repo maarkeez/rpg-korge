@@ -2,7 +2,7 @@ package com.mkz.rpg.cpuBattleBrain.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.cpuBattleBrain.usecases.commands.PlayTurn
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.PlayPlayerTurn
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -16,11 +16,11 @@ class OnPlayerTurnStartedTest {
     private val onPlayerTurnStarted =
         OnPlayerTurnStarted(
             eventBus = eventBus,
-            playTurn = PlayTurn(queries.searchPlayerById, queries.searchBattleUnitsByPlayerId, queries.cpuBattleBrainRepository, eventBus),
+            playPlayerTurn = PlayPlayerTurn(queries.searchPlayerById, queries.searchBattleUnitsByPlayerId, queries.cpuBattleBrainRepository, eventBus),
         )
 
     @Test
-    fun `should play turn when a player turn starts`() {
+    fun `should play the player turn when a player turn starts`() {
         // Given
         val cpu = player(id = "cpu", type = CPU)
         queries.playerRepository.create(cpu)

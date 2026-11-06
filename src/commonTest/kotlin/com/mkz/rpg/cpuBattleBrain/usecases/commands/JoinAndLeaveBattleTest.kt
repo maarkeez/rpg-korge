@@ -11,11 +11,11 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import kotlin.test.Test
 
-class UpdateEngagementTest {
+class JoinAndLeaveBattleTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val updateEngagement =
-        UpdateEngagement(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
+    private val joinAndLeaveBattle =
+        JoinAndLeaveBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
 
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
@@ -42,23 +42,23 @@ class UpdateEngagementTest {
         // Given
         givenBattle()
         // When
-        updateEngagement(battleUnitIds = setOf("knight-1", "rat-1"))
+        joinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
         )
     }
 
     @Test
-    fun `should update the engagement without anybody joining when no cpu battle unit out of the battle has an enemy within reach`() {
+    fun `should have nobody join when no cpu battle unit out of the battle has an enemy within reach`() {
         // Given
         givenBattle()
         // When
-        updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2"))
+        joinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1", "rat-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
         )
     }
@@ -68,21 +68,21 @@ class UpdateEngagementTest {
         // Given
         givenBattle()
         // When
-        updateEngagement(battleUnitIds = setOf("knight-1", "rat-1", "rat-2", "rat-3"))
+        joinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1", "rat-2", "rat-3"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")),
             BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = listOf("rat-3")),
         )
     }
 
     @Test
-    fun `should update the engagement without anybody joining nor leaving when there is no human player`() {
+    fun `should have nobody join nor leave when there is no human player`() {
         // When
-        updateEngagement(battleUnitIds = emptySet())
+        joinAndLeaveBattle(battleUnitIds = emptySet())
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestStartNextRound(joiningPlayerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
         )
     }
@@ -96,10 +96,10 @@ class UpdateEngagementTest {
         queries.battleUnitRepository.create(battleUnit(id = "bat-1", player = cpu.toDto(), remainingSummonDuration = 3))
         queries.battlefieldRepository.create(battlefield("B . # . K", occupants = mapOf('K' to "knight-1", 'B' to "bat-1")))
         // When
-        updateEngagement(battleUnitIds = setOf("knight-1", "bat-1"))
+        joinAndLeaveBattle(battleUnitIds = setOf("knight-1", "bat-1"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestStartNextRound(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
         )
     }

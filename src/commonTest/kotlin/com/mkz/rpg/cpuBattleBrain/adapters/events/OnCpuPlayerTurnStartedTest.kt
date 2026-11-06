@@ -2,25 +2,25 @@ package com.mkz.rpg.cpuBattleBrain.adapters.events
 
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrain
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
-import com.mkz.rpg.cpuBattleBrain.usecases.commands.ManageCpuBattleUnit
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.MakeNextDecision
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldBeEmpty
 import kotlin.test.Test
 
-class OnCpuBattleUnitManagedTest {
+class OnCpuPlayerTurnStartedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
-    private val manageCpuBattleUnit =
-        ManageCpuBattleUnit(queries.cpuBattleBrainRepository, queries.searchBattleUnitsByPlayerId, queries.whatShouldCast, queries.whereShouldMove, eventBus)
-    private val listener = OnCpuBattleUnitManaged(manageCpuBattleUnit, eventBus)
+    private val makeNextDecision =
+        MakeNextDecision(queries.cpuBattleBrainRepository, queries.searchBattleUnitsByPlayerId, queries.whatShouldCast, queries.whereShouldWalk, eventBus)
+    private val listener = OnCpuPlayerTurnStarted(makeNextDecision, eventBus)
 
     @Test
-    fun `should manage the next cpu battle unit when a cpu battle unit is managed is dispatched`() {
+    fun `should make the next decision when the cpu player turn starts`() {
         // Given
         // The rat has been defeated, so it has nothing left to do this turn.
-        queries.cpuBattleBrainRepository.save(CpuBattleBrain.startTurn(playerId = "cpu", battleUnitIds = listOf("rat-1")).pullEvents().second)
-        eventBus.publish(CpuBattleBrainEvent.CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "skull-1"))
+        queries.cpuBattleBrainRepository.save(CpuBattleBrain.startPlayerTurn(playerId = "cpu", battleUnitIds = listOf("rat-1")).pullEvents().second)
+        eventBus.publish(CpuBattleBrainEvent.CpuPlayerTurnStarted(playerId = "cpu"))
         // When
         eventBus.dispatch()
         // Then

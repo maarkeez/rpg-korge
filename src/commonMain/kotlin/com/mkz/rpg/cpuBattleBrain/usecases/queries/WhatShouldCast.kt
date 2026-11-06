@@ -22,7 +22,7 @@ import kotlin.random.Random
 
 /**
  * Decides which ability a CPU battle unit should cast, following the utility AI pattern:
- * every castable ability and target is scored as an attack, a heal or a deploy, and the best one is cast
+ * every castable ability and target is scored as a damage, a heal or a summon, and the best one is cast
  * when it beats doing nothing. Otherwise, one of the other abilities (e.g.: teleport) is cast at random.
  * Only the enemies within reach are engaged: without any, the battle unit only heals.
  */
@@ -44,7 +44,7 @@ class WhatShouldCast(
         if (caster.remainingActions.remainingCasts <= 0) return null
         val casterMaxHealth = caster.maximumHealth
         val enemiesWithinReach = searchEnemiesWithinReach(battleUnitId = caster.id)
-        val candidates =
+        val options =
             caster.knownAbilities.keys
                 .filter { abilityId -> canCastAbility(battleUnitId = caster.id, abilityId = abilityId) }
                 .mapNotNull { abilityId -> searchAbilityById(abilityId) }
@@ -52,15 +52,15 @@ class WhatShouldCast(
                     whereCanCast(battleUnitId = caster.id, abilityId = ability.id).map { castGroup ->
                         evaluate(ability, castGroup, caster, casterMaxHealth, enemiesWithinReach)
                     }
-                }.filter { candidate -> enemiesWithinReach.isNotEmpty() || candidate.kind == CastKind.HEAL }
-        val bestCandidate = candidates.filter { it.kind != CastKind.OTHER }.maxByOrNull { it.utility }
-        if (bestCandidate != null && bestCandidate.utility > MINIMUM_UTILITY_GAIN) {
-            return CastDecision(abilityId = bestCandidate.abilityId, castGroup = bestCandidate.castGroup)
+                }.filter { option -> enemiesWithinReach.isNotEmpty() || option.kind == CastKind.HEAL }
+        val bestOption = options.filter { it.kind != CastKind.OTHER }.maxByOrNull { it.utility }
+        if (bestOption != null && bestOption.utility > MINIMUM_UTILITY_GAIN) {
+            return CastDecision(abilityId = bestOption.abilityId, castGroup = bestOption.castGroup)
         }
-        return candidates
+        return options
             .filter { it.kind == CastKind.OTHER }
             .randomOrNull(random)
-            ?.let { candidate -> CastDecision(abilityId = candidate.abilityId, castGroup = candidate.castGroup) }
+            ?.let { option -> CastDecision(abilityId = option.abilityId, castGroup = option.castGroup) }
     }
 
     data class CastDecision(
@@ -69,9 +69,9 @@ class WhatShouldCast(
     )
 
     private enum class CastKind {
-        ATTACK,
+        DAMAGE,
         HEAL,
-        DEPLOY,
+        SUMMON,
         OTHER,
     }
 
@@ -94,9 +94,9 @@ class WhatShouldCast(
         val healing = expectedAmount(effects, target = TargetExpressionDto.Type.CASTER, outcome = TypeDto.INCREASE_HEALTH)
         val deployedUnitId = effects.firstNotNullOfOrNull { (_, effect) -> effect.outcome.deployBattleUnit?.unitId }
         return when {
-            damage > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.ATTACK, attackUtility(damage, castGroup, caster, casterMaxHealth, enemiesWithinReach))
+            damage > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.DAMAGE, damageUtility(damage, castGroup, caster, casterMaxHealth, enemiesWithinReach))
             healing > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.HEAL, healUtility(healing, caster, casterMaxHealth))
-            deployedUnitId != null -> UtilityEvaluationData(ability.id, castGroup, CastKind.DEPLOY, deployUtility(deployedUnitId, castGroup, caster, casterMaxHealth, enemiesWithinReach))
+            deployedUnitId != null -> UtilityEvaluationData(ability.id, castGroup, CastKind.SUMMON, summonUtility(deployedUnitId, castGroup, caster, casterMaxHealth, enemiesWithinReach))
             else -> UtilityEvaluationData(ability.id, castGroup, CastKind.OTHER, utility = 0.0)
         }
     }
@@ -105,8 +105,8 @@ class WhatShouldCast(
         ability.abilityEffects.mapNotNull { abilityEffect -> searchEffectById(abilityEffect.effectId)?.let { effect -> abilityEffect.target.type to effect } }
 
     // Removing more of what is left of the targets is better, e.g.: finishing off a weak enemy. Only the enemies within
-    // reach count. A badly hurt caster attacks less eagerly, as it does when it moves towards enemies.
-    private fun attackUtility(
+    // reach count. A badly hurt caster damages less eagerly, as it does when it walks towards enemies.
+    private fun damageUtility(
         damage: Double,
         castGroup: WhereCanCast.CastGroup,
         caster: BattleUnit.Dto,
@@ -136,10 +136,10 @@ class WhatShouldCast(
         return healingNeed(battleUnitId = caster.id) * usefulHealing / healing
     }
 
-    // A deployed battle unit is worth the attack it will make on the enemy within reach of the caster nearest to its tile,
-    // discounted for every turn it waits: it acts from the next turn, and may need several turns to walk next to the enemy.
-    // As with attacks, a badly hurt caster deploys less eagerly.
-    private fun deployUtility(
+    // A summon is worth the damage it will deal to the enemy within reach of the caster nearest to its tile, discounted
+    // for every player turn it waits: it may need several player turns to walk next to the enemy. As with damage, a badly
+    // hurt caster summons less eagerly.
+    private fun summonUtility(
         deployedUnitId: String,
         castGroup: WhereCanCast.CastGroup,
         caster: BattleUnit.Dto,
@@ -162,13 +162,13 @@ class WhatShouldCast(
         val (enemy, distance) = nearestEnemy
         val tilesToWalk = distance - 1
         if (tilesToWalk > 0 && deployedUnit.movementRange <= 0) return 0.0
-        // It moves and attacks in the same turn, so it attacks in the turn it walks its last tile.
-        val turnsToAttack = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.movementRange - 1) / deployedUnit.movementRange
+        // It walks and casts in the same player turn, so it deals damage in the player turn it walks its last tile.
+        val playerTurnsToDamage = if (tilesToWalk <= 0) 1 else (tilesToWalk + deployedUnit.movementRange - 1) / deployedUnit.movementRange
         val casterHealthRatio = caster.remainingHealth.toDouble() / casterMaxHealth
-        return casterHealthRatio * TURN_DISCOUNT.pow(turnsToAttack) * min(damage, enemy.remainingHealth.toDouble()) / enemy.remainingHealth
+        return casterHealthRatio * PLAYER_TURN_DISCOUNT.pow(playerTurnsToDamage) * min(damage, enemy.remainingHealth.toDouble()) / enemy.remainingHealth
     }
 
-    // Immediate effects count in full. Effects applied each turn count their total, discounted for every turn they wait.
+    // Immediate effects count in full. Effects applied each player turn count their total, discounted for every player turn they wait.
     private fun expectedAmount(
         effects: List<Pair<TargetExpressionDto.Type, Effect.Dto>>,
         target: TargetExpressionDto.Type,
@@ -187,13 +187,13 @@ class WhatShouldCast(
                     ApplicationTypeDto.IMMEDIATELY -> amount.toDouble()
                     ApplicationTypeDto.ON_TURN_STARTED -> {
                         val turns = effect.application.onTurnStarted?.duration ?: 0
-                        (1..turns).sumOf { turn -> amount * TURN_DISCOUNT.pow(turn) }
+                        (1..turns).sumOf { turn -> amount * PLAYER_TURN_DISCOUNT.pow(turn) }
                     }
                     else -> 0.0
                 }
             }
 
     private companion object {
-        const val TURN_DISCOUNT = 0.9
+        const val PLAYER_TURN_DISCOUNT = 0.9
     }
 }

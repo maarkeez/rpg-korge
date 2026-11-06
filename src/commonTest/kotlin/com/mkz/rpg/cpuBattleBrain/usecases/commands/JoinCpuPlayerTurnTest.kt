@@ -11,10 +11,10 @@ import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.nulls.shouldBeNull
 import kotlin.test.Test
 
-class JoinCpuTurnTest {
+class JoinCpuPlayerTurnTest {
     private val queries = InMemoryQueries()
     private val cpuBattleBrainRepository = InMemoryCpuBattleBrainRepository()
-    private val joinCpuTurn = JoinCpuTurn(cpuBattleBrainRepository, queries.searchBattleUnitById)
+    private val joinCpuPlayerTurn = JoinCpuPlayerTurn(cpuBattleBrainRepository, queries.searchBattleUnitById)
 
     init {
         val human = player(id = "human", type = PlayerTypeDto.HUMAN).toDto()
@@ -24,11 +24,11 @@ class JoinCpuTurnTest {
     }
 
     @Test
-    fun `should have a battle unit deployed for the cpu player while it plays its turn play it too`() {
+    fun `should have a battle unit deployed for the cpu player while it plays its player turn play it too`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain(playerId = "cpu", battleUnitIds = listOf("goat-1")).requestCast(battleUnitId = "goat-1", abilityId = "bat"))
         // When
-        joinCpuTurn(battleUnitId = "bat-1")
+        joinCpuPlayerTurn(battleUnitId = "bat-1")
         // Then
         cpuBattleBrainRepository
             .search()!!
@@ -38,11 +38,11 @@ class JoinCpuTurnTest {
     }
 
     @Test
-    fun `should not have a battle unit of another player play the cpu turn`() {
+    fun `should not have a battle unit of another player play the cpu player turn`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain(playerId = "cpu", battleUnitIds = listOf("goat-1")))
         // When
-        joinCpuTurn(battleUnitId = "bee-1")
+        joinCpuPlayerTurn(battleUnitId = "bee-1")
         // Then
         cpuBattleBrainRepository
             .search()!!
@@ -52,11 +52,11 @@ class JoinCpuTurnTest {
     }
 
     @Test
-    fun `should not have a battle unit deployed out of the cpu turns play any`() {
+    fun `should not have a battle unit deployed out of the cpu player turns play any`() {
         // Given
-        cpuBattleBrainRepository.save(cpuBattleBrain(playerId = "cpu", battleUnitIds = listOf("goat-1")).finishTurn().pullEvents().second)
+        cpuBattleBrainRepository.save(cpuBattleBrain(playerId = "cpu", battleUnitIds = listOf("goat-1")).finishPlayerTurn().pullEvents().second)
         // When
-        joinCpuTurn(battleUnitId = "bat-1")
+        joinCpuPlayerTurn(battleUnitId = "bat-1")
         // Then
         cpuBattleBrainRepository
             .search()!!
@@ -66,9 +66,9 @@ class JoinCpuTurnTest {
     }
 
     @Test
-    fun `should do nothing when no cpu turn was ever played`() {
+    fun `should do nothing when no cpu player turn was ever played`() {
         // When
-        joinCpuTurn(battleUnitId = "bat-1")
+        joinCpuPlayerTurn(battleUnitId = "bat-1")
         // Then
         cpuBattleBrainRepository.search().shouldBeNull()
     }

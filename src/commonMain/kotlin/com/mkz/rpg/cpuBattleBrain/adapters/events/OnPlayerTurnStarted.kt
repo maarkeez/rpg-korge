@@ -1,16 +1,16 @@
 package com.mkz.rpg.cpuBattleBrain.adapters.events
 
 import com.mkz.rpg.battle.domain.BattleEvent
-import com.mkz.rpg.cpuBattleBrain.usecases.commands.PlayTurn
+import com.mkz.rpg.cpuBattleBrain.usecases.commands.PlayPlayerTurn
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
 class OnPlayerTurnStarted(
     eventBus: EventBus,
-    playTurn: PlayTurn,
+    playPlayerTurn: PlayPlayerTurn,
 ) {
     private val subscription =
         eventBus.subscribe<BattleEvent.PlayerTurnStarted> { event ->
-            playTurn(event.playerId, event.battleUnitIds)
+            playPlayerTurn(event.playerId, event.battleUnitIds)
         }
 }

@@ -18,7 +18,7 @@ class OnExplorationStartedTest {
     private val queries = InMemoryQueries()
     private val onExplorationStarted =
         OnExplorationStarted(EngageEnemies(queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
-    private val engagements = mutableListOf<CpuBattleBrainEvent.CombatEngaged>().also { engaged -> eventBus.subscribe<CpuBattleBrainEvent.CombatEngaged> { engaged += it } }
+    private val engagements = mutableListOf<CpuBattleBrainEvent.EnemiesEngaged>().also { engaged -> eventBus.subscribe<CpuBattleBrainEvent.EnemiesEngaged> { engaged += it } }
 
     @Test
     fun `should engage when the party starts exploring within reach of a cpu battle unit`() {
@@ -34,6 +34,6 @@ class OnExplorationStartedTest {
         // When
         eventBus.dispatch()
         // Then
-        engagements.shouldContainExactly(CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
+        engagements.shouldContainExactly(CpuBattleBrainEvent.EnemiesEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")))
     }
 }

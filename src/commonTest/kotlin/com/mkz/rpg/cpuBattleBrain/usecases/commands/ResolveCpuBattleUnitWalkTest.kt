@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
 import com.mkz.rpg.cpuBattleBrain.adapters.storage.InMemoryCpuBattleBrainRepository
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitActionResolved
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitDecisionResolved
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainMother.cpuBattleBrain
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -10,46 +10,46 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import kotlin.test.Test
 
-class ResolveCpuBattleUnitMoveTest {
+class ResolveCpuBattleUnitWalkTest {
     private val cpuBattleBrainRepository = InMemoryCpuBattleBrainRepository()
     private val eventBus = FakeEventBus()
-    private val resolveCpuBattleUnitMove = ResolveCpuBattleUnitMove(cpuBattleBrainRepository, eventBus)
+    private val resolveCpuBattleUnitWalk = ResolveCpuBattleUnitWalk(cpuBattleBrainRepository, eventBus)
 
     @Test
-    fun `should continue the cpu turn when the awaited move has been applied`() {
+    fun `should continue the cpu player turn when the awaited walk has ended`() {
         // Given
-        cpuBattleBrainRepository.save(cpuBattleBrain().requestMove(battleUnitId = "unit-1", row = 2, column = 3))
+        cpuBattleBrainRepository.save(cpuBattleBrain().requestWalk(battleUnitId = "unit-1", row = 2, column = 3))
         // When
-        resolveCpuBattleUnitMove(battleUnitId = "unit-1", row = 2, column = 3)
+        resolveCpuBattleUnitWalk(battleUnitId = "unit-1", row = 2, column = 3)
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleUnitActionResolved(playerId = "cpu", battleUnitId = "unit-1"))
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitDecisionResolved(playerId = "cpu", battleUnitId = "unit-1"))
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeFalse()
     }
 
     @Test
-    fun `should ignore the move when it is not the awaited one`() {
+    fun `should ignore the walk when it is not the awaited one`() {
         // Given
-        cpuBattleBrainRepository.save(cpuBattleBrain().requestMove(battleUnitId = "unit-1", row = 2, column = 3))
+        cpuBattleBrainRepository.save(cpuBattleBrain().requestWalk(battleUnitId = "unit-1", row = 2, column = 3))
         // When
-        resolveCpuBattleUnitMove(battleUnitId = "human-unit", row = 2, column = 3)
+        resolveCpuBattleUnitWalk(battleUnitId = "human-unit", row = 2, column = 3)
         // Then
         eventBus.shouldNotHavePublishedEvents()
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeTrue()
     }
 
     @Test
-    fun `should ignore the move when there is no cpu turn in progress`() {
+    fun `should ignore the walk when there is no cpu player turn in progress`() {
         // Given
         // When
-        resolveCpuBattleUnitMove(battleUnitId = "unit-1", row = 2, column = 3)
+        resolveCpuBattleUnitWalk(battleUnitId = "unit-1", row = 2, column = 3)
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

@@ -18,7 +18,7 @@ class OnAbilityCastResolvedTest {
         // Given
         queries.cpuBattleBrainRepository.save(
             CpuBattleBrain
-                .startTurn(playerId = "cpu", battleUnitIds = listOf("unit-1"))
+                .startPlayerTurn(playerId = "cpu", battleUnitIds = listOf("unit-1"))
                 .requestCast(battleUnitId = "unit-1", abilityId = "sword")
                 .pullEvents()
                 .second,
@@ -30,7 +30,7 @@ class OnAbilityCastResolvedTest {
         queries.cpuBattleBrainRepository
             .search()!!
             .toDto()
-            .isAwaitingAction
+            .isAwaitingDecision
             .shouldBeFalse()
     }
 }

@@ -15,9 +15,9 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class WhereShouldMoveTest {
+class WhereShouldWalkTest {
     private val queries = InMemoryQueries()
-    private val whereShouldMove = queries.whereShouldMove
+    private val whereShouldWalk = queries.whereShouldWalk
 
     init {
         queries.playerRepository.create(player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU))
@@ -62,45 +62,45 @@ class WhereShouldMoveTest {
     ) = Battlefield.Dto.PositionDto(row = row, column = column)
 
     @Test
-    fun `should move to the position closest to the enemy when the battle unit is healthy`() {
+    fun `should walk to the tile closest to the enemy when the battle unit is healthy`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         givenBattlefieldRow(List(4) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 3))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 2)
     }
 
     @Test
-    fun `should not move when the only enemy is out of reach`() {
+    fun `should not walk when the only enemy is out of reach`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         // The battle unit walks 6 tiles to the enemy, further than it engages enemies.
         givenBattlefieldRow(List(7) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 6))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result.shouldBeNull()
     }
 
     @Test
-    fun `should move to the position closest to the ally when the battle unit is hurt and the enemy is out of reach`() {
+    fun `should walk to the tile closest to the ally when the battle unit is hurt and the enemy is out of reach`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 1)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         givenBattleUnit(id = "ally-battle-unit", playerId = "player-1", remainingHealth = 10)
         givenBattlefieldRow(List(13) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 6, "ally-battle-unit" to 12))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 8)
     }
 
     @Test
-    fun `should move to the position closest to the ally when the battle unit is hurt`() {
+    fun `should walk to the tile closest to the ally when the battle unit is hurt`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 1)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
@@ -108,63 +108,63 @@ class WhereShouldMoveTest {
         // The enemy stands on one side, and the ally on the other.
         givenBattlefieldRow(List(5) { "sand" }, battleUnitColumns = mapOf("enemy-battle-unit" to 0, "battle-unit-1" to 2, "ally-battle-unit" to 4))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 3)
     }
 
     @Test
-    fun `should not move when the current position already offers the best utility`() {
+    fun `should not walk when the current tile already offers the best utility`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         // The battle unit is already next to the enemy.
         givenBattlefieldRow(List(3) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 1, "enemy-battle-unit" to 2))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result.shouldBeNull()
     }
 
     @Test
-    fun `should not move when there are no enemies and no allies`() {
+    fun `should not walk when there are no enemies and no allies`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10)
         givenBattlefieldRow(List(3) { "sand" }, battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result.shouldBeNull()
     }
 
     @Test
-    fun `should move to the healing terrain when the battle unit has low health and other utilities are equivalent`() {
+    fun `should walk to the healing terrain when the battle unit has low health and other utilities are equivalent`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
         givenTerrain(id = "healing", effect = increaseHealthEffect(id = "effect-healing", healing = 10))
         givenBattlefieldRow(listOf("neutral", "healing", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 1)
     }
 
     @Test
-    fun `should move to the neutral terrain when the battle unit has low health and stands on damaging terrain`() {
+    fun `should walk to the neutral terrain when the battle unit has low health and stands on damaging terrain`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
         givenTerrain(id = "damaging", effect = decreaseHealthEffect(id = "effect-damaging", damage = 10))
         givenBattlefieldRow(listOf("damaging", "neutral", "damaging"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 1)
     }
 
     @Test
-    fun `should move to the healing terrain when the battle unit has low health and candidates include neutral and damaging terrains`() {
+    fun `should walk to the healing terrain when the battle unit has low health and the options include neutral and damaging terrains`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
@@ -172,13 +172,13 @@ class WhereShouldMoveTest {
         givenTerrain(id = "damaging", effect = decreaseHealthEffect(id = "effect-damaging", damage = 10))
         givenBattlefieldRow(listOf("neutral", "damaging", "healing", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 2)
     }
 
     @Test
-    fun `should move to the position favored by the existing utilities when the battle unit has high health`() {
+    fun `should walk to the tile favored by the existing utilities when the battle unit has high health`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 90, maxHealthPoints = 100)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
@@ -186,13 +186,13 @@ class WhereShouldMoveTest {
         givenTerrain(id = "healing", effect = increaseHealthEffect(id = "effect-healing", healing = 10))
         givenBattlefieldRow(listOf("neutral", "healing", "neutral", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 3))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 2)
     }
 
     @Test
-    fun `should move to the stronger healing terrain when the battle unit has low health and other utilities are equivalent`() {
+    fun `should walk to the stronger healing terrain when the battle unit has low health and other utilities are equivalent`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
@@ -200,20 +200,20 @@ class WhereShouldMoveTest {
         givenTerrain(id = "weak-healing", effect = increaseHealthEffect(id = "effect-weak-healing", healing = 2))
         givenBattlefieldRow(listOf("neutral", "strong-healing", "weak-healing"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 1)
     }
 
     @Test
-    fun `should move to the less damaging terrain when the battle unit has low health and stands on more damaging terrain`() {
+    fun `should walk to the less damaging terrain when the battle unit has low health and stands on more damaging terrain`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "strong-damaging", effect = decreaseHealthEffect(id = "effect-strong-damaging", damage = 10))
         givenTerrain(id = "weak-damaging", effect = decreaseHealthEffect(id = "effect-weak-damaging", damage = 2))
         givenBattlefieldRow(listOf("strong-damaging", "weak-damaging", "strong-damaging"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
-        val result = whereShouldMove("battle-unit-1")
+        val result = whereShouldWalk("battle-unit-1")
         // Then
         result shouldBe position(0, 1)
     }

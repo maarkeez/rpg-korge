@@ -232,7 +232,7 @@ class CpuWanderBrainTest {
         events shouldBe
             setOf(
                 CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-1")),
-                CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-1")),
+                CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-1")),
             )
     }
 
@@ -249,7 +249,7 @@ class CpuWanderBrainTest {
         events shouldBe
             setOf(
                 CpuWanderBrainEvent.BattleUnitsWanderedAfterRound(battleUnitIds = setOf("knight-1", "rat-2")),
-                CpuBattleBrainEvent.RequestUpdateEngagement(battleUnitIds = setOf("knight-1", "rat-2")),
+                CpuBattleBrainEvent.RequestJoinAndLeaveBattle(battleUnitIds = setOf("knight-1", "rat-2")),
             )
     }
 

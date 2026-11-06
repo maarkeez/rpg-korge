@@ -22,7 +22,7 @@ import kotlin.random.Random
  * - Terrain: the health effect of the tile terrain, weighted by its healing need, as when moving in a battle.
  *
  * Outside its territory (e.g.: after chasing the party in a battle), and while [isReturning] home after leaving it, it
- * heads home: it never rests, and only steps nearer to home, around the harmful terrain. Once home, it wanders again. It
+ * returns: it never rests, and only steps nearer to home, around the harmful terrain. Once home, it wanders again. It
  * stays when home can not be walked to.
  *
  * Distances from home: those of the battle unit's home, as computed once it claimed it ([SearchDistancesFromHome]).
@@ -44,17 +44,17 @@ class WhereShouldWander(
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return null
         val position = searchPosition(occupantId = battleUnitId) ?: return null
         val distanceFromHome = distancesFromHome[position] ?: return null
-        val isHeadingHome = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)
+        val returns = distanceFromHome > WANDER_DISTANCE || (isReturning && distanceFromHome > 0)
         val isOnHarmfulTerrain = terrainHealthEffect(position) < 0
-        if (!isHeadingHome && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
-        // The free tiles next to it that are not harmful, with their distance from home: nearer to home when it heads
-        // home, and within its territory otherwise.
+        if (!returns && !isOnHarmfulTerrain && random.nextDouble() < REST_CHANCE) return null
+        // The free tiles next to it that are not harmful, with their distance from home: nearer to home when it
+        // returns, and within its territory otherwise.
         val steps =
             adjacentPositions(position)
                 .filter { step -> isTileVacant(row = step.row, column = step.column) }
                 .filter { step -> terrainHealthEffect(step) >= 0 }
                 .mapNotNull { step -> distancesFromHome[step]?.let { distance -> step to distance } }
-                .filter { (_, distance) -> if (isHeadingHome) distance < distanceFromHome else distance <= WANDER_DISTANCE }
+                .filter { (_, distance) -> if (returns) distance < distanceFromHome else distance <= WANDER_DISTANCE }
         if (steps.isEmpty()) return null
         // The distances are normalised between the steps and the current tile, so staying is the reference.
         val distances = steps.map { (_, distance) -> distance } + distanceFromHome

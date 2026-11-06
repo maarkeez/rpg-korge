@@ -28,7 +28,7 @@ class EngageEnemies(
         val engagedBattleUnitIds = searchBattleUnitsByPlayerId(playerId = exploringPlayerId).map { battleUnit -> battleUnit.id }
         eventBus.publish(
             setOf(
-                CpuBattleBrainEvent.CombatEngaged(
+                CpuBattleBrainEvent.EnemiesEngaged(
                     playerId = cpuPlayer.id,
                     engagedPlayerId = exploringPlayerId,
                     battleUnitIds = engagingBattleUnitIds,

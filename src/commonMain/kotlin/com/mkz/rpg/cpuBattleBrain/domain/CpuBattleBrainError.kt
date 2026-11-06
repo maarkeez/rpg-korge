@@ -3,9 +3,9 @@ package com.mkz.rpg.cpuBattleBrain.domain
 sealed class CpuBattleBrainError(
     message: String,
 ) : Throwable(message = message) {
-    class NoBattleUnitsToManage : CpuBattleBrainError("At least one battle unit is required to play a CPU turn")
+    class NoBattleUnitsToDecideFor : CpuBattleBrainError("At least one battle unit is required to play a CPU player turn")
 
-    class NotTheNextBattleUnit : CpuBattleBrainError("Only the next battle unit to manage can act")
+    class NotTheNextBattleUnit : CpuBattleBrainError("Only the next battle unit to decide for can act")
 
-    class AlreadyAwaitingAnAction : CpuBattleBrainError("A new action can not be requested while awaiting the previous one")
+    class AlreadyAwaitingADecision : CpuBattleBrainError("A new decision can not be requested while awaiting the previous one")
 }

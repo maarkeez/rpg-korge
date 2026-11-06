@@ -39,7 +39,7 @@ class EngageEnemiesTest {
         engageEnemies(exploringPlayerId = "human")
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+            CpuBattleBrainEvent.EnemiesEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
             BattleEvent.RequestStartBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
         )
     }
@@ -53,7 +53,7 @@ class EngageEnemiesTest {
         engageEnemies(exploringPlayerId = "human")
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.CombatEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
+            CpuBattleBrainEvent.EnemiesEngaged(playerId = "cpu", engagedPlayerId = "human", battleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
             BattleEvent.RequestStartBattle(engagingPlayerId = "cpu", engagedPlayerId = "human", engagingBattleUnitIds = listOf("rat-1"), engagedBattleUnitIds = listOf("knight-1")),
         )
     }

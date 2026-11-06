@@ -11,11 +11,11 @@ import com.mkz.rpg.shared.domain.EventBus
 /**
  * Once a round finishes and the CPU battle units out of the battle have wandered, those that now have an enemy
  * within reach join it, so they play from the next round, and the CPU battle units in the battle without any enemy
- * within reach leave it (e.g.: left behind), but the summons, which never leave it. The engagement is updated even when nobody joins nor leaves, as the next round starts on it.
+ * within reach leave it (e.g.: left behind), but the summons, which never leave it. They are announced even when nobody joins nor leaves, as the next round starts on it.
  * The next round is requested to start right after, on it.
  * Battle units: those in the battle.
  */
-class UpdateEngagement(
+class JoinAndLeaveBattle(
     private val searchHumanPlayer: SearchHumanPlayer,
     private val searchEnemyPlayer: SearchEnemyPlayer,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
@@ -37,7 +37,7 @@ class UpdateEngagement(
                 .filterNot { battleUnitId -> hasEnemyWithinReach(battleUnitId) }
         eventBus.publish(
             setOf(
-                CpuBattleBrainEvent.EngagementUpdated(playerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds),
+                CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds),
                 BattleEvent.RequestStartNextRound(joiningPlayerId = cpuPlayer?.id, joiningBattleUnitIds = joiningBattleUnitIds, leavingBattleUnitIds = leavingBattleUnitIds),
             ),
         )

@@ -3,16 +3,16 @@ package com.mkz.rpg.cpuBattleBrain.domain
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface CpuBattleBrainEvent : DomainEvent {
-    data class CpuBattleBrainInitialized(
+    data class CpuPlayerTurnStarted(
         val playerId: String,
     ) : CpuBattleBrainEvent
 
-    data class CpuBattleUnitActionResolved(
+    data class CpuBattleUnitDecisionResolved(
         val playerId: String,
         val battleUnitId: String,
     ) : CpuBattleBrainEvent
 
-    data class CpuBattleUnitManaged(
+    data class CpuBattleUnitDone(
         val playerId: String,
         val battleUnitId: String,
     ) : CpuBattleBrainEvent
@@ -21,7 +21,7 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
      * Battle units: the CPU battle units with an enemy of the engaged player within reach, which engage it.
      * Engaged battle units: every living battle unit of the engaged player.
      */
-    data class CombatEngaged(
+    data class EnemiesEngaged(
         val playerId: String,
         val engagedPlayerId: String,
         val battleUnitIds: List<String>,
@@ -33,7 +33,7 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
      * Leaving battle units: the CPU battle units in the battle without any enemy within reach, so they leave it.
      * Player: the CPU player, whose battle units join and leave, null when there is none.
      */
-    data class EngagementUpdated(
+    data class CpuBattleUnitsJoinedAndLeft(
         val playerId: String?,
         val joiningBattleUnitIds: List<String>,
         val leavingBattleUnitIds: List<String>,
@@ -45,11 +45,11 @@ sealed interface CpuBattleBrainEvent : DomainEvent {
     ) : CpuBattleBrainEvent
 
     // Requested once every CPU battle unit out of the battle has wandered, after a round finished. Battle units: those in the battle.
-    data class RequestUpdateEngagement(
+    data class RequestJoinAndLeaveBattle(
         val battleUnitIds: Set<String>,
     ) : CpuBattleBrainEvent
 
-    data class CpuTurnFinished(
+    data class CpuPlayerTurnFinished(
         val playerId: String,
     ) : CpuBattleBrainEvent
 }

@@ -34,7 +34,7 @@ import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchDistancesFromHome
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchEnemiesWithinReach
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchTerrainHealthEffect
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhatShouldCast
-import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldMove
+import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWalk
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhereShouldWander
 import com.mkz.rpg.cpuWanderBrain.usecases.queries.IsInSight
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
@@ -165,8 +165,8 @@ class InMemoryQueries(
             healingNeed,
             random,
         )
-    val whereShouldMove =
-        WhereShouldMove(
+    val whereShouldWalk =
+        WhereShouldWalk(
             searchBattleUnitsByPlayerId,
             whereCanWalk,
             searchBattleUnitById,

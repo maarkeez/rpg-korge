@@ -10,8 +10,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrain
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitManaged
-import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuTurnFinished
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitDone
+import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuPlayerTurnFinished
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainMother.cpuBattleBrain
 import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
@@ -25,16 +25,16 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class ManageCpuBattleUnitTest {
+class MakeNextDecisionTest {
     private val queries = InMemoryQueries()
     private val cpuBattleBrainRepository = queries.cpuBattleBrainRepository
     private val eventBus = FakeEventBus()
-    private val manageCpuBattleUnit =
-        ManageCpuBattleUnit(
+    private val makeNextDecision =
+        MakeNextDecision(
             cpuBattleBrainRepository = cpuBattleBrainRepository,
             searchBattleUnitsByPlayerId = queries.searchBattleUnitsByPlayerId,
             whatShouldCast = queries.whatShouldCast,
-            whereShouldMove = queries.whereShouldMove,
+            whereShouldWalk = queries.whereShouldWalk,
             eventBus = eventBus,
         )
     private val cpu = player(id = "cpu", type = CPU).toDto()
@@ -74,7 +74,7 @@ class ManageCpuBattleUnitTest {
             ratAbilities = listOf("sword"),
         )
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestCastAbility(battleUnitId = "unit-1", abilityId = "sword", castGroup = listOf(Battlefield.Dto.PositionDto(row = 0, column = 1))),
@@ -82,12 +82,12 @@ class ManageCpuBattleUnitTest {
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeTrue()
     }
 
     @Test
-    fun `should move and await the move when the next battle unit should move and not cast`() {
+    fun `should walk and await the walk when the next battle unit should walk and not cast`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
         // The rat has no abilities, and walks towards the knight.
@@ -98,18 +98,18 @@ class ManageCpuBattleUnitTest {
             """,
         )
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitInBattle(battleUnitId = "unit-1", walkToRow = 0, walkToColumn = 2))
         cpuBattleBrainRepository
             .search()
             ?.toDto()
-            ?.isAwaitingAction
+            ?.isAwaitingDecision
             .shouldBeTrue()
     }
 
     @Test
-    fun `should manage the battle unit when it has nothing left to do`() {
+    fun `should mark the battle unit done when it has nothing left to do`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
         // The rat has no abilities, and there is no enemy to walk to.
@@ -120,38 +120,38 @@ class ManageCpuBattleUnitTest {
             """,
         )
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitDone(playerId = "cpu", battleUnitId = "unit-1"))
         cpuBattleBrainRepository.search()?.nextBattleUnitId() shouldBe "unit-2"
     }
 
     @Test
-    fun `should manage the battle unit without acting when it has been defeated`() {
+    fun `should mark the battle unit done without acting when it has been defeated`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain())
         queries.battleUnitRepository.create(battleUnit(id = "unit-2", player = cpu))
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuBattleUnitManaged(playerId = "cpu", battleUnitId = "unit-1"))
+        eventBus.shouldHavePublishedEvents(CpuBattleUnitDone(playerId = "cpu", battleUnitId = "unit-1"))
     }
 
     @Test
-    fun `should finish the turn when every battle unit has been managed`() {
+    fun `should finish the player turn when every battle unit is done`() {
         // Given
-        cpuBattleBrainRepository.save(cpuBattleBrain(battleUnitIds = listOf("unit-1")).manageBattleUnit("unit-1").pullEvents().second)
+        cpuBattleBrainRepository.save(cpuBattleBrain(battleUnitIds = listOf("unit-1")).markDone("unit-1").pullEvents().second)
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
+        eventBus.shouldHavePublishedEvents(CpuPlayerTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
     }
 
     @Test
-    fun `should finish the turn when the action limit has been reached`() {
+    fun `should finish the player turn when the decision limit has been reached`() {
         // Given
         var limitedCpuBattleBrain = cpuBattleBrain()
-        repeat(CpuBattleBrain.MAX_ACTIONS_PER_TURN) {
+        repeat(CpuBattleBrain.MAX_DECISIONS_PER_PLAYER_TURN) {
             limitedCpuBattleBrain =
                 limitedCpuBattleBrain
                     .requestCast(battleUnitId = "unit-1", abilityId = "sword")
@@ -159,17 +159,17 @@ class ManageCpuBattleUnitTest {
         }
         cpuBattleBrainRepository.save(limitedCpuBattleBrain.pullEvents().second)
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
-        eventBus.shouldHavePublishedEvents(CpuTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
+        eventBus.shouldHavePublishedEvents(CpuPlayerTurnFinished(playerId = "cpu"), BattleEvent.RequestFinishPlayerTurn)
     }
 
     @Test
-    fun `should not act when the cpu battle brain is awaiting an action`() {
+    fun `should not act when the cpu battle brain is awaiting a decision`() {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain().requestCast(battleUnitId = "unit-1", abilityId = "sword"))
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -179,7 +179,7 @@ class ManageCpuBattleUnitTest {
         // Given
         cpuBattleBrainRepository.save(cpuBattleBrain(playerId = "another-cpu"))
         // When
-        manageCpuBattleUnit("cpu")
+        makeNextDecision("cpu")
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

@@ -11,11 +11,11 @@ import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import kotlin.test.Test
 
-class ReengageEnemiesTest {
+class JoinDisengagedBattleTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val reengageEnemies =
-        ReengageEnemies(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
+    private val joinDisengagedBattle =
+        JoinDisengagedBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
 
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)
@@ -43,10 +43,10 @@ class ReengageEnemiesTest {
         // Given
         givenDisengagedBattle(ratIds = listOf("rat-2", "rat-3"))
         // When
-        reengageEnemies(battleUnitIds = setOf("knight-1"))
+        joinDisengagedBattle(battleUnitIds = setOf("knight-1"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = listOf("rat-2"), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = listOf("rat-2")),
         )
     }
@@ -56,10 +56,10 @@ class ReengageEnemiesTest {
         // Given
         givenDisengagedBattle(ratIds = listOf("rat-3"))
         // When
-        reengageEnemies(battleUnitIds = setOf("knight-1"))
+        joinDisengagedBattle(battleUnitIds = setOf("knight-1"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
         )
     }
@@ -69,10 +69,10 @@ class ReengageEnemiesTest {
         // Given: the knight left the battle, which the rat-2 is still in.
         givenDisengagedBattle(ratIds = listOf("rat-2"))
         // When
-        reengageEnemies(battleUnitIds = setOf("rat-2"))
+        joinDisengagedBattle(battleUnitIds = setOf("rat-2"))
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = "cpu", joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = "cpu", joiningBattleUnitIds = emptyList()),
         )
     }
@@ -80,10 +80,10 @@ class ReengageEnemiesTest {
     @Test
     fun `should request the battle to finish without anybody joining when there is no human player`() {
         // When
-        reengageEnemies(battleUnitIds = emptySet())
+        joinDisengagedBattle(battleUnitIds = emptySet())
         // Then
         eventBus.shouldHavePublishedEvents(
-            CpuBattleBrainEvent.EngagementUpdated(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
+            CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft(playerId = null, joiningBattleUnitIds = emptyList(), leavingBattleUnitIds = emptyList()),
             BattleEvent.RequestResolveDisengagedBattle(joiningPlayerId = null, joiningBattleUnitIds = emptyList()),
         )
     }
