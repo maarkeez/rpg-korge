@@ -18,13 +18,11 @@ import com.mkz.rpg.battleUnit.adapters.events.OnRequestRespawnBattleUnit
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestSwapBattleUnits
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnitInBattle
 import com.mkz.rpg.battleUnit.adapters.events.OnRequestWalkBattleUnitOutOfBattle
-import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectTriggered
+import com.mkz.rpg.battleUnit.adapters.events.OnTerrainEffectApplied
 import com.mkz.rpg.battleUnit.adapters.save.BattleUnitSnapshottable
 import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
-import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnDefeatedEffectsToAdjacentAllies
-import com.mkz.rpg.battleUnit.usecases.commands.ApplyOnTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
@@ -39,6 +37,8 @@ import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceC
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.SwapBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.TriggerOnDefeatedEffects
+import com.mkz.rpg.battleUnit.usecases.commands.TriggerOnPlayerTurnStartedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.VanishSummons
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitInBattle
 import com.mkz.rpg.battleUnit.usecases.commands.WalkBattleUnitOutOfBattle
@@ -198,8 +198,8 @@ class BattleUnitApi(
             battleUnitDeployment,
             abilityApi.searchAbilityById,
         )
-    val applyOnDefeatedEffectsToAdjacentAllies =
-        ApplyOnDefeatedEffectsToAdjacentAllies(
+    val triggerOnDefeatedEffects =
+        TriggerOnDefeatedEffects(
             battleUnitRepository,
             effectApi.searchEffectById,
             battlefieldApi.searchOccupant,
@@ -215,8 +215,8 @@ class BattleUnitApi(
         )
     val areAllBattleUnitsDefeated = AreAllBattleUnitsDefeated(battleUnitRepository)
     val searchBattleUnitsByPlayerId = SearchBattleUnitsByPlayerId(battleUnitRepository)
-    val applyOnTurnStartedEffects =
-        ApplyOnTurnStartedEffects(
+    val triggerOnPlayerTurnStartedEffects =
+        TriggerOnPlayerTurnStartedEffects(
             effectApi.searchEffectById,
             searchBattleUnitsByPlayerId,
             battleUnitRepository,
@@ -233,12 +233,12 @@ class BattleUnitApi(
     val requestLeaveBattle = RequestLeaveBattle(areAllBattleUnitsDefeated, eventBus)
 
     // Events
-    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, applyOnTurnStartedEffects, replenishMana, eventBus)
+    private val onPlayerTurnStarted = OnPlayerTurnStarted(resetBattleUnitActionsAndReduceCooldowns, triggerOnPlayerTurnStartedEffects, replenishMana, eventBus)
     private val onPlayerTurnFinished = OnPlayerTurnFinished(reduceRemainingSummonDurations, eventBus)
     private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(vanishSummons, eventBus)
     private val onAbilityCasted = OnAbilityCasted(requestEffectApplicationToCastTargets, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(requestJoinBattle, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(applyOnDefeatedEffectsToAdjacentAllies, requestLeaveBattle, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(triggerOnDefeatedEffects, requestLeaveBattle, eventBus)
     private val onBattleUnitVanished = OnBattleUnitVanished(requestLeaveBattle, eventBus)
     private val onRequestCastAbility = OnRequestCastAbility(castAbility, eventBus)
     private val onRequestWalkBattleUnitInBattle = OnRequestWalkBattleUnitInBattle(walkBattleUnitInBattle, eventBus)
@@ -250,7 +250,7 @@ class BattleUnitApi(
     private val onRequestInitialiseBattleUnits = OnRequestInitialiseBattleUnits(initialiseBattleUnits, eventBus)
     private val onRequestApplyEffect = OnRequestApplyEffect(applyEffect, eventBus)
     private val onRequestRemoveEquippedEffects = OnRequestRemoveEquippedEffects(removeEquippedEffects, eventBus)
-    private val onTerrainEffectTriggered = OnTerrainEffectTriggered(applyEffect, eventBus)
+    private val onTerrainEffectApplied = OnTerrainEffectApplied(applyEffect, eventBus)
 
     suspend fun init() {
         battleUnitLoader.initResources()

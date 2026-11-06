@@ -3,7 +3,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
@@ -68,7 +68,7 @@ class DeployBattleUnitEffectAcceptanceTest {
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
-        val deployEffect = EffectMother.deployBattleUnitEffect(id = deployEffectId, unitId = summonUnitId)
+        val deployEffect = EffectMother.summonEffect(id = deployEffectId, unitId = summonUnitId)
         effectApi.requestEffectCreation(deployEffect.toDto())
 
         val deployAbility =
@@ -76,7 +76,7 @@ class DeployBattleUnitEffectAcceptanceTest {
                 id = deployAbilityId,
                 manaCost = 0,
                 cooldown = 0,
-                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = deployEffectId, target = TargetExpressionDto.Type.TARGETED_TILE)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = deployEffectId, target = EffectTargetDto.Type.TARGETED_TILE)),
                 targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
                 summonDuration = 5,
             )

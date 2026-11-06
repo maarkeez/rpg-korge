@@ -2,5 +2,5 @@
 type = "LEARN_ABILITY"
 abilityId = "bee"
 
-[application]
+[timing]
 type = "IMMEDIATELY"

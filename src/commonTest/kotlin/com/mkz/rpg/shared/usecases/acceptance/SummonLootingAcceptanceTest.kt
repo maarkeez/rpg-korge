@@ -2,7 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
@@ -83,14 +83,14 @@ class SummonLootingAcceptanceTest {
         lootableItemApi.initialiseLootableItems()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
-        effectApi.requestEffectCreation(EffectMother.deployBattleUnitEffect(id = "deploy-summon", unitId = "summon").toDto())
+        effectApi.requestEffectCreation(EffectMother.summonEffect(id = "deploy-summon", unitId = "summon").toDto())
         abilityApi.requestAbilityCreation(
             AbilityMother
                 .ability(
                     id = "summon",
                     manaCost = 0,
                     cooldown = 0,
-                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = TargetExpressionDto.Type.TARGETED_TILE)),
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = EffectTargetDto.Type.TARGETED_TILE)),
                     targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
                     summonDuration = 5,
                 ).toDto(),

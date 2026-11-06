@@ -1,7 +1,7 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
@@ -34,7 +34,7 @@ class ShopPresenterTest {
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            effects = listOf(increaseHealthEffect(id = "cure").toDto(), increaseMaximumHealthEffect(id = "sturdy").toDto()),
+            effects = listOf(healEffect(id = "cure").toDto(), increaseMaximumHealthEffect(id = "sturdy").toDto()),
             lootableItems =
                 listOf(
                     consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),

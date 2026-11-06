@@ -8,8 +8,8 @@ import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -31,7 +31,7 @@ class RequestAbilityCreationTest {
     @Test
     fun `should create ability`() {
         // Given
-        val effect = decreaseHealthEffect()
+        val effect = damageEffect()
         effectRepository.create(effect)
         val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id))).toDto()
         // When
@@ -45,7 +45,7 @@ class RequestAbilityCreationTest {
     @Test
     fun `should create an ability deploying a battle unit with its summon duration`() {
         // Given
-        val effect = deployBattleUnitEffect()
+        val effect = summonEffect()
         effectRepository.create(effect)
         val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = 5).toDto()
         // When
@@ -57,7 +57,7 @@ class RequestAbilityCreationTest {
     @Test
     fun `should fail when an ability deploying a battle unit has no summon duration`() {
         // Given
-        val effect = deployBattleUnitEffect()
+        val effect = summonEffect()
         effectRepository.create(effect)
         val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = null).toDto()
         // When
@@ -70,7 +70,7 @@ class RequestAbilityCreationTest {
     @Test
     fun `should fail when an ability deploying no battle unit has a summon duration`() {
         // Given
-        val effect = decreaseHealthEffect()
+        val effect = damageEffect()
         effectRepository.create(effect)
         val ability = ability(abilityEffects = listOf(abilityEffect(effectId = effect.toDto().id)), summonDuration = 5).toDto()
         // When

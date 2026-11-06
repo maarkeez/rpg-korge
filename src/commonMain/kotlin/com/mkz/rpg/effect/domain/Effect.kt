@@ -1,49 +1,49 @@
 package com.mkz.rpg.effect.domain
 
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.BeforeApplyingEffectDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DAMAGE
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.HEAL
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.RESTORE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.SUMMON
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.EffectError.ApplicationDurationAboveLimit
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.BeforeApplyingEffectDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.OnPlayerTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
+import com.mkz.rpg.effect.domain.EffectError.AmountAboveLimit
+import com.mkz.rpg.effect.domain.EffectError.DurationAboveLimit
 import com.mkz.rpg.effect.domain.EffectError.EmptyEffectId
-import com.mkz.rpg.effect.domain.EffectError.InvalidEffectApplication
-import com.mkz.rpg.effect.domain.EffectError.MissingEffectApplicationDetails
-import com.mkz.rpg.effect.domain.EffectError.NegativeApplicationDuration
-import com.mkz.rpg.effect.domain.EffectError.NegativePower
-import com.mkz.rpg.effect.domain.EffectError.PowerAboveLimit
+import com.mkz.rpg.effect.domain.EffectError.InvalidEffectTiming
+import com.mkz.rpg.effect.domain.EffectError.MissingEffectTimingDetails
+import com.mkz.rpg.effect.domain.EffectError.NegativeAmount
+import com.mkz.rpg.effect.domain.EffectError.NegativeDuration
 import kotlin.jvm.JvmInline
 
 @ConsistentCopyVisibility
 data class Effect private constructor(
     private val id: Id,
     private val outcome: Outcome,
-    private val application: Application,
+    private val timing: Timing,
     private val events: Set<EffectEvent>,
 ) {
     companion object {
         /**
-         * Fails when the outcome only makes sense while an item is equipped but the application is not, or the other way round,
+         * Fails when the outcome only makes sense while an item is equipped but the timing is not, or the other way round,
          * and when learning an ability is not applied immediately.
          */
         fun create(dto: Dto): Effect {
             val outcome = Outcome(dto.outcome)
-            val application = Application(dto.application)
-            if (outcome.lastsWhileEquipped() != application.isWhileEquipped()) throw InvalidEffectApplication()
-            if (outcome.learnsAbility() && !application.isImmediately()) throw InvalidEffectApplication()
+            val timing = Timing(dto.timing)
+            if (outcome.lastsWhileEquipped() != timing.isWhileEquipped()) throw InvalidEffectTiming()
+            if (outcome.learnsAbility() && !timing.isImmediately()) throw InvalidEffectTiming()
             return Effect(
                 id = Id(dto.id),
                 outcome = outcome,
-                application = application,
+                timing = timing,
                 events = setOf(EffectEvent.EffectCreated(dto.id)),
             )
         }
@@ -55,7 +55,7 @@ data class Effect private constructor(
         Dto(
             id = id.value,
             outcome = outcome.toDto(),
-            application = application.toDto(),
+            timing = timing.toDto(),
         )
 
     @JvmInline private value class Id(
@@ -70,15 +70,15 @@ data class Effect private constructor(
         companion object {
             operator fun invoke(dto: Dto.EffectOutcomeDto): Outcome =
                 when (dto.type) {
-                    DECREASE_HEALTH -> DecreaseHealth(dto.decreaseHealth!!.damage)
-                    INCREASE_HEALTH -> IncreaseHealth(dto.increaseHealth!!.healing)
+                    DAMAGE -> Damage(dto.damage!!.damage)
+                    HEAL -> Heal(dto.heal!!.healing)
                     NEGATE_INCREASE_HEALTH -> NegateIncreaseHealth
                     TELEPORT -> Teleport
-                    APPLY_EFFECT_ON_ADJACENT_ALLIES -> ApplyEffectOnAdjacentAllies(dto.applyEffectOnAdjacentAllies!!.effectId)
-                    DEPLOY_BATTLE_UNIT -> DeployBattleUnit(dto.deployBattleUnit!!.unitId)
-                    INCREASE_MANA -> IncreaseMana(dto.increaseMana!!.mana)
-                    INCREASE_MAXIMUM_HEALTH -> IncreaseMaximumHealth(dto.increaseMaximumHealth!!.healthPoints)
-                    INCREASE_MAXIMUM_MANA -> IncreaseMaximumMana(dto.increaseMaximumMana!!.manaPoints)
+                    APPLY_EFFECT_TO_ADJACENT_ALLIES -> ApplyEffectToAdjacentAllies(dto.applyEffectToAdjacentAllies!!.effectId)
+                    SUMMON -> Summon(dto.summon!!.unitId)
+                    RESTORE_MANA -> RestoreMana(dto.restoreMana!!.mana)
+                    INCREASE_MAXIMUM_HEALTH -> IncreaseMaximumHealth(dto.increaseMaximumHealth!!.maximumHealth)
+                    INCREASE_MAXIMUM_MANA -> IncreaseMaximumMana(dto.increaseMaximumMana!!.maximumMana)
                     LEARN_ABILITY -> LearnAbility(dto.learnAbility!!.abilityId)
                 }
         }
@@ -91,68 +91,68 @@ data class Effect private constructor(
 
         fun toDto() =
             when (this) {
-                is DecreaseHealth -> Dto.EffectOutcomeDto.decreaseHealth(damage = damage)
-                is IncreaseHealth -> Dto.EffectOutcomeDto.increaseHealth(healing = healing)
+                is Damage -> Dto.EffectOutcomeDto.damage(damage = damage)
+                is Heal -> Dto.EffectOutcomeDto.heal(healing = healing)
                 NegateIncreaseHealth -> Dto.EffectOutcomeDto.negateIncreaseHealth()
                 Teleport -> Dto.EffectOutcomeDto.teleport()
-                is ApplyEffectOnAdjacentAllies -> Dto.EffectOutcomeDto.applyEffectOnAdjacentAllies(effectId = effectId)
-                is DeployBattleUnit -> Dto.EffectOutcomeDto.deployBattleUnit(unitId = unitId)
-                is IncreaseMana -> Dto.EffectOutcomeDto.increaseMana(mana = mana)
-                is IncreaseMaximumHealth -> Dto.EffectOutcomeDto.increaseMaximumHealth(healthPoints = healthPoints)
-                is IncreaseMaximumMana -> Dto.EffectOutcomeDto.increaseMaximumMana(manaPoints = manaPoints)
+                is ApplyEffectToAdjacentAllies -> Dto.EffectOutcomeDto.applyEffectToAdjacentAllies(effectId = effectId)
+                is Summon -> Dto.EffectOutcomeDto.summon(unitId = unitId)
+                is RestoreMana -> Dto.EffectOutcomeDto.restoreMana(mana = mana)
+                is IncreaseMaximumHealth -> Dto.EffectOutcomeDto.increaseMaximumHealth(maximumHealth = maximumHealth)
+                is IncreaseMaximumMana -> Dto.EffectOutcomeDto.increaseMaximumMana(maximumMana = maximumMana)
                 is LearnAbility -> Dto.EffectOutcomeDto.learnAbility(abilityId = abilityId)
             }
 
-        @JvmInline private value class DecreaseHealth(
+        @JvmInline private value class Damage(
             val damage: Int,
         ) : Outcome {
             init {
-                if (damage < 0) throw NegativePower()
-                if (damage > 999) throw PowerAboveLimit()
+                if (damage < 0) throw NegativeAmount()
+                if (damage > 999) throw AmountAboveLimit()
             }
         }
 
-        @JvmInline private value class IncreaseHealth(
+        @JvmInline private value class Heal(
             val healing: Int,
         ) : Outcome {
             init {
-                if (healing < 0) throw NegativePower()
-                if (healing > 999) throw PowerAboveLimit()
+                if (healing < 0) throw NegativeAmount()
+                if (healing > 999) throw AmountAboveLimit()
             }
         }
 
-        @JvmInline private value class IncreaseMana(
+        @JvmInline private value class RestoreMana(
             val mana: Int,
         ) : Outcome {
             init {
-                if (mana < 0) throw NegativePower()
-                if (mana > 999) throw PowerAboveLimit()
+                if (mana < 0) throw NegativeAmount()
+                if (mana > 999) throw AmountAboveLimit()
             }
         }
 
         @JvmInline private value class IncreaseMaximumHealth(
-            val healthPoints: Int,
+            val maximumHealth: Int,
         ) : Outcome {
             init {
-                if (healthPoints < 0) throw NegativePower()
-                if (healthPoints > 999) throw PowerAboveLimit()
+                if (maximumHealth < 0) throw NegativeAmount()
+                if (maximumHealth > 999) throw AmountAboveLimit()
             }
         }
 
         @JvmInline private value class IncreaseMaximumMana(
-            val manaPoints: Int,
+            val maximumMana: Int,
         ) : Outcome {
             init {
-                if (manaPoints < 0) throw NegativePower()
-                if (manaPoints > 999) throw PowerAboveLimit()
+                if (maximumMana < 0) throw NegativeAmount()
+                if (maximumMana > 999) throw AmountAboveLimit()
             }
         }
 
-        @JvmInline private value class ApplyEffectOnAdjacentAllies(
+        @JvmInline private value class ApplyEffectToAdjacentAllies(
             val effectId: String,
         ) : Outcome
 
-        @JvmInline private value class DeployBattleUnit(
+        @JvmInline private value class Summon(
             val unitId: String,
         ) : Outcome
 
@@ -166,15 +166,15 @@ data class Effect private constructor(
         private object Teleport : Outcome
     }
 
-    private sealed interface Application {
+    private sealed interface Timing {
         companion object {
-            operator fun invoke(dto: ApplicationDto): Application =
+            operator fun invoke(dto: TimingDto): Timing =
                 when (dto.type) {
-                    ApplicationTypeDto.IMMEDIATELY -> Immediately
-                    ApplicationTypeDto.ON_TURN_STARTED -> OnTurnStarted(dto.onTurnStarted ?: throw MissingEffectApplicationDetails())
-                    ApplicationTypeDto.BEFORE_APPLYING_EFFECT -> BeforeApplyingEffect(dto.beforeApplyingEffect ?: throw MissingEffectApplicationDetails())
-                    ApplicationTypeDto.ON_DEFEATED -> OnDefeated
-                    ApplicationTypeDto.WHILE_EQUIPPED -> WhileEquipped
+                    TimingTypeDto.IMMEDIATELY -> Immediately
+                    TimingTypeDto.ON_PLAYER_TURN_STARTED -> OnPlayerTurnStarted(dto.onPlayerTurnStarted ?: throw MissingEffectTimingDetails())
+                    TimingTypeDto.BEFORE_APPLYING_EFFECT -> BeforeApplyingEffect(dto.beforeApplyingEffect ?: throw MissingEffectTimingDetails())
+                    TimingTypeDto.ON_DEFEATED -> OnDefeated
+                    TimingTypeDto.WHILE_EQUIPPED -> WhileEquipped
                 }
         }
 
@@ -183,47 +183,47 @@ data class Effect private constructor(
         fun isImmediately() = this is Immediately
 
         fun toDto() =
-            ApplicationDto(
+            TimingDto(
                 type =
                     when (this) {
-                        is Immediately -> ApplicationTypeDto.IMMEDIATELY
-                        is OnTurnStarted -> ApplicationTypeDto.ON_TURN_STARTED
-                        is BeforeApplyingEffect -> ApplicationTypeDto.BEFORE_APPLYING_EFFECT
-                        is OnDefeated -> ApplicationTypeDto.ON_DEFEATED
-                        is WhileEquipped -> ApplicationTypeDto.WHILE_EQUIPPED
+                        is Immediately -> TimingTypeDto.IMMEDIATELY
+                        is OnPlayerTurnStarted -> TimingTypeDto.ON_PLAYER_TURN_STARTED
+                        is BeforeApplyingEffect -> TimingTypeDto.BEFORE_APPLYING_EFFECT
+                        is OnDefeated -> TimingTypeDto.ON_DEFEATED
+                        is WhileEquipped -> TimingTypeDto.WHILE_EQUIPPED
                     },
-                onTurnStarted = if (this is OnTurnStarted) toTurnStartedDto() else null,
+                onPlayerTurnStarted = if (this is OnPlayerTurnStarted) toPlayerTurnStartedDto() else null,
                 beforeApplyingEffect = if (this is BeforeApplyingEffect) toBeforeApplyingEffectDto() else null,
             )
 
-        private object Immediately : Application
+        private object Immediately : Timing
 
-        private object OnDefeated : Application
+        private object OnDefeated : Timing
 
         /** Active from the moment its item is equipped until it is unequipped. */
-        private object WhileEquipped : Application
+        private object WhileEquipped : Timing
 
-        private data class OnTurnStarted(
+        private data class OnPlayerTurnStarted(
             val duration: Int,
-        ) : Application {
-            constructor(dto: OnTurnStartedDto) : this(duration = dto.duration)
+        ) : Timing {
+            constructor(dto: OnPlayerTurnStartedDto) : this(duration = dto.duration)
 
             init {
-                if (duration < 0) throw NegativeApplicationDuration()
-                if (duration > 99) throw ApplicationDurationAboveLimit()
+                if (duration < 0) throw NegativeDuration()
+                if (duration > 99) throw DurationAboveLimit()
             }
 
-            fun toTurnStartedDto() = OnTurnStartedDto(duration = duration)
+            fun toPlayerTurnStartedDto() = OnPlayerTurnStartedDto(duration = duration)
         }
 
         private data class BeforeApplyingEffect(
             val duration: Int,
-        ) : Application {
+        ) : Timing {
             constructor(dto: BeforeApplyingEffectDto) : this(duration = dto.duration)
 
             init {
-                if (duration < 0) throw NegativeApplicationDuration()
-                if (duration > 99) throw ApplicationDurationAboveLimit()
+                if (duration < 0) throw NegativeDuration()
+                if (duration > 99) throw DurationAboveLimit()
             }
 
             fun toBeforeApplyingEffectDto() = BeforeApplyingEffectDto(duration = duration)
@@ -233,15 +233,15 @@ data class Effect private constructor(
     data class Dto(
         val id: String,
         val outcome: EffectOutcomeDto,
-        val application: ApplicationDto,
+        val timing: TimingDto,
     ) {
         data class EffectApplicationDto(
-            val source: ApplicationSourceDto,
-            val target: EffectTargetDto,
+            val source: SourceDto,
+            val recipient: RecipientDto,
             val effectId: String,
-            val destination: EffectTargetDto?,
+            val destination: RecipientDto?,
         ) {
-            data class ApplicationSourceDto(
+            data class SourceDto(
                 val type: SourceTypeDto,
                 val battleUnitId: String?,
                 val terrainId: String?,
@@ -259,7 +259,7 @@ data class Effect private constructor(
                     fun battleUnit(
                         battleUnitId: String,
                         abilityId: String? = null,
-                    ) = ApplicationSourceDto(
+                    ) = SourceDto(
                         type = SourceTypeDto.BATTLE_UNIT,
                         battleUnitId = battleUnitId,
                         terrainId = null,
@@ -268,7 +268,7 @@ data class Effect private constructor(
                     )
 
                     fun terrain(terrainId: String) =
-                        ApplicationSourceDto(
+                        SourceDto(
                             type = SourceTypeDto.TERRAIN,
                             battleUnitId = null,
                             terrainId = terrainId,
@@ -278,7 +278,7 @@ data class Effect private constructor(
 
                     /** A consumed or equipped item. */
                     fun item(lootableItemId: String) =
-                        ApplicationSourceDto(
+                        SourceDto(
                             type = SourceTypeDto.ITEM,
                             battleUnitId = null,
                             terrainId = null,
@@ -290,18 +290,18 @@ data class Effect private constructor(
         }
 
         /** A battle unit, or a position of the battlefield. */
-        data class EffectTargetDto(
+        data class RecipientDto(
             val type: TypeDto,
             val battleUnitId: String?,
             val position: PositionDto?,
         ) {
             companion object {
-                fun battleUnit(battleUnitId: String) = EffectTargetDto(type = TypeDto.BATTLE_UNIT, battleUnitId = battleUnitId, position = null)
+                fun battleUnit(battleUnitId: String) = RecipientDto(type = TypeDto.BATTLE_UNIT, battleUnitId = battleUnitId, position = null)
 
                 fun position(
                     row: Int,
                     column: Int,
-                ) = EffectTargetDto(type = TypeDto.POSITION, battleUnitId = null, position = PositionDto(row = row, column = column))
+                ) = RecipientDto(type = TypeDto.POSITION, battleUnitId = null, position = PositionDto(row = row, column = column))
             }
 
             enum class TypeDto {
@@ -317,34 +317,34 @@ data class Effect private constructor(
 
         data class EffectOutcomeDto(
             val type: TypeDto,
-            val decreaseHealth: DecreaseHealthDto?,
-            val increaseHealth: IncreaseHealthDto?,
-            val applyEffectOnAdjacentAllies: ApplyEffectOnAdjacentAlliesDto?,
-            val deployBattleUnit: DeployBattleUnitDto?,
-            val increaseMana: IncreaseManaDto?,
+            val damage: DamageDto?,
+            val heal: HealDto?,
+            val applyEffectToAdjacentAllies: ApplyEffectToAdjacentAlliesDto?,
+            val summon: SummonDto?,
+            val restoreMana: RestoreManaDto?,
             val increaseMaximumHealth: IncreaseMaximumHealthDto?,
             val increaseMaximumMana: IncreaseMaximumManaDto?,
             val learnAbility: LearnAbilityDto?,
         ) {
             companion object {
-                fun decreaseHealth(damage: Int) = withoutDetails(TypeDto.DECREASE_HEALTH).copy(decreaseHealth = DecreaseHealthDto(damage = damage))
+                fun damage(damage: Int) = withoutDetails(TypeDto.DAMAGE).copy(damage = DamageDto(damage = damage))
 
-                fun increaseHealth(healing: Int) = withoutDetails(TypeDto.INCREASE_HEALTH).copy(increaseHealth = IncreaseHealthDto(healing = healing))
+                fun heal(healing: Int) = withoutDetails(TypeDto.HEAL).copy(heal = HealDto(healing = healing))
 
                 fun negateIncreaseHealth() = withoutDetails(TypeDto.NEGATE_INCREASE_HEALTH)
 
                 fun teleport() = withoutDetails(TypeDto.TELEPORT)
 
-                fun applyEffectOnAdjacentAllies(effectId: String) =
-                    withoutDetails(TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES).copy(applyEffectOnAdjacentAllies = ApplyEffectOnAdjacentAlliesDto(effectId = effectId))
+                fun applyEffectToAdjacentAllies(effectId: String) =
+                    withoutDetails(TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES).copy(applyEffectToAdjacentAllies = ApplyEffectToAdjacentAlliesDto(effectId = effectId))
 
-                fun deployBattleUnit(unitId: String) = withoutDetails(TypeDto.DEPLOY_BATTLE_UNIT).copy(deployBattleUnit = DeployBattleUnitDto(unitId = unitId))
+                fun summon(unitId: String) = withoutDetails(TypeDto.SUMMON).copy(summon = SummonDto(unitId = unitId))
 
-                fun increaseMana(mana: Int) = withoutDetails(TypeDto.INCREASE_MANA).copy(increaseMana = IncreaseManaDto(mana = mana))
+                fun restoreMana(mana: Int) = withoutDetails(TypeDto.RESTORE_MANA).copy(restoreMana = RestoreManaDto(mana = mana))
 
-                fun increaseMaximumHealth(healthPoints: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_HEALTH).copy(increaseMaximumHealth = IncreaseMaximumHealthDto(healthPoints = healthPoints))
+                fun increaseMaximumHealth(maximumHealth: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_HEALTH).copy(increaseMaximumHealth = IncreaseMaximumHealthDto(maximumHealth = maximumHealth))
 
-                fun increaseMaximumMana(manaPoints: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_MANA).copy(increaseMaximumMana = IncreaseMaximumManaDto(manaPoints = manaPoints))
+                fun increaseMaximumMana(maximumMana: Int) = withoutDetails(TypeDto.INCREASE_MAXIMUM_MANA).copy(increaseMaximumMana = IncreaseMaximumManaDto(maximumMana = maximumMana))
 
                 fun learnAbility(abilityId: String) = withoutDetails(TypeDto.LEARN_ABILITY).copy(learnAbility = LearnAbilityDto(abilityId = abilityId))
 
@@ -352,11 +352,11 @@ data class Effect private constructor(
                 private fun withoutDetails(type: TypeDto) =
                     EffectOutcomeDto(
                         type = type,
-                        decreaseHealth = null,
-                        increaseHealth = null,
-                        applyEffectOnAdjacentAllies = null,
-                        deployBattleUnit = null,
-                        increaseMana = null,
+                        damage = null,
+                        heal = null,
+                        applyEffectToAdjacentAllies = null,
+                        summon = null,
+                        restoreMana = null,
                         increaseMaximumHealth = null,
                         increaseMaximumMana = null,
                         learnAbility = null,
@@ -364,44 +364,44 @@ data class Effect private constructor(
             }
 
             enum class TypeDto {
-                DECREASE_HEALTH,
-                INCREASE_HEALTH,
+                DAMAGE,
+                HEAL,
                 NEGATE_INCREASE_HEALTH,
                 TELEPORT,
-                APPLY_EFFECT_ON_ADJACENT_ALLIES,
-                DEPLOY_BATTLE_UNIT,
-                INCREASE_MANA,
+                APPLY_EFFECT_TO_ADJACENT_ALLIES,
+                SUMMON,
+                RESTORE_MANA,
                 INCREASE_MAXIMUM_HEALTH,
                 INCREASE_MAXIMUM_MANA,
                 LEARN_ABILITY,
             }
 
-            data class DecreaseHealthDto(
+            data class DamageDto(
                 val damage: Int,
             )
 
-            data class IncreaseHealthDto(
+            data class HealDto(
                 val healing: Int,
             )
 
-            data class ApplyEffectOnAdjacentAlliesDto(
+            data class ApplyEffectToAdjacentAlliesDto(
                 val effectId: String,
             )
 
-            data class DeployBattleUnitDto(
+            data class SummonDto(
                 val unitId: String,
             )
 
-            data class IncreaseManaDto(
+            data class RestoreManaDto(
                 val mana: Int,
             )
 
             data class IncreaseMaximumHealthDto(
-                val healthPoints: Int,
+                val maximumHealth: Int,
             )
 
             data class IncreaseMaximumManaDto(
-                val manaPoints: Int,
+                val maximumMana: Int,
             )
 
             data class LearnAbilityDto(
@@ -409,20 +409,20 @@ data class Effect private constructor(
             )
         }
 
-        data class ApplicationDto(
-            val type: ApplicationTypeDto,
-            val onTurnStarted: OnTurnStartedDto?,
+        data class TimingDto(
+            val type: TimingTypeDto,
+            val onPlayerTurnStarted: OnPlayerTurnStartedDto?,
             val beforeApplyingEffect: BeforeApplyingEffectDto?,
         ) {
-            enum class ApplicationTypeDto {
+            enum class TimingTypeDto {
                 IMMEDIATELY,
-                ON_TURN_STARTED,
+                ON_PLAYER_TURN_STARTED,
                 BEFORE_APPLYING_EFFECT,
                 ON_DEFEATED,
                 WHILE_EQUIPPED,
             }
 
-            data class OnTurnStartedDto(
+            data class OnPlayerTurnStartedDto(
                 val duration: Int,
             )
 

@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.usecases.queries
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
@@ -31,7 +31,7 @@ class CanConsumeItemTest {
     @BeforeTest
     fun setUp() {
         queries.effectRepository.create(learnAbilityEffect(id = "learn-teleport", abilityId = "teleport"))
-        queries.effectRepository.create(increaseHealthEffect(id = "heal"))
+        queries.effectRepository.create(healEffect(id = "heal"))
         queries.lootableItemRepository.create(consumableLootableItem(id = "teleport-essence", consumable = consumable(effectIds = setOf("learn-teleport"))))
         queries.lootableItemRepository.create(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))))
         queries.lootableItemRepository.create(equippableLootableItem(id = "hammer"))

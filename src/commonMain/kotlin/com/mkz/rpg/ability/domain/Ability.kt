@@ -99,11 +99,11 @@ data class Ability private constructor(
 
         private data class AbilityEffect(
             val effectId: EffectId,
-            val target: TargetExpression,
+            val target: EffectTarget,
         ) {
-            constructor(dto: Dto.AbilityEffectDto) : this(EffectId(dto.effectId), TargetExpression(dto.target))
+            constructor(dto: Dto.AbilityEffectDto) : this(EffectId(dto.effectId), EffectTarget(dto.target))
 
-            fun toDto() = Dto.AbilityEffectDto(effectId = effectId.value, target = TargetExpression.of(target))
+            fun toDto() = Dto.AbilityEffectDto(effectId = effectId.value, target = EffectTarget.of(target))
 
             @JvmInline private value class EffectId(
                 val value: String,
@@ -111,36 +111,36 @@ data class Ability private constructor(
         }
     }
 
-    sealed interface TargetExpression {
-        data object Caster : TargetExpression
+    sealed interface EffectTarget {
+        data object Caster : EffectTarget
 
-        data object TargetedBattleUnit : TargetExpression
+        data object TargetedBattleUnit : EffectTarget
 
-        data object TargetedTile : TargetExpression
+        data object TargetedTile : EffectTarget
 
-        data object CasterTile : TargetExpression
+        data object CasterTile : EffectTarget
 
-        data object AdjacentAllies : TargetExpression
+        data object AdjacentAllies : EffectTarget
 
         companion object {
-            operator fun invoke(dto: Dto.TargetExpressionDto): TargetExpression =
+            operator fun invoke(dto: Dto.EffectTargetDto): EffectTarget =
                 when (dto.type) {
-                    Dto.TargetExpressionDto.Type.CASTER -> Caster
-                    Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT -> TargetedBattleUnit
-                    Dto.TargetExpressionDto.Type.TARGETED_TILE -> TargetedTile
-                    Dto.TargetExpressionDto.Type.CASTER_TILE -> CasterTile
-                    Dto.TargetExpressionDto.Type.ADJACENT_ALLIES -> AdjacentAllies
+                    Dto.EffectTargetDto.Type.CASTER -> Caster
+                    Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT -> TargetedBattleUnit
+                    Dto.EffectTargetDto.Type.TARGETED_TILE -> TargetedTile
+                    Dto.EffectTargetDto.Type.CASTER_TILE -> CasterTile
+                    Dto.EffectTargetDto.Type.ADJACENT_ALLIES -> AdjacentAllies
                 }
 
-            fun of(expression: TargetExpression): Dto.TargetExpressionDto =
-                Dto.TargetExpressionDto(
+            fun of(effectTarget: EffectTarget): Dto.EffectTargetDto =
+                Dto.EffectTargetDto(
                     type =
-                        when (expression) {
-                            is Caster -> Dto.TargetExpressionDto.Type.CASTER
-                            is TargetedBattleUnit -> Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
-                            is TargetedTile -> Dto.TargetExpressionDto.Type.TARGETED_TILE
-                            is CasterTile -> Dto.TargetExpressionDto.Type.CASTER_TILE
-                            is AdjacentAllies -> Dto.TargetExpressionDto.Type.ADJACENT_ALLIES
+                        when (effectTarget) {
+                            is Caster -> Dto.EffectTargetDto.Type.CASTER
+                            is TargetedBattleUnit -> Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
+                            is TargetedTile -> Dto.EffectTargetDto.Type.TARGETED_TILE
+                            is CasterTile -> Dto.EffectTargetDto.Type.CASTER_TILE
+                            is AdjacentAllies -> Dto.EffectTargetDto.Type.ADJACENT_ALLIES
                         },
                 )
         }
@@ -193,10 +193,10 @@ data class Ability private constructor(
 
         data class AbilityEffectDto(
             val effectId: String,
-            val target: TargetExpressionDto,
+            val target: EffectTargetDto,
         )
 
-        data class TargetExpressionDto(
+        data class EffectTargetDto(
             val type: Type,
         ) {
             enum class Type {

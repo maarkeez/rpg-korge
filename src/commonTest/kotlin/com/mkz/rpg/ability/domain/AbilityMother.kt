@@ -1,6 +1,6 @@
 package com.mkz.rpg.ability.domain
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.effect.domain.EffectMother.effectId
 import korlibs.io.util.UUID
 import kotlin.random.Random
@@ -35,10 +35,10 @@ object AbilityMother {
 
     fun abilityEffect(
         effectId: String = effectId(),
-        target: TargetExpressionDto.Type = targetExpression(),
-    ) = Ability.Dto.AbilityEffectDto(effectId = effectId, target = TargetExpressionDto(type = target))
+        target: EffectTargetDto.Type = targetExpression(),
+    ) = Ability.Dto.AbilityEffectDto(effectId = effectId, target = EffectTargetDto(type = target))
 
-    fun targetExpression() = TargetExpressionDto.Type.values().random()
+    fun targetExpression() = EffectTargetDto.Type.values().random()
 
     fun targeting() =
         Ability.Dto.TargetingDto

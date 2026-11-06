@@ -22,7 +22,7 @@ class EffectImagesTest : ViewsForTesting() {
             val ongoingEffectIds =
                 effectLoader
                     .loadEffects()
-                    .filter { effect -> effect.application.type in PreviewCastOngoingEffects.ONGOING_APPLICATION_TYPES }
+                    .filter { effect -> effect.timing.type in PreviewCastOngoingEffects.ONGOING_TIMINGS }
                     .map { effect -> effect.id }
             val effectIdsWithoutImage = ongoingEffectIds.filter { effectId -> resourcesLoader.bitmapOrNull("effect/$effectId.png") == null }
             // Then

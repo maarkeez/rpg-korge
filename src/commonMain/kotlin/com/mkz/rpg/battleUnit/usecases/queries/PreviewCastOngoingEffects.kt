@@ -3,11 +3,11 @@ package com.mkz.rpg.battleUnit.usecases.queries
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.usecases.services.CastResolution
 import com.mkz.rpg.battlefield.domain.Battlefield
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 /**
- * The effects that would stay on each battle unit (e.g.: a venom damaging it on every turn started) when the ability
+ * The effects that would stay on each battle unit (e.g.: a venom damaging it on every player turn started) when the ability
  * is cast on the cast group, keyed by battle unit id. Each effect is listed as many times as it would be received.
  * The effects applied immediately are not listed, as they do not stay on the battle units.
  */
@@ -17,7 +17,7 @@ class PreviewCastOngoingEffects(
     private val castResolution: CastResolution,
 ) {
     companion object {
-        val ONGOING_APPLICATION_TYPES = setOf(ApplicationTypeDto.ON_TURN_STARTED, ApplicationTypeDto.ON_DEFEATED)
+        val ONGOING_TIMINGS = setOf(TimingTypeDto.ON_PLAYER_TURN_STARTED, TimingTypeDto.ON_DEFEATED)
     }
 
     operator fun invoke(
@@ -29,8 +29,8 @@ class PreviewCastOngoingEffects(
         // The same applications as the cast, which applies the ability on each tile of the cast group.
         return castGroup
             .flatMap { position -> castResolution(casterId = battleUnitId, ability = ability, targetedRow = position.row, targetedColumn = position.column) }
-            .filter { application -> searchEffectById(application.effectId)?.application?.type in ONGOING_APPLICATION_TYPES }
-            .mapNotNull { application -> application.target.battleUnitId?.let { battleUnitId -> battleUnitId to application.effectId } }
+            .filter { application -> searchEffectById(application.effectId)?.timing?.type in ONGOING_TIMINGS }
+            .mapNotNull { application -> application.recipient.battleUnitId?.let { battleUnitId -> battleUnitId to application.effectId } }
             .groupBy(keySelector = { (targetId, _) -> targetId }, valueTransform = { (_, effectId) -> effectId })
     }
 }

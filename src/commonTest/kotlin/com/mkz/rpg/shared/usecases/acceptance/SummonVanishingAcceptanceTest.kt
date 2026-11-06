@@ -2,7 +2,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
@@ -65,15 +65,15 @@ class SummonVanishingAcceptanceTest {
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
-        effectApi.requestEffectCreation(EffectMother.deployBattleUnitEffect(id = "deploy-summon", unitId = "summon").toDto())
-        effectApi.requestEffectCreation(EffectMother.decreaseHealthEffect(id = "deadly-damage", damage = 100, applicationType = "IMMEDIATELY").toDto())
+        effectApi.requestEffectCreation(EffectMother.summonEffect(id = "deploy-summon", unitId = "summon").toDto())
+        effectApi.requestEffectCreation(EffectMother.damageEffect(id = "deadly-damage", damage = 100, timingType = "IMMEDIATELY").toDto())
         abilityApi.requestAbilityCreation(
             AbilityMother
                 .ability(
                     id = "summon",
                     manaCost = 0,
                     cooldown = 0,
-                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = TargetExpressionDto.Type.TARGETED_TILE)),
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deploy-summon", target = EffectTargetDto.Type.TARGETED_TILE)),
                     targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER,
                     summonDuration = 2,
                 ).toDto(),
@@ -84,7 +84,7 @@ class SummonVanishingAcceptanceTest {
                     id = "deadly-strike",
                     manaCost = 0,
                     cooldown = 0,
-                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deadly-damage", target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                    abilityEffects = listOf(AbilityMother.abilityEffect(effectId = "deadly-damage", target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
                     targeting = TargetingDto.ADJACENT_ENEMY,
                 ).toDto(),
         )

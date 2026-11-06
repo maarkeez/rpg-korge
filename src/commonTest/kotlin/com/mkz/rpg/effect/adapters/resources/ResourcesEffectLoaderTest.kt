@@ -1,13 +1,13 @@
 package com.mkz.rpg.effect.adapters.resources
 
-import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnAdjacentAlliesEffect
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.applyEffectToAdjacentAlliesEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumManaEffect
 import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
+import com.mkz.rpg.effect.domain.EffectMother.restoreManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
@@ -23,30 +23,30 @@ class ResourcesEffectLoaderTest {
             // Given
             val effectRoot =
                 MemoryVfsMix(
-                    "effect/venom.toml" to "[outcome]\ntype = \"DECREASE_HEALTH\"\ndamage = 3\n\n[application]\ntype = \"ON_TURN_STARTED\"\nduration = 5\n",
-                    "effect/heal.toml" to "[outcome]\ntype = \"INCREASE_HEALTH\"\nhealing = 7\n\n[application]\ntype = \"IMMEDIATELY\"\n",
-                    "effect/teleport.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
-                    "effect/curse.toml" to "[outcome]\ntype = \"APPLY_EFFECT_ON_ADJACENT_ALLIES\"\neffectId = \"venom\"\n\n[application]\ntype = \"ON_DEFEATED\"\n",
-                    "effect/summon.toml" to "[outcome]\ntype = \"DEPLOY_BATTLE_UNIT\"\nunitId = \"bee\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
-                    "effect/ether.toml" to "[outcome]\ntype = \"INCREASE_MANA\"\nmana = 15\n\n[application]\ntype = \"IMMEDIATELY\"\n",
-                    "effect/sturdy.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_HEALTH\"\nhealthPoints = 20\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
-                    "effect/wise.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_MANA\"\nmanaPoints = 5\n\n[application]\ntype = \"WHILE_EQUIPPED\"\n",
-                    "effect/learn-teleport.toml" to "[outcome]\ntype = \"LEARN_ABILITY\"\nabilityId = \"teleport\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/venom.toml" to "[outcome]\ntype = \"DAMAGE\"\ndamage = 3\n\n[timing]\ntype = \"ON_PLAYER_TURN_STARTED\"\nduration = 5\n",
+                    "effect/heal.toml" to "[outcome]\ntype = \"HEAL\"\nhealing = 7\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/teleport.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/curse.toml" to "[outcome]\ntype = \"APPLY_EFFECT_TO_ADJACENT_ALLIES\"\neffectId = \"venom\"\n\n[timing]\ntype = \"ON_DEFEATED\"\n",
+                    "effect/summon.toml" to "[outcome]\ntype = \"SUMMON\"\nunitId = \"bee\"\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/ether.toml" to "[outcome]\ntype = \"RESTORE_MANA\"\nmana = 15\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/sturdy.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_HEALTH\"\nmaximumHealth = 20\n\n[timing]\ntype = \"WHILE_EQUIPPED\"\n",
+                    "effect/wise.toml" to "[outcome]\ntype = \"INCREASE_MAXIMUM_MANA\"\nmaximumMana = 5\n\n[timing]\ntype = \"WHILE_EQUIPPED\"\n",
+                    "effect/learn-teleport.toml" to "[outcome]\ntype = \"LEARN_ABILITY\"\nabilityId = \"teleport\"\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
                 )["effect"]
             val loader = ResourcesEffectLoader(effectRoot = effectRoot)
             // When
             loader.initResources()
             // Then
             loader.loadEffects().shouldContainExactly(
-                applyEffectOnAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto(),
-                increaseManaEffect(id = "ether", mana = 15).toDto(),
-                increaseHealthEffect(id = "heal", healing = 7).toDto(),
+                applyEffectToAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto(),
+                restoreManaEffect(id = "ether", mana = 15).toDto(),
+                healEffect(id = "heal", healing = 7).toDto(),
                 learnAbilityEffect(id = "learn-teleport", abilityId = "teleport").toDto(),
-                increaseMaximumHealthEffect(id = "sturdy", healthPoints = 20).toDto(),
-                deployBattleUnitEffect(id = "summon", unitId = "bee").toDto(),
+                increaseMaximumHealthEffect(id = "sturdy", maximumHealth = 20).toDto(),
+                summonEffect(id = "summon", unitId = "bee").toDto(),
                 teleportEffect(id = "teleport").toDto(),
-                decreaseHealthEffect(id = "venom", damage = 3).toDto(),
-                increaseMaximumManaEffect(id = "wise", manaPoints = 5).toDto(),
+                damageEffect(id = "venom", damage = 3).toDto(),
+                increaseMaximumManaEffect(id = "wise", maximumMana = 5).toDto(),
             )
         }
 
@@ -56,7 +56,7 @@ class ResourcesEffectLoaderTest {
             // Given
             val effectRoot =
                 MemoryVfsMix(
-                    "effect/venom.toml" to "[outcome]\ntype = \"DECREASE_HEALTH\"\n\n[application]\ntype = \"IMMEDIATELY\"\n",
+                    "effect/venom.toml" to "[outcome]\ntype = \"DAMAGE\"\n\n[timing]\ntype = \"IMMEDIATELY\"\n",
                 )["effect"]
             val loader = ResourcesEffectLoader(effectRoot = effectRoot)
             // When
@@ -66,12 +66,12 @@ class ResourcesEffectLoaderTest {
         }
 
     @Test
-    fun `should fail with the file when the application type is unknown`() =
+    fun `should fail with the file when the timing type is unknown`() =
         runTest {
             // Given
             val effectRoot =
                 MemoryVfsMix(
-                    "effect/venom.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[application]\ntype = \"SOMETIMES\"\n",
+                    "effect/venom.toml" to "[outcome]\ntype = \"TELEPORT\"\n\n[timing]\ntype = \"SOMETIMES\"\n",
                 )["effect"]
             val loader = ResourcesEffectLoader(effectRoot = effectRoot)
             // When

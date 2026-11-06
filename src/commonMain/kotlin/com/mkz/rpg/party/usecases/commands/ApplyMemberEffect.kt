@@ -2,8 +2,8 @@ package com.mkz.rpg.party.usecases.commands
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestApplyEffect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
@@ -23,8 +23,8 @@ class ApplyMemberEffect(
             RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.item(lootableItemId),
-                        target = EffectTargetDto.battleUnit(battleUnitId),
+                        source = SourceDto.item(lootableItemId),
+                        recipient = RecipientDto.battleUnit(battleUnitId),
                         effectId = effectId,
                         destination = null,
                     ),

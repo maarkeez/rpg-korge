@@ -1,15 +1,15 @@
 package com.mkz.rpg.screen.adapters.presentation
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.domain.EffectMother.learnAbilityEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
@@ -52,9 +52,9 @@ class InventoryPresenterTest {
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
             effects =
                 listOf(
-                    increaseHealthEffect(id = "heal", healing = 10).toDto(),
-                    increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto(),
-                    deployBattleUnitEffect(id = "summon-bee", unitId = "bee").toDto(),
+                    healEffect(id = "heal", healing = 10).toDto(),
+                    increaseMaximumHealthEffect(id = "maximum-health-20", maximumHealth = 20).toDto(),
+                    summonEffect(id = "summon-bee", unitId = "bee").toDto(),
                     learnAbilityEffect(id = "learn-teleport", abilityId = "teleport").toDto(),
                     learnAbilityEffect(id = "learn-bee", abilityId = "bee").toDto(),
                 ),

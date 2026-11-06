@@ -2,7 +2,7 @@ package com.mkz.rpg.effect.adapters.events
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectEvent
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.effect.usecases.commands.InitialiseEffects
 import com.mkz.rpg.effect.usecases.services.FakeEffectLoader
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
@@ -12,7 +12,7 @@ import kotlin.test.Test
 class OnRequestInitialiseEffectsTest {
     private val eventBus = InMemoryEventBus()
     private val effectRepository = InMemoryEffectRepository()
-    private val venom = decreaseHealthEffect(id = "venom").toDto()
+    private val venom = damageEffect(id = "venom").toDto()
     private val onRequestInitialiseEffects = OnRequestInitialiseEffects(InitialiseEffects(FakeEffectLoader(effects = listOf(venom)), effectRepository, eventBus), eventBus)
 
     @Test

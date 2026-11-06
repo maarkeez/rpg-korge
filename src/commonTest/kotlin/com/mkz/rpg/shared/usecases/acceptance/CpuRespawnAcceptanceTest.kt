@@ -16,8 +16,8 @@ import com.mkz.rpg.cpuWanderBrain.domain.RESPAWN_STEPS
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
@@ -82,8 +82,8 @@ class CpuRespawnAcceptanceTest {
     private fun hitRat() {
         battleUnitApi.applyEffect(
             EffectApplicationDto(
-                source = ApplicationSourceDto.terrain("lava"),
-                target = EffectTargetDto.battleUnit("rat-1"),
+                source = SourceDto.terrain("lava"),
+                recipient = RecipientDto.battleUnit("rat-1"),
                 effectId = "low-physical-damage",
                 destination = null,
             ),

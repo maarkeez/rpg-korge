@@ -27,7 +27,7 @@ class EffectsViewTest : ViewsForTesting() {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             // When
-            effectsView.display(effectIds = listOf("venom-damage", "venom-on-death"))
+            effectsView.display(effectIds = listOf("venom-damage", "venom-on-defeat"))
             // Then
             effectsView.displayedEffectCount() shouldBe 2
         }
@@ -37,7 +37,7 @@ class EffectsViewTest : ViewsForTesting() {
         sharedViewsTest {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
-            effectsView.display(effectIds = listOf("venom-damage", "venom-on-death", "venom-damage"))
+            effectsView.display(effectIds = listOf("venom-damage", "venom-on-defeat", "venom-damage"))
             // When
             effectsView.display(effectIds = listOf("venom-damage"))
             // Then
@@ -62,7 +62,7 @@ class EffectsViewTest : ViewsForTesting() {
             // Given
             val effectsView = EffectsView(loadedResourcesLoader())
             // When
-            effectsView.display(effectIds = listOf("venom-damage"), newEffectIds = listOf("venom-on-death", "venom-damage"))
+            effectsView.display(effectIds = listOf("venom-damage"), newEffectIds = listOf("venom-on-defeat", "venom-damage"))
             // Then
             effectsView.blinkingEffects().shouldContainExactly(false, true, true)
         }
@@ -86,7 +86,7 @@ class EffectsViewTest : ViewsForTesting() {
             val effectsView = EffectsView(loadedResourcesLoader())
             val effectIds = List(effectsView.effectSlotCount()) { "venom-damage" }
             // When
-            effectsView.display(effectIds = effectIds, newEffectIds = listOf("venom-on-death"))
+            effectsView.display(effectIds = effectIds, newEffectIds = listOf("venom-on-defeat"))
             // Then
             effectsView.isOverflowDisplayed().shouldBeTrue()
         }

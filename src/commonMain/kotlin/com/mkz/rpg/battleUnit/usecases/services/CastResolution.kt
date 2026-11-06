@@ -1,11 +1,11 @@
 package com.mkz.rpg.battleUnit.usecases.services
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.ADJACENT_ALLIES
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER_TILE
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.ADJACENT_ALLIES
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_TILE
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToResolveEffectTarget
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
@@ -13,7 +13,7 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 class CastResolution(
@@ -32,15 +32,15 @@ class CastResolution(
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToResolveEffectTarget()
         validateTargeting(ability = ability, caster = caster, targetedRow = targetedRow, targetedColumn = targetedColumn)
         return ability.abilityEffects.flatMap { abilityEffect ->
-            resolveTargets(
+            resolveRecipients(
                 abilityEffect = abilityEffect,
                 caster = caster,
                 targetedRow = targetedRow,
                 targetedColumn = targetedColumn,
-            ).map { target ->
+            ).map { recipient ->
                 EffectApplicationDto(
-                    source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId = casterId, abilityId = ability.id),
-                    target = target,
+                    source = EffectApplicationDto.SourceDto.battleUnit(battleUnitId = casterId, abilityId = ability.id),
+                    recipient = recipient,
                     effectId = abilityEffect.effectId,
                     destination = destinationFor(effectId = abilityEffect.effectId, targetedRow = targetedRow, targetedColumn = targetedColumn),
                 )
@@ -71,37 +71,37 @@ class CastResolution(
         }
     }
 
-    private fun resolveTargets(
+    private fun resolveRecipients(
         abilityEffect: Ability.Dto.AbilityEffectDto,
         caster: BattleUnit,
         targetedRow: Int,
         targetedColumn: Int,
-    ): List<EffectTargetDto> =
+    ): List<RecipientDto> =
         when (abilityEffect.target.type) {
-            CASTER -> listOf(EffectTargetDto.battleUnit(caster.toDto().id))
+            CASTER -> listOf(RecipientDto.battleUnit(caster.toDto().id))
             TARGETED_BATTLE_UNIT -> {
                 val occupantId = searchOccupant(targetedRow, targetedColumn) ?: throw FailedToResolveEffectTarget()
-                listOf(EffectTargetDto.battleUnit(occupantId))
+                listOf(RecipientDto.battleUnit(occupantId))
             }
             TARGETED_TILE -> {
                 if (searchOccupant(targetedRow, targetedColumn) != null) throw FailedToResolveEffectTarget()
-                listOf(EffectTargetDto.position(row = targetedRow, column = targetedColumn))
+                listOf(RecipientDto.position(row = targetedRow, column = targetedColumn))
             }
             CASTER_TILE -> {
                 val position = searchPosition(caster.toDto().id) ?: throw FailedToResolveEffectTarget()
-                listOf(EffectTargetDto.position(row = position.row, column = position.column))
+                listOf(RecipientDto.position(row = position.row, column = position.column))
             }
-            ADJACENT_ALLIES -> searchAdjacentAllies(caster = caster).map { ally -> EffectTargetDto.battleUnit(ally.toDto().id) }
+            ADJACENT_ALLIES -> searchAdjacentAllies(caster = caster).map { ally -> RecipientDto.battleUnit(ally.toDto().id) }
         }
 
     private fun destinationFor(
         effectId: String,
         targetedRow: Int,
         targetedColumn: Int,
-    ): EffectTargetDto? {
+    ): RecipientDto? {
         val effect = searchEffectById(effectId) ?: return null
         return if (effect.outcome.type == TELEPORT) {
-            EffectTargetDto.position(row = targetedRow, column = targetedColumn)
+            RecipientDto.position(row = targetedRow, column = targetedColumn)
         } else {
             null
         }

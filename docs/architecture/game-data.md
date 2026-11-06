@@ -44,7 +44,7 @@ An invalid or missing file fails when the resources are read, with the file path
 
 ## Resources
 
-Unless stated otherwise, there is one file per entity and **the file name is the entity id**. Enum values are written by name (e.g.: `"DECREASE_HEALTH"`).
+Unless stated otherwise, there is one file per entity and **the file name is the entity id**. Enum values are written by name (e.g.: `"DAMAGE"`).
 
 The files hold no text: the names of the abilities, lootable items, npcs, players, quests, terrains and units, the npc lines, and the description and tasks of each quest, are in [`resources/localization/messages.pot`](../../resources/localization/messages.pot), keyed by the entity id (e.g.: `unit.knight.name`, `npc.elder.line`, `quest.defeat-the-goat-wizard.task.0`), so they can be translated. See [Localization](localization.md).
 
@@ -52,26 +52,26 @@ The files hold no text: the names of the abilities, lootable items, npcs, player
 
 ```toml
 [outcome]
-type = "DECREASE_HEALTH"   # DECREASE_HEALTH, INCREASE_HEALTH, INCREASE_MANA, INCREASE_MAXIMUM_HEALTH, INCREASE_MAXIMUM_MANA, TELEPORT, APPLY_EFFECT_ON_ADJACENT_ALLIES, DEPLOY_BATTLE_UNIT, LEARN_ABILITY
-damage = 3                 # Only for DECREASE_HEALTH
-# healing = 5              # Only for INCREASE_HEALTH
-# mana = 5                 # Only for INCREASE_MANA
-# healthPoints = 20        # Only for INCREASE_MAXIMUM_HEALTH
-# manaPoints = 20          # Only for INCREASE_MAXIMUM_MANA
-# effectId = "..."         # Only for APPLY_EFFECT_ON_ADJACENT_ALLIES
-# unitId = "..."           # Only for DEPLOY_BATTLE_UNIT
+type = "DAMAGE"            # DAMAGE, HEAL, RESTORE_MANA, INCREASE_MAXIMUM_HEALTH, INCREASE_MAXIMUM_MANA, TELEPORT, APPLY_EFFECT_TO_ADJACENT_ALLIES, SUMMON, LEARN_ABILITY
+damage = 3                 # Only for DAMAGE
+# healing = 5              # Only for HEAL
+# mana = 5                 # Only for RESTORE_MANA
+# maximumHealth = 20       # Only for INCREASE_MAXIMUM_HEALTH
+# maximumMana = 20         # Only for INCREASE_MAXIMUM_MANA
+# effectId = "..."         # Only for APPLY_EFFECT_TO_ADJACENT_ALLIES
+# unitId = "..."           # Only for SUMMON
 # abilityId = "..."        # Only for LEARN_ABILITY
 
-[application]
-type = "ON_TURN_STARTED"   # IMMEDIATELY, ON_TURN_STARTED, BEFORE_APPLYING_EFFECT, ON_DEFEATED, WHILE_EQUIPPED
-duration = 5               # Only for ON_TURN_STARTED and BEFORE_APPLYING_EFFECT
+[timing]
+type = "ON_PLAYER_TURN_STARTED" # IMMEDIATELY, ON_PLAYER_TURN_STARTED, BEFORE_APPLYING_EFFECT, ON_DEFEATED, WHILE_EQUIPPED
+duration = 5                   # Only for ON_PLAYER_TURN_STARTED and BEFORE_APPLYING_EFFECT
 ```
 
-The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 0 to 999. Healing and restoring mana never go above the battle unit's maximum, equipment included.
+The amount of an outcome (`damage`, `healing`, `mana`, `maximumHealth`, `maximumMana`) goes from 0 to 999. Healing and restoring mana never go above the battle unit's maximum, equipment included.
 
-`INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` application, and `WHILE_EQUIPPED` only accepts these two outcomes. A battle unit applies them while their item is equipped, see [Inventory](inventory.md#equipment).
+`INCREASE_MAXIMUM_HEALTH` and `INCREASE_MAXIMUM_MANA` only last while the item granting them is equipped: they must use the `WHILE_EQUIPPED` timing, and `WHILE_EQUIPPED` only accepts these two outcomes. A battle unit applies them while their item is equipped, see [Inventory](inventory.md#equipment).
 
-`LEARN_ABILITY` teaches the battle unit its `abilityId` for good, e.g.: the teleport essence teaches teleport. It must use the `IMMEDIATELY` application. The ability is not checked to exist, as the effects are created before the abilities. The battle unit adds it at the end of its abilities, ready to be cast, and keeps it when it respawns. It fails when the battle unit already knows the ability or already knows 6 abilities, so an item teaching it can not be consumed then, see [Inventory](inventory.md#learning-an-ability).
+`LEARN_ABILITY` teaches the battle unit its `abilityId` for good, e.g.: the teleport essence teaches teleport. It must use the `IMMEDIATELY` timing. The ability is not checked to exist, as the effects are created before the abilities. The battle unit adds it at the end of its abilities, ready to be cast, and keeps it when it respawns. It fails when the battle unit already knows the ability or already knows 6 abilities, so an item teaching it can not be consumed then, see [Inventory](inventory.md#learning-an-ability).
 
 ### `ability/<ability id>.toml`
 
@@ -79,19 +79,19 @@ The amounts (`damage`, `healing`, `mana`, `healthPoints`, `manaPoints`) go from 
 manaCost = 10
 cooldown = 0
 targeting = "ADJACENT_ENEMY"    # CASTER, ADJACENT_ENEMY, ALL_ADJACENT_ENEMIES, VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT, VACANT_TILE_ADJACENT_TO_CASTER
-# summonDuration = 5            # Only when an effect is DEPLOY_BATTLE_UNIT
+# summonDuration = 5            # Only when an effect is SUMMON
 
 [[effects]]
 effectId = "low-physical-damage"
 target = "TARGETED_BATTLE_UNIT" # CASTER, TARGETED_BATTLE_UNIT, TARGETED_TILE, CASTER_TILE, ADJACENT_ALLIES
 ```
 
-`summonDuration` goes from 1 to 99: how many turns of its player the battle unit the ability deploys (a summon) lasts. An ability with a `DEPLOY_BATTLE_UNIT` effect must have one, and the others can not.
+`summonDuration` goes from 1 to 99: how many turns of its player the battle unit the ability deploys (a summon) lasts. An ability with a `SUMMON` effect must have one, and the others can not.
 
 The battle tells the player what an ability does when it is selected, in the ability info under the ability buttons: one
-sentence per effect, generated by `AbilityInfoMapper` from its outcome, application and target, e.g.: an `IMMEDIATELY`
-`DECREASE_HEALTH` is "Deals 10 damage.", and an `ON_DEFEATED` `APPLY_EFFECT_ON_ADJACENT_ALLIES` of an `ON_TURN_STARTED`
-`DECREASE_HEALTH` is "When defeated: poisons its adjacent allies (3 damage each turn for 5 turns).". Only the kinds of
+sentence per effect, generated by `AbilityInfoMapper` from its outcome, timing and effect target, e.g.: an `IMMEDIATELY`
+`DAMAGE` is "Deals 10 damage.", and an `ON_DEFEATED` `APPLY_EFFECT_TO_ADJACENT_ALLIES` of an `ON_PLAYER_TURN_STARTED`
+`DAMAGE` is "When defeated: poisons its adjacent allies (3 damage each turn for 5 turns).". Only the kinds of
 effect the abilities use have a sentence: an ability with another kind fails `AbilityInfoResourcesTest` until the kind
 gets its case in the mapper and its `ui.abilityInfo.effect.*` text in the catalogs.
 

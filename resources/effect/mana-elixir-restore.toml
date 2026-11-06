@@ -1,6 +1,6 @@
 [outcome]
-type = "INCREASE_MANA"
+type = "RESTORE_MANA"
 mana = 30
 
-[application]
+[timing]
 type = "IMMEDIATELY"

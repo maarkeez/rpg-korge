@@ -1,9 +1,9 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER
@@ -17,7 +17,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnPlayerTurnStartedEffectTriggered
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.RequestWalkBattleUnitInBattle
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
@@ -26,11 +26,11 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent.BattlefieldCreated
 import com.mkz.rpg.building.domain.BuildingEvent.BuildingPlaced
 import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
@@ -97,10 +97,10 @@ class BattlefieldPresenterTest {
             lootDrops = listOf(lootDrop(unitId = "rat", lootTableIds = listOf("rat-loot")).toDto()),
             effects =
                 listOf(
-                    decreaseHealthEffect(id = "poison", damage = 7, applicationType = "IMMEDIATELY").toDto(),
-                    decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED").toDto(),
-                    increaseHealthEffect(id = "cure", healing = 5).toDto(),
-                    deployBattleUnitEffect(id = "summon", unitId = "rat").toDto(),
+                    damageEffect(id = "poison", damage = 7, timingType = "IMMEDIATELY").toDto(),
+                    damageEffect(id = "venom", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto(),
+                    healEffect(id = "cure", healing = 5).toDto(),
+                    summonEffect(id = "summon", unitId = "rat").toDto(),
                 ),
             abilities =
                 listOf(
@@ -665,11 +665,11 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashHealth should flash the health left of the battle unit alongside the timeline when it is damaged while exploring`() {
         // Given
-        val exploringApis = exploringApis(effects = listOf(decreaseHealthEffect(id = "lava-damage", damage = 15, applicationType = "IMMEDIATELY").toDto()))
+        val exploringApis = exploringApis(effects = listOf(damageEffect(id = "lava-damage", damage = 15, timingType = "IMMEDIATELY").toDto()))
         val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
         val exploringTimeline = battleSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
-        val lavaDamage = EffectApplicationDto(source = ApplicationSourceDto.terrain("lava"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "lava-damage", destination = null)
+        val lavaDamage = EffectApplicationDto(source = SourceDto.terrain("lava"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "lava-damage", destination = null)
         exploringApis.battleUnitApi.applyEffect(lavaDamage)
         // When
         exploringApis.eventBus.dispatch()
@@ -683,10 +683,10 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashHealth should flash the full health of the battle unit when it is healed at full health while exploring`() {
         // Given
-        val exploringApis = exploringApis(effects = listOf(increaseHealthEffect(id = "water-heal", healing = 5).toDto()))
+        val exploringApis = exploringApis(effects = listOf(healEffect(id = "water-heal", healing = 5).toDto()))
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
-        val waterHeal = EffectApplicationDto(source = ApplicationSourceDto.terrain("water"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "water-heal", destination = null)
+        val waterHeal = EffectApplicationDto(source = SourceDto.terrain("water"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "water-heal", destination = null)
         exploringApis.battleUnitApi.applyEffect(waterHeal)
         // When
         exploringApis.eventBus.dispatch()
@@ -697,7 +697,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashHealth should not flash the health of the battle unit when it is damaged in a battle`() {
         // Given
-        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
+        val poisoning = EffectApplicationDto(source = SourceDto.battleUnit("rat-1"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         // When
         eventBus.dispatch()
@@ -731,7 +731,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `FlashUnit should flash the battle unit on view when an effect is applied at the start of its turn`() {
         // Given
-        eventBus.publish(OnTurnStartedEffectApplied(battleUnitId = "knight-1", effectId = "venom-damage"))
+        eventBus.publish(OnPlayerTurnStartedEffectTriggered(battleUnitId = "knight-1", effectId = "venom-damage"))
         // When
         eventBus.dispatch()
         // Then
@@ -989,7 +989,7 @@ class BattlefieldPresenterTest {
         // Given
         val exploringApis =
             exploringApis(
-                effects = listOf(increaseHealthEffect(id = "cure", healing = 5).toDto()),
+                effects = listOf(healEffect(id = "cure", healing = 5).toDto()),
                 abilities = listOf(ability(id = "heal", manaCost = 10, abilityEffects = listOf(abilityEffect(effectId = "cure", target = CASTER)), targeting = TargetingDto.CASTER).toDto()),
             )
         val exploringBattleUnitInfoView = FakeBattleUnitInfoView()
@@ -1139,7 +1139,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `SelectBattleUnit should display the effects applied when the turn starts followed by the ones applied when defeated of the selected battle unit when it is selected`() {
         // Given
-        val venom = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "venom", destination = null)
+        val venom = EffectApplicationDto(source = SourceDto.battleUnit("rat-1"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "venom", destination = null)
         apis.battleUnitApi.applyEffect(venom)
         val ongoingEffects = apis.battleUnitApi.searchBattleUnitById("knight-1")!!.ongoingEffects
         // When
@@ -1149,14 +1149,14 @@ class BattlefieldPresenterTest {
             battleUnitInfoView.displayedBattleUnits
                 .last()
                 .battleUnit.effectIds
-        effectIds shouldBe ongoingEffects.onTurnStarted + ongoingEffects.onDefeatedEffects
+        effectIds shouldBe ongoingEffects.onPlayerTurnStarted + ongoingEffects.onDefeatedEffects
         effectIds.shouldContain("venom")
     }
 
     @Test
     fun `SelectBattleUnit should display the health the selected battle unit has left when it is hurt`() {
         // Given
-        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
+        val poisoning = EffectApplicationDto(source = SourceDto.battleUnit("rat-1"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         // When
         selectKnight()
@@ -1484,7 +1484,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `DisplaySelfAbilityCastPreview should preview the health the caster would have left when it is healed`() {
         // Given
-        val poisoning = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("rat-1"), target = EffectTargetDto.battleUnit("knight-1"), effectId = "poison", destination = null)
+        val poisoning = EffectApplicationDto(source = SourceDto.battleUnit("rat-1"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         val knight = apis.battleUnitApi.searchBattleUnitById("knight-1")!!
         eventBus.publish(

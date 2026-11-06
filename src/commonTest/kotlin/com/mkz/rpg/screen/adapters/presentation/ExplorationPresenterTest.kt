@@ -5,7 +5,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.inventory.domain.InventoryEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
@@ -46,7 +46,7 @@ class ExplorationPresenterTest {
     private val apis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            effects = listOf(increaseHealthEffect(id = "cure").toDto()),
+            effects = listOf(healEffect(id = "cure").toDto()),
             lootableItems =
                 listOf(
                     consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto(),
@@ -341,7 +341,7 @@ class ExplorationPresenterTest {
     private fun partyOnWaterApis() =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("water")).toDto(), occupiableTerrain(id = "water", effectId = "water-heal").toDto()),
-            effects = listOf(increaseHealthEffect(id = "water-heal").toDto()),
+            effects = listOf(healEffect(id = "water-heal").toDto()),
             units = listOf(unit(id = "knight").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = listOf(listOf("sand"), listOf("water"), listOf("water"), listOf("water")),

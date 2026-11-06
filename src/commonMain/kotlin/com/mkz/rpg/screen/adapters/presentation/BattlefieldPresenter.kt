@@ -114,7 +114,7 @@ class BattlefieldPresenter(
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
                 flashUnit(event.battleUnitId, isAlongside = !isBattling())
             },
-            eventBus.subscribe<BattleUnitEvent.OnTurnStartedEffectApplied> { event ->
+            eventBus.subscribe<BattleUnitEvent.OnPlayerTurnStartedEffectTriggered> { event ->
                 flashUnit(event.battleUnitId)
             },
             // While exploring, the health is displayed as the battle unit flashes, e.g.: so standing on lava is seen hurting.

@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
@@ -41,7 +41,7 @@ class InventoryPresenterGiveGoldTest {
     ): SubdomainApis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            effects = listOf(increaseHealthEffect(id = "heal", healing = 10).toDto()),
+            effects = listOf(healEffect(id = "heal", healing = 10).toDto()),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto()),
             units =
                 listOf(

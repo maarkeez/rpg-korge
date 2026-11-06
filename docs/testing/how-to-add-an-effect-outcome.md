@@ -4,8 +4,8 @@ An effect outcome describes what happens when an [`Effect`](../../src/commonMain
 
 Examples of existing outcomes are:
 
-- `DECREASE_HEALTH`
-- `INCREASE_HEALTH`
+- `DAMAGE`
+- `HEAL`
 - `TELEPORT`
 
 Adding a new outcome requires more than adding an enum value. The new outcome must be represented by the effect domain, handled by the code that applies effects, be usable by abilities, and be covered by tests.
@@ -36,7 +36,7 @@ An `Effect` currently contains common properties such as:
 
 - `id`
 - `outcome`
-- `application`
+- `timing`
 
 The outcome property is therefore the part that identifies the effect outcome.  [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
 
@@ -90,8 +90,8 @@ Adding the outcome to `Effect.kt` only makes the outcome representable. It does 
 Find the code that interprets an effect and applies its outcome. Search for the existing outcome names, particularly:
 
 ```text
-DECREASE_HEALTH
-INCREASE_HEALTH
+DAMAGE
+HEAL
 TELEPORT
 ```
 
@@ -101,8 +101,8 @@ For example, if the existing application logic contains a dispatch such as:
 
 ```kotlin
 when (effect.outcome.type) {
-    DECREASE_HEALTH -> ...
-    INCREASE_HEALTH -> ...
+    DAMAGE -> ...
+    HEAL -> ...
     TELEPORT -> ...
 }
 ```
@@ -121,21 +121,21 @@ An ability contains a list of effect IDs. Its responsibility is to reference eff
 
 The `Ability` domain confirms this separation: its `effects` value is a list of `String` IDs, and ability creation verifies that those IDs correspond to existing effects. [Ability](../../src/commonMain/kotlin/com/mkz/rpg/ability/domain/Ability.kt)
 
-## 5. Make the outcome work with the effect's application rules
+## 5. Make the outcome work with the effect's timing
 
-An effect is not necessarily applied immediately.
+An effect's outcome does not necessarily trigger as soon as it is applied.
 
-`Effect` currently supports these application modes:
+`Effect` currently supports these timings:
 
 - `IMMEDIATELY`
-- `ON_TURN_STARTED`
+- `ON_PLAYER_TURN_STARTED`
 - `BEFORE_APPLYING_EFFECT`
 
-The application mode is part of the effect itself. [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
+The timing is part of the effect itself. [Effect](../../src/commonMain/kotlin/com/mkz/rpg/effect/domain/Effect.kt)
 
-When implementing a new outcome, make sure it behaves correctly in every application mode that the game allows for that outcome.
+When implementing a new outcome, make sure it behaves correctly in every timing that the game allows for that outcome.
 
-For example, if `REMOVE_STATUS` is valid only immediately, the application logic should enforce that rule rather than silently producing an unexpected result when the effect is configured for another application mode.
+For example, if `REMOVE_STATUS` is valid only immediately, the application logic should enforce that rule rather than silently producing an unexpected result when the effect is configured for another timing.
 
 Similarly, respect existing effect behavior around:
 

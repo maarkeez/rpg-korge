@@ -1,7 +1,7 @@
 package com.mkz.rpg.battleUnit.usecases.commands
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.battleUnit.domain.BattleUnitError
@@ -11,14 +11,14 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -45,14 +45,14 @@ class RequestEffectApplicationToCastTargetsTest {
     fun `should request the effect application to the caster when the effect targets the caster`() {
         // Given
         val effectId = "effect-1"
-        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "IMMEDIATELY").toDto()
+        val effect = damageEffect(id = effectId, damage = 3, timingType = "IMMEDIATELY").toDto()
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
+            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.CASTER))),
         )
         queries.effectRepository.create(Effect.create(effect))
         queries.battlefieldRepository.create(battlefield("C .", occupants = mapOf('C' to battleUnitId)))
@@ -63,8 +63,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(battleUnitId),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(battleUnitId),
                         effectId = effectId,
                         destination = null,
                     ),
@@ -77,7 +77,7 @@ class RequestEffectApplicationToCastTargetsTest {
     fun `should request the effect application to the selected tile when the effect outcome is deploy battle unit`() {
         // Given
         val effectId = "effect-1"
-        val effect = deployBattleUnitEffect(id = effectId, unitId = "summoned-unit").toDto()
+        val effect = summonEffect(id = effectId, unitId = "summoned-unit").toDto()
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
@@ -87,7 +87,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
-                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_TILE)),
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.TARGETED_TILE)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -99,8 +99,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.position(row = 1, column = 1),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.position(row = 1, column = 1),
                         effectId = effectId,
                         destination = null,
                     ),
@@ -113,7 +113,7 @@ class RequestEffectApplicationToCastTargetsTest {
     fun `should request the effect application to the enemy occupant when the effect targets the selected target`() {
         // Given
         val effectId = "effect-1"
-        val effect = decreaseHealthEffect(id = effectId, damage = 3, applicationType = "IMMEDIATELY").toDto()
+        val effect = damageEffect(id = effectId, damage = 3, timingType = "IMMEDIATELY").toDto()
         val enemyUnit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val enemyPlayer = player(id = "player-2").toDto()
@@ -127,7 +127,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
-                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -139,8 +139,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(enemyBattleUnitId),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
                         destination = null,
                     ),
@@ -150,20 +150,20 @@ class RequestEffectApplicationToCastTargetsTest {
     }
 
     @Test
-    fun `should request the effect application when the effect application type is on defeated`() {
+    fun `should request the effect application when the timing is on defeated`() {
         // Given
         val effectId = "effect-1"
         val effect =
-            decreaseHealthEffect(id = effectId, damage = 3)
+            damageEffect(id = effectId, damage = 3)
                 .toDto()
-                .copy(application = ApplicationDto(type = ApplicationTypeDto.ON_DEFEATED, onTurnStarted = null, beforeApplyingEffect = null))
+                .copy(timing = TimingDto(type = TimingTypeDto.ON_DEFEATED, onPlayerTurnStarted = null, beforeApplyingEffect = null))
         val unit = unit(healthPoints = 10).toDto()
         val player = player(id = "player-1").toDto()
         val battleUnit = battleUnit(unit = unit, player = player)
         battleUnitRepository.create(battleUnit)
         val battleUnitId = battleUnit.toDto().id
         queries.abilityRepository.create(
-            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER))),
+            ability(id = "ability-1", targeting = Ability.Dto.TargetingDto.CASTER, abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.CASTER))),
         )
         queries.effectRepository.create(Effect.create(effect))
         queries.battlefieldRepository.create(battlefield("C .", occupants = mapOf('C' to battleUnitId)))
@@ -174,8 +174,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(battleUnitId),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(battleUnitId),
                         effectId = effectId,
                         destination = null,
                     ),
@@ -198,7 +198,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.VACANT_TILE_ADJACENT_TO_ANOTHER_BATTLE_UNIT,
-                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.CASTER)),
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.CASTER)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -210,10 +210,10 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(battleUnitId),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(battleUnitId),
                         effectId = effectId,
-                        destination = EffectTargetDto.position(row = 1, column = 1),
+                        destination = RecipientDto.position(row = 1, column = 1),
                     ),
             ),
             BattleUnitEvent.AbilityCastResolved(battleUnitId = battleUnitId, abilityId = "ability-1"),
@@ -224,7 +224,7 @@ class RequestEffectApplicationToCastTargetsTest {
     fun `should request the effect application to the defeated target when the ability targets an adjacent enemy`() {
         // Given
         val effectId = "effect-1"
-        val effect = decreaseHealthEffect(id = effectId, damage = 10, applicationType = "IMMEDIATELY").toDto()
+        val effect = damageEffect(id = effectId, damage = 10, timingType = "IMMEDIATELY").toDto()
         val enemyUnit = unit(healthPoints = 3).toDto()
         val player = player(id = "player-1").toDto()
         val enemyPlayer = player(id = "player-2").toDto()
@@ -238,7 +238,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                abilityEffects = listOf(abilityEffect(effectId = effectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                abilityEffects = listOf(abilityEffect(effectId = effectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
             ),
         )
         queries.effectRepository.create(Effect.create(effect))
@@ -250,8 +250,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(enemyBattleUnitId),
+                        source = SourceDto.battleUnit(battleUnitId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(enemyBattleUnitId),
                         effectId = effectId,
                         destination = null,
                     ),
@@ -290,8 +290,8 @@ class RequestEffectApplicationToCastTargetsTest {
         // Given
         val enemyDamageEffectId = "enemy-damage-effect"
         val casterDamageEffectId = "caster-damage-effect"
-        val enemyDamageEffect = decreaseHealthEffect(id = enemyDamageEffectId, damage = 10, applicationType = "IMMEDIATELY").toDto()
-        val casterDamageEffect = decreaseHealthEffect(id = casterDamageEffectId, damage = 5, applicationType = "IMMEDIATELY").toDto()
+        val enemyDamageEffect = damageEffect(id = enemyDamageEffectId, damage = 10, timingType = "IMMEDIATELY").toDto()
+        val casterDamageEffect = damageEffect(id = casterDamageEffectId, damage = 5, timingType = "IMMEDIATELY").toDto()
         val casterUnit = unit(healthPoints = 10).toDto()
         val enemyUnit = unit(healthPoints = 20).toDto()
         val player = player(id = "player-1").toDto()
@@ -308,8 +308,8 @@ class RequestEffectApplicationToCastTargetsTest {
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
                 abilityEffects =
                     listOf(
-                        abilityEffect(effectId = enemyDamageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT),
-                        abilityEffect(effectId = casterDamageEffectId, target = TargetExpressionDto.Type.CASTER),
+                        abilityEffect(effectId = enemyDamageEffectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT),
+                        abilityEffect(effectId = casterDamageEffectId, target = EffectTargetDto.Type.CASTER),
                     ),
             ),
         )
@@ -323,8 +323,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(enemyId),
+                        source = SourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(enemyId),
                         effectId = enemyDamageEffectId,
                         destination = null,
                     ),
@@ -332,8 +332,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(casterId),
+                        source = SourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(casterId),
                         effectId = casterDamageEffectId,
                         destination = null,
                     ),
@@ -346,7 +346,7 @@ class RequestEffectApplicationToCastTargetsTest {
     fun `should request only the caster effect application when the only effect targets the caster`() {
         // Given
         val healEffectId = "heal-effect"
-        val healEffect = increaseHealthEffect(id = healEffectId, healing = 10).toDto()
+        val healEffect = healEffect(id = healEffectId, healing = 10).toDto()
         val casterUnit = unit(healthPoints = 10).toDto()
         val enemyUnit = unit(healthPoints = 20).toDto()
         val player = player(id = "player-1").toDto()
@@ -361,7 +361,7 @@ class RequestEffectApplicationToCastTargetsTest {
             ability(
                 id = "ability-1",
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
-                abilityEffects = listOf(abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
+                abilityEffects = listOf(abilityEffect(effectId = healEffectId, target = EffectTargetDto.Type.CASTER)),
             ),
         )
         queries.effectRepository.create(Effect.create(healEffect))
@@ -373,8 +373,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(casterId),
+                        source = SourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(casterId),
                         effectId = healEffectId,
                         destination = null,
                     ),
@@ -384,12 +384,12 @@ class RequestEffectApplicationToCastTargetsTest {
     }
 
     @Test
-    fun `should request each effect application to its own resolved target when the effects target different expressions`() {
+    fun `should request each effect application to its own resolved target when the effects have different effect targets`() {
         // Given
         val damageEffectId = "damage-effect"
         val healEffectId = "heal-effect"
-        val damageEffect = decreaseHealthEffect(id = damageEffectId, damage = 10, applicationType = "IMMEDIATELY").toDto()
-        val healEffect = increaseHealthEffect(id = healEffectId, healing = 5).toDto()
+        val damageEffect = damageEffect(id = damageEffectId, damage = 10, timingType = "IMMEDIATELY").toDto()
+        val healEffect = healEffect(id = healEffectId, healing = 5).toDto()
         val casterUnit = unit(healthPoints = 10).toDto()
         val enemyUnit = unit(healthPoints = 20).toDto()
         val player = player(id = "player-1").toDto()
@@ -408,8 +408,8 @@ class RequestEffectApplicationToCastTargetsTest {
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
                 abilityEffects =
                     listOf(
-                        abilityEffect(effectId = damageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT),
-                        abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER),
+                        abilityEffect(effectId = damageEffectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT),
+                        abilityEffect(effectId = healEffectId, target = EffectTargetDto.Type.CASTER),
                     ),
             ),
         )
@@ -421,8 +421,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(enemyId),
+                        source = SourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(enemyId),
                         effectId = damageEffectId,
                         destination = null,
                     ),
@@ -430,8 +430,8 @@ class RequestEffectApplicationToCastTargetsTest {
             BattleUnitEvent.RequestApplyEffect(
                 application =
                     EffectApplicationDto(
-                        source = ApplicationSourceDto.battleUnit(casterId, abilityId = "ability-1"),
-                        target = EffectTargetDto.battleUnit(casterId),
+                        source = SourceDto.battleUnit(casterId, abilityId = "ability-1"),
+                        recipient = RecipientDto.battleUnit(casterId),
                         effectId = healEffectId,
                         destination = null,
                     ),

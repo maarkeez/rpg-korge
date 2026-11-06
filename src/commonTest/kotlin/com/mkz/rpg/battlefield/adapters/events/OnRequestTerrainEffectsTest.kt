@@ -3,7 +3,7 @@ package com.mkz.rpg.battlefield.adapters.events
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
-import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
+import com.mkz.rpg.battlefield.usecases.commands.ApplyTerrainEffects
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
@@ -18,16 +18,16 @@ class OnRequestTerrainEffectsTest {
     private val terrainRepository = InMemoryTerrainRepository()
     private val onRequestTerrainEffects =
         OnRequestTerrainEffects(
-            TriggerTerrainEffects(battlefieldRepository, SearchTerrainById(terrainRepository), eventBus),
+            ApplyTerrainEffects(battlefieldRepository, SearchTerrainById(terrainRepository), eventBus),
             eventBus,
         )
     private val requestedTargets =
         mutableListOf<String?>().also { targets ->
-            eventBus.subscribe<BattlefieldEvent.TerrainEffectTriggered> { targets += it.application.target.battleUnitId }
+            eventBus.subscribe<BattlefieldEvent.TerrainEffectApplied> { targets += it.application.recipient.battleUnitId }
         }
 
     @Test
-    fun `should trigger the terrain effect for the requested occupants only when it is requested`() {
+    fun `should apply the terrain effect for the requested occupants only when it is requested`() {
         // Given
         battlefieldRepository.create(battlefield("K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2")))
         terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))

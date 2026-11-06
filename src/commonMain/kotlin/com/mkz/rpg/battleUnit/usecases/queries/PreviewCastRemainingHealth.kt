@@ -6,8 +6,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.CastResolution
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 
 /**
@@ -22,7 +22,7 @@ class PreviewCastRemainingHealth(
     private val castResolution: CastResolution,
 ) {
     companion object {
-        private val HEALTH_OUTCOME_TYPES = setOf(TypeDto.DECREASE_HEALTH, TypeDto.INCREASE_HEALTH)
+        private val HEALTH_OUTCOME_TYPES = setOf(TypeDto.DAMAGE, TypeDto.HEAL)
     }
 
     operator fun invoke(
@@ -36,12 +36,12 @@ class PreviewCastRemainingHealth(
         castGroup
             .flatMap { position -> castResolution(casterId = battleUnitId, ability = ability, targetedRow = position.row, targetedColumn = position.column) }
             .forEach { application ->
-                val targetId = application.target.battleUnitId ?: return@forEach
+                val targetId = application.recipient.battleUnitId ?: return@forEach
                 val effect = searchEffectById(application.effectId) ?: return@forEach
-                if (effect.application.type != ApplicationTypeDto.IMMEDIATELY || effect.outcome.type !in HEALTH_OUTCOME_TYPES) return@forEach
+                if (effect.timing.type != TimingTypeDto.IMMEDIATELY || effect.outcome.type !in HEALTH_OUTCOME_TYPES) return@forEach
                 val battleUnit = previewedBattleUnits[targetId] ?: battleUnitRepository.searchById(targetId) ?: return@forEach
                 val position = searchPosition(targetId) ?: return@forEach
-                previewedBattleUnits[targetId] = battleUnit.applyImmediateEffect(effect = effect, currentRow = position.row, currentColumn = position.column)
+                previewedBattleUnits[targetId] = battleUnit.triggerImmediateEffect(effect = effect, currentRow = position.row, currentColumn = position.column)
             }
         return previewedBattleUnits.mapValues { (_, battleUnit) -> battleUnit.toDto().remainingHealth }
     }

@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.usecases.queries.SearchAbilityById
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.usecases.queries.CanCastAbility
@@ -11,8 +11,8 @@ import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.cpuBattleBrain.usecases.services.MINIMUM_UTILITY_GAIN
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.unit.usecases.queries.SearchUnitById
 import kotlin.math.abs
@@ -90,9 +90,9 @@ class WhatShouldCast(
         enemiesWithinReach: List<BattleUnit.Dto>,
     ): UtilityEvaluationData {
         val effects = effectsOf(ability)
-        val damage = expectedAmount(effects, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DECREASE_HEALTH)
-        val healing = expectedAmount(effects, target = TargetExpressionDto.Type.CASTER, outcome = TypeDto.INCREASE_HEALTH)
-        val deployedUnitId = effects.firstNotNullOfOrNull { (_, effect) -> effect.outcome.deployBattleUnit?.unitId }
+        val damage = expectedAmount(effects, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DAMAGE)
+        val healing = expectedAmount(effects, target = EffectTargetDto.Type.CASTER, outcome = TypeDto.HEAL)
+        val deployedUnitId = effects.firstNotNullOfOrNull { (_, effect) -> effect.outcome.summon?.unitId }
         return when {
             damage > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.DAMAGE, damageUtility(damage, castGroup, caster, casterMaxHealth, enemiesWithinReach))
             healing > 0 -> UtilityEvaluationData(ability.id, castGroup, CastKind.HEAL, healUtility(healing, caster, casterMaxHealth))
@@ -101,7 +101,7 @@ class WhatShouldCast(
         }
     }
 
-    private fun effectsOf(ability: Ability.Dto): List<Pair<TargetExpressionDto.Type, Effect.Dto>> =
+    private fun effectsOf(ability: Ability.Dto): List<Pair<EffectTargetDto.Type, Effect.Dto>> =
         ability.abilityEffects.mapNotNull { abilityEffect -> searchEffectById(abilityEffect.effectId)?.let { effect -> abilityEffect.target.type to effect } }
 
     // Removing more of what is left of the targets is better, e.g.: finishing off a weak enemy. Only the enemies within
@@ -150,7 +150,7 @@ class WhatShouldCast(
         val damage =
             deployedUnit.abilities
                 .mapNotNull { abilityId -> searchAbilityById(abilityId) }
-                .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DECREASE_HEALTH) }
+                .maxOfOrNull { ability -> expectedAmount(effectsOf(ability), target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT, outcome = TypeDto.DAMAGE) }
                 ?: 0.0
         val tile = castGroup.positions.firstOrNull() ?: return 0.0
         val nearestEnemy =
@@ -170,8 +170,8 @@ class WhatShouldCast(
 
     // Immediate effects count in full. Effects applied each player turn count their total, discounted for every player turn they wait.
     private fun expectedAmount(
-        effects: List<Pair<TargetExpressionDto.Type, Effect.Dto>>,
-        target: TargetExpressionDto.Type,
+        effects: List<Pair<EffectTargetDto.Type, Effect.Dto>>,
+        target: EffectTargetDto.Type,
         outcome: TypeDto,
     ): Double =
         effects
@@ -179,14 +179,14 @@ class WhatShouldCast(
             .sumOf { (_, effect) ->
                 val amount =
                     when (outcome) {
-                        TypeDto.DECREASE_HEALTH -> effect.outcome.decreaseHealth?.damage ?: 0
-                        TypeDto.INCREASE_HEALTH -> effect.outcome.increaseHealth?.healing ?: 0
+                        TypeDto.DAMAGE -> effect.outcome.damage?.damage ?: 0
+                        TypeDto.HEAL -> effect.outcome.heal?.healing ?: 0
                         else -> 0
                     }
-                when (effect.application.type) {
-                    ApplicationTypeDto.IMMEDIATELY -> amount.toDouble()
-                    ApplicationTypeDto.ON_TURN_STARTED -> {
-                        val turns = effect.application.onTurnStarted?.duration ?: 0
+                when (effect.timing.type) {
+                    TimingTypeDto.IMMEDIATELY -> amount.toDouble()
+                    TimingTypeDto.ON_PLAYER_TURN_STARTED -> {
+                        val turns = effect.timing.onPlayerTurnStarted?.duration ?: 0
                         (1..turns).sumOf { turn -> amount * PLAYER_TURN_DISCOUNT.pow(turn) }
                     }
                     else -> 0.0

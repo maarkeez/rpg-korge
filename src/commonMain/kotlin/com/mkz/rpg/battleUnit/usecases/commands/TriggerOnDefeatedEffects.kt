@@ -6,12 +6,12 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.AdjacencyService
 import com.mkz.rpg.battlefield.usecases.queries.SearchOccupant
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 
-class ApplyOnDefeatedEffectsToAdjacentAllies(
+class TriggerOnDefeatedEffects(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchEffectById: SearchEffectById,
     private val searchOccupant: SearchOccupant,
@@ -28,16 +28,16 @@ class ApplyOnDefeatedEffectsToAdjacentAllies(
         val onDefeatedEffectIds = battleUnit.toDto().ongoingEffects.onDefeatedEffects
         onDefeatedEffectIds.forEach { onDefeatedEffectId ->
             val onDefeatedEffect = searchEffectById(onDefeatedEffectId) ?: return@forEach
-            if (onDefeatedEffect.outcome.type != APPLY_EFFECT_ON_ADJACENT_ALLIES) return@forEach
-            val appliedEffectId = onDefeatedEffect.outcome.applyEffectOnAdjacentAllies!!.effectId
+            if (onDefeatedEffect.outcome.type != APPLY_EFFECT_TO_ADJACENT_ALLIES) return@forEach
+            val appliedEffectId = onDefeatedEffect.outcome.applyEffectToAdjacentAllies!!.effectId
             searchAdjacentAllies(battleUnit = battleUnit, defeatedAtRow = defeatedAtRow, defeatedAtColumn = defeatedAtColumn)
                 .forEach { adjacentAlly ->
                     eventBus.publish(
                         BattleUnitEvent.RequestApplyEffect(
                             application =
                                 EffectApplicationDto(
-                                    source = EffectApplicationDto.ApplicationSourceDto.battleUnit(battleUnitId),
-                                    target = EffectTargetDto.battleUnit(adjacentAlly.toDto().id),
+                                    source = EffectApplicationDto.SourceDto.battleUnit(battleUnitId),
+                                    recipient = RecipientDto.battleUnit(adjacentAlly.toDto().id),
                                     effectId = appliedEffectId,
                                     destination = null,
                                 ),
@@ -45,7 +45,7 @@ class ApplyOnDefeatedEffectsToAdjacentAllies(
                     )
                 }
         }
-        val (events, updatedBattleUnit) = battleUnit.applyOnDefeatedEffects().pullEvents()
+        val (events, updatedBattleUnit) = battleUnit.triggerOnDefeatedEffects().pullEvents()
         battleUnitRepository.update(updatedBattleUnit)
         eventBus.publish(events)
     }

@@ -1,7 +1,7 @@
 package com.mkz.rpg.lootableItem.adapters.events
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
@@ -16,7 +16,7 @@ import kotlin.test.Test
 class OnRequestInitialiseLootableItemsTest {
     private val eventBus = InMemoryEventBus()
     private val lootableItemRepository = InMemoryLootableItemRepository()
-    private val effectRepository = InMemoryEffectRepository().also { it.create(increaseHealthEffect(id = "heal")) }
+    private val effectRepository = InMemoryEffectRepository().also { it.create(healEffect(id = "heal")) }
     private val healthPotion = consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))).toDto()
     private val onRequestInitialiseLootableItems =
         OnRequestInitialiseLootableItems(

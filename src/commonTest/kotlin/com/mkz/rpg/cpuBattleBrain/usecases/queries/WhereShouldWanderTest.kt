@@ -3,8 +3,8 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
@@ -36,8 +36,8 @@ class WhereShouldWanderTest {
         val queries = InMemoryQueries(random = FixedDoublesRandom(*rolls))
         queries.playerRepository.create(player(id = "player-2", type = Player.Dto.PlayerTypeDto.CPU))
         terrains().forEach(queries.terrainRepository::create)
-        queries.effectRepository.create(decreaseHealthEffect(id = "effect-lava", damage = 10))
-        queries.effectRepository.create(increaseHealthEffect(id = "effect-water", healing = 10))
+        queries.effectRepository.create(damageEffect(id = "effect-lava", damage = 10))
+        queries.effectRepository.create(healEffect(id = "effect-water", healing = 10))
         givens.forEach { given -> given(queries) }
         return queries
     }

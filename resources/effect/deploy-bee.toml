@@ -1,6 +1,6 @@
 [outcome]
-type = "DEPLOY_BATTLE_UNIT"
+type = "SUMMON"
 unitId = "bee"
 
-[application]
+[timing]
 type = "IMMEDIATELY"

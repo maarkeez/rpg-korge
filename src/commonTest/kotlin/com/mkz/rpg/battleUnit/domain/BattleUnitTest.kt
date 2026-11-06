@@ -332,16 +332,16 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ReceiveDelayedEffect should add the on turn started effect and publish the received event when the battle unit receives it`() {
+    fun `ReceiveOnPlayerTurnStartedEffect should add the on player turn started effect and publish the received event when the battle unit receives it`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit()
         val effectId = "effect-1"
         // When
-        val updatedBattleUnit = battleUnit.receiveOnTurnStartedEffect(effectId = effectId, turnsLeft = 2)
+        val updatedBattleUnit = battleUnit.receiveOnPlayerTurnStartedEffect(effectId = effectId, remainingDuration = 2)
         // Then
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldContainExactly(effectId)
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(BattleUnitEvent.EffectReceived(battleUnitId = updatedBattleUnit.toDto().id, effectId = effectId))
@@ -380,8 +380,8 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .applyImmediateEffect(
-                    effect = EffectMother.decreaseHealthEffect(damage = 1).toDto(),
+                .triggerImmediateEffect(
+                    effect = EffectMother.damageEffect(damage = 1).toDto(),
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
@@ -392,11 +392,11 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyOnDefeatedEffects should remove the on defeated effects when the on defeated effects are applied`() {
+    fun `TriggerOnDefeatedEffects should remove the on defeated effects when the on defeated effects are triggered`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit().receiveOnDefeatedEffect(effectId = "effect-1")
         // When
-        val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
+        val updatedBattleUnit = battleUnit.triggerOnDefeatedEffects()
         // Then
         updatedBattleUnit
             .toDto()
@@ -405,15 +405,15 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyOnDefeatedEffects should keep the on turn started effects when the on defeated effects are applied`() {
+    fun `TriggerOnDefeatedEffects should keep the on player turn started effects when the on defeated effects are triggered`() {
         // Given
         val battleUnit =
             BattleUnitMother
                 .battleUnit()
                 .receiveOnDefeatedEffect(effectId = "effect-1")
-                .receiveOnTurnStartedEffect(effectId = "effect-2", turnsLeft = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = "effect-2", remainingDuration = 2)
         // When
-        val updatedBattleUnit = battleUnit.applyOnDefeatedEffects()
+        val updatedBattleUnit = battleUnit.triggerOnDefeatedEffects()
         // Then
         updatedBattleUnit
             .toDto()
@@ -421,19 +421,19 @@ class BattleUnitTest {
             .shouldBeEmpty()
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldContainExactly("effect-2")
     }
 
     @Test
-    fun `ApplyImmediateEffect should reduce the health and publish the damaged event when the effect decreases health`() {
+    fun `TriggerImmediateEffect should reduce the health and publish the damaged event when the effect damages`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = unit)
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
-                effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
+            battleUnit.triggerImmediateEffect(
+                effect = EffectMother.damageEffect(damage = 3).toDto(),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -444,7 +444,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should publish the defeated event and request its loot drop when the battle unit health reaches zero`() {
+    fun `TriggerImmediateEffect should publish the defeated event and request its loot drop when the battle unit health reaches zero`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 3).toDto()
         val player = PlayerMother.player(id = "player-1").toDto()
@@ -452,8 +452,8 @@ class BattleUnitTest {
         val defeatedAtPosition = position()
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
-                effect = EffectMother.decreaseHealthEffect(damage = 3).toDto(),
+            battleUnit.triggerImmediateEffect(
+                effect = EffectMother.damageEffect(damage = 3).toDto(),
                 currentRow = defeatedAtPosition.row,
                 currentColumn = defeatedAtPosition.column,
             )
@@ -474,22 +474,22 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the health up to the unit maximum and publish the healed event when the effect increases health`() {
+    fun `TriggerImmediateEffect should increase the health up to the unit maximum and publish the healed event when the effect heals`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .applyImmediateEffect(
-                    effect = EffectMother.decreaseHealthEffect(damage = 4).toDto(),
+                .triggerImmediateEffect(
+                    effect = EffectMother.damageEffect(damage = 4).toDto(),
                     currentRow = position().row,
                     currentColumn = position().column,
                 ).pullEvents()
                 .second
-        val healingEffect = EffectMother.increaseHealthEffect(healing = 20).toDto()
+        val healingEffect = EffectMother.healEffect(healing = 20).toDto()
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
+            battleUnit.triggerImmediateEffect(
                 effect = healingEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -501,7 +501,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana and publish the mana increased event when the effect increases mana`() {
+    fun `TriggerImmediateEffect should increase the mana and publish the mana restored event when the effect restores mana`() {
         // Given
         val unit = UnitMother.unit(manaPoints = 10).toDto()
         val battleUnit =
@@ -510,10 +510,10 @@ class BattleUnitTest {
                 .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 7, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
                 .pullEvents()
                 .second
-        val manaEffect = EffectMother.increaseManaEffect(mana = 5).toDto()
+        val manaEffect = EffectMother.restoreManaEffect(mana = 5).toDto()
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
+            battleUnit.triggerImmediateEffect(
                 effect = manaEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -521,21 +521,21 @@ class BattleUnitTest {
         // Then
         updatedBattleUnit.toDto().remainingMana shouldBe 8
         val (events, _) = updatedBattleUnit.pullEvents()
-        events.shouldContainExactly(BattleUnitEvent.BattleUnitManaIncreased(battleUnitId = updatedBattleUnit.toDto().id))
+        events.shouldContainExactly(BattleUnitEvent.BattleUnitManaRestored(battleUnitId = updatedBattleUnit.toDto().id))
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana up to the unit maximum when the effect gives more mana than spent`() {
+    fun `TriggerImmediateEffect should increase the mana up to the unit maximum when the effect gives more mana than spent`() {
         // Given
         val unit = UnitMother.unit(manaPoints = 10).toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
                 .castAbility(abilityId = "ability-1", abilityCooldown = 0, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
-        val manaEffect = EffectMother.increaseManaEffect(mana = 20).toDto()
+        val manaEffect = EffectMother.restoreManaEffect(mana = 20).toDto()
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
+            battleUnit.triggerImmediateEffect(
                 effect = manaEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -545,14 +545,14 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should publish the teleported event when the effect teleports the battle unit`() {
+    fun `TriggerImmediateEffect should publish the teleported event when the effect teleports the battle unit`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
         val battleUnit = BattleUnitMother.battleUnit(unit = unit)
         val teleportEffect = EffectMother.teleportEffect().toDto()
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
+            battleUnit.triggerImmediateEffect(
                 effect = teleportEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -563,7 +563,7 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should learn the ability after the known ones, ready to be cast, when the effect teaches an ability`() {
+    fun `TriggerImmediateEffect should learn the ability after the known ones, ready to be cast, when the effect teaches an ability`() {
         // Given: sword is cooling down.
         val battleUnit =
             BattleUnitMother
@@ -574,7 +574,7 @@ class BattleUnitTest {
         val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
         // When
         val (events, updatedBattleUnit) =
-            battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0).pullEvents()
+            battleUnit.triggerImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0).pullEvents()
         // Then
         updatedBattleUnit
             .toDto()
@@ -585,72 +585,72 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should fail when the effect teaches an ability the battle unit already knows`() {
+    fun `TriggerImmediateEffect should fail when the effect teaches an ability the battle unit already knows`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = listOf("sword", "teleport")).toDto())
         val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
         // When
-        val result = runCatching { battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
+        val result = runCatching { battleUnit.triggerImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.AbilityAlreadyKnown>()
     }
 
     @Test
-    fun `ApplyImmediateEffect should fail when the effect teaches an ability and the battle unit already knows its maximum`() {
+    fun `TriggerImmediateEffect should fail when the effect teaches an ability and the battle unit already knows its maximum`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(abilities = List(3) { index -> "ability-$index" }).toDto(), maximumAbilities = 3)
         val learnTeleportEffect = EffectMother.learnAbilityEffect(abilityId = "teleport").toDto()
         // When
-        val result = runCatching { battleUnit.applyImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
+        val result = runCatching { battleUnit.triggerImmediateEffect(effect = learnTeleportEffect, currentRow = 0, currentColumn = 0) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.AbilitiesAboveLimit>()
     }
 
     @Test
-    fun `HasDelayedOngoingEffects should be true when the battle unit has on turn started effects`() {
+    fun `HasOnPlayerTurnStartedEffects should be true when the battle unit has on player turn started effects`() {
         // Given
-        val battleUnit = BattleUnitMother.battleUnit().receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
+        val battleUnit = BattleUnitMother.battleUnit().receiveOnPlayerTurnStartedEffect(effectId = "effect-1", remainingDuration = 2)
         // When
-        val result = battleUnit.hasOnTurnStartedEffects()
+        val result = battleUnit.hasOnPlayerTurnStartedEffects()
         // Then
         result.shouldBeTrue()
     }
 
     @Test
-    fun `HasDelayedOngoingEffects should be false when the battle unit has no on turn started effects`() {
+    fun `HasOnPlayerTurnStartedEffects should be false when the battle unit has no on player turn started effects`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit()
         // When
-        val result = battleUnit.hasOnTurnStartedEffects()
+        val result = battleUnit.hasOnPlayerTurnStartedEffects()
         // Then
         result.shouldBeFalse()
     }
 
     @Test
-    fun `HasDelayedOngoingEffects should be false when the battle unit only has on defeated effects`() {
+    fun `HasOnPlayerTurnStartedEffects should be false when the battle unit only has on defeated effects`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit().receiveOnDefeatedEffect(effectId = "effect-1")
         // When
-        val result = battleUnit.hasOnTurnStartedEffects()
+        val result = battleUnit.hasOnPlayerTurnStartedEffects()
         // Then
         result.shouldBeFalse()
     }
 
     @Test
-    fun `ApplyDelayedEffect should reduce the health and remove the on turn started effect when the effect decreases health`() {
+    fun `TriggerOnPlayerTurnStartedEffect should reduce the health and remove the on player turn started effect when the effect damages`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
-        val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val onPlayerTurnStartedEffect = EffectMother.damageEffect(damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
+                .receiveOnPlayerTurnStartedEffect(effectId = onPlayerTurnStartedEffect.id, remainingDuration = 1)
                 .pullEvents()
                 .second
         // When
         val updatedBattleUnit =
-            battleUnit.applyOnTurnStartedEffect(
-                effect = onTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffect(
+                effect = onPlayerTurnStartedEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -658,37 +658,37 @@ class BattleUnitTest {
         updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldBeEmpty()
         val (events, _) = updatedBattleUnit.pullEvents()
         events.shouldContainExactly(
-            BattleUnitEvent.OnTurnStartedEffectApplied(battleUnitId = updatedBattleUnit.toDto().id, effectId = onTurnStartedEffect.id),
+            BattleUnitEvent.OnPlayerTurnStartedEffectTriggered(battleUnitId = updatedBattleUnit.toDto().id, effectId = onPlayerTurnStartedEffect.id),
             BattleUnitEvent.BattleUnitDamaged(battleUnitId = updatedBattleUnit.toDto().id),
         )
     }
 
     @Test
-    fun `ApplyDelayedEffect should publish the applied event before the defeat when the effect defeats the battle unit`() {
+    fun `TriggerOnPlayerTurnStartedEffect should publish the triggered event before the defeat when the effect defeats the battle unit`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 3).toDto()
-        val onTurnStartedEffect = EffectMother.decreaseHealthEffect(damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val onPlayerTurnStartedEffect = EffectMother.damageEffect(damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 1)
+                .receiveOnPlayerTurnStartedEffect(effectId = onPlayerTurnStartedEffect.id, remainingDuration = 1)
                 .pullEvents()
                 .second
         // When
         val updatedBattleUnit =
-            battleUnit.applyOnTurnStartedEffect(
-                effect = onTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffect(
+                effect = onPlayerTurnStartedEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
         // Then
         val (events, _) = updatedBattleUnit.pullEvents()
         events.map { event -> event::class }.shouldContainExactly(
-            BattleUnitEvent.OnTurnStartedEffectApplied::class,
+            BattleUnitEvent.OnPlayerTurnStartedEffectTriggered::class,
             BattleUnitEvent.BattleUnitDamaged::class,
             BattleUnitEvent.BattleUnitDefeated::class,
             BattlefieldEvent.RequestRemoveOccupant::class,
@@ -696,15 +696,15 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyDelayedEffect should keep the on turn started effect with one turn less when the effect has more turns left`() {
+    fun `TriggerOnPlayerTurnStartedEffect should keep the on player turn started effect with one less remaining duration when it has more than one left`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
-        val onTurnStartedEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
-        val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 2)
+        val onPlayerTurnStartedEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnPlayerTurnStartedEffect(effectId = onPlayerTurnStartedEffect.id, remainingDuration = 2)
         // When
         val updatedBattleUnit =
-            battleUnit.applyOnTurnStartedEffect(
-                effect = onTurnStartedEffect,
+            battleUnit.triggerOnPlayerTurnStartedEffect(
+                effect = onPlayerTurnStartedEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -712,48 +712,48 @@ class BattleUnitTest {
         updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldContainExactly("effect-1")
     }
 
     @Test
-    fun `ApplyDelayedEffect should remove the on turn started effect when it is applied for its last turn`() {
+    fun `TriggerOnPlayerTurnStartedEffect should remove the on player turn started effect when it is triggered for its last player turn`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
-        val onTurnStartedEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
-        val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnTurnStartedEffect(effectId = onTurnStartedEffect.id, turnsLeft = 2)
+        val onPlayerTurnStartedEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val battleUnit = BattleUnitMother.battleUnit(unit = unit).receiveOnPlayerTurnStartedEffect(effectId = onPlayerTurnStartedEffect.id, remainingDuration = 2)
         // When
         val updatedBattleUnit =
             battleUnit
-                .applyOnTurnStartedEffect(
-                    effect = onTurnStartedEffect,
+                .triggerOnPlayerTurnStartedEffect(
+                    effect = onPlayerTurnStartedEffect,
                     currentRow = position().row,
                     currentColumn = position().column,
-                ).applyOnTurnStartedEffect(
-                    effect = onTurnStartedEffect,
+                ).triggerOnPlayerTurnStartedEffect(
+                    effect = onPlayerTurnStartedEffect,
                     currentRow = position().row,
                     currentColumn = position().column,
                 )
         // Then
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldBeEmpty()
     }
 
     @Test
-    fun `ApplyDelayedEffect should only update the matching on turn started effect when the battle unit has several effects`() {
+    fun `TriggerOnPlayerTurnStartedEffect should only update the matching on player turn started effect when the battle unit has several effects`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
-        val appliedEffect = EffectMother.decreaseHealthEffect(id = "effect-2", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val appliedEffect = EffectMother.damageEffect(id = "effect-2", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .receiveOnTurnStartedEffect(effectId = "effect-1", turnsLeft = 2)
-                .receiveOnTurnStartedEffect(effectId = appliedEffect.id, turnsLeft = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = "effect-1", remainingDuration = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = appliedEffect.id, remainingDuration = 2)
         // When
         val updatedBattleUnit =
-            battleUnit.applyOnTurnStartedEffect(
+            battleUnit.triggerOnPlayerTurnStartedEffect(
                 effect = appliedEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -762,23 +762,23 @@ class BattleUnitTest {
         updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldContainExactly("effect-1", "effect-2")
     }
 
     @Test
-    fun `ApplyDelayedEffect should keep the on turn started effect when an immediate effect with the same id is applied`() {
+    fun `TriggerOnPlayerTurnStartedEffect should keep the on player turn started effect when an immediate effect with the same id is applied`() {
         // Given
         val unit = UnitMother.unit(healthPoints = 10).toDto()
-        val immediateEffect = EffectMother.decreaseHealthEffect(id = "effect-1", damage = 3, applicationType = "IMMEDIATELY").toDto()
+        val immediateEffect = EffectMother.damageEffect(id = "effect-1", damage = 3, timingType = "IMMEDIATELY").toDto()
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .receiveOnTurnStartedEffect(effectId = immediateEffect.id, turnsLeft = 2)
+                .receiveOnPlayerTurnStartedEffect(effectId = immediateEffect.id, remainingDuration = 2)
                 .receiveImmediateEffect(effectId = immediateEffect.id)
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
+            battleUnit.triggerImmediateEffect(
                 effect = immediateEffect,
                 currentRow = position().row,
                 currentColumn = position().column,
@@ -787,7 +787,7 @@ class BattleUnitTest {
         updatedBattleUnit.toDto().remainingHealth shouldBe 7
         updatedBattleUnit
             .toDto()
-            .ongoingEffects.onTurnStarted
+            .ongoingEffects.onPlayerTurnStarted
             .shouldContainExactly("effect-1")
     }
 
@@ -795,8 +795,8 @@ class BattleUnitTest {
     fun `ApplyEquippedEffect should raise the maximums without changing the remaining health and mana when the item effects are applied`() {
         // Given
         val battleUnit = BattleUnitMother.battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealth = 80)
-        val maximumHealthEffect = EffectMother.increaseMaximumHealthEffect(id = "maximum-health-20", healthPoints = 20).toDto()
-        val maximumManaEffect = EffectMother.increaseMaximumManaEffect(id = "maximum-mana-20", manaPoints = 20).toDto()
+        val maximumHealthEffect = EffectMother.increaseMaximumHealthEffect(id = "maximum-health-20", maximumHealth = 20).toDto()
+        val maximumManaEffect = EffectMother.increaseMaximumManaEffect(id = "maximum-mana-20", maximumMana = 20).toDto()
         // When
         val updatedBattleUnit =
             battleUnit
@@ -832,22 +832,22 @@ class BattleUnitTest {
         // Given
         val battleUnit = BattleUnitMother.battleUnit()
         // When
-        val result = runCatching { battleUnit.applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseHealthEffect().toDto()) }
+        val result = runCatching { battleUnit.applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.healEffect().toDto()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.InvalidEffectApplicationStatus>()
+        result.exceptionOrNull().shouldBeTypeOf<BattleUnitError.InvalidEffectTiming>()
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the health up to the maximum with the equipped effects when the effect increases health`() {
+    fun `TriggerImmediateEffect should increase the health up to the maximum with the equipped effects when the effect heals`() {
         // Given
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(healthPoints = 100).toDto(), remainingHealth = 90)
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
-                effect = EffectMother.increaseHealthEffect(healing = 50).toDto(),
+            battleUnit.triggerImmediateEffect(
+                effect = EffectMother.healEffect(healing = 50).toDto(),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -856,16 +856,16 @@ class BattleUnitTest {
     }
 
     @Test
-    fun `ApplyImmediateEffect should increase the mana up to the maximum with the equipped effects when the effect increases mana`() {
+    fun `TriggerImmediateEffect should increase the mana up to the maximum with the equipped effects when the effect restores mana`() {
         // Given
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(manaPoints = 30).toDto())
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(maximumMana = 20).toDto())
         // When
         val updatedBattleUnit =
-            battleUnit.applyImmediateEffect(
-                effect = EffectMother.increaseManaEffect(mana = 50).toDto(),
+            battleUnit.triggerImmediateEffect(
+                effect = EffectMother.restoreManaEffect(mana = 50).toDto(),
                 currentRow = position().row,
                 currentColumn = position().column,
             )
@@ -879,7 +879,7 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(manaPoints = 30).toDto())
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 5).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(maximumMana = 5).toDto())
         // When
         val replenishedBattleUnit = battleUnit.replenishMana()
         // Then
@@ -892,10 +892,10 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto())
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 20).toDto())
-                .applyImmediateEffect(effect = EffectMother.increaseHealthEffect(healing = 20).toDto(), currentRow = 0, currentColumn = 0)
-                .applyImmediateEffect(effect = EffectMother.increaseManaEffect(mana = 20).toDto(), currentRow = 0, currentColumn = 0)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumManaEffect(maximumMana = 20).toDto())
+                .triggerImmediateEffect(effect = EffectMother.healEffect(healing = 20).toDto(), currentRow = 0, currentColumn = 0)
+                .triggerImmediateEffect(effect = EffectMother.restoreManaEffect(mana = 20).toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second
         require(battleUnit.toDto().remainingHealth == 120 && battleUnit.toDto().remainingMana == 50)
@@ -918,8 +918,8 @@ class BattleUnitTest {
         val battleUnit =
             BattleUnitMother
                 .battleUnit(unit = UnitMother.unit(healthPoints = 100, manaPoints = 30).toDto(), remainingHealth = 70)
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
-                .applyEquippedEffect(lootableItemId = "helmet", effect = EffectMother.increaseMaximumManaEffect(manaPoints = 5).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "helmet", effect = EffectMother.increaseMaximumManaEffect(maximumMana = 5).toDto())
         // When
         val updatedBattleUnit = battleUnit.removeEquippedEffects(lootableItemId = "hammer")
         // Then
@@ -991,7 +991,7 @@ class BattleUnitTest {
         // Given: the hammer raises the maximum health from 20 to 40.
         val battleUnit =
             hurtBattleUnit(remainingHealth = 10, spentMana = 0)
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
         // When
         val recoveredBattleUnit = battleUnit.recover(percentage = 10)
         // Then
@@ -1138,8 +1138,8 @@ class BattleUnitTest {
             BattleUnitMother
                 .battleUnit(id = "rat-1", unit = unit, player = player)
                 .castAbility(abilityId = "ability-1", abilityCooldown = 2, abilityManaCost = 5, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
-                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(healthPoints = 20).toDto())
-                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 40, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .applyEquippedEffect(lootableItemId = "hammer", effect = EffectMother.increaseMaximumHealthEffect(maximumHealth = 20).toDto())
+                .triggerImmediateEffect(EffectMother.damageEffect(damage = 40, timingType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second
         require(defeatedBattleUnit.isDefeated())
@@ -1160,9 +1160,9 @@ class BattleUnitTest {
         val defeatedBattleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit)
-                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
+                .triggerImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
                 .castAbility(abilityId = "teleport", abilityCooldown = 2, abilityManaCost = 0, castGroup = listOf(Battlefield.Dto.PositionDto(0, 0)))
-                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 20, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .triggerImmediateEffect(EffectMother.damageEffect(damage = 20, timingType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second
         require(defeatedBattleUnit.isDefeated())
@@ -1183,8 +1183,8 @@ class BattleUnitTest {
         val defeatedBattleUnit =
             BattleUnitMother
                 .battleUnit(unit = unit, maximumAbilities = 3)
-                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
-                .applyImmediateEffect(EffectMother.decreaseHealthEffect(damage = 20, applicationType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
+                .triggerImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "teleport").toDto(), currentRow = 0, currentColumn = 0)
+                .triggerImmediateEffect(EffectMother.damageEffect(damage = 20, timingType = "IMMEDIATELY").toDto(), currentRow = 0, currentColumn = 0)
                 .pullEvents()
                 .second
         require(defeatedBattleUnit.isDefeated())
@@ -1193,7 +1193,7 @@ class BattleUnitTest {
         // Then
         val withFireball =
             respawnedBattleUnit
-                .applyImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "fireball").toDto(), currentRow = 2, currentColumn = 3)
+                .triggerImmediateEffect(EffectMother.learnAbilityEffect(abilityId = "fireball").toDto(), currentRow = 2, currentColumn = 3)
                 .pullEvents()
                 .second
         withFireball.canLearnAbility(abilityId = "heal").shouldBeFalse()

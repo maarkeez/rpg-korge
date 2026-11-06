@@ -1,6 +1,6 @@
 [outcome]
 type = "INCREASE_MAXIMUM_HEALTH"
-healthPoints = 20
+maximumHealth = 20
 
-[application]
+[timing]
 type = "WHILE_EQUIPPED"

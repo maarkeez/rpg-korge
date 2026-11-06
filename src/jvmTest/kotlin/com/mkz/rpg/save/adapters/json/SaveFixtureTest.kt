@@ -3,7 +3,7 @@ package com.mkz.rpg.save.adapters.json
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.cpuBattleBrain.adapters.presentation.CpuBattleBrainApi
 import com.mkz.rpg.cpuWanderBrain.adapters.presentation.CpuWanderBrainApi
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootableItemEntry
@@ -59,7 +59,7 @@ class SaveFixtureTest {
         val apis =
             SubdomainApis(
                 terrains = listOf(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("void")).toDto(), nonOccupiableTerrain(id = "void").toDto()),
-                effects = listOf(increaseHealthEffect(id = "cure").toDto()),
+                effects = listOf(healEffect(id = "cure").toDto()),
                 lootableItems = listOf(consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto()),
                 lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(lootableItemEntry(lootableItemId = "health-potion"), nothingEntry())).toDto()),
                 units =

@@ -7,5 +7,5 @@ effectId = "low-physical-damage"
 target = "TARGETED_BATTLE_UNIT"
 
 [[effects]]
-effectId = "venom-on-death"
+effectId = "venom-on-defeat"
 target = "TARGETED_BATTLE_UNIT"

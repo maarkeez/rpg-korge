@@ -3,7 +3,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
@@ -68,7 +68,7 @@ class MushroomAbilityAcceptanceTest {
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
-        val venomEffect = EffectMother.decreaseHealthEffect(id = venomEffectId)
+        val venomEffect = EffectMother.damageEffect(id = venomEffectId)
         effectApi.requestEffectCreation(venomEffect.toDto())
 
         val mushroomAbility =
@@ -76,7 +76,7 @@ class MushroomAbilityAcceptanceTest {
                 id = mushroomAbilityId,
                 manaCost = 10,
                 cooldown = 0,
-                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = venomEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = venomEffectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES,
             )
         abilityApi.requestAbilityCreation(mushroomAbility.toDto())
@@ -145,8 +145,8 @@ class MushroomAbilityAcceptanceTest {
             eventBus.dispatch()
             // Then
             val firstRat = battleUnitApi.searchBattleUnitById(firstRatBattleUnitId)!!
-            firstRat.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
+            firstRat.ongoingEffects.onPlayerTurnStarted.shouldContain(venomEffectId)
             val secondRat = battleUnitApi.searchBattleUnitById(secondRatBattleUnitId)!!
-            secondRat.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
+            secondRat.ongoingEffects.onPlayerTurnStarted.shouldContain(venomEffectId)
         }
 }

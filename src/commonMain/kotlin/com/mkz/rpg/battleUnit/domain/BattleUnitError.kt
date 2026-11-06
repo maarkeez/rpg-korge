@@ -27,9 +27,9 @@ sealed class BattleUnitError(
 
     class EffectNotFound : BattleUnitError("Effect not found")
 
-    class NotOnTurnStarted : BattleUnitError("Not on turn started effect")
+    class NotOnPlayerTurnStarted : BattleUnitError("Not an on player turn started effect")
 
-    class InvalidEffectApplicationStatus : BattleUnitError("Invalid effect application status")
+    class InvalidEffectTiming : BattleUnitError("Invalid effect timing")
 
     class BattleUnitDoesNotExists : BattleUnitError("Battle unit does not exist")
 

@@ -3,13 +3,13 @@ package com.mkz.rpg.battlefield.usecases.commands
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.battlefield.domain.BattlefieldRepository
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
 /** Triggers the effect of each terrain for the occupants standing on it, among the given ones (e.g.: the battle units in the battle). */
-class TriggerTerrainEffects(
+class ApplyTerrainEffects(
     private val battlefieldRepository: BattlefieldRepository,
     private val searchTerrainById: SearchTerrainById,
     private val eventBus: EventBus,
@@ -32,11 +32,11 @@ class TriggerTerrainEffects(
                 .filter { terrainEffect -> terrainEffect.occupantId in occupantIds }
         terrainEffects.forEach { terrainEffect ->
             eventBus.publish(
-                BattlefieldEvent.TerrainEffectTriggered(
+                BattlefieldEvent.TerrainEffectApplied(
                     application =
                         EffectApplicationDto(
-                            source = ApplicationSourceDto.terrain(terrainEffect.terrainId),
-                            target = EffectTargetDto.battleUnit(terrainEffect.occupantId),
+                            source = SourceDto.terrain(terrainEffect.terrainId),
+                            recipient = RecipientDto.battleUnit(terrainEffect.occupantId),
                             effectId = terrainEffect.effectId,
                             destination = null,
                         ),

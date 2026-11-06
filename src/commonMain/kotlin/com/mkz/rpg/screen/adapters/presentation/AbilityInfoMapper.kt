@@ -1,11 +1,11 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo
 import com.mkz.rpg.unit.domain.Unit
 
@@ -58,38 +58,38 @@ internal object AbilityInfoMapper {
     ): AbilityInfo.Effect {
         val effect = searchEffect(abilityEffect.effectId) ?: error("The ability '${ability.id}' has the effect '${abilityEffect.effectId}', which does not exist")
         val outcome = effect.outcome
-        val application = effect.application
+        val timing = effect.timing
 
         fun noSentence(): Nothing =
             error(
-                "The ability '${ability.id}' has the effect '${effect.id}' (${outcome.type}, ${application.type}, on ${abilityEffect.target.type}), " +
+                "The ability '${ability.id}' has the effect '${effect.id}' (${outcome.type}, ${timing.type}, on ${abilityEffect.target.type}), " +
                     "which has no sentence in AbilityInfoMapper",
             )
         return when {
-            outcome.type == EffectOutcomeDto.TypeDto.DECREASE_HEALTH && application.type == ApplicationTypeDto.IMMEDIATELY ->
-                AbilityInfo.Effect.Damage(damage = outcome.decreaseHealth!!.damage)
-            outcome.type == EffectOutcomeDto.TypeDto.DECREASE_HEALTH && application.type == ApplicationTypeDto.ON_TURN_STARTED ->
-                AbilityInfo.Effect.DamageEachTurn(damage = outcome.decreaseHealth!!.damage, turns = application.onTurnStarted!!.duration)
-            outcome.type == EffectOutcomeDto.TypeDto.INCREASE_HEALTH && application.type == ApplicationTypeDto.IMMEDIATELY ->
+            outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && timing.type == TimingTypeDto.IMMEDIATELY ->
+                AbilityInfo.Effect.Damage(damage = outcome.damage!!.damage)
+            outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED ->
+                AbilityInfo.Effect.DamageEachTurn(damage = outcome.damage!!.damage, turns = timing.onPlayerTurnStarted!!.duration)
+            outcome.type == EffectOutcomeDto.TypeDto.HEAL && timing.type == TimingTypeDto.IMMEDIATELY ->
                 when (abilityEffect.target.type) {
-                    TargetExpressionDto.Type.CASTER -> AbilityInfo.Effect.HealSelf(healing = outcome.increaseHealth!!.healing)
-                    TargetExpressionDto.Type.ADJACENT_ALLIES -> AbilityInfo.Effect.HealAdjacentAllies(healing = outcome.increaseHealth!!.healing)
+                    EffectTargetDto.Type.CASTER -> AbilityInfo.Effect.HealSelf(healing = outcome.heal!!.healing)
+                    EffectTargetDto.Type.ADJACENT_ALLIES -> AbilityInfo.Effect.HealAdjacentAllies(healing = outcome.heal!!.healing)
                     else -> noSentence()
                 }
-            outcome.type == EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT && application.type == ApplicationTypeDto.IMMEDIATELY -> {
-                val unitId = outcome.deployBattleUnit!!.unitId
+            outcome.type == EffectOutcomeDto.TypeDto.SUMMON && timing.type == TimingTypeDto.IMMEDIATELY -> {
+                val unitId = outcome.summon!!.unitId
                 val unit = searchUnit(unitId) ?: error("The ability '${ability.id}' summons the unit '$unitId', which does not exist")
                 val turns = ability.summonDuration ?: error("The ability '${ability.id}' summons the unit '$unitId' with no summonDuration")
                 AbilityInfo.Effect.Summon(unitId = unitId, turns = turns, healthPoints = unit.healthPoints)
             }
-            outcome.type == EffectOutcomeDto.TypeDto.TELEPORT && application.type == ApplicationTypeDto.IMMEDIATELY -> AbilityInfo.Effect.Teleport
-            outcome.type == EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES && application.type == ApplicationTypeDto.ON_DEFEATED -> {
+            outcome.type == EffectOutcomeDto.TypeDto.TELEPORT && timing.type == TimingTypeDto.IMMEDIATELY -> AbilityInfo.Effect.Teleport
+            outcome.type == EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES && timing.type == TimingTypeDto.ON_DEFEATED -> {
                 // Expanded one level: the poison the allies get.
-                val nestedEffectId = outcome.applyEffectOnAdjacentAllies!!.effectId
+                val nestedEffectId = outcome.applyEffectToAdjacentAllies!!.effectId
                 val nestedEffect = searchEffect(nestedEffectId) ?: error("The effect '${effect.id}' applies the effect '$nestedEffectId', which does not exist")
-                val isPoison = nestedEffect.outcome.type == EffectOutcomeDto.TypeDto.DECREASE_HEALTH && nestedEffect.application.type == ApplicationTypeDto.ON_TURN_STARTED
+                val isPoison = nestedEffect.outcome.type == EffectOutcomeDto.TypeDto.DAMAGE && nestedEffect.timing.type == TimingTypeDto.ON_PLAYER_TURN_STARTED
                 if (!isPoison) noSentence()
-                AbilityInfo.Effect.OnDefeatedPoisonAllies(damage = nestedEffect.outcome.decreaseHealth!!.damage, turns = nestedEffect.application.onTurnStarted!!.duration)
+                AbilityInfo.Effect.OnDefeatedPoisonAllies(damage = nestedEffect.outcome.damage!!.damage, turns = nestedEffect.timing.onPlayerTurnStarted!!.duration)
             }
             else -> noSentence()
         }

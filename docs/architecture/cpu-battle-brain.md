@@ -52,12 +52,12 @@ A summoned battle unit (e.g.: the bat a goat summons) lasts its summon duration,
 
 Every ability the unit can cast (enough mana, no cooldown), with every target `WhereCanCast` allows, is an option, but only heals when no enemy is within reach. Each ability is classified by its effects:
 
-| Kind   | Effects                                         | Examples                          |
-|--------|-------------------------------------------------|-----------------------------------|
-| Damage | `DECREASE_HEALTH` on the selected target        | sword, skull, poisoned-sword      |
-| Heal   | `INCREASE_HEALTH` on the caster                 | heal                              |
-| Summon | `DEPLOY_BATTLE_UNIT`                            | bee, bat                          |
-| Other  | Anything else                                   | teleport                          |
+| Kind   | Effects                         | Examples                     |
+|--------|---------------------------------|------------------------------|
+| Damage | `DAMAGE` on the selected target | sword, skull, poisoned-sword |
+| Heal   | `HEAL` on the caster            | heal                         |
+| Summon | `SUMMON`                        | bee, bat                     |
+| Other  | Anything else                   | teleport                     |
 
 The **expected amount** of an effect is its full amount when it is applied immediately. When it is applied every turn, it is its total discounted by 0.9 for every turn it waits, e.g.: venom (3 per turn for 5 turns) is worth 3 × (0.9 + 0.81 + 0.73 + 0.66 + 0.59) ≈ 11.1.
 

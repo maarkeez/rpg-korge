@@ -1,6 +1,6 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.commands
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
@@ -13,7 +13,7 @@ import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrain
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuBattleUnitDone
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent.CpuPlayerTurnFinished
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainMother.cpuBattleBrain
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.domain.FakeEventBus
@@ -43,7 +43,7 @@ class MakeNextDecisionTest {
     init {
         queries.playerRepository.create(player(id = "cpu", type = CPU))
         queries.playerRepository.create(player(id = "human"))
-        queries.effectRepository.create(decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY"))
+        queries.effectRepository.create(damageEffect(id = "damage", damage = 10, timingType = "IMMEDIATELY"))
         queries.abilityRepository.create(ability(id = "sword", manaCost = 0, cooldown = 0, targeting = ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("damage", TARGETED_BATTLE_UNIT))))
     }
 

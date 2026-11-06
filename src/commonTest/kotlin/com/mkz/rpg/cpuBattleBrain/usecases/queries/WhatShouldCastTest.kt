@@ -1,9 +1,9 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ADJACENT_ENEMY
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto.ALL_ADJACENT_ENEMIES
@@ -16,9 +16,9 @@ import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast
 import com.mkz.rpg.battleUnit.usecases.queries.WhereCanCast.CastGroup
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.WhatShouldCast.CastDecision
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.effect.domain.EffectMother.teleportEffect
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -60,13 +60,13 @@ class WhatShouldCastTest {
     private val unaffordableHeal = ability(id = "heal", manaCost = 100, cooldown = 0, targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("heal", CASTER)))
 
     init {
-        queries.effectRepository.create(decreaseHealthEffect(id = "damage", damage = 10, applicationType = "IMMEDIATELY"))
-        queries.effectRepository.create(decreaseHealthEffect(id = "big-damage", damage = 12, applicationType = "IMMEDIATELY"))
-        queries.effectRepository.create(decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED"))
-        queries.effectRepository.create(increaseHealthEffect(id = "heal", healing = 20))
+        queries.effectRepository.create(damageEffect(id = "damage", damage = 10, timingType = "IMMEDIATELY"))
+        queries.effectRepository.create(damageEffect(id = "big-damage", damage = 12, timingType = "IMMEDIATELY"))
+        queries.effectRepository.create(damageEffect(id = "venom", damage = 3, timingType = "ON_PLAYER_TURN_STARTED"))
+        queries.effectRepository.create(healEffect(id = "heal", healing = 20))
         queries.effectRepository.create(teleportEffect(id = "teleport"))
-        queries.effectRepository.create(deployBattleUnitEffect(id = "deploy-bat", unitId = "bat"))
-        queries.effectRepository.create(deployBattleUnitEffect(id = "deploy-scarecrow", unitId = "scarecrow"))
+        queries.effectRepository.create(summonEffect(id = "deploy-bat", unitId = "bat"))
+        queries.effectRepository.create(summonEffect(id = "deploy-scarecrow", unitId = "scarecrow"))
         queries.abilityRepository.create(sword)
         queries.unitRepository.create(unit(id = "bat", movementRange = 2, abilities = listOf("sword")))
         queries.unitRepository.create(unit(id = "scarecrow", movementRange = 2, abilities = listOf("heal")))

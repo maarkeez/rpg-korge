@@ -14,7 +14,7 @@ The inventory stores the lootable items a battle unit carries, and its gold. It 
 |-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
 | `storeLootedItem` | Stores an item lying on a tile, or announces `InventoryFull` without storing it when there is no space left.                                       |
 | `grantReward`     | Adds the gold of a reward and stores its items, dropping what does not fit. See [Rewards](#rewards).                                                |
-| `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as target. E.g.: the health potion heals 10. Fails, keeping it, when its battle unit can not learn the ability it teaches. See [Learning an ability](#learning-an-ability). |
+| `consumeItem`     | Removes a consumable and requests the application of its effects, with the item as source and its battle unit as recipient. E.g.: the health potion heals 10. Fails, keeping it, when its battle unit can not learn the ability it teaches. See [Learning an ability](#learning-an-ability). |
 | `discardItem`     | Removes an item, freeing its space. The item leaves the game.                                                                                      |
 | `equipItem`       | Equips a stored equippable item in its zone, and requests the application of its effects. See [Equipment](#equipment).                              |
 | `unequipItem`     | Unequips an item, which stays stored, and requests the removal of its effects. See [Equipment](#equipment).                                         |
@@ -73,7 +73,7 @@ A battle unit with no inventory receives nothing. A lootable item the game does 
 Each equipment zone (`HEAD`, `BODY`, `ARMS`, `LEGS`, `WEAPON`) holds one equipped item. Equipped items stay stored, so the inventory exposes them as `equippedItems`, by zone, next to `storedItems`.
 
 1. `equipItem` equips a stored equippable item in its zone, announcing `ItemEquipped`. If the zone held another item, it is a **swap**: the old item is unequipped first, announcing `ItemUnequipped`.
-2. The inventory requests the application of each effect of the new item (`RequestApplyEffect`), with the item as source and its battle unit as target. The battle unit records them under the item: they raise its maximum health and mana, without changing the remaining ones. E.g.: the hammer takes the knight from 100/100 health to 100/120.
+2. The inventory requests the application of each effect of the new item (`RequestApplyEffect`), with the item as source and its battle unit as recipient. The battle unit records them under the item: they raise its maximum health and mana, without changing the remaining ones. E.g.: the hammer takes the knight from 100/100 health to 100/120.
 3. `unequipItem` unequips an item, announcing `ItemUnequipped`, and requests the removal of its effects (`RequestRemoveEquippedEffects`). The battle unit lowers its remaining health and mana to the new maximums when they are above them, announcing `EquippedEffectsRemoved`.
 
 - In a swap, the new item's effects are applied **before** the old item's are removed, so the remaining health and mana are only lowered to the final maximums: swapping an item for another with the same effects loses nothing.

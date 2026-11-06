@@ -38,7 +38,7 @@ inline fun <T> fromResource(
         throw IllegalStateException("Resource '$path' is invalid: ${exception.message}", exception)
     }
 
-/** Parses an enum [value] by its name, e.g.: `"DECREASE_HEALTH"`. */
+/** Parses an enum [value] by its name, e.g.: `"DAMAGE"`. */
 inline fun <reified E : Enum<E>> enumOf(
     field: String,
     value: String,
@@ -46,7 +46,7 @@ inline fun <reified E : Enum<E>> enumOf(
     enumValues<E>().firstOrNull { it.name == value }
         ?: throw IllegalArgumentException("'$field' must be one of ${enumValues<E>().map { it.name }}, but was '$value'")
 
-/** Requires a [value] that is only optional for some types, e.g.: `damage` is required by `DECREASE_HEALTH` outcomes. */
+/** Requires a [value] that is only optional for some types, e.g.: `damage` is required by `DAMAGE` outcomes. */
 fun <T : Any> required(
     field: String,
     value: T?,

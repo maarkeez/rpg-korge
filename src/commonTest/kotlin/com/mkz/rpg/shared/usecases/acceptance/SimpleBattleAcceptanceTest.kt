@@ -3,7 +3,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
@@ -74,10 +74,10 @@ class SimpleBattleAcceptanceTest {
 
         val lowPhysicalDamage =
             EffectMother
-                .decreaseHealthEffect(
+                .damageEffect(
                     id = "low-physical-damage",
                     damage = 10,
-                    applicationType = "IMMEDIATELY",
+                    timingType = "IMMEDIATELY",
                 ).toDto()
         effectApi.requestEffectCreation(lowPhysicalDamage)
 
@@ -86,7 +86,7 @@ class SimpleBattleAcceptanceTest {
                 id = swordAbilityId,
                 manaCost = 0,
                 cooldown = 0,
-                abilityEffects = listOf(Ability.Dto.AbilityEffectDto(effectId = lowPhysicalDamage.id, target = TargetExpressionDto(type = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT))),
+                abilityEffects = listOf(Ability.Dto.AbilityEffectDto(effectId = lowPhysicalDamage.id, target = EffectTargetDto(type = EffectTargetDto.Type.TARGETED_BATTLE_UNIT))),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
                 summonDuration = null,
             )

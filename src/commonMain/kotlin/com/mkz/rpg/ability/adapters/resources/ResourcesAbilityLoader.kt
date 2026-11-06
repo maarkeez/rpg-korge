@@ -2,7 +2,7 @@ package com.mkz.rpg.ability.adapters.resources
 
 import com.mkz.rpg.ability.domain.Ability
 import com.mkz.rpg.ability.domain.Ability.Dto.AbilityEffectDto
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.usecases.services.AbilityLoader
 import com.mkz.rpg.shared.adapters.resources.ResourcesBundle
@@ -54,7 +54,7 @@ class ResourcesAbilityLoader(
         fun toDto(): AbilityEffectDto =
             AbilityEffectDto(
                 effectId = effectId,
-                target = TargetExpressionDto(type = enumOf<TargetExpressionDto.Type>("effects.target", target)),
+                target = EffectTargetDto(type = enumOf<EffectTargetDto.Type>("effects.target", target)),
             )
     }
 }

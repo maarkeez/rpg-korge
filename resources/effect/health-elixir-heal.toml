@@ -1,6 +1,6 @@
 [outcome]
-type = "INCREASE_HEALTH"
+type = "HEAL"
 healing = 30
 
-[application]
+[timing]
 type = "IMMEDIATELY"

@@ -1,19 +1,19 @@
 package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.ADJACENT_ALLIES
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_TILE
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.ADJACENT_ALLIES
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_TILE
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnAdjacentAlliesEffect
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.deployBattleUnitEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.applyEffectToAdjacentAlliesEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
+import com.mkz.rpg.effect.domain.EffectMother.restoreManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.summonEffect
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.throwables.shouldThrow
@@ -36,7 +36,7 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should map an immediate decrease of health to a damage`() {
         // Given
-        val damage = decreaseHealthEffect(id = "low-physical-damage", damage = 10, applicationType = "IMMEDIATELY").toDto()
+        val damage = damageEffect(id = "low-physical-damage", damage = 10, timingType = "IMMEDIATELY").toDto()
         val sword =
             ability(
                 id = "sword",
@@ -61,7 +61,7 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should map a decrease of health on each turn to a damage each turn`() {
         // Given
-        val venom = decreaseHealthEffect(id = "venom-damage", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
+        val venom = damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
         val mushroom = ability(targeting = TargetingDto.ALL_ADJACENT_ENEMIES, abilityEffects = listOf(abilityEffect("venom-damage", TARGETED_BATTLE_UNIT))).toDto()
         // When
         val abilityInfo = abilityInfo(mushroom, venom)
@@ -72,7 +72,7 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should map an increase of health to a heal of the caster or of its allies by its target`() {
         // Given
-        val heal = increaseHealthEffect(id = "mending-heal", healing = 15).toDto()
+        val heal = healEffect(id = "mending-heal", healing = 15).toDto()
         val mending = ability(targeting = TargetingDto.CASTER, abilityEffects = listOf(abilityEffect("mending-heal", CASTER), abilityEffect("mending-heal", ADJACENT_ALLIES))).toDto()
         // When
         val abilityInfo = abilityInfo(mending, heal)
@@ -83,7 +83,7 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should map a deployed battle unit to a summon with its turns and health`() {
         // Given
-        val deployBat = deployBattleUnitEffect(id = "deploy-bat", unitId = "bat").toDto()
+        val deployBat = summonEffect(id = "deploy-bat", unitId = "bat").toDto()
         val bat = unit(id = "bat", healthPoints = 10).toDto()
         val batAbility = ability(targeting = TargetingDto.VACANT_TILE_ADJACENT_TO_CASTER, abilityEffects = listOf(abilityEffect("deploy-bat", TARGETED_TILE)), summonDuration = 5).toDto()
         // When
@@ -95,9 +95,9 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should expand the effect applied to the adjacent allies when it is applied on defeat`() {
         // Given
-        val venom = decreaseHealthEffect(id = "venom-damage", damage = 3, applicationType = "ON_TURN_STARTED").toDto()
-        val venomOnDeath = applyEffectOnAdjacentAlliesEffect(id = "venom-on-death", effectId = "venom-damage").toDto()
-        val skull = ability(targeting = TargetingDto.ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("venom-on-death", TARGETED_BATTLE_UNIT))).toDto()
+        val venom = damageEffect(id = "venom-damage", damage = 3, timingType = "ON_PLAYER_TURN_STARTED").toDto()
+        val venomOnDeath = applyEffectToAdjacentAlliesEffect(id = "venom-on-defeat", effectId = "venom-damage").toDto()
+        val skull = ability(targeting = TargetingDto.ADJACENT_ENEMY, abilityEffects = listOf(abilityEffect("venom-on-defeat", TARGETED_BATTLE_UNIT))).toDto()
         // When
         val abilityInfo = abilityInfo(skull, venom, venomOnDeath)
         // Then
@@ -137,7 +137,7 @@ class AbilityInfoMapperTest {
     @Test
     fun `AbilityInfoMapper should fail naming the ability when an effect has no sentence`() {
         // Given
-        val restoreMana = increaseManaEffect(id = "mana-potion-restore").toDto()
+        val restoreMana = restoreManaEffect(id = "mana-potion-restore").toDto()
         val ability = ability(id = "mana-burst", abilityEffects = listOf(abilityEffect("mana-potion-restore", CASTER))).toDto()
         // When
         val error = shouldThrow<IllegalStateException> { abilityInfo(ability, restoreMana) }

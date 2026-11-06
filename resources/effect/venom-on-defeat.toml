@@ -1,6 +1,6 @@
 [outcome]
-type = "APPLY_EFFECT_ON_ADJACENT_ALLIES"
+type = "APPLY_EFFECT_TO_ADJACENT_ALLIES"
 effectId = "venom-damage"
 
-[application]
+[timing]
 type = "ON_DEFEATED"

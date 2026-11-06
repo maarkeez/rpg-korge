@@ -6,8 +6,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitError.AbilityAlreadyKnown
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EffectNotFound
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectAlreadyApplied
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.EquippedEffectsNotFound
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidEffectApplicationStatus
-import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotOnTurnStarted
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.InvalidEffectTiming
+import com.mkz.rpg.battleUnit.domain.BattleUnitError.NotOnPlayerTurnStarted
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.RemainingManaBelowZero
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.WalkingDistanceExceedsRemainingSteps
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.WalkingDistanceMustBeGreaterThanZero
@@ -16,28 +16,28 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDamaged
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDeployed
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitHealed
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaIncreased
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitManaRestored
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitMoved
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitRespawned
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitTeleported
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitVanished
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EffectReceived
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.EquippedEffectsRemoved
-import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnTurnStartedEffectApplied
+import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.OnPlayerTurnStartedEffectTriggered
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestMoveOccupant
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestOccupyTile
 import com.mkz.rpg.battlefield.domain.BattlefieldEvent.RequestRemoveOccupant
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_ON_ADJACENT_ALLIES
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.APPLY_EFFECT_TO_ADJACENT_ALLIES
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DAMAGE
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.HEAL
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_HEALTH
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_MAXIMUM_MANA
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.LEARN_ABILITY
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.NEGATE_INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.RESTORE_MANA
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.SUMMON
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.shared.domain.DomainEvent
@@ -429,11 +429,11 @@ data class BattleUnit private constructor(
         )
     }
 
-    fun receiveOnTurnStartedEffect(
+    fun receiveOnPlayerTurnStartedEffect(
         effectId: String,
-        turnsLeft: Int,
+        remainingDuration: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.receiveOnTurnStartedEffect(effectId, turnsLeft)
+        val ongoingEffects = ongoingEffects.receiveOnPlayerTurnStartedEffect(effectId, remainingDuration)
         val effectReceivedEvent =
             EffectReceived(
                 battleUnitId = id.value,
@@ -460,24 +460,24 @@ data class BattleUnit private constructor(
 
     fun isDefeated(): Boolean = remainingHealth.value <= 0
 
-    fun applyOnDefeatedEffects(): BattleUnit {
+    fun triggerOnDefeatedEffects(): BattleUnit {
         val ongoingEffects = ongoingEffects.clearOnDefeatedEffects()
         return copy(ongoingEffects = ongoingEffects)
     }
 
-    fun applyImmediateEffect(
+    fun triggerImmediateEffect(
         effect: Effect.Dto,
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.applyImmediateEffect(effect.id)
+        val ongoingEffects = ongoingEffects.triggerImmediateEffect(effect.id)
         return when (effect.outcome.type) {
-            DECREASE_HEALTH -> {
+            DAMAGE -> {
                 applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
             }
-            INCREASE_HEALTH -> {
+            HEAL -> {
                 val remainingHealth =
-                    RemainingHealth(min(maximumHealth(), remainingHealth.value + effect.outcome.increaseHealth!!.healing))
+                    RemainingHealth(min(maximumHealth(), remainingHealth.value + effect.outcome.heal!!.healing))
                 val healedEvent = BattleUnitHealed(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
@@ -485,14 +485,14 @@ data class BattleUnit private constructor(
                     events = events + healedEvent,
                 )
             }
-            INCREASE_MANA -> {
+            RESTORE_MANA -> {
                 val remainingMana =
-                    RemainingMana(min(maximumMana(), remainingMana.value + effect.outcome.increaseMana!!.mana))
-                val manaIncreasedEvent = BattleUnitManaIncreased(id.value)
+                    RemainingMana(min(maximumMana(), remainingMana.value + effect.outcome.restoreMana!!.mana))
+                val manaRestoredEvent = BattleUnitManaRestored(id.value)
                 copy(
                     ongoingEffects = ongoingEffects,
                     remainingMana = remainingMana,
-                    events = events + manaIncreasedEvent,
+                    events = events + manaRestoredEvent,
                 )
             }
             TELEPORT -> {
@@ -502,8 +502,8 @@ data class BattleUnit private constructor(
             }
             LEARN_ABILITY -> copy(ongoingEffects = ongoingEffects).learnAbility(effect.outcome.learnAbility!!.abilityId)
             NEGATE_INCREASE_HEALTH,
-            APPLY_EFFECT_ON_ADJACENT_ALLIES,
-            DEPLOY_BATTLE_UNIT,
+            APPLY_EFFECT_TO_ADJACENT_ALLIES,
+            SUMMON,
             INCREASE_MAXIMUM_HEALTH,
             INCREASE_MAXIMUM_MANA,
             -> TODO("Not implemented")
@@ -521,16 +521,16 @@ data class BattleUnit private constructor(
         )
     }
 
-    fun hasOnTurnStartedEffects(): Boolean = ongoingEffects.hasOnTurnStartedEffects()
+    fun hasOnPlayerTurnStartedEffects(): Boolean = ongoingEffects.hasOnPlayerTurnStartedEffects()
 
-    fun applyOnTurnStartedEffect(
+    fun triggerOnPlayerTurnStartedEffect(
         effect: Effect.Dto,
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val ongoingEffects = ongoingEffects.applyOnTurnStartedEffect(effect.id)
-        val appliedEvent = OnTurnStartedEffectApplied(battleUnitId = id.value, effectId = effect.id)
-        return if (effect.outcome.type == DECREASE_HEALTH) {
+        val ongoingEffects = ongoingEffects.triggerOnPlayerTurnStartedEffect(effect.id)
+        val appliedEvent = OnPlayerTurnStartedEffectTriggered(battleUnitId = id.value, effectId = effect.id)
+        return if (effect.outcome.type == DAMAGE) {
             copy(events = events + appliedEvent).applyDecreaseHealthEffect(effect, ongoingEffects, currentRow, currentColumn)
         } else {
             TODO("Not implemented yet")
@@ -543,7 +543,7 @@ data class BattleUnit private constructor(
         currentRow: Int,
         currentColumn: Int,
     ): BattleUnit {
-        val remainingHealth = RemainingHealth(max(0, remainingHealth.value - effect.outcome.decreaseHealth!!.damage))
+        val remainingHealth = RemainingHealth(max(0, remainingHealth.value - effect.outcome.damage!!.damage))
         val newEvents =
             buildList {
                 add(BattleUnitDamaged(battleUnitId = id.value))
@@ -625,8 +625,8 @@ data class BattleUnit private constructor(
                     snapshots.map { snapshot ->
                         val bonus =
                             when (snapshot.bonus) {
-                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH -> Bonus.MaximumHealth(snapshot.points)
-                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA -> Bonus.MaximumMana(snapshot.points)
+                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH -> Bonus.MaximumHealth(snapshot.amount)
+                                Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA -> Bonus.MaximumMana(snapshot.amount)
                             }
                         EquippedEffect(LootableItemId(snapshot.lootableItemId), EffectId(snapshot.effectId), bonus)
                     },
@@ -635,16 +635,16 @@ data class BattleUnit private constructor(
 
         fun toSnapshot(): List<Dto.EquippedEffectSnapshotDto> =
             value.map { equippedEffect ->
-                val (bonus, points) =
+                val (bonus, amount) =
                     when (val equippedBonus = equippedEffect.bonus) {
-                        is Bonus.MaximumHealth -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH to equippedBonus.healthPoints
-                        is Bonus.MaximumMana -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA to equippedBonus.manaPoints
+                        is Bonus.MaximumHealth -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_HEALTH to equippedBonus.amount
+                        is Bonus.MaximumMana -> Dto.EquippedEffectSnapshotDto.BonusDto.MAXIMUM_MANA to equippedBonus.amount
                     }
                 Dto.EquippedEffectSnapshotDto(
                     lootableItemId = equippedEffect.lootableItemId.value,
                     effectId = equippedEffect.effectId.value,
                     bonus = bonus,
-                    points = points,
+                    amount = amount,
                 )
             }
 
@@ -654,9 +654,9 @@ data class BattleUnit private constructor(
         ): EquippedEffects {
             val bonus =
                 when (effect.outcome.type) {
-                    INCREASE_MAXIMUM_HEALTH -> Bonus.MaximumHealth(effect.outcome.increaseMaximumHealth!!.healthPoints)
-                    INCREASE_MAXIMUM_MANA -> Bonus.MaximumMana(effect.outcome.increaseMaximumMana!!.manaPoints)
-                    else -> throw InvalidEffectApplicationStatus()
+                    INCREASE_MAXIMUM_HEALTH -> Bonus.MaximumHealth(effect.outcome.increaseMaximumHealth!!.maximumHealth)
+                    INCREASE_MAXIMUM_MANA -> Bonus.MaximumMana(effect.outcome.increaseMaximumMana!!.maximumMana)
+                    else -> throw InvalidEffectTiming()
                 }
             val equippedEffect = EquippedEffect(LootableItemId(lootableItemId), EffectId(effect.id), bonus)
             if (value.any { it.isSameEffect(equippedEffect) }) throw EquippedEffectAlreadyApplied()
@@ -669,9 +669,9 @@ data class BattleUnit private constructor(
             return EquippedEffects(remainingEffects)
         }
 
-        fun maximumHealthBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumHealth)?.healthPoints ?: 0 }
+        fun maximumHealthBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumHealth)?.amount ?: 0 }
 
-        fun maximumManaBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumMana)?.manaPoints ?: 0 }
+        fun maximumManaBonus(): Int = value.sumOf { (it.bonus as? Bonus.MaximumMana)?.amount ?: 0 }
 
         fun toDto(): Map<String, List<String>> =
             value
@@ -696,11 +696,11 @@ data class BattleUnit private constructor(
 
         private sealed interface Bonus {
             @JvmInline value class MaximumHealth(
-                val healthPoints: Int,
+                val amount: Int,
             ) : Bonus
 
             @JvmInline value class MaximumMana(
-                val manaPoints: Int,
+                val amount: Int,
             ) : Bonus
         }
     }
@@ -846,11 +846,11 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
-        fun receiveOnTurnStartedEffect(
+        fun receiveOnPlayerTurnStartedEffect(
             effectId: String,
-            turnsLeft: Int,
+            remainingDuration: Int,
         ): OngoingEffects {
-            val newEffect = Effect.onTurnStarted(effectId, turnsLeft)
+            val newEffect = Effect.onPlayerTurnStarted(effectId, remainingDuration)
             return OngoingEffects(value + newEffect)
         }
 
@@ -859,18 +859,18 @@ data class BattleUnit private constructor(
             return OngoingEffects(value + newEffect)
         }
 
-        fun applyImmediateEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isImmediate() && it.hasEffectId(effectId) })
+        fun triggerImmediateEffect(effectId: String): OngoingEffects = OngoingEffects(value.filterNot { it.isImmediate() && it.hasEffectId(effectId) })
 
-        fun applyOnTurnStartedEffect(effectId: String): OngoingEffects {
+        fun triggerOnPlayerTurnStartedEffect(effectId: String): OngoingEffects {
             val effect = value.firstOrNull { it.hasEffectId(effectId) } ?: throw EffectNotFound()
-            if (!effect.isOnTurnStarted()) throw NotOnTurnStarted()
-            val effectAfterApplication = effect.applyOnTurnStarted()
+            if (!effect.isOnPlayerTurnStarted()) throw NotOnPlayerTurnStarted()
+            val effectAfterTrigger = effect.triggerOnPlayerTurnStarted()
             val ongoingEffects =
-                if (effectAfterApplication != null) {
+                if (effectAfterTrigger != null) {
                     buildList {
                         value.forEach { ongoingEffect ->
                             if (ongoingEffect.hasEffectId(effectId)) {
-                                add(effectAfterApplication)
+                                add(effectAfterTrigger)
                             } else {
                                 add(ongoingEffect)
                             }
@@ -882,13 +882,13 @@ data class BattleUnit private constructor(
             return OngoingEffects(ongoingEffects)
         }
 
-        fun hasOnTurnStartedEffects(): Boolean = value.any { it.isOnTurnStarted() }
+        fun hasOnPlayerTurnStartedEffects(): Boolean = value.any { it.isOnPlayerTurnStarted() }
 
         fun clearOnDefeatedEffects(): OngoingEffects = OngoingEffects(value.filter { !it.isOnDefeated() })
 
         fun toDto(): Dto.OngoingEffectsDto =
             Dto.OngoingEffectsDto(
-                onTurnStarted = value.filter { it.isOnTurnStarted() }.map { it.effectId() },
+                onPlayerTurnStarted = value.filter { it.isOnPlayerTurnStarted() }.map { it.effectId() },
                 onDefeatedEffects = value.filter { it.isOnDefeated() }.map { it.effectId() },
             )
 
@@ -898,10 +898,10 @@ data class BattleUnit private constructor(
             fun restore(snapshots: List<Dto.OngoingEffectSnapshotDto>) =
                 OngoingEffects(
                     snapshots.map { snapshot ->
-                        when (snapshot.application) {
-                            Dto.OngoingEffectSnapshotDto.ApplicationDto.IMMEDIATE -> Effect.immediate(snapshot.effectId)
-                            Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_DEFEATED -> Effect.onDefeated(snapshot.effectId)
-                            Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_TURN_STARTED -> Effect.onTurnStarted(snapshot.effectId, requireNotNull(snapshot.turnsLeft))
+                        when (snapshot.timing) {
+                            Dto.OngoingEffectSnapshotDto.TimingDto.IMMEDIATE -> Effect.immediate(snapshot.effectId)
+                            Dto.OngoingEffectSnapshotDto.TimingDto.ON_DEFEATED -> Effect.onDefeated(snapshot.effectId)
+                            Dto.OngoingEffectSnapshotDto.TimingDto.ON_PLAYER_TURN_STARTED -> Effect.onPlayerTurnStarted(snapshot.effectId, requireNotNull(snapshot.remainingDuration))
                         }
                     },
                 )
@@ -912,29 +912,29 @@ data class BattleUnit private constructor(
         @ConsistentCopyVisibility
         private data class Effect private constructor(
             private val effectId: EffectId,
-            private val applicationStatus: ApplicationStatus,
+            private val timing: Timing,
         ) {
             companion object {
-                fun immediate(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.immediate())
+                fun immediate(effectId: String) = Effect(EffectId(effectId), Timing.immediate())
 
-                fun onTurnStarted(
+                fun onPlayerTurnStarted(
                     effectId: String,
-                    turnsLeft: Int,
-                ) = Effect(EffectId(effectId), ApplicationStatus.onTurnStarted(turnsLeft))
+                    remainingDuration: Int,
+                ) = Effect(EffectId(effectId), Timing.onPlayerTurnStarted(remainingDuration))
 
-                fun onDefeated(effectId: String) = Effect(EffectId(effectId), ApplicationStatus.onDefeated())
+                fun onDefeated(effectId: String) = Effect(EffectId(effectId), Timing.onDefeated())
             }
 
-            fun isOnTurnStarted() = applicationStatus.isOnTurnStarted()
+            fun isOnPlayerTurnStarted() = timing.isOnPlayerTurnStarted()
 
-            fun isOnDefeated() = applicationStatus.isOnDefeated()
+            fun isOnDefeated() = timing.isOnDefeated()
 
-            fun isImmediate() = applicationStatus.isImmediate()
+            fun isImmediate() = timing.isImmediate()
 
-            fun applyOnTurnStarted(): Effect? {
-                if (!isOnTurnStarted()) throw InvalidEffectApplicationStatus()
-                val updatedApplicationStatus = (applicationStatus as ApplicationStatus.OnTurnStarted).apply()
-                return updatedApplicationStatus?.let { copy(applicationStatus = updatedApplicationStatus) }
+            fun triggerOnPlayerTurnStarted(): Effect? {
+                if (!isOnPlayerTurnStarted()) throw InvalidEffectTiming()
+                val updatedTiming = (timing as Timing.OnPlayerTurnStarted).trigger()
+                return updatedTiming?.let { copy(timing = updatedTiming) }
             }
 
             fun hasEffectId(effectId: String) = effectId == this.effectId.value
@@ -942,11 +942,11 @@ data class BattleUnit private constructor(
             fun effectId() = effectId.value
 
             fun toSnapshot() =
-                when (applicationStatus) {
-                    ApplicationStatus.Immediate -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.IMMEDIATE, turnsLeft = null)
-                    ApplicationStatus.OnDefeated -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_DEFEATED, turnsLeft = null)
-                    is ApplicationStatus.OnTurnStarted ->
-                        Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.ApplicationDto.ON_TURN_STARTED, turnsLeft = applicationStatus.turnsLeft)
+                when (timing) {
+                    Timing.Immediate -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.TimingDto.IMMEDIATE, remainingDuration = null)
+                    Timing.OnDefeated -> Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.TimingDto.ON_DEFEATED, remainingDuration = null)
+                    is Timing.OnPlayerTurnStarted ->
+                        Dto.OngoingEffectSnapshotDto(effectId.value, Dto.OngoingEffectSnapshotDto.TimingDto.ON_PLAYER_TURN_STARTED, remainingDuration = timing.remainingDuration)
                 }
         }
 
@@ -954,26 +954,26 @@ data class BattleUnit private constructor(
             val value: String,
         )
 
-        private sealed interface ApplicationStatus {
-            object Immediate : ApplicationStatus
+        private sealed interface Timing {
+            object Immediate : Timing
 
-            object OnDefeated : ApplicationStatus
+            object OnDefeated : Timing
 
-            @JvmInline value class OnTurnStarted(
-                val turnsLeft: Int,
-            ) : ApplicationStatus {
-                fun apply(): OnTurnStarted? = if (turnsLeft - 1 == 0) null else OnTurnStarted(turnsLeft - 1)
+            @JvmInline value class OnPlayerTurnStarted(
+                val remainingDuration: Int,
+            ) : Timing {
+                fun trigger(): OnPlayerTurnStarted? = if (remainingDuration - 1 == 0) null else OnPlayerTurnStarted(remainingDuration - 1)
             }
 
             companion object {
-                fun immediate(): ApplicationStatus = Immediate
+                fun immediate(): Timing = Immediate
 
-                fun onDefeated(): ApplicationStatus = OnDefeated
+                fun onDefeated(): Timing = OnDefeated
 
-                fun onTurnStarted(turnsLeft: Int): ApplicationStatus = OnTurnStarted(turnsLeft)
+                fun onPlayerTurnStarted(remainingDuration: Int): Timing = OnPlayerTurnStarted(remainingDuration)
             }
 
-            fun isOnTurnStarted() = this is OnTurnStarted
+            fun isOnPlayerTurnStarted() = this is OnPlayerTurnStarted
 
             fun isOnDefeated() = this is OnDefeated
 
@@ -1006,7 +1006,7 @@ data class BattleUnit private constructor(
         )
 
         data class OngoingEffectsDto(
-            val onTurnStarted: List<String>,
+            val onPlayerTurnStarted: List<String>,
             val onDefeatedEffects: List<String>,
         )
 
@@ -1032,12 +1032,12 @@ data class BattleUnit private constructor(
             val remainingSummonDuration: Int?,
         )
 
-        /** An effect of an equipped item, with the points its bonus adds to the maximum health or mana. */
+        /** An effect of an equipped item, with the amount its bonus adds to the maximum health or mana. */
         data class EquippedEffectSnapshotDto(
             val lootableItemId: String,
             val effectId: String,
             val bonus: BonusDto,
-            val points: Int,
+            val amount: Int,
         ) {
             enum class BonusDto {
                 MAXIMUM_HEALTH,
@@ -1045,15 +1045,15 @@ data class BattleUnit private constructor(
             }
         }
 
-        /** An effect received and not applied yet, with the turns it has left when it applies every turn. */
+        /** An effect received and not triggered yet, with its remaining duration when it triggers on each player turn started. */
         data class OngoingEffectSnapshotDto(
             val effectId: String,
-            val application: ApplicationDto,
-            val turnsLeft: Int?,
+            val timing: TimingDto,
+            val remainingDuration: Int?,
         ) {
-            enum class ApplicationDto {
+            enum class TimingDto {
                 IMMEDIATE,
-                ON_TURN_STARTED,
+                ON_PLAYER_TURN_STARTED,
                 ON_DEFEATED,
             }
         }

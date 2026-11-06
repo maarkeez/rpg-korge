@@ -74,7 +74,7 @@ class TerrainEffectAcceptanceTest {
         terrainApi.init()
         terrainApi.initialiseTerrains()
 
-        val terrainEffect = EffectMother.decreaseHealthEffect(id = terrainEffectId, damage = 7, applicationType = "IMMEDIATELY")
+        val terrainEffect = EffectMother.damageEffect(id = terrainEffectId, damage = 7, timingType = "IMMEDIATELY")
         effectApi.requestEffectCreation(terrainEffect.toDto())
 
         val tiles =

@@ -1,8 +1,8 @@
 package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.battlefield.usecases.queries.SearchTerrainId
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DECREASE_HEALTH
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.INCREASE_HEALTH
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DAMAGE
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.HEAL
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 
@@ -23,8 +23,8 @@ class SearchTerrainHealthEffect(
         val effectId = searchTerrainById(terrainId)?.effectId ?: return 0
         val effect = searchEffectById(effectId) ?: return 0
         return when (effect.outcome.type) {
-            INCREASE_HEALTH -> effect.outcome.increaseHealth!!.healing
-            DECREASE_HEALTH -> -effect.outcome.decreaseHealth!!.damage
+            HEAL -> effect.outcome.heal!!.healing
+            DAMAGE -> -effect.outcome.damage!!.damage
             else -> 0
         }
     }

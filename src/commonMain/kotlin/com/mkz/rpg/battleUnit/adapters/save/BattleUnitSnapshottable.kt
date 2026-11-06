@@ -53,14 +53,14 @@ private data class BattleUnitSnapshot(
                 remainingMana = dto.remainingMana,
                 baseMaximumHealth = dto.baseMaximumHealth,
                 baseMaximumMana = dto.baseMaximumMana,
-                equippedEffects = dto.equippedEffects.map { effect -> EquippedEffect(effect.lootableItemId, effect.effectId, effect.bonus.name, effect.points) },
+                equippedEffects = dto.equippedEffects.map { effect -> EquippedEffect(effect.lootableItemId, effect.effectId, effect.bonus.name, effect.amount) },
                 maximumSteps = dto.remainingActions.maximumSteps,
                 remainingSteps = dto.remainingActions.remainingSteps,
                 remainingCasts = dto.remainingActions.remainingCasts,
                 knownAbilities = dto.knownAbilities,
                 learnedAbilityIds = dto.learnedAbilityIds,
                 maximumAbilities = dto.maximumAbilities,
-                ongoingEffects = dto.ongoingEffects.map { effect -> OngoingEffect(effect.effectId, effect.application.name, effect.turnsLeft) },
+                ongoingEffects = dto.ongoingEffects.map { effect -> OngoingEffect(effect.effectId, effect.timing.name, effect.remainingDuration) },
                 remainingSummonDuration = dto.remainingSummonDuration,
             )
     }
@@ -76,14 +76,14 @@ private data class BattleUnitSnapshot(
             baseMaximumMana = baseMaximumMana,
             equippedEffects =
                 equippedEffects.map { effect ->
-                    EquippedEffectSnapshotDto(effect.lootableItemId, effect.effectId, EquippedEffectSnapshotDto.BonusDto.valueOf(effect.bonus), effect.points)
+                    EquippedEffectSnapshotDto(effect.lootableItemId, effect.effectId, EquippedEffectSnapshotDto.BonusDto.valueOf(effect.bonus), effect.amount)
                 },
             // The casts of a player turn are not saved, as they are the same for every battle unit.
             remainingActions = RemainingActionsDto(remainingCasts = remainingCasts, remainingSteps = remainingSteps, maximumSteps = maximumSteps, maximumCasts = 1),
             knownAbilities = knownAbilities,
             learnedAbilityIds = learnedAbilityIds,
             maximumAbilities = maximumAbilities,
-            ongoingEffects = ongoingEffects.map { effect -> OngoingEffectSnapshotDto(effect.effectId, OngoingEffectSnapshotDto.ApplicationDto.valueOf(effect.application), effect.turnsLeft) },
+            ongoingEffects = ongoingEffects.map { effect -> OngoingEffectSnapshotDto(effect.effectId, OngoingEffectSnapshotDto.TimingDto.valueOf(effect.timing), effect.remainingDuration) },
             remainingSummonDuration = remainingSummonDuration,
         )
 
@@ -93,14 +93,14 @@ private data class BattleUnitSnapshot(
         val lootableItemId: String,
         val effectId: String,
         val bonus: String,
-        val points: Int,
+        val amount: Int,
     )
 
-    // Application: IMMEDIATE, ON_TURN_STARTED or ON_DEFEATED. Turns left: only when it applies every turn.
+    // Timing: IMMEDIATE, ON_PLAYER_TURN_STARTED or ON_DEFEATED. Remaining duration: only when it triggers on each player turn started.
     @Serializable
     data class OngoingEffect(
         val effectId: String,
-        val application: String,
-        val turnsLeft: Int?,
+        val timing: String,
+        val remainingDuration: Int?,
     )
 }

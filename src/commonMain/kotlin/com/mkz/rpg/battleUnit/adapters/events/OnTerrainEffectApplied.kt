@@ -5,12 +5,12 @@ import com.mkz.rpg.battlefield.domain.BattlefieldEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnTerrainEffectTriggered(
+class OnTerrainEffectApplied(
     applyEffect: ApplyEffect,
     eventBus: EventBus,
 ) {
     val subscription =
-        eventBus.subscribe<BattlefieldEvent.TerrainEffectTriggered> { event ->
+        eventBus.subscribe<BattlefieldEvent.TerrainEffectApplied> { event ->
             applyEffect(event.application)
         }
 }

@@ -41,7 +41,7 @@ class EffectViewTest : ViewsForTesting() {
             val effectView = EffectView(size, loadedResourcesLoader())
             effectView.displayEffect("venom-damage")
             // When
-            effectView.displayEffect("venom-on-death")
+            effectView.displayEffect("venom-on-defeat")
             // Then
             effectView.effectIconCount() shouldBe 1
         }

@@ -1,6 +1,6 @@
 package com.mkz.rpg.battleUnit.domain
 
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.unit.domain.Unit
@@ -22,8 +22,8 @@ object BattleUnitMother {
         val damage = unit.healthPoints - remainingHealth
         if (damage == 0) return deployedBattleUnit
         // A battle unit can only lose health by receiving damage.
-        val damageEffect = decreaseHealthEffect(damage = damage, applicationType = "IMMEDIATELY").toDto()
-        return deployedBattleUnit.applyImmediateEffect(damageEffect, deployAtRow, deployAtColumn).pullEvents().second
+        val damageEffect = damageEffect(damage = damage, timingType = "IMMEDIATELY").toDto()
+        return deployedBattleUnit.triggerImmediateEffect(damageEffect, deployAtRow, deployAtColumn).pullEvents().second
     }
 
     fun id() = "battle-unit-${UUID.randomUUID()}"

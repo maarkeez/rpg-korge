@@ -3,11 +3,11 @@ package com.mkz.rpg.battleUnit.usecases.commands
 import com.mkz.rpg.battleUnit.domain.BattleUnitError.FailedToReceiveAbilityEffects
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.BATTLE_UNIT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.POSITION
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto.TypeDto.BATTLE_UNIT
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto.TypeDto.POSITION
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -35,28 +35,28 @@ class ApplyEffectTest {
         )
 
     @Test
-    fun `should fail when the battle unit target has no battle unit id`() {
+    fun `should fail when the battle unit recipient has no battle unit id`() {
         // Given
-        queries.effectRepository.create(decreaseHealthEffect(id = "poison"))
-        val target = EffectTargetDto(type = BATTLE_UNIT, battleUnitId = null, position = null)
+        queries.effectRepository.create(damageEffect(id = "poison"))
+        val recipient = RecipientDto(type = BATTLE_UNIT, battleUnitId = null, position = null)
         // When
-        val result = runCatching { applyEffect(application(target)) }
+        val result = runCatching { applyEffect(application(recipient)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<FailedToReceiveAbilityEffects>()
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should fail when the position target has no position`() {
+    fun `should fail when the position recipient has no position`() {
         // Given
-        queries.effectRepository.create(decreaseHealthEffect(id = "poison"))
-        val target = EffectTargetDto(type = POSITION, battleUnitId = "rat-1", position = null)
+        queries.effectRepository.create(damageEffect(id = "poison"))
+        val recipient = RecipientDto(type = POSITION, battleUnitId = "rat-1", position = null)
         // When
-        val result = runCatching { applyEffect(application(target)) }
+        val result = runCatching { applyEffect(application(recipient)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<FailedToReceiveAbilityEffects>()
         eventBus.shouldNotHavePublishedEvents()
     }
 
-    private fun application(target: EffectTargetDto) = EffectApplicationDto(source = ApplicationSourceDto.battleUnit("knight-1"), target = target, effectId = "poison", destination = null)
+    private fun application(recipient: RecipientDto) = EffectApplicationDto(source = SourceDto.battleUnit("knight-1"), recipient = recipient, effectId = "poison", destination = null)
 }

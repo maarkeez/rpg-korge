@@ -1,32 +1,32 @@
 package com.mkz.rpg.effect.domain
 
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.OnTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.OnPlayerTurnStartedDto
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import korlibs.io.util.UUID
 
 object EffectMother {
-    fun decreaseHealthEffect(
+    fun damageEffect(
         id: String = effectId(),
         damage: Int = 3,
-        applicationType: String = "ON_TURN_STARTED",
+        timingType: String = "ON_PLAYER_TURN_STARTED",
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.decreaseHealth(damage = damage),
-                application =
-                    if (applicationType == "IMMEDIATELY") {
-                        ApplicationDto(
-                            type = ApplicationTypeDto.IMMEDIATELY,
-                            onTurnStarted = null,
+                outcome = Effect.Dto.EffectOutcomeDto.damage(damage = damage),
+                timing =
+                    if (timingType == "IMMEDIATELY") {
+                        TimingDto(
+                            type = TimingTypeDto.IMMEDIATELY,
+                            onPlayerTurnStarted = null,
                             beforeApplyingEffect = null,
                         )
                     } else {
-                        ApplicationDto(
-                            type = ApplicationTypeDto.ON_TURN_STARTED,
-                            onTurnStarted =
-                                OnTurnStartedDto(
+                        TimingDto(
+                            type = TimingTypeDto.ON_PLAYER_TURN_STARTED,
+                            onPlayerTurnStarted =
+                                OnPlayerTurnStartedDto(
                                     duration = 5,
                                 ),
                             beforeApplyingEffect = null,
@@ -36,36 +36,36 @@ object EffectMother {
         ).pullEvents()
         .second
 
-    fun increaseHealthEffect(
+    fun healEffect(
         id: String = effectId(),
         healing: Int = 3,
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.increaseHealth(healing = healing),
-                application =
-                    ApplicationDto(
-                        type = ApplicationTypeDto.IMMEDIATELY,
-                        onTurnStarted = null,
+                outcome = Effect.Dto.EffectOutcomeDto.heal(healing = healing),
+                timing =
+                    TimingDto(
+                        type = TimingTypeDto.IMMEDIATELY,
+                        onPlayerTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
             ),
         ).pullEvents()
         .second
 
-    fun increaseManaEffect(
+    fun restoreManaEffect(
         id: String = effectId(),
         mana: Int = 3,
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.increaseMana(mana = mana),
-                application =
-                    ApplicationDto(
-                        type = ApplicationTypeDto.IMMEDIATELY,
-                        onTurnStarted = null,
+                outcome = Effect.Dto.EffectOutcomeDto.restoreMana(mana = mana),
+                timing =
+                    TimingDto(
+                        type = TimingTypeDto.IMMEDIATELY,
+                        onPlayerTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
             ),
@@ -74,34 +74,34 @@ object EffectMother {
 
     fun increaseMaximumHealthEffect(
         id: String = effectId(),
-        healthPoints: Int = 10,
+        maximumHealth: Int = 10,
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumHealth(healthPoints = healthPoints),
-                application = whileEquippedApplication(),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumHealth(maximumHealth = maximumHealth),
+                timing = whileEquippedTiming(),
             ),
         ).pullEvents()
         .second
 
     fun increaseMaximumManaEffect(
         id: String = effectId(),
-        manaPoints: Int = 10,
+        maximumMana: Int = 10,
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumMana(manaPoints = manaPoints),
-                application = whileEquippedApplication(),
+                outcome = Effect.Dto.EffectOutcomeDto.increaseMaximumMana(maximumMana = maximumMana),
+                timing = whileEquippedTiming(),
             ),
         ).pullEvents()
         .second
 
-    fun whileEquippedApplication() =
-        ApplicationDto(
-            type = ApplicationTypeDto.WHILE_EQUIPPED,
-            onTurnStarted = null,
+    fun whileEquippedTiming() =
+        TimingDto(
+            type = TimingTypeDto.WHILE_EQUIPPED,
+            onPlayerTurnStarted = null,
             beforeApplyingEffect = null,
         )
 
@@ -111,46 +111,46 @@ object EffectMother {
                 Effect.Dto(
                     id = id,
                     outcome = Effect.Dto.EffectOutcomeDto.teleport(),
-                    application =
-                        ApplicationDto(
-                            type = ApplicationTypeDto.IMMEDIATELY,
-                            onTurnStarted = null,
+                    timing =
+                        TimingDto(
+                            type = TimingTypeDto.IMMEDIATELY,
+                            onPlayerTurnStarted = null,
                             beforeApplyingEffect = null,
                         ),
                 ),
             ).pullEvents()
             .second
 
-    fun applyEffectOnAdjacentAlliesEffect(
+    fun applyEffectToAdjacentAlliesEffect(
         id: String = effectId(),
         effectId: String = "effect-adjacent",
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.applyEffectOnAdjacentAllies(effectId = effectId),
-                application =
-                    ApplicationDto(
-                        type = ApplicationTypeDto.ON_DEFEATED,
-                        onTurnStarted = null,
+                outcome = Effect.Dto.EffectOutcomeDto.applyEffectToAdjacentAllies(effectId = effectId),
+                timing =
+                    TimingDto(
+                        type = TimingTypeDto.ON_DEFEATED,
+                        onPlayerTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
             ),
         ).pullEvents()
         .second
 
-    fun deployBattleUnitEffect(
+    fun summonEffect(
         id: String = effectId(),
         unitId: String = "unit-${UUID.randomUUID()}",
     ) = Effect
         .create(
             Effect.Dto(
                 id = id,
-                outcome = Effect.Dto.EffectOutcomeDto.deployBattleUnit(unitId = unitId),
-                application =
-                    ApplicationDto(
-                        type = ApplicationTypeDto.IMMEDIATELY,
-                        onTurnStarted = null,
+                outcome = Effect.Dto.EffectOutcomeDto.summon(unitId = unitId),
+                timing =
+                    TimingDto(
+                        type = TimingTypeDto.IMMEDIATELY,
+                        onPlayerTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
             ),
@@ -165,10 +165,10 @@ object EffectMother {
             Effect.Dto(
                 id = id,
                 outcome = Effect.Dto.EffectOutcomeDto.learnAbility(abilityId = abilityId),
-                application =
-                    ApplicationDto(
-                        type = ApplicationTypeDto.IMMEDIATELY,
-                        onTurnStarted = null,
+                timing =
+                    TimingDto(
+                        type = TimingTypeDto.IMMEDIATELY,
+                        onPlayerTurnStarted = null,
                         beforeApplyingEffect = null,
                     ),
             ),

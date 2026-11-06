@@ -15,7 +15,7 @@ internal object BattleUnitInfoMapper {
             maximumHealthPoints = battleUnit.maximumHealth,
             remainingManaPoints = battleUnit.remainingMana,
             maximumManaPoints = battleUnit.maximumMana,
-            effectIds = battleUnit.ongoingEffects.onTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
+            effectIds = battleUnit.ongoingEffects.onPlayerTurnStarted + battleUnit.ongoingEffects.onDefeatedEffects,
             isAlly = isAlly,
         )
 

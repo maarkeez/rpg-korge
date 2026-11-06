@@ -1,8 +1,8 @@
 package com.mkz.rpg.battleUnit.usecases.queries
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
@@ -10,8 +10,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.EffectMother.applyEffectOnAdjacentAlliesEffect
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.applyEffectToAdjacentAlliesEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.maps.shouldBeEmpty
@@ -40,14 +40,14 @@ class PreviewCastOngoingEffectsTest {
             queries.battleUnitRepository.create(battleUnit(id = battleUnitId, player = if (letter == 'C') player else enemyPlayer))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
-        queries.effectRepository.create(Effect.create(decreaseHealthEffect(id = "venom", applicationType = "ON_TURN_STARTED").toDto()))
-        queries.effectRepository.create(Effect.create(applyEffectOnAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto()))
-        queries.effectRepository.create(Effect.create(decreaseHealthEffect(id = "slash", applicationType = "IMMEDIATELY").toDto()))
+        queries.effectRepository.create(Effect.create(damageEffect(id = "venom", timingType = "ON_PLAYER_TURN_STARTED").toDto()))
+        queries.effectRepository.create(Effect.create(applyEffectToAdjacentAlliesEffect(id = "curse", effectId = "venom").toDto()))
+        queries.effectRepository.create(Effect.create(damageEffect(id = "slash", timingType = "IMMEDIATELY").toDto()))
     }
 
     private fun givenAbility(
         targeting: TargetingDto,
-        vararg abilityEffects: Pair<String, TargetExpressionDto.Type>,
+        vararg abilityEffects: Pair<String, EffectTargetDto.Type>,
     ) {
         queries.abilityRepository.create(
             ability(id = "ability-1", targeting = targeting, abilityEffects = abilityEffects.map { (effectId, target) -> abilityEffect(effectId = effectId, target = target) }),

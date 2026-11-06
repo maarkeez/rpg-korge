@@ -3,7 +3,7 @@ package com.mkz.rpg.shared.usecases.acceptance
 import com.mkz.rpg.ability.adapters.presentation.AbilityApi
 import com.mkz.rpg.ability.adapters.resources.ResourcesAbilityLoader
 import com.mkz.rpg.ability.domain.Ability
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
 import com.mkz.rpg.ability.domain.AbilityMother
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.battle.adapters.presentation.startBattleWithEveryBattleUnit
@@ -77,10 +77,10 @@ class SkullAbilityAcceptanceTest {
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
 
-        val venomEffect = EffectMother.decreaseHealthEffect(id = venomEffectId, damage = 3, applicationType = "ON_TURN_STARTED")
-        val skullEffect = EffectMother.applyEffectOnAdjacentAlliesEffect(id = skullEffectId, effectId = venomEffectId)
-        val swordDamageEffect = EffectMother.decreaseHealthEffect(id = swordDamageEffectId, damage = 10, applicationType = "IMMEDIATELY")
-        val healEffect = EffectMother.increaseHealthEffect(id = healEffectId, healing = 20)
+        val venomEffect = EffectMother.damageEffect(id = venomEffectId, damage = 3, timingType = "ON_PLAYER_TURN_STARTED")
+        val skullEffect = EffectMother.applyEffectToAdjacentAlliesEffect(id = skullEffectId, effectId = venomEffectId)
+        val swordDamageEffect = EffectMother.damageEffect(id = swordDamageEffectId, damage = 10, timingType = "IMMEDIATELY")
+        val healEffect = EffectMother.healEffect(id = healEffectId, healing = 20)
         effectApi.requestEffectCreation(venomEffect.toDto())
         effectApi.requestEffectCreation(skullEffect.toDto())
         effectApi.requestEffectCreation(swordDamageEffect.toDto())
@@ -91,7 +91,7 @@ class SkullAbilityAcceptanceTest {
                 id = skullAbilityId,
                 manaCost = 0,
                 cooldown = 0,
-                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = skullEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = skullEffectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val swordAbility =
@@ -99,7 +99,7 @@ class SkullAbilityAcceptanceTest {
                 id = swordAbilityId,
                 manaCost = 0,
                 cooldown = 0,
-                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = swordDamageEffectId, target = TargetExpressionDto.Type.TARGETED_BATTLE_UNIT)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = swordDamageEffectId, target = EffectTargetDto.Type.TARGETED_BATTLE_UNIT)),
                 targeting = Ability.Dto.TargetingDto.ADJACENT_ENEMY,
             )
         val healAbility =
@@ -107,7 +107,7 @@ class SkullAbilityAcceptanceTest {
                 id = healAbilityId,
                 manaCost = 10,
                 cooldown = 2,
-                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = healEffectId, target = TargetExpressionDto.Type.CASTER)),
+                abilityEffects = listOf(AbilityMother.abilityEffect(effectId = healEffectId, target = EffectTargetDto.Type.CASTER)),
                 targeting = Ability.Dto.TargetingDto.CASTER,
             )
         abilityApi.requestAbilityCreation(skullAbility.toDto())
@@ -210,6 +210,6 @@ class SkullAbilityAcceptanceTest {
             val enemy = battleUnitApi.searchBattleUnitById(enemyBattleUnitId)!!
             enemy.remainingHealth shouldBe 0
             val ally = battleUnitApi.searchBattleUnitById(allyBattleUnitId)!!
-            ally.ongoingEffects.onTurnStarted.shouldContain(venomEffectId)
+            ally.ongoingEffects.onPlayerTurnStarted.shouldContain(venomEffectId)
         }
 }

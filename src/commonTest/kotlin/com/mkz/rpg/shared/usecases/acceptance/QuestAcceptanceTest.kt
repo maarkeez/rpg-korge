@@ -13,10 +13,10 @@ import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
@@ -104,8 +104,8 @@ class QuestAcceptanceTest {
         repeat(15) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
-                    source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.battleUnit("goat-wizard"),
+                    source = SourceDto.terrain("lava"),
+                    recipient = RecipientDto.battleUnit("goat-wizard"),
                     effectId = "low-physical-damage",
                     destination = null,
                 ),
@@ -143,7 +143,7 @@ class QuestAcceptanceTest {
     private fun smallGame(vararg quests: Quest.Dto): SubdomainApis =
         SubdomainApis(
             terrains = listOf(occupiableTerrain(id = "sand").toDto()),
-            effects = listOf(increaseHealthEffect(id = "cure").toDto(), decreaseHealthEffect(id = "smite", damage = 100, applicationType = "IMMEDIATELY").toDto()),
+            effects = listOf(healEffect(id = "cure").toDto(), damageEffect(id = "smite", damage = 100, timingType = "IMMEDIATELY").toDto()),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
             units = listOf(unit(id = "knight", healthPoints = 30, abilities = emptyList(), movementRange = 3).toDto(), unit(id = "rat", healthPoints = 8, abilities = emptyList()).toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
@@ -165,8 +165,8 @@ class QuestAcceptanceTest {
     private fun SubdomainApis.defeatTheRat() {
         battleUnitApi.applyEffect(
             EffectApplicationDto(
-                source = ApplicationSourceDto.terrain("lava"),
-                target = EffectTargetDto.battleUnit("rat-1"),
+                source = SourceDto.terrain("lava"),
+                recipient = RecipientDto.battleUnit("rat-1"),
                 effectId = "smite",
                 destination = null,
             ),

@@ -1,6 +1,6 @@
 [outcome]
-type = "DECREASE_HEALTH"
+type = "DAMAGE"
 damage = 15
 
-[application]
+[timing]
 type = "IMMEDIATELY"

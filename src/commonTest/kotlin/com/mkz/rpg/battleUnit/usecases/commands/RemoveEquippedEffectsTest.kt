@@ -22,7 +22,7 @@ class RemoveEquippedEffectsTest {
         // Given
         battleUnitRepository.create(
             battleUnit(id = "knight-1", unit = unit(healthPoints = 100).toDto())
-                .applyEquippedEffect(lootableItemId = "hammer", effect = increaseMaximumHealthEffect(healthPoints = 20).toDto())
+                .applyEquippedEffect(lootableItemId = "hammer", effect = increaseMaximumHealthEffect(maximumHealth = 20).toDto())
                 .pullEvents()
                 .second,
         )

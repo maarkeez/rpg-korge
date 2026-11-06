@@ -11,7 +11,7 @@ class InMemoryEffectRepositoryTest {
     @Test
     fun `Create should store the effect when the effect is created`() {
         // Given
-        val effect = EffectMother.decreaseHealthEffect()
+        val effect = EffectMother.damageEffect()
         // When
         effectRepository.create(effect)
         // Then
@@ -22,7 +22,7 @@ class InMemoryEffectRepositoryTest {
     @Test
     fun `SearchById should return the effect when the effect is stored`() {
         // Given
-        val effect = EffectMother.decreaseHealthEffect()
+        val effect = EffectMother.damageEffect()
         effectRepository.create(effect)
         // When
         val storedEffect = effectRepository.searchById(effect.toDto().id)

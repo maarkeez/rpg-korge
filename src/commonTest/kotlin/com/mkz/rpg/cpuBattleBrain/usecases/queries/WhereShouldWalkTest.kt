@@ -4,8 +4,8 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.player.domain.Player
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -142,7 +142,7 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
-        givenTerrain(id = "healing", effect = increaseHealthEffect(id = "effect-healing", healing = 10))
+        givenTerrain(id = "healing", effect = healEffect(id = "effect-healing", healing = 10))
         givenBattlefieldRow(listOf("neutral", "healing", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -155,7 +155,7 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
-        givenTerrain(id = "damaging", effect = decreaseHealthEffect(id = "effect-damaging", damage = 10))
+        givenTerrain(id = "damaging", effect = damageEffect(id = "effect-damaging", damage = 10))
         givenBattlefieldRow(listOf("damaging", "neutral", "damaging"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -168,8 +168,8 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
-        givenTerrain(id = "healing", effect = increaseHealthEffect(id = "effect-healing", healing = 10))
-        givenTerrain(id = "damaging", effect = decreaseHealthEffect(id = "effect-damaging", damage = 10))
+        givenTerrain(id = "healing", effect = healEffect(id = "effect-healing", healing = 10))
+        givenTerrain(id = "damaging", effect = damageEffect(id = "effect-damaging", damage = 10))
         givenBattlefieldRow(listOf("neutral", "damaging", "healing", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -183,7 +183,7 @@ class WhereShouldWalkTest {
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 90, maxHealthPoints = 100)
         givenBattleUnit(id = "enemy-battle-unit", playerId = "player-2", remainingHealth = 10)
         givenTerrain(id = "neutral")
-        givenTerrain(id = "healing", effect = increaseHealthEffect(id = "effect-healing", healing = 10))
+        givenTerrain(id = "healing", effect = healEffect(id = "effect-healing", healing = 10))
         givenBattlefieldRow(listOf("neutral", "healing", "neutral", "neutral"), battleUnitColumns = mapOf("battle-unit-1" to 0, "enemy-battle-unit" to 3))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -196,8 +196,8 @@ class WhereShouldWalkTest {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
         givenTerrain(id = "neutral")
-        givenTerrain(id = "strong-healing", effect = increaseHealthEffect(id = "effect-strong-healing", healing = 10))
-        givenTerrain(id = "weak-healing", effect = increaseHealthEffect(id = "effect-weak-healing", healing = 2))
+        givenTerrain(id = "strong-healing", effect = healEffect(id = "effect-strong-healing", healing = 10))
+        givenTerrain(id = "weak-healing", effect = healEffect(id = "effect-weak-healing", healing = 2))
         givenBattlefieldRow(listOf("neutral", "strong-healing", "weak-healing"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
         val result = whereShouldWalk("battle-unit-1")
@@ -209,8 +209,8 @@ class WhereShouldWalkTest {
     fun `should walk to the less damaging terrain when the battle unit has low health and stands on more damaging terrain`() {
         // Given
         givenBattleUnit(id = "battle-unit-1", playerId = "player-1", remainingHealth = 10, maxHealthPoints = 100)
-        givenTerrain(id = "strong-damaging", effect = decreaseHealthEffect(id = "effect-strong-damaging", damage = 10))
-        givenTerrain(id = "weak-damaging", effect = decreaseHealthEffect(id = "effect-weak-damaging", damage = 2))
+        givenTerrain(id = "strong-damaging", effect = damageEffect(id = "effect-strong-damaging", damage = 10))
+        givenTerrain(id = "weak-damaging", effect = damageEffect(id = "effect-weak-damaging", damage = 2))
         givenBattlefieldRow(listOf("strong-damaging", "weak-damaging", "strong-damaging"), battleUnitColumns = mapOf("battle-unit-1" to 0))
         // When
         val result = whereShouldWalk("battle-unit-1")

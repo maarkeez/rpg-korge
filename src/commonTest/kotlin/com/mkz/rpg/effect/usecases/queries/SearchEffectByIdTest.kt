@@ -1,7 +1,7 @@
 package com.mkz.rpg.effect.usecases.queries
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.effect.domain.EffectMother.effectId
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
@@ -14,7 +14,7 @@ class SearchEffectByIdTest {
     @Test
     fun `should return effect when it exists`() {
         // Given
-        val effect = decreaseHealthEffect()
+        val effect = damageEffect()
         val effectDto = effect.toDto()
         effectRepository.create(effect)
         // When

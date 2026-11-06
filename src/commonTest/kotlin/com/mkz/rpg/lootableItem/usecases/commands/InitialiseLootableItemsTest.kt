@@ -1,7 +1,7 @@
 package com.mkz.rpg.lootableItem.usecases.commands
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
@@ -33,7 +33,7 @@ class InitialiseLootableItemsTest {
     @Test
     fun `should create every loaded lootable item when lootable items are initialised`() {
         // Given
-        effectRepository.create(increaseHealthEffect(id = "heal"))
+        effectRepository.create(healEffect(id = "heal"))
         effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
         val healthPotion = consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("heal"))).toDto()
         val helmet = equippableLootableItem(id = "helmet", equippable = equippable(effectIds = setOf("maximum-health-20"))).toDto()
@@ -97,7 +97,7 @@ class InitialiseLootableItemsTest {
     fun `should fail when an equippable lootable item effect is not applied while equipped`() {
         // Given
         effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
-        effectRepository.create(increaseHealthEffect(id = "heal"))
+        effectRepository.create(healEffect(id = "heal"))
         val helmet = equippableLootableItem(id = "helmet", equippable = equippable(effectIds = setOf("maximum-health-20", "heal"))).toDto()
         val initialiseLootableItems = initialiseLootableItems(loadedLootableItems = listOf(helmet))
         // When

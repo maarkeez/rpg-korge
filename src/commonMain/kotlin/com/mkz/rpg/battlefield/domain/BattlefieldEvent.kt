@@ -47,8 +47,8 @@ sealed interface BattlefieldEvent : DomainEvent {
         val occupantId: String,
     ) : BattlefieldEvent
 
-    /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its target. */
-    data class TerrainEffectTriggered(
+    /** The terrain under an occupant has an effect for it, e.g.: lava hurts, water heals. The application has the terrain as its source and the occupant as its recipient. */
+    data class TerrainEffectApplied(
         val application: EffectApplicationDto,
     ) : BattlefieldEvent
 

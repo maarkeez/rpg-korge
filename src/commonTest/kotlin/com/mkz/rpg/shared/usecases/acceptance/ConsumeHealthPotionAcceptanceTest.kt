@@ -13,8 +13,8 @@ import com.mkz.rpg.battlefield.adapters.resources.TomlBattlefieldEncoder
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
 import com.mkz.rpg.effect.adapters.resources.ResourcesEffectLoader
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto
 import com.mkz.rpg.gameSetup.adapters.presentation.GameSetupApi
 import com.mkz.rpg.inventory.adapters.presentation.InventoryApi
 import com.mkz.rpg.lootDrop.adapters.presentation.LootDropApi
@@ -79,8 +79,8 @@ class ConsumeHealthPotionAcceptanceTest {
         repeat(2) {
             battleUnitApi.applyEffect(
                 EffectApplicationDto(
-                    source = ApplicationSourceDto.terrain("lava"),
-                    target = EffectTargetDto.battleUnit(playerOneKnightBattleUnitId),
+                    source = SourceDto.terrain("lava"),
+                    recipient = RecipientDto.battleUnit(playerOneKnightBattleUnitId),
                     effectId = "low-physical-damage",
                     destination = null,
                 ),

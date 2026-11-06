@@ -7,7 +7,7 @@ import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.EventBus
 
 /** Battle units: those in the battle. The battle units of the player outside it stay as they are. */
-class ApplyOnTurnStartedEffects(
+class TriggerOnPlayerTurnStartedEffects(
     private val searchEffectById: SearchEffectById,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val battleUnitRepository: BattleUnitRepository,
@@ -23,15 +23,15 @@ class ApplyOnTurnStartedEffects(
                 .filter { battleUnit -> battleUnit.id in battleUnitIds }
                 .map { battleUnit -> battleUnitRepository.searchById(battleUnit.id)!! }
         battleUnits
-            .filter { battleUnit -> battleUnit.hasOnTurnStartedEffects() }
+            .filter { battleUnit -> battleUnit.hasOnPlayerTurnStartedEffects() }
             .forEach { battleUnit ->
-                val onTurnStartedEffects = battleUnit.toDto().ongoingEffects.onTurnStarted
-                onTurnStartedEffects.forEach { onTurnStartedEffectId ->
-                    val effect = searchEffectById(onTurnStartedEffectId)!!
+                val onPlayerTurnStartedEffects = battleUnit.toDto().ongoingEffects.onPlayerTurnStarted
+                onPlayerTurnStartedEffects.forEach { onPlayerTurnStartedEffectId ->
+                    val effect = searchEffectById(onPlayerTurnStartedEffectId)!!
                     val position = searchPosition(occupantId = battleUnit.toDto().id)!!
                     val (events, updatedBattleUnit) =
                         battleUnit
-                            .applyOnTurnStartedEffect(
+                            .triggerOnPlayerTurnStartedEffect(
                                 effect = effect,
                                 currentRow = position.row,
                                 currentColumn = position.column,

@@ -2,7 +2,7 @@ package com.mkz.rpg.effect.usecases.commands
 
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectEvent
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.matchers.shouldBe
@@ -20,7 +20,7 @@ class RequestEffectCreationTest {
     @Test
     fun `should create effect when it does not exist`() {
         // Given
-        val effect = decreaseHealthEffect().toDto()
+        val effect = damageEffect().toDto()
         // When
         requestEffectCreation(effectDto = effect)
         // Then
@@ -32,8 +32,8 @@ class RequestEffectCreationTest {
     @Test
     fun `should not create effect when it already exists`() {
         // Given
-        val existingEffect = decreaseHealthEffect(damage = 3)
-        val duplicateEffect = decreaseHealthEffect(existingEffect.toDto().id, damage = 10)
+        val existingEffect = damageEffect(damage = 3)
+        val duplicateEffect = damageEffect(existingEffect.toDto().id, damage = 10)
         effectRepository.create(existingEffect)
         // When
         requestEffectCreation(effectDto = duplicateEffect.toDto())

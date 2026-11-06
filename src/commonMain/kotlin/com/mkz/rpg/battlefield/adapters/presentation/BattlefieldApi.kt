@@ -10,6 +10,7 @@ import com.mkz.rpg.battlefield.adapters.events.OnRequestTerrainEffects
 import com.mkz.rpg.battlefield.adapters.events.OnRoundStarted
 import com.mkz.rpg.battlefield.adapters.save.BattlefieldSnapshottable
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
+import com.mkz.rpg.battlefield.usecases.commands.ApplyTerrainEffects
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.OccupyTile
 import com.mkz.rpg.battlefield.usecases.commands.OccupyTiles
@@ -17,7 +18,6 @@ import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
 import com.mkz.rpg.battlefield.usecases.commands.RestoreBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.SwapOccupants
-import com.mkz.rpg.battlefield.usecases.commands.TriggerTerrainEffects
 import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
 import com.mkz.rpg.battlefield.usecases.queries.IsTileVacant
@@ -74,8 +74,8 @@ class BattlefieldApi(
     val occupyTile = OccupyTile(battlefieldRepository, eventBus)
     val occupyTiles = OccupyTiles(battlefieldRepository, eventBus)
     val swapOccupants = SwapOccupants(battlefieldRepository, eventBus)
-    val triggerTerrainEffects =
-        TriggerTerrainEffects(
+    val applyTerrainEffects =
+        ApplyTerrainEffects(
             battlefieldRepository = battlefieldRepository,
             searchTerrainById = terrainApi.searchTerrainById,
             eventBus = eventBus,
@@ -103,8 +103,8 @@ class BattlefieldApi(
     private val onRequestRemoveOccupant = OnRequestRemoveOccupant(removeOccupant, eventBus)
     private val onRequestSwapOccupants = OnRequestSwapOccupants(swapOccupants, eventBus)
     private val onRequestInitialiseBattlefield = OnRequestInitialiseBattlefield(initialiseBattlefield, eventBus)
-    private val onRoundStarted = OnRoundStarted(triggerTerrainEffects, eventBus)
-    private val onRequestTerrainEffects = OnRequestTerrainEffects(triggerTerrainEffects, eventBus)
+    private val onRoundStarted = OnRoundStarted(applyTerrainEffects, eventBus)
+    private val onRequestTerrainEffects = OnRequestTerrainEffects(applyTerrainEffects, eventBus)
 
     suspend fun init() {
         battlefieldLoader.initResources()

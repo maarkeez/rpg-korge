@@ -10,7 +10,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
@@ -30,7 +30,7 @@ class BattleUnitSnapshottableTest {
     private val unitRepository = InMemoryUnitRepository().apply { create(knightUnit) }
     private val playerRepository = InMemoryPlayerRepository().apply { create(player(id = "human")) }
     private val abilityRepository = InMemoryAbilityRepository().apply { create(ability(id = "slash")) }
-    private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), increaseHealthEffect(id = "regeneration")).forEach(::create) }
+    private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), healEffect(id = "regeneration")).forEach(::create) }
 
     private fun snapshottable(repository: BattleUnitRepository) =
         BattleUnitSnapshottable(
@@ -43,7 +43,7 @@ class BattleUnitSnapshottableTest {
     private fun hurtKnight(): BattleUnit =
         battleUnit(id = "knight-1", unit = knight, player = human, maximumAbilities = 4, remainingHealth = 18)
             .applyEquippedEffect("iron-helmet", effectRepository.searchById("iron-helmet")!!.toDto())
-            .receiveOnTurnStartedEffect("regeneration", turnsLeft = 2)
+            .receiveOnPlayerTurnStartedEffect("regeneration", remainingDuration = 2)
             .castAbility(abilityId = "slash", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList())
             .pullEvents()
             .second

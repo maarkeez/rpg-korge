@@ -1,7 +1,7 @@
 package com.mkz.rpg.lootableItem.usecases.commands
 
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto.WHILE_EQUIPPED
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto.WHILE_EQUIPPED
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.domain.LootableItem
 import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectAppliedWhileEquipped
@@ -36,8 +36,8 @@ class InitialiseLootableItems(
                     ?.effectIds
                     .orEmpty()
                     .map(::searchEffect)
-            if (consumableEffects.any(::isAppliedWhileEquipped)) throw ConsumableEffectAppliedWhileEquipped()
-            if (!equippableEffects.all(::isAppliedWhileEquipped)) throw EquippableEffectNotAppliedWhileEquipped()
+            if (consumableEffects.any(::isTimedWhileEquipped)) throw ConsumableEffectAppliedWhileEquipped()
+            if (!equippableEffects.all(::isTimedWhileEquipped)) throw EquippableEffectNotAppliedWhileEquipped()
             val (lootableItemEvents, lootableItem) = LootableItem.create(lootableItemDto).pullEvents()
             lootableItemRepository.create(lootableItem)
             events += lootableItemEvents
@@ -47,5 +47,5 @@ class InitialiseLootableItems(
 
     private fun searchEffect(effectId: String): Effect.Dto = searchEffectById(effectId) ?: throw LootableItemEffectDoesNotExist()
 
-    private fun isAppliedWhileEquipped(effect: Effect.Dto): Boolean = effect.application.type == WHILE_EQUIPPED
+    private fun isTimedWhileEquipped(effect: Effect.Dto): Boolean = effect.timing.type == WHILE_EQUIPPED
 }

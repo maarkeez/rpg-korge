@@ -1,8 +1,8 @@
 package com.mkz.rpg.battleUnit.usecases.queries
 
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.CASTER
-import com.mkz.rpg.ability.domain.Ability.Dto.TargetExpressionDto.Type.TARGETED_BATTLE_UNIT
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.CASTER
+import com.mkz.rpg.ability.domain.Ability.Dto.EffectTargetDto.Type.TARGETED_BATTLE_UNIT
 import com.mkz.rpg.ability.domain.Ability.Dto.TargetingDto
 import com.mkz.rpg.ability.domain.AbilityMother.ability
 import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
@@ -10,9 +10,9 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother.battlefield
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseManaEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
+import com.mkz.rpg.effect.domain.EffectMother.restoreManaEffect
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -47,18 +47,18 @@ class PreviewCastRemainingHealthTest {
         val occupants = mapOf('C' to "caster", 'E' to "enemy-1", 'F' to "enemy-2").filterKeys { letter -> letter in map }
         queries.battlefieldRepository.create(battlefield(map, occupants = occupants))
         listOf(
-            decreaseHealthEffect(id = "slash", damage = 6, applicationType = "IMMEDIATELY"),
-            decreaseHealthEffect(id = "smash", damage = 30, applicationType = "IMMEDIATELY"),
-            increaseHealthEffect(id = "cure", healing = 4),
-            increaseHealthEffect(id = "elixir", healing = 50),
-            decreaseHealthEffect(id = "venom", damage = 3, applicationType = "ON_TURN_STARTED"),
-            increaseManaEffect(id = "ether", mana = 5),
+            damageEffect(id = "slash", damage = 6, timingType = "IMMEDIATELY"),
+            damageEffect(id = "smash", damage = 30, timingType = "IMMEDIATELY"),
+            healEffect(id = "cure", healing = 4),
+            healEffect(id = "elixir", healing = 50),
+            damageEffect(id = "venom", damage = 3, timingType = "ON_PLAYER_TURN_STARTED"),
+            restoreManaEffect(id = "ether", mana = 5),
         ).forEach { effect -> queries.effectRepository.create(Effect.create(effect.toDto())) }
     }
 
     private fun givenAbility(
         targeting: TargetingDto,
-        vararg abilityEffects: Pair<String, TargetExpressionDto.Type>,
+        vararg abilityEffects: Pair<String, EffectTargetDto.Type>,
     ) {
         queries.abilityRepository.create(
             ability(id = "ability-1", targeting = targeting, abilityEffects = abilityEffects.map { (effectId, target) -> abilityEffect(effectId = effectId, target = target) }),

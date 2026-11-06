@@ -7,13 +7,13 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitDeployment
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.effect.domain.Effect
-import com.mkz.rpg.effect.domain.Effect.Dto.ApplicationDto.ApplicationTypeDto
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.ApplicationSourceDto.SourceTypeDto
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.DEPLOY_BATTLE_UNIT
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectApplicationDto.SourceDto.SourceTypeDto
+import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.SUMMON
 import com.mkz.rpg.effect.domain.Effect.Dto.EffectOutcomeDto.TypeDto.TELEPORT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.BATTLE_UNIT
-import com.mkz.rpg.effect.domain.Effect.Dto.EffectTargetDto.TypeDto.POSITION
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto.TypeDto.BATTLE_UNIT
+import com.mkz.rpg.effect.domain.Effect.Dto.RecipientDto.TypeDto.POSITION
+import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
@@ -29,7 +29,7 @@ class ApplyEffect(
 ) {
     operator fun invoke(application: EffectApplicationDto) {
         val effect = searchEffectById(application.effectId) ?: throw FailedToReceiveAbilityEffects()
-        when (application.target.type) {
+        when (application.recipient.type) {
             POSITION -> applyToTile(application = application, effect = effect)
             BATTLE_UNIT -> applyToUnit(application = application, effect = effect)
         }
@@ -40,8 +40,8 @@ class ApplyEffect(
         effect: Effect.Dto,
     ) {
         // TODO: Revisit this policy, should we include/exclude other effect outcome types?
-        val target = application.target.position ?: throw FailedToReceiveAbilityEffects()
-        if (effect.outcome.type != DEPLOY_BATTLE_UNIT) throw FailedToReceiveAbilityEffects()
+        val tile = application.recipient.position ?: throw FailedToReceiveAbilityEffects()
+        if (effect.outcome.type != SUMMON) throw FailedToReceiveAbilityEffects()
         val casterId = application.source.battleUnitId ?: throw FailedToReceiveAbilityEffects()
         val caster = battleUnitRepository.searchById(casterId) ?: throw FailedToReceiveAbilityEffects()
         // The summon lasts the turns of the ability it is cast with.
@@ -51,10 +51,10 @@ class ApplyEffect(
         val events =
             battleUnitDeployment.deploy(
                 battleUnitId = "summon-${Random.nextLong()}",
-                unitId = effect.outcome.deployBattleUnit!!.unitId,
+                unitId = effect.outcome.summon!!.unitId,
                 playerId = caster.toDto().playerId,
-                deployAtRow = target.row,
-                deployAtColumn = target.column,
+                deployAtRow = tile.row,
+                deployAtColumn = tile.column,
                 remainingSummonDuration = ability.summonDuration,
             )
         eventBus.publish(events)
@@ -64,33 +64,33 @@ class ApplyEffect(
         application: EffectApplicationDto,
         effect: Effect.Dto,
     ) {
-        val battleUnitId = application.target.battleUnitId ?: throw FailedToReceiveAbilityEffects()
+        val battleUnitId = application.recipient.battleUnitId ?: throw FailedToReceiveAbilityEffects()
         val battleUnit = battleUnitRepository.searchById(battleUnitId) ?: throw FailedToReceiveAbilityEffects()
         val position = searchPosition(battleUnit.toDto().id) ?: throw FailedToReceiveAbilityEffects()
         val (events, appliedBattleUnit) =
-            when (effect.application.type) {
-                ApplicationTypeDto.IMMEDIATELY ->
+            when (effect.timing.type) {
+                TimingTypeDto.IMMEDIATELY ->
                     battleUnit
                         .receiveImmediateEffect(effectId = effect.id)
-                        .applyImmediateEffect(
+                        .triggerImmediateEffect(
                             effect = effect,
                             currentRow = position.row,
                             currentColumn = position.column,
                         ).pullEvents()
-                ApplicationTypeDto.ON_TURN_STARTED ->
+                TimingTypeDto.ON_PLAYER_TURN_STARTED ->
                     battleUnit
-                        .receiveOnTurnStartedEffect(
+                        .receiveOnPlayerTurnStartedEffect(
                             effectId = effect.id,
-                            turnsLeft = effect.application.onTurnStarted!!.duration,
+                            remainingDuration = effect.timing.onPlayerTurnStarted!!.duration,
                         ).pullEvents()
-                ApplicationTypeDto.ON_DEFEATED -> {
+                TimingTypeDto.ON_DEFEATED -> {
                     battleUnit.receiveOnDefeatedEffect(effectId = effect.id).pullEvents()
                 }
-                ApplicationTypeDto.BEFORE_APPLYING_EFFECT -> {
-                    // TODO: We are missing business logic, this application type is not yet implemented
+                TimingTypeDto.BEFORE_APPLYING_EFFECT -> {
+                    // TODO: We are missing business logic, this timing is not yet implemented
                     throw FailedToReceiveAbilityEffects()
                 }
-                ApplicationTypeDto.WHILE_EQUIPPED -> {
+                TimingTypeDto.WHILE_EQUIPPED -> {
                     // Only an equipped item applies effects that last while it is equipped.
                     val lootableItemId = application.source.lootableItemId
                     if (application.source.type != SourceTypeDto.ITEM || lootableItemId == null) throw FailedToReceiveAbilityEffects()

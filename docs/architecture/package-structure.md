@@ -112,7 +112,7 @@ Likewise, `battlefield` does not depend on `battleUnit`. The `BattleUnit` aggreg
 | A battle unit moves, walks or teleports | `RequestMoveOccupant(occupantId, toRow, toColumn)` | Occupies the destination. |
 | A battle unit is defeated, or vanishes  | `RequestRemoveOccupant(occupantId)`                | Removes it.               |
 
-The terrain effects go the other way: `battlefield` announces `TerrainEffectTriggered(application)` for each battle unit standing on a terrain with an effect, and `battleUnit` applies it.
+The terrain effects go the other way: `battlefield` announces `TerrainEffectApplied(application)` for each battle unit standing on a terrain with an effect, and `battleUnit` applies it.
 
 `battlefield` does not depend on `npc` either. It names whoever stands on a tile its occupant (`occupantId`), a battle unit or an npc, and the `Npc` aggregate records the same requests right after its own events:
 

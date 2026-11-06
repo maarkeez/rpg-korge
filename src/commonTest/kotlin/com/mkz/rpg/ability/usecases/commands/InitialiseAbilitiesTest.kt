@@ -9,7 +9,7 @@ import com.mkz.rpg.ability.domain.AbilityMother.abilityEffect
 import com.mkz.rpg.ability.usecases.services.AbilityCreation
 import com.mkz.rpg.ability.usecases.services.FakeAbilityLoader
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -28,7 +28,7 @@ class InitialiseAbilitiesTest {
     @Test
     fun `should create every loaded ability when abilities are initialised`() {
         // Given
-        effectRepository.create(decreaseHealthEffect(id = "damage"))
+        effectRepository.create(damageEffect(id = "damage"))
         val sword = ability(id = "sword", abilityEffects = listOf(abilityEffect(effectId = "damage"))).toDto()
         val initialiseAbilities = initialiseAbilities(loadedAbilities = listOf(sword))
         // When

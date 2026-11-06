@@ -2,8 +2,8 @@ package com.mkz.rpg.cpuBattleBrain.usecases.queries
 
 import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldMother
-import com.mkz.rpg.effect.domain.EffectMother.decreaseHealthEffect
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.damageEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
 import io.kotest.matchers.maps.shouldContainExactly
@@ -18,8 +18,8 @@ class SearchDistancesFromHomeTest {
         queries.terrainRepository.create(occupiableTerrain(id = "sand"))
         queries.terrainRepository.create(occupiableTerrain(id = "lava", effectId = "effect-lava"))
         queries.terrainRepository.create(occupiableTerrain(id = "water", effectId = "effect-water"))
-        queries.effectRepository.create(decreaseHealthEffect(id = "effect-lava", damage = 10))
-        queries.effectRepository.create(increaseHealthEffect(id = "effect-water", healing = 10))
+        queries.effectRepository.create(damageEffect(id = "effect-lava", damage = 10))
+        queries.effectRepository.create(healEffect(id = "effect-water", healing = 10))
     }
 
     // Stores a battlefield with one line per row and one terrain per tile ("sand", "lava", "water" or "void"), and the

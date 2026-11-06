@@ -7,7 +7,7 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
-import com.mkz.rpg.effect.domain.EffectMother.increaseHealthEffect
+import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
@@ -25,7 +25,7 @@ class RestoreBattleUnitsTest {
     private val knightUnit = unit(id = "knight", healthPoints = 30, abilities = listOf("slash"))
     private val knight = knightUnit.toDto()
     private val human = player(id = "human").toDto()
-    private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), increaseHealthEffect(id = "regeneration")).forEach(::create) }
+    private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), healEffect(id = "regeneration")).forEach(::create) }
     private val battleUnitRepository = InMemoryBattleUnitRepository()
     private val restoreBattleUnits =
         RestoreBattleUnits(
@@ -41,7 +41,7 @@ class RestoreBattleUnitsTest {
     private fun hurtKnight(): BattleUnit =
         battleUnit(id = "knight-1", unit = knight, player = human, maximumAbilities = 4, remainingHealth = 18)
             .applyEquippedEffect("iron-helmet", effectRepository.searchById("iron-helmet")!!.toDto())
-            .receiveOnTurnStartedEffect("regeneration", turnsLeft = 2)
+            .receiveOnPlayerTurnStartedEffect("regeneration", remainingDuration = 2)
             .castAbility(abilityId = "slash", abilityCooldown = 2, abilityManaCost = 0, castGroup = emptyList())
             .pullEvents()
             .second

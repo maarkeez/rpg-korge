@@ -2,5 +2,5 @@
 type = "LEARN_ABILITY"
 abilityId = "teleport"
 
-[application]
+[timing]
 type = "IMMEDIATELY"
