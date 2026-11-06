@@ -89,6 +89,7 @@ Said of a battle unit not taking part in the battle in progress.
 
 **Join**:
 A battle unit going into a battle in progress.
+_Avoid_: Re-engage, update the engagement
 
 **Leave**:
 A battle unit going out of a battle in progress.
@@ -352,6 +353,79 @@ The tile a building is placed from.
 **Size**:
 The rows and columns of tiles a building covers.
 _Avoid_: Dimensions
+
+### CPU battle brain
+
+**CPU battle brain**:
+What decides what the CPU player's battle units do: what they cast and where they walk in a battle, when they engage,
+and where they step while wandering.
+_Avoid_: AI
+
+#### Decisions
+
+**Decision**:
+A cast or a walk the CPU battle brain chooses for one of its battle units, and waits for before choosing the next.
+_Avoid_: Action
+
+**Pending**:
+Said of a CPU battle unit the CPU battle brain has still to decide for this player turn.
+
+**Done**:
+Said of a CPU battle unit the CPU battle brain has nothing left to decide for this player turn.
+_Avoid_: Managed
+
+#### Utility
+
+**Utility**:
+How much an option is worth to the CPU battle brain.
+_Avoid_: Score
+
+**Option**:
+A cast or a tile the CPU battle brain weighs the utility of.
+_Avoid_: Candidate
+
+**Minimum utility gain**:
+How much more than doing nothing an option must be worth for the CPU battle brain to take it.
+
+**Cast kind**:
+How the CPU battle brain sorts an ability by its effects: damage, heal, summon or other.
+_Avoid_: Attack, deploy
+
+**Healing need**:
+The share of its maximum health a battle unit has lost.
+
+**Tiles apart**:
+How many tiles separate two tiles along rows and columns, whatever stands between them.
+_Avoid_: Manhattan distance, tile distance
+
+#### Engaging
+
+**Engage**:
+CPU battle units starting a battle against the enemies within their reach.
+_Avoid_: Combat
+
+**Reach**:
+How far a CPU battle unit walks to an enemy to engage it.
+_Avoid_: Engagement distance
+
+**Within reach**:
+Said of an enemy a CPU battle unit can walk to within its reach.
+
+#### Wandering
+
+**Territory**:
+The tiles around its home a CPU battle unit wanders on, never on harmful terrain.
+
+**Distance from home**:
+How many tiles a CPU battle unit walks from its home to a tile, around void and harmful terrain, through other battle
+units.
+
+**Rest**:
+A wandering CPU battle unit staying where it is instead of stepping.
+
+**Return**:
+A CPU battle unit walking back home after leaving its territory, without resting.
+_Avoid_: Head home
 
 ### Game setup
 
