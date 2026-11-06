@@ -620,3 +620,70 @@ The party member who gives.
 
 **Receiver**:
 The party member a give goes to.
+
+### Localization
+
+**Localization**:
+The messages of the game in every language it can be played in, and the selected language.
+
+#### Languages
+
+**Language**:
+A language the game can be played in, one per catalog, known by its code, such as es for Spanish.
+
+**Source language**:
+English, the language the game is written in, which every other catalog translates.
+_Avoid_: Default language, base language
+
+**Selected language**:
+The language the game shows its messages in, English until the player selects another for the session.
+_Avoid_: Picked language, current language, locale
+
+**Language name**:
+The name of a language in that same language, such as Español, which names it in the language list.
+
+#### Catalogs
+
+**Catalog**:
+The messages of one language, such as the Spanish one.
+_Avoid_: PO file, translation
+
+**Source catalog**:
+The catalog of the source language, which holds every message.
+_Avoid_: Template
+
+#### Messages
+
+**Message**:
+A piece of the game's text players read, found by its key in every catalog.
+_Avoid_: Text, string, entry
+
+**Key**:
+What identifies a message in every catalog, such as ui.shop.notEnoughGold.
+_Avoid_: Context, id
+
+**Translation**:
+A message in a language other than the source language, such as "No hay suficiente oro" for "Not enough gold".
+
+**Untranslated**:
+Said of a message with no translation in a catalog, shown in the source language instead.
+_Avoid_: Missing translation, fallback
+
+**Translate**:
+To get a message in the selected language, with its placeholders filled in.
+
+**Placeholder**:
+A named gap in a message, such as {turns} in "Vanishes in {turns} turns", filled in when it is translated.
+_Avoid_: Variable, parameter
+
+#### Plurals
+
+**Plural form**:
+One version of a message for some counts, such as "Vanishes in 1 turn" and "Vanishes in 3 turns".
+
+**Plural rule**:
+How a language picks the plural form of a message for a count: English has one for 1 and another for every other count.
+_Avoid_: Plural forms
+
+**Count**:
+The number a plural form is picked for, such as the 3 of "Vanishes in 3 turns".
