@@ -336,6 +336,23 @@ The tiles walked from one tile to another.
 How many tiles are walked from one tile to another.
 _Avoid_: Distance
 
+### Building
+
+**Building**:
+An occupant standing for the whole game on a block of tiles, such as the fortress.
+_Avoid_: Structure, obstacle
+
+**Place**:
+A building being put on its tiles when a game is set up.
+_Avoid_: Initialise, deploy, build, spawn
+
+**Top-left tile**:
+The tile a building is placed from.
+
+**Size**:
+The rows and columns of tiles a building covers.
+_Avoid_: Dimensions
+
 ### Game setup
 
 **Game**:
