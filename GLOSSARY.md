@@ -762,6 +762,39 @@ _Avoid_: Chance, probability, odds
 An entry that leaves no item when it is rolled.
 _Avoid_: Empty, no drop
 
+### Npc
+
+**Npc**:
+A character standing on a tile of the battlefield, whom the party talks to, and who is no battle unit: nobody can attack it.
+_Avoid_: NPC, villager, townsfolk
+
+**Line**:
+What an npc says when the party talks to it.
+_Avoid_: Dialog, text, quote
+
+**Place**:
+An npc being put on its tile when a game is set up.
+_Avoid_: Initialise, spawn
+
+#### Recruiting
+
+**Recruit**:
+An npc leaving its tile to join the party as a battle unit of its unit, once the talk with it is finished.
+_Avoid_: Hire, join
+
+**Recruitable**:
+Said of an npc with a unit to be recruited as.
+
+#### Merchants
+
+**Merchant**:
+An npc the party members buy the items of its stock from, and sell their stored items to.
+_Avoid_: Shopkeeper, vendor, trader
+
+**Stock**:
+The lootable items a merchant sells, in the order they are shown, never running out.
+_Avoid_: Wares, goods, inventory
+
 ### World builder
 
 **World**:
