@@ -1,6 +1,6 @@
 # Plan: Rename the map builder to the world builder, in the code and in what players read
 
-> **Status:** to do.
+> **Status:** built on `main` in `cd254b3b`, with its screenshots still to be approved.
 >
 > **Summary:** The [glossary](../../GLOSSARY.md) avoids "map", while the map builder says it everywhere: `MapBuilder`,
 > `CreateMap`, `ImportMap`, `MapImportRejected`, and players read "Build a map", "Map Builder" and "Map copied to the
@@ -150,3 +150,9 @@ The tests are renamed with their classes, and their names say "world" for "map".
   direction.
 - `screen`: `isOneOfTheNeighbours`, `mapWidth` and `mapHeight` in `BattlefieldView`, which are the battlefield view's own
   words, not the world builder's.
+
+## Changes while building
+
+- A few more words follow the plan than it named: the `map.toml` file of the file picker tests is `world.toml`, the
+  text that is not a world reads "Hello, world builder!", every test name saying "neighbour" says "adjacent tile", and
+  the comments saying a world is "designed" say it is "built".
