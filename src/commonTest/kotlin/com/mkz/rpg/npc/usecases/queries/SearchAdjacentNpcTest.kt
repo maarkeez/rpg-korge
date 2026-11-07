@@ -6,30 +6,30 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class SearchNpcNextToTest {
+class SearchAdjacentNpcTest {
     private val npcRepository = InMemoryNpcRepository()
-    private val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+    private val searchAdjacentNpc = SearchAdjacentNpc(npcRepository)
 
     @Test
-    fun `should return the npc standing next to the tile`() {
+    fun `should return the npc standing adjacent to the tile`() {
         // Given
         val theGuy = npc(id = "the-guy", row = 10, column = 1)
         npcRepository.save(theGuy)
         npcRepository.save(npc(id = "the-girl", row = 3, column = 4))
         // When
-        val npc = searchNpcNextTo(row = 10, column = 2)
+        val npc = searchAdjacentNpc(row = 10, column = 2)
         // Then
         npc shouldBe theGuy.toDto()
     }
 
     @Test
-    fun `should return the first npc next to the tile, north, east, south and west, in that order`() {
+    fun `should return the first npc adjacent to the tile, north, east, south and west, in that order`() {
         // Given
         npcRepository.save(npc(id = "the-west-guy", row = 10, column = 1))
         npcRepository.save(npc(id = "the-south-guy", row = 11, column = 2))
         npcRepository.save(npc(id = "the-east-guy", row = 10, column = 3))
         // When
-        val npc = searchNpcNextTo(row = 10, column = 2)
+        val npc = searchAdjacentNpc(row = 10, column = 2)
         // Then
         npc?.id shouldBe "the-east-guy"
     }
@@ -39,7 +39,7 @@ class SearchNpcNextToTest {
         // Given
         npcRepository.save(npc(id = "the-guy", row = 9, column = 1))
         // When
-        val npc = searchNpcNextTo(row = 10, column = 2)
+        val npc = searchAdjacentNpc(row = 10, column = 2)
         // Then
         npc.shouldBeNull()
     }
@@ -49,7 +49,7 @@ class SearchNpcNextToTest {
         // Given
         npcRepository.save(npc(id = "the-guy", row = 10, column = 2))
         // When
-        val npc = searchNpcNextTo(row = 10, column = 2)
+        val npc = searchAdjacentNpc(row = 10, column = 2)
         // Then
         npc.shouldBeNull()
     }

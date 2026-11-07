@@ -18,5 +18,5 @@ sealed interface NpcEvent : DomainEvent {
         val column: Int,
     ) : NpcEvent
 
-    object RequestInitialiseNpcs : NpcEvent
+    object RequestPlaceNpcs : NpcEvent
 }

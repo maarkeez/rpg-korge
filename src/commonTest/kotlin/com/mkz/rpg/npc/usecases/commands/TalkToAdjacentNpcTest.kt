@@ -13,7 +13,7 @@ import kotlin.test.Test
 class TalkToAdjacentNpcTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val talkToAdjacentNpc = TalkToAdjacentNpc(queries.searchParty, queries.searchPosition, queries.searchNpcNextTo, eventBus)
+    private val talkToAdjacentNpc = TalkToAdjacentNpc(queries.searchParty, queries.searchPosition, queries.searchAdjacentNpc, eventBus)
 
     // The knight-1 leads from the centre of the map, and the knight-2 follows it. Each letter of the npcs is an npc.
     private fun givenParty(
@@ -29,7 +29,7 @@ class TalkToAdjacentNpcTest {
     }
 
     @Test
-    fun `should request to talk to the npc next to the leader`() {
+    fun `should request to talk to the npc adjacent to the leader`() {
         // Given
         givenParty(
             """
@@ -46,7 +46,7 @@ class TalkToAdjacentNpcTest {
     }
 
     @Test
-    fun `should request to talk to the first npc next to the leader, north, east, south and west, in that order`() {
+    fun `should request to talk to the first npc adjacent to the leader, north, east, south and west, in that order`() {
         // Given
         givenParty(
             """

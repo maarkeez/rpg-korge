@@ -14,7 +14,7 @@ A new game starts exploring the battlefield, out of the battles: there are no tu
 [`VirtualPadView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/VirtualPadView.kt) is laid out as a Game Boy Color: the north, east, south and west arrows on the left, the round B and A buttons on the right, A higher and further right than B, and the Start pill centred at the bottom, between both. The arrows are grey squares as big as A and B, of the same grey as Start. The pad is laid out from its bottom, lower than the battle HUD it takes the place of: Start lines up with the bottom of Finish turn, so the lowest button is on the same line while exploring and battling.
 
 - The arrows walk the party (see [Walking](#walking)).
-- A talks to an npc next to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
+- A talks to an npc adjacent to the leader (see [Talking to an npc](#talking-to-an-npc)), recruits it when it is recruitable (see [Recruiting an npc](#recruiting-an-npc)), and trades with it when it is a merchant (see [Shopping at a merchant](#shopping-at-a-merchant)).
 - B opens the party formation, where the player chooses who leads (see [Choosing the leader](#choosing-the-leader)).
 - Start pauses the game, to save it or quit to the menu (see [Pausing](#pausing)).
 - Tapping the tracker, on the top line, opens the journal or the main quest in full (see [Reading the quest](#reading-the-quest)).
@@ -47,7 +47,7 @@ Holding an arrow keeps walking: [`VirtualPadView`](../../src/commonMain/kotlin/c
 A tap is never lost while the timeline plays (e.g.: the party still gliding, or a recruit flashing):
 
 - The pad reports each press once, before holding it. The presenter keeps the last arrow or A pressed, a newer press replacing it, so tapping several times while the timeline plays walks one step, towards the last arrow.
-- On the first frame the timeline is idle, the presenter acts on it: it walks the party, or talks to the npc next to the leader. It is acted on once, even when nothing happens (e.g.: a blocked tile), and a held arrow walking towards it acts on it.
+- On the first frame the timeline is idle, the presenter acts on it: it walks the party, or talks to the npc adjacent to the leader. It is acted on once, even when nothing happens (e.g.: a blocked tile), and a held arrow walking towards it acts on it.
 - It is forgotten when the pad is hidden meanwhile (e.g.: a battle starts, or a battle unit of the party is selected).
 
 The camera trails the leader, as in A Link to the Past, not the followers ([`BattlefieldPresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/BattlefieldPresenter.kt)):
@@ -64,9 +64,9 @@ When a battle starts (`ExplorationPaused`), the camera stops trailing, and the b
 
 While exploring, a [quest marker](quests.md#the-quest-markers) over an npc's head says that it can start a side quest, or that a current task is to talk to it. A battle removes the markers until it finishes.
 
-An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands next to the leader.
+An npc ([`npc`](../../src/commonMain/kotlin/com/mkz/rpg/npc) subdomain, see [Game data](game-data.md)) stands on its tile. Pressing A talks to it when it stands adjacent to the leader.
 
-1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces ([`SearchNpcNextTo`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/queries/SearchNpcNextTo.kt)), and requests the party to talk to the first one (`RequestStartTalk`). The party talks to it ([`StartTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartTalk.kt), `NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
+1. [`TalkToAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt) looks for an npc on the tiles north, east, south and west of the leader, in that order, with no diagonals and whichever way the leader faces ([`SearchAdjacentNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/queries/SearchAdjacentNpc.kt)), and requests the party to talk to the first one (`RequestStartTalk`). The party talks to it ([`StartTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/StartTalk.kt), `NpcTalkStarted`). Nothing happens when there is none, or when the party can not walk (e.g.: it is still walking, or battling).
 2. While talking, the party is in its `TALKING` mode: `isExploring` is `false`, so time stops. The party does not walk, and no second starts, so nothing wanders, no terrain effect applies, and nobody engages.
 3. [`NpcDialogView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/NpcDialogView.kt) takes the place of the virtual pad: the portrait of the npc on the left (`npc/<npc id>_portrait.png`, at 3x), its name on top and its line below it, wrapping when long. Tapping the battlefield does nothing.
 4. Tapping anywhere on the dialog finishes the talk ([`FinishTalk`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/FinishTalk.kt), `NpcTalkFinished`): the virtual pad is displayed again, and time goes on. A merchant's dialog is only left with its Leave choice instead (see [Shopping at a merchant](#shopping-at-a-merchant)).
@@ -79,7 +79,7 @@ An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game 
 
 1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: the elder.
 2. The npc leaves its tile (`NpcRecruited`): the battlefield removes it, and the screen removes the npc.
-3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the party player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A next to it no longer talks to it.
+3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the party player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A while adjacent to it no longer talks to it.
 4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
 
 The events are dispatched in the order they are published, so the npc is removed before the battle unit is deployed on its tile, and the battle unit is deployed before it joins the party, as the party publishes both requests together. Once recruited, it is a party member as any other: it has an inventory, and leaves the party once defeated.

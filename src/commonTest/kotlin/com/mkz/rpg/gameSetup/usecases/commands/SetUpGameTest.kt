@@ -41,7 +41,7 @@ class SetUpGameTest {
             BuildingEvent.RequestPlaceBuildings,
             QuestEvent.RequestInitialiseQuests,
             BattleUnitEvent.RequestInitialiseBattleUnits,
-            NpcEvent.RequestInitialiseNpcs,
+            NpcEvent.RequestPlaceNpcs,
             PartyEvent.RequestStartExploration,
             QuestEvent.RequestStartMainQuest,
         )

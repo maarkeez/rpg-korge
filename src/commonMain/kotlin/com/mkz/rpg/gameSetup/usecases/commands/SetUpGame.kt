@@ -40,7 +40,7 @@ class SetUpGame(
         eventBus.publish(QuestEvent.RequestInitialiseQuests)
         if (isLoadingASavedGame) return
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
-        eventBus.publish(NpcEvent.RequestInitialiseNpcs)
+        eventBus.publish(NpcEvent.RequestPlaceNpcs)
         eventBus.publish(PartyEvent.RequestStartExploration)
         eventBus.publish(QuestEvent.RequestStartMainQuest)
     }

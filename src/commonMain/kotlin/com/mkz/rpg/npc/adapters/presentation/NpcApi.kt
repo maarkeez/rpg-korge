@@ -3,17 +3,17 @@ package com.mkz.rpg.npc.adapters.presentation
 import com.mkz.rpg.battlefield.adapters.presentation.BattlefieldApi
 import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.npc.adapters.events.OnNpcTalkFinished
-import com.mkz.rpg.npc.adapters.events.OnRequestInitialiseNpcs
+import com.mkz.rpg.npc.adapters.events.OnRequestPlaceNpcs
 import com.mkz.rpg.npc.adapters.save.NpcSnapshottable
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
-import com.mkz.rpg.npc.usecases.commands.InitialiseNpcs
+import com.mkz.rpg.npc.usecases.commands.PlaceNpcs
 import com.mkz.rpg.npc.usecases.commands.RecruitNpc
 import com.mkz.rpg.npc.usecases.commands.RestoreNpcs
 import com.mkz.rpg.npc.usecases.commands.TalkToAdjacentNpc
+import com.mkz.rpg.npc.usecases.queries.SearchAdjacentNpc
 import com.mkz.rpg.npc.usecases.queries.SearchIsMerchant
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
-import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.npc.usecases.queries.SearchNpcsSnapshot
 import com.mkz.rpg.npc.usecases.services.NpcLoader
 import com.mkz.rpg.party.adapters.presentation.PartyApi
@@ -37,16 +37,16 @@ class NpcApi(
 
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)
-    val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+    val searchAdjacentNpc = SearchAdjacentNpc(npcRepository)
     val searchIsMerchant = SearchIsMerchant(npcRepository)
 
     // Commands
-    val initialiseNpcs = InitialiseNpcs(npcLoader, npcRepository, battlefieldApi.isTileVacant, lootableItemApi.searchLootableItemById, eventBus)
+    val placeNpcs = PlaceNpcs(npcLoader, npcRepository, battlefieldApi.isTileVacant, lootableItemApi.searchLootableItemById, eventBus)
     val recruitNpc = RecruitNpc(npcRepository, eventBus)
-    val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchNpcNextTo, eventBus)
+    val talkToAdjacentNpc = TalkToAdjacentNpc(partyApi.searchParty, battlefieldApi.searchPosition, searchAdjacentNpc, eventBus)
 
     // Events
-    private val onRequestInitialiseNpcs = OnRequestInitialiseNpcs(initialiseNpcs, eventBus)
+    private val onRequestPlaceNpcs = OnRequestPlaceNpcs(placeNpcs, eventBus)
     private val onNpcTalkFinished = OnNpcTalkFinished(recruitNpc, eventBus)
 
     suspend fun init() {

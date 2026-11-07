@@ -86,7 +86,7 @@ class NpcAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 0, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("knight-2", "knight", "human", deployAtRow = 1, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("rat-1", "rat", "cpu", deployAtRow = 7, deployAtColumn = 7)
-        npcApi.initialiseNpcs()
+        npcApi.placeNpcs()
         partyApi.startExploration()
         eventBus.dispatch()
     }

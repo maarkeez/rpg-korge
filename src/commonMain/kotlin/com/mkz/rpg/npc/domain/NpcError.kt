@@ -3,7 +3,7 @@ package com.mkz.rpg.npc.domain
 sealed class NpcError(
     message: String,
 ) : Throwable(message = message) {
-    class NpcTileCanNotBeOccupied : NpcError("The npc tile can not be occupied")
+    class NpcTileNotVacant : NpcError("The npc tile is not vacant")
 
     class NpcStockTooLarge : NpcError("The npc stock has more than ${Npc.MAX_STOCK_SIZE} items")
 

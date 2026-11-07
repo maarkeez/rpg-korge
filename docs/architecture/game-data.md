@@ -21,11 +21,11 @@ The game is defined by TOML files under [`resources`](../../resources). No game 
 | 10 | `RequestPlaceBuildings`          | The placed buildings           | Their tiles                    |
 | 11 | `RequestInitialiseQuests`        | The quests, not started yet    | The tiles they name            |
 | 12 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
-| 13 | `RequestInitialiseNpcs`          | The npcs on the battlefield    | Their tiles                    |
+| 13 | `RequestPlaceNpcs`               | The placed npcs                | Their tiles                    |
 | 14 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
 | 15 | `RequestStartMainQuest`          | The main quest, active         | The quests                     |
 
-3. Each `Initialise<Subdomain>` command, and `PlaceBuildings`, creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
+3. Each `Initialise<Subdomain>` command, as well as `PlaceBuildings` and `PlaceNpcs`, creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
 To load a saved game, `SetUpGame` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
 and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).

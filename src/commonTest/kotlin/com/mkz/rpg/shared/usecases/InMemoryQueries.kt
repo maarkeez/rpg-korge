@@ -43,9 +43,9 @@ import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.lootableItem.usecases.queries.SearchSellPrice
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
+import com.mkz.rpg.npc.usecases.queries.SearchAdjacentNpc
 import com.mkz.rpg.npc.usecases.queries.SearchIsMerchant
 import com.mkz.rpg.npc.usecases.queries.SearchNpcById
-import com.mkz.rpg.npc.usecases.queries.SearchNpcNextTo
 import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 import com.mkz.rpg.party.usecases.queries.SearchParty
@@ -98,7 +98,7 @@ class InMemoryQueries(
 
     // Npc
     val searchNpcById = SearchNpcById(npcRepository)
-    val searchNpcNextTo = SearchNpcNextTo(npcRepository)
+    val searchAdjacentNpc = SearchAdjacentNpc(npcRepository)
     val searchIsMerchant = SearchIsMerchant(npcRepository)
 
     // Party

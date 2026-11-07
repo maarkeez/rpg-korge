@@ -18,21 +18,21 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import kotlin.test.Test
 
-class InitialiseNpcsTest {
+class PlaceNpcsTest {
     private val queries = InMemoryQueries()
     private val npcRepository = InMemoryNpcRepository()
     private val eventBus = FakeEventBus()
 
-    private fun initialiseNpcs(vararg npcs: Npc.Dto) = InitialiseNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.isTileVacant, queries.searchLootableItemById, eventBus)()
+    private fun placeNpcs(vararg npcs: Npc.Dto) = PlaceNpcs(FakeNpcLoader(npcs.toList()), npcRepository, queries.isTileVacant, queries.searchLootableItemById, eventBus)()
 
     @Test
-    fun `should place every loaded npc on its tile, requesting the battlefield to occupy it, when the npcs are initialised`() {
+    fun `should place every loaded npc on its tile, requesting the battlefield to occupy it, when the npcs are placed`() {
         // Given
         queries.battlefieldRepository.create(battlefield(". . .\n. . ."))
         val theGuy = npc(id = "the-guy", row = 1, column = 2).toDto()
         val theGirl = npc(id = "the-girl", row = 0, column = 0).toDto()
         // When
-        initialiseNpcs(theGuy, theGirl)
+        placeNpcs(theGuy, theGirl)
         // Then
         npcRepository.searchById("the-guy")?.toDto() shouldBe theGuy
         npcRepository.searchById("the-girl")?.toDto() shouldBe theGirl
@@ -50,7 +50,7 @@ class InitialiseNpcsTest {
         queries.battlefieldRepository.create(battlefield(". ."))
         val viking = npc(id = "viking", row = 0, column = 1, unitId = "viking").toDto()
         // When
-        initialiseNpcs(viking)
+        placeNpcs(viking)
         // Then
         npcRepository.searchById("viking")?.toDto() shouldBe viking
         eventBus.shouldHavePublishedEvents(
@@ -67,7 +67,7 @@ class InitialiseNpcsTest {
         queries.lootableItemRepository.create(lootableItem(id = "health-potion"))
         val merchant = npc(id = "merchant", row = 0, column = 1, stock = listOf("hammer", "health-potion")).toDto()
         // When
-        initialiseNpcs(merchant)
+        placeNpcs(merchant)
         // Then
         npcRepository.searchById("merchant")?.toDto() shouldBe merchant
         eventBus.shouldHavePublishedEvents(
@@ -82,7 +82,7 @@ class InitialiseNpcsTest {
         queries.battlefieldRepository.create(battlefield(". ."))
         queries.lootableItemRepository.create(lootableItem(id = "hammer"))
         // When
-        val result = runCatching { initialiseNpcs(npc(id = "merchant", row = 0, column = 1, stock = listOf("hammer", "dragon-egg")).toDto()) }
+        val result = runCatching { placeNpcs(npc(id = "merchant", row = 0, column = 1, stock = listOf("hammer", "dragon-egg")).toDto()) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcStockItemNotFound>()
         npcRepository.searchById("merchant").shouldBeNull()
@@ -94,7 +94,7 @@ class InitialiseNpcsTest {
         queries.battlefieldRepository.create(battlefield(". . ."))
         npcRepository.save(npc(id = "the-guy", row = 0, column = 0))
         // When
-        initialiseNpcs(npc(id = "the-guy", row = 0, column = 2).toDto())
+        placeNpcs(npc(id = "the-guy", row = 0, column = 2).toDto())
         // Then
         npcRepository.searchById("the-guy")?.toDto()?.column shouldBe 0
         eventBus.shouldNotHavePublishedEvents()
@@ -105,9 +105,9 @@ class InitialiseNpcsTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". #"))
         // When
-        val result = runCatching { initialiseNpcs(npc(id = "the-guy", row = 0, column = 1).toDto()) }
+        val result = runCatching { placeNpcs(npc(id = "the-guy", row = 0, column = 1).toDto()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileCanNotBeOccupied>()
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileNotVacant>()
         npcRepository.searchById("the-guy").shouldBeNull()
     }
 
@@ -116,8 +116,8 @@ class InitialiseNpcsTest {
         // Given
         queries.battlefieldRepository.create(battlefield(". ."))
         // When
-        val result = runCatching { initialiseNpcs(npc(id = "the-guy", row = 3, column = 0).toDto()) }
+        val result = runCatching { placeNpcs(npc(id = "the-guy", row = 3, column = 0).toDto()) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileCanNotBeOccupied>()
+        result.exceptionOrNull().shouldBeTypeOf<NpcError.NpcTileNotVacant>()
     }
 }

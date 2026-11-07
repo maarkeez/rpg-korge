@@ -71,7 +71,7 @@ class TradeAcceptanceTest {
         battleUnitApi.deployBattleUnit("knight-1", "knight", "human", deployAtRow = 0, deployAtColumn = 1)
         battleUnitApi.deployBattleUnit("viking-1", "viking", "human", deployAtRow = 1, deployAtColumn = 1)
         eventBus.dispatch()
-        npcApi.initialiseNpcs()
+        npcApi.placeNpcs()
         partyApi.startExploration()
         eventBus.dispatch()
         npcApi.talkToAdjacentNpc()

@@ -952,12 +952,12 @@ const DATA = {
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestOccupyTile"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "battlefield.domain.BattlefieldEvent.RequestRemoveOccupant"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/PlaceNpcs.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "npc", "to": "lootableItem", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "lootableItem.adapters.presentation.LootableItemApi"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/PlaceNpcs.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"},
       {"file": "com/mkz/rpg/npc/usecases/commands/RestoreNpcs.kt", "layer": "usecases", "name": "lootableItem.usecases.queries.SearchLootableItemById"}
     ]},
     {"from": "npc", "to": "party", "weight": 5, "files": 4, "imports": [
@@ -970,8 +970,8 @@ const DATA = {
     {"from": "npc", "to": "shared", "weight": 16, "files": 10, "imports": [
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/npc/adapters/events/OnRequestInitialiseNpcs.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/npc/adapters/events/OnRequestInitialiseNpcs.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/npc/adapters/events/OnRequestPlaceNpcs.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/npc/adapters/events/OnRequestPlaceNpcs.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/adapters/presentation/NpcApi.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/npc/adapters/resources/ResourcesNpcLoader.kt", "layer": "adapters", "name": "shared.adapters.resources.ResourcesBundle"},
@@ -980,8 +980,8 @@ const DATA = {
       {"file": "com/mkz/rpg/npc/adapters/save/NpcSnapshottable.kt", "layer": "adapters", "name": "shared.domain.Snapshottable"},
       {"file": "com/mkz/rpg/npc/domain/Npc.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
       {"file": "com/mkz/rpg/npc/domain/NpcEvent.kt", "layer": "domain", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
-      {"file": "com/mkz/rpg/npc/usecases/commands/InitialiseNpcs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/PlaceNpcs.kt", "layer": "usecases", "name": "shared.domain.DomainEvent"},
+      {"file": "com/mkz/rpg/npc/usecases/commands/PlaceNpcs.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/npc/usecases/commands/TalkToAdjacentNpc.kt", "layer": "usecases", "name": "shared.domain.EventBus"}
     ]},

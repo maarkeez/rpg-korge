@@ -105,7 +105,7 @@ class SubdomainApis(
         if (quests.isNotEmpty()) questApi.initialiseQuests()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()
-        npcApi.initialiseNpcs()
+        npcApi.placeNpcs()
         eventBus.dispatch()
         if (explore) partyApi.startExploration()
         eventBus.dispatch()
