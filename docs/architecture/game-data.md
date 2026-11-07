@@ -115,7 +115,7 @@ effectIds = ["health-potion-heal"]
 
 ### `lootTable/<loot table id>.toml`
 
-The weighted entries a defeated unit may drop. Each entry is a lootable item, which must exist, or nothing. Weights must be greater than 0, and a loot table can not repeat a lootable item nor nothing. The loot table only holds the weights: they are turned into chances when a loot drop is rolled.
+The weighted entries loot drops roll on, shared by every loot drop that lists it. Each entry is a lootable item, which must exist, or nothing. Weights must be greater than 0, and a loot table can not repeat a lootable item nor nothing. The loot table only holds the weights: they are turned into chances when a loot drop is rolled.
 
 ```toml
 [[entries]]

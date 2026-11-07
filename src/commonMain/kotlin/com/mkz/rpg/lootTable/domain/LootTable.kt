@@ -5,12 +5,15 @@ import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto.TypeDto.LOOTABLE_ITEM
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto.TypeDto.NOTHING
 import com.mkz.rpg.lootTable.domain.LootTableError.DuplicatedLootTableEntry
 import com.mkz.rpg.lootTable.domain.LootTableError.EmptyLootTableEntries
-import com.mkz.rpg.lootTable.domain.LootTableError.InvalidLootTableEntryType
+import com.mkz.rpg.lootTable.domain.LootTableError.LootTableEntryWithoutLootableItem
 import com.mkz.rpg.lootTable.domain.LootTableError.NonPositiveLootTableWeight
 import com.mkz.rpg.lootTable.domain.LootTableEvent.LootTableCreated
 import kotlin.jvm.JvmInline
 
-/** The weighted entries a defeated unit may drop. It only holds the weights: the loot drop turns them into chances. */
+/**
+ * The weighted entries loot drops roll on, shared by every loot drop that lists it. It only holds the weights: a loot
+ * drop's roll turns them into chances.
+ */
 @ConsistentCopyVisibility
 data class LootTable private constructor(
     private val id: Id,
@@ -53,7 +56,7 @@ data class LootTable private constructor(
         fun toDto(): List<EntryDto> = value.map(Entry::toDto)
     }
 
-    /** A lootable item, or nothing when [lootableItemId] is `null`, dropped with the given [weight]. */
+    /** A lootable item, or nothing when [lootableItemId] is `null`, rolled with the given [weight]. */
     private data class Entry(
         val lootableItemId: LootableItemId?,
         val weight: Weight,
@@ -61,7 +64,7 @@ data class LootTable private constructor(
         constructor(dto: EntryDto) : this(
             lootableItemId =
                 when (dto.type) {
-                    LOOTABLE_ITEM -> LootableItemId(dto.lootableItemId ?: throw InvalidLootTableEntryType())
+                    LOOTABLE_ITEM -> LootableItemId(dto.lootableItemId ?: throw LootTableEntryWithoutLootableItem())
                     NOTHING -> null
                 },
             weight = Weight(dto.weight),

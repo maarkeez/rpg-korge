@@ -4,7 +4,7 @@ import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto
 import com.mkz.rpg.lootTable.domain.LootTable.Dto.EntryDto.TypeDto.LOOTABLE_ITEM
 import com.mkz.rpg.lootTable.domain.LootTableError.DuplicatedLootTableEntry
 import com.mkz.rpg.lootTable.domain.LootTableError.EmptyLootTableEntries
-import com.mkz.rpg.lootTable.domain.LootTableError.InvalidLootTableEntryType
+import com.mkz.rpg.lootTable.domain.LootTableError.LootTableEntryWithoutLootableItem
 import com.mkz.rpg.lootTable.domain.LootTableError.NonPositiveLootTableWeight
 import com.mkz.rpg.lootTable.domain.LootTableEvent.LootTableCreated
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootableItemEntry
@@ -97,7 +97,7 @@ class LootTableTest {
         // When
         val result = runCatching { LootTable.create(lootTableDto) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<InvalidLootTableEntryType>()
+        result.exceptionOrNull().shouldBeTypeOf<LootTableEntryWithoutLootableItem>()
     }
 
     @Test

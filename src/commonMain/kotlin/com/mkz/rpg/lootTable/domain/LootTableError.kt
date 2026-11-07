@@ -9,7 +9,7 @@ sealed class LootTableError(
 
     class DuplicatedLootTableEntry : LootTableError("Loot table entries must not repeat a lootable item nor nothing")
 
-    class InvalidLootTableEntryType : LootTableError("Invalid loot table entry type")
+    class LootTableEntryWithoutLootableItem : LootTableError("A lootable item entry of a loot table requires a lootable item")
 
     class LootTableLootableItemDoesNotExist : LootTableError("Loot table lootable item does not exist")
 }
