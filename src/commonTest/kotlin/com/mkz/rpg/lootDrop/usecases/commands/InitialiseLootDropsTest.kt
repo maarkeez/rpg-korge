@@ -63,7 +63,7 @@ class InitialiseLootDropsTest {
         val ownerless =
             LootDrop
                 .ownerless()
-                .place(lootableItemId = "hammer", row = 0, column = 1)
+                .drop(lootableItemId = "hammer", row = 0, column = 1)
                 .pullEvents()
                 .second
         lootDropRepository.create(ownerless)

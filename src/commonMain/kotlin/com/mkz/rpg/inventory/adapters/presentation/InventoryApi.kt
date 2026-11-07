@@ -2,8 +2,8 @@ package com.mkz.rpg.inventory.adapters.presentation
 
 import com.mkz.rpg.battle.adapters.presentation.BattleApi
 import com.mkz.rpg.effect.adapters.presentation.EffectApi
+import com.mkz.rpg.inventory.adapters.events.OnDroppedItemsFound
 import com.mkz.rpg.inventory.adapters.events.OnExplorationStarted
-import com.mkz.rpg.inventory.adapters.events.OnLootFound
 import com.mkz.rpg.inventory.adapters.events.OnPartyJoined
 import com.mkz.rpg.inventory.adapters.events.OnRequestGrantReward
 import com.mkz.rpg.inventory.adapters.save.InventorySnapshottable
@@ -90,7 +90,7 @@ class InventoryApi(
     val searchGiveGoldRefusal = SearchGiveGoldRefusal(inventoryRepository, giveRule, searchGoldReceivers)
 
     // Event Listeners
-    private val onLootFound = OnLootFound(storeLootedItem, eventBus)
+    private val onDroppedItemsFound = OnDroppedItemsFound(storeLootedItem, eventBus)
     private val onExplorationStarted = OnExplorationStarted(createInventory, eventBus)
     private val onPartyJoined = OnPartyJoined(createInventory, eventBus)
     private val onRequestGrantReward = OnRequestGrantReward(grantReward, eventBus)

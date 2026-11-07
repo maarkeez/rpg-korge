@@ -3,7 +3,7 @@ package com.mkz.rpg.lootDrop.usecases.commands
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
 import com.mkz.rpg.lootDrop.domain.LootDrop
 import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.ItemDropped
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.assertions.throwables.shouldThrow
@@ -16,18 +16,18 @@ class DropItemsTest {
     private val dropItems = DropItems(lootDropRepository, eventBus)
 
     @Test
-    fun `DropItems should place the item on the tile and announce it when requested`() {
+    fun `DropItems should drop the item on the tile and announce it when requested`() {
         // Given
         lootDropRepository.create(LootDrop.ownerless())
         // When
         dropItems(lootableItemIds = listOf("health-potion"), row = 0, column = 1)
         // Then
         lootDropRepository.searchByUnitId(LootDrop.OWNERLESS_UNIT_ID)!!.toDto().droppedItems shouldBe mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion"))
-        eventBus.shouldHavePublishedEvents(LootDropped(lootableItemId = "health-potion", row = 0, column = 1))
+        eventBus.shouldHavePublishedEvents(ItemDropped(lootableItemId = "health-potion", row = 0, column = 1))
     }
 
     @Test
-    fun `DropItems should place every copy and announce each when the same item is requested twice`() {
+    fun `DropItems should drop every copy and announce each when the same item is requested twice`() {
         // Given
         lootDropRepository.create(LootDrop.ownerless())
         // When
@@ -35,8 +35,8 @@ class DropItemsTest {
         // Then
         lootDropRepository.searchByUnitId(LootDrop.OWNERLESS_UNIT_ID)!!.toDto().droppedItems shouldBe mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion", "health-potion"))
         eventBus.shouldHavePublishedEvents(
-            LootDropped(lootableItemId = "health-potion", row = 0, column = 1),
-            LootDropped(lootableItemId = "health-potion", row = 0, column = 1),
+            ItemDropped(lootableItemId = "health-potion", row = 0, column = 1),
+            ItemDropped(lootableItemId = "health-potion", row = 0, column = 1),
         )
     }
 

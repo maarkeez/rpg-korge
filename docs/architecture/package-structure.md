@@ -141,18 +141,18 @@ So a recruited npc is removed before the battle unit it joins the party as is de
 
 A building is never moved, removed nor swapped, so battlefield does not support it for an occupant over several tiles.
 
-`battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about loot. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `LootDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the occupant is removed. `LootFound` is published while handling `BattleUnitMoved`, so it is dispatched before the battle unit occupies its tile (`TileOccupied`):
+`battleUnit` does not depend on `lootDrop`: `lootDrop` listens to the facts of `battleUnit`, and `battlefield` knows nothing about dropped items. Each `LootDrop` keeps the items its unit dropped on each tile, with its own position type, into which it maps the path walked. `ItemDropped` is published while handling `BattleUnitDefeated`, so it is dispatched after `RequestRemoveOccupant`, once the occupant is removed. `DroppedItemsFound` is published while handling `BattleUnitMoved`, so it is dispatched before the battle unit occupies its tile (`TileOccupied`):
 
-| When `battleUnit` publishes                                 | `lootDrop`                                                                            |
-|-------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| `BattleUnitDefeated` (a battle unit is defeated)            | Drops the loot of its unit on the tile where it was defeated (`LootDropped`), if any. |
-| `BattleUnitMoved` (a battle unit moves, walks or teleports) | Announces the items on each tile of its path (`LootFound`), in walking order.         |
+| When `battleUnit` publishes                                 | `lootDrop`                                                                                                           |
+|-------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `BattleUnitDefeated` (a battle unit is defeated)            | Rolls the loot drop of its unit and drops the item rolled on the tile where it was defeated (`ItemDropped`), if any. |
+| `BattleUnitMoved` (a battle unit moves, walks or teleports) | Announces the dropped items on each tile of its path (`DroppedItemsFound`), in walking order.                        |
 
-`lootDrop` does not depend on `inventory` either. `inventory` listens to `LootFound`, and the `Inventory` aggregate records the pick-up right after its own event:
+`lootDrop` does not depend on `inventory` either. `inventory` listens to `DroppedItemsFound`, and the `Inventory` aggregate records the looting right after its own event:
 
-| When              | `Inventory` records                                     | `lootDrop`                 |
-|-------------------|---------------------------------------------------------|----------------------------|
-| An item is stored | `RequestPickUpDroppedItem(lootableItemId, row, column)` | Picks it up from its tile. |
+| When              | `Inventory` records                                   | `lootDrop`                  |
+|-------------------|-------------------------------------------------------|-----------------------------|
+| An item is stored | `RequestLootDroppedItem(lootableItemId, row, column)` | Takes it off its tile.      |
 
 `inventory` does not depend on `battleUnit` nor `player` either: only the party members have an inventory, so it relies on `party` for them. It creates the inventory of each party member when the exploration starts (`ExplorationStarted`) or a battle unit joins the party (`PartyJoined`), which carry the unit of each battle unit for its starting gold. It checks the turn of the party player, and asks `party` whether a member can learn the ability a consumable teaches (`CanMemberLearnAbility`). The effects of the items reach `battleUnit` through the requests of `party`, which relays them to its members:
 

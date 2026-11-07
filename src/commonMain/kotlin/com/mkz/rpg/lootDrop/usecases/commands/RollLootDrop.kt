@@ -7,10 +7,10 @@ import com.mkz.rpg.shared.domain.EventBus
 import kotlin.random.Random
 
 /**
- * Drops the loot of a unit on the given tile, where one of its battle units was defeated, unless the unit drops nothing. The item lies there
- * until an inventory stores it.
+ * Rolls the loot drop of a unit and drops the item rolled on the given tile, where one of its battle units was defeated, unless it rolls
+ * nothing or the unit has no loot drop. The item lies there until a party member loots it.
  */
-class DropLoot(
+class RollLootDrop(
     private val lootDropRepository: LootDropRepository,
     private val searchLootTableById: SearchLootTableById,
     private val random: Random,
@@ -23,8 +23,8 @@ class DropLoot(
     ) {
         val storedLootDrop = lootDropRepository.searchByUnitId(unitId) ?: return
         val lootTables = storedLootDrop.toDto().lootTableIds.map { lootTableId -> searchLootTableById(lootTableId) ?: throw LootDropLootTableDoesNotExist() }
-        val lootableItemId = storedLootDrop.drop(lootTables, random) ?: return
-        val (events, lootDrop) = storedLootDrop.place(lootableItemId, row, column).pullEvents()
+        val lootableItemId = storedLootDrop.roll(lootTables, random) ?: return
+        val (events, lootDrop) = storedLootDrop.drop(lootableItemId, row, column).pullEvents()
         lootDropRepository.update(lootDrop)
         eventBus.publish(events)
     }

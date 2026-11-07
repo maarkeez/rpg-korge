@@ -4,16 +4,16 @@ import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
 import com.mkz.rpg.lootDrop.domain.LootDropError.DroppedItemNotFound
 import com.mkz.rpg.lootDrop.domain.LootDropError.DuplicatedLootDropLootTable
 import com.mkz.rpg.lootDrop.domain.LootDropError.EmptyLootDropLootTables
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.DroppedItemPickedUp
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.DroppedItemLooted
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.ItemDropped
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropCreated
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
 import com.mkz.rpg.lootTable.domain.LootTable
 import kotlin.jvm.JvmInline
 import kotlin.random.Random
 
 /**
- * The loot tables a unit rolls on when one of its battle units is defeated, and the items it dropped, lying on their tiles until an inventory
- * stores them.
+ * The loot tables a unit rolls on when one of its battle units is defeated, and the items it dropped, lying on their tiles until a party
+ * member loots them.
  */
 @ConsistentCopyVisibility
 data class LootDrop private constructor(
@@ -49,33 +49,33 @@ data class LootDrop private constructor(
     fun pullEvents() = events to copy(events = emptySet())
 
     /**
-     * Picks the lootable item to drop, or `null` when nothing drops, from the entries of the given [lootTables] merged together,
+     * Rolls the lootable item to drop, or `null` when it rolls nothing, from the entries of the given [lootTables] merged together,
      * in proportion to their weights.
      */
-    fun drop(
+    fun roll(
         lootTables: List<LootTable.Dto>,
         random: Random,
     ): String? {
         val entries = lootTables.flatMap(LootTable.Dto::entries)
         val roll = random.nextInt(entries.sumOf(LootTable.Dto.EntryDto::weight))
         var accumulatedWeight = 0
-        val droppedEntry =
+        val rolledEntry =
             entries.first { entry ->
                 accumulatedWeight += entry.weight
                 roll < accumulatedWeight
             }
-        return droppedEntry.lootableItemId
+        return rolledEntry.lootableItemId
     }
 
-    /** Places a dropped item on its tile, e.g.: where the battle unit was defeated, where it lies until an inventory stores it. */
-    fun place(
+    /** Drops an item on its tile, e.g.: where the battle unit was defeated, where it lies until a party member loots it. */
+    fun drop(
         lootableItemId: String,
         row: Int,
         column: Int,
     ): LootDrop =
         copy(
-            droppedItems = droppedItems.place(Position(row = row, column = column), LootableItemId(lootableItemId)),
-            events = events + LootDropped(lootableItemId = lootableItemId, row = row, column = column),
+            droppedItems = droppedItems.drop(Position(row = row, column = column), LootableItemId(lootableItemId)),
+            events = events + ItemDropped(lootableItemId = lootableItemId, row = row, column = column),
         )
 
     /** The items dropped by the unit lying on the tile, in the order they were dropped. */
@@ -84,15 +84,15 @@ data class LootDrop private constructor(
         column: Int,
     ): List<String> = droppedItems.lootableItemIds(Position(row = row, column = column))
 
-    /** Removes one copy of a dropped item from its tile, once an inventory has stored it. */
-    fun pickUp(
+    /** Takes one copy of a dropped item off its tile, once a party member has looted it. */
+    fun loot(
         lootableItemId: String,
         row: Int,
         column: Int,
     ): LootDrop =
         copy(
-            droppedItems = droppedItems.pickUpOne(Position(row = row, column = column), LootableItemId(lootableItemId)),
-            events = events + DroppedItemPickedUp(lootableItemId = lootableItemId, row = row, column = column),
+            droppedItems = droppedItems.lootOne(Position(row = row, column = column), LootableItemId(lootableItemId)),
+            events = events + DroppedItemLooted(lootableItemId = lootableItemId, row = row, column = column),
         )
 
     /** Puts back the items dropped by the unit when the game was saved, in place of the ones lying now, publishing no events. */
@@ -143,12 +143,12 @@ data class LootDrop private constructor(
                 )
         }
 
-        fun place(
+        fun drop(
             position: Position,
             lootableItemId: LootableItemId,
         ) = DroppedItems(value + (position to (value[position].orEmpty() + lootableItemId)))
 
-        fun pickUpOne(
+        fun lootOne(
             position: Position,
             lootableItemId: LootableItemId,
         ): DroppedItems {

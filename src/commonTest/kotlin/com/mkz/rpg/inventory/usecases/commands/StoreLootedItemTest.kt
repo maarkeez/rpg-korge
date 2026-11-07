@@ -6,7 +6,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.InventoryFull
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestLootDroppedItem
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
@@ -47,7 +47,7 @@ class StoreLootedItemTest {
             .shouldBe(listOf("health-potion"))
         eventBus.shouldHavePublishedEvents(
             ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
-            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+            RequestLootDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
         )
     }
 
@@ -65,7 +65,7 @@ class StoreLootedItemTest {
             ?.shouldContainExactly("health-potion", "health-potion")
         eventBus.shouldHavePublishedEvents(
             ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
-            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+            RequestLootDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
         )
     }
 

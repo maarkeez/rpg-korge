@@ -133,10 +133,10 @@ class BattlefieldPresenter(
                 removeUnit(event.row, event.column)
                 battlefieldHudApi.refreshMovementRange()
             },
-            eventBus.subscribe<LootDropEvent.LootDropped> { event ->
+            eventBus.subscribe<LootDropEvent.ItemDropped> { event ->
                 timeline.play { dropLoot(event.row, event.column, event.lootableItemId) }
             },
-            eventBus.subscribe<LootDropEvent.DroppedItemPickedUp> { event ->
+            eventBus.subscribe<LootDropEvent.DroppedItemLooted> { event ->
                 timeline.play { pickUpLoot(event.row, event.column, event.lootableItemId) }
             },
             // The selection is cleared before the turn is announced, and can not be acted on during the new turn. A human

@@ -127,7 +127,7 @@ class InventoryPresenterTest {
         battleUnitId: String,
         lootableItemId: String,
     ) {
-        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 1)
+        apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 1)
         apis.inventoryApi.storeLootedItem(battleUnitId = battleUnitId, lootableItemId = lootableItemId, row = 1, column = 1)
         eventBus.dispatch()
     }
@@ -183,7 +183,7 @@ class InventoryPresenterTest {
 
     // The knight finds an item lying on (1,2) while its inventory is full.
     private fun findWhileFull(lootableItemId: String) {
-        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 2)
+        apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = lootableItemId, row = 1, column = 2)
         apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = lootableItemId, row = 1, column = 2)
         eventBus.dispatch()
     }

@@ -84,7 +84,7 @@ class LootDroppedItemsAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battlefieldApi.searchPosition(playerOneKnightBattleUnitId) == PositionDto(row = 2, column = 1))
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
+            lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2)
             battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 3)
             // When
             eventBus.dispatch()
@@ -98,7 +98,7 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
+            lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 3)
             battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 3)
             // When
             eventBus.dispatch()
@@ -142,7 +142,7 @@ class LootDroppedItemsAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
-            repeat(13) { lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2) }
+            repeat(13) { lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 2, column = 2) }
             battleUnitApi.walkBattleUnitInBattle(battleUnitId = playerOneKnightBattleUnitId, walkToRow = 2, walkToColumn = 2)
             // When
             eventBus.dispatch()

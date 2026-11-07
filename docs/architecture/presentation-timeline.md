@@ -124,10 +124,10 @@ The items lying on a tile are drawn on its `LOOT` layer by `BattlefieldView.disp
 
 `BattlefieldPresenter` keeps the items it has drawn on each tile, and changes them in timeline order:
 
-| Event                 | Step played                                                                                      |
-|-----------------------|--------------------------------------------------------------------------------------------------|
-| `LootDropped`         | The item appears, once the defeated battle unit has been removed from its tile                   |
-| `DroppedItemPickedUp` | The item disappears, or the chest becomes the item left, once the battle unit has walked its path |
+| Event               | Step played                                                                                       |
+|---------------------|---------------------------------------------------------------------------------------------------|
+| `ItemDropped`       | The item appears, once the defeated battle unit has been removed from its tile                    |
+| `DroppedItemLooted` | The item disappears, or the chest becomes the item left, once the battle unit has walked its path |
 
 ## Inventory
 

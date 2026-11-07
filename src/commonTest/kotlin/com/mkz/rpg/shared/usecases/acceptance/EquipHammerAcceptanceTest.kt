@@ -77,7 +77,7 @@ class EquipHammerAcceptanceTest {
         // The setup starts exploring: the battle starts as if the players engaged each other.
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, "player-one", "player-two")
         eventBus.dispatch()
-        lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "hammer", row = 6, column = 7)
+        lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "hammer", row = 6, column = 7)
         inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "hammer", row = 6, column = 7)
         eventBus.dispatch()
     }

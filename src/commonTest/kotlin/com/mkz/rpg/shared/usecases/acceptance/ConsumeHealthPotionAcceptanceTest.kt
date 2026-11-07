@@ -95,7 +95,7 @@ class ConsumeHealthPotionAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingHealth == 80)
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
+            lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "health-potion")

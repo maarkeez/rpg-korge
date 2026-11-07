@@ -56,7 +56,7 @@ The camera trails the leader, as in A Link to the Past, not the followers ([`Bat
 - The leader moves freely in the 2x2 tiles at the center of the viewport (the deadzone). Once it walks past them, the camera moves with it, pixel for pixel, so it sees 3 tiles ahead. Clamped to the battlefield, so walking along its border does not scroll it.
 - When the camera is more than a tile away from the deadzone (the exploration starts or resumes, a teleport), it eases there, in about 250ms.
 - Dragging the battlefield pauses it, to look around. The leader's next step resumes it.
-- A flash, a loot pick-up and the shop's buyer do not scroll the battlefield meanwhile: they are party members, next to the leader.
+- A flash, looting a dropped item and the shop's buyer do not scroll the battlefield meanwhile: they are party members, next to the leader.
 
 When a battle starts (`ExplorationPaused`), the camera stops trailing, and the battlefield centers each battle unit instead, waiting for the scroll before it moves.
 

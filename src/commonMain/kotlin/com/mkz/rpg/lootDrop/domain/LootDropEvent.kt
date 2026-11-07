@@ -9,8 +9,8 @@ sealed interface LootDropEvent : DomainEvent {
 
     object RequestInitialiseLootDrops : LootDropEvent
 
-    // Requested for an item stored by an inventory, which leaves the tile at row and column it was lying on.
-    data class RequestPickUpDroppedItem(
+    // Requested for an item a party member looted, which leaves the tile at row and column it was lying on.
+    data class RequestLootDroppedItem(
         val lootableItemId: String,
         val row: Int,
         val column: Int,
@@ -23,22 +23,22 @@ sealed interface LootDropEvent : DomainEvent {
         val column: Int,
     ) : LootDropEvent
 
-    /** An item was dropped on the tile at row and column, where it lies until an inventory stores it. */
-    data class LootDropped(
+    /** An item was dropped on the tile at row and column, where it lies until a party member loots it. */
+    data class ItemDropped(
         val lootableItemId: String,
         val row: Int,
         val column: Int,
     ) : LootDropEvent
 
-    /** A battle unit stepped on a tile with dropped items, listed in the order they were dropped. They stay on the tile until an inventory stores them. */
-    data class LootFound(
+    /** A battle unit found dropped items on a tile, listed in the order they were dropped. They stay on the tile until a party member loots them. */
+    data class DroppedItemsFound(
         val battleUnitId: String,
         val lootableItemIds: List<String>,
         val row: Int,
         val column: Int,
     ) : LootDropEvent
 
-    data class DroppedItemPickedUp(
+    data class DroppedItemLooted(
         val lootableItemId: String,
         val row: Int,
         val column: Int,

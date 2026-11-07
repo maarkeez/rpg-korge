@@ -170,7 +170,7 @@ class InventoryPresenterGiveGoldTest {
         // Given
         val scene = Scene()
         scene.openKnightBag()
-        scene.apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
+        scene.apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
         scene.apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 1)
         scene.eventBus.dispatch()
         scene.inventoryView.delegate
@@ -227,7 +227,7 @@ class InventoryPresenterGiveGoldTest {
         // Given
         val scene = Scene()
         scene.openKnightBag()
-        scene.apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
+        scene.apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "health-potion", row = 1, column = 1)
         scene.apis.inventoryApi.storeLootedItem(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 1)
         scene.eventBus.dispatch()
         scene.inventoryView.delegate

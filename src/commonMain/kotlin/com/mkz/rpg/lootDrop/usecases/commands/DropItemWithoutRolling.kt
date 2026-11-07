@@ -4,10 +4,10 @@ import com.mkz.rpg.lootDrop.domain.LootDropRepository
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Places an item dropped by a unit on a tile, where it lies until an inventory stores it, without rolling its loot tables, e.g.: to prepare a
+ * Drops an item for a unit on a tile, where it lies until a party member loots it, without rolling its loot drop, e.g.: to prepare a
  * scenario.
  */
-class PlaceDroppedItem(
+class DropItemWithoutRolling(
     private val lootDropRepository: LootDropRepository,
     private val eventBus: EventBus,
 ) {
@@ -18,7 +18,7 @@ class PlaceDroppedItem(
         column: Int,
     ) {
         val storedLootDrop = lootDropRepository.searchByUnitId(unitId) ?: return
-        val (events, lootDrop) = storedLootDrop.place(lootableItemId, row, column).pullEvents()
+        val (events, lootDrop) = storedLootDrop.drop(lootableItemId, row, column).pullEvents()
         lootDropRepository.update(lootDrop)
         eventBus.publish(events)
     }

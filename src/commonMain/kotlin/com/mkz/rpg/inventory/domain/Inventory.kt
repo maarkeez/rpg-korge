@@ -27,7 +27,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.ItemStored
 import com.mkz.rpg.inventory.domain.InventoryEvent.ItemUnequipped
 import com.mkz.rpg.inventory.domain.InventoryEvent.RewardGranted
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropItems
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestLootDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.domain.DomainEvent
 import kotlin.jvm.JvmInline
@@ -44,7 +44,7 @@ data class Inventory private constructor(
     private val storedItems: StoredItems,
     private val equippedItems: EquippedItems,
     private val gold: Gold,
-    // Its own events, each followed by the battlefield request it needs (e.g.: picking up the item it stored),
+    // Its own events, each followed by the battlefield request it needs (e.g.: looting the item it stored),
     // published together so the battlefield is up to date before anything reacting to the next events.
     private val events: Set<DomainEvent>,
 ) {
@@ -85,7 +85,7 @@ data class Inventory private constructor(
     fun canStore(): Boolean = storedItems.value.size < maximumStorageSpace.value
 
     /**
-     * Stores the item lying on the tile at [row] and [column], and requests its pick-up from the tile. Or announces the inventory is full, so the
+     * Stores the item lying on the tile at [row] and [column], and requests its looting from the tile. Or announces the inventory is full, so the
      * player chooses whether to discard an item to make room.
      */
     fun store(
@@ -99,7 +99,7 @@ data class Inventory private constructor(
                 events =
                     events +
                         ItemStored(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column) +
-                        RequestPickUpDroppedItem(lootableItemId = lootableItemId, row = row, column = column),
+                        RequestLootDroppedItem(lootableItemId = lootableItemId, row = row, column = column),
             )
         } else {
             copy(events = events + InventoryFull(battleUnitId = battleUnitId.value, lootableItemId = lootableItemId, row = row, column = column))

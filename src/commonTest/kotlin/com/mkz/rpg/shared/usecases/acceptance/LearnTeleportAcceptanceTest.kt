@@ -93,7 +93,7 @@ class LearnTeleportAcceptanceTest {
                     .knownAbilities.keys
                     .toList() == listOf("sword"),
             )
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "teleport-essence", row = vikingRow, column = vikingColumn)
+            lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "teleport-essence", row = vikingRow, column = vikingColumn)
             inventoryApi.storeLootedItem(battleUnitId = vikingBattleUnitId, lootableItemId = "teleport-essence", row = vikingRow, column = vikingColumn)
             // When
             inventoryApi.consumeItem(battleUnitId = vikingBattleUnitId, lootableItemId = "teleport-essence")

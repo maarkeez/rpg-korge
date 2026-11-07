@@ -39,7 +39,7 @@ import io.kotest.matchers.shouldBe
 import kotlin.random.Random
 import kotlin.test.Test
 
-class DropLootAcceptanceTest {
+class RollLootDropAcceptanceTest {
     private val eventBus = InMemoryEventBus()
     private val terrainApi = TerrainApi(eventBus, ResourcesTerrainLoader())
     private val unitApi = UnitApi(eventBus, ResourcesUnitLoader())

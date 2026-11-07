@@ -29,7 +29,7 @@ import com.mkz.rpg.inventory.domain.InventoryEvent.RewardGranted
 import com.mkz.rpg.inventory.domain.InventoryMother.fullInventory
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestDropItems
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestPickUpDroppedItem
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.RequestLootDroppedItem
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.HEAD
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto.WEAPON
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -260,7 +260,7 @@ class InventoryTest {
     }
 
     @Test
-    fun `Store should store the item and request its pick-up when there is space left`() {
+    fun `Store should store the item and request its looting when there is space left`() {
         // Given
         val inventory = inventory(battleUnitId = "knight-1", storedItems = listOf("health-potion"))
         // When
@@ -269,7 +269,7 @@ class InventoryTest {
         updatedInventory.toDto().storedItems.shouldContainExactly("health-potion", "health-potion")
         events.shouldContainExactly(
             ItemStored(battleUnitId = "knight-1", lootableItemId = "health-potion", row = 1, column = 2),
-            RequestPickUpDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
+            RequestLootDroppedItem(lootableItemId = "health-potion", row = 1, column = 2),
         )
     }
 

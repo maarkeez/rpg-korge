@@ -2,9 +2,9 @@ package com.mkz.rpg.lootDrop.adapters.events
 
 import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.ItemDropped
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
-import com.mkz.rpg.lootDrop.usecases.commands.DropLoot
+import com.mkz.rpg.lootDrop.usecases.commands.RollLootDrop
 import com.mkz.rpg.lootTable.adapters.storage.InMemoryLootTableRepository
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootableItemEntry
@@ -21,18 +21,18 @@ class OnBattleUnitDefeatedTest {
     private val lootDropRepository = InMemoryLootDropRepository().also { it.create(lootDrop(unitId = "bat", lootTableIds = listOf("tier-1"))) }
     private val onBattleUnitDefeated =
         OnBattleUnitDefeated(
-            DropLoot(lootDropRepository, SearchLootTableById(lootTableRepository), FixedRandom(roll = 0), eventBus),
+            RollLootDrop(lootDropRepository, SearchLootTableById(lootTableRepository), FixedRandom(roll = 0), eventBus),
             eventBus,
         )
-    private val droppedLoot = mutableListOf<LootDropped>().also { dropped -> eventBus.subscribe<LootDropped> { dropped += it } }
+    private val droppedLoot = mutableListOf<ItemDropped>().also { dropped -> eventBus.subscribe<ItemDropped> { dropped += it } }
 
     @Test
-    fun `should drop the loot of its unit where a battle unit is defeated`() {
+    fun `should roll the loot drop of its unit where a battle unit is defeated`() {
         // Given
         eventBus.publish(BattleUnitDefeated(playerId = "cpu", battleUnitId = "bat-1", unitId = "bat", defeatedAtRow = 2, defeatedAtColumn = 3))
         // When
         eventBus.dispatch()
         // Then
-        droppedLoot.shouldContainExactly(LootDropped(lootableItemId = "health-potion", row = 2, column = 3))
+        droppedLoot.shouldContainExactly(ItemDropped(lootableItemId = "health-potion", row = 2, column = 3))
     }
 }

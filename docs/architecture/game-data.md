@@ -115,7 +115,7 @@ effectIds = ["health-potion-heal"]
 
 ### `lootTable/<loot table id>.toml`
 
-The weighted entries a defeated unit may drop. Each entry is a lootable item, which must exist, or nothing. Weights must be greater than 0, and a loot table can not repeat a lootable item nor nothing. The loot table only holds the weights: they are turned into chances when the loot is dropped.
+The weighted entries a defeated unit may drop. Each entry is a lootable item, which must exist, or nothing. Weights must be greater than 0, and a loot table can not repeat a lootable item nor nothing. The loot table only holds the weights: they are turned into chances when a loot drop is rolled.
 
 ```toml
 [[entries]]
@@ -285,7 +285,7 @@ The shipped side quests are examples of each: [`bats-in-the-meadow`](../../resou
 1. Add the lootable items it drops, if they do not exist yet. See [How to add a lootable item](#how-to-add-a-lootable-item).
 2. Add `resources/lootTable/<loot table id>.toml`.
 
-## How to make a unit drop loot
+## How to give a unit a loot drop
 
 1. Add the loot tables it rolls on, if they do not exist yet. See [How to add a loot table](#how-to-add-a-loot-table).
 2. Add `resources/lootDrop/<unit id>.toml`.

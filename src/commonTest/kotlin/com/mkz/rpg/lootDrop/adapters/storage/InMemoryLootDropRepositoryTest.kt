@@ -46,7 +46,7 @@ class InMemoryLootDropRepositoryTest {
         // Given
         val lootDrop = LootDropMother.lootDrop()
         lootDropRepository.create(lootDrop)
-        val updatedLootDrop = lootDrop.place(lootableItemId = "health-potion", row = 0, column = 1).pullEvents().second
+        val updatedLootDrop = lootDrop.drop(lootableItemId = "health-potion", row = 0, column = 1).pullEvents().second
         // When
         lootDropRepository.update(updatedLootDrop)
         // Then

@@ -108,7 +108,7 @@ class SummonLootingAcceptanceTest {
         eventBus.dispatch()
         battleApi.startBattleWithEveryBattleUnit(battleUnitApi, humanPlayerId, enemyPlayerId)
         eventBus.dispatch()
-        lootDropApi.placeDroppedItem(unitId = "enemy", lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)
+        lootDropApi.dropItemWithoutRolling(unitId = "enemy", lootableItemId = "health-potion", row = potionTile.row, column = potionTile.column)
         eventBus.dispatch()
     }
 

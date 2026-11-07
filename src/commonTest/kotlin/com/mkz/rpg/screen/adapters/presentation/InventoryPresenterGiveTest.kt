@@ -98,7 +98,7 @@ class InventoryPresenterGiveTest {
         lootableItemId: String,
     ) {
         val position = apis.battlefieldApi.searchPosition(battleUnitId).shouldNotBeNull()
-        apis.lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = lootableItemId, row = position.row, column = position.column)
+        apis.lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = lootableItemId, row = position.row, column = position.column)
         apis.inventoryApi.storeLootedItem(battleUnitId = battleUnitId, lootableItemId = lootableItemId, row = position.row, column = position.column)
         eventBus.dispatch()
     }

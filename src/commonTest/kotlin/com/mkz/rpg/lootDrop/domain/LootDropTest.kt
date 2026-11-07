@@ -4,9 +4,9 @@ import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
 import com.mkz.rpg.lootDrop.domain.LootDropError.DroppedItemNotFound
 import com.mkz.rpg.lootDrop.domain.LootDropError.DuplicatedLootDropLootTable
 import com.mkz.rpg.lootDrop.domain.LootDropError.EmptyLootDropLootTables
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.DroppedItemPickedUp
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.DroppedItemLooted
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.ItemDropped
 import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropCreated
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootableItemEntry
 import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
@@ -54,34 +54,34 @@ class LootDropTest {
     }
 
     @Test
-    fun `Drop should drop the lootable item when the roll falls within its weight`() {
+    fun `Roll should roll the lootable item when the roll falls within its weight`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(lootTableIds = listOf("tier-1"))
         // When
-        val droppedLootableItemId = lootDrop.drop(lootTables = listOf(tierOne), random = FixedRandom(roll = 9))
+        val rolledLootableItemId = lootDrop.roll(lootTables = listOf(tierOne), random = FixedRandom(roll = 9))
         // Then
-        droppedLootableItemId shouldBe "health-potion"
+        rolledLootableItemId shouldBe "health-potion"
     }
 
     @Test
-    fun `Drop should drop nothing when the roll falls within the nothing weight`() {
+    fun `Roll should roll nothing when the roll falls within the nothing weight`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(lootTableIds = listOf("tier-1"))
         // When
-        val droppedLootableItemId = lootDrop.drop(lootTables = listOf(tierOne), random = FixedRandom(roll = 10))
+        val rolledLootableItemId = lootDrop.roll(lootTables = listOf(tierOne), random = FixedRandom(roll = 10))
         // Then
-        droppedLootableItemId.shouldBeNull()
+        rolledLootableItemId.shouldBeNull()
     }
 
     @Test
-    fun `Drop should drop a lootable item of the next loot table when the roll falls after the weights of the previous loot table`() {
+    fun `Roll should roll a lootable item of the next loot table when the roll falls after the weights of the previous loot table`() {
         // Given
         val tierTwo = lootTable(id = "tier-2", entries = listOf(lootableItemEntry(lootableItemId = "mana-potion", weight = 5))).toDto()
         val lootDrop = LootDropMother.lootDrop(lootTableIds = listOf("tier-1", "tier-2"))
         // When
-        val droppedLootableItemId = lootDrop.drop(lootTables = listOf(tierOne, tierTwo), random = FixedRandom(roll = 15))
+        val rolledLootableItemId = lootDrop.roll(lootTables = listOf(tierOne, tierTwo), random = FixedRandom(roll = 15))
         // Then
-        droppedLootableItemId shouldBe "mana-potion"
+        rolledLootableItemId shouldBe "mana-potion"
     }
 
     @Test
@@ -96,23 +96,23 @@ class LootDropTest {
     }
 
     @Test
-    fun `Place should place the item on its tile and publish the event when an item is dropped`() {
+    fun `Drop should drop the item on its tile and publish the event when an item is dropped`() {
         // Given
         val lootDrop = LootDropMother.lootDrop()
         // When
-        val updatedLootDrop = lootDrop.place(lootableItemId = "health-potion", row = 0, column = 1)
+        val updatedLootDrop = lootDrop.drop(lootableItemId = "health-potion", row = 0, column = 1)
         // Then
         updatedLootDrop.toDto().droppedItems shouldBe mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion"))
         val (events, _) = updatedLootDrop.pullEvents()
-        events.shouldContainExactly(LootDropped(lootableItemId = "health-potion", row = 0, column = 1))
+        events.shouldContainExactly(ItemDropped(lootableItemId = "health-potion", row = 0, column = 1))
     }
 
     @Test
-    fun `Place should keep the items already dropped first when the tile has dropped items`() {
+    fun `Drop should keep the items already dropped first when the tile has dropped items`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion")))
         // When
-        val updatedLootDrop = lootDrop.place(lootableItemId = "helmet", row = 0, column = 1)
+        val updatedLootDrop = lootDrop.drop(lootableItemId = "helmet", row = 0, column = 1)
         // Then
         updatedLootDrop.toDto().droppedItems shouldBe mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion", "helmet"))
     }
@@ -141,33 +141,33 @@ class LootDropTest {
     }
 
     @Test
-    fun `PickUp should remove one copy of the item and publish the event when the item lies on the tile`() {
+    fun `Loot should remove one copy of the item and publish the event when the item lies on the tile`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion", "helmet", "health-potion")))
         // When
-        val updatedLootDrop = lootDrop.pickUp(lootableItemId = "health-potion", row = 0, column = 1)
+        val updatedLootDrop = lootDrop.loot(lootableItemId = "health-potion", row = 0, column = 1)
         // Then
         updatedLootDrop.toDto().droppedItems shouldBe mapOf(PositionDto(row = 0, column = 1) to listOf("helmet", "health-potion"))
         val (events, _) = updatedLootDrop.pullEvents()
-        events.shouldContainExactly(DroppedItemPickedUp(lootableItemId = "health-potion", row = 0, column = 1))
+        events.shouldContainExactly(DroppedItemLooted(lootableItemId = "health-potion", row = 0, column = 1))
     }
 
     @Test
-    fun `PickUp should leave out the tile when its last item is picked up`() {
+    fun `Loot should leave out the tile when its last item is looted`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(droppedItems = mapOf(PositionDto(row = 0, column = 1) to listOf("health-potion")))
         // When
-        val updatedLootDrop = lootDrop.pickUp(lootableItemId = "health-potion", row = 0, column = 1)
+        val updatedLootDrop = lootDrop.loot(lootableItemId = "health-potion", row = 0, column = 1)
         // Then
         updatedLootDrop.toDto().droppedItems.shouldBeEmpty()
     }
 
     @Test
-    fun `PickUp should fail when the item does not lie on the tile`() {
+    fun `Loot should fail when the item does not lie on the tile`() {
         // Given
         val lootDrop = LootDropMother.lootDrop(droppedItems = mapOf(PositionDto(row = 0, column = 0) to listOf("health-potion")))
         // When
-        val result = runCatching { lootDrop.pickUp(lootableItemId = "health-potion", row = 0, column = 1) }
+        val result = runCatching { lootDrop.loot(lootableItemId = "health-potion", row = 0, column = 1) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<DroppedItemNotFound>()
     }
@@ -187,7 +187,7 @@ class LootDropTest {
         val ownerless = LootDrop.ownerless()
         // When / Then
         ownerless.isOwnerlessAndEmpty() shouldBe true
-        ownerless.place(lootableItemId = "hammer", row = 0, column = 1).isOwnerlessAndEmpty() shouldBe false
+        ownerless.drop(lootableItemId = "hammer", row = 0, column = 1).isOwnerlessAndEmpty() shouldBe false
         LootDropMother.lootDrop().isOwnerlessAndEmpty() shouldBe false
     }
 

@@ -2,7 +2,7 @@ package com.mkz.rpg.lootDrop.usecases.commands
 
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
 import com.mkz.rpg.lootDrop.domain.LootDrop.Dto.PositionDto
-import com.mkz.rpg.lootDrop.domain.LootDropEvent.LootDropped
+import com.mkz.rpg.lootDrop.domain.LootDropEvent.ItemDropped
 import com.mkz.rpg.lootDrop.domain.LootDropMother.lootDrop
 import com.mkz.rpg.lootTable.adapters.storage.InMemoryLootTableRepository
 import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
@@ -17,7 +17,7 @@ import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class DropLootTest {
+class RollLootDropTest {
     private val lootDropRepository = InMemoryLootDropRepository()
     private val lootTableRepository = InMemoryLootTableRepository()
     private val eventBus = FakeEventBus()
@@ -28,27 +28,27 @@ class DropLootTest {
         lootDropRepository.create(lootDrop(unitId = "bat", lootTableIds = listOf("tier-1")))
     }
 
-    private fun dropLoot(roll: Int) = DropLoot(lootDropRepository, SearchLootTableById(lootTableRepository), FixedRandom(roll), eventBus)
+    private fun rollLootDrop(roll: Int) = RollLootDrop(lootDropRepository, SearchLootTableById(lootTableRepository), FixedRandom(roll), eventBus)
 
     @Test
     fun `should drop the rolled lootable item on the given tile when the unit has a loot drop`() {
         // Given
         givenABatLootDrop()
-        val dropLoot = dropLoot(roll = 0)
+        val rollLootDrop = rollLootDrop(roll = 0)
         // When
-        dropLoot(unitId = "bat", row = 2, column = 3)
+        rollLootDrop(unitId = "bat", row = 2, column = 3)
         // Then
         lootDropRepository.searchByUnitId("bat")!!.toDto().droppedItems shouldBe mapOf(PositionDto(row = 2, column = 3) to listOf("health-potion"))
-        eventBus.shouldHavePublishedEvents(LootDropped(lootableItemId = "health-potion", row = 2, column = 3))
+        eventBus.shouldHavePublishedEvents(ItemDropped(lootableItemId = "health-potion", row = 2, column = 3))
     }
 
     @Test
-    fun `should not drop loot when nothing is rolled`() {
+    fun `should not drop an item when nothing is rolled`() {
         // Given
         givenABatLootDrop()
-        val dropLoot = dropLoot(roll = 14)
+        val rollLootDrop = rollLootDrop(roll = 14)
         // When
-        dropLoot(unitId = "bat", row = 2, column = 3)
+        rollLootDrop(unitId = "bat", row = 2, column = 3)
         // Then
         lootDropRepository
             .searchByUnitId("bat")!!
@@ -59,11 +59,11 @@ class DropLootTest {
     }
 
     @Test
-    fun `should not drop loot when the unit has no loot drop`() {
+    fun `should not drop an item when the unit has no loot drop`() {
         // Given
-        val dropLoot = dropLoot(roll = 0)
+        val rollLootDrop = rollLootDrop(roll = 0)
         // When
-        dropLoot(unitId = "rat", row = 2, column = 3)
+        rollLootDrop(unitId = "rat", row = 2, column = 3)
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

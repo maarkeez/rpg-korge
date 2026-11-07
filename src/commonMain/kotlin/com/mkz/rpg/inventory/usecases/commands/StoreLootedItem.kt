@@ -6,7 +6,7 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Stores an item lying on a tile in the inventory of a battle unit, and requests the battlefield to pick it up from its tile. CPU battle units
+ * Stores an item lying on a tile in the inventory of a battle unit, and requests to take it off its tile, as it is looted. CPU battle units
  * and summons have none, so the item stays on its tile.
  */
 class StoreLootedItem(

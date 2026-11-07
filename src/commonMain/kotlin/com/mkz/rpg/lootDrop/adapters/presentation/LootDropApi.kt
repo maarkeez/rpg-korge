@@ -4,17 +4,17 @@ import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.lootDrop.adapters.events.OnBattleUnitMoved
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestDropItems
 import com.mkz.rpg.lootDrop.adapters.events.OnRequestInitialiseLootDrops
-import com.mkz.rpg.lootDrop.adapters.events.OnRequestPickUpDroppedItem
+import com.mkz.rpg.lootDrop.adapters.events.OnRequestLootDroppedItem
 import com.mkz.rpg.lootDrop.adapters.save.LootDropSnapshottable
 import com.mkz.rpg.lootDrop.adapters.storage.InMemoryLootDropRepository
 import com.mkz.rpg.lootDrop.domain.LootDropRepository
+import com.mkz.rpg.lootDrop.usecases.commands.DropItemWithoutRolling
 import com.mkz.rpg.lootDrop.usecases.commands.DropItems
-import com.mkz.rpg.lootDrop.usecases.commands.DropLoot
-import com.mkz.rpg.lootDrop.usecases.commands.FindLoot
+import com.mkz.rpg.lootDrop.usecases.commands.FindDroppedItems
 import com.mkz.rpg.lootDrop.usecases.commands.InitialiseLootDrops
-import com.mkz.rpg.lootDrop.usecases.commands.PickUpDroppedItem
-import com.mkz.rpg.lootDrop.usecases.commands.PlaceDroppedItem
+import com.mkz.rpg.lootDrop.usecases.commands.LootDroppedItem
 import com.mkz.rpg.lootDrop.usecases.commands.RestoreLootDrops
+import com.mkz.rpg.lootDrop.usecases.commands.RollLootDrop
 import com.mkz.rpg.lootDrop.usecases.queries.SearchDroppedItems
 import com.mkz.rpg.lootDrop.usecases.queries.SearchLootDropsSnapshot
 import com.mkz.rpg.lootDrop.usecases.services.LootDropLoader
@@ -41,20 +41,20 @@ class LootDropApi(
 
     // Commands
     val initialiseLootDrops = InitialiseLootDrops(lootDropLoader, lootDropRepository, unitApi.searchUnitById, lootTableApi.searchLootTableById, eventBus)
-    val dropLoot = DropLoot(lootDropRepository, lootTableApi.searchLootTableById, random, eventBus)
+    val rollLootDrop = RollLootDrop(lootDropRepository, lootTableApi.searchLootTableById, random, eventBus)
     val dropItems = DropItems(lootDropRepository, eventBus)
-    val placeDroppedItem = PlaceDroppedItem(lootDropRepository, eventBus)
-    val findLoot = FindLoot(lootDropRepository, eventBus)
-    val pickUpDroppedItem = PickUpDroppedItem(lootDropRepository, eventBus)
+    val dropItemWithoutRolling = DropItemWithoutRolling(lootDropRepository, eventBus)
+    val findDroppedItems = FindDroppedItems(lootDropRepository, eventBus)
+    val lootDroppedItem = LootDroppedItem(lootDropRepository, eventBus)
 
     // Queries
     val searchDroppedItems = SearchDroppedItems(lootDropRepository)
 
     // Events
     private val onRequestInitialiseLootDrops = OnRequestInitialiseLootDrops(initialiseLootDrops, eventBus)
-    private val onBattleUnitDefeated = OnBattleUnitDefeated(dropLoot, eventBus)
-    private val onBattleUnitMoved = OnBattleUnitMoved(findLoot, eventBus)
-    private val onRequestPickUpDroppedItem = OnRequestPickUpDroppedItem(pickUpDroppedItem, eventBus)
+    private val onBattleUnitDefeated = OnBattleUnitDefeated(rollLootDrop, eventBus)
+    private val onBattleUnitMoved = OnBattleUnitMoved(findDroppedItems, eventBus)
+    private val onRequestLootDroppedItem = OnRequestLootDroppedItem(lootDroppedItem, eventBus)
     private val onRequestDropItems = OnRequestDropItems(dropItems, eventBus)
 
     suspend fun init() {

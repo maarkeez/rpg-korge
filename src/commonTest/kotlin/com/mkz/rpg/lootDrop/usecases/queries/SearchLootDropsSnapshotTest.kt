@@ -40,7 +40,7 @@ class SearchLootDropsSnapshotTest {
         val ownerless =
             LootDrop
                 .ownerless()
-                .place(lootableItemId = "hammer", row = 1, column = 1)
+                .drop(lootableItemId = "hammer", row = 1, column = 1)
                 .pullEvents()
                 .second
         lootDropRepository.create(ownerless)
@@ -51,7 +51,7 @@ class SearchLootDropsSnapshotTest {
     }
 
     @Test
-    fun `should return nothing when no unit drops loot`() {
+    fun `should return nothing when no unit has a loot drop`() {
         // When
         val result = searchLootDropsSnapshot()
         // Then

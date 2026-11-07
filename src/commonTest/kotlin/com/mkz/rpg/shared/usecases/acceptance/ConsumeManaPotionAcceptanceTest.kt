@@ -84,7 +84,7 @@ class ConsumeManaPotionAcceptanceTest {
             // Given
             require(battleApi.searchBattle()!!.currentPlayerId == playerOneId)
             require(battleUnitApi.searchBattleUnitById(playerOneKnightBattleUnitId)!!.remainingMana == 20)
-            lootDropApi.placeDroppedItem(unitId = "rat", lootableItemId = "mana-potion", row = 6, column = 7)
+            lootDropApi.dropItemWithoutRolling(unitId = "rat", lootableItemId = "mana-potion", row = 6, column = 7)
             inventoryApi.storeLootedItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion", row = 6, column = 7)
             // When
             inventoryApi.consumeItem(battleUnitId = playerOneKnightBattleUnitId, lootableItemId = "mana-potion")

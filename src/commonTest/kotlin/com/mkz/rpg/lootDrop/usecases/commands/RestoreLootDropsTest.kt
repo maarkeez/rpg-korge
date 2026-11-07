@@ -28,7 +28,7 @@ class RestoreLootDropsTest {
     }
 
     @Test
-    fun `should fail when a unit no longer drops loot`() {
+    fun `should fail when a unit no longer has a loot drop`() {
         // When
         val result = runCatching { restoreLootDrops(mapOf("orc" to mapOf(PositionDto(1, 1) to listOf("dagger")))) }
         // Then
