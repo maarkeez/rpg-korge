@@ -1,6 +1,6 @@
 # Plan: Rename the code of the lootable item subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the lootable item subdomain says an item's effects are "applied while equipped", while the
 > [glossary](../../GLOSSARY.md) makes While equipped a timing, and an effect is applied by a source. E.g.: a health potion
