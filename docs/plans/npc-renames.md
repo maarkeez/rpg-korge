@@ -1,6 +1,6 @@
 # Plan: Rename the code of the npc subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the npc subdomain says the npcs are initialised, while the [glossary](../../GLOSSARY.md) says
 > they are placed, as the buildings are. E.g.: setting up a game publishes `RequestInitialiseNpcs`, and `InitialiseNpcs`
@@ -111,3 +111,10 @@
   to be defined.
 - `quest`: the quest giver (`giverNpcId`) and `TALK_TO_NPC`.
 - `unit`: the unit a recruitable npc is recruited as.
+
+## Changes while building
+
+- [Game data](../architecture/game-data.md) also says the npcs created by row 13 are "The placed npcs", as for the
+  buildings, and "Each `Initialise<Subdomain>` command, as well as `PlaceBuildings` and `PlaceNpcs`, creates all its data".
+- [Exploration](../architecture/exploration.md) also says "pressing A while adjacent to it" for a recruited npc, and the
+  presenter "talks to the npc adjacent to the leader".
