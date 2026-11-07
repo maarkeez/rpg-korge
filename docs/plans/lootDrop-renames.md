@@ -1,6 +1,6 @@
 # Plan: Rename the code of the loot drop subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code of the loot drop subdomain says "loot" for the items lying on the battlefield, "pick up" for a
 > party member looting them, and "drop" and "place" for what the [glossary](../../GLOSSARY.md) calls a roll and a drop.
@@ -149,3 +149,19 @@
   [Presentation timeline](../architecture/presentation-timeline.md), while Loot is only a verb and Pick up is to be avoided.
   The translator comment of `ui.inventoryFull.leave`, "Leaves the item found on the ground", while a dropped item lies on a
   tile.
+
+## Changes while building
+
+- Names the plan left out follow the table: `DroppedItems.place` is `drop`, the local `droppedEntry` of `LootDrop.roll` is
+  `rolledEntry`, `droppedLootableItemId` in `LootDropTest` is `rolledLootableItemId`, the `onRequestPickUpDroppedItem` of
+  `LootDropApi` is `onRequestLootDroppedItem`, and the local `pickingUp` of `LootDroppedItemTest` is `looting`.
+- More test names than the plan named say the same words, asserting the same: `SearchLootDropsSnapshotTest` says `should
+  return nothing when no unit has a loot drop`, and `RestoreLootDropsTest` says `should fail when a unit no longer has a
+  loot drop`, for "drops loot".
+- More comments than the plan named say "loots" for "an inventory stores": every comment of `LootDropEvent`, `LootDrop`,
+  `DropItems` and `FindDroppedItems`, and the comment of `RequestLootDroppedItem` says it is requested for an item a party
+  member looted. `StoreLootedItem` says it "requests to take it off its tile, as it is looted", for "requests the
+  battlefield to pick it up". [Inventory](../architecture/inventory.md) also says the reward items left are "found, looted
+  and drawn", and that the loot drop of the unit is rolled.
+- The comments and test names of `BattlefieldView`, `BattlefieldViewTest`, `BattlefieldViewExtension` and
+  `BattlefieldPresenterTest` keep "picked up", as they go with `pickUpLoot`, which waits for the `screen` section.
