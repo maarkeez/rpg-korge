@@ -761,3 +761,42 @@ _Avoid_: Chance, probability, odds
 **Nothing**:
 An entry that leaves no item when it is rolled.
 _Avoid_: Empty, no drop
+
+### World builder
+
+**World**:
+What the world builder builds for a game to be played in: for now, a battlefield.
+_Avoid_: Map, game, scenario, level
+
+**World builder**:
+Where the player builds one world at a time, to export it.
+_Avoid_: Map builder, game builder, editor
+
+**Size**:
+How many rows and columns of tiles a world has.
+_Avoid_: Dimensions
+
+**Resize**:
+Changing the size of a world, keeping the tiles that still fit.
+
+#### Painting
+
+**Selected terrain**:
+The terrain the player paints tiles with.
+_Avoid_: Brush, current terrain
+
+**Paint**:
+Giving a tile of the world the selected terrain.
+_Avoid_: Draw, set
+
+#### Files
+
+**Export**:
+Writing the world as text, in the format a battlefield is loaded from.
+
+**Import**:
+Replacing the world with one read from a file.
+_Avoid_: Load, parse
+
+**Rejected**:
+Said of a paint or an import that leaves the world as it was, as its result would not be a world a game can be played in.
