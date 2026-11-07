@@ -6,8 +6,8 @@ import com.mkz.rpg.effect.domain.EffectMother.increaseMaximumHealthEffect
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItem
-import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectAppliedWhileEquipped
-import com.mkz.rpg.lootableItem.domain.LootableItemError.EquippableEffectNotAppliedWhileEquipped
+import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectTimedWhileEquipped
+import com.mkz.rpg.lootableItem.domain.LootableItemError.EquippableEffectNotTimedWhileEquipped
 import com.mkz.rpg.lootableItem.domain.LootableItemError.LootableItemEffectDoesNotExist
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent.LootableItemCreated
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
@@ -82,7 +82,7 @@ class InitialiseLootableItemsTest {
     }
 
     @Test
-    fun `should fail when a consumable lootable item effect is applied while equipped`() {
+    fun `should fail when a consumable lootable item effect is timed while equipped`() {
         // Given
         effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
         val healthPotion = consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("maximum-health-20"))).toDto()
@@ -90,11 +90,11 @@ class InitialiseLootableItemsTest {
         // When
         val initialisation = { initialiseLootableItems() }
         // Then
-        shouldThrow<ConsumableEffectAppliedWhileEquipped> { initialisation() }
+        shouldThrow<ConsumableEffectTimedWhileEquipped> { initialisation() }
     }
 
     @Test
-    fun `should fail when an equippable lootable item effect is not applied while equipped`() {
+    fun `should fail when an equippable lootable item effect is not timed while equipped`() {
         // Given
         effectRepository.create(increaseMaximumHealthEffect(id = "maximum-health-20"))
         effectRepository.create(healEffect(id = "heal"))
@@ -103,6 +103,6 @@ class InitialiseLootableItemsTest {
         // When
         val initialisation = { initialiseLootableItems() }
         // Then
-        shouldThrow<EquippableEffectNotAppliedWhileEquipped> { initialisation() }
+        shouldThrow<EquippableEffectNotTimedWhileEquipped> { initialisation() }
     }
 }

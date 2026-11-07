@@ -4,8 +4,8 @@ import com.mkz.rpg.effect.domain.Effect
 import com.mkz.rpg.effect.domain.Effect.Dto.TimingDto.TimingTypeDto.WHILE_EQUIPPED
 import com.mkz.rpg.effect.usecases.queries.SearchEffectById
 import com.mkz.rpg.lootableItem.domain.LootableItem
-import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectAppliedWhileEquipped
-import com.mkz.rpg.lootableItem.domain.LootableItemError.EquippableEffectNotAppliedWhileEquipped
+import com.mkz.rpg.lootableItem.domain.LootableItemError.ConsumableEffectTimedWhileEquipped
+import com.mkz.rpg.lootableItem.domain.LootableItemError.EquippableEffectNotTimedWhileEquipped
 import com.mkz.rpg.lootableItem.domain.LootableItemError.LootableItemEffectDoesNotExist
 import com.mkz.rpg.lootableItem.domain.LootableItemEvent
 import com.mkz.rpg.lootableItem.domain.LootableItemRepository
@@ -14,7 +14,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Creates every loaded lootable item, unless it already exists, once all its effects exist and suit its type: a consumable's effects can not be
- * applied while equipped, and an equippable item's effects must be.
+ * timed while equipped, and an equippable item's effects must be.
  */
 class InitialiseLootableItems(
     private val lootableItemLoader: LootableItemLoader,
@@ -36,8 +36,8 @@ class InitialiseLootableItems(
                     ?.effectIds
                     .orEmpty()
                     .map(::searchEffect)
-            if (consumableEffects.any(::isTimedWhileEquipped)) throw ConsumableEffectAppliedWhileEquipped()
-            if (!equippableEffects.all(::isTimedWhileEquipped)) throw EquippableEffectNotAppliedWhileEquipped()
+            if (consumableEffects.any(::isTimedWhileEquipped)) throw ConsumableEffectTimedWhileEquipped()
+            if (!equippableEffects.all(::isTimedWhileEquipped)) throw EquippableEffectNotTimedWhileEquipped()
             val (lootableItemEvents, lootableItem) = LootableItem.create(lootableItemDto).pullEvents()
             lootableItemRepository.create(lootableItem)
             events += lootableItemEvents
