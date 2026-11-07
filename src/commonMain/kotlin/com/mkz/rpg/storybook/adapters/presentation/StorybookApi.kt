@@ -90,10 +90,10 @@ class StorybookApi(
                 QuestAnnouncementViewStories,
                 QuestMarkerViewStories,
                 MenuViewStories,
-                MapBuilderInfoViewStories,
-                MapBuilderHudViewStories,
-                MapBuilderCallToActionViewStories,
-                MapBuilderMenuViewStories,
+                WorldBuilderInfoViewStories,
+                WorldBuilderHudViewStories,
+                WorldBuilderCallToActionViewStories,
+                WorldBuilderMenuViewStories,
                 ShopViewStories,
             )
 

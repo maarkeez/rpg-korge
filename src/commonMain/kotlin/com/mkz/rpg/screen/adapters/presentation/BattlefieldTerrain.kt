@@ -2,7 +2,7 @@ package com.mkz.rpg.screen.adapters.presentation
 
 /**
  * What [BattlefieldView] draws of a battlefield: its size, and the terrain of each of its tiles, with the transition
- * to the terrain around it. [BattlefieldPresenter] and [MapBuilderPresenter] map it from the domain.
+ * to the terrain around it. [BattlefieldPresenter] and [WorldBuilderPresenter] map it from the domain.
  */
 data class BattlefieldTerrain(
     val rows: Int,

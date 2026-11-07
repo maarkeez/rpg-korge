@@ -46,7 +46,7 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
   (`ConfirmButton.COLOR`).
 - [`DiscardQuestionView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/DiscardQuestionView.kt):
   Back and Discard, in red, of the question asked before discarding an item, in an `ActionRowView` of its own.
-- [`MapBuilderHudView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/MapBuilderHudView.kt): the
+- [`WorldBuilderHudView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/WorldBuilderHudView.kt): the
   steps of the rows and the columns, disabled out of the allowed sizes.
 - [`FinishTurnView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/FinishTurnView.kt): Finish
   turn, blue, disabled while the turn can not be ended.
@@ -56,7 +56,7 @@ The row sits 15 below the 300 of the panels, as it does below the battle HUD, al
   and Buy of a merchant.
 
 A new button of a view is a `gameButton`, so a disabled one looks disabled. The buttons drawn with images (e.g.: the
-abilities, the bag, the virtual pad, the terrains of the map builder) and the Storybook's own buttons are not.
+abilities, the bag, the virtual pad, the terrains of the world builder) and the Storybook's own buttons are not.
 
 ## Seeing and testing it
 

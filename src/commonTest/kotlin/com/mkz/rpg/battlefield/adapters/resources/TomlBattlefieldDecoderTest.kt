@@ -35,7 +35,7 @@ class TomlBattlefieldDecoderTest {
     @Test
     fun `should fail when the text is not a battlefield`() {
         // When
-        val decode = { decoder.decode("Hello, map builder!") }
+        val decode = { decoder.decode("Hello, world builder!") }
         // Then
         shouldThrow<InvalidBattlefieldFormat> { decode() }
     }

@@ -15,13 +15,13 @@ fun MenuView.playNewGameLabel(): String = playNewGameButton.confirmButton.text
 
 fun MenuView.loadGameLabel(): String = loadGameButton.cancelButton.text
 
-fun MenuView.buildMapLabel(): String = buildMapButton.cancelButton.text
+fun MenuView.buildWorldLabel(): String = buildWorldButton.cancelButton.text
 
 suspend fun ViewsForTesting.clickPlayNewGame(menuView: MenuView) = clickOn(menuView.playNewGameButton.confirmButton)
 
 suspend fun ViewsForTesting.clickLoadGame(menuView: MenuView) = clickOn(menuView.loadGameButton.cancelButton)
 
-suspend fun ViewsForTesting.clickBuildMap(menuView: MenuView) = clickOn(menuView.buildMapButton.cancelButton)
+suspend fun ViewsForTesting.clickBuildWorld(menuView: MenuView) = clickOn(menuView.buildWorldButton.cancelButton)
 
 /** Whether the options are on the screen, to select one. */
 fun MenuView.areOptionsShown(): Boolean = options.isShown()

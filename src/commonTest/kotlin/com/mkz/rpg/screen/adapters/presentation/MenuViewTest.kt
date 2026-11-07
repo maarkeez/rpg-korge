@@ -13,17 +13,17 @@ class MenuViewTest : ViewsForTesting() {
     private val texts = TextsMother.texts()
 
     private fun newMenuView() =
-        MenuView(texts, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onMapBuilderSelected = { selections += "map builder" })
+        MenuView(texts, onNewGameSelected = { selections += "new game" }, onLoadGameSelected = { selections += "load game" }, onWorldBuilderSelected = { selections += "world builder" })
 
     @Test
-    fun `MenuView should display playing a new game, building a map and the language when it is displayed`() =
+    fun `MenuView should display playing a new game, building a world and the language when it is displayed`() =
         sharedViewsTest {
             // When
             val menuView = newMenuView()
             // Then
             menuView.playNewGameLabel() shouldBe "Play new game"
             menuView.loadGameLabel() shouldBe "Load game"
-            menuView.buildMapLabel() shouldBe "Build a map"
+            menuView.buildWorldLabel() shouldBe "Build a world"
             menuView.languageLabel() shouldBe "Language"
             menuView.areLanguagesShown() shouldBe false
         }
@@ -54,7 +54,7 @@ class MenuViewTest : ViewsForTesting() {
             // Then
             menuView.playNewGameLabel() shouldBe "Jugar partida nueva"
             menuView.loadGameLabel() shouldBe "Cargar partida"
-            menuView.buildMapLabel() shouldBe "Construir un mapa"
+            menuView.buildWorldLabel() shouldBe "Construir un mundo"
             menuView.languageLabel() shouldBe "Idioma"
             menuView.areOptionsShown() shouldBe true
             menuView.areLanguagesShown() shouldBe false
@@ -116,15 +116,15 @@ class MenuViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `BuildMap should open the map builder when it is clicked`() =
+    fun `BuildWorld should open the world builder when it is clicked`() =
         sharedViewsTest {
             // Given
             val menuView = newMenuView()
             addChild(menuView)
             // When
-            clickBuildMap(menuView)
+            clickBuildWorld(menuView)
             // Then
-            selections.shouldContainExactly("map builder")
+            selections.shouldContainExactly("world builder")
         }
 
     @Test
@@ -150,13 +150,13 @@ class MenuViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `BuildMap should hide the options when it is clicked`() =
+    fun `BuildWorld should hide the options when it is clicked`() =
         sharedViewsTest {
             // Given
             val menuView = newMenuView()
             addChild(menuView)
             // When
-            clickBuildMap(menuView)
+            clickBuildWorld(menuView)
             // Then
             menuView.areOptionsShown() shouldBe false
         }
@@ -170,7 +170,7 @@ class MenuViewTest : ViewsForTesting() {
             clickPlayNewGame(menuView)
             // When
             clickPlayNewGame(menuView)
-            clickBuildMap(menuView)
+            clickBuildWorld(menuView)
             // Then
             selections.shouldContainExactly("new game")
         }

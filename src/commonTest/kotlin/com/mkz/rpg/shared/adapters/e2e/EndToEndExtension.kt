@@ -4,17 +4,17 @@ import com.mkz.rpg.screen.adapters.presentation.VirtualPadView.Direction
 import com.mkz.rpg.screen.adapters.presentation.battlefieldView
 import com.mkz.rpg.screen.adapters.presentation.canHumanPlayerAct
 import com.mkz.rpg.screen.adapters.presentation.clickArrow
-import com.mkz.rpg.screen.adapters.presentation.clickBuildMap
+import com.mkz.rpg.screen.adapters.presentation.clickBuildWorld
 import com.mkz.rpg.screen.adapters.presentation.clickPlayNewGame
 import com.mkz.rpg.screen.adapters.presentation.hasBattleUnitAt
 import com.mkz.rpg.screen.adapters.presentation.isAnnouncementShown
 import com.mkz.rpg.screen.adapters.presentation.isBattlefieldDisplayed
 import com.mkz.rpg.screen.adapters.presentation.isPadShown
-import com.mkz.rpg.screen.adapters.presentation.mapBuilderHudView
 import com.mkz.rpg.screen.adapters.presentation.menuView
 import com.mkz.rpg.screen.adapters.presentation.paletteTerrainIds
 import com.mkz.rpg.screen.adapters.presentation.questAnnouncementView
 import com.mkz.rpg.screen.adapters.presentation.virtualPadView
+import com.mkz.rpg.screen.adapters.presentation.worldBuilderHudView
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
 import com.mkz.rpg.startApp
 import korlibs.korge.service.storage.IStorage
@@ -116,12 +116,12 @@ private suspend fun ViewsForTesting.walkLeader(step: RouteStep) {
     require(battlefieldView.hasBattleUnitAt(step.row, step.column)) { "The leader did not walk to (${step.row},${step.column})" }
 }
 
-/** Starts the game as the player does, opens the map builder from the menu and waits until the map is displayed. */
-suspend fun ViewsForTesting.startMapBuilder() {
+/** Starts the game as the player does, opens the world builder from the menu and waits until the world is displayed. */
+suspend fun ViewsForTesting.startWorldBuilder() {
     stage.startApp(storage = InmemoryStorage())
     waitUntil { stage.menuView() != null }
-    clickBuildMap(requireNotNull(stage.menuView()) { "The menu is not displayed" })
-    waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.mapBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }
+    clickBuildWorld(requireNotNull(stage.menuView()) { "The menu is not displayed" })
+    waitUntil { stage.battlefieldView()?.isBattlefieldDisplayed() == true && stage.worldBuilderHudView()?.paletteTerrainIds()?.isNotEmpty() == true }
 }
 
 /** Lets the game run for the given game time, frame by frame. */

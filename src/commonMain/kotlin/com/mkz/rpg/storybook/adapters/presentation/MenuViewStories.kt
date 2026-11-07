@@ -6,7 +6,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
 /**
- * The stories of [MenuView], built with its real buttons. As in the game, playing or building a map hides the options,
+ * The stories of [MenuView], built with its real buttons. As in the game, playing or building a world hides the options,
  * and picking a language translates the texts: both last until the story is shown again, e.g.: with Reset.
  */
 object MenuViewStories : StoryBinding {
@@ -14,7 +14,7 @@ object MenuViewStories : StoryBinding {
         StoryDto(
             id = "screen-menu--options",
             name = "Options",
-            description = "Play new game, Load game, Build map and Language. Tapping Language lists the languages in place of the options.",
+            description = "Play new game, Load game, Build world and Language. Tapping Language lists the languages in place of the options.",
             args = emptyMap(),
         )
 
@@ -23,7 +23,7 @@ object MenuViewStories : StoryBinding {
             id = "screen-menu",
             group = "Screen",
             title = "Menu",
-            description = "The first screen of the game: playing a new game, its primary action, loading a saved game, building a map, or picking the language.",
+            description = "The first screen of the game: playing a new game, its primary action, loading a saved game, building a world, or picking the language.",
             controls = emptyList(),
             args = emptyMap(),
             stories = listOf(options),
@@ -37,6 +37,6 @@ object MenuViewStories : StoryBinding {
             context.texts,
             onNewGameSelected = { context.action("onNewGameSelected") },
             onLoadGameSelected = { context.action("onLoadGameSelected") },
-            onMapBuilderSelected = { context.action("onMapBuilderSelected") },
+            onWorldBuilderSelected = { context.action("onWorldBuilderSelected") },
         )
 }

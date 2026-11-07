@@ -13,7 +13,7 @@ import korlibs.time.DateTime
 import kotlin.random.Random
 
 /**
- * The first scene of the game, opening the battle, a saved game or the map builder. Localization: the texts of the
+ * The first scene of the game, opening the battle, a saved game or the world builder. Localization: the texts of the
  * selected language, kept by every scene. Storage: where the games are saved, `views.storage` by default, also kept by
  * every scene. Random: the rolls of the CPU battle brain in the battle. Incompatible slot: the slot whose game could not
  * be loaded, if any, so Load game lists the slots straight away, that one as incompatible.
@@ -53,7 +53,7 @@ class MenuScene(
                 texts = texts,
                 onNewGameSelected = { launchImmediately { sceneContainer.changeTo { BattleScene(localizationApi, storage, random) } } },
                 onLoadGameSelected = { loadGamePresenter.open() },
-                onMapBuilderSelected = { launchImmediately { sceneContainer.changeTo { MapBuilderScene(localizationApi, storage) } } },
+                onWorldBuilderSelected = { launchImmediately { sceneContainer.changeTo { WorldBuilderScene(localizationApi, storage) } } },
             )
         // The save slots, and the question before deleting one, take the place of the options: as wide as the window.
         val saveSlotsView = SaveSlotsView(texts)

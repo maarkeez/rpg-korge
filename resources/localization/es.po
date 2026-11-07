@@ -22,9 +22,9 @@ msgctxt "ui.menu.loadGame"
 msgid "Load game"
 msgstr "Cargar partida"
 
-msgctxt "ui.menu.buildMap"
-msgid "Build a map"
-msgstr "Construir un mapa"
+msgctxt "ui.menu.buildWorld"
+msgid "Build a world"
+msgstr "Construir un mundo"
 
 #. Opens the list of languages, each named in its own language.
 msgctxt "ui.menu.language"
@@ -366,90 +366,90 @@ msgctxt "ui.saveSlots.deleteConfirmation"
 msgid "Delete the game saved in slot {slot}?"
 msgstr "¿Borrar la partida guardada en la ranura {slot}?"
 
-msgctxt "ui.mapBuilderInfo.title"
-msgid "Map Builder"
-msgstr "Constructor de mapas"
+msgctxt "ui.worldBuilderInfo.title"
+msgid "World Builder"
+msgstr "Constructor de mundos"
 
-#. The size of the map. {rows} and {columns}: how many tiles tall and wide it is.
-msgctxt "ui.mapBuilderInfo.size"
+#. The size of the world. {rows} and {columns}: how many tiles tall and wide it is.
+msgctxt "ui.worldBuilderInfo.size"
 msgid "{rows} x {columns}"
 msgstr "{rows} x {columns}"
 
-msgctxt "ui.mapBuilderHud.rows"
+msgctxt "ui.worldBuilderHud.rows"
 msgid "Rows"
 msgstr "Filas"
 
-msgctxt "ui.mapBuilderHud.columns"
+msgctxt "ui.worldBuilderHud.columns"
 msgid "Columns"
 msgstr "Columnas"
 
-msgctxt "ui.mapBuilderHud.terrain"
+msgctxt "ui.worldBuilderHud.terrain"
 msgid "Terrain"
 msgstr "Terreno"
 
 #. Goes back to the menu.
-msgctxt "ui.mapBuilderCallToAction.back"
+msgctxt "ui.worldBuilderCallToAction.back"
 msgid "Back"
 msgstr "Volver"
 
-#. Copies the map to the clipboard.
-msgctxt "ui.mapBuilderCallToAction.export"
+#. Copies the world to the clipboard.
+msgctxt "ui.worldBuilderCallToAction.export"
 msgid "Export"
 msgstr "Exportar"
 
-msgctxt "ui.mapBuilderCallToAction.stay"
+msgctxt "ui.worldBuilderCallToAction.stay"
 msgid "Stay"
 msgstr "Quedarse"
 
-#. Leaves the map builder, losing the map.
-msgctxt "ui.mapBuilderCallToAction.leave"
+#. Leaves the world builder, losing the world.
+msgctxt "ui.worldBuilderCallToAction.leave"
 msgid "Leave"
 msgstr "Salir"
 
-#. Imports a map from a file.
-msgctxt "ui.mapBuilderMenu.import"
+#. Imports a world from a file.
+msgctxt "ui.worldBuilderMenu.import"
 msgid "Import"
 msgstr "Importar"
 
-msgctxt "ui.mapBuilder.mapCopied"
-msgid "Map copied to the clipboard"
-msgstr "Mapa copiado al portapapeles"
+msgctxt "ui.worldBuilder.worldCopied"
+msgid "World copied to the clipboard"
+msgstr "Mundo copiado al portapapeles"
 
-msgctxt "ui.mapBuilder.mapLostWhenLeaving"
-msgid "The map is lost when leaving"
-msgstr "El mapa se pierde al salir"
+msgctxt "ui.worldBuilder.worldLostWhenLeaving"
+msgid "The world is lost when leaving"
+msgstr "El mundo se pierde al salir"
 
-msgctxt "ui.mapBuilder.mapImported"
-msgid "Map imported"
-msgstr "Mapa importado"
+msgctxt "ui.worldBuilder.worldImported"
+msgid "World imported"
+msgstr "Mundo importado"
 
-msgctxt "ui.mapBuilder.fileNotRead"
+msgctxt "ui.worldBuilder.fileNotRead"
 msgid "The file can not be read"
 msgstr "No se puede leer el archivo"
 
-msgctxt "ui.mapBuilder.notAMap"
-msgid "The file has no map"
-msgstr "El archivo no tiene ningún mapa"
+msgctxt "ui.worldBuilder.notAWorld"
+msgid "The file has no world"
+msgstr "El archivo no tiene ningún mundo"
 
-#. {minimum} and {maximum}: the smallest and the largest size of a map.
-msgctxt "ui.mapBuilder.sizeOutOfRange"
-msgid "The map must be {minimum} to {maximum} tiles wide and tall"
-msgstr "El mapa debe tener de {minimum} a {maximum} casillas de ancho y de alto"
+#. {minimum} and {maximum}: the smallest and the largest size of a world.
+msgctxt "ui.worldBuilder.sizeOutOfRange"
+msgid "The world must be {minimum} to {maximum} tiles wide and tall"
+msgstr "El mundo debe tener de {minimum} a {maximum} casillas de ancho y de alto"
 
 #. {terrain}: the id of the terrain, as written in the file.
-msgctxt "ui.mapBuilder.unknownTerrain"
+msgctxt "ui.worldBuilder.unknownTerrain"
 msgid "Unknown terrain: {terrain}"
 msgstr "Terreno desconocido: {terrain}"
 
 #. {terrain} and {neighbour}: the names of two terrains, e.g.: Lava and Water.
-msgctxt "ui.mapBuilder.forbiddenNeighbours"
+msgctxt "ui.worldBuilder.forbiddenAdjacentTerrains"
 msgid "{terrain} can not be next to {neighbour}"
 msgstr "{terrain} no puede estar junto a {neighbour}"
 
 #. The kind of files the file dialog shows.
-msgctxt "ui.mapFilePicker.maps"
-msgid "Maps"
-msgstr "Mapas"
+msgctxt "ui.worldFilePicker.worlds"
+msgid "Worlds"
+msgstr "Mundos"
 
 #. Why an ability in cooldown can not be cast. {turns}: the turns left until it can be cast again.
 msgctxt "ui.abilityInfo.readyIn"
@@ -877,27 +877,27 @@ msgctxt "quest.the-elders-errand.task.1"
 msgid "Talk to the Elder"
 msgstr "Habla con el Anciano"
 
-#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.grass.name"
 msgid "Grass"
 msgstr "Hierba"
 
-#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.lava.name"
 msgid "Lava"
 msgstr "Lava"
 
-#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.sand.name"
 msgid "Sand"
 msgstr "Arena"
 
-#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.void.name"
 msgid "Void"
 msgstr "Vacío"
 
-#. Displayed in the map builder, e.g.: "{terrain} can not be next to {neighbour}".
+#. Displayed in the world builder, e.g.: "{terrain} can not be next to {neighbour}".
 msgctxt "terrain.water.name"
 msgid "Water"
 msgstr "Agua"

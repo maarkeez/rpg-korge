@@ -28,7 +28,7 @@ class SnapshotCoverageArchitectureTest {
             "battle" to "no battle is in progress while exploring, the only time the game is saved",
             "cpuBattleBrain" to "no battle is in progress while exploring, the only time the game is saved",
             "localization" to "the language is picked for the session",
-            "mapBuilder" to "the map builder exports its maps instead",
+            "worldBuilder" to "the world builder exports its worlds instead",
             "storybook" to "a tool, not the game",
             "screen.adapters.presentation.battlefieldHud" to "what the HUD displays, drawn again from the other subdomains",
         )

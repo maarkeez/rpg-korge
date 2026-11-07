@@ -96,7 +96,7 @@ class FakeBattlefieldView : BattlefieldView(BattleSceneResourcesLoader()) {
     val pickedUpLoot = mutableListOf<PickedUpLoot>()
     val updatedTerrains = mutableListOf<UpdatedTerrain>()
 
-    // The image of each terrain, so presenters can display it elsewhere (e.g.: the map builder palette).
+    // The image of each terrain, so presenters can display it elsewhere (e.g.: the world builder palette).
     val terrainBitmaps = mutableMapOf<String, Bitmap>()
 
     override fun setDelegate(delegate: Delegate) {

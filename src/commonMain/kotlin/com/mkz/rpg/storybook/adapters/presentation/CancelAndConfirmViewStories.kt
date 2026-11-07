@@ -17,14 +17,14 @@ object CancelAndConfirmViewStories : StoryBinding {
         StoryDto(
             id = "screen-cancel-and-confirm--export-and-back",
             name = "Export and back",
-            description = "The labels the map builder gives it to export the map or go back to the menu.",
+            description = "The labels the world builder gives it to export the world or go back to the menu.",
             args = mapOf(CANCEL_LABEL to ArgDto.text("Back"), CONFIRM_LABEL to ArgDto.text("Export")),
         )
     private val leaveConfirmation =
         StoryDto(
             id = "screen-cancel-and-confirm--leave-confirmation",
             name = "Leave confirmation",
-            description = "The labels the map builder gives it to confirm leaving, as the map is lost.",
+            description = "The labels the world builder gives it to confirm leaving, as the world is lost.",
             args = mapOf(CANCEL_LABEL to ArgDto.text("Stay"), CONFIRM_LABEL to ArgDto.text("Leave")),
         )
     private val longLabels =
@@ -40,7 +40,7 @@ object CancelAndConfirmViewStories : StoryBinding {
             id = "screen-cancel-and-confirm",
             group = "Screen",
             title = "Cancel and confirm",
-            description = "A secondary action on the left and a primary one on the right, as the call to action of the map builder shows them.",
+            description = "A secondary action on the left and a primary one on the right, as the call to action of the world builder shows them.",
             controls = listOf(ControlDto.text(CANCEL_LABEL), ControlDto.text(CONFIRM_LABEL)),
             args = mapOf(CANCEL_LABEL to ArgDto.text("Cancel"), CONFIRM_LABEL to ArgDto.text("Confirm")),
             stories = listOf(default, exportAndBack, leaveConfirmation, longLabels),
