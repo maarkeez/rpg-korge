@@ -687,3 +687,35 @@ _Avoid_: Plural forms
 
 **Count**:
 The number a plural form is picked for, such as the 3 of "Vanishes in 3 turns".
+
+### Lootable item
+
+**Lootable item**:
+Something a party member stores in its inventory to consume or equip, defined once and shared by every inventory that
+stores it. Item for short.
+_Avoid_: Loot
+
+**Loot type**:
+Whether a lootable item is a consumable or an equippable.
+_Avoid_: Item type, kind
+
+**Consumable**:
+A lootable item used up once to apply its effects, such as a health potion.
+
+**Equippable**:
+A lootable item whose effects last while it is equipped in its equipment zone, such as a hammer.
+_Avoid_: Equipment, gear, wearable
+
+**Equipment zone**:
+The place on a party member an equippable is equipped in: head, body, arms, legs or weapon.
+_Avoid_: Slot
+
+#### Price
+
+**Price**:
+The gold a merchant charges for a lootable item.
+_Avoid_: Cost, value
+
+**Sell price**:
+The gold a merchant pays for a lootable item.
+_Avoid_: Resale value
