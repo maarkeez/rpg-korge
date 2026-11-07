@@ -744,3 +744,20 @@ A battle unit walking or teleporting onto a tile with dropped items.
 **Loot**:
 A party member storing a dropped item from a tile it walks or teleports onto, which takes the item off the tile.
 _Avoid_: Pick up
+
+### Loot table
+
+**Loot table**:
+A list of weighted entries that loot drops roll on, shared by every loot drop that lists it.
+
+**Entry**:
+One line of a loot table: a lootable item or nothing, with its weight.
+_Avoid_: Outcome, row
+
+**Weight**:
+How much of a roll an entry gets, compared with the other entries rolled with it.
+_Avoid_: Chance, probability, odds
+
+**Nothing**:
+An entry that leaves no item when it is rolled.
+_Avoid_: Empty, no drop
