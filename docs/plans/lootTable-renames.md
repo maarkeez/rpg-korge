@@ -1,6 +1,6 @@
 # Plan: Rename the code of the loot table subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done.
 >
 > **Summary:** The code and docs of the loot table subdomain call a loot table "the weighted entries a defeated unit may
 > drop", while a loot table belongs to no unit: `tier-1` is shared by every loot drop that lists it, and the
