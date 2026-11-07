@@ -719,3 +719,28 @@ _Avoid_: Cost, value
 **Sell price**:
 The gold a merchant pays for a lootable item.
 _Avoid_: Resale value
+
+### Loot drop
+
+**Loot drop**:
+The loot tables a unit rolls on when one of its battle units is defeated, at most one per unit.
+_Avoid_: Drop table
+
+**Roll**:
+Picking at random, by weight, an item or nothing from the loot tables of a loot drop.
+
+#### Dropped items
+
+**Drop**:
+A lootable item being left on a tile, by a defeated battle unit or from a reward with no storage space left for it.
+
+**Dropped item**:
+A lootable item lying on a tile until a party member loots it.
+_Avoid_: Loot
+
+**Find**:
+A battle unit walking or teleporting onto a tile with dropped items.
+
+**Loot**:
+A party member storing a dropped item from a tile it walks or teleports onto, which takes the item off the tile.
+_Avoid_: Pick up
