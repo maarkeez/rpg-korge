@@ -1,6 +1,6 @@
 # Plan: Rename the code of the player subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `6d512455`.
 >
 > **Summary:** The code of the player subdomain calls the other player the enemy (`SearchEnemyPlayer`), while the
 > [glossary](../../GLOSSARY.md) gives Enemy to a battle unit of another player. E.g.: when the human player's last
@@ -89,3 +89,9 @@ The tests are renamed with the code, and their names and comments say the new wo
 ### Waiting for other sections
 
 Nothing.
+
+## Changes while building
+
+- [Exploration](../architecture/exploration.md) also says "`PlayerVictory` for their opponent" when a player is defeated
+  while exploring, for "their enemy".
+- `SearchOpponent` gained a comment: "The opponent of the player, e.g.: the CPU player for the human player."
