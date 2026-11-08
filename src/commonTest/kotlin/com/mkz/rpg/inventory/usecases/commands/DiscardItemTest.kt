@@ -72,7 +72,7 @@ class DiscardItemTest {
     }
 
     @Test
-    fun `should fail when it is not the player turn of the party player`() {
+    fun `should fail when it is not the player turn of the human player`() {
         // Given
         battleRepository.create(battle(players = listOf("cpu", "human")))
         inventoryRepository.create(inventory(battleUnitId = "knight-1", storedItems = listOf("helmet")))

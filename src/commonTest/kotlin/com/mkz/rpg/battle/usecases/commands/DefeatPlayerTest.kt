@@ -6,7 +6,7 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battle.domain.BattleMother
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerMother.player
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import io.kotest.matchers.shouldBe
@@ -19,7 +19,7 @@ class DefeatPlayerTest {
     private val playerRepository = InMemoryPlayerRepository()
     private val defeatPlayer =
         DefeatPlayer(
-            searchEnemyPlayer = SearchEnemyPlayer(playerRepository),
+            searchOpponent = SearchOpponent(playerRepository),
             battleRepository = battleRepository,
             eventBus = eventBus,
         )
@@ -42,7 +42,7 @@ class DefeatPlayerTest {
     }
 
     @Test
-    fun `should defeat the player and leave their enemy as the only player while exploring`() {
+    fun `should defeat the player and leave their opponent as the only player while exploring`() {
         // Given
         playerRepository.create(player(id = "human"))
         playerRepository.create(player(id = "cpu"))

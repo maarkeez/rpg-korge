@@ -16,7 +16,7 @@ class WhereCanCastTest {
     private val queries = InMemoryQueries()
     private val whereCanCast = queries.whereCanCast
     private val player = player(id = "player-1").toDto()
-    private val enemyPlayer = player(id = "player-2").toDto()
+    private val opponent = player(id = "player-2").toDto()
 
     private fun storeAbility(targeting: Ability.Dto.TargetingDto) = queries.abilityRepository.create(ability(id = "ability-1", targeting = targeting))
 
@@ -26,7 +26,7 @@ class WhereCanCastTest {
         players: Map<Char, String>,
     ) {
         players.forEach { (letter, playerId) ->
-            queries.battleUnitRepository.create(battleUnit(id = "$letter-1", player = if (playerId == player.id) player else enemyPlayer))
+            queries.battleUnitRepository.create(battleUnit(id = "$letter-1", player = if (playerId == player.id) player else opponent))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = players.keys.associateWith { letter -> "$letter-1" }))
     }
@@ -59,7 +59,7 @@ class WhereCanCastTest {
             . K R
             . . .
             """,
-            players = mapOf('K' to player.id, 'R' to enemyPlayer.id),
+            players = mapOf('K' to player.id, 'R' to opponent.id),
         )
         // When
         val result = whereCanCast("K-1", "ability-1")
@@ -77,7 +77,7 @@ class WhereCanCastTest {
             . K .
             . . .
             """,
-            players = mapOf('K' to player.id, 'R' to enemyPlayer.id),
+            players = mapOf('K' to player.id, 'R' to opponent.id),
         )
         // When
         val result = whereCanCast("K-1", "ability-1")
@@ -96,7 +96,7 @@ class WhereCanCastTest {
             A K E
             . F G
             """,
-            players = mapOf('K' to player.id, 'A' to player.id, 'E' to enemyPlayer.id, 'F' to enemyPlayer.id, 'G' to enemyPlayer.id),
+            players = mapOf('K' to player.id, 'A' to player.id, 'E' to opponent.id, 'F' to opponent.id, 'G' to opponent.id),
         )
         // When
         val result = whereCanCast("K-1", "ability-1")
@@ -136,7 +136,7 @@ class WhereCanCastTest {
             . . .
             . . O
             """,
-            players = mapOf('C' to player.id, 'O' to enemyPlayer.id),
+            players = mapOf('C' to player.id, 'O' to opponent.id),
         )
         // When
         val result = whereCanCast("C-1", "ability-1")

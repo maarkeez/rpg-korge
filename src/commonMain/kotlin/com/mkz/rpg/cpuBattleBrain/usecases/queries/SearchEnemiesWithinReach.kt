@@ -6,7 +6,7 @@ import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.battlefield.usecases.queries.SearchPosition
 import com.mkz.rpg.battlefield.usecases.queries.SearchWalkingDistance
 import com.mkz.rpg.cpuBattleBrain.usecases.services.REACH
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 
 /**
  * The enemy battle units a CPU battle unit engages: the ones it can walk to in [REACH] tiles or fewer,
@@ -15,7 +15,7 @@ import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
  */
 class SearchEnemiesWithinReach(
     private val searchBattleUnitById: SearchBattleUnitById,
-    private val searchEnemyPlayer: SearchEnemyPlayer,
+    private val searchOpponent: SearchOpponent,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val searchPosition: SearchPosition,
     private val searchWalkingDistance: SearchWalkingDistance,
@@ -23,9 +23,9 @@ class SearchEnemiesWithinReach(
     operator fun invoke(battleUnitId: String): List<BattleUnit.Dto> {
         val battleUnit = searchBattleUnitById(id = battleUnitId) ?: return emptyList()
         val position = searchPosition(occupantId = battleUnitId) ?: return emptyList()
-        val enemyPlayer = searchEnemyPlayer(playerId = battleUnit.playerId) ?: return emptyList()
+        val opponent = searchOpponent(playerId = battleUnit.playerId) ?: return emptyList()
         val maximumDistance = if (battleUnit.remainingSummonDuration != null) Int.MAX_VALUE else REACH
-        return searchBattleUnitsByPlayerId(playerId = enemyPlayer.id)
+        return searchBattleUnitsByPlayerId(playerId = opponent.id)
             .filter { enemy -> enemy.remainingHealth > 0 }
             .filter { enemy ->
                 val enemyPosition = searchPosition(occupantId = enemy.id) ?: return@filter false

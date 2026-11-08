@@ -15,7 +15,7 @@ class RecruitMemberTest {
     private val recruitMember = RecruitMember(partyRepository, eventBus)
 
     @Test
-    fun `should request the deployment of the battle unit for the party player on the tile, and then its joining`() {
+    fun `should request the deployment of the battle unit for the human player on the tile, and then its joining`() {
         // Given
         partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")))
         // When

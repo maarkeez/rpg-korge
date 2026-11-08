@@ -39,11 +39,11 @@ class PreviewCastRemainingHealthTest {
      */
     private fun givenBattle(map: String) {
         val player = player(id = "player-1").toDto()
-        val enemyPlayer = player(id = "player-2").toDto()
+        val opponent = player(id = "player-2").toDto()
         val unit = unit(healthPoints = 20).toDto()
         queries.battleUnitRepository.create(battleUnit(id = "caster", unit = unit, player = player, remainingHealth = 10))
-        queries.battleUnitRepository.create(battleUnit(id = "enemy-1", unit = unit, player = enemyPlayer))
-        queries.battleUnitRepository.create(battleUnit(id = "enemy-2", unit = unit, player = enemyPlayer))
+        queries.battleUnitRepository.create(battleUnit(id = "enemy-1", unit = unit, player = opponent))
+        queries.battleUnitRepository.create(battleUnit(id = "enemy-2", unit = unit, player = opponent))
         val occupants = mapOf('C' to "caster", 'E' to "enemy-1", 'F' to "enemy-2").filterKeys { letter -> letter in map }
         queries.battlefieldRepository.create(battlefield(map, occupants = occupants))
         listOf(

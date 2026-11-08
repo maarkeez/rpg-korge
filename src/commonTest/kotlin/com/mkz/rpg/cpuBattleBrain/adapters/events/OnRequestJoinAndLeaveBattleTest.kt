@@ -13,7 +13,7 @@ class OnRequestJoinAndLeaveBattleTest {
     private val queries = InMemoryQueries()
     private val onRequestJoinAndLeaveBattle =
         OnRequestJoinAndLeaveBattle(
-            JoinAndLeaveBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
+            JoinAndLeaveBattle(queries.searchHumanPlayer, queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
             eventBus,
         )
     private val updates = mutableListOf<CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft>().also { updated -> eventBus.subscribe<CpuBattleBrainEvent.CpuBattleUnitsJoinedAndLeft> { updated += it } }

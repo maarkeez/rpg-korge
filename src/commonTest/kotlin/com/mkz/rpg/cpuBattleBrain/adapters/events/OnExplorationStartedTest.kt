@@ -17,7 +17,7 @@ class OnExplorationStartedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val onExplorationStarted =
-        OnExplorationStarted(EngageEnemies(queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
+        OnExplorationStarted(EngageEnemies(queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
     private val engagements = mutableListOf<CpuBattleBrainEvent.EnemiesEngaged>().also { engaged -> eventBus.subscribe<CpuBattleBrainEvent.EnemiesEngaged> { engaged += it } }
 
     @Test

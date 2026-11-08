@@ -16,7 +16,7 @@ import kotlin.test.Test
 class EngageEnemiesTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
-    private val engageEnemies = EngageEnemies(queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
+    private val engageEnemies = EngageEnemies(queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
 
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)

@@ -5,20 +5,20 @@ import com.mkz.rpg.player.domain.PlayerMother.player
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class SearchEnemyPlayerTest {
+class SearchOpponentTest {
     private val playerRepository = InMemoryPlayerRepository()
-    private val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
+    private val searchOpponent = SearchOpponent(playerRepository)
 
     @Test
-    fun `should return enemy player when another player exists`() {
+    fun `should return the opponent when another player exists`() {
         // Given
         val player = player(id = "player-1")
-        val enemyPlayer = player(id = "player-2")
+        val opponent = player(id = "player-2")
         playerRepository.create(player)
-        playerRepository.create(enemyPlayer)
+        playerRepository.create(opponent)
         // When
-        val storedEnemyPlayer = searchEnemyPlayer(player.toDto().id)
+        val storedOpponent = searchOpponent(player.toDto().id)
         // Then
-        storedEnemyPlayer shouldBe enemyPlayer.toDto()
+        storedOpponent shouldBe opponent.toDto()
     }
 }

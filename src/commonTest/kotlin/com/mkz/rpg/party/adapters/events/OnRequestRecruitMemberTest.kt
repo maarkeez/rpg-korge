@@ -16,7 +16,7 @@ class OnRequestRecruitMemberTest {
     private val onRequestRecruitMember = OnRequestRecruitMember(RecruitMember(partyRepository, eventBus), eventBus)
 
     @Test
-    fun `should request the deployment of the battle unit for the party player when its recruitment is requested`() {
+    fun `should request the deployment of the battle unit for the human player when its recruitment is requested`() {
         // Given
         val requests = mutableListOf<RequestDeployBattleUnit>()
         eventBus.subscribe<RequestDeployBattleUnit> { event -> requests += event }

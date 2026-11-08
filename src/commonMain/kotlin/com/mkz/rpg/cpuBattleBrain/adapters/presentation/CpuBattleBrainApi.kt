@@ -60,7 +60,7 @@ class CpuBattleBrainApi(
     val searchEnemiesWithinReach =
         SearchEnemiesWithinReach(
             battleUnitApi.searchBattleUnitById,
-            playerApi.searchEnemyPlayer,
+            playerApi.searchOpponent,
             battleUnitApi.searchBattleUnitsByPlayerId,
             battlefieldApi.searchPosition,
             battlefieldApi.searchWalkingDistance,
@@ -123,7 +123,7 @@ class CpuBattleBrainApi(
         )
     val engageEnemies =
         EngageEnemies(
-            playerApi.searchEnemyPlayer,
+            playerApi.searchOpponent,
             battleUnitApi.searchBattleUnitsByPlayerId,
             searchEnemiesWithinReach,
             eventBus,
@@ -131,7 +131,7 @@ class CpuBattleBrainApi(
     val joinAndLeaveBattle =
         JoinAndLeaveBattle(
             playerApi.searchHumanPlayer,
-            playerApi.searchEnemyPlayer,
+            playerApi.searchOpponent,
             battleUnitApi.searchBattleUnitsByPlayerId,
             searchEnemiesWithinReach,
             eventBus,
@@ -139,7 +139,7 @@ class CpuBattleBrainApi(
     val joinDisengagedBattle =
         JoinDisengagedBattle(
             playerApi.searchHumanPlayer,
-            playerApi.searchEnemyPlayer,
+            playerApi.searchOpponent,
             battleUnitApi.searchBattleUnitsByPlayerId,
             searchEnemiesWithinReach,
             eventBus,

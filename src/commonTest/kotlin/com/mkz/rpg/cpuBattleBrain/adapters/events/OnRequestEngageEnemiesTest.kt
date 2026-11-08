@@ -16,7 +16,7 @@ class OnRequestEngageEnemiesTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val onRequestEngageEnemies =
-        OnRequestEngageEnemies(EngageEnemies(queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
+        OnRequestEngageEnemies(EngageEnemies(queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
     private val engagements = mutableListOf<CpuBattleBrainEvent.EnemiesEngaged>().also { engaged -> eventBus.subscribe<CpuBattleBrainEvent.EnemiesEngaged> { engaged += it } }
 
     @Test

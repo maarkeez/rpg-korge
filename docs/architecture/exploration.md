@@ -79,7 +79,7 @@ An npc with a unit in its game data is recruitable (e.g.: the viking, see [Game 
 
 1. Finishing the talk (`NpcTalkFinished`, with the npc talked to) recruits it ([`RecruitNpc`](../../src/commonMain/kotlin/com/mkz/rpg/npc/usecases/commands/RecruitNpc.kt)). Nothing happens for an npc that is not recruitable, e.g.: the elder.
 2. The npc leaves its tile (`NpcRecruited`): the battlefield removes it, and the screen removes the npc.
-3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the party player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A while adjacent to it no longer talks to it.
+3. The party recruits a battle unit of its unit on that tile (`RequestRecruitMember`, see [`RecruitMember`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/RecruitMember.kt)): it is deployed for the human player (`RequestDeployBattleUnit`), with full health and mana. It takes the id of the npc, which is deleted, so an npc is only recruited once, and pressing A while adjacent to it no longer talks to it.
 4. The battle unit joins the party, last (`RequestJoinParty`, `PartyJoined`, see [`JoinParty`](../../src/commonMain/kotlin/com/mkz/rpg/party/usecases/commands/JoinParty.kt)), and the screen flashes it. It follows the battle unit ahead of it, walking the shortest path to it when it is not next to it.
 
 The events are dispatched in the order they are published, so the npc is removed before the battle unit is deployed on its tile, and the battle unit is deployed before it joins the party, as the party publishes both requests together. Once recruited, it is a party member as any other: it has an inventory, and leaves the party once defeated.
@@ -181,7 +181,7 @@ Every second while exploring, the battle units that stood still during that seco
 - The battle units flash alongside the timeline, so the party walks meanwhile, whatever the number of battle units flashing. A flash stops once its battle unit walks away.
 - Then, the next second starts (`ExplorationSecondStarted`), and the CPU battle units wander (see [CPU battle brain](cpu-battle-brain.md#wandering)). They wander after the effects, so a battle unit that steps counts as moved during the new second.
 
-A battle unit defeated by its terrain while exploring leaves the party. A player whose last battle units are defeated while exploring loses the game, as in a battle (`PlayerVictory` for their enemy, see [`DefeatPlayer`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt)). Once the game is over, the virtual pad is hidden and the seconds are no longer counted.
+A battle unit defeated by its terrain while exploring leaves the party. A player whose last battle units are defeated while exploring loses the game, as in a battle (`PlayerVictory` for their opponent, see [`DefeatPlayer`](../../src/commonMain/kotlin/com/mkz/rpg/battle/usecases/commands/DefeatPlayer.kt)). Once the game is over, the virtual pad is hidden and the seconds are no longer counted.
 
 ## Engaging
 

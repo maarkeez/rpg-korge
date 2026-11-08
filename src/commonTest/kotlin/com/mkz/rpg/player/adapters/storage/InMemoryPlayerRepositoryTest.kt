@@ -39,15 +39,15 @@ class InMemoryPlayerRepositoryTest {
     }
 
     @Test
-    fun `SearchEnemy should return the other player when there are two players stored`() {
+    fun `SearchOpponent should return the other player when there are two players stored`() {
         // Given
         val player = PlayerMother.player(id = "player-1")
-        val enemyPlayer = PlayerMother.player(id = "player-2")
+        val opponent = PlayerMother.player(id = "player-2")
         playerRepository.create(player)
-        playerRepository.create(enemyPlayer)
+        playerRepository.create(opponent)
         // When
-        val storedEnemyPlayer = playerRepository.searchEnemy(playerId = player.toDto().id)
+        val storedOpponent = playerRepository.searchOpponent(playerId = player.toDto().id)
         // Then
-        storedEnemyPlayer shouldBe enemyPlayer
+        storedOpponent shouldBe opponent
     }
 }

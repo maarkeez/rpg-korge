@@ -34,10 +34,10 @@ class PreviewCastOngoingEffectsTest {
      */
     private fun givenBattle(map: String) {
         val player = player(id = "player-1").toDto()
-        val enemyPlayer = player(id = "player-2").toDto()
+        val opponent = player(id = "player-2").toDto()
         val battleUnits = mapOf('C' to "caster", 'E' to "enemy-1", 'F' to "enemy-2")
         battleUnits.forEach { (letter, battleUnitId) ->
-            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, player = if (letter == 'C') player else enemyPlayer))
+            queries.battleUnitRepository.create(battleUnit(id = battleUnitId, player = if (letter == 'C') player else opponent))
         }
         queries.battlefieldRepository.create(battlefield(map, occupants = battleUnits.filterKeys { letter -> letter in map }))
         queries.effectRepository.create(Effect.create(damageEffect(id = "venom", timingType = "ON_PLAYER_TURN_STARTED").toDto()))

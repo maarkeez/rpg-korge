@@ -6,8 +6,8 @@ import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
 import com.mkz.rpg.player.domain.PlayerRepository
 import com.mkz.rpg.player.usecases.commands.InitialisePlayers
 import com.mkz.rpg.player.usecases.commands.RequestPlayerCreation
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.player.usecases.services.PlayerLoader
 import com.mkz.rpg.shared.domain.EventBus
@@ -25,7 +25,7 @@ class PlayerApi(
 
     // Queries
     val searchPlayerById = SearchPlayerById(playerRepository)
-    val searchEnemyPlayer = SearchEnemyPlayer(playerRepository)
+    val searchOpponent = SearchOpponent(playerRepository)
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)
 
     // Events

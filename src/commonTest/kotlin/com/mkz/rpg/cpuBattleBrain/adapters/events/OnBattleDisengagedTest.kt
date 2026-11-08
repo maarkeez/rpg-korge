@@ -13,7 +13,7 @@ class OnBattleDisengagedTest {
     private val queries = InMemoryQueries()
     private val onBattleDisengaged =
         OnBattleDisengaged(
-            JoinDisengagedBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
+            JoinDisengagedBattle(queries.searchHumanPlayer, queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus),
             eventBus,
         )
     private val requests =

@@ -52,7 +52,7 @@ class SummonVanishingAcceptanceTest {
     private val cpuWanderBrainApi = CpuWanderBrainApi(playerApi, battleUnitApi, battlefieldApi, cpuBattleBrainApi, partyApi, eventBus)
 
     private val summonerPlayerId = "summoner"
-    private val enemyPlayerId = "enemy"
+    private val opponentId = "enemy"
     private val summonerId = "summoner-1"
     private val enemyId = "enemy-1"
 
@@ -60,7 +60,7 @@ class SummonVanishingAcceptanceTest {
     // defeat it at once.
     private suspend fun setUp() {
         playerApi.requestPlayerCreation(summonerPlayerId, HUMAN)
-        playerApi.requestPlayerCreation(enemyPlayerId, HUMAN)
+        playerApi.requestPlayerCreation(opponentId, HUMAN)
         terrainApi.init()
         terrainApi.initialiseTerrains()
         battlefieldApi.requestBattlefieldCreation(8, 8, List(8) { List(8) { "sand" } })
@@ -93,8 +93,8 @@ class SummonVanishingAcceptanceTest {
         unitApi.requestUnitCreation(UnitMother.unit(id = "enemy", healthPoints = 20, manaPoints = 10, abilities = listOf("deadly-strike"), movementRange = 3).toDto())
 
         battleUnitApi.deployBattleUnit(battleUnitId = summonerId, unitId = "summoner", playerId = summonerPlayerId, deployAtRow = 2, deployAtColumn = 2)
-        battleUnitApi.deployBattleUnit(battleUnitId = enemyId, unitId = "enemy", playerId = enemyPlayerId, deployAtRow = 2, deployAtColumn = 3)
-        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, summonerPlayerId, enemyPlayerId)
+        battleUnitApi.deployBattleUnit(battleUnitId = enemyId, unitId = "enemy", playerId = opponentId, deployAtRow = 2, deployAtColumn = 3)
+        battleApi.startBattleWithEveryBattleUnit(battleUnitApi, summonerPlayerId, opponentId)
         eventBus.dispatch()
     }
 
@@ -152,7 +152,7 @@ class SummonVanishingAcceptanceTest {
             val battle = battleApi.searchBattle()!!
             battle.battleUnitIds shouldNotContain summonedBattleUnitId
             battle.isFinished shouldBe false
-            battle.currentPlayerId shouldBe enemyPlayerId
+            battle.currentPlayerId shouldBe opponentId
         }
 
     @Test

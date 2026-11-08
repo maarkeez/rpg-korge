@@ -21,7 +21,7 @@ class WhereShouldWalkTest {
 
     init {
         queries.playerRepository.create(player(id = "player-1", type = Player.Dto.PlayerTypeDto.CPU))
-        // The game always has an enemy player, even when none of its battle units is left.
+        // The game always has an opponent, even when none of its battle units is left.
         queries.playerRepository.create(player(id = "player-2"))
     }
 

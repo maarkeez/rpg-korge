@@ -4,8 +4,8 @@ import com.mkz.rpg.battle.domain.BattleEvent
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsByPlayerId
 import com.mkz.rpg.cpuBattleBrain.domain.CpuBattleBrainEvent
 import com.mkz.rpg.cpuBattleBrain.usecases.queries.SearchEnemiesWithinReach
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
 import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
@@ -17,13 +17,13 @@ import com.mkz.rpg.shared.domain.EventBus
  */
 class JoinAndLeaveBattle(
     private val searchHumanPlayer: SearchHumanPlayer,
-    private val searchEnemyPlayer: SearchEnemyPlayer,
+    private val searchOpponent: SearchOpponent,
     private val searchBattleUnitsByPlayerId: SearchBattleUnitsByPlayerId,
     private val searchEnemiesWithinReach: SearchEnemiesWithinReach,
     private val eventBus: EventBus,
 ) {
     operator fun invoke(battleUnitIds: Set<String>) {
-        val cpuPlayer = searchHumanPlayer()?.let { humanPlayer -> searchEnemyPlayer(playerId = humanPlayer.id) }
+        val cpuPlayer = searchHumanPlayer()?.let { humanPlayer -> searchOpponent(playerId = humanPlayer.id) }
         val (cpuBattleUnitsInBattle, cpuBattleUnitsOutOfBattle) =
             cpuPlayer
                 ?.let { searchBattleUnitsByPlayerId(playerId = it.id) }

@@ -6,7 +6,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerDefeated
 import com.mkz.rpg.battle.domain.BattleMother.battle
 import com.mkz.rpg.battle.usecases.commands.DefeatPlayer
 import com.mkz.rpg.player.adapters.storage.InMemoryPlayerRepository
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.domain.subscribe
 import io.kotest.matchers.collections.shouldContainExactly
@@ -15,7 +15,7 @@ import kotlin.test.Test
 class OnRequestDefeatPlayerTest {
     private val eventBus = InMemoryEventBus()
     private val battleRepository = InMemoryBattleRepository()
-    private val onRequestDefeatPlayer = OnRequestDefeatPlayer(DefeatPlayer(SearchEnemyPlayer(InMemoryPlayerRepository()), battleRepository, eventBus), eventBus)
+    private val onRequestDefeatPlayer = OnRequestDefeatPlayer(DefeatPlayer(SearchOpponent(InMemoryPlayerRepository()), battleRepository, eventBus), eventBus)
     private val defeatedPlayers = mutableListOf<PlayerDefeated>().also { defeated -> eventBus.subscribe<PlayerDefeated> { defeated += it } }
 
     @Test

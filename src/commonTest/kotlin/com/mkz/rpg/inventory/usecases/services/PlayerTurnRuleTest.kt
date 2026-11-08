@@ -21,7 +21,7 @@ class PlayerTurnRuleTest {
     }
 
     @Test
-    fun `should allow the inventory during the player turn of the party player in a battle`() {
+    fun `should allow the inventory during the player turn of the human player in a battle`() {
         // Given
         queries.battleRepository.create(battle(players = listOf("human", "cpu")))
         // Then

@@ -2,15 +2,15 @@ package com.mkz.rpg.battle.usecases.commands
 
 import com.mkz.rpg.battle.domain.Battle
 import com.mkz.rpg.battle.domain.BattleRepository
-import com.mkz.rpg.player.usecases.queries.SearchEnemyPlayer
+import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Defeats the player, e.g.: once all their battle units are defeated, in a battle or while exploring (e.g.: by the
- * terrain). Out of the battles, their enemy is left as the only player, so it wins.
+ * terrain). Out of the battles, their opponent is left as the only player, so it wins.
  */
 class DefeatPlayer(
-    private val searchEnemyPlayer: SearchEnemyPlayer,
+    private val searchOpponent: SearchOpponent,
     private val battleRepository: BattleRepository,
     private val eventBus: EventBus,
 ) {
@@ -21,7 +21,7 @@ class DefeatPlayer(
             battleRepository.update(battle)
             eventBus.publish(events)
         } else {
-            val winner = searchEnemyPlayer(playerId) ?: return
+            val winner = searchOpponent(playerId) ?: return
             val (events, battle) = Battle.defeatWhileExploring(defeatedPlayerId = playerId, winnerPlayerId = winner.id).pullEvents()
             battleRepository.create(battle)
             eventBus.publish(events)

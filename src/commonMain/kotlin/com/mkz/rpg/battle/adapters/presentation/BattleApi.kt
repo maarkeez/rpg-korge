@@ -30,7 +30,7 @@ class BattleApi(
     private val battleRepository: BattleRepository = InMemoryBattleRepository()
 
     // Commands
-    val defeatPlayer = DefeatPlayer(playerApi.searchEnemyPlayer, battleRepository, eventBus)
+    val defeatPlayer = DefeatPlayer(playerApi.searchOpponent, battleRepository, eventBus)
     val finishBattleWithWinner = FinishBattleWithWinner(battleRepository, eventBus)
     val finishPlayerTurn = FinishPlayerTurn(battleRepository, eventBus)
     val startBattle = StartBattle(battleRepository, eventBus)

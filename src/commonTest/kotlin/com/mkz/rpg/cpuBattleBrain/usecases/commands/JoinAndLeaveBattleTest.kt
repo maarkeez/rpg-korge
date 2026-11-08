@@ -15,7 +15,7 @@ class JoinAndLeaveBattleTest {
     private val queries = InMemoryQueries()
     private val eventBus = FakeEventBus()
     private val joinAndLeaveBattle =
-        JoinAndLeaveBattle(queries.searchHumanPlayer, queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
+        JoinAndLeaveBattle(queries.searchHumanPlayer, queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus)
 
     private val human = player(id = "human", type = PlayerTypeDto.HUMAN)
     private val cpu = player(id = "cpu", type = PlayerTypeDto.CPU)

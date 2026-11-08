@@ -17,7 +17,7 @@ class OnPartySteppedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val onPartyStepped =
-        OnPartyStepped(EngageEnemies(queries.searchEnemyPlayer, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
+        OnPartyStepped(EngageEnemies(queries.searchOpponent, queries.searchBattleUnitsByPlayerId, queries.searchEnemiesWithinReach, eventBus), eventBus)
     private val engagements = mutableListOf<CpuBattleBrainEvent.EnemiesEngaged>().also { engaged -> eventBus.subscribe<CpuBattleBrainEvent.EnemiesEngaged> { engaged += it } }
 
     @Test
