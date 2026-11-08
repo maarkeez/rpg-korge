@@ -1,6 +1,6 @@
 # Plan: Rename the code of the party subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** built on `main` in `b338a522`, its screenshots of the formation hints still to be approved.
 >
 > **Summary:** The code of the party subdomain uses words the [glossary](../../GLOSSARY.md) gives to other concepts.
 > E.g.: the party keeps its walking order as a `Line`, while a line is what an npc says. A battle starting publishes
@@ -165,3 +165,17 @@ The tests are renamed with the code, and their names and comments say the new wo
   `RecruitMember`).
 - `screen`: the comments of `FormationPresenter` and `FormationView` (e.g.: "tapping another one swaps both", "to swap
   them"), now that players read "reorder".
+
+## Changes while building
+
+- `StepsRequired` also says "At least one step is required for a party step", for "to walk", and the comment of
+  `DirectionDto` says "Where the leader steps to".
+- The comments of `CpuWanderBrain.walkPartyStep` and `RespawnDefeatedBattleUnits` say "The party took a party step", and
+  the comment in `ExplorationPresenter` says the exploration is interrupted, for paused.
+- `CloseFormation`'s comment says the followers "fall in" behind the new leader, as "line up" read as the old Line.
+- The **Screen / Formation** story descriptions say "reorder", and `FormationPresenterTest` and `FormationViewTest`
+  expect the new hints.
+- The test names of the party tests, `ExplorationPresenterTest`, `BattlefieldPresenterTest`, the give tests and the
+  acceptance tests say stepping, walking order and interrupted where they meant the party, while a battle unit's own
+  walk stays a walk. Local variables such as `pausedParty` in `PartyTest` were left as they are.
+- [Quests](../architecture/quests.md): the first column of the tracker table is wider, to fit `ExplorationInterrupted`.
