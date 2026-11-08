@@ -3,7 +3,7 @@ package com.mkz.rpg.quest.domain
 import com.mkz.rpg.shared.domain.DomainEvent
 
 sealed interface QuestEvent : DomainEvent {
-    object RequestInitialiseQuests : QuestEvent
+    object RequestCreateQuests : QuestEvent
 
     object RequestStartMainQuest : QuestEvent
 
@@ -11,12 +11,12 @@ sealed interface QuestEvent : DomainEvent {
         val questId: String,
     ) : QuestEvent
 
-    /** A battle unit asked for by the current task was defeated: it counts [progress] of [count]. */
-    data class TaskProgressed(
+    /** A battle unit asked for by the current defeat task was defeated: it counts [defeats] of [requiredDefeats]. */
+    data class DefeatCounted(
         val questId: String,
         val taskIndex: Int,
-        val progress: Int,
-        val count: Int,
+        val defeats: Int,
+        val requiredDefeats: Int,
     ) : QuestEvent
 
     data class TaskCompleted(
@@ -29,7 +29,7 @@ sealed interface QuestEvent : DomainEvent {
         val questId: String,
     ) : QuestEvent
 
-    /** The player follows the quest: the main quest, when no other quest is pinned. */
+    /** The quest is the pinned quest: the main quest, when no side quest is pinned. */
     data class QuestPinned(
         val questId: String,
     ) : QuestEvent

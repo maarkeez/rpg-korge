@@ -10,8 +10,8 @@ import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Makes the quest the one the player follows, unpinning any other, so exactly one is followed. The main quest is followed
- * when no other quest is pinned, so it holds no pin: pinning it, or a quest already pinned, returns to the main quest.
+ * Makes the quest the pinned quest, unpinning any other, so the tracker shows exactly one. The main quest is the pinned
+ * quest when no side quest is pinned, so it holds no pin: pinning it, or a quest already pinned, returns to the main quest.
  */
 class PinQuest(
     private val questRepository: QuestRepository,

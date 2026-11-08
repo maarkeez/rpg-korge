@@ -1,12 +1,12 @@
 type = "SIDE"
-giverNpcId = "elder"
+questGiverNpcId = "elder"
 
 [[tasks]]
-type = "REACH_TILES"
+type = "VISIT"
 tiles = [[25, 3], [25, 4]]
 
 [[tasks]]
-type = "TALK_TO_NPC"
+type = "TALK"
 npcId = "elder"
 
 [reward]

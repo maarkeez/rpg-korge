@@ -5,8 +5,8 @@ import com.mkz.rpg.quest.domain.Quest.Dto.PositionDto
 import com.mkz.rpg.quest.domain.QuestRepository
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 
-/** Completes the current task of every quest asking for a tile of the path, when a party member walked or teleported it. A summon is no party member. */
-class ProgressReachTasks(
+/** Completes the current task of every quest asking for a tile of the path, when a party member walked or teleported onto it. A summon is no party member. */
+class ProgressVisitTasks(
     private val questRepository: QuestRepository,
     private val searchParty: SearchParty,
     private val publishQuestProgress: PublishQuestProgress,
@@ -17,6 +17,6 @@ class ProgressReachTasks(
     ) {
         val party = searchParty() ?: return
         if (battleUnitId !in party.battleUnitIds) return
-        questRepository.searchAll().forEach { quest -> publishQuestProgress(quest.reached(path)) }
+        questRepository.searchAll().forEach { quest -> publishQuestProgress(quest.visited(path)) }
     }
 }

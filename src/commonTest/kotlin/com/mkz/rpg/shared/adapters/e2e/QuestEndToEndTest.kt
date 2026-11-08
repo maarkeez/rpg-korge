@@ -82,7 +82,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     private val gateBatAsTheGoatWizard = """"id":"gate-bat","unitId":"goat-wizard""""
     private val farmerInTheSave = """"id":"farmer","row":8,"column":12"""
     private val farmerOnTheBattlefieldInTheSave = """"occupantId":"farmer","row":8,"column":12"""
-    private val batsQuestStarted = """"questId":"bats-in-the-meadow","status":"ACTIVE","currentTaskIndex":0,"currentTaskProgress":0"""
+    private val batsQuestStarted = """"questId":"bats-in-the-meadow","status":"ACTIVE","currentTaskIndex":0,"currentTaskDefeats":0"""
     private val batsQuest = "bats-in-the-meadow"
     private val goatWizardQuest = "defeat-the-goat-wizard"
 
@@ -133,7 +133,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
     private fun countTwoBatsInTheSave() {
         val save = requireNotNull(storage.getOrNull(saveSlotKey)) { "Nothing is saved in the slot" }
         save shouldContain batsQuestStarted
-        storage[saveSlotKey] = save.replace(batsQuestStarted, batsQuestStarted.replace(""""currentTaskProgress":0""", """"currentTaskProgress":2"""))
+        storage[saveSlotKey] = save.replace(batsQuestStarted, batsQuestStarted.replace(""""currentTaskDefeats":0""", """"currentTaskDefeats":2"""))
     }
 
     // A new game with the farmer next to the knight.
@@ -345,7 +345,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
             waitUntil { confirmDialogView.isShown() }
             clickConfirmation(requireNotNull(stage.playerCallToActionView()))
             waitUntil { virtualPadView()?.isPadShown() == true }
-            // Then: no side quest is listed, so the pad is back, and its giver can start it again.
+            // Then: no side quest is listed, so the pad is back, and its quest giver can start it again.
             withClue("Expected the gold marker back over the farmer") { battlefieldView()?.questMarkerColorAt(FARMER_ROW, FARMER_COLUMN) shouldBe HudStyle.SELECTION }
             // When
             clickCapsule(requireNotNull(questTrackerView()))

@@ -1,11 +1,11 @@
 type = "SIDE"
-giverNpcId = "elf"
+questGiverNpcId = "elf"
 repeatable = true
 
 [[tasks]]
-type = "DEFEAT_UNITS"
+type = "DEFEAT"
 unitId = "rat"
-count = 2
+requiredDefeats = 2
 
 [reward]
 gold = 20

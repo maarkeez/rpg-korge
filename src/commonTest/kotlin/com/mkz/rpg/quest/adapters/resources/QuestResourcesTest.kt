@@ -20,7 +20,7 @@ class QuestResourcesTest {
     fun `should find the unit of every defeat task in the unit resources`() =
         runTest {
             // Given
-            val defeatTasks = quests().flatMap(Quest.Dto::tasks).mapNotNull(TaskDto::defeatUnits)
+            val defeatTasks = quests().flatMap(Quest.Dto::tasks).mapNotNull(TaskDto::defeat)
             // When
             val unitIds =
                 ResourcesUnitLoader()
@@ -30,15 +30,15 @@ class QuestResourcesTest {
                     .toSet()
             // Then
             defeatTasks.shouldNotBeEmpty()
-            defeatTasks.map(TaskDto.DefeatUnitsDto::unitId).filterNot(unitIds::contains).shouldBeEmpty()
+            defeatTasks.map(TaskDto.DefeatDto::unitId).filterNot(unitIds::contains).shouldBeEmpty()
         }
 
     @Test
-    fun `should find the npc of every talk task and giver, and none recruitable, in the npc resources`() =
+    fun `should find the npc of every talk task and quest giver, and none recruitable, in the npc resources`() =
         runTest {
             // Given
             val quests = quests()
-            val npcIds = quests.flatMap(Quest.Dto::tasks).mapNotNull(TaskDto::talkToNpc).map(TaskDto.TalkToNpcDto::npcId) + quests.mapNotNull(Quest.Dto::giverNpcId)
+            val npcIds = quests.flatMap(Quest.Dto::tasks).mapNotNull(TaskDto::talk).map(TaskDto.TalkDto::npcId) + quests.mapNotNull(Quest.Dto::questGiverNpcId)
             // When
             val npcs = ResourcesNpcLoader().also { loader -> loader.initResources() }.loadNpcs()
             val notRecruitableNpcIds = npcs.filter { npc -> npc.unitId == null }.map { npc -> npc.id }.toSet()

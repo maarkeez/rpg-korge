@@ -5,7 +5,7 @@ import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.QuestNotFound
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
@@ -21,10 +21,10 @@ class AbandonQuestTest {
     private val abandonQuest = AbandonQuest(questRepository, PublishQuestProgress(questRepository, eventBus))
 
     @Test
-    fun `AbandonQuest should allow its giver to start it again when it is not repeatable`() {
+    fun `AbandonQuest should allow its quest giver to start it again when it is not repeatable`() {
         // Given
         val startedQuest =
-            sideQuest(id = "clear-the-rats", giverNpcId = "farmer", tasks = listOf(defeatUnits(unitId = "rat", count = 5)))
+            sideQuest(id = "clear-the-rats", questGiverNpcId = "farmer", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 5)))
                 .start()
                 .defeated("rat")
                 .pullEvents()

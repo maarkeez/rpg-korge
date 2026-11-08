@@ -11,13 +11,13 @@ sealed class QuestError(
 
     class InvalidTask : QuestError("A task needs the details of its type")
 
-    class EmptyTaskTiles : QuestError("A task to reach tiles needs at least one tile")
+    class EmptyVisitTaskTiles : QuestError("A visit task needs at least one tile")
 
-    class TaskCountBelowOne : QuestError("A task to defeat units needs a count of at least 1")
+    class RequiredDefeatsBelowOne : QuestError("A defeat task needs at least 1 required defeat")
 
-    class SideQuestWithoutGiver : QuestError("A side quest needs a quest giver")
+    class SideQuestWithoutQuestGiver : QuestError("A side quest needs a quest giver")
 
-    class MainQuestWithGiver : QuestError("The main quest starts with a new game, so it has no quest giver")
+    class MainQuestWithQuestGiver : QuestError("The main quest starts with a new game, so it has no quest giver")
 
     class MainQuestRepeatable : QuestError("The main quest runs once, so it is not repeatable")
 
@@ -29,5 +29,5 @@ sealed class QuestError(
 
     class QuestNotFound : QuestError("The quest was not found")
 
-    class QuestTileCanNotBeOccupied : QuestError("A tile of a task to reach tiles can not be occupied")
+    class QuestTileNotVacant : QuestError("A tile of a visit task is not vacant")
 }

@@ -13,7 +13,7 @@ class SearchQuestMarkers(
         val npcIds =
             quests
                 .map { quest -> quest.toDto() }
-                .flatMap { quest -> listOfNotNull(quest.giverNpcId) + quest.tasks.filter { task -> task.type == TaskDto.TypeDto.TALK_TO_NPC }.mapNotNull { task -> task.talkToNpc?.npcId } }
+                .flatMap { quest -> listOfNotNull(quest.questGiverNpcId) + quest.tasks.filter { task -> task.type == TaskDto.TypeDto.TALK }.mapNotNull { task -> task.talk?.npcId } }
                 .distinct()
         return npcIds.mapNotNull { npcId ->
             val markers = quests.mapNotNull { quest -> quest.markerFor(npcId) }

@@ -33,7 +33,7 @@ class ResourcesQuestLoader(
     @Serializable
     data class QuestDefinition(
         val type: String,
-        val giverNpcId: String? = null,
+        val questGiverNpcId: String? = null,
         val repeatable: Boolean = false,
         val tasks: List<TaskDefinition> = emptyList(),
         val reward: RewardDefinition,
@@ -42,7 +42,7 @@ class ResourcesQuestLoader(
             Quest.Dto(
                 id = questId,
                 type = enumOf<QuestTypeDto>("type", type),
-                giverNpcId = giverNpcId,
+                questGiverNpcId = questGiverNpcId,
                 repeatable = repeatable,
                 tasks = tasks.map(TaskDefinition::toDto),
                 reward = reward.toDto(),
@@ -54,16 +54,16 @@ class ResourcesQuestLoader(
     data class TaskDefinition(
         val type: String,
         val unitId: String? = null,
-        val count: Int? = null,
+        val requiredDefeats: Int? = null,
         val npcId: String? = null,
         val tiles: List<List<Int>>? = null,
     ) {
         fun toDto(): TaskDto =
             when (enumOf<TaskDto.TypeDto>("tasks.type", type)) {
-                TaskDto.TypeDto.DEFEAT_UNITS -> TaskDto.defeatUnits(unitId = required("tasks.unitId", unitId), count = required("tasks.count", count))
-                TaskDto.TypeDto.TALK_TO_NPC -> TaskDto.talkToNpc(npcId = required("tasks.npcId", npcId))
-                TaskDto.TypeDto.REACH_TILES ->
-                    TaskDto.reachTiles(
+                TaskDto.TypeDto.DEFEAT -> TaskDto.defeat(unitId = required("tasks.unitId", unitId), requiredDefeats = required("tasks.requiredDefeats", requiredDefeats))
+                TaskDto.TypeDto.TALK -> TaskDto.talk(npcId = required("tasks.npcId", npcId))
+                TaskDto.TypeDto.VISIT ->
+                    TaskDto.visit(
                         tiles =
                             required("tasks.tiles", tiles).map { tile ->
                                 require(tile.size == 2) { "'tasks.tiles' must hold lists of [row, column], but held $tile" }

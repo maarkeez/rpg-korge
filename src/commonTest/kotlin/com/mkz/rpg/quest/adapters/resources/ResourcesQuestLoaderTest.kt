@@ -32,9 +32,9 @@ class ResourcesQuestLoaderTest {
                 type = "MAIN"
 
                 [[tasks]]
-                type = "DEFEAT_UNITS"
+                type = "DEFEAT"
                 unitId = "goat-wizard"
-                count = 1
+                requiredDefeats = 1
 
                 [reward]
                 gold = 150
@@ -46,9 +46,9 @@ class ResourcesQuestLoaderTest {
                 Quest.Dto(
                     id = "defeat-the-goat-wizard",
                     type = QuestTypeDto.MAIN,
-                    giverNpcId = null,
+                    questGiverNpcId = null,
                     repeatable = false,
-                    tasks = listOf(TaskDto.defeatUnits(unitId = "goat-wizard", count = 1)),
+                    tasks = listOf(TaskDto.defeat(unitId = "goat-wizard", requiredDefeats = 1)),
                     reward = RewardDto(gold = 150, lootableItemIds = emptyList()),
                     progress = ProgressDto.notStarted("defeat-the-goat-wizard"),
                 ),
@@ -62,15 +62,15 @@ class ResourcesQuestLoaderTest {
             val toml =
                 """
                 type = "SIDE"
-                giverNpcId = "farmer"
+                questGiverNpcId = "farmer"
                 repeatable = true
 
                 [[tasks]]
-                type = "REACH_TILES"
+                type = "VISIT"
                 tiles = [[17, 11], [18, 11]]
 
                 [[tasks]]
-                type = "TALK_TO_NPC"
+                type = "TALK"
                 npcId = "farmer"
 
                 [reward]
@@ -84,12 +84,12 @@ class ResourcesQuestLoaderTest {
                 Quest.Dto(
                     id = "help-the-farmer",
                     type = QuestTypeDto.SIDE,
-                    giverNpcId = "farmer",
+                    questGiverNpcId = "farmer",
                     repeatable = true,
                     tasks =
                         listOf(
-                            TaskDto.reachTiles(tiles = listOf(PositionDto(row = 17, column = 11), PositionDto(row = 18, column = 11))),
-                            TaskDto.talkToNpc(npcId = "farmer"),
+                            TaskDto.visit(tiles = listOf(PositionDto(row = 17, column = 11), PositionDto(row = 18, column = 11))),
+                            TaskDto.talk(npcId = "farmer"),
                         ),
                     reward = RewardDto(gold = 20, lootableItemIds = listOf("health-potion")),
                     progress = ProgressDto.notStarted("help-the-farmer"),
@@ -98,10 +98,10 @@ class ResourcesQuestLoaderTest {
         }
 
     @Test
-    fun `should fail with the file when a defeat task has no count`() =
+    fun `should fail with the file when a defeat task has no required defeats`() =
         runTest {
             // Given
-            val toml = "type = \"MAIN\"\n\n[[tasks]]\ntype = \"DEFEAT_UNITS\"\nunitId = \"rat\"\n\n[reward]\ngold = 1\n"
+            val toml = "type = \"MAIN\"\n\n[[tasks]]\ntype = \"DEFEAT\"\nunitId = \"rat\"\n\n[reward]\ngold = 1\n"
             // When
             val loading = suspend { load("defeat-a-rat", toml) }
             // Then
@@ -112,18 +112,18 @@ class ResourcesQuestLoaderTest {
     fun `should fail with the file when a tile is not a row and a column`() =
         runTest {
             // Given
-            val toml = "type = \"MAIN\"\n\n[[tasks]]\ntype = \"REACH_TILES\"\ntiles = [[1, 2, 3]]\n\n[reward]\ngold = 1\n"
+            val toml = "type = \"MAIN\"\n\n[[tasks]]\ntype = \"VISIT\"\ntiles = [[1, 2, 3]]\n\n[reward]\ngold = 1\n"
             // When
-            val loading = suspend { load("reach-a-tile", toml) }
+            val loading = suspend { load("visit-a-tile", toml) }
             // Then
-            shouldThrow<IllegalStateException> { loading() }.message.shouldContain("quest/reach-a-tile.toml")
+            shouldThrow<IllegalStateException> { loading() }.message.shouldContain("quest/visit-a-tile.toml")
         }
 
     @Test
     fun `should fail with the file when its type is unknown`() =
         runTest {
             // Given
-            val toml = "type = \"SECRET\"\n\n[[tasks]]\ntype = \"TALK_TO_NPC\"\nnpcId = \"farmer\"\n\n[reward]\ngold = 1\n"
+            val toml = "type = \"SECRET\"\n\n[[tasks]]\ntype = \"TALK\"\nnpcId = \"farmer\"\n\n[reward]\ngold = 1\n"
             // When
             val loading = suspend { load("a-secret", toml) }
             // Then

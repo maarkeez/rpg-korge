@@ -8,12 +8,12 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
+import com.mkz.rpg.quest.domain.QuestEvent.DefeatCounted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
-import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.shared.domain.EventBus
@@ -80,7 +80,7 @@ class QuestPresenter(
                 announce(Moment.STARTED, event.questId)
                 displayMarkers()
             },
-            eventBus.subscribe<TaskProgressed> { event -> taskChanged(event.questId) },
+            eventBus.subscribe<DefeatCounted> { event -> taskChanged(event.questId) },
             eventBus.subscribe<TaskCompleted> { event ->
                 taskChanged(event.questId)
                 displayMarkers()

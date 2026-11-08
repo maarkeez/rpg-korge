@@ -39,7 +39,7 @@ class SetUpGameTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BuildingEvent.RequestPlaceBuildings,
-            QuestEvent.RequestInitialiseQuests,
+            QuestEvent.RequestCreateQuests,
             BattleUnitEvent.RequestInitialiseBattleUnits,
             NpcEvent.RequestPlaceNpcs,
             PartyEvent.RequestStartExploration,
@@ -63,7 +63,7 @@ class SetUpGameTest {
             PlayerEvent.RequestInitialisePlayers,
             BattlefieldEvent.RequestInitialiseBattlefield,
             BuildingEvent.RequestPlaceBuildings,
-            QuestEvent.RequestInitialiseQuests,
+            QuestEvent.RequestCreateQuests,
         )
     }
 }

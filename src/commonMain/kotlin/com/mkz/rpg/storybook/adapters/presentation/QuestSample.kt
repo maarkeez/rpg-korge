@@ -49,7 +49,7 @@ private val errand =
         "errand",
         "The Elder's Errand",
         "The Elder wants to know whether the path to the southern fields is still open.",
-        listOf(Task(Kind.REACH, "Reach the southern fields", progress = 1, isDone = true), Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT)),
+        listOf(Task(Kind.REACH, "Visit the southern fields", progress = 1, isDone = true), Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT)),
         gold = 25,
     )
 private val fields =
@@ -72,7 +72,7 @@ private fun journal(texts: Texts) =
         bees,
         errand,
         QuestInfo("bats", "Bats in the Meadow", "Bats nest in the meadow near the farm.", listOf(Task(Kind.DEFEAT, "Defeat 4 Bats", count = 4, portraitPath = "unit/bat_portrait.png")), gold = 35),
-        QuestInfo("road", "A Road Less Travelled", "Someone must see whether the old road still leads anywhere.", listOf(Task(Kind.REACH, "Reach the old bridge")), gold = 15),
+        QuestInfo("road", "A Road Less Travelled", "Someone must see whether the old road still leads anywhere.", listOf(Task(Kind.REACH, "Visit the old bridge")), gold = 15),
         QuestInfo(
             "princess",
             "A Word with the Princess",
@@ -120,8 +120,8 @@ enum class QuestSample(
     ),
     REACH(
         "Reach",
-        "A task to reach some tiles: it has no portrait.",
-        { texts -> goatWizard(texts).copy(tasks = listOf(Task(Kind.REACH, "Reach the lair down south"))) },
+        "A visit task: it has no portrait.",
+        { texts -> goatWizard(texts).copy(tasks = listOf(Task(Kind.REACH, "Visit the lair down south"))) },
     ),
     SEVERAL_TASKS(
         "Several tasks",
@@ -131,7 +131,7 @@ enum class QuestSample(
                 tasks =
                     listOf(
                         Task(Kind.TALK, "Talk to the Elder", progress = 1, portraitPath = ELDER_PORTRAIT, isDone = true),
-                        Task(Kind.REACH, "Reach the lair down south", progress = 1, isDone = true),
+                        Task(Kind.REACH, "Visit the lair down south", progress = 1, isDone = true),
                         goatWizardTask(texts),
                     ),
             )
@@ -164,7 +164,7 @@ enum class QuestSample(
         "The longest task, with the pin, as a translation may be.",
         { rats.copy(isPinned = true, tasks = listOf(Task(Kind.DEFEAT, "Derrota a las ratas de los campos del sur de una vez", progress = 12, count = 50, portraitPath = RAT_PORTRAIT))) },
     ),
-    COMPLETED_REPEATABLE("Completed, repeatable", "A completed side quest, whose giver can start it again.", { fields }),
+    COMPLETED_REPEATABLE("Completed, repeatable", "A completed side quest, whose quest giver can start it again.", { fields }),
     LONG_TEXT(
         "Long text",
         "The longest texts, as a translation may be: a long name, description and task, and the largest gold.",

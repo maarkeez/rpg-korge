@@ -6,8 +6,8 @@ import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
-import com.mkz.rpg.quest.domain.QuestMother.reachTiles
-import com.mkz.rpg.quest.usecases.commands.ProgressReachTasks
+import com.mkz.rpg.quest.domain.QuestMother.visit
+import com.mkz.rpg.quest.usecases.commands.ProgressVisitTasks
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
@@ -19,13 +19,13 @@ class OnBattleUnitMovedTest {
     private val queries = InMemoryQueries()
     private val questRepository = InMemoryQuestRepository()
     private val onBattleUnitMoved =
-        OnBattleUnitMoved(ProgressReachTasks(questRepository, queries.searchParty, PublishQuestProgress(questRepository, eventBus)), eventBus)
+        OnBattleUnitMoved(ProgressVisitTasks(questRepository, queries.searchParty, PublishQuestProgress(questRepository, eventBus)), eventBus)
 
     @Test
-    fun `should progress the reach tasks with the tiles walked when a battle unit moves`() {
+    fun `should progress the visit tasks with the tiles walked when a battle unit moves`() {
         // Given
         queries.partyRepository.save(party(battleUnitIds = listOf("knight-1")))
-        questRepository.save(mainQuest(id = "cross-the-bridge", tasks = listOf(reachTiles(17 to 11))).start().pullEvents().second)
+        questRepository.save(mainQuest(id = "cross-the-bridge", tasks = listOf(visit(17 to 11))).start().pullEvents().second)
         eventBus.publish(
             BattleUnitMoved(
                 battleUnitId = "knight-1",

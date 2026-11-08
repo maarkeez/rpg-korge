@@ -24,7 +24,7 @@ class QuestSnapshottable(
                     questId = progress.questId,
                     status = progress.status.name,
                     currentTaskIndex = progress.currentTaskIndex,
-                    currentTaskProgress = progress.currentTaskProgress,
+                    currentTaskDefeats = progress.currentTaskDefeats,
                     isPinned = progress.isPinned,
                 )
             },
@@ -37,7 +37,7 @@ class QuestSnapshottable(
                     questId = quest.questId,
                     status = enumValueOf<StatusDto>(quest.status),
                     currentTaskIndex = quest.currentTaskIndex,
-                    currentTaskProgress = quest.currentTaskProgress,
+                    currentTaskDefeats = quest.currentTaskDefeats,
                     isPinned = quest.isPinned,
                 )
             },
@@ -49,6 +49,6 @@ private data class QuestSnapshot(
     val questId: String,
     val status: String,
     val currentTaskIndex: Int,
-    val currentTaskProgress: Int,
+    val currentTaskDefeats: Int,
     val isPinned: Boolean,
 )

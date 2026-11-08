@@ -31,7 +31,7 @@ The timeline plays its steps on the scene coroutines, which `BattleScene` runs o
 
 `QuestPresenter` turns `QuestStarted` and `QuestCompleted` of any quest into a step of the timeline, which draws the tracker for the main quest and adds a [toast](quests.md#the-announcements) to a queue. The queue plays with `playAlongside`, one toast at a time, so **it never holds the timeline**: the party walks and the battle ends under it. A toast still appears once the timeline reaches its event, so it never announces a later state before an earlier one is displayed.
 
-The tracker's pop when a task changes does the same: the step draws it and plays `pop` with `playAlongside`. A last defeat publishes `TaskProgressed`, `TaskCompleted` and `QuestCompleted` in one chain of events, each read when it arrives: the first two find the quest completed and draw nothing, as the third one announces it.
+The tracker's pop when a task changes does the same: the step draws it and plays `pop` with `playAlongside`. A last defeat publishes `DefeatCounted`, `TaskCompleted` and `QuestCompleted` in one chain of events, each read when it arrives: the first two find the quest completed and draw nothing, as the third one announces it.
 
 ## Starting a turn
 

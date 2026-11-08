@@ -1,13 +1,13 @@
 type = "SIDE"
-giverNpcId = "farmer"
+questGiverNpcId = "farmer"
 
 [[tasks]]
-type = "DEFEAT_UNITS"
+type = "DEFEAT"
 unitId = "bat"
-count = 3
+requiredDefeats = 3
 
 [[tasks]]
-type = "TALK_TO_NPC"
+type = "TALK"
 npcId = "farmer"
 
 [reward]

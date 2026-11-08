@@ -4,7 +4,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.usecases.commands.ProgressDefeatTasks
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
@@ -24,7 +24,7 @@ class OnBattleUnitDefeatedTest {
     fun `should progress the defeat tasks when a battle unit is defeated`() {
         // Given
         queries.partyRepository.save(party(playerId = "human"))
-        questRepository.save(mainQuest(id = "defeat-the-goat-wizard", tasks = listOf(defeatUnits(unitId = "goat-wizard"))).start().pullEvents().second)
+        questRepository.save(mainQuest(id = "defeat-the-goat-wizard", tasks = listOf(defeat(unitId = "goat-wizard"))).start().pullEvents().second)
         eventBus.publish(BattleUnitDefeated(playerId = "cpu", battleUnitId = "goat-wizard-1", unitId = "goat-wizard", defeatedAtRow = 36, defeatedAtColumn = 11))
         // When
         eventBus.dispatch()

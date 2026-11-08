@@ -613,7 +613,7 @@ msgstr ""
 
 #. Asked before abandoning a side quest. {quest}: its name.
 msgctxt "ui.quest.abandonQuestion"
-msgid "Abandon {quest}? Its progress is lost, and its giver can start it again."
+msgid "Abandon {quest}? Its progress is lost, and its quest giver can start it again."
 msgstr ""
 
 #. The title of the list of every quest started.
@@ -869,7 +869,7 @@ msgstr ""
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.the-elders-errand.task.0"
-msgid "Reach the southern fields"
+msgid "Visit the southern fields"
 msgstr ""
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.

@@ -43,12 +43,12 @@ import com.mkz.rpg.quest.adapters.resources.ResourcesQuestLoader
 import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
-import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
-import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
+import com.mkz.rpg.quest.domain.QuestMother.talk
+import com.mkz.rpg.quest.domain.QuestMother.visit
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
@@ -192,7 +192,7 @@ class QuestAcceptanceTest {
     @Test
     fun `A reward item should lie on the leader's tile and be stored when it walks back when the bag is full`() {
         // Given
-        val apis = smallGame(mainQuest(tasks = listOf(defeatUnits(unitId = "rat")), reward = thirteenPotions).toDto())
+        val apis = smallGame(mainQuest(tasks = listOf(defeat(unitId = "rat")), reward = thirteenPotions).toDto())
         // When
         apis.defeatTheRat()
         // Then
@@ -209,9 +209,9 @@ class QuestAcceptanceTest {
     }
 
     @Test
-    fun `A reward item should lie on the tile the leader walked onto when reaching it completes the quest`() {
+    fun `A reward item should lie on the tile the leader walked onto when visiting it completes the quest`() {
         // Given
-        val apis = smallGame(mainQuest(tasks = listOf(reachTiles(1 to 1)), reward = thirteenPotions).toDto())
+        val apis = smallGame(mainQuest(tasks = listOf(visit(1 to 1)), reward = thirteenPotions).toDto())
         // When
         apis.walk(DirectionDto.EAST)
         // Then
@@ -220,17 +220,17 @@ class QuestAcceptanceTest {
     }
 
     @Test
-    fun `A side quest should run through its tasks and pay its reward when it is started by talking to its giver`() {
+    fun `A side quest should run through its tasks and grant its reward when it is started by talking to its quest giver`() {
         // Given
         val sideQuest =
             sideQuest(
                 id = "help-the-farmer",
-                giverNpcId = "farmer",
+                questGiverNpcId = "farmer",
                 repeatable = true,
-                tasks = listOf(reachTiles(2 to 0), talkToNpc(npcId = "farmer")),
+                tasks = listOf(visit(2 to 0), talk(npcId = "farmer")),
                 reward = reward(gold = 20, lootableItemIds = listOf("health-potion")),
             ).toDto()
-        val apis = smallGame(mainQuest(tasks = listOf(defeatUnits(unitId = "rat"))).toDto(), sideQuest)
+        val apis = smallGame(mainQuest(tasks = listOf(defeat(unitId = "rat"))).toDto(), sideQuest)
 
         fun progress() =
             apis.questApi

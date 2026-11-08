@@ -613,8 +613,8 @@ msgstr "Abandonar"
 
 #. Asked before abandoning a side quest. {quest}: its name.
 msgctxt "ui.quest.abandonQuestion"
-msgid "Abandon {quest}? Its progress is lost, and its giver can start it again."
-msgstr "¿Abandonar {quest}? Se pierde su progreso, y quien la dio puede empezarla de nuevo."
+msgid "Abandon {quest}? Its progress is lost, and its quest giver can start it again."
+msgstr "¿Abandonar {quest}? Se pierde su progreso, y quien la encargó puede empezarla de nuevo."
 
 #. The title of the list of every quest started.
 msgctxt "ui.questJournal.title"
@@ -869,8 +869,8 @@ msgstr "El Anciano quiere saber si el paso a los campos del sur sigue abierto."
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.the-elders-errand.task.0"
-msgid "Reach the southern fields"
-msgstr "Llega a los campos del sur"
+msgid "Visit the southern fields"
+msgstr "Visita los campos del sur"
 
 #. A task of a quest, by its place in the line of tasks, as a whole sentence.
 msgctxt "quest.the-elders-errand.task.1"

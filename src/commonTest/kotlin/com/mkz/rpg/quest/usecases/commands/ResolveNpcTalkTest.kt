@@ -8,7 +8,7 @@ import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
-import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
+import com.mkz.rpg.quest.domain.QuestMother.talk
 import com.mkz.rpg.quest.usecases.services.PublishQuestProgress
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
@@ -30,7 +30,7 @@ class ResolveNpcTalkTest {
     @Test
     fun `ResolveNpcTalk should complete the task when the talk with its npc finishes`() {
         // Given
-        questRepository.save(mainQuest(id = "talk-to-the-elder", tasks = listOf(talkToNpc(npcId = "elder"))).start().pullEvents().second)
+        questRepository.save(mainQuest(id = "talk-to-the-elder", tasks = listOf(talk(npcId = "elder"))).start().pullEvents().second)
         // When
         resolveNpcTalk(npcId = "elder")
         // Then
@@ -42,11 +42,11 @@ class ResolveNpcTalkTest {
     }
 
     @Test
-    fun `ResolveNpcTalk should start every eligible side quest of the giver`() {
+    fun `ResolveNpcTalk should start every eligible side quest of the quest giver`() {
         // Given
-        questRepository.save(sideQuest(id = "clear-the-rats", giverNpcId = "farmer"))
-        questRepository.save(sideQuest(id = "find-the-cow", giverNpcId = "farmer"))
-        questRepository.save(sideQuest(id = "forge-a-sword", giverNpcId = "blacksmith"))
+        questRepository.save(sideQuest(id = "clear-the-rats", questGiverNpcId = "farmer"))
+        questRepository.save(sideQuest(id = "find-the-cow", questGiverNpcId = "farmer"))
+        questRepository.save(sideQuest(id = "forge-a-sword", questGiverNpcId = "blacksmith"))
         // When
         resolveNpcTalk(npcId = "farmer")
         // Then
@@ -59,7 +59,7 @@ class ResolveNpcTalkTest {
     @Test
     fun `ResolveNpcTalk should not complete the first task of a quest when the same talk starts it`() {
         // Given
-        questRepository.save(sideQuest(id = "talk-again", giverNpcId = "farmer", tasks = listOf(talkToNpc(npcId = "farmer"))))
+        questRepository.save(sideQuest(id = "talk-again", questGiverNpcId = "farmer", tasks = listOf(talk(npcId = "farmer"))))
         // When
         resolveNpcTalk(npcId = "farmer")
         // Then
@@ -70,7 +70,7 @@ class ResolveNpcTalkTest {
     @Test
     fun `ResolveNpcTalk should not restart a repeatable quest when the same talk completes it`() {
         // Given
-        questRepository.save(sideQuest(id = "talk-again", giverNpcId = "farmer", repeatable = true, tasks = listOf(talkToNpc(npcId = "farmer"))).start().pullEvents().second)
+        questRepository.save(sideQuest(id = "talk-again", questGiverNpcId = "farmer", repeatable = true, tasks = listOf(talk(npcId = "farmer"))).start().pullEvents().second)
         // When
         resolveNpcTalk(npcId = "farmer")
         // Then
@@ -82,7 +82,7 @@ class ResolveNpcTalkTest {
     fun `ResolveNpcTalk should restart a repeatable quest when a later talk finishes`() {
         // Given
         questRepository.save(
-            sideQuest(id = "talk-again", giverNpcId = "farmer", repeatable = true, tasks = listOf(talkToNpc(npcId = "farmer")))
+            sideQuest(id = "talk-again", questGiverNpcId = "farmer", repeatable = true, tasks = listOf(talk(npcId = "farmer")))
                 .start()
                 .talkedTo("farmer")
                 .pullEvents()
@@ -92,7 +92,7 @@ class ResolveNpcTalkTest {
         resolveNpcTalk(npcId = "farmer")
         // Then
         questRepository.searchById("talk-again")!!.toDto().progress shouldBe
-            ProgressDto(questId = "talk-again", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
+            ProgressDto(questId = "talk-again", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskDefeats = 0, isPinned = false)
         eventBus.shouldHavePublishedEvents(QuestStarted(questId = "talk-again"))
     }
 
@@ -100,7 +100,7 @@ class ResolveNpcTalkTest {
     fun `ResolveNpcTalk should not start a quest again when it is completed and not repeatable`() {
         // Given
         questRepository.save(
-            sideQuest(id = "talk-again", giverNpcId = "farmer", tasks = listOf(talkToNpc(npcId = "farmer")))
+            sideQuest(id = "talk-again", questGiverNpcId = "farmer", tasks = listOf(talk(npcId = "farmer")))
                 .start()
                 .talkedTo("farmer")
                 .pullEvents()
@@ -116,7 +116,7 @@ class ResolveNpcTalkTest {
     @Test
     fun `ResolveNpcTalk should not complete the task when the talk with another npc finishes`() {
         // Given
-        questRepository.save(mainQuest(id = "talk-to-the-elder", tasks = listOf(talkToNpc(npcId = "elder"))).start().pullEvents().second)
+        questRepository.save(mainQuest(id = "talk-to-the-elder", tasks = listOf(talk(npcId = "elder"))).start().pullEvents().second)
         // When
         resolveNpcTalk(npcId = "merchant")
         // Then

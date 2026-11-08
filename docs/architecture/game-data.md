@@ -19,13 +19,13 @@ The game is defined by TOML files under [`resources`](../../resources). No game 
 | 8  | `RequestInitialisePlayers`       | Players                        | -                              |
 | 9  | `RequestInitialiseBattlefield`   | The battlefield                | Its terrains                   |
 | 10 | `RequestPlaceBuildings`          | The placed buildings           | Their tiles                    |
-| 11 | `RequestInitialiseQuests`        | The quests, not started yet    | The tiles they name            |
+| 11 | `RequestCreateQuests`            | The quests, not started yet    | The tiles they name            |
 | 12 | `RequestInitialiseBattleUnits`   | The deployed battle units      | Their units, players and tiles |
 | 13 | `RequestPlaceNpcs`               | The placed npcs                | Their tiles                    |
 | 14 | `RequestStartExploration`        | The exploring party            | The deployed battle units      |
 | 15 | `RequestStartMainQuest`          | The main quest, active         | The quests                     |
 
-3. Each `Initialise<Subdomain>` command, as well as `PlaceBuildings` and `PlaceNpcs`, creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
+3. Each `Initialise<Subdomain>` command, as well as `PlaceBuildings`, `PlaceNpcs` and `CreateQuests`, creates all its data synchronously, so the next subdomain can rely on it. It **MUST NOT** publish per-entity requests instead (e.g.: `RequestAbilityCreation`): those would be handled after every remaining initialisation request.
 
 To load a saved game, `SetUpGame` stops after step 11 (`isLoadingASavedGame`): the battle units, the npcs, the party
 and how far each quest went are restored from the save instead, once the first 11 steps are dispatched. See [Save and load](save-and-load.md#loading).
@@ -224,32 +224,32 @@ stock = ["health-potion", "mana-potion", "hammer"]
 
 ### `quest/<quest id>.toml`
 
-A line of tasks, completed one after the other, and the reward paid to the party leader. See [Quests](quests.md). The game needs exactly one `MAIN` quest, and fails to start on a quest with no tasks, an empty reward, negative gold, an empty tile group, a tile that is not vacant or a `count` below 1, on a `SIDE` quest with no `giverNpcId`, and on a `MAIN` quest with a `giverNpcId` or `repeatable`. The units, npcs and lootable items it names are checked in CI by `QuestResourcesTest`, which also fails on a recruitable npc as a giver or a talk task, as recruiting deletes the npc.
+A line of tasks, completed one after the other, and the reward granted to the party leader. See [Quests](quests.md). The game needs exactly one `MAIN` quest, and fails to start on a quest with no tasks, an empty reward, negative gold, an empty tile group, a tile that is not vacant or a `requiredDefeats` below 1, on a `SIDE` quest with no `questGiverNpcId`, and on a `MAIN` quest with a `questGiverNpcId` or `repeatable`. The units, npcs and lootable items it names are checked in CI by `QuestResourcesTest`, which also fails on a recruitable npc as a quest giver or a talk task, as recruiting deletes the npc.
 
 ```toml
 type = "MAIN"                    # MAIN, SIDE
-# giverNpcId = "farmer"          # Only for SIDE, required: the npc who starts it once the party finishes talking to it
-# repeatable = true              # Only for SIDE, false by default: whether a later talk to its giver runs it again once completed
+# questGiverNpcId = "farmer"     # Only for SIDE, required: the npc who starts it once the party finishes talking to it
+# repeatable = true              # Only for SIDE, false by default: whether a later talk to its quest giver runs it again once completed
 
 [[tasks]]
-type = "DEFEAT_UNITS"            # DEFEAT_UNITS, TALK_TO_NPC, REACH_TILES
-unitId = "goat-wizard"           # Only for DEFEAT_UNITS
-count = 1                        # Only for DEFEAT_UNITS
+type = "DEFEAT"                  # DEFEAT, TALK, VISIT
+unitId = "goat-wizard"           # Only for DEFEAT
+requiredDefeats = 1              # Only for DEFEAT
 
 # [[tasks]]
-# type = "TALK_TO_NPC"
-# npcId = "farmer"               # Only for TALK_TO_NPC
+# type = "TALK"
+# npcId = "farmer"               # Only for TALK
 
 # [[tasks]]
-# type = "REACH_TILES"
-# tiles = [[17, 11], [18, 11]]   # Only for REACH_TILES: a list of [row, column], any of which completes it
+# type = "VISIT"
+# tiles = [[17, 11], [18, 11]]   # Only for VISIT: a list of [row, column], any of which completes it
 
 [reward]
 gold = 150                       # Optional, 0 by default
 # lootableItemIds = ["hammer"]   # Optional, none by default
 ```
 
-The shipped side quests are examples of each: [`bats-in-the-meadow`](../../resources/quest/bats-in-the-meadow.toml) counts defeats then asks to talk, [`the-elders-errand`](../../resources/quest/the-elders-errand.toml) asks to reach some tiles and pays an item, and [`rats-in-the-fields`](../../resources/quest/rats-in-the-fields.toml) is repeatable.
+The shipped side quests are examples of each: [`bats-in-the-meadow`](../../resources/quest/bats-in-the-meadow.toml) counts defeats then asks to talk, [`the-elders-errand`](../../resources/quest/the-elders-errand.toml) asks to visit some tiles and grants an item, and [`rats-in-the-fields`](../../resources/quest/rats-in-the-fields.toml) is repeatable.
 
 ## How to add a unit
 

@@ -7,28 +7,28 @@ import com.mkz.rpg.quest.domain.Quest.Dto.QuestTypeDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.Quest.Dto.TaskDto
 import com.mkz.rpg.quest.domain.QuestError.EmptyQuestReward
-import com.mkz.rpg.quest.domain.QuestError.EmptyTaskTiles
+import com.mkz.rpg.quest.domain.QuestError.EmptyVisitTaskTiles
 import com.mkz.rpg.quest.domain.QuestError.InvalidTask
 import com.mkz.rpg.quest.domain.QuestError.MainQuestCanNotBeAbandoned
 import com.mkz.rpg.quest.domain.QuestError.MainQuestRepeatable
-import com.mkz.rpg.quest.domain.QuestError.MainQuestWithGiver
+import com.mkz.rpg.quest.domain.QuestError.MainQuestWithQuestGiver
 import com.mkz.rpg.quest.domain.QuestError.NegativeQuestRewardGold
 import com.mkz.rpg.quest.domain.QuestError.QuestNotActive
 import com.mkz.rpg.quest.domain.QuestError.QuestWithoutTasks
-import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutGiver
-import com.mkz.rpg.quest.domain.QuestError.TaskCountBelowOne
+import com.mkz.rpg.quest.domain.QuestError.RequiredDefeatsBelowOne
+import com.mkz.rpg.quest.domain.QuestError.SideQuestWithoutQuestGiver
+import com.mkz.rpg.quest.domain.QuestEvent.DefeatCounted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestAbandoned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
-import com.mkz.rpg.quest.domain.QuestEvent.TaskProgressed
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
-import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
-import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
+import com.mkz.rpg.quest.domain.QuestMother.talk
+import com.mkz.rpg.quest.domain.QuestMother.visit
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -43,7 +43,7 @@ class QuestTest {
         // When
         val quest = mainQuest(id = "defeat-the-goat-wizard")
         // Then
-        quest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
+        quest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.NOT_STARTED, currentTaskIndex = 0, currentTaskDefeats = 0, isPinned = false)
         quest.pullEvents().first.shouldBeEmpty()
     }
 
@@ -65,41 +65,41 @@ class QuestTest {
     @Test
     fun `Quest should fail when a task has no details of its type`() {
         // Given
-        val task = TaskDto(type = TaskDto.TypeDto.TALK_TO_NPC, defeatUnits = null, talkToNpc = null, reachTiles = null)
+        val task = TaskDto(type = TaskDto.TypeDto.TALK, defeat = null, talk = null, visit = null)
         // When / Then
         shouldThrow<InvalidTask> { mainQuest(tasks = listOf(task)) }
     }
 
     @Test
     fun `Quest should fail when a task has no tiles`() {
-        shouldThrow<EmptyTaskTiles> { mainQuest(tasks = listOf(reachTiles())) }
+        shouldThrow<EmptyVisitTaskTiles> { mainQuest(tasks = listOf(visit())) }
     }
 
     @Test
-    fun `Quest should fail when a task has a count below one`() {
-        shouldThrow<TaskCountBelowOne> { mainQuest(tasks = listOf(defeatUnits(count = 0))) }
+    fun `Quest should fail when a defeat task has fewer than one required defeat`() {
+        shouldThrow<RequiredDefeatsBelowOne> { mainQuest(tasks = listOf(defeat(requiredDefeats = 0))) }
     }
 
     @Test
-    fun `Quest should fail when a side quest has no giver`() {
+    fun `Quest should fail when a side quest has no quest giver`() {
         // Given
-        val dto = sideQuest().toDto().copy(giverNpcId = null)
+        val dto = sideQuest().toDto().copy(questGiverNpcId = null)
         // When / Then
-        shouldThrow<SideQuestWithoutGiver> { Quest.create(dto) }
+        shouldThrow<SideQuestWithoutQuestGiver> { Quest.create(dto) }
     }
 
     @Test
-    fun `Quest should fail when a main quest has a giver`() {
+    fun `Quest should fail when a main quest has a quest giver`() {
         // Given
-        val dto = mainQuest().toDto().copy(giverNpcId = "farmer")
+        val dto = mainQuest().toDto().copy(questGiverNpcId = "farmer")
         // When / Then
-        shouldThrow<MainQuestWithGiver> { Quest.create(dto) }
+        shouldThrow<MainQuestWithQuestGiver> { Quest.create(dto) }
     }
 
     @Test
     fun `Quest should fail when a main quest is repeatable`() {
         // Given
-        val dto = sideQuest(repeatable = true).toDto().copy(type = QuestTypeDto.MAIN, giverNpcId = null)
+        val dto = sideQuest(repeatable = true).toDto().copy(type = QuestTypeDto.MAIN, questGiverNpcId = null)
         // When / Then
         shouldThrow<MainQuestRepeatable> { Quest.create(dto) }
     }
@@ -111,25 +111,25 @@ class QuestTest {
         // When
         val startedQuest = quest.start()
         // Then
-        startedQuest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 0, isPinned = false)
+        startedQuest.toDto().progress shouldBe ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskDefeats = 0, isPinned = false)
         startedQuest.pullEvents().first.shouldContainExactly(QuestStarted(questId = "defeat-the-goat-wizard"))
     }
 
     @Test
     fun `Quest should move on to the next task when the current one is done`() {
         // Given
-        val quest = started(tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat")))
+        val quest = started(tasks = listOf(visit(1 to 1), defeat(unitId = "rat")))
         // When
-        val updatedQuest = quest.reached(listOf(PositionDto(row = 1, column = 1)))
+        val updatedQuest = quest.visited(listOf(PositionDto(row = 1, column = 1)))
         // Then
-        updatedQuest.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0, isPinned = false)
+        updatedQuest.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 0, isPinned = false)
         updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0))
     }
 
     @Test
     fun `Quest should not count an event when its task is not the current one`() {
         // Given
-        val quest = started(tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat")))
+        val quest = started(tasks = listOf(visit(1 to 1), defeat(unitId = "rat")))
         // When
         val updatedQuest = quest.defeated("rat")
         // Then
@@ -139,9 +139,9 @@ class QuestTest {
     @Test
     fun `Quest should not count an event when the current task asks for something else`() {
         // Given
-        val quest = started(tasks = listOf(defeatUnits(unitId = "rat")))
+        val quest = started(tasks = listOf(defeat(unitId = "rat")))
         // When
-        val updatedQuest = quest.defeated("bat").reached(listOf(PositionDto(row = 1, column = 1)))
+        val updatedQuest = quest.defeated("bat").visited(listOf(PositionDto(row = 1, column = 1)))
         // Then
         updatedQuest shouldBe quest
     }
@@ -149,7 +149,7 @@ class QuestTest {
     @Test
     fun `Quest should not count an event when it has not started`() {
         // Given
-        val quest = mainQuest(tasks = listOf(defeatUnits(unitId = "rat")))
+        val quest = mainQuest(tasks = listOf(defeat(unitId = "rat")))
         // When
         val updatedQuest = quest.defeated("rat")
         // Then
@@ -157,20 +157,20 @@ class QuestTest {
     }
 
     @Test
-    fun `Quest should complete only once the defeats reach the count`() {
+    fun `Quest should complete only once the defeats counted reach the required defeats`() {
         // Given
-        val quest = started(tasks = listOf(defeatUnits(unitId = "rat", count = 2)))
+        val quest = started(tasks = listOf(defeat(unitId = "rat", requiredDefeats = 2)))
         // When
         val onceDefeated = quest.defeated("rat").pullEvents()
         val twiceDefeated = onceDefeated.second.defeated("rat").pullEvents()
         // Then
-        onceDefeated.second.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskProgress = 1, isPinned = false)
-        onceDefeated.first.shouldContainExactly(TaskProgressed(questId = "a-quest", taskIndex = 0, progress = 1, count = 2))
+        onceDefeated.second.toDto().progress shouldBe ProgressDto(questId = "a-quest", status = StatusDto.ACTIVE, currentTaskIndex = 0, currentTaskDefeats = 1, isPinned = false)
+        onceDefeated.first.shouldContainExactly(DefeatCounted(questId = "a-quest", taskIndex = 0, defeats = 1, requiredDefeats = 2))
         twiceDefeated.second
             .toDto()
             .progress.status shouldBe StatusDto.COMPLETED
         twiceDefeated.first.shouldContainExactly(
-            TaskProgressed(questId = "a-quest", taskIndex = 0, progress = 2, count = 2),
+            DefeatCounted(questId = "a-quest", taskIndex = 0, defeats = 2, requiredDefeats = 2),
             TaskCompleted(questId = "a-quest", taskIndex = 0),
             QuestCompleted(questId = "a-quest"),
         )
@@ -179,9 +179,9 @@ class QuestTest {
     @Test
     fun `Quest should complete when the last task is done`() {
         // Given
-        val quest = started(tasks = listOf(reachTiles(1 to 1)))
+        val quest = started(tasks = listOf(visit(1 to 1)))
         // When
-        val updatedQuest = quest.reached(listOf(PositionDto(row = 0, column = 0), PositionDto(row = 1, column = 1)))
+        val updatedQuest = quest.visited(listOf(PositionDto(row = 0, column = 0), PositionDto(row = 1, column = 1)))
         // Then
         updatedQuest.toDto().progress.status shouldBe StatusDto.COMPLETED
         updatedQuest.pullEvents().first.shouldContainExactly(TaskCompleted(questId = "a-quest", taskIndex = 0), QuestCompleted(questId = "a-quest"))
@@ -190,7 +190,7 @@ class QuestTest {
     @Test
     fun `Quest should complete the task when the talk is with its npc`() {
         // Given
-        val quest = started(tasks = listOf(talkToNpc(npcId = "elder")))
+        val quest = started(tasks = listOf(talk(npcId = "elder")))
         // When
         val updatedQuest = quest.talkedTo("elder")
         // Then
@@ -200,7 +200,7 @@ class QuestTest {
     @Test
     fun `Quest should not complete the task when the talk is with another npc`() {
         // Given
-        val quest = started(tasks = listOf(talkToNpc(npcId = "elder")))
+        val quest = started(tasks = listOf(talk(npcId = "elder")))
         // When
         val updatedQuest = quest.talkedTo("merchant")
         // Then
@@ -210,7 +210,7 @@ class QuestTest {
     @Test
     fun `Quest should not count an event when it is completed`() {
         // Given
-        val completedQuest = started(tasks = listOf(defeatUnits(unitId = "rat"))).defeated("rat").pullEvents().second
+        val completedQuest = started(tasks = listOf(defeat(unitId = "rat"))).defeated("rat").pullEvents().second
         // When
         val updatedQuest = completedQuest.defeated("rat")
         // Then
@@ -218,9 +218,9 @@ class QuestTest {
     }
 
     @Test
-    fun `Quest should be startable by its giver when it is not started`() {
+    fun `Quest should be startable by its quest giver when it is not started`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer")
+        val quest = sideQuest(questGiverNpcId = "farmer")
         // When / Then
         quest.canBeStartedBy("farmer") shouldBe true
     }
@@ -228,31 +228,31 @@ class QuestTest {
     @Test
     fun `Quest should not be startable by another npc`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer")
+        val quest = sideQuest(questGiverNpcId = "farmer")
         // When / Then
         quest.canBeStartedBy("blacksmith") shouldBe false
     }
 
     @Test
-    fun `Quest should not be startable by its giver when it is active`() {
+    fun `Quest should not be startable by its quest giver when it is active`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer", repeatable = true).start()
+        val quest = sideQuest(questGiverNpcId = "farmer", repeatable = true).start()
         // When / Then
         quest.canBeStartedBy("farmer") shouldBe false
     }
 
     @Test
-    fun `Quest should be startable by its giver when it is completed and repeatable`() {
+    fun `Quest should be startable by its quest giver when it is completed and repeatable`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat"))).start().defeated("rat")
+        val quest = sideQuest(questGiverNpcId = "farmer", repeatable = true, tasks = listOf(defeat(unitId = "rat"))).start().defeated("rat")
         // When / Then
         quest.canBeStartedBy("farmer") shouldBe true
     }
 
     @Test
-    fun `Quest should not be startable by its giver when it is completed and not repeatable`() {
+    fun `Quest should not be startable by its quest giver when it is completed and not repeatable`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer", tasks = listOf(defeatUnits(unitId = "rat"))).start().defeated("rat")
+        val quest = sideQuest(questGiverNpcId = "farmer", tasks = listOf(defeat(unitId = "rat"))).start().defeated("rat")
         // When / Then
         quest.canBeStartedBy("farmer") shouldBe false
     }
@@ -271,8 +271,8 @@ class QuestTest {
         val quest =
             sideQuest(
                 id = "a-quest",
-                tasks = listOf(reachTiles(1 to 1), defeatUnits(unitId = "rat", count = 5)),
-            ).start().reached(listOf(PositionDto(row = 1, column = 1))).defeated("rat").pullEvents().second
+                tasks = listOf(visit(1 to 1), defeat(unitId = "rat", requiredDefeats = 5)),
+            ).start().visited(listOf(PositionDto(row = 1, column = 1))).defeated("rat").pullEvents().second
         // When
         val abandonedQuest = quest.abandon()
         // Then
@@ -309,7 +309,7 @@ class QuestTest {
     @Test
     fun `Pin should mark the quest and publish QuestPinned when it is active`() {
         // When
-        val (events, pinned) = started(listOf(defeatUnits())).pin().pullEvents()
+        val (events, pinned) = started(listOf(defeat())).pin().pullEvents()
         // Then
         pinned.toDto().progress.isPinned shouldBe true
         events.shouldContainExactly(QuestPinned(questId = "a-quest"))
@@ -323,7 +323,7 @@ class QuestTest {
     @Test
     fun `Unpin should clear the pin and publish nothing when it is pinned`() {
         // Given
-        val pinned = started(listOf(defeatUnits())).pin().pullEvents().second
+        val pinned = started(listOf(defeat())).pin().pullEvents().second
         // When
         val (events, unpinned) = pinned.unpin().pullEvents()
         // Then
@@ -349,7 +349,7 @@ class QuestTest {
     @Test
     fun `Defeated should unpin the quest when its last task is completed`() {
         // Given
-        val pinned = started(listOf(defeatUnits(unitId = "rat", count = 1))).pin().pullEvents().second
+        val pinned = started(listOf(defeat(unitId = "rat", requiredDefeats = 1))).pin().pullEvents().second
         // When
         val completed = pinned.defeated("rat")
         // Then
@@ -360,7 +360,7 @@ class QuestTest {
     @Test
     fun `Defeated should keep the pin when a task is left`() {
         // Given
-        val pinned = started(listOf(defeatUnits(unitId = "rat", count = 1), talkToNpc("farmer"))).pin().pullEvents().second
+        val pinned = started(listOf(defeat(unitId = "rat", requiredDefeats = 1), talk("farmer"))).pin().pullEvents().second
         // When
         val progressed = pinned.defeated("rat")
         // Then
@@ -370,7 +370,7 @@ class QuestTest {
     @Test
     fun `MarkerFor should be a talk task when the current task is to talk to the npc`() {
         // Given
-        val quest = started(listOf(talkToNpc("elder")))
+        val quest = started(listOf(talk("elder")))
         // When
         val result = quest.markerFor("elder")
         // Then
@@ -380,7 +380,7 @@ class QuestTest {
     @Test
     fun `MarkerFor should be nothing when the talk is not the current task`() {
         // Given
-        val quest = started(listOf(defeatUnits(), talkToNpc("elder")))
+        val quest = started(listOf(defeat(), talk("elder")))
         // When
         val result = quest.markerFor("elder")
         // Then
@@ -390,7 +390,7 @@ class QuestTest {
     @Test
     fun `MarkerFor should be a quest to start when the npc can start it`() {
         // When
-        val result = sideQuest(giverNpcId = "farmer").markerFor("farmer")
+        val result = sideQuest(questGiverNpcId = "farmer").markerFor("farmer")
         // Then
         result?.sign shouldBe QuestMarkerDto.SignDto.QUEST_TO_START
     }
@@ -398,7 +398,7 @@ class QuestTest {
     @Test
     fun `MarkerFor should be nothing when the quest is under way or another npc is asked`() {
         // Given
-        val quest = sideQuest(giverNpcId = "farmer")
+        val quest = sideQuest(questGiverNpcId = "farmer")
         // When
         val underWay =
             quest
@@ -416,7 +416,7 @@ class QuestTest {
     fun `MarkerFor should be a quest to start when a repeatable quest is completed`() {
         // Given
         val completed =
-            sideQuest(giverNpcId = "farmer", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat", count = 1)))
+            sideQuest(questGiverNpcId = "farmer", repeatable = true, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1)))
                 .start()
                 .defeated("rat")
                 .pullEvents()

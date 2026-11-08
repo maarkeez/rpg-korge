@@ -3,12 +3,12 @@ package com.mkz.rpg.screen.adapters.presentation
 import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
-import com.mkz.rpg.quest.domain.QuestMother.reachTiles
 import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
-import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
+import com.mkz.rpg.quest.domain.QuestMother.talk
+import com.mkz.rpg.quest.domain.QuestMother.visit
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.Kind
 import com.mkz.rpg.screen.adapters.presentation.QuestInfo.RewardItem
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -19,22 +19,22 @@ import kotlin.test.Test
 
 class QuestMapperTest {
     private val goatWizardQuestId = "defeat-the-goat-wizard"
-    private val threeTasks = listOf(talkToNpc("elder"), defeatUnits(unitId = "rat", count = 5), reachTiles(1 to 1))
+    private val threeTasks = listOf(talk("elder"), defeat(unitId = "rat", requiredDefeats = 5), visit(1 to 1))
 
     private fun questInfo(
         quest: Quest,
         status: StatusDto = StatusDto.ACTIVE,
         currentTaskIndex: Int = 0,
-        currentTaskProgress: Int = 0,
+        currentTaskDefeats: Int = 0,
     ): QuestInfo {
         val id = quest.toDto().id
-        return QuestMapper.questInfos(listOf(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskProgress, isPinned = false)).toDto()), TextsMother.texts()).single()
+        return QuestMapper.questInfos(listOf(quest.restoreProgress(ProgressDto(id, status, currentTaskIndex, currentTaskDefeats, isPinned = false)).toDto()), TextsMother.texts()).single()
     }
 
     @Test
     fun `questInfo should translate the name, the description and each task when given a quest`() {
         // Given
-        val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(defeatUnits()))
+        val quest = mainQuest(id = goatWizardQuestId, tasks = listOf(defeat()))
         // When
         val spanish = QuestMapper.questInfos(listOf(quest.toDto()), TextsMother.texts("es")).single()
         val english = questInfo(quest)
@@ -51,7 +51,7 @@ class QuestMapperTest {
         // Given
         val quest = mainQuest(tasks = threeTasks)
         // When
-        val info = questInfo(quest, currentTaskIndex = 1, currentTaskProgress = 3)
+        val info = questInfo(quest, currentTaskIndex = 1, currentTaskDefeats = 3)
         // Then
         info.isCompleted.shouldBeFalse()
         info.tasks.map { task -> task.isDone }.shouldContainExactly(true, false)

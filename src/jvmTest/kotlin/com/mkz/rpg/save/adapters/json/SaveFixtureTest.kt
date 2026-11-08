@@ -16,7 +16,7 @@ import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.reward
 import com.mkz.rpg.save.adapters.presentation.SaveApi
@@ -80,7 +80,7 @@ class SaveFixtureTest {
                         emptyList()
                     },
                 npcs = if (isPlayed) listOf(npc(id = "elder", row = 0, column = 3, stock = listOf("health-potion")).toDto()) else emptyList(),
-                quests = listOf(mainQuest(id = "defeat-a-rat", tasks = listOf(defeatUnits(unitId = "rat")), reward = reward(gold = 15)).toDto()),
+                quests = listOf(mainQuest(id = "defeat-a-rat", tasks = listOf(defeat(unitId = "rat")), reward = reward(gold = 15)).toDto()),
                 explore = isPlayed,
             )
         private val cpuBattleBrainApi =

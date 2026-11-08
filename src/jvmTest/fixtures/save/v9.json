@@ -1,0 +1,139 @@
+{
+    "summary": {
+        "version": 9,
+        "savedAt": 1.79338572E12,
+        "leaderUnitId": "knight",
+        "partySize": 1
+    },
+    "snapshots": {
+        "battleUnit": [
+            {
+                "id": "knight-1",
+                "unitId": "knight",
+                "playerId": "human",
+                "remainingHealth": 30,
+                "remainingMana": 10,
+                "baseMaximumHealth": 30,
+                "baseMaximumMana": 10,
+                "equippedEffects": [],
+                "maximumSteps": 3,
+                "remainingSteps": 3,
+                "remainingCasts": 1,
+                "knownAbilities": {},
+                "learnedAbilityIds": [],
+                "maximumAbilities": 6,
+                "ongoingEffects": [],
+                "remainingSummonDuration": null
+            },
+            {
+                "id": "rat-1",
+                "unitId": "rat",
+                "playerId": "cpu",
+                "remainingHealth": 8,
+                "remainingMana": 0,
+                "baseMaximumHealth": 8,
+                "baseMaximumMana": 0,
+                "equippedEffects": [],
+                "maximumSteps": 1,
+                "remainingSteps": 1,
+                "remainingCasts": 1,
+                "knownAbilities": {},
+                "learnedAbilityIds": [],
+                "maximumAbilities": 6,
+                "ongoingEffects": [],
+                "remainingSummonDuration": null
+            }
+        ],
+        "battlefield": [
+            {
+                "occupantId": "elder",
+                "row": 0,
+                "column": 3
+            },
+            {
+                "occupantId": "knight-1",
+                "row": 1,
+                "column": 1
+            },
+            {
+                "occupantId": "rat-1",
+                "row": 2,
+                "column": 5
+            }
+        ],
+        "npc": [
+            {
+                "id": "elder",
+                "row": 0,
+                "column": 3,
+                "unitId": null,
+                "stock": [
+                    "health-potion"
+                ]
+            }
+        ],
+        "lootDrop": [
+            {
+                "unitId": "rat",
+                "droppedItems": []
+            }
+        ],
+        "inventory": [
+            {
+                "battleUnitId": "knight-1",
+                "maximumStorageSpace": 12,
+                "storedItems": [
+                    "health-potion"
+                ],
+                "equippedItems": {},
+                "gold": 40
+            }
+        ],
+        "party": {
+            "playerId": "human",
+            "battleUnitIds": [
+                "knight-1"
+            ],
+            "walkingOrderBattleUnitIds": [
+                "knight-1"
+            ]
+        },
+        "cpuWanderBrain": {
+            "homes": [
+                {
+                    "battleUnitId": "rat-1",
+                    "row": 2,
+                    "column": 5,
+                    "distancesFromHome": [
+                        [
+                            2,
+                            5,
+                            0
+                        ],
+                        [
+                            1,
+                            5,
+                            1
+                        ],
+                        [
+                            0,
+                            5,
+                            2
+                        ]
+                    ]
+                }
+            ],
+            "returningBattleUnitIds": [],
+            "awaitedRespawns": {}
+        },
+        "quest": [
+            {
+                "questId": "defeat-a-rat",
+                "status": "ACTIVE",
+                "currentTaskIndex": 0,
+                "currentTaskDefeats": 0,
+                "isPinned": false
+            }
+        ]
+    }
+}

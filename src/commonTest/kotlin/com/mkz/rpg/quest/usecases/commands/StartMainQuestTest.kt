@@ -37,7 +37,7 @@ class StartMainQuestTest {
     }
 
     @Test
-    fun `StartMainQuest should fail when the quests are not initialised`() {
+    fun `StartMainQuest should fail when the quests are not created`() {
         shouldThrow<MainQuestNotUnique> { startMainQuest() }
     }
 }

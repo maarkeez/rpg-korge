@@ -3,7 +3,7 @@ package com.mkz.rpg.quest.usecases.commands
 import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -19,9 +19,9 @@ class RestoreQuestsTest {
     fun `RestoreQuests should put back the progress of each quest, publishing no events`() {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
-        questRepository.save(sideQuest(id = "clear-the-rats", tasks = listOf(defeatUnits(unitId = "bat"), defeatUnits(unitId = "rat", count = 5))))
-        val mainProgress = ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.COMPLETED, currentTaskIndex = 0, currentTaskProgress = 1, isPinned = false)
-        val sideProgress = ProgressDto(questId = "clear-the-rats", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 3, isPinned = false)
+        questRepository.save(sideQuest(id = "clear-the-rats", tasks = listOf(defeat(unitId = "bat"), defeat(unitId = "rat", requiredDefeats = 5))))
+        val mainProgress = ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.COMPLETED, currentTaskIndex = 0, currentTaskDefeats = 1, isPinned = false)
+        val sideProgress = ProgressDto(questId = "clear-the-rats", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 3, isPinned = false)
         // When
         restoreQuests(listOf(mainProgress, sideProgress))
         // Then
@@ -44,7 +44,7 @@ class RestoreQuestsTest {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
         // When
-        val result = runCatching { restoreQuests(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskProgress = 0, isPinned = false))) }
+        val result = runCatching { restoreQuests(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 0, isPinned = false))) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "defeat-the-goat-wizard"
     }

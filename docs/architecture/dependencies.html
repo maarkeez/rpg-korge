@@ -1092,7 +1092,7 @@ const DATA = {
     ]},
     {"from": "quest", "to": "battlefield", "weight": 3, "files": 3, "imports": [
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "battlefield.adapters.presentation.BattlefieldApi"},
-      {"file": "com/mkz/rpg/quest/usecases/commands/InitialiseQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
+      {"file": "com/mkz/rpg/quest/usecases/commands/CreateQuests.kt", "layer": "usecases", "name": "battlefield.usecases.queries.IsTileVacant"},
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "battlefield.usecases.queries.SearchPosition"}
     ]},
     {"from": "quest", "to": "inventory", "weight": 1, "files": 1, "imports": [
@@ -1102,7 +1102,7 @@ const DATA = {
       {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "party.domain.PartyEvent.NpcTalkFinished"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "party.adapters.presentation.PartyApi"},
       {"file": "com/mkz/rpg/quest/usecases/commands/ProgressDefeatTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
-      {"file": "com/mkz/rpg/quest/usecases/commands/ProgressReachTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
+      {"file": "com/mkz/rpg/quest/usecases/commands/ProgressVisitTasks.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"},
       {"file": "com/mkz/rpg/quest/usecases/commands/RequestQuestReward.kt", "layer": "usecases", "name": "party.usecases.queries.SearchParty"}
     ]},
     {"from": "quest", "to": "shared", "weight": 26, "files": 14, "imports": [
@@ -1114,8 +1114,8 @@ const DATA = {
       {"file": "com/mkz/rpg/quest/adapters/events/OnNpcTalkFinished.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnQuestCompleted.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
-      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
-      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestInitialiseQuests.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
+      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestCreateQuests.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
+      {"file": "com/mkz/rpg/quest/adapters/events/OnRequestCreateQuests.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
       {"file": "com/mkz/rpg/quest/adapters/events/OnRequestStartMainQuest.kt", "layer": "adapters", "name": "shared.domain.subscribe"},
       {"file": "com/mkz/rpg/quest/adapters/presentation/QuestApi.kt", "layer": "adapters", "name": "shared.domain.EventBus"},
@@ -1354,12 +1354,12 @@ const DATA = {
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestMapper.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.TaskDto"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.adapters.presentation.QuestApi"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.Quest.Dto.StatusDto"},
+      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.DefeatCounted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestAbandoned"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestCompleted"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestPinned"},
       {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.QuestStarted"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.TaskCompleted"},
-      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.TaskProgressed"}
+      {"file": "com/mkz/rpg/screen/adapters/presentation/QuestPresenter.kt", "layer": "adapters", "name": "quest.domain.QuestEvent.TaskCompleted"}
     ]},
     {"from": "screen", "to": "save", "weight": 12, "files": 9, "imports": [
       {"file": "com/mkz/rpg/screen/adapters/presentation/BattleInfoPresenter.kt", "layer": "adapters", "name": "save.domain.SaveEvent.GameRestored"},

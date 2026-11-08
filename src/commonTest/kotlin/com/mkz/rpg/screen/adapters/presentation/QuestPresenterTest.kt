@@ -14,10 +14,10 @@ import com.mkz.rpg.quest.domain.Quest
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
 import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
-import com.mkz.rpg.quest.domain.QuestMother.defeatUnits
+import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
-import com.mkz.rpg.quest.domain.QuestMother.talkToNpc
+import com.mkz.rpg.quest.domain.QuestMother.talk
 import com.mkz.rpg.save.domain.SaveEvent.GameRestored
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
@@ -164,7 +164,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should pop the tracker when a defeat counts`() {
         // Given
-        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 5))))
         apis.startedPresenter()
         // When
         apis.defeatRat()
@@ -179,7 +179,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should pop the tracker once when a defeat completes a task with another one after it`() {
         // Given
-        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1), defeatUnits(unitId = "knight", count = 1))))
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1), defeat(unitId = "knight", requiredDefeats = 1))))
         apis.startedPresenter()
         // When
         apis.defeatRat()
@@ -197,7 +197,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should announce the completion once when the last defeat publishes three events`() {
         // Given
-        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1))))
         apis.startedPresenter()
         // When
         apis.defeatRat()
@@ -274,7 +274,7 @@ class QuestPresenterTest {
     @Test
     fun `OpenQuest should display the quest in its completed state when it is completed`() {
         // Given
-        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1))))
         val presenter = apis.startedPresenter()
         apis.defeatRat()
         // When
@@ -367,7 +367,7 @@ class QuestPresenterTest {
     @Test
     fun `questJournalSelected should display Back alone when it is the main quest or a completed one`() {
         // Given: the side quest completed before opening, as the last defeat also wins the battle, which closes the journal.
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1))))
         val presenter = apis.presenter()
         apis.startQuest()
         apis.questApi.resolveNpcTalk("farmer")
@@ -401,7 +401,7 @@ class QuestPresenterTest {
     @Test
     fun `OpenQuest should list the active quests before the completed ones when one is completed`() {
         // Given
-        val completed = sideQuest(id = "completed", tasks = listOf(defeatUnits(unitId = "rat", count = 1)))
+        val completed = sideQuest(id = "completed", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1)))
         val active = sideQuest(id = "active")
         val apis = apis(completed, mainQuest(id = questId), active)
         val presenter = apis.presenter()
@@ -536,7 +536,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should only pop the tracker when a quest it does not name progresses`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 5))))
         apis.presenterWithASideQuestOpen()
         val drawn = trackerView.displayedQuests.size
         // When
@@ -549,7 +549,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should pop the tracker once when a defeat completes a task of a quest it does not name`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1), defeatUnits(unitId = "knight", count = 1))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1), defeat(unitId = "knight", requiredDefeats = 1))))
         apis.presenterWithASideQuestOpen()
         // When
         apis.defeatRat()
@@ -560,7 +560,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should pop the tracker when a repeatable quest counts the same as its last run`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", repeatable = true, tasks = listOf(defeatUnits(unitId = "rat", count = 2))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", repeatable = true, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 2))))
         apis.presenterWithASideQuestOpen()
         apis.defeatRat()
         apis.defeatRat()
@@ -576,7 +576,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should name the pinned quest and draw it without popping when it is pinned`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 5))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 5))))
         apis.presenterWithASideQuestOpen()
         // When
         apis.pin("side")
@@ -610,7 +610,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should display the main quest when the pinned quest completes`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeatUnits(unitId = "rat", count = 1))))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1))))
         apis.presenterWithASideQuestOpen()
         apis.pin("side")
         val pops = trackerView.pops
@@ -637,7 +637,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should not move the tracker when another quest starts`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "later", giverNpcId = "elder"))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side"), sideQuest(id = "later", questGiverNpcId = "elder"))
         apis.presenterWithASideQuestOpen()
         apis.pin("side")
         // When
@@ -678,7 +678,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should draw the markers when the party explores, and remove them in a battle`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(farmer))
         apis.presenter()
         // When
         apis.startQuest()
@@ -697,7 +697,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should draw no marker when a task is completed in a battle`() {
         // Given
-        val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1), talkToNpc("farmer"))), npcs = listOf(farmer))
+        val apis = apis(mainQuest(id = questId, tasks = listOf(defeat(unitId = "rat", requiredDefeats = 1), talk("farmer"))), npcs = listOf(farmer))
         apis.presenter()
         apis.startQuest()
         apis.interruptExploration()
@@ -714,7 +714,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should remove the marker when its quest starts, and put it back when it is abandoned`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(farmer))
         apis.presenter()
         apis.startQuest()
         // When
@@ -732,7 +732,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should draw the markers when a game is restored`() {
         // Given
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"), npcs = listOf(farmer))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(farmer))
         apis.presenter()
         // When
         apis.eventBus.publish(GameRestored(slot = 1))
@@ -744,7 +744,7 @@ class QuestPresenterTest {
     @Test
     fun `QuestPresenter should draw no marker when the npc is not on the battlefield`() {
         // Given: nobody stands for the farmer.
-        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", giverNpcId = "farmer"))
+        val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"))
         apis.presenter()
         // When
         apis.startQuest()

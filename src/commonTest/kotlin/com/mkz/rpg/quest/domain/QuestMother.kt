@@ -10,26 +10,27 @@ import korlibs.io.util.UUID
 object QuestMother {
     fun mainQuest(
         id: String = id(),
-        tasks: List<TaskDto> = listOf(defeatUnits()),
+        tasks: List<TaskDto> = listOf(defeat()),
         reward: RewardDto = reward(),
-    ): Quest = Quest.create(Quest.Dto(id = id, type = QuestTypeDto.MAIN, giverNpcId = null, repeatable = false, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
+    ): Quest = Quest.create(Quest.Dto(id = id, type = QuestTypeDto.MAIN, questGiverNpcId = null, repeatable = false, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
 
     fun sideQuest(
         id: String = id(),
-        giverNpcId: String = "farmer",
+        questGiverNpcId: String = "farmer",
         repeatable: Boolean = false,
-        tasks: List<TaskDto> = listOf(defeatUnits()),
+        tasks: List<TaskDto> = listOf(defeat()),
         reward: RewardDto = reward(),
-    ): Quest = Quest.create(Quest.Dto(id = id, type = QuestTypeDto.SIDE, giverNpcId = giverNpcId, repeatable = repeatable, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
+    ): Quest =
+        Quest.create(Quest.Dto(id = id, type = QuestTypeDto.SIDE, questGiverNpcId = questGiverNpcId, repeatable = repeatable, tasks = tasks, reward = reward, progress = ProgressDto.notStarted(id)))
 
-    fun defeatUnits(
+    fun defeat(
         unitId: String = "goat-wizard",
-        count: Int = 1,
-    ) = TaskDto.defeatUnits(unitId = unitId, count = count)
+        requiredDefeats: Int = 1,
+    ) = TaskDto.defeat(unitId = unitId, requiredDefeats = requiredDefeats)
 
-    fun talkToNpc(npcId: String = "farmer") = TaskDto.talkToNpc(npcId = npcId)
+    fun talk(npcId: String = "farmer") = TaskDto.talk(npcId = npcId)
 
-    fun reachTiles(vararg tiles: Pair<Int, Int>) = TaskDto.reachTiles(tiles = tiles.map { (row, column) -> PositionDto(row = row, column = column) })
+    fun visit(vararg tiles: Pair<Int, Int>) = TaskDto.visit(tiles = tiles.map { (row, column) -> PositionDto(row = row, column = column) })
 
     fun reward(
         gold: Int = 150,

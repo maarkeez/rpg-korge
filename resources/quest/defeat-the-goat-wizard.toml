@@ -1,9 +1,9 @@
 type = "MAIN"
 
 [[tasks]]
-type = "DEFEAT_UNITS"
+type = "DEFEAT"
 unitId = "goat-wizard"
-count = 1
+requiredDefeats = 1
 
 [reward]
 gold = 150

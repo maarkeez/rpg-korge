@@ -102,7 +102,7 @@ class SubdomainApis(
         buildingApi.placeBuildings()
         eventBus.dispatch()
         // Only with quests, as the game needs exactly one main quest once it has any.
-        if (quests.isNotEmpty()) questApi.initialiseQuests()
+        if (quests.isNotEmpty()) questApi.createQuests()
         battleUnitApi.initialiseBattleUnits()
         eventBus.dispatch()
         npcApi.placeNpcs()
