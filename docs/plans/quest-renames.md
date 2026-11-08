@@ -1,6 +1,7 @@
 # Plan: Rename the code of the quest subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** built on `main` in `09f6d153`, with its screenshots of the abandon question and the visit tasks still to be
+> approved.
 >
 > **Summary:** The code of the quest subdomain uses words the [glossary](../../GLOSSARY.md) gives to other concepts,
 > and one word for two things. E.g.: Bats in the Meadow is a `DEFEAT_UNITS` task with a `count` of 3, while a unit is
@@ -178,3 +179,17 @@ The tests are renamed with the code, and their names and comments say the new wo
   journal is reading a quest, as `OpenQuest`, `QuestOpened` and `READING_QUEST` live in `party`, whose glossary already
   says the party "reads a quest". The `progress` and `count` of `QuestInfo.Task`, which may follow Defeats counted and
   Required defeats.
+  `QuestInfo.Kind.REACH`, which `QuestMapper` maps a visit task to, and the `questInfo should count the defeats of a
+  defeat task and 1 for a talk or a reach` test of `QuestMapperTest`.
+- `storybook`: `QuestSample.REACH` and the `reach` stories of the quest tracker and the quest detail
+  (`screen-quest-tracker--reach`, `screen-quest-detail--reach`).
+
+## Changes while building
+
+- The storybook's sample quests read like the game: "Visit the southern fields", "Visit the old bridge" and "Visit the
+  lair down south", for "Reach", and the description of the `REACH` sample says "A visit task: it has no portrait". The
+  names of the samples and stories wait for the `storybook` section.
+- `ResourcesQuestLoaderTest` loads its malformed visit task as `visit-a-tile`, for `reach-a-tile`.
+- [Game data](../architecture/game-data.md) also lists `RequestCreateQuests` in the order of the game setup, and
+  `CreateQuests` beside `PlaceBuildings` and `PlaceNpcs` as creating its data synchronously.
+- The tables of [Quests](../architecture/quests.md) are aligned again, as the new names changed their widths.
