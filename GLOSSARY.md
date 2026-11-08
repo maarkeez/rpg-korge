@@ -880,6 +880,85 @@ _Avoid_: Enemy, enemy player
 **CPU battle unit**:
 A battle unit of the CPU player.
 
+### Quest
+
+**Quest**:
+A line of tasks the party completes one after the other, the last one earning a reward.
+_Avoid_: Mission
+
+**Main quest**:
+The one quest that starts with a new game, which runs once and can not be abandoned.
+
+**Side quest**:
+A quest that starts when the party finishes talking to its quest giver.
+
+**Quest giver**:
+The npc whose talk starts a side quest.
+_Avoid_: Giver
+
+**Repeatable**:
+Said of a side quest its quest giver can start again once it is completed.
+
+**Reward**:
+The gold and lootable items a completed quest grants to the party leader.
+
+#### Progress
+
+**Progress**:
+How far a quest went: its status, its current task, its defeats counted, and whether it is pinned.
+
+**Start**:
+A quest becoming active, on its first task.
+
+**Active**:
+Said of a quest started and not yet completed.
+
+**Completed**:
+Said of a quest whose last task is done.
+
+**Abandon**:
+The player giving up an active side quest, which goes back to not started with its progress lost.
+
+#### Tasks
+
+**Task**:
+One stage of a quest, done once the party does what it asks.
+
+**Current task**:
+The task an active quest asks for now.
+
+**Defeat task**:
+A task done once enough battle units of one unit, of the CPU player, are defeated.
+_Avoid_: Defeat units
+
+**Required defeats**:
+How many defeats a defeat task needs, such as the 3 bats of Bats in the Meadow.
+_Avoid_: Count
+
+**Defeats counted**:
+How many of its required defeats the current task has counted so far.
+_Avoid_: Progress, task progress
+
+**Talk task**:
+A task done once the party finishes talking to one npc.
+_Avoid_: Talk to npc
+
+**Visit task**:
+A task done once a party member walks or teleports onto one of its tiles.
+_Avoid_: Reach, touch
+
+#### Pins and markers
+
+**Pin**:
+The player choosing the active side quest the tracker shows.
+
+**Pinned quest**:
+The quest the tracker shows: the pinned side quest, or the main quest when none is.
+_Avoid_: Followed quest, tracked quest
+
+**Quest marker**:
+The sign over an npc's head that it has a quest to start, or is the npc of a current talk task.
+
 ### World builder
 
 **World**:
