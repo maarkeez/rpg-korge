@@ -795,6 +795,70 @@ _Avoid_: Shopkeeper, vendor, trader
 The lootable items a merchant sells, in the order they are shown, never running out.
 _Avoid_: Wares, goods, inventory
 
+### Party
+
+**Party**:
+The human player's battle units that explore the battlefield together, one leading and the rest following, in a battle
+or not.
+
+**Party member**:
+A battle unit of the party. Member for short.
+
+**Leader**:
+The party member in front, the first in the party order, whom the player steers.
+
+**Follower**:
+A party member other than the leader, who follows the one ahead of it in the walking order.
+
+**Party order**:
+The order of the party members, set in the formation, which decides who leads.
+
+**Walking order**:
+The order in which the party members follow one another, the leader first.
+_Avoid_: Line, line order
+
+**Join the party**:
+A battle unit becoming the last party member, such as a recruited npc.
+
+**Leave the party**:
+A party member going out of the party when it is defeated.
+
+#### Exploring
+
+**Exploring**:
+Said of the party out of the battles while time goes on.
+
+**Second**:
+The beat of time while exploring, as the round is in a battle.
+
+**Party step**:
+The party moving one tile on, the leader first and each follower onto the tile the one ahead of it left.
+_Avoid_: Party walk
+
+**Standing still**:
+Said of a battle unit that has not moved during the current second.
+
+**Interrupt**:
+A battle starting, which stops the party exploring until it finishes.
+_Avoid_: Pause
+
+**Resume**:
+The party exploring again once the battle that interrupted it finishes.
+
+#### Time stopped
+
+**Time stopped**:
+Said of the party out of the battles while it talks, is in the formation, is paused or reads a quest.
+
+**Talk**:
+The party listening to the line of an npc adjacent to the leader, with time stopped, until the player finishes it.
+
+**Formation**:
+Where the player sets the party order, with time stopped.
+
+**Pause**:
+The player stopping time from the pause screen, such as to save the game.
+
 ### World builder
 
 **World**:
