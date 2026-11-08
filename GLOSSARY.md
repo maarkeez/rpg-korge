@@ -127,7 +127,7 @@ Said of a battle with fewer than two of its players left with battle units in it
 A battle that is over, with or without a winner.
 
 **Player defeat**:
-A player losing all their battle units, which gives their enemy the victory.
+A player losing all their battle units, which gives their opponent the victory.
 _Avoid_: Loss
 
 **Victory**:
@@ -858,6 +858,27 @@ Where the player sets the party order, with time stopped.
 
 **Pause**:
 The player stopping time from the pause screen, such as to save the game.
+
+### Player
+
+**Player**:
+One of the two sides of the game, human or CPU, each with its battle units.
+_Avoid_: Side
+
+**Human player**:
+The player a person plays, whose battle units explore as the party.
+_Avoid_: Party player
+
+**CPU player**:
+The player the game plays itself.
+_Avoid_: AI, computer
+
+**Opponent**:
+The other player of the game.
+_Avoid_: Enemy, enemy player
+
+**CPU battle unit**:
+A battle unit of the CPU player.
 
 ### World builder
 
