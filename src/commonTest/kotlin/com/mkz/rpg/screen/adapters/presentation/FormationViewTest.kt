@@ -113,9 +113,9 @@ class FormationViewTest : ViewsForTesting() {
             // Given
             val formationView = FormationView(loadedResourcesLoader())
             // When
-            formationView.displayHint("Tap two members to swap them")
+            formationView.displayHint("Tap two members to reorder them")
             // Then
-            formationView.hint() shouldBe "Tap two members to swap them"
+            formationView.hint() shouldBe "Tap two members to reorder them"
             formationView.hintWidth() shouldBe 370.0
         }
 

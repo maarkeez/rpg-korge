@@ -9,29 +9,29 @@ import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Walks the party one step at a time: it requests the walk of the next step, and skips the steps whose battle unit can
- * not reach its tile (e.g.: the battle unit ahead could not leave it), so the party always finishes walking.
+ * Walks a party step one battle unit's step at a time: it requests the walk of the next step, and skips the steps whose
+ * battle unit can not reach its tile (e.g.: the battle unit ahead could not leave it), so the party step is always done.
  */
-class PartyWalking(
+class PartyStepping(
     private val partyRepository: PartyRepository,
     private val searchPosition: SearchPosition,
     private val searchShortestPath: SearchShortestPath,
     private val eventBus: EventBus,
 ) {
-    fun continueWalking(party: Party) {
-        var walkingParty = party
+    fun continueStepping(party: Party) {
+        var steppingParty = party
         val walkRequests = mutableListOf<DomainEvent>()
         while (true) {
-            val step = walkingParty.nextStep() ?: break
+            val step = steppingParty.nextStep() ?: break
             if (!canReach(battleUnitId = step.battleUnitId, row = step.row, column = step.column)) {
-                walkingParty = walkingParty.skipNextStep()
+                steppingParty = steppingParty.skipNextStep()
                 continue
             }
-            walkingParty = walkingParty.awaitNextStep()
+            steppingParty = steppingParty.awaitNextStep()
             walkRequests += BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = step.battleUnitId, walkToRow = step.row, walkToColumn = step.column)
             break
         }
-        val (events, updatedParty) = walkingParty.pullEvents()
+        val (events, updatedParty) = steppingParty.pullEvents()
         partyRepository.save(updatedParty)
         walkRequests.forEach(eventBus::publish)
         eventBus.publish(events)

@@ -121,7 +121,7 @@ class SaveFixtureTest {
         fun playAndSave(): String {
             apis.questApi.startMainQuest()
             apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
-            apis.partyApi.walkParty(DirectionDto.EAST)
+            apis.partyApi.stepParty(DirectionDto.EAST)
             apis.eventBus.dispatch()
             apis.partyApi.openPause()
             apis.eventBus.dispatch()

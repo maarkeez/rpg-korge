@@ -8,7 +8,7 @@ import com.mkz.rpg.lootTable.domain.LootTableMother.lootTable
 import com.mkz.rpg.lootTable.domain.LootTableMother.nothingEntry
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -451,13 +451,13 @@ class InventoryPresenterGiveGoldTest {
     }
 
     @Test
-    fun `Give gold should be abandoned when the exploration pauses, e g a battle starts`() {
+    fun `Give gold should be abandoned when the exploration is interrupted, e g a battle starts`() {
         // Given
         val scene = Scene()
         scene.openPanel()
         val resets = scene.battlefieldView.resetTilesCount
         // When
-        scene.publish(ExplorationPaused(playerId = "human"))
+        scene.publish(ExplorationInterrupted(playerId = "human"))
         // Then
         scene.playerCallToActionView.displayedGiveGold.shouldBeNull()
         scene.battleHudView.displays.last() shouldBe Display.INVENTORY

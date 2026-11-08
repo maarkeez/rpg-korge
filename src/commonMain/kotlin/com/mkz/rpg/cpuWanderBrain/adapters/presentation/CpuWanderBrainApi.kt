@@ -7,7 +7,7 @@ import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDefeated
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitDeployed
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnBattleUnitRespawned
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnExplorationSecondStarted
-import com.mkz.rpg.cpuWanderBrain.adapters.events.OnPartyWalked
+import com.mkz.rpg.cpuWanderBrain.adapters.events.OnPartyStepped
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnRoundFinished
 import com.mkz.rpg.cpuWanderBrain.adapters.events.OnTileOccupied
 import com.mkz.rpg.cpuWanderBrain.adapters.save.CpuWanderBrainSnapshottable
@@ -66,6 +66,6 @@ class CpuWanderBrainApi(
     private val onTileOccupied = OnTileOccupied(resolveWanderingStep, eventBus)
     private val onRoundFinished = OnRoundFinished(wanderAfterRound, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(awaitRespawn, eventBus)
-    private val onPartyWalked = OnPartyWalked(respawnDefeatedBattleUnits, eventBus)
+    private val onPartyStepped = OnPartyStepped(respawnDefeatedBattleUnits, eventBus)
     private val onBattleUnitRespawned = OnBattleUnitRespawned(resolveRespawn, eventBus)
 }

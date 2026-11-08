@@ -16,7 +16,7 @@ class OnBattleFinishedWithoutWinnerTest {
     @Test
     fun `should explore again when a battle finishes`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         eventBus.publish(BattleEvent.BattleFinishedWithoutWinner)
         // When
         eventBus.dispatch()

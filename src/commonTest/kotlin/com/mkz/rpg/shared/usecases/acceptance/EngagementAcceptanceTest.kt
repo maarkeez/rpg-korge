@@ -84,7 +84,7 @@ class EngagementAcceptanceTest {
 
     // The leader walks to (5,1), 5 tiles away from the rat-1, which engages the party.
     private fun engageRat() {
-        partyApi.walkParty(DirectionDto.NORTH)
+        partyApi.stepParty(DirectionDto.NORTH)
         eventBus.dispatch()
     }
 
@@ -202,7 +202,7 @@ class EngagementAcceptanceTest {
             // When
             // The leader walks from (5,1) to (5,4), 5 tiles away from the rat-2.
             repeat(3) {
-                partyApi.walkParty(DirectionDto.EAST)
+                partyApi.stepParty(DirectionDto.EAST)
                 eventBus.dispatch()
             }
             // Then

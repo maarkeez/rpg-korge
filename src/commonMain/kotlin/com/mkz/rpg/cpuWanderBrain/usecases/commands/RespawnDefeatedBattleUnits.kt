@@ -6,7 +6,7 @@ import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * The party walked a step: every defeated CPU battle unit counts it, and those that have counted enough steps are
+ * The party took a party step: every defeated CPU battle unit counts it, and those that have counted enough steps are
  * requested to respawn on their home. The ones whose home is occupied (e.g.: by a battle unit of the party) wait, and
  * are requested again on the next step.
  */

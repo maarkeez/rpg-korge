@@ -70,7 +70,7 @@ class FormationPresenterTest {
         formationView.names().shouldContainExactly("Knight", "Viking", "Herbalist")
         formationView.crownedRowIndexes().shouldContainExactly(0)
         formationView.selectedRowIndexes().shouldBeEmpty()
-        formationView.hint() shouldBe "Tap two members to swap them"
+        formationView.hint() shouldBe "Tap two members to reorder them"
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, vikingTile, herbalistTile)
     }
 
@@ -82,7 +82,7 @@ class FormationPresenterTest {
         presenter.formationRowSelected(2)
         // Then
         formationView.selectedRowIndexes().shouldContainExactly(2)
-        formationView.hint() shouldBe "Swap Herbalist with..."
+        formationView.hint() shouldBe "Reorder Herbalist with..."
         battlefieldView.tileSelections.last() shouldBe herbalistTile
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile, vikingTile, herbalistTile)
     }
@@ -98,7 +98,7 @@ class FormationPresenterTest {
         formationView.names().shouldContainExactly("Herbalist", "Viking", "Knight")
         formationView.crownedRowIndexes().shouldContainExactly(0)
         formationView.selectedRowIndexes().shouldBeEmpty()
-        formationView.hint() shouldBe "Tap two members to swap them"
+        formationView.hint() shouldBe "Tap two members to reorder them"
     }
 
     @Test

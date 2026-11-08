@@ -5,7 +5,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Opens the formation, where the player sets the party order, so time stops until it is closed. Nothing happens when
- * the party can not walk (e.g.: it is still walking, talking, or battling).
+ * the party can not step (e.g.: it is still stepping, talking, or battling).
  */
 class OpenFormation(
     private val partyRepository: PartyRepository,

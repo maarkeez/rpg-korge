@@ -68,7 +68,7 @@ class PartyMemberSwapAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 
@@ -83,7 +83,7 @@ class PartyMemberSwapAcceptanceTest {
             battlefieldApi.searchPosition("knight-1") shouldBe PositionDto(row = 0, column = 1)
             battlefieldApi.searchPosition("knight-2") shouldBe PositionDto(row = 0, column = 2)
             battlefieldApi.searchPosition("knight-3") shouldBe PositionDto(row = 0, column = 0)
-            partyApi.searchParty()!!.isWalking.shouldBeFalse()
+            partyApi.searchParty()!!.isStepping.shouldBeFalse()
             partyApi.searchParty()!!.isExploring.shouldBeTrue()
         }
 
@@ -97,7 +97,7 @@ class PartyMemberSwapAcceptanceTest {
             repeat(6) { walk(DirectionDto.WEST) }
             // Then the leader leads the way back, the others following it in the line rebuilt by the swaps: "K M L . ."
             columns() shouldBe listOf(0, 2, 1)
-            partyApi.searchParty()!!.lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
+            partyApi.searchParty()!!.walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
             partyApi.searchParty()!!.battleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
         }
 }

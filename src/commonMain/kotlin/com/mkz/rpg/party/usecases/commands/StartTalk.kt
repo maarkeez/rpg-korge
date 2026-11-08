@@ -4,8 +4,8 @@ import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Starts the talk with the npc, so time stops until it is finished. Nothing happens when the party can not walk (e.g.:
- * it is still walking, or battling).
+ * Starts the talk with the npc, so time stops until it is finished. Nothing happens when the party can not step (e.g.:
+ * it is still stepping, or battling).
  */
 class StartTalk(
     private val partyRepository: PartyRepository,

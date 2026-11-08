@@ -98,7 +98,7 @@ class ExploringTerrainEffectAcceptanceTest {
         scenarioTest(::setUp) {
             // Given
             // The leader walks off the lava to (5,1), and the knight-2 onto it.
-            partyApi.walkParty(DirectionDto.NORTH)
+            partyApi.stepParty(DirectionDto.NORTH)
             eventBus.dispatch()
             // When
             waitASecond()

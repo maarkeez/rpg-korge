@@ -5,12 +5,12 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnPartyWalked(
+class OnPartyStepped(
     respawnDefeatedBattleUnits: RespawnDefeatedBattleUnits,
     eventBus: EventBus,
 ) {
     private val subscription =
-        eventBus.subscribe<PartyEvent.PartyWalked> {
+        eventBus.subscribe<PartyEvent.PartyStepped> {
             respawnDefeatedBattleUnits()
         }
 }

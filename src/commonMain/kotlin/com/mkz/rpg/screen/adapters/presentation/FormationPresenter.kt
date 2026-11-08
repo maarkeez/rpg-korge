@@ -80,7 +80,7 @@ class FormationPresenter(
             if (selectedId == null) {
                 texts[UiText.FORMATION_TAP_TO_SELECT]
             } else {
-                texts[UiText.FORMATION_TAP_TO_SWAP, "name" to memberName(selectedId)]
+                texts[UiText.FORMATION_TAP_TO_REORDER, "name" to memberName(selectedId)]
             },
         )
         battlefieldView.resetTiles()

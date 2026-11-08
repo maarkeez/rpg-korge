@@ -1,12 +1,12 @@
 package com.mkz.rpg.party.domain
 
-import com.mkz.rpg.party.domain.PartyError.AlreadyWalking
+import com.mkz.rpg.party.domain.PartyError.AlreadyStepping
 import com.mkz.rpg.party.domain.PartyError.NotAFollower
 import com.mkz.rpg.party.domain.PartyError.NotExploring
 import com.mkz.rpg.party.domain.PartyError.NotTheParty
 import com.mkz.rpg.party.domain.PartyError.PartyRequired
 import com.mkz.rpg.party.domain.PartyError.StepsRequired
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationSecondStarted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
@@ -15,7 +15,7 @@ import com.mkz.rpg.party.domain.PartyEvent.FormationOpened
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkFinished
 import com.mkz.rpg.party.domain.PartyEvent.NpcTalkStarted
 import com.mkz.rpg.party.domain.PartyEvent.PartyJoined
-import com.mkz.rpg.party.domain.PartyEvent.PartyWalked
+import com.mkz.rpg.party.domain.PartyEvent.PartyStepped
 import com.mkz.rpg.party.domain.PartyEvent.PauseClosed
 import com.mkz.rpg.party.domain.PartyEvent.PauseOpened
 import com.mkz.rpg.party.domain.PartyEvent.QuestClosed
@@ -24,19 +24,20 @@ import kotlin.jvm.JvmInline
 import kotlin.math.abs
 
 /**
- * The human player exploring the battlefield with their party, out of the battles: the leader walks where the player
- * says, and the rest follow it in a line.
+ * The human player exploring the battlefield with their party, out of the battles: the leader steps where the player
+ * says, and the rest follow it in walking order.
  *
- * The party walks one step at a time: each step is awaited until its battle unit occupies its tile, so the next battle
- * unit can step on the tile it left.
+ * Each party step is one battle unit's step at a time: each step is awaited until its battle unit occupies its tile, so
+ * the next battle unit can step on the tile it left.
  *
- * The followers walk in line order, which is kept apart from the party order: the leader swaps tiles with a party member
- * on its next tile, and the line is rebuilt then, so each follower follows the closest member ahead of it.
+ * The followers walk in walking order, which is kept apart from the party order: the leader swaps tiles with a party
+ * member on its next tile, and the walking order is rebuilt then, so each follower follows the closest member ahead of
+ * it.
  *
  * Every second while exploring, the battle units that stood still during it receive the effect of their terrain, so it
  * remembers the battle units that moved during the current second.
  *
- * The party can talk to an npc while exploring. Time stops while talking: the party does not walk, and no second starts.
+ * The party can talk to an npc while exploring. Time stops while talking: the party does not step, and no second starts.
  * Time also stops while the player sets the party order in the formation, which decides who leads, while the game is
  * paused (e.g.: to save it), and while the player reads a quest.
  */
@@ -44,7 +45,7 @@ import kotlin.math.abs
 data class Party private constructor(
     private val playerId: PlayerId,
     private val members: Members,
-    private val line: Line,
+    private val walkingOrder: WalkingOrder,
     private val mode: Mode,
     private val pendingSteps: PendingSteps,
     private val awaitedStep: Step?,
@@ -63,7 +64,7 @@ data class Party private constructor(
             return Party(
                 playerId = PlayerId(playerId),
                 members = Members(battleUnitIds),
-                line = Line(battleUnitIds),
+                walkingOrder = WalkingOrder(battleUnitIds),
                 mode = Mode.EXPLORING,
                 pendingSteps = PendingSteps(emptyList()),
                 awaitedStep = null,
@@ -74,7 +75,7 @@ data class Party private constructor(
         }
 
         /**
-         * Rebuilds the party as it was when the game was saved, from its [toSnapshot], exploring, done walking, and with
+         * Rebuilds the party as it was when the game was saved, from its [toSnapshot], exploring, done stepping, and with
          * no battle unit moved in the current second. It publishes no events.
          */
         fun restore(snapshot: Dto.SnapshotDto): Party {
@@ -82,7 +83,7 @@ data class Party private constructor(
             return Party(
                 playerId = PlayerId(snapshot.playerId),
                 members = Members(snapshot.battleUnitIds),
-                line = Line(snapshot.lineBattleUnitIds),
+                walkingOrder = WalkingOrder(snapshot.walkingOrderBattleUnitIds),
                 mode = Mode.EXPLORING,
                 pendingSteps = PendingSteps(emptyList()),
                 awaitedStep = null,
@@ -98,52 +99,52 @@ data class Party private constructor(
             playerId = playerId.value,
             leaderBattleUnitId = members.value.firstOrNull(),
             battleUnitIds = members.value,
-            lineBattleUnitIds = walkingLine(),
+            walkingOrderBattleUnitIds = leaderFirstWalkingOrder(),
             isExploring = mode == Mode.EXPLORING,
-            isWalking = isWalking(),
+            isStepping = isStepping(),
             talkingNpcId = talkingNpcId?.value,
             isInFormation = mode == Mode.FORMATION,
             isPaused = mode == Mode.PAUSED,
             isReadingQuest = mode == Mode.READING_QUEST,
         )
 
-    /** What is kept when the game is saved: the members and the line, as [restore] explores again. */
-    fun toSnapshot() = Dto.SnapshotDto(playerId = playerId.value, battleUnitIds = members.value, lineBattleUnitIds = line.value)
+    /** What is kept when the game is saved: the members and the walking order, as [restore] explores again. */
+    fun toSnapshot() = Dto.SnapshotDto(playerId = playerId.value, battleUnitIds = members.value, walkingOrderBattleUnitIds = walkingOrder.value)
 
-    /** Whether the party can walk: it is exploring and has finished walking. */
-    fun canWalk(): Boolean = mode == Mode.EXPLORING && !isWalking()
+    /** Whether the party can step: it is exploring and its party step is done. */
+    fun canStep(): Boolean = mode == Mode.EXPLORING && !isStepping()
 
-    /** Steps: where each battle unit of the party walks to, in walking order (the leader first). */
-    fun walkParty(steps: List<Dto.StepDto>): Party {
+    /** Plans a party step. Steps: where each battle unit of the party walks to, in walking order (the leader first). */
+    fun stepParty(steps: List<Dto.StepDto>): Party {
         if (mode != Mode.EXPLORING) throw NotExploring()
-        if (isWalking()) throw AlreadyWalking()
+        if (isStepping()) throw AlreadyStepping()
         if (steps.isEmpty()) throw StepsRequired()
         return copy(pendingSteps = PendingSteps(steps.map(::Step)))
     }
 
     /**
-     * Swaps the tiles of the leader and the follower on its next tile, as its single step, and rebuilds the line from the
-     * positions after the swap: from the leader, the closest remaining member by tile distance follows next, ties broken
-     * by party order. Positions: where each battle unit of the party stands before the swap.
+     * Swaps the tiles of the leader and the follower on its next tile, as its single step, and rebuilds the walking order
+     * from the positions after the swap: from the leader, the closest remaining member by tile distance follows next, ties
+     * broken by party order. Positions: where each battle unit of the party stands before the swap.
      */
     fun swapLeader(
         followerId: String,
         positions: Map<String, Dto.PositionDto>,
     ): Party {
         if (mode != Mode.EXPLORING) throw NotExploring()
-        if (isWalking()) throw AlreadyWalking()
+        if (isStepping()) throw AlreadyStepping()
         val leaderId = members.value.first()
         val leaderPosition = positions[leaderId]
         val followerPosition = positions[followerId]
         if (followerId == leaderId || followerId !in members.value || leaderPosition == null || followerPosition == null) throw NotAFollower()
         val swappedPositions = positions + (leaderId to followerPosition) + (followerId to leaderPosition)
         return copy(
-            line = Line.closestFirst(leaderId = leaderId, memberIds = members.value, positions = swappedPositions),
+            walkingOrder = WalkingOrder.closestFirst(leaderId = leaderId, memberIds = members.value, positions = swappedPositions),
             awaitedStep = Step(Dto.StepDto(battleUnitId = leaderId, row = followerPosition.row, column = followerPosition.column)),
         )
     }
 
-    /** The next step to walk, or `null` while awaiting the previous one or when the party has finished walking. */
+    /** The next step to walk, or `null` while awaiting the previous one or when the party step is done. */
     fun nextStep(): Dto.StepDto? = if (awaitedStep == null) pendingSteps.value.firstOrNull()?.toDto() else null
 
     /** Awaits the next step, once its walk is requested. */
@@ -153,7 +154,7 @@ data class Party private constructor(
     }
 
     /** Skips the next step, e.g.: when its battle unit can not reach its tile. */
-    fun skipNextStep(): Party = copy(pendingSteps = PendingSteps(pendingSteps.value.drop(1))).finishWalkWhenDone()
+    fun skipNextStep(): Party = copy(pendingSteps = PendingSteps(pendingSteps.value.drop(1))).finishStepWhenDone()
 
     /** Resolves the awaited step when the battle unit occupies its tile. Otherwise, nothing changes. */
     fun resolveStep(
@@ -162,12 +163,12 @@ data class Party private constructor(
         column: Int,
     ): Party {
         if (awaitedStep != Step(Dto.StepDto(battleUnitId = battleUnitId, row = row, column = column))) return this
-        return copy(awaitedStep = null).finishWalkWhenDone()
+        return copy(awaitedStep = null).finishStepWhenDone()
     }
 
-    /** Talks to the npc, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    /** Talks to the npc, only when the party can step (exploring, and done stepping). Otherwise, nothing changes. */
     fun talk(npcId: String): Party {
-        if (!canWalk()) return this
+        if (!canStep()) return this
         return copy(
             mode = Mode.TALKING,
             talkingNpcId = NpcId(npcId),
@@ -185,16 +186,16 @@ data class Party private constructor(
         )
     }
 
-    /** Opens the formation, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    /** Opens the formation, only when the party can step (exploring, and done stepping). Otherwise, nothing changes. */
     fun openFormation(): Party {
-        if (!canWalk()) return this
+        if (!canStep()) return this
         return copy(mode = Mode.FORMATION, events = events + FormationOpened(playerId = playerId.value))
     }
 
     /**
      * Closes the formation with the new party order, the leader first, so the party explores again. Nobody moves: the
-     * line is rebuilt from the new leader, as after a swap, unless the order is the same. Positions: where each battle
-     * unit of the party stands. Nothing changes when it is not in formation.
+     * walking order is rebuilt from the new leader, as after a swap, unless the order is the same. Positions: where each
+     * battle unit of the party stands. Nothing changes when it is not in formation.
      */
     fun closeFormation(
         battleUnitIds: List<String>,
@@ -202,23 +203,23 @@ data class Party private constructor(
     ): Party {
         if (mode != Mode.FORMATION) return this
         if (battleUnitIds.size != members.value.size || battleUnitIds.toSet() != members.value.toSet()) throw NotTheParty()
-        val reorderedLine =
+        val reorderedWalkingOrder =
             when {
-                battleUnitIds == members.value -> line
-                battleUnitIds.first() !in positions -> Line(battleUnitIds)
-                else -> Line.closestFirst(leaderId = battleUnitIds.first(), memberIds = battleUnitIds, positions = positions)
+                battleUnitIds == members.value -> walkingOrder
+                battleUnitIds.first() !in positions -> WalkingOrder(battleUnitIds)
+                else -> WalkingOrder.closestFirst(leaderId = battleUnitIds.first(), memberIds = battleUnitIds, positions = positions)
             }
         return copy(
             mode = Mode.EXPLORING,
             members = Members(battleUnitIds),
-            line = reorderedLine,
+            walkingOrder = reorderedWalkingOrder,
             events = events + FormationClosed(playerId = playerId.value, battleUnitIds = battleUnitIds),
         )
     }
 
-    /** Pauses the game, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    /** Pauses the game, only when the party can step (exploring, and done stepping). Otherwise, nothing changes. */
     fun openPause(): Party {
-        if (!canWalk()) return this
+        if (!canStep()) return this
         return copy(mode = Mode.PAUSED, events = events + PauseOpened(playerId = playerId.value))
     }
 
@@ -228,9 +229,9 @@ data class Party private constructor(
         return copy(mode = Mode.EXPLORING, events = events + PauseClosed(playerId = playerId.value))
     }
 
-    /** Reads a quest, only when the party can walk (exploring, and done walking). Otherwise, nothing changes. */
+    /** Reads a quest, only when the party can step (exploring, and done stepping). Otherwise, nothing changes. */
     fun openQuest(): Party {
-        if (!canWalk()) return this
+        if (!canStep()) return this
         return copy(mode = Mode.READING_QUEST, events = events + QuestOpened(playerId = playerId.value))
     }
 
@@ -240,22 +241,22 @@ data class Party private constructor(
         return copy(mode = Mode.EXPLORING, events = events + QuestClosed(playerId = playerId.value))
     }
 
-    /** Stops exploring, e.g.: when a battle starts. A walk, a talk or a formation in progress is abandoned. */
-    fun pause(): Party =
+    /** Interrupts the exploration when a battle starts: a party step, a talk, a formation or a pause in progress is abandoned. */
+    fun interrupt(): Party =
         copy(
             mode = Mode.BATTLING,
             pendingSteps = PendingSteps(emptyList()),
             awaitedStep = null,
             movedBattleUnits = MovedBattleUnits(emptySet()),
             talkingNpcId = null,
-            events = events + ExplorationPaused(playerId = playerId.value),
+            events = events + ExplorationInterrupted(playerId = playerId.value),
         )
 
-    /** Explores again, e.g.: when a battle finishes. */
+    /** Resumes the exploration when the battle that interrupted it finishes. */
     fun resume(): Party =
         copy(
             mode = Mode.EXPLORING,
-            line = Line(members.value),
+            walkingOrder = WalkingOrder(members.value),
             events = events + ExplorationResumed(playerId = playerId.value, battleUnitIds = members.value),
         )
 
@@ -267,13 +268,13 @@ data class Party private constructor(
         if (battleUnitId in members.value) return this
         return copy(
             members = Members(members.value + battleUnitId),
-            line = Line(line.value + battleUnitId),
+            walkingOrder = WalkingOrder(walkingOrder.value + battleUnitId),
             events = events + PartyJoined(playerId = playerId.value, battleUnitId = battleUnitId, unitId = unitId),
         )
     }
 
     /** Removes the battle unit from the party, e.g.: when it is defeated. The next one leads when it was leading. */
-    fun leave(battleUnitId: String): Party = copy(members = Members(members.value - battleUnitId), line = Line(line.value - battleUnitId))
+    fun leave(battleUnitId: String): Party = copy(members = Members(members.value - battleUnitId), walkingOrder = WalkingOrder(walkingOrder.value - battleUnitId))
 
     /** Remembers that the battle unit moved during the current second, any battle unit (e.g.: a CPU one). Only while exploring. */
     fun markMoved(battleUnitId: String): Party {
@@ -293,17 +294,17 @@ data class Party private constructor(
 
     fun pullEvents() = events to copy(events = emptySet())
 
-    // The leader first, as the line may have it elsewhere once another member leads (e.g.: the leader was defeated).
-    private fun walkingLine(): List<String> {
+    // The leader first, as the walking order may have it elsewhere once another member leads (e.g.: the leader was defeated).
+    private fun leaderFirstWalkingOrder(): List<String> {
         val leaderId = members.value.firstOrNull() ?: return emptyList()
-        return listOf(leaderId) + (line.value - leaderId)
+        return listOf(leaderId) + (walkingOrder.value - leaderId)
     }
 
-    private fun isWalking(): Boolean = awaitedStep != null || pendingSteps.value.isNotEmpty()
+    private fun isStepping(): Boolean = awaitedStep != null || pendingSteps.value.isNotEmpty()
 
-    private fun finishWalkWhenDone(): Party {
-        if (isWalking()) return this
-        return copy(events = events + PartyWalked(playerId = playerId.value, battleUnitIds = members.value))
+    private fun finishStepWhenDone(): Party {
+        if (isStepping()) return this
+        return copy(events = events + PartyStepped(playerId = playerId.value, battleUnitIds = members.value))
     }
 
     private enum class Mode {
@@ -327,7 +328,7 @@ data class Party private constructor(
         val value: List<String>,
     )
 
-    @JvmInline private value class Line(
+    @JvmInline private value class WalkingOrder(
         val value: List<String>,
     ) {
         companion object {
@@ -335,7 +336,7 @@ data class Party private constructor(
                 leaderId: String,
                 memberIds: List<String>,
                 positions: Map<String, Dto.PositionDto>,
-            ): Line {
+            ): WalkingOrder {
                 val lined = mutableListOf(leaderId)
                 val remaining = (memberIds - leaderId).filter { memberId -> memberId in positions }.toMutableList()
                 while (remaining.isNotEmpty()) {
@@ -344,7 +345,7 @@ data class Party private constructor(
                     lined += closest
                     remaining -= closest
                 }
-                return Line(lined + (memberIds - lined.toSet()))
+                return WalkingOrder(lined + (memberIds - lined.toSet()))
             }
 
             // The tiles between both, in rows plus columns.
@@ -370,8 +371,8 @@ data class Party private constructor(
     }
 
     /**
-     * Leader: `null` once every battle unit of the party has been defeated. Line: the battle units in walking order, the
-     * leader first. Exploring: `false` while battling, while talking and while in formation. Talking npc: the npc the
+     * Leader: `null` once every battle unit of the party has been defeated. Walking order: the battle units in walking
+     * order, the leader first. Exploring: `false` while battling, while talking and while in formation. Talking npc: the npc the
      * party talks to, or `null` when it talks to none. In formation: whether the player sets the party order. Paused:
      * whether the game is paused, e.g.: to save it. Reading quest: whether the player reads a quest.
      */
@@ -379,15 +380,15 @@ data class Party private constructor(
         val playerId: String,
         val leaderBattleUnitId: String?,
         val battleUnitIds: List<String>,
-        val lineBattleUnitIds: List<String>,
+        val walkingOrderBattleUnitIds: List<String>,
         val isExploring: Boolean,
-        val isWalking: Boolean,
+        val isStepping: Boolean,
         val talkingNpcId: String?,
         val isInFormation: Boolean,
         val isPaused: Boolean,
         val isReadingQuest: Boolean,
     ) {
-        /** Where the leader walks to, one tile away. */
+        /** Where the leader steps to, one tile away. */
         enum class DirectionDto(
             val rowOffset: Int,
             val columnOffset: Int,
@@ -411,11 +412,11 @@ data class Party private constructor(
             val column: Int,
         )
 
-        /** The party as the game was saved. Battle units: the party, the leader first. Line: in walking order, as kept. */
+        /** The party as the game was saved. Battle units: the party, the leader first. Walking order: as kept. */
         data class SnapshotDto(
             val playerId: String,
             val battleUnitIds: List<String>,
-            val lineBattleUnitIds: List<String>,
+            val walkingOrderBattleUnitIds: List<String>,
         )
     }
 }

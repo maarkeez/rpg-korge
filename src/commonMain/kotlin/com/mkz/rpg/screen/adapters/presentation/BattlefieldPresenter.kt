@@ -96,7 +96,7 @@ class BattlefieldPresenter(
             // The camera eases to the new leader once the formation is closed.
             eventBus.subscribe<PartyEvent.FormationClosed> { trailPartyLeader() },
             // The health flashed while exploring is removed too, so it does not linger over the battle.
-            eventBus.subscribe<PartyEvent.ExplorationPaused> {
+            eventBus.subscribe<PartyEvent.ExplorationInterrupted> {
                 timeline.play {
                     battlefieldView.stopTrailing()
                     battlefieldView.removeHealthFlashes()

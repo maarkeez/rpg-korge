@@ -26,9 +26,9 @@ class PartyTest {
                 playerId = "human",
                 leaderBattleUnitId = "knight-1",
                 battleUnitIds = listOf("knight-1", "knight-2"),
-                lineBattleUnitIds = listOf("knight-1", "knight-2"),
+                walkingOrderBattleUnitIds = listOf("knight-1", "knight-2"),
                 isExploring = true,
-                isWalking = false,
+                isStepping = false,
                 talkingNpcId = null,
                 isInFormation = false,
                 isPaused = false,
@@ -48,38 +48,38 @@ class PartyTest {
     }
 
     @Test
-    fun `WalkParty should walk the steps in order when the party is exploring`() {
+    fun `StepParty should walk the steps in order when the party is exploring`() {
         // When
-        val walkingParty = party().walkParty(listOf(leaderStep, followerStep))
+        val walkingParty = party().stepParty(listOf(leaderStep, followerStep))
         // Then
-        walkingParty.toDto().isWalking.shouldBeTrue()
+        walkingParty.toDto().isStepping.shouldBeTrue()
         walkingParty.nextStep() shouldBe leaderStep
     }
 
     @Test
-    fun `WalkParty should fail when the party is still walking`() {
+    fun `StepParty should fail when the party is still stepping`() {
         // Given
-        val walkingParty = party().walkParty(listOf(leaderStep))
+        val walkingParty = party().stepParty(listOf(leaderStep))
         // When
-        val result = runCatching { walkingParty.walkParty(listOf(leaderStep)) }
+        val result = runCatching { walkingParty.stepParty(listOf(leaderStep)) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<PartyError.AlreadyWalking>()
+        result.exceptionOrNull().shouldBeTypeOf<PartyError.AlreadyStepping>()
     }
 
     @Test
-    fun `WalkParty should fail when the party is not exploring`() {
+    fun `StepParty should fail when the party is not exploring`() {
         // Given
-        val pausedParty = party().pause()
+        val pausedParty = party().interrupt()
         // When
-        val result = runCatching { pausedParty.walkParty(listOf(leaderStep)) }
+        val result = runCatching { pausedParty.stepParty(listOf(leaderStep)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PartyError.NotExploring>()
     }
 
     @Test
-    fun `WalkParty should fail when there are no steps`() {
+    fun `StepParty should fail when there are no steps`() {
         // When
-        val result = runCatching { party().walkParty(emptyList()) }
+        val result = runCatching { party().stepParty(emptyList()) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<PartyError.StepsRequired>()
     }
@@ -91,21 +91,21 @@ class PartyTest {
         // When
         val swappingParty = party().swapLeader(followerId = "knight-2", positions = positions)
         // Then
-        swappingParty.toDto().isWalking.shouldBeTrue()
+        swappingParty.toDto().isStepping.shouldBeTrue()
         swappingParty.nextStep().shouldBeNull()
         val walkedParty = swappingParty.resolveStep(battleUnitId = "knight-1", row = 2, column = 0)
-        walkedParty.toDto().isWalking.shouldBeFalse()
-        walkedParty.pullEvents().first.shouldContainExactly(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
+        walkedParty.toDto().isStepping.shouldBeFalse()
+        walkedParty.pullEvents().first.shouldContainExactly(PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
     }
 
     @Test
-    fun `SwapLeader should rebuild the line with the closest member following next when the leader swaps in a corridor`() {
+    fun `SwapLeader should rebuild the walking order with the closest member following next when the leader swaps in a corridor`() {
         // Given the corridor "M K L", K leading, then L and M
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         // When K swaps with M: "K M L"
         val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
         // Then
-        swappingParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
+        swappingParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
         swappingParty.toDto().battleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
     }
 
@@ -116,7 +116,7 @@ class PartyTest {
         // When
         val swappingParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3", "knight-4")).swapLeader(followerId = "knight-4", positions = positions)
         // Then K stands on (0, 1), and the swapped member on (1, 1)
-        swappingParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-4", "knight-2", "knight-3")
+        swappingParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-4", "knight-2", "knight-3")
     }
 
     @Test
@@ -130,18 +130,18 @@ class PartyTest {
     }
 
     @Test
-    fun `SwapLeader should fail when the party is still walking`() {
+    fun `SwapLeader should fail when the party is still stepping`() {
         // Given
         val positions = mapOf("knight-1" to PositionDto(1, 0), "knight-2" to PositionDto(2, 0))
-        val walkingParty = party().walkParty(listOf(leaderStep))
+        val walkingParty = party().stepParty(listOf(leaderStep))
         // When
         val result = runCatching { walkingParty.swapLeader(followerId = "knight-2", positions = positions) }
         // Then
-        result.exceptionOrNull().shouldBeTypeOf<PartyError.AlreadyWalking>()
+        result.exceptionOrNull().shouldBeTypeOf<PartyError.AlreadyStepping>()
     }
 
     @Test
-    fun `Resume should line the party up in party order again when a battle finishes`() {
+    fun `Resume should put the walking order back in party order when a battle finishes`() {
         // Given
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         val swappedParty =
@@ -149,37 +149,37 @@ class PartyTest {
                 .swapLeader(followerId = "knight-3", positions = positions)
                 .resolveStep(battleUnitId = "knight-1", row = 0, column = 2)
         // When
-        val resumedParty = swappedParty.pause().resume()
+        val resumedParty = swappedParty.interrupt().resume()
         // Then
-        resumedParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
+        resumedParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-2", "knight-3")
     }
 
     @Test
-    fun `Join should add the battle unit to the end of the line`() {
+    fun `Join should add the battle unit to the end of the walking order`() {
         // Given
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         val swappedParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
         // When
         val joinedParty = swappedParty.join("viking-1", "viking")
         // Then
-        joinedParty.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2", "viking-1")
+        joinedParty.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2", "viking-1")
     }
 
     @Test
-    fun `Leave should have the next battle unit in party order lead the line when the leader leaves the party`() {
+    fun `Leave should have the next battle unit in party order lead the walking order when the leader leaves the party`() {
         // Given
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         val swappedParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).swapLeader(followerId = "knight-3", positions = positions)
         // When
         val party = swappedParty.leave("knight-1")
         // Then
-        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-2", "knight-3")
+        party.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-2", "knight-3")
     }
 
     @Test
     fun `NextStep should be null while the step is awaited`() {
         // Given
-        val awaitingParty = party().walkParty(listOf(leaderStep, followerStep)).awaitNextStep()
+        val awaitingParty = party().stepParty(listOf(leaderStep, followerStep)).awaitNextStep()
         // When
         val result = awaitingParty.nextStep()
         // Then
@@ -189,7 +189,7 @@ class PartyTest {
     @Test
     fun `ResolveStep should continue with the next step when the awaited battle unit occupies its tile`() {
         // Given
-        val awaitingParty = party().walkParty(listOf(leaderStep, followerStep)).awaitNextStep()
+        val awaitingParty = party().stepParty(listOf(leaderStep, followerStep)).awaitNextStep()
         // When
         val resolvedParty = awaitingParty.resolveStep(battleUnitId = "knight-1", row = 1, column = 0)
         // Then
@@ -198,22 +198,22 @@ class PartyTest {
     }
 
     @Test
-    fun `ResolveStep should finish walking when the last step is walked`() {
+    fun `ResolveStep should finish the party step when the last step is walked`() {
         // Given
-        val awaitingParty = party().walkParty(listOf(leaderStep)).awaitNextStep()
+        val awaitingParty = party().stepParty(listOf(leaderStep)).awaitNextStep()
         // When
         val resolvedParty = awaitingParty.resolveStep(battleUnitId = "knight-1", row = 1, column = 0)
         // Then
-        resolvedParty.canWalk().shouldBeTrue()
+        resolvedParty.canStep().shouldBeTrue()
         resolvedParty.pullEvents().first.shouldContainExactly(
-            PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
+            PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
         )
     }
 
     @Test
     fun `ResolveStep should not change when another tile is occupied`() {
         // Given
-        val awaitingParty = party().walkParty(listOf(leaderStep)).awaitNextStep()
+        val awaitingParty = party().stepParty(listOf(leaderStep)).awaitNextStep()
         // When
         val resolvedParty = awaitingParty.resolveStep(battleUnitId = "knight-1", row = 5, column = 5)
         // Then
@@ -221,41 +221,41 @@ class PartyTest {
     }
 
     @Test
-    fun `SkipNextStep should finish walking when the skipped step is the last one`() {
+    fun `SkipNextStep should finish the party step when the skipped step is the last one`() {
         // Given
-        val awaitingParty = party().walkParty(listOf(leaderStep, followerStep)).awaitNextStep()
+        val awaitingParty = party().stepParty(listOf(leaderStep, followerStep)).awaitNextStep()
         val resolvedParty = awaitingParty.resolveStep(battleUnitId = "knight-1", row = 1, column = 0)
         // When
         val skippedParty = resolvedParty.skipNextStep()
         // Then
-        skippedParty.canWalk().shouldBeTrue()
+        skippedParty.canStep().shouldBeTrue()
         skippedParty.pullEvents().first.shouldContainExactly(
-            PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
+            PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
         )
     }
 
     @Test
-    fun `Pause should stop exploring and abandon the walk when a battle starts`() {
+    fun `Interrupt should stop exploring and abandon the party step when a battle starts`() {
         // Given
-        val walkingParty = party().walkParty(listOf(leaderStep, followerStep)).awaitNextStep()
+        val walkingParty = party().stepParty(listOf(leaderStep, followerStep)).awaitNextStep()
         // When
-        val pausedParty = walkingParty.pause()
+        val pausedParty = walkingParty.interrupt()
         // Then
         pausedParty.toDto().isExploring.shouldBeFalse()
-        pausedParty.toDto().isWalking.shouldBeFalse()
-        pausedParty.canWalk().shouldBeFalse()
-        pausedParty.pullEvents().first.shouldContainExactly(PartyEvent.ExplorationPaused(playerId = "human"))
+        pausedParty.toDto().isStepping.shouldBeFalse()
+        pausedParty.canStep().shouldBeFalse()
+        pausedParty.pullEvents().first.shouldContainExactly(PartyEvent.ExplorationInterrupted(playerId = "human"))
     }
 
     @Test
     fun `Resume should explore again with the party when a battle finishes`() {
         // Given
-        val pausedParty = party().pause().pullEvents().second
+        val pausedParty = party().interrupt().pullEvents().second
         // When
         val resumedParty = pausedParty.resume()
         // Then
         resumedParty.toDto().isExploring.shouldBeTrue()
-        resumedParty.canWalk().shouldBeTrue()
+        resumedParty.canStep().shouldBeTrue()
         resumedParty.pullEvents().first.shouldContainExactly(
             PartyEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
         )
@@ -337,34 +337,34 @@ class PartyTest {
     @Test
     fun `MarkMoved should not remember the battle units moving while battling`() {
         // When
-        val party = party().pause().markMoved("knight-1")
+        val party = party().interrupt().markMoved("knight-1")
         // Then
         party.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
     }
 
     @Test
-    fun `Pause should forget the battle units that moved while exploring when a battle starts`() {
+    fun `Interrupt should forget the battle units that moved while exploring when a battle starts`() {
         // When
-        val party = party().markMoved("knight-1").pause().resume()
+        val party = party().markMoved("knight-1").interrupt().resume()
         // Then
         party.standingBattleUnitIds(setOf("knight-1")) shouldBe setOf("knight-1")
     }
 
     @Test
-    fun `Talk should talk to the npc and stop exploring when the party can walk`() {
+    fun `Talk should talk to the npc and stop exploring when the party can step`() {
         // When
         val talkingParty = party().talk("the-guy")
         // Then
         talkingParty.toDto().talkingNpcId shouldBe "the-guy"
         talkingParty.toDto().isExploring.shouldBeFalse()
-        talkingParty.canWalk().shouldBeFalse()
+        talkingParty.canStep().shouldBeFalse()
         talkingParty.pullEvents().first.shouldContainExactly(PartyEvent.NpcTalkStarted(playerId = "human", npcId = "the-guy"))
     }
 
     @Test
-    fun `Talk should not talk while the party is walking`() {
+    fun `Talk should not talk while the party is still stepping`() {
         // Given
-        val walkingParty = party().walkParty(listOf(leaderStep, followerStep))
+        val walkingParty = party().stepParty(listOf(leaderStep, followerStep))
         // When
         val party = walkingParty.talk("the-guy")
         // Then
@@ -374,7 +374,7 @@ class PartyTest {
     @Test
     fun `Talk should not talk while battling`() {
         // Given
-        val pausedParty = party().pause().pullEvents().second
+        val pausedParty = party().interrupt().pullEvents().second
         // When
         val party = pausedParty.talk("the-guy")
         // Then
@@ -408,7 +408,7 @@ class PartyTest {
         // Then
         party.toDto().talkingNpcId.shouldBeNull()
         party.toDto().isExploring.shouldBeTrue()
-        party.canWalk().shouldBeTrue()
+        party.canStep().shouldBeTrue()
         party.pullEvents().first.shouldContainExactly(PartyEvent.NpcTalkFinished(playerId = "human", npcId = "the-guy"))
     }
 
@@ -423,31 +423,31 @@ class PartyTest {
     }
 
     @Test
-    fun `Pause should abandon the talk when a battle starts`() {
+    fun `Interrupt should abandon the talk when a battle starts`() {
         // Given
         val talkingParty = party().talk("the-guy").pullEvents().second
         // When
-        val pausedParty = talkingParty.pause().resume()
+        val pausedParty = talkingParty.interrupt().resume()
         // Then
         pausedParty.toDto().talkingNpcId.shouldBeNull()
-        pausedParty.canWalk().shouldBeTrue()
+        pausedParty.canStep().shouldBeTrue()
     }
 
     @Test
-    fun `OpenFormation should stop exploring when the party can walk`() {
+    fun `OpenFormation should stop exploring when the party can step`() {
         // When
         val party = party().openFormation()
         // Then
         party.toDto().isInFormation.shouldBeTrue()
         party.toDto().isExploring.shouldBeFalse()
-        party.canWalk().shouldBeFalse()
+        party.canStep().shouldBeFalse()
         party.pullEvents().first.shouldContainExactly(PartyEvent.FormationOpened(playerId = "human"))
     }
 
     @Test
-    fun `OpenFormation should not open while the party is walking`() {
+    fun `OpenFormation should not open while the party is still stepping`() {
         // Given
-        val walkingParty = party().walkParty(listOf(leaderStep))
+        val walkingParty = party().stepParty(listOf(leaderStep))
         // When
         val party = walkingParty.openFormation()
         // Then
@@ -475,7 +475,7 @@ class PartyTest {
     }
 
     @Test
-    fun `CloseFormation should reorder the party and rebuild the line from the new leader`() {
+    fun `CloseFormation should reorder the party and rebuild the walking order from the new leader`() {
         // Given the corridor "M L K", K leading, then L and M
         val positions = mapOf("knight-1" to PositionDto(0, 2), "knight-2" to PositionDto(0, 1), "knight-3" to PositionDto(0, 0))
         val formationParty = party(battleUnitIds = listOf("knight-1", "knight-2", "knight-3")).openFormation().pullEvents().second
@@ -484,14 +484,14 @@ class PartyTest {
         // Then L, the closest to M, follows it
         party.toDto().leaderBattleUnitId shouldBe "knight-3"
         party.toDto().battleUnitIds.shouldContainExactly("knight-3", "knight-1", "knight-2")
-        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
+        party.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
         party.toDto().isInFormation.shouldBeFalse()
-        party.canWalk().shouldBeTrue()
+        party.canStep().shouldBeTrue()
         party.pullEvents().first.shouldContainExactly(PartyEvent.FormationClosed(playerId = "human", battleUnitIds = listOf("knight-3", "knight-1", "knight-2")))
     }
 
     @Test
-    fun `CloseFormation should keep the line when the order is the same`() {
+    fun `CloseFormation should keep the walking order when the order is the same`() {
         // Given the line K, M, L after K swapped with M in the corridor "K M L"
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 4), "knight-3" to PositionDto(0, 2))
         val swappedParty =
@@ -504,8 +504,8 @@ class PartyTest {
         // When
         val party = formationParty.closeFormation(battleUnitIds = listOf("knight-1", "knight-2", "knight-3"), positions = positions)
         // Then
-        party.toDto().lineBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
-        party.canWalk().shouldBeTrue()
+        party.toDto().walkingOrderBattleUnitIds.shouldContainExactly("knight-1", "knight-3", "knight-2")
+        party.canStep().shouldBeTrue()
     }
 
     @Test
@@ -529,14 +529,14 @@ class PartyTest {
     }
 
     @Test
-    fun `Pause should abandon the formation when a battle starts`() {
+    fun `Interrupt should abandon the formation when a battle starts`() {
         // Given
         val formationParty = party().openFormation().pullEvents().second
         // When
-        val pausedParty = formationParty.pause().resume()
+        val pausedParty = formationParty.interrupt().resume()
         // Then
         pausedParty.toDto().isInFormation.shouldBeFalse()
-        pausedParty.canWalk().shouldBeTrue()
+        pausedParty.canStep().shouldBeTrue()
     }
 
     @Test
@@ -546,14 +546,14 @@ class PartyTest {
         // Then
         party.toDto().isPaused.shouldBeTrue()
         party.toDto().isExploring.shouldBeFalse()
-        party.canWalk().shouldBeFalse()
+        party.canStep().shouldBeFalse()
         party.pullEvents().first.shouldContainExactly(PartyEvent.PauseOpened(playerId = "human"))
     }
 
     @Test
     fun `OpenPause should do nothing when the party is battling`() {
         // Given
-        val battlingParty = party().pause().pullEvents().second
+        val battlingParty = party().interrupt().pullEvents().second
         // When
         val party = battlingParty.openPause()
         // Then
@@ -561,9 +561,9 @@ class PartyTest {
     }
 
     @Test
-    fun `OpenPause should do nothing when the party is walking`() {
+    fun `OpenPause should do nothing when the party is still stepping`() {
         // Given
-        val walkingParty = party().walkParty(listOf(leaderStep))
+        val walkingParty = party().stepParty(listOf(leaderStep))
         // When
         val party = walkingParty.openPause()
         // Then
@@ -578,7 +578,7 @@ class PartyTest {
         val party = pausedParty.closePause()
         // Then
         party.toDto().isPaused.shouldBeFalse()
-        party.canWalk().shouldBeTrue()
+        party.canStep().shouldBeTrue()
         party.pullEvents().first.shouldContainExactly(PartyEvent.PauseClosed(playerId = "human"))
     }
 
@@ -593,26 +593,26 @@ class PartyTest {
     }
 
     @Test
-    fun `openQuest should read the quest when the party can walk`() {
+    fun `openQuest should read the quest when the party can step`() {
         // When
         val party = party().openQuest()
         // Then
         party.toDto().isReadingQuest.shouldBeTrue()
         party.toDto().isExploring.shouldBeFalse()
-        party.canWalk().shouldBeFalse()
+        party.canStep().shouldBeFalse()
         party.pullEvents().first.shouldContainExactly(PartyEvent.QuestOpened(playerId = "human"))
     }
 
     @Test
-    fun `openQuest should change nothing when the party is walking, talking, in formation, paused or battling`() {
+    fun `openQuest should change nothing when the party is still stepping, talking, in formation, paused or battling`() {
         // Given
         val parties =
             listOf(
-                party().walkParty(listOf(leaderStep)),
+                party().stepParty(listOf(leaderStep)),
                 party().talk("the-guy").pullEvents().second,
                 party().openFormation().pullEvents().second,
                 party().openPause().pullEvents().second,
-                party().pause().pullEvents().second,
+                party().interrupt().pullEvents().second,
             )
         // When
         val openedParties = parties.map(Party::openQuest)
@@ -628,7 +628,7 @@ class PartyTest {
         val party = readingParty.closeQuest()
         // Then
         party.toDto().isReadingQuest.shouldBeFalse()
-        party.canWalk().shouldBeTrue()
+        party.canStep().shouldBeTrue()
         party.pullEvents().first.shouldContainExactly(PartyEvent.QuestClosed(playerId = "human"))
     }
 

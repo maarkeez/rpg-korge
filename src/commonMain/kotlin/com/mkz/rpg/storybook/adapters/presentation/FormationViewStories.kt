@@ -29,7 +29,7 @@ object FormationViewStories : StoryBinding {
         StoryDto(
             id = "screen-formation--row-selected",
             name = "Row selected",
-            description = "A row tapped, in blue: the hint asks to tap another one to swap them.",
+            description = "A row tapped, in blue: the hint asks to tap another one to reorder them.",
             args =
                 mapOf(
                     SELECTED_ROW to ArgDto.text("1"),
@@ -56,7 +56,7 @@ object FormationViewStories : StoryBinding {
             title = "Formation",
             description =
                 "Where the pad is, while the player sets the party order: a row per party member and a hint, with Close in the row of the call to action. " +
-                    "Tap a row, then another one, to swap them.",
+                    "Tap a row, then another one, to reorder them.",
             controls =
                 listOf(
                     ControlDto.int(MEMBERS, minimum = 1, maximum = FormationView.ROWS),
@@ -105,7 +105,7 @@ object FormationViewStories : StoryBinding {
                 if (selectedRow == null) {
                     context.texts[UiText.FORMATION_TAP_TO_SELECT]
                 } else {
-                    context.texts[UiText.FORMATION_TAP_TO_SWAP, "name" to rows[selectedRow].name]
+                    context.texts[UiText.FORMATION_TAP_TO_REORDER, "name" to rows[selectedRow].name]
                 },
             )
         }

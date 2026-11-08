@@ -6,7 +6,7 @@ import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.Party.Dto.StepDto
 import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.party.domain.PartyMother.party
-import com.mkz.rpg.party.usecases.services.PartyWalking
+import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
@@ -21,7 +21,7 @@ class ResolvePartyStepTest {
     private val resolvePartyStep =
         ResolvePartyStep(
             partyRepository = partyRepository,
-            partyWalking = PartyWalking(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus),
+            partyStepping = PartyStepping(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus),
         )
 
     // The leader walked north from (1,0) to (0,0), and the follower at (2,0) walks to the tile the leader left.
@@ -29,7 +29,7 @@ class ResolvePartyStepTest {
         queries.battlefieldRepository.create(battlefield(map, occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'R' to "rat-1")))
         partyRepository.save(
             party(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2"))
-                .walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0), StepDto(battleUnitId = "knight-2", row = 1, column = 0)))
+                .stepParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0), StepDto(battleUnitId = "knight-2", row = 1, column = 0)))
                 .awaitNextStep(),
         )
     }
@@ -51,7 +51,7 @@ class ResolvePartyStepTest {
     }
 
     @Test
-    fun `should finish walking when the follower has walked`() {
+    fun `should finish the party step when the follower has walked`() {
         // Given
         givenLeaderWalkedNorth(
             """
@@ -67,13 +67,13 @@ class ResolvePartyStepTest {
         // Then
         eventBus.shouldHavePublishedEvents(
             BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-2", walkToRow = 1, walkToColumn = 0),
-            PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
+            PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")),
         )
-        partyRepository.search()!!.canWalk().shouldBeTrue()
+        partyRepository.search()!!.canStep().shouldBeTrue()
     }
 
     @Test
-    fun `should skip the follower and finish walking when the follower can not reach the tile the leader left`() {
+    fun `should skip the follower and finish the party step when the follower can not reach the tile the leader left`() {
         // Given
         givenLeaderWalkedNorth(
             """
@@ -85,8 +85,8 @@ class ResolvePartyStepTest {
         // When
         resolvePartyStep(battleUnitId = "knight-1", row = 0, column = 0)
         // Then
-        eventBus.shouldHavePublishedEvents(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
-        partyRepository.search()!!.canWalk().shouldBeTrue()
+        eventBus.shouldHavePublishedEvents(PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2")))
+        partyRepository.search()!!.canStep().shouldBeTrue()
     }
 
     @Test

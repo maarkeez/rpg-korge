@@ -37,7 +37,7 @@ class CloseFormationTest {
         // Then
         val partyDto = partyRepository.search()!!.toDto()
         partyDto.battleUnitIds.shouldContainExactly("knight-3", "knight-1", "knight-2")
-        partyDto.lineBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
+        partyDto.walkingOrderBattleUnitIds.shouldContainExactly("knight-3", "knight-2", "knight-1")
         partyDto.isInFormation.shouldBeFalse()
         eventBus.shouldHavePublishedEvents(PartyEvent.FormationClosed(playerId = "human", battleUnitIds = listOf("knight-3", "knight-1", "knight-2")))
     }

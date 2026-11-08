@@ -65,7 +65,7 @@ enum class UiText(
     SHOP_EQUIPPED("ui.shop.equipped"),
     SHOP_GOLD_FULL("ui.shop.goldFull"),
     FORMATION_TAP_TO_SELECT("ui.formation.tapToSelect"),
-    FORMATION_TAP_TO_SWAP("ui.formation.tapToSwap"),
+    FORMATION_TAP_TO_REORDER("ui.formation.tapToReorder"),
     FORMATION_CLOSE("ui.formation.close"),
     PAUSE_RESUME("ui.pause.resume"),
     PAUSE_SAVE("ui.pause.save"),

@@ -10,24 +10,24 @@ import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.nulls.shouldBeNull
 import kotlin.test.Test
 
-class PauseExplorationTest {
+class InterruptExplorationTest {
     private val partyRepository = InMemoryPartyRepository()
     private val eventBus = FakeEventBus()
-    private val pauseExploration = PauseExploration(partyRepository, eventBus)
+    private val interruptExploration = InterruptExploration(partyRepository, eventBus)
 
     @Test
     fun `should stop exploring when the party is exploring`() {
         // Given
         partyRepository.save(party(playerId = "human"))
         // When
-        pauseExploration()
+        interruptExploration()
         // Then
         partyRepository
             .search()!!
             .toDto()
             .isExploring
             .shouldBeFalse()
-        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationInterrupted(playerId = "human"))
     }
 
     @Test
@@ -35,30 +35,30 @@ class PauseExplorationTest {
         // Given
         partyRepository.save(party(playerId = "human").talk("the-guy").pullEvents().second)
         // When
-        pauseExploration()
+        interruptExploration()
         // Then
         partyRepository
             .search()!!
             .toDto()
             .talkingNpcId
             .shouldBeNull()
-        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationInterrupted(playerId = "human"))
     }
 
     @Test
-    fun `should not pause again when the exploration is already paused`() {
+    fun `should not interrupt again when the exploration is already interrupted`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
-        pauseExploration()
+        interruptExploration()
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should not pause when nobody explores`() {
+    fun `should not interrupt when nobody explores`() {
         // When
-        pauseExploration()
+        interruptExploration()
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
@@ -68,13 +68,13 @@ class PauseExplorationTest {
         // Given
         partyRepository.save(party(playerId = "human").openFormation().pullEvents().second)
         // When
-        pauseExploration()
+        interruptExploration()
         // Then
         partyRepository
             .search()!!
             .toDto()
             .isInFormation
             .shouldBeFalse()
-        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.shouldHavePublishedEvents(PartyEvent.ExplorationInterrupted(playerId = "human"))
     }
 }

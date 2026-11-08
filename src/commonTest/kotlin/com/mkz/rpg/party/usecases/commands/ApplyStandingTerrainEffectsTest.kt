@@ -88,7 +88,7 @@ class ApplyStandingTerrainEffectsTest {
     fun `should not request the terrain effects while battling`() {
         // Given
         givenBattlefield()
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
         applyStandingTerrainEffects()
         // Then

@@ -11,7 +11,7 @@ import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.consumableLootableItem
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippable
 import com.mkz.rpg.lootableItem.domain.LootableItemMother.equippableLootableItem
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
 import com.mkz.rpg.player.domain.PlayerMother.player
@@ -278,13 +278,13 @@ class InventoryPresenterGiveTest {
     }
 
     @Test
-    fun `Give should be abandoned when the exploration pauses, e g a battle starts`() {
+    fun `Give should be abandoned when the exploration is interrupted, e g a battle starts`() {
         // Given
         loot("knight-1", "hammer")
         selectKnightFirstItem()
         clickGive()
         // When
-        publish(ExplorationPaused(playerId = "human"))
+        publish(ExplorationInterrupted(playerId = "human"))
         // Then
         playerCallToActionView.displayedGiveItem.shouldBeNull()
         tapTile(vikingTile).shouldBeFalse()

@@ -8,25 +8,26 @@ import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.Party.Dto.StepDto
 import com.mkz.rpg.party.domain.PartyRepository
-import com.mkz.rpg.party.usecases.services.PartyWalking
+import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.shared.domain.EventBus
 
 /**
- * Walks the leader one tile towards the direction, and each follower, in line order, to the tile the battle unit ahead
- * of it left. When a party member stands on that tile, the leader swaps tiles with it instead, and the rest stay.
- * Nothing happens when the party can not walk (e.g.: it is still walking, or battling) or the leader can not occupy the tile.
+ * Steps the party: the leader one tile towards the direction, and each follower, in walking order, onto the tile the
+ * battle unit ahead of it left. When a party member stands on that tile, the leader swaps tiles with it instead, and the
+ * rest stay. Nothing happens when the party can not step (e.g.: it is still stepping, or battling) or the leader can not
+ * occupy the tile.
  */
-class WalkParty(
+class StepParty(
     private val partyRepository: PartyRepository,
     private val searchPosition: SearchPosition,
     private val searchOccupant: SearchOccupant,
-    private val partyWalking: PartyWalking,
+    private val partyStepping: PartyStepping,
     private val eventBus: EventBus,
 ) {
     operator fun invoke(direction: DirectionDto) {
         val party = partyRepository.search() ?: return
-        if (!party.canWalk()) return
-        val positions = party.toDto().lineBattleUnitIds.mapNotNull { battleUnitId -> searchPosition(battleUnitId)?.let { battleUnitId to it } }
+        if (!party.canStep()) return
+        val positions = party.toDto().walkingOrderBattleUnitIds.mapNotNull { battleUnitId -> searchPosition(battleUnitId)?.let { battleUnitId to it } }
         val (leaderId, leaderPosition) = positions.firstOrNull() ?: return
         val leaderStep = StepDto(battleUnitId = leaderId, row = leaderPosition.row + direction.rowOffset, column = leaderPosition.column + direction.columnOffset)
         val follower = searchOccupant(leaderStep.row, leaderStep.column)?.takeIf { occupantId -> occupantId != leaderId && occupantId in party.toDto().battleUnitIds }
@@ -34,12 +35,12 @@ class WalkParty(
             swapLeader(party, follower, positions.associate { (battleUnitId, position) -> battleUnitId to PositionDto(row = position.row, column = position.column) })
             return
         }
-        if (!partyWalking.canReach(battleUnitId = leaderStep.battleUnitId, row = leaderStep.row, column = leaderStep.column)) return
+        if (!partyStepping.canReach(battleUnitId = leaderStep.battleUnitId, row = leaderStep.row, column = leaderStep.column)) return
         val followerSteps =
             positions.zipWithNext { (_, aheadPosition), (followerId, _) ->
                 StepDto(battleUnitId = followerId, row = aheadPosition.row, column = aheadPosition.column)
             }
-        partyWalking.continueWalking(party.walkParty(listOf(leaderStep) + followerSteps))
+        partyStepping.continueStepping(party.stepParty(listOf(leaderStep) + followerSteps))
     }
 
     private fun swapLeader(

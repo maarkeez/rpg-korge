@@ -74,7 +74,7 @@ class ExplorationAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 
@@ -87,7 +87,7 @@ class ExplorationAcceptanceTest {
         }
 
     @Test
-    fun `should walk the leader and have the other knight follow it without spending steps when the party walks`() =
+    fun `should walk the leader and have the other knight follow it without spending steps when the party steps`() =
         scenarioTest(::setUp) {
             // When
             walk(DirectionDto.EAST)
@@ -99,7 +99,7 @@ class ExplorationAcceptanceTest {
         }
 
     @Test
-    fun `should keep the party in a line when it walks several tiles`() =
+    fun `should keep the party in walking order when it steps several tiles`() =
         scenarioTest(::setUp) {
             // When
             repeat(4) { walk(DirectionDto.EAST) }
@@ -110,7 +110,7 @@ class ExplorationAcceptanceTest {
         }
 
     @Test
-    fun `should start the battle and stop exploring when the party walks within reach of the cpu rat`() =
+    fun `should start the battle and stop exploring when the party steps within reach of the cpu rat`() =
         scenarioTest(::setUp) {
             // When
             walk(DirectionDto.NORTH)

@@ -95,14 +95,14 @@ The screen follows the quests in [`QuestPresenter`](../../src/commonMain/kotlin/
 
 [`QuestTrackerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestTrackerView.kt) is a capsule on the right of the top line, beside Exploring, naming the current task of the [pinned quest](#pinning), or else of the main quest, with a pin while a side quest is pinned, and its count when it counts above 1, e.g.: `Defeat 5 Rats 3/5`. A talk, a reach or a single defeat has nothing to count.
 
-| Event                                     | The tracker                                                                                                     |
-|-------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| `QuestStarted` of the main quest, `GameRestored` | Is drawn, without popping, so a loaded game draws it too, ticked when completed.                         |
-| `TaskProgressed`, `TaskCompleted`         | Pops alongside the timeline when what it reads differs from what it displays, so a defeat pops it once, even when it publishes both. Nothing when the quest is completed, as `QuestCompleted` follows. Of a quest it does not name, it only pops, with no text change. |
-| `QuestPinned`, `QuestAbandoned`           | Is drawn, without popping, naming the quest now pinned, or the main quest.                                      |
-| `QuestCompleted`                          | Is drawn, without popping: a pinned quest returns to the main quest, and the main quest reads Quest completed for good, with a tick. |
-| `ExplorationPaused`, `ExplorationResumed` | Stays in the same place, read only in a battle: no chevron, and tapping it does nothing.                        |
-| `PlayerVictory`                           | Is hidden, as the winner is drawn centred across the whole top line.                                            |
+| Event                                          | The tracker                                                                                                     |
+|------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| `QuestStarted` of the main quest, `GameRestored`      | Is drawn, without popping, so a loaded game draws it too, ticked when completed.                         |
+| `TaskProgressed`, `TaskCompleted`              | Pops alongside the timeline when what it reads differs from what it displays, so a defeat pops it once, even when it publishes both. Nothing when the quest is completed, as `QuestCompleted` follows. Of a quest it does not name, it only pops, with no text change. |
+| `QuestPinned`, `QuestAbandoned`                | Is drawn, without popping, naming the quest now pinned, or the main quest.                                      |
+| `QuestCompleted`                               | Is drawn, without popping: a pinned quest returns to the main quest, and the main quest reads Quest completed for good, with a tick. |
+| `ExplorationInterrupted`, `ExplorationResumed` | Stays in the same place, read only in a battle: no chevron, and tapping it does nothing.                        |
+| `PlayerVictory`                                | Is hidden, as the winner is drawn centred across the whole top line.                                            |
 
 ### The detail view
 
@@ -128,7 +128,7 @@ The detail view of an active side quest has Abandon beside Back in the action ro
 [`QuestMarkerView`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/QuestMarkerView.kt) is the sign over an npc's head, on the battlefield: gold with an exclamation mark for a quest to start, and green with a speech bubble for a talk task. [`SearchQuestMarkers`](../../src/commonMain/kotlin/com/mkz/rpg/quest/usecases/queries/SearchQuestMarkers.kt) lists one sign per npc, the talk task winning over a quest to start, as the talk does both.
 
 - `QuestPresenter` reads them on `QuestStarted`, `TaskCompleted`, `QuestCompleted`, `QuestAbandoned`, `NpcRecruited`, `GameRestored` and `ExplorationResumed`, and draws each on the tile of its npc, removing those gone. An npc no longer on the battlefield, e.g.: once recruited, has none.
-- They only show while exploring, as an npc can only be talked to then: `ExplorationPaused` removes them all.
+- They only show while exploring, as an npc can only be talked to then: `ExplorationInterrupted` removes them all.
 - A repeatable giver stays marked whenever its quest can start.
 
 ### The announcements
@@ -146,7 +146,7 @@ For example, a new game, then defeating the goat wizard in a battle:
 | The new game is set up      | `QuestStarted`                                      | The tracker reads Defeat the Goat Wizard, and a toast announces the quest for 4.5 seconds       | Runs     |
 | The tracker is tapped       | `QuestOpened`                                       | The detail view takes the place of the pad, as no side quest is listed                          | Stopped  |
 | Back is tapped              | `QuestClosed`                                       | The pad is displayed again                                                                      | Runs     |
-| A battle starts             | `ExplorationPaused`                                 | The tracker stays, without its chevron                                                          | In turns |
+| A battle starts             | `ExplorationInterrupted`                            | The tracker stays, without its chevron                                                          | In turns |
 | The goat wizard is defeated | `TaskProgressed`, `TaskCompleted`, `QuestCompleted` | Once it has fallen, the tracker reads Quest completed, and a toast announces 150 G              | In turns |
 | The battle ends             | `ExplorationResumed`                                | The ticked tracker has its chevron back, and opens the completed detail                         | Runs     |
 

@@ -19,7 +19,7 @@ import com.mkz.rpg.lootableItem.adapters.presentation.LootableItemApi
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.CONSUMABLE
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.TypeDto.EQUIPPABLE
 import com.mkz.rpg.party.adapters.presentation.PartyApi
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
 import com.mkz.rpg.screen.adapters.presentation.battlefieldHud.domain.BattlefieldHudEvent
@@ -171,7 +171,7 @@ class InventoryPresenter(
                 flashReceiver(event.battleUnitId)
             },
             // A battle starting abandons the giving, as the battle HUD takes over.
-            eventBus.subscribe<ExplorationPaused> { timeline.play { abandonGiving() } },
+            eventBus.subscribe<ExplorationInterrupted> { timeline.play { abandonGiving() } },
             // The giver leaves the party, or a receiver can no longer receive: back to the item's actions, when the giver remains.
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingOf(event.battleUnitId) } },
             // The bag is displayed again with the new gold, so the next give can start straight away, and the receiver flashes on its tile.
@@ -182,7 +182,7 @@ class InventoryPresenter(
             },
             // The gold and the room are read again, e.g.: a wandering rat dies on lava and completes a task.
             eventBus.subscribe<RewardGranted> { event -> timeline.play { readGivingGoldAgain(event.battleUnitId) } },
-            eventBus.subscribe<ExplorationPaused> { timeline.play { abandonGivingGold() } },
+            eventBus.subscribe<ExplorationInterrupted> { timeline.play { abandonGivingGold() } },
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingGoldOf(event.battleUnitId) } },
             eventBus.subscribe<InventoryFull> { event ->
                 val sellPrice = lootableItemApi.searchSellPrice(event.lootableItemId) ?: return@subscribe

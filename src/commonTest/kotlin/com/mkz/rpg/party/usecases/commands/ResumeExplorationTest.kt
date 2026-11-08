@@ -15,9 +15,9 @@ class ResumeExplorationTest {
     private val resumeExploration = ResumeExploration(partyRepository, eventBus)
 
     @Test
-    fun `should explore again when the exploration is paused`() {
+    fun `should explore again when the exploration is interrupted`() {
         // Given
-        partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")).pause().pullEvents().second)
+        partyRepository.save(party(playerId = "human", battleUnitIds = listOf("knight-1")).interrupt().pullEvents().second)
         // When
         resumeExploration()
         // Then

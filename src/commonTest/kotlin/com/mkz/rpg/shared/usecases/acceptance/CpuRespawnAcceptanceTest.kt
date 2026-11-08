@@ -92,7 +92,7 @@ class CpuRespawnAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 
@@ -100,7 +100,7 @@ class CpuRespawnAcceptanceTest {
     private fun walkBackAndForth(steps: Int) = repeat(steps) { step -> walk(if (step % 2 == 0) DirectionDto.EAST else DirectionDto.WEST) }
 
     @Test
-    fun `should not respawn the defeated cpu battle unit before the party has walked the respawn steps`() =
+    fun `should not respawn the defeated cpu battle unit before the party has taken the respawn steps`() =
         scenarioTest(::setUp) {
             // When
             walkBackAndForth(RESPAWN_STEPS - 1)
@@ -110,7 +110,7 @@ class CpuRespawnAcceptanceTest {
         }
 
     @Test
-    fun `should respawn the defeated cpu battle unit on its home with full health once the party has walked the respawn steps`() =
+    fun `should respawn the defeated cpu battle unit on its home with full health once the party has taken the respawn steps`() =
         scenarioTest(::setUp) {
             // When
             walkBackAndForth(RESPAWN_STEPS)

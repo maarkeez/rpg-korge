@@ -166,12 +166,12 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should display the battle HUD and the call to action in place of the virtual pad when the exploration pauses`() {
+    fun `DisplayExploring should display the battle HUD and the call to action in place of the virtual pad when the exploration is interrupted`() {
         // Given
         createPresenter()
         startExploring()
         // When
-        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeFalse()
@@ -202,7 +202,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
-        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // When
         eventBus.publish(PartyEvent.ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
@@ -214,7 +214,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should walk the party towards the held arrow when the scene is idle`() {
+    fun `StepParty should step the party towards the held arrow when the scene is idle`() {
         // Given
         createPresenter()
         startExploring()
@@ -226,7 +226,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should walk the party one tile towards each arrow when it is held`() {
+    fun `StepParty should step the party one tile towards each arrow when it is held`() {
         // Given
         createPresenter()
         startExploring()
@@ -247,7 +247,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should walk the party once the scene is idle when an arrow was tapped while it played`() {
+    fun `StepParty should step the party once the scene is idle when an arrow was tapped while it played`() {
         // Given
         val presenter = createPresenter()
         startExploring()
@@ -267,7 +267,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should walk only towards the last arrow tapped while the scene played`() {
+    fun `StepParty should step only towards the last arrow tapped while the scene played`() {
         // Given
         val presenter = createPresenter()
         startExploring()
@@ -285,7 +285,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should forget the arrow tapped while the scene played when the pad is hidden`() {
+    fun `StepParty should forget the arrow tapped while the scene played when the pad is hidden`() {
         // Given
         val presenter = createPresenter()
         startExploring()
@@ -316,7 +316,7 @@ class ExplorationPresenterTest {
         }
 
     @Test
-    fun `WalkParty should walk the party when an arrow is tapped while its three members flash every second on water`() {
+    fun `StepParty should step the party when an arrow is tapped while its three members flash every second on water`() {
         // Given
         val apis = partyOnWaterApis()
         val timeline = battleSceneTimeline()
@@ -504,7 +504,7 @@ class ExplorationPresenterTest {
         // Given
         createPresenter()
         startExploring()
-        apis.partyApi.pauseExploration()
+        apis.partyApi.interruptExploration()
         eventBus.dispatch()
         // When
         eventBus.publish(BattlefieldHudEvent.Idle)
@@ -530,7 +530,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should not walk the party while the pad is hidden, even when an arrow is still held`() {
+    fun `StepParty should not step the party while the pad is hidden, even when an arrow is still held`() {
         // Given
         createPresenter()
         startExploring()
@@ -614,7 +614,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should not walk the party while talking, even when an arrow is still held`() {
+    fun `StepParty should not step the party while talking, even when an arrow is still held`() {
         // Given
         createPresenter()
         startExploring()
@@ -645,13 +645,13 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should close the dialog when the exploration pauses while talking`() {
+    fun `DisplayExploring should close the dialog when the exploration is interrupted while talking`() {
         // Given
         createPresenter()
         startExploring()
         talk()
         // When
-        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // Then
         npcDialogView.visible.shouldBeFalse()
@@ -825,14 +825,14 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should close the shop and display the finish turn again when the exploration pauses while shopping`() {
+    fun `DisplayExploring should close the shop and display the finish turn again when the exploration is interrupted while shopping`() {
         // Given
         createPresenter()
         startExploring()
         openTheShop()
         shopPresenter.shopSlotSelected(0)
         // When
-        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // Then
         shopPresenter.isOpen.shouldBeFalse()
@@ -907,7 +907,7 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `WalkParty should not walk the party while in the party formation, even when an arrow is still held`() {
+    fun `StepParty should not step the party while in the party formation, even when an arrow is still held`() {
         // Given
         createPresenter()
         startExploring()
@@ -1067,7 +1067,7 @@ class ExplorationPresenterTest {
         startExploring()
         tapTracker()
         // When
-        eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
         // Then
         questDetailView.visible.shouldBeFalse()

@@ -78,7 +78,7 @@ class SummonsAtBattleEndAcceptanceTest {
         battleUnitApi.deployBattleUnit("rat-2", "rat", cpuPlayerId, deployAtRow = 2, deployAtColumn = 6)
         partyApi.startExploration()
         eventBus.dispatch()
-        partyApi.walkParty(DirectionDto.NORTH)
+        partyApi.stepParty(DirectionDto.NORTH)
         eventBus.dispatch()
     }
 

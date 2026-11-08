@@ -6,7 +6,7 @@ import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
 import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.PartyMother.party
-import com.mkz.rpg.party.usecases.services.PartyWalking
+import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
@@ -16,16 +16,16 @@ import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-class WalkPartyTest {
+class StepPartyTest {
     private val queries = InMemoryQueries()
     private val partyRepository = InMemoryPartyRepository()
     private val eventBus = FakeEventBus()
-    private val walkParty =
-        WalkParty(
+    private val stepParty =
+        StepParty(
             partyRepository = partyRepository,
             searchPosition = queries.searchPosition,
             searchOccupant = queries.searchOccupant,
-            partyWalking = PartyWalking(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus),
+            partyStepping = PartyStepping(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus),
             eventBus = eventBus,
         )
 
@@ -45,13 +45,13 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.NORTH)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
         partyRepository
             .search()!!
             .toDto()
-            .isWalking
+            .isStepping
             .shouldBeTrue()
     }
 
@@ -65,13 +65,13 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.EAST)
+        stepParty(DirectionDto.EAST)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 1))
     }
 
     @Test
-    fun `should not walk when the leader can not occupy the next tile`() {
+    fun `should not step when the leader can not occupy the next tile`() {
         // Given
         givenParty(
             """
@@ -81,14 +81,14 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.NORTH)
-        walkParty(DirectionDto.WEST)
+        stepParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.WEST)
         // Then
         eventBus.shouldNotHavePublishedEvents()
         partyRepository
             .search()!!
             .toDto()
-            .isWalking
+            .isStepping
             .shouldBeFalse()
     }
 
@@ -103,18 +103,18 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.SOUTH)
+        stepParty(DirectionDto.SOUTH)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestSwapBattleUnits(battleUnitId = "knight-1", otherBattleUnitId = "knight-2"))
         partyRepository
             .search()!!
             .toDto()
-            .isWalking
+            .isStepping
             .shouldBeTrue()
     }
 
     @Test
-    fun `should swap the leader with any party member on the next tile and rebuild the line when it is not the one behind`() {
+    fun `should swap the leader with any party member on the next tile and rebuild the walking order when it is not the one behind`() {
         // Given the corridor ". M K L", K leading, after K swapped with L: the line is K, L, M, as L and M are as close to K
         queries.battlefieldRepository.create(battlefield(". M K L", occupants = mapOf('K' to "knight-1", 'L' to "knight-2", 'M' to "knight-3")))
         val positions = mapOf("knight-1" to PositionDto(0, 3), "knight-2" to PositionDto(0, 2), "knight-3" to PositionDto(0, 1))
@@ -126,13 +126,13 @@ class WalkPartyTest {
                 .second,
         )
         // When K swaps with M
-        walkParty(DirectionDto.WEST)
+        stepParty(DirectionDto.WEST)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestSwapBattleUnits(battleUnitId = "knight-1", otherBattleUnitId = "knight-3"))
         partyRepository
             .search()!!
             .toDto()
-            .lineBattleUnitIds
+            .walkingOrderBattleUnitIds
             .shouldContainExactly("knight-1", "knight-3", "knight-2")
     }
 
@@ -147,13 +147,13 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.NORTH)
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should not walk when the leader would leave the battlefield`() {
+    fun `should not step when the leader would leave the battlefield`() {
         // Given
         givenParty(
             """
@@ -162,13 +162,13 @@ class WalkPartyTest {
             """,
         )
         // When
-        walkParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.NORTH)
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }
 
     @Test
-    fun `should not walk again when the party is still walking`() {
+    fun `should not step again when the party is still stepping`() {
         // Given
         givenParty(
             """
@@ -177,20 +177,20 @@ class WalkPartyTest {
             L .
             """,
         )
-        walkParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.NORTH)
         // When
-        walkParty(DirectionDto.EAST)
+        stepParty(DirectionDto.EAST)
         // Then
         eventBus.shouldHavePublishedEvents(BattleUnitEvent.RequestWalkBattleUnitOutOfBattle(battleUnitId = "knight-1", walkToRow = 0, walkToColumn = 0))
     }
 
     @Test
-    fun `should not walk when the party is battling`() {
+    fun `should not step when the party is battling`() {
         // Given
         queries.battlefieldRepository.create(battlefield(". .\nK .", occupants = mapOf('K' to "knight-1")))
-        partyRepository.save(party(battleUnitIds = listOf("knight-1")).pause().pullEvents().second)
+        partyRepository.save(party(battleUnitIds = listOf("knight-1")).interrupt().pullEvents().second)
         // When
-        walkParty(DirectionDto.NORTH)
+        stepParty(DirectionDto.NORTH)
         // Then
         eventBus.shouldNotHavePublishedEvents()
     }

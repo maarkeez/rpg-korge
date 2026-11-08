@@ -15,7 +15,7 @@ class ClosePauseTest {
     private val eventBus = FakeEventBus()
     private val closePause = ClosePause(partyRepository, eventBus)
 
-    private fun canWalk() = partyRepository.search()!!.canWalk()
+    private fun canStep() = partyRepository.search()!!.canStep()
 
     @Test
     fun `should explore again when the game is paused`() {
@@ -24,18 +24,18 @@ class ClosePauseTest {
         // When
         closePause()
         // Then
-        canWalk().shouldBeTrue()
+        canStep().shouldBeTrue()
         eventBus.shouldHavePublishedEvents(PartyEvent.PauseClosed(playerId = "human"))
     }
 
     @Test
     fun `should do nothing when the game is not paused`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
         closePause()
         // Then
-        canWalk().shouldBeFalse()
+        canStep().shouldBeFalse()
         eventBus.shouldNotHavePublishedEvents()
     }
 }

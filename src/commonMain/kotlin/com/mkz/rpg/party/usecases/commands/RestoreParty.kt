@@ -5,7 +5,7 @@ import com.mkz.rpg.party.domain.Party
 import com.mkz.rpg.party.domain.PartyRepository
 
 /**
- * Restores the party a save took, publishing no events: it explores again, done walking. Nothing happens when there was
+ * Restores the party a save took, publishing no events: it explores again, done stepping. Nothing happens when there was
  * none. Fails when a member is not a battle unit, so the battle units are restored before.
  */
 class RestoreParty(

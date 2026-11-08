@@ -10,17 +10,17 @@ import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
 
-class OnPartyWalkedTest {
+class OnPartySteppedTest {
     private val eventBus = InMemoryEventBus()
     private val queries = InMemoryQueries()
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val onPartyWalked = OnPartyWalked(RespawnDefeatedBattleUnits(cpuWanderBrainRepository, queries.isTileVacant, eventBus), eventBus)
+    private val onPartyStepped = OnPartyStepped(RespawnDefeatedBattleUnits(cpuWanderBrainRepository, queries.isTileVacant, eventBus), eventBus)
 
     @Test
-    fun `should count the party step for every defeated cpu battle unit when the party walks`() {
+    fun `should count the party step for every defeated cpu battle unit when the party steps`() {
         // Given
         cpuWanderBrainRepository.save(cpuWanderBrain(homes = mapOf("rat-1" to (0 to 0))).awaitRespawn("rat-1"))
-        eventBus.publish(PartyEvent.PartyWalked(playerId = "human", battleUnitIds = listOf("knight-1")))
+        eventBus.publish(PartyEvent.PartyStepped(playerId = "human", battleUnitIds = listOf("knight-1")))
         // When
         eventBus.dispatch()
         // Then

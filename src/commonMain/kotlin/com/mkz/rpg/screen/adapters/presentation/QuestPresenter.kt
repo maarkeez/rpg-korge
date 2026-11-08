@@ -4,7 +4,7 @@ import com.mkz.rpg.battle.domain.BattleEvent.PlayerVictory
 import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.NpcEvent.NpcRecruited
 import com.mkz.rpg.party.adapters.presentation.PartyApi
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.quest.adapters.presentation.QuestApi
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
@@ -104,7 +104,7 @@ class QuestPresenter(
                 displayTracker()
                 displayMarkers()
             },
-            eventBus.subscribe<ExplorationPaused> {
+            eventBus.subscribe<ExplorationInterrupted> {
                 isInBattle = true
                 timeline.play { questTrackerView.setTappable(false) }
                 moveMarkersTo(emptyMap())

@@ -22,13 +22,13 @@ import com.mkz.rpg.party.usecases.commands.CloseFormation
 import com.mkz.rpg.party.usecases.commands.ClosePause
 import com.mkz.rpg.party.usecases.commands.CloseQuest
 import com.mkz.rpg.party.usecases.commands.FinishTalk
+import com.mkz.rpg.party.usecases.commands.InterruptExploration
 import com.mkz.rpg.party.usecases.commands.JoinParty
 import com.mkz.rpg.party.usecases.commands.LeaveParty
 import com.mkz.rpg.party.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.party.usecases.commands.OpenFormation
 import com.mkz.rpg.party.usecases.commands.OpenPause
 import com.mkz.rpg.party.usecases.commands.OpenQuest
-import com.mkz.rpg.party.usecases.commands.PauseExploration
 import com.mkz.rpg.party.usecases.commands.RecruitMember
 import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
@@ -36,11 +36,11 @@ import com.mkz.rpg.party.usecases.commands.RestoreParty
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.party.usecases.commands.StartExploration
 import com.mkz.rpg.party.usecases.commands.StartTalk
-import com.mkz.rpg.party.usecases.commands.WalkParty
+import com.mkz.rpg.party.usecases.commands.StepParty
 import com.mkz.rpg.party.usecases.queries.CanMemberLearnAbility
 import com.mkz.rpg.party.usecases.queries.SearchParty
 import com.mkz.rpg.party.usecases.queries.SearchPartySnapshot
-import com.mkz.rpg.party.usecases.services.PartyWalking
+import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Snapshottable
@@ -60,13 +60,13 @@ class PartyApi(
     val snapshottable: Snapshottable = PartySnapshottable(searchPartySnapshot, restoreParty)
 
     // Services
-    private val partyWalking = PartyWalking(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)
+    private val partyStepping = PartyStepping(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)
 
     // Commands
     val startExploration = StartExploration(playerApi.searchHumanPlayer, battleUnitApi.searchBattleUnitsByPlayerId, partyRepository, eventBus)
-    val walkParty = WalkParty(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchOccupant, partyWalking, eventBus)
-    val resolvePartyStep = ResolvePartyStep(partyRepository, partyWalking)
-    val pauseExploration = PauseExploration(partyRepository, eventBus)
+    val stepParty = StepParty(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchOccupant, partyStepping, eventBus)
+    val resolvePartyStep = ResolvePartyStep(partyRepository, partyStepping)
+    val interruptExploration = InterruptExploration(partyRepository, eventBus)
     val resumeExploration = ResumeExploration(partyRepository, eventBus)
     val leaveParty = LeaveParty(partyRepository)
     val joinParty = JoinParty(partyRepository, battleUnitApi.searchBattleUnitById, eventBus)
@@ -91,7 +91,7 @@ class PartyApi(
     // Events
     private val onRequestStartExploration = OnRequestStartExploration(startExploration, eventBus)
     private val onTileOccupied = OnTileOccupied(resolvePartyStep, eventBus)
-    private val onBattleStarted = OnBattleStarted(pauseExploration, eventBus)
+    private val onBattleStarted = OnBattleStarted(interruptExploration, eventBus)
     private val onBattleFinishedWithoutWinner = OnBattleFinishedWithoutWinner(resumeExploration, eventBus)
     private val onBattleUnitDefeated = OnBattleUnitDefeated(leaveParty, eventBus)
     private val onBattleUnitMoved = OnBattleUnitMoved(markBattleUnitMoved, eventBus)

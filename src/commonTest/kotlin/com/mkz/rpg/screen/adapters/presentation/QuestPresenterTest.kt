@@ -5,7 +5,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnitEvent.BattleUnitDefeated
 import com.mkz.rpg.battleUnit.usecases.services.BattleUnitLoader.Deployment
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.npc.domain.NpcMother.npc
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.CPU
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto.HUMAN
@@ -238,7 +238,7 @@ class QuestPresenterTest {
         val apis = apis(mainQuest(id = questId))
         apis.presenter()
         // When
-        apis.eventBus.publish(ExplorationPaused(playerId = "human"))
+        apis.eventBus.publish(ExplorationInterrupted(playerId = "human"))
         apis.eventBus.publish(ExplorationResumed(playerId = "human", battleUnitIds = listOf("knight-1")))
         apis.eventBus.dispatch()
         // Then
@@ -665,8 +665,8 @@ class QuestPresenterTest {
     private val farmer = npc(id = "farmer", row = 0, column = 1).toDto()
     private val farmerTile = TilePosition(0, 1)
 
-    private fun SubdomainApis.pauseExploration() {
-        eventBus.publish(ExplorationPaused(playerId = "human"))
+    private fun SubdomainApis.interruptExploration() {
+        eventBus.publish(ExplorationInterrupted(playerId = "human"))
         eventBus.dispatch()
     }
 
@@ -685,7 +685,7 @@ class QuestPresenterTest {
         // Then
         battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))
         // When
-        apis.pauseExploration()
+        apis.interruptExploration()
         // Then
         battlefieldView.displayedQuestMarkers.shouldBeEmpty()
         // When
@@ -700,7 +700,7 @@ class QuestPresenterTest {
         val apis = apis(mainQuest(id = questId, tasks = listOf(defeatUnits(unitId = "rat", count = 1), talkToNpc("farmer"))), npcs = listOf(farmer))
         apis.presenter()
         apis.startQuest()
-        apis.pauseExploration()
+        apis.interruptExploration()
         // When
         apis.defeatRat()
         // Then

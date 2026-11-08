@@ -34,7 +34,7 @@ class RestorePartyTest {
         // Then
         val restored = partyRepository.search()!!
         restored shouldBe party
-        restored.canWalk().shouldBeTrue()
+        restored.canStep().shouldBeTrue()
     }
 
     @Test

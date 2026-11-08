@@ -3,7 +3,7 @@ package com.mkz.rpg.party.usecases.queries
 import com.mkz.rpg.party.domain.Party
 import com.mkz.rpg.party.domain.PartyRepository
 
-/** What is saved of the party exploring, if any: its members and its line. */
+/** What is saved of the party exploring, if any: its members and its walking order. */
 class SearchPartySnapshot(
     private val partyRepository: PartyRepository,
 ) {

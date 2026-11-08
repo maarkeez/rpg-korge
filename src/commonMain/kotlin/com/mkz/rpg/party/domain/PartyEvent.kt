@@ -13,12 +13,12 @@ sealed interface PartyEvent : DomainEvent {
     ) : PartyEvent
 
     /** Battle units: the party, the leader first. */
-    data class PartyWalked(
+    data class PartyStepped(
         val playerId: String,
         val battleUnitIds: List<String>,
     ) : PartyEvent
 
-    data class ExplorationPaused(
+    data class ExplorationInterrupted(
         val playerId: String,
     ) : PartyEvent
 
@@ -33,7 +33,7 @@ sealed interface PartyEvent : DomainEvent {
         val playerId: String,
     ) : PartyEvent
 
-    // Requested for the npc standing next to the leader, when A is pressed.
+    // Requested for the npc adjacent to the leader, when A is pressed.
     data class RequestStartTalk(
         val npcId: String,
     ) : PartyEvent

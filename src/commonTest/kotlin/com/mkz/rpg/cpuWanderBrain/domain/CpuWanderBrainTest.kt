@@ -275,7 +275,7 @@ class CpuWanderBrainTest {
     }
 
     @Test
-    fun `WalkPartyStep should count a step for every defeated battle unit`() {
+    fun `StepPartyStep should count a step for every defeated battle unit`() {
         // Given
         val cpuWanderBrain = cpuWanderBrain().awaitRespawn("rat-1").walkPartyStep().awaitRespawn("rat-2")
         // When

@@ -18,7 +18,7 @@ class OpenQuestTest {
     private fun isReadingQuest() = partyRepository.search()!!.toDto().isReadingQuest
 
     @Test
-    fun `should publish QuestOpened when the party can walk`() {
+    fun `should publish QuestOpened when the party can step`() {
         // Given
         partyRepository.save(party())
         // When
@@ -29,9 +29,9 @@ class OpenQuestTest {
     }
 
     @Test
-    fun `should publish nothing when the party can not walk`() {
+    fun `should publish nothing when the party can not step`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
         openQuest()
         // Then

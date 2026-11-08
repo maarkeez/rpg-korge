@@ -13,7 +13,7 @@ class SearchPartySnapshotTest {
     private val searchPartySnapshot = SearchPartySnapshot(partyRepository)
 
     @Test
-    fun `should return the members and the line of the party`() {
+    fun `should return the members and the walking order of the party`() {
         // Given
         // K leads in the corridor "M L K", after swapping with M: the line is K, M, L.
         partyRepository.save(
@@ -26,7 +26,7 @@ class SearchPartySnapshotTest {
         // When
         val result = searchPartySnapshot()
         // Then
-        result shouldBe Party.Dto.SnapshotDto(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2", "knight-3"), lineBattleUnitIds = listOf("knight-1", "knight-3", "knight-2"))
+        result shouldBe Party.Dto.SnapshotDto(playerId = "human", battleUnitIds = listOf("knight-1", "knight-2", "knight-3"), walkingOrderBattleUnitIds = listOf("knight-1", "knight-3", "knight-2"))
     }
 
     @Test

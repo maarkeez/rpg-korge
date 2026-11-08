@@ -18,7 +18,7 @@ class GiveMother {
 
     fun talkTo(npcId: String) = queries.partyRepository.save(party(battleUnitIds = listOf("knight-1", "viking-1", "mage-1")).talk(npcId).pullEvents().second)
 
-    fun battle() = queries.partyRepository.save(party(battleUnitIds = listOf("knight-1", "viking-1", "mage-1")).pause().pullEvents().second)
+    fun battle() = queries.partyRepository.save(party(battleUnitIds = listOf("knight-1", "viking-1", "mage-1")).interrupt().pullEvents().second)
 
     fun storedItems(battleUnitId: String): List<String>? = inventoryRepository.searchByBattleUnitId(battleUnitId)?.toDto()?.storedItems
 }

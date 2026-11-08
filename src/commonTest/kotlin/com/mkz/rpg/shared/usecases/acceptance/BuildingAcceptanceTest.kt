@@ -69,7 +69,7 @@ class BuildingAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 
@@ -85,7 +85,7 @@ class BuildingAcceptanceTest {
         }
 
     @Test
-    fun `should not let the party walk into the building`() =
+    fun `should not let the party step into the building`() =
         scenarioTest({ setUp() }) {
             // When
             walk(DirectionDto.EAST)
@@ -95,7 +95,7 @@ class BuildingAcceptanceTest {
         }
 
     @Test
-    fun `should let the party walk around the building`() =
+    fun `should let the party step around the building`() =
         scenarioTest({ setUp() }) {
             // When
             walk(DirectionDto.SOUTH)

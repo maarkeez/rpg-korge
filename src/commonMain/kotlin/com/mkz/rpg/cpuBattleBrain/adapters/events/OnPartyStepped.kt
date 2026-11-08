@@ -5,12 +5,12 @@ import com.mkz.rpg.party.domain.PartyEvent
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.subscribe
 
-class OnPartyWalked(
+class OnPartyStepped(
     engageEnemies: EngageEnemies,
     eventBus: EventBus,
 ) {
     private val subscription =
-        eventBus.subscribe<PartyEvent.PartyWalked> { event ->
+        eventBus.subscribe<PartyEvent.PartyStepped> { event ->
             engageEnemies(exploringPlayerId = event.playerId)
         }
 }

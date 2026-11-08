@@ -3,7 +3,7 @@ package com.mkz.rpg.party.usecases.commands
 import com.mkz.rpg.party.domain.PartyRepository
 import com.mkz.rpg.shared.domain.EventBus
 
-/** Explores again, e.g.: when a battle finishes, so the party walks again. */
+/** Resumes the exploration when the battle that interrupted it finishes, so the party steps again. */
 class ResumeExploration(
     private val partyRepository: PartyRepository,
     private val eventBus: EventBus,

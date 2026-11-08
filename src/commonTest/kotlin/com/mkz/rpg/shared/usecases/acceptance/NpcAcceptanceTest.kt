@@ -92,7 +92,7 @@ class NpcAcceptanceTest {
     }
 
     private fun walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 
@@ -137,7 +137,7 @@ class NpcAcceptanceTest {
         }
 
     @Test
-    fun `should have the recruited viking follow the party when it walks`() =
+    fun `should have the recruited viking follow the party when it steps`() =
         scenarioTest({
             npcs = listOf(theGuy, viking)
             setUp()
@@ -216,7 +216,7 @@ class NpcAcceptanceTest {
         }
 
     @Test
-    fun `should not let the party walk onto the tile of the npc`() =
+    fun `should not let the party step onto the tile of the npc`() =
         scenarioTest(::setUp) {
             // When
             walk(DirectionDto.WEST)

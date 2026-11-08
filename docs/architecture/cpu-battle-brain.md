@@ -144,10 +144,10 @@ The others stay put, including the ones returning home after a chase, as nobody 
 
 ### Respawning
 
-A defeated CPU battle unit with a home comes back to it once the party has walked `RESPAWN_STEPS` (50) steps since its defeat, whether it was defeated in a battle or by its terrain while exploring. The summons have no home, so they never respawn.
+A defeated CPU battle unit with a home comes back to it once the party has taken `RESPAWN_STEPS` (50) party steps since its defeat, whether it was defeated in a battle or by its terrain while exploring. The summons have no home, so they never respawn.
 
 1. [`AwaitRespawn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/AwaitRespawn.kt) starts counting the party steps of the battle unit when it is defeated (`BattleUnitDefeated`).
-2. Every time the party walks a step (`PartyWalked`), [`RespawnDefeatedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/RespawnDefeatedBattleUnits.kt) counts it for every defeated battle unit, and requests the respawn of those that have counted enough steps on their home (`RequestRespawnBattleUnit`). There are no steps while battling, so the battle units only count while the party explores.
+2. Every time the party takes a party step (`PartyStepped`), [`RespawnDefeatedBattleUnits`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/RespawnDefeatedBattleUnits.kt) counts it for every defeated battle unit, and requests the respawn of those that have counted enough steps on their home (`RequestRespawnBattleUnit`). There are no steps while battling, so the battle units only count while the party explores.
 3. While its home is occupied (e.g.: by a battle unit of the party), the battle unit waits: it is requested again on the next step, and respawns on the first one its home is free.
 4. [`RespawnBattleUnit`](../../src/commonMain/kotlin/com/mkz/rpg/battleUnit/usecases/commands/RespawnBattleUnit.kt) brings it back as it was deployed: full health and mana, no cooldowns, no ongoing effects, with the same id. It announces `BattleUnitRespawned`, followed by `RequestOccupyTile`, so the battlefield occupies its home and the screen displays it, and [`ResolveRespawn`](../../src/commonMain/kotlin/com/mkz/rpg/cpuWanderBrain/usecases/commands/ResolveRespawn.kt) stops counting its steps.
 

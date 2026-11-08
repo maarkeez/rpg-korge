@@ -19,7 +19,7 @@ class StartTalkTest {
     private fun talkingNpcId() = partyRepository.search()!!.toDto().talkingNpcId
 
     @Test
-    fun `should talk to the npc when the party can walk`() {
+    fun `should talk to the npc when the party can step`() {
         // Given
         partyRepository.save(party(battleUnitIds = listOf("knight-1", "knight-2")))
         // When
@@ -30,9 +30,9 @@ class StartTalkTest {
     }
 
     @Test
-    fun `should not talk while the party is walking`() {
+    fun `should not talk while the party is still stepping`() {
         // Given
-        partyRepository.save(party(battleUnitIds = listOf("knight-1", "knight-2")).walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 1))))
+        partyRepository.save(party(battleUnitIds = listOf("knight-1", "knight-2")).stepParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 1))))
         // When
         startTalk(npcId = "the-guy")
         // Then
@@ -45,7 +45,7 @@ class StartTalkTest {
         // Given
         partyRepository.save(
             party(battleUnitIds = listOf("knight-1", "knight-2"))
-                .pause()
+                .interrupt()
                 .pullEvents()
                 .second,
         )

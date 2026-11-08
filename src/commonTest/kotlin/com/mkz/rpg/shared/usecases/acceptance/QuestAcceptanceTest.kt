@@ -175,7 +175,7 @@ class QuestAcceptanceTest {
     }
 
     private fun SubdomainApis.walk(direction: DirectionDto) {
-        partyApi.walkParty(direction)
+        partyApi.stepParty(direction)
         eventBus.dispatch()
     }
 

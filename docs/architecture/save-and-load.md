@@ -87,7 +87,7 @@ tables, players, the battlefield and its buildings, and the definition of each q
 | 3  | `npc`            | The npcs left (a recruited npc is gone), their tiles and stocks      | -                                              |
 | 4  | `lootDrop`       | The dropped items on each tile                                        | -                                              |
 | 5  | `inventory`      | Stored and equipped items, and gold                                   | -                                              |
-| 6  | `party`          | The members and the line                                              | It explores again: no pending step, no battle unit moved this second |
+| 6  | `party`          | The members and the walking order                                     | It explores again: no pending step, no battle unit moved this second |
 | 7  | `cpuWanderBrain` | The homes, the battle units returning home, and the awaited respawns  | The wandering in progress                      |
 | 8  | `quest`          | Each quest's status, current task, progress and whether it is pinned  | -                                              |
 

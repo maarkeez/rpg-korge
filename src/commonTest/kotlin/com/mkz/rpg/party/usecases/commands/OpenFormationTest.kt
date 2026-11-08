@@ -19,7 +19,7 @@ class OpenFormationTest {
     private fun isInFormation() = partyRepository.search()!!.toDto().isInFormation
 
     @Test
-    fun `should open the formation when the party can walk`() {
+    fun `should open the formation when the party can step`() {
         // Given
         partyRepository.save(party())
         // When
@@ -30,9 +30,9 @@ class OpenFormationTest {
     }
 
     @Test
-    fun `should not open the formation while the party is walking`() {
+    fun `should not open the formation while the party is still stepping`() {
         // Given
-        partyRepository.save(party().walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 1))))
+        partyRepository.save(party().stepParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 1))))
         // When
         openFormation()
         // Then
@@ -43,7 +43,7 @@ class OpenFormationTest {
     @Test
     fun `should not open the formation while battling`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
         openFormation()
         // Then

@@ -7,7 +7,7 @@ import com.mkz.rpg.shared.domain.EventBus
 
 /**
  * Closes the formation with the new party order, the leader first, so the party explores again: nobody moves, and the
- * followers line up behind the new leader. Nothing happens when it is not in formation.
+ * followers fall in behind the new leader. Nothing happens when it is not in formation.
  */
 class CloseFormation(
     private val partyRepository: PartyRepository,

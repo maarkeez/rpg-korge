@@ -277,14 +277,14 @@ msgctxt "ui.shop.goldFull"
 msgid "Gold full"
 msgstr ""
 
-#. The hint of the party formation, where the player swaps two party members to set the party order.
+#. The hint of the party formation, where the player reorders two party members to set the party order.
 msgctxt "ui.formation.tapToSelect"
-msgid "Tap two members to swap them"
+msgid "Tap two members to reorder them"
 msgstr ""
 
 #. The hint once a party member is selected in the formation, until another one is tapped. {name}: its name.
-msgctxt "ui.formation.tapToSwap"
-msgid "Swap {name} with..."
+msgctxt "ui.formation.tapToReorder"
+msgid "Reorder {name} with..."
 msgstr ""
 
 msgctxt "ui.formation.close"

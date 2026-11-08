@@ -133,7 +133,7 @@ data class CpuWanderBrain private constructor(
         return copy(awaitedRespawns = AwaitedRespawns(awaitedRespawns.value + (battleUnitId to 0)))
     }
 
-    /** The party walked a step: every defeated battle unit counts it. */
+    /** The party took a party step: every defeated battle unit counts it. */
     fun walkPartyStep(): CpuWanderBrain = copy(awaitedRespawns = AwaitedRespawns(awaitedRespawns.value.mapValues { (_, partySteps) -> partySteps + 1 }))
 
     /** The defeated battle units that have counted [RESPAWN_STEPS] party steps, with their home, in their deployment order. */

@@ -378,7 +378,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `MoveUnit should trail the leader of the party when it walks while exploring`() {
+    fun `MoveUnit should trail the leader of the party when it steps while exploring`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -489,12 +489,12 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `ExplorationPaused should stop trailing the leader of the party`() {
+    fun `ExplorationInterrupted should stop trailing the leader of the party`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
-        exploringApis.eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        exploringApis.eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         // When
         exploringApis.eventBus.dispatch()
         // Then
@@ -502,12 +502,12 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `ExplorationPaused should remove the health flashes`() {
+    fun `ExplorationInterrupted should remove the health flashes`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
-        exploringApis.eventBus.publish(PartyEvent.ExplorationPaused(playerId = "human"))
+        exploringApis.eventBus.publish(PartyEvent.ExplorationInterrupted(playerId = "human"))
         // When
         exploringApis.eventBus.dispatch()
         // Then

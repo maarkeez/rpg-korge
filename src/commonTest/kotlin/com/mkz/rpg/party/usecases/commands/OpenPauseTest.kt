@@ -18,7 +18,7 @@ class OpenPauseTest {
     private fun isPaused() = partyRepository.search()!!.toDto().isPaused
 
     @Test
-    fun `should pause when the party can walk`() {
+    fun `should pause when the party can step`() {
         // Given
         partyRepository.save(party())
         // When
@@ -31,7 +31,7 @@ class OpenPauseTest {
     @Test
     fun `should not pause while battling`() {
         // Given
-        partyRepository.save(party().pause().pullEvents().second)
+        partyRepository.save(party().interrupt().pullEvents().second)
         // When
         openPause()
         // Then

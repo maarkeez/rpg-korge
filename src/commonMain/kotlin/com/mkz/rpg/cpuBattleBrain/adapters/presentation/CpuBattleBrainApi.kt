@@ -10,7 +10,7 @@ import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitDecisionResolve
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuBattleUnitDone
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnCpuPlayerTurnStarted
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnExplorationStarted
-import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPartyWalked
+import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPartyStepped
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnPlayerTurnStarted
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestEngageEnemies
 import com.mkz.rpg.cpuBattleBrain.adapters.events.OnRequestJoinAndLeaveBattle
@@ -157,7 +157,7 @@ class CpuBattleBrainApi(
     private val onAbilityCastResolved = OnAbilityCastResolved(resolveCpuBattleUnitCast, eventBus)
     private val onBattleUnitDeployed = OnBattleUnitDeployed(joinCpuPlayerTurn, eventBus)
     private val onExplorationStarted = OnExplorationStarted(engageEnemies, eventBus)
-    private val onPartyWalked = OnPartyWalked(engageEnemies, eventBus)
+    private val onPartyStepped = OnPartyStepped(engageEnemies, eventBus)
     private val onRequestEngageEnemies = OnRequestEngageEnemies(engageEnemies, eventBus)
     private val onRequestJoinAndLeaveBattle = OnRequestJoinAndLeaveBattle(joinAndLeaveBattle, eventBus)
     private val onBattleDisengaged = OnBattleDisengaged(joinDisengagedBattle, eventBus)

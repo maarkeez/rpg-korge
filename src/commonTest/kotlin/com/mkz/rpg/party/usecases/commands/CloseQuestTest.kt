@@ -21,7 +21,7 @@ class CloseQuestTest {
         // When
         closeQuest()
         // Then
-        partyRepository.search()!!.canWalk().shouldBeTrue()
+        partyRepository.search()!!.canStep().shouldBeTrue()
         eventBus.shouldHavePublishedEvents(PartyEvent.QuestClosed(playerId = "human"))
     }
 

@@ -10,8 +10,8 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 /**
- * The party exploring: its members and its line. What it was doing (e.g.: walking) is not saved, as the game is only
- * saved while exploring, done walking: it explores again once restored, see [RestoreParty].
+ * The party exploring: its members and its walking order. What it was doing (e.g.: stepping) is not saved, as the game
+ * is only saved while exploring, done stepping: it explores again once restored, see [RestoreParty].
  */
 class PartySnapshottable(
     private val searchPartySnapshot: SearchPartySnapshot,
@@ -22,13 +22,13 @@ class PartySnapshottable(
     override fun snapshot(): String =
         SnapshotJson.encodeToString(
             searchPartySnapshot()?.let { party ->
-                PartySnapshot(playerId = party.playerId, battleUnitIds = party.battleUnitIds, lineBattleUnitIds = party.lineBattleUnitIds)
+                PartySnapshot(playerId = party.playerId, battleUnitIds = party.battleUnitIds, walkingOrderBattleUnitIds = party.walkingOrderBattleUnitIds)
             },
         )
 
     override fun restore(snapshot: String) {
         val party = SnapshotJson.decodeFromString<PartySnapshot?>(snapshot)
-        restoreParty(party?.let { Party.Dto.SnapshotDto(playerId = it.playerId, battleUnitIds = it.battleUnitIds, lineBattleUnitIds = it.lineBattleUnitIds) })
+        restoreParty(party?.let { Party.Dto.SnapshotDto(playerId = it.playerId, battleUnitIds = it.battleUnitIds, walkingOrderBattleUnitIds = it.walkingOrderBattleUnitIds) })
     }
 }
 
@@ -36,5 +36,5 @@ class PartySnapshottable(
 private data class PartySnapshot(
     val playerId: String,
     val battleUnitIds: List<String>,
-    val lineBattleUnitIds: List<String>,
+    val walkingOrderBattleUnitIds: List<String>,
 )

@@ -6,7 +6,7 @@ import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.Party.Dto.StepDto
 import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
-import com.mkz.rpg.party.usecases.services.PartyWalking
+import com.mkz.rpg.party.usecases.services.PartyStepping
 import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.usecases.InMemoryQueries
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -18,23 +18,23 @@ class OnTileOccupiedTest {
     private val partyRepository = InMemoryPartyRepository()
     private val onTileOccupied =
         OnTileOccupied(
-            ResolvePartyStep(partyRepository, PartyWalking(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus)),
+            ResolvePartyStep(partyRepository, PartyStepping(partyRepository, queries.searchPosition, queries.searchShortestPath, eventBus)),
             eventBus,
         )
 
     @Test
-    fun `should finish walking when the awaited battle unit occupies its tile`() {
+    fun `should finish the party step when the awaited battle unit occupies its tile`() {
         // Given
         queries.battlefieldRepository.create(battlefield("K .", occupants = mapOf('K' to "knight-1")))
         partyRepository.save(
             party(battleUnitIds = listOf("knight-1"))
-                .walkParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0)))
+                .stepParty(listOf(StepDto(battleUnitId = "knight-1", row = 0, column = 0)))
                 .awaitNextStep(),
         )
         eventBus.publish(BattlefieldEvent.TileOccupied(row = 0, column = 0, occupantId = "knight-1"))
         // When
         eventBus.dispatch()
         // Then
-        partyRepository.search()!!.canWalk().shouldBeTrue()
+        partyRepository.search()!!.canStep().shouldBeTrue()
     }
 }

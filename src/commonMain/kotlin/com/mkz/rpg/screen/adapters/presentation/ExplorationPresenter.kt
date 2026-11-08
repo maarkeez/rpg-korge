@@ -7,7 +7,7 @@ import com.mkz.rpg.npc.adapters.presentation.NpcApi
 import com.mkz.rpg.npc.domain.Npc
 import com.mkz.rpg.party.adapters.presentation.PartyApi
 import com.mkz.rpg.party.domain.Party.Dto.DirectionDto
-import com.mkz.rpg.party.domain.PartyEvent.ExplorationPaused
+import com.mkz.rpg.party.domain.PartyEvent.ExplorationInterrupted
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.party.domain.PartyEvent.FormationClosed
@@ -98,11 +98,11 @@ class ExplorationPresenter(
                 timeline.play { displayVirtualPad(isDisplayed = true) }
             },
             // As soon as the leader lands on its last tile, before the battle is announced, so the party does not look
-            // frozen meanwhile. The exploration is paused right after, which hides it again: it does nothing more.
+            // frozen meanwhile. The exploration is interrupted right after, which hides it again: it does nothing more.
             eventBus.subscribe<BattleStarted> {
                 if (!isGameOver) timeline.playNext { displayVirtualPad(isDisplayed = false) }
             },
-            eventBus.subscribe<ExplorationPaused> {
+            eventBus.subscribe<ExplorationInterrupted> {
                 timeline.play { displayVirtualPad(isDisplayed = false) }
             },
             eventBus.subscribe<ExplorationResumed> {
@@ -172,7 +172,7 @@ class ExplorationPresenter(
         virtualPadView.visible = false
         npcDialogView.visible = false
         virtualPadView.setOnDirectionPressed { direction -> pendingPress = Press.Arrow(direction) }
-        virtualPadView.setOnDirectionHeld { direction -> walkParty(direction) }
+        virtualPadView.setOnDirectionHeld { direction -> stepParty(direction) }
         virtualPadView.setOnAPressed {
             pendingPress = Press.A
             talkToAdjacentNpc()
@@ -212,7 +212,7 @@ class ExplorationPresenter(
     private fun actOnPendingPress() {
         if (!virtualPadView.visible) pendingPress = null
         when (val press = pendingPress) {
-            is Press.Arrow -> walkParty(press.direction)
+            is Press.Arrow -> stepParty(press.direction)
             Press.A -> talkToAdjacentNpc()
             Press.B -> openFormation()
             Press.Start -> openPause()
@@ -223,10 +223,10 @@ class ExplorationPresenter(
     // The party only walks once the scene shows where it is, so a held arrow can not walk ahead of the animation, nor
     // while the pad is hidden (e.g.: an arrow still held when the inventory is displayed). Walking towards the pressed
     // arrow acts on its press, so it is not walked again.
-    private fun walkParty(direction: VirtualPadView.Direction) {
+    private fun stepParty(direction: VirtualPadView.Direction) {
         if (timeline.isPlaying || !virtualPadView.visible) return
         if (pendingPress == Press.Arrow(direction)) pendingPress = null
-        partyApi.walkParty(directionDto(direction))
+        partyApi.stepParty(directionDto(direction))
     }
 
     private fun directionDto(direction: VirtualPadView.Direction): DirectionDto =
