@@ -254,7 +254,7 @@ A battle unit using an ability, aimed at a tile or a cast group.
 The tiles one cast is aimed at together.
 
 **Known ability**:
-An ability a battle unit can cast, from its unit or learned.
+An ability a battle unit can cast: a starting ability of its unit, or a learned ability.
 
 **Learned ability**:
 A known ability gained during the game, kept on respawn.
@@ -1236,6 +1236,20 @@ A terrain whose terrain effect damages the occupant standing on it, such as lava
 
 **Healing terrain**:
 A terrain whose terrain effect heals the occupant standing on it, such as water.
+
+### Unit
+
+**Unit**:
+The kind of battle unit a battle unit is deployed from, such as the knight. It sets the base maximum health and mana,
+maximum steps, starting abilities and starting gold of its battle units.
+_Avoid_: Unit type, class, template, character
+
+**Starting ability**:
+An ability every battle unit of a unit knows from its deployment, up to the maximum abilities.
+_Avoid_: Unit ability, abilities
+
+**Starting gold**:
+The gold each battle unit of a unit carries once deployed.
 
 ### World builder
 
