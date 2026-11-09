@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
 /**
- * A saved game as it is stored: its summary, and the snapshot of each subdomain, kept as the JSON it wrote, so the file
+ * A save as it is stored: its summary, and the snapshot of each subdomain, kept as the JSON it wrote, so the file
  * reads as one document. A key it does not know fails to decode, so a save of another shape is incompatible.
  */
 @Serializable

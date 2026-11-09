@@ -33,7 +33,7 @@ class LoadGameTest {
         saveRepository.save(Save.save(slot = 2, savedAt = 0.0, leaderUnitId = "knight", partySize = 3, snapshots = snapshots))
 
     @Test
-    fun `LoadGame should restore every snapshot in order and publish GameRestored when the slot is compatible`() {
+    fun `LoadGame should restore every snapshot in order and publish GameLoaded when the slot is compatible`() {
         // Given
         save()
         val snapshottables = snapshottables()
@@ -42,7 +42,7 @@ class LoadGameTest {
         // Then
         restored.shouldContainExactly("battleUnit", "battlefield", "party")
         snapshottables.first().snapshot() shouldBe "{\"hp\":18}"
-        eventBus.shouldHavePublishedEvents(SaveEvent.GameRestored(slot = 2))
+        eventBus.shouldHavePublishedEvents(SaveEvent.GameLoaded(slot = 2))
     }
 
     @Test

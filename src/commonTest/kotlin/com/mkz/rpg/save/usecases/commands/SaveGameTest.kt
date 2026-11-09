@@ -38,7 +38,7 @@ class SaveGameTest {
     }
 
     @Test
-    fun `SaveGame should replace the game saved in the slot`() {
+    fun `SaveGame should overwrite the save in the slot`() {
         // Given
         saveGame(slot = 1)
         snapshottables.last().state = "{\"party\":2}"

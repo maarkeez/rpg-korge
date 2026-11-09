@@ -62,7 +62,7 @@ class LoadGamePresenter(
     }
 
     private fun delete(number: Int) {
-        saveApi.deleteSaveSlot(slot = number)
+        saveApi.deleteSave(slot = number)
         if (number == incompatibleSlot) incompatibleSlot = null
         displaySlots()
     }

@@ -26,12 +26,12 @@ class SaveTest {
     }
 
     @Test
-    fun `Load should hand the snapshots and announce the game is restored when it was saved with this version`() {
+    fun `Load should hand the snapshots and announce the game is loaded when it was saved with this version`() {
         // When
         val (snapshots, loaded) = saved().load()
         // Then
         snapshots shouldBe mapOf("party" to "{}")
-        loaded.pullEvents().first.shouldContainExactly(SaveEvent.GameRestored(slot = 2))
+        loaded.pullEvents().first.shouldContainExactly(SaveEvent.GameLoaded(slot = 2))
     }
 
     @Test

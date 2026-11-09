@@ -7,7 +7,7 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Snapshottable
 
 /**
- * Saves the game into the slot, replacing the game saved there: the snapshot of each subdomain, in order, and the
+ * Saves the game into the slot, overwriting the save there: the snapshot of each subdomain, in order, and the
  * summary the slot shows. Fails when the game is not paused while exploring, e.g.: in a battle.
  *
  * Can save: whether the game is paused while exploring. Leader unit: the unit of the party leader. Party size: its

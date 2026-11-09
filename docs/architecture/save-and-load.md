@@ -103,14 +103,14 @@ fails when a subdomain with a repository has no `Snapshottable` and is not liste
 
 1. Load game, in the menu, lists the slots in place of its options ([`LoadGamePresenter`](../../src/commonMain/kotlin/com/mkz/rpg/screen/adapters/presentation/LoadGamePresenter.kt)).
    Only a saved slot can be chosen; Delete, on any slot not empty, deletes its game once confirmed
-   ([`DeleteSaveSlot`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/DeleteSaveSlot.kt), `SaveSlotDeleted`).
+   ([`DeleteSave`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/DeleteSave.kt), `SaveDeleted`).
    Back and the choices of the question are in the [action row](buttons.md#the-action-row), directly below the panel, as the menu has no battlefield above it: `MenuScene` displays the panel centred at y 272 and the row at y 587, with the same 15 as in a game.
 2. Choosing a slot starts `BattleScene` with it. It runs the first 11 steps of the [setup](game-data.md#how-the-game-is-set-up),
    terrains to quests, as a new game does, and dispatches them, so the battlefield and its buildings are drawn.
 3. [`LoadGame`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/LoadGame.kt) restores each snapshot in
    order, silently, without creation events, as replaying them would create empty inventories and new homes. Then it
-   publishes one `GameRestored`.
-4. On `GameRestored`, the presenters draw the whole state from the queries: `BattlefieldPresenter` places every battle
+   publishes one `GameLoaded`.
+4. On `GameLoaded`, the presenters draw the whole state from the queries: `BattlefieldPresenter` places every battle
    unit, npc and dropped item, and trails the leader, `ExplorationPresenter` displays the pad, and
    `BattleInfoPresenter` displays `Exploring`.
 

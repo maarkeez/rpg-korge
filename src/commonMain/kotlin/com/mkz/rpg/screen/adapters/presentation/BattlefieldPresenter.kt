@@ -87,8 +87,8 @@ class BattlefieldPresenter(
             },
             // While exploring, the camera trails the leader, e.g.: once a battle finishes, and stops when a battle starts.
             eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
-            // A saved game is restored without announcing what it holds: it is all drawn at once, then the camera trails the leader.
-            eventBus.subscribe<SaveEvent.GameRestored> {
+            // A save is loaded without announcing what it holds: it is all drawn at once, then the camera trails the leader.
+            eventBus.subscribe<SaveEvent.GameLoaded> {
                 displayRestoredGame()
                 trailPartyLeader()
             },

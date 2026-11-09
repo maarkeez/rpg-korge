@@ -9,7 +9,7 @@ import com.mkz.rpg.shared.domain.Snapshottable
 
 /**
  * Loads the game saved in the slot: restores the snapshot of each subdomain, in order, as the game was saved, without
- * announcing any of them, then announces the game is restored (`GameRestored`), so the screen draws it all.
+ * announcing any of them, then announces the game is loaded (`GameLoaded`), so the screen draws it all.
  *
  * Fails with [IncompatibleSave] when it was saved with another version, or a snapshot can not be restored (e.g.: it
  * names a unit the game no longer has, or a subdomain has no snapshot): the subdomains restored so far are left as they

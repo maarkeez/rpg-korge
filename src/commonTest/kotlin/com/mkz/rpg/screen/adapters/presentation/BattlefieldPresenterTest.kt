@@ -1518,11 +1518,11 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `GameRestored should display every battle unit, npc and dropped item when a saved game is restored`() {
-        // Given: a health potion was dropped at (2,2) by a rat, as the saved game holds it.
+    fun `GameLoaded should display every battle unit, npc and dropped item when a save is loaded`() {
+        // Given: a health potion was dropped at (2,2) by a rat, as the save holds it.
         apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":2,"column":2,"lootableItemIds":["health-potion"]}]}]""")
         // When
-        eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        eventBus.publish(SaveEvent.GameLoaded(slot = 1))
         eventBus.dispatch()
         // Then
         battlefieldView.displayedBattleUnits.shouldContainExactlyInAnyOrder(
@@ -1534,14 +1534,14 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `GameRestored should display the npcs left and trail the leader of the party when a saved game is restored while exploring`() {
+    fun `GameLoaded should display the npcs left and trail the leader of the party when a save is loaded while exploring`() {
         // Given
         val exploringApis = exploringApis(npcs = listOf(npc(id = "elder", row = 2, column = 0).toDto()))
         exploringApis.partyApi.startExploration()
         val exploringBattlefieldView = FakeBattlefieldView()
         exploringPresenter(exploringApis, exploringBattlefieldView)
         // When
-        exploringApis.eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        exploringApis.eventBus.publish(SaveEvent.GameLoaded(slot = 1))
         exploringApis.eventBus.dispatch()
         // Then
         exploringBattlefieldView.displayedNpcs.shouldContainExactly(FakeBattlefieldView.NpcAt(2, 0, "elder"))

@@ -111,10 +111,10 @@ class BattleInfoPresenterTest {
     }
 
     @Test
-    fun `DisplayExploring should display that the player explores when a saved game is restored`() {
+    fun `DisplayExploring should display that the player explores when a save is loaded`() {
         // Given
         turnOf(Player.Dto.PlayerTypeDto.HUMAN)
-        apis.eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        apis.eventBus.publish(SaveEvent.GameLoaded(slot = 1))
         // When
         apis.eventBus.dispatch()
         // Then

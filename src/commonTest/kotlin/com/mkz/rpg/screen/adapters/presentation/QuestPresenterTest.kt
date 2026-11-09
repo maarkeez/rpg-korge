@@ -18,7 +18,7 @@ import com.mkz.rpg.quest.domain.QuestMother.defeat
 import com.mkz.rpg.quest.domain.QuestMother.mainQuest
 import com.mkz.rpg.quest.domain.QuestMother.sideQuest
 import com.mkz.rpg.quest.domain.QuestMother.talk
-import com.mkz.rpg.save.domain.SaveEvent.GameRestored
+import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.battleSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.BattleSceneTimelineMother.playLongStep
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
@@ -215,12 +215,12 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should draw the tracker without announcing when a game is restored`() {
+    fun `QuestPresenter should draw the tracker without announcing when a save is loaded`() {
         // Given
         val apis = apis(mainQuest(id = questId))
         apis.presenter()
         // When
-        apis.eventBus.publish(GameRestored(slot = 1))
+        apis.eventBus.publish(GameLoaded(slot = 1))
         apis.eventBus.dispatch()
         // Then
         trackerView.displayedQuests
@@ -648,7 +648,7 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should draw the pinned quest when a game is restored`() {
+    fun `QuestPresenter should draw the pinned quest when a save is loaded`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side"))
         apis.startQuest()
@@ -656,7 +656,7 @@ class QuestPresenterTest {
         apis.pin("side")
         apis.presenter()
         // When
-        apis.eventBus.publish(GameRestored(slot = 1))
+        apis.eventBus.publish(GameLoaded(slot = 1))
         apis.eventBus.dispatch()
         // Then
         trackerView.displayedQuests.single().id shouldBe "side"
@@ -730,12 +730,12 @@ class QuestPresenterTest {
     }
 
     @Test
-    fun `QuestPresenter should draw the markers when a game is restored`() {
+    fun `QuestPresenter should draw the markers when a save is loaded`() {
         // Given
         val apis = apis(mainQuest(id = questId), sideQuest(id = "side", questGiverNpcId = "farmer"), npcs = listOf(farmer))
         apis.presenter()
         // When
-        apis.eventBus.publish(GameRestored(slot = 1))
+        apis.eventBus.publish(GameLoaded(slot = 1))
         apis.eventBus.dispatch()
         // Then
         battlefieldView.displayedQuestMarkers.shouldContainExactly(mapOf(farmerTile to QuestMarkerView.Sign.QUEST_TO_START))

@@ -327,7 +327,7 @@ class BattleScene(
         if (slot == null) {
             gameSetupApi.setUpGame()
         } else {
-            gameSetupApi.setUpGame(isLoadingASavedGame = true)
+            gameSetupApi.setUpGame(isLoadingASave = true)
             eventBus.dispatch()
             try {
                 saveApi.loadGame(slot)

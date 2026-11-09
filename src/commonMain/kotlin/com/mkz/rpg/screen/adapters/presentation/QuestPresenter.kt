@@ -14,7 +14,7 @@ import com.mkz.rpg.quest.domain.QuestEvent.QuestCompleted
 import com.mkz.rpg.quest.domain.QuestEvent.QuestPinned
 import com.mkz.rpg.quest.domain.QuestEvent.QuestStarted
 import com.mkz.rpg.quest.domain.QuestEvent.TaskCompleted
-import com.mkz.rpg.save.domain.SaveEvent.GameRestored
+import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
@@ -100,7 +100,7 @@ class QuestPresenter(
                 displayMarkers()
             },
             eventBus.subscribe<NpcRecruited> { displayMarkers() },
-            eventBus.subscribe<GameRestored> {
+            eventBus.subscribe<GameLoaded> {
                 displayTracker()
                 displayMarkers()
             },

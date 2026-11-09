@@ -20,13 +20,13 @@ import com.mkz.rpg.unit.domain.UnitEvent
  * Initialises each subdomain from its resources, then starts exploring and the main quest. The order matters, as each
  * subdomain requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
  *
- * To load a saved game, only what never changes while playing is initialised, up to the quests: the saved game restores
+ * To load a save, only what never changes while playing is initialised, up to the quests: the save restores
  * the rest (the battle units, the npcs and the party) and how far each quest went.
  */
 class SetUpGame(
     private val eventBus: EventBus,
 ) {
-    operator fun invoke(isLoadingASavedGame: Boolean = false) {
+    operator fun invoke(isLoadingASave: Boolean = false) {
         eventBus.publish(TerrainEvent.RequestInitialiseTerrains)
         eventBus.publish(EffectEvent.RequestInitialiseEffects)
         eventBus.publish(LootableItemEvent.RequestInitialiseLootableItems)
@@ -38,7 +38,7 @@ class SetUpGame(
         eventBus.publish(BattlefieldEvent.RequestInitialiseBattlefield)
         eventBus.publish(BuildingEvent.RequestPlaceBuildings)
         eventBus.publish(QuestEvent.RequestCreateQuests)
-        if (isLoadingASavedGame) return
+        if (isLoadingASave) return
         eventBus.publish(BattleUnitEvent.RequestInitialiseBattleUnits)
         eventBus.publish(NpcEvent.RequestPlaceNpcs)
         eventBus.publish(PartyEvent.RequestStartExploration)

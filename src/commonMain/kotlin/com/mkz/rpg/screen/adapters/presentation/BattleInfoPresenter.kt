@@ -9,7 +9,7 @@ import com.mkz.rpg.party.domain.PartyEvent.ExplorationResumed
 import com.mkz.rpg.party.domain.PartyEvent.ExplorationStarted
 import com.mkz.rpg.player.adapters.presentation.PlayerApi
 import com.mkz.rpg.player.domain.Player.Dto.PlayerTypeDto
-import com.mkz.rpg.save.domain.SaveEvent.GameRestored
+import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
@@ -30,8 +30,8 @@ class BattleInfoPresenter(
             eventBus.subscribe<ExplorationStarted> {
                 timeline.play { battleInfoView.displayExploring() }
             },
-            // A saved game is restored exploring.
-            eventBus.subscribe<GameRestored> {
+            // A save is loaded exploring.
+            eventBus.subscribe<GameLoaded> {
                 timeline.play { battleInfoView.displayExploring() }
             },
             eventBus.subscribe<BattleStarted> {

@@ -2,7 +2,7 @@ package com.mkz.rpg.save.domain
 
 import com.mkz.rpg.save.domain.SaveError.IncompatibleSave
 import com.mkz.rpg.save.domain.SaveError.SlotOutOfRange
-import com.mkz.rpg.save.domain.SaveEvent.GameRestored
+import com.mkz.rpg.save.domain.SaveEvent.GameLoaded
 import com.mkz.rpg.save.domain.SaveEvent.GameSaved
 import kotlin.jvm.JvmInline
 
@@ -27,7 +27,7 @@ data class Save private constructor(
 
         const val SLOTS = 3
 
-        /** Saves the game into the slot, replacing the game saved there, if any. Saved at: in milliseconds since the epoch. */
+        /** Saves the game into the slot, overwriting the save there, if any. Saved at: in milliseconds since the epoch. */
         fun save(
             slot: Int,
             savedAt: Double,
@@ -78,12 +78,12 @@ data class Save private constructor(
         )
 
     /**
-     * The snapshot of each subdomain, to restore them, then announces the game is restored. Fails with
+     * The snapshot of each subdomain, to restore them, then announces the game is loaded. Fails with
      * [SaveError.IncompatibleSave] when it was saved with another version.
      */
     fun load(): Pair<Map<String, String>, Save> {
         if (version.value != SAVE_VERSION) throw IncompatibleSave(slot.value)
-        return snapshots.value to copy(events = events + GameRestored(slot = slot.value))
+        return snapshots.value to copy(events = events + GameLoaded(slot = slot.value))
     }
 
     fun pullEvents() = events to copy(events = emptySet())

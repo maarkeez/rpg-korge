@@ -9,15 +9,15 @@ sealed interface SaveEvent : DomainEvent {
     ) : SaveEvent
 
     /**
-     * The game saved in the slot was restored: every subdomain is back as it was saved, without announcing it, so the
+     * The save in the slot was loaded: every subdomain is back as it was saved, without announcing it, so the
      * screen draws it all again.
      */
-    data class GameRestored(
+    data class GameLoaded(
         val slot: Int,
     ) : SaveEvent
 
-    /** The game saved in the slot was deleted, so the slot is empty. */
-    data class SaveSlotDeleted(
+    /** The save in the slot was deleted, so the slot is empty. */
+    data class SaveDeleted(
         val slot: Int,
     ) : SaveEvent
 }

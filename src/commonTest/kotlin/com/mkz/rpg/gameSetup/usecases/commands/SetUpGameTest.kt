@@ -48,9 +48,9 @@ class SetUpGameTest {
     }
 
     @Test
-    fun `should stop after the quests, which the saved game is restored on, when a saved game is loaded`() {
+    fun `should stop after the quests, which the save is loaded on, when a save is loaded`() {
         // When
-        setUpGame(isLoadingASavedGame = true)
+        setUpGame(isLoadingASave = true)
         // Then
         eventBus.shouldHavePublishedEvents(
             TerrainEvent.RequestInitialiseTerrains,

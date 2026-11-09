@@ -1103,11 +1103,11 @@ class ExplorationPresenterTest {
     }
 
     @Test
-    fun `GameRestored should display the virtual pad in place of the battle HUD and the call to action when a saved game is restored`() {
+    fun `GameLoaded should display the virtual pad in place of the battle HUD and the call to action when a save is loaded`() {
         // Given
         createPresenter()
         // When
-        eventBus.publish(SaveEvent.GameRestored(slot = 1))
+        eventBus.publish(SaveEvent.GameLoaded(slot = 1))
         eventBus.dispatch()
         // Then
         virtualPadView.visible.shouldBeTrue()
