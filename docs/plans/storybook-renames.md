@@ -1,6 +1,6 @@
 # Plan: Rename the Storybook's words, and its stories', to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `7fea011f`.
 >
 > **Summary:** The Storybook still says the words the earlier sections of the [glossary](../../GLOSSARY.md) left
 > behind, as their plans renamed the views but not their stories. E.g.: `CastPreviewViewStories` shows **Screen /
@@ -158,3 +158,22 @@ Each story id follows its component id and name, e.g.: `screen-shop--buy-invento
 - `unit`: **Screen / Unit portrait**, **Unit name** and **Unit sprite**, and the `unit` args of the stories, while the
   glossary avoids Unit for a battle unit.
 - `terrain`: **Screen / Terrain tile**, its `transition` and `wangIndex` args, and its **Sand to void** story.
+
+## Changes while building
+
+- The `callToAction` control of **Screen / Call to action** and the `refusal` control of **Screen / Shop** are picks, not
+  enums: `FINISH_PLAYER_TURN`, `BUTTON_ROW` and `INVENTORY_FULL` made their buttons wrap over the Actions, which
+  `StorySmokeTest` caught. A pick goes round its options on one row. This is why the screen renames had kept
+  `FINISH_TURN` and `ITEM_ACTIONS`.
+- More story enums say the glossary's words: `Refusal.BAG_FULL` of `ShopViewStories` is `INVENTORY_FULL`, and
+  `Kind.BAGS_FULL` of `ItemButtonsViewStories` is `NO_SPACE`, with its `actions` as `buttons` and `PRIMARY_ACTIONS` as
+  `PRIMARY_BUTTONS`.
+- `TileHighlightView.Kind.MOVE_RANGE` is `WALKING_RANGE`, which the screen renames had missed, as the **Walking range**
+  story of **Screen / Tile highlight** displays it.
+- More descriptions say the glossary's words than the plan named: those of **Health bar preview**, **Mana bar
+  preview**, **Preview bar**, **Recipient preview**, **HUD**, **Talk panel**, **Unit name**, **Virtual pad**, **Game
+  button**, **Gold button** and **Give gold**. **Cast preview › Defeat** says the recipient reads KO.
+- The `remainingTurns` parameter that `BattleUnitInfoViewStories` hands to the screen's `BattleUnitInfo` keeps its
+  name: it is the screen's, outside this plan.
+- [Storybook](../architecture/storybook.md) says that only these renames changed the ids, once, and the test names say
+  open, selected story and record.
