@@ -1113,6 +1113,35 @@ One quest in full: its description, current task, tasks done and reward.
 The notice that a quest starts or is completed, shown for a moment without stopping the game.
 _Avoid_: Toast
 
+### Shared
+
+**Game data**:
+What defines the game and never changes while playing, such as its terrains, units, abilities and quests, read from
+its files rather than saved.
+_Avoid_: Config, content
+
+**Definition**:
+The game data of one thing, such as the knight in `unit/knight.toml`.
+
+#### Bars
+
+**Bar**:
+A value out of its maximum, filled in proportion, with the value after it, such as a battle unit's health at 18/30.
+_Avoid_: Progress bar, gauge
+
+**Preview bar**:
+A bar of what a cast would leave, such as a recipient's health: 30 → 18 in the cast preview, or blinking over its tile.
+
+**Blink**:
+Fading in and out in a loop, to show what a cast would change.
+_Avoid_: Flash, pulse
+
+#### Buttons
+
+**Disabled**:
+Said of a button shown faded, as it can't be tapped now, such as Discard for an equipped item.
+_Avoid_: Greyed out, inactive
+
 ### World builder
 
 **World**:
