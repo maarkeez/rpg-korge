@@ -54,7 +54,7 @@ import com.mkz.rpg.player.usecases.queries.SearchHumanPlayer
 import com.mkz.rpg.player.usecases.queries.SearchOpponent
 import com.mkz.rpg.player.usecases.queries.SearchPlayerById
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
+import com.mkz.rpg.terrain.usecases.queries.HasTerrainTransition
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import com.mkz.rpg.unit.adapters.storage.InMemoryUnitRepository
 import com.mkz.rpg.unit.usecases.queries.SearchMaximumAbilities
@@ -90,7 +90,7 @@ class InMemoryQueries(
     val searchOpponent = SearchOpponent(playerRepository)
     val searchHumanPlayer = SearchHumanPlayer(playerRepository)
     val searchTerrainById = SearchTerrainById(terrainRepository)
-    val isTransitionAllowed = IsTransitionAllowed(terrainRepository)
+    val hasTerrainTransition = HasTerrainTransition(terrainRepository)
 
     // Lootable item
     val searchLootableItemById = SearchLootableItemById(lootableItemRepository)

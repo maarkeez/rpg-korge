@@ -20,7 +20,7 @@ class InitialiseBattlefieldTest {
     @Test
     fun `should create the battlefield with the size of the loaded tiles when the battlefield is initialised`() {
         // Given
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand"))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "sand"))
         val initialiseBattlefield =
             InitialiseBattlefield(FakeBattlefieldLoader(tiles = List(2) { List(3) { "sand" } }), BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)), eventBus)
         // When

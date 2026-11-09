@@ -18,7 +18,7 @@ class TerrainTransitionsAcceptanceTest {
     }
 
     @Test
-    fun `should allow only the sand to void transition when the game is set up`() =
+    fun `should have only the sand to void transition when the game is set up`() =
         scenarioTest(::setUp) {
             // Given
             gameSetupApi.setUpGame()
@@ -27,7 +27,7 @@ class TerrainTransitionsAcceptanceTest {
             // Then
             require(terrainApi.searchTerrainById("sand") != null)
             require(terrainApi.searchTerrainById("void") != null)
-            terrainApi.isTransitionAllowed(terrainId = "sand", transitionToTerrainId = "void").shouldBeTrue()
-            terrainApi.isTransitionAllowed(terrainId = "void", transitionToTerrainId = "sand").shouldBeFalse()
+            terrainApi.hasTerrainTransition(terrainId = "sand", toTerrainId = "void").shouldBeTrue()
+            terrainApi.hasTerrainTransition(terrainId = "void", toTerrainId = "sand").shouldBeFalse()
         }
 }

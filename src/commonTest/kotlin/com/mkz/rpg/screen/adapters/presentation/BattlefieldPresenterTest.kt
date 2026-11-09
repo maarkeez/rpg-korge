@@ -60,7 +60,7 @@ import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.DomainEvent
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.withClue
 import io.kotest.matchers.booleans.shouldBeFalse
@@ -85,7 +85,7 @@ class BattlefieldPresenterTest {
     // A health potion, healing 5, can be looted. The knight explored before the battle, so it has an inventory.
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             units =
                 listOf(
                     unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = listOf("mushroom", "heal", "bee")).toDto(),
@@ -325,7 +325,7 @@ class BattlefieldPresenterTest {
         effects: List<Effect.Dto> = emptyList(),
         abilities: List<Ability.Dto> = emptyList(),
     ) = SubdomainApis(
-        terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+        terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
         units =
             listOf(
                 unit(id = "knight", movementRange = 3, healthPoints = 30, manaPoints = 4, abilities = abilities.map(Ability.Dto::id)).toDto(),
@@ -1228,7 +1228,7 @@ class BattlefieldPresenterTest {
         // E.g.: the knight-1 has been defeated, so the knight-2 leads the party.
         val battlingApis =
             SubdomainApis(
-                terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+                terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
                 units = listOf(unit(id = "knight", movementRange = 3).toDto(), unit(id = "rat").toDto()),
                 players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
                 tiles = List(4) { List(4) { "sand" } },

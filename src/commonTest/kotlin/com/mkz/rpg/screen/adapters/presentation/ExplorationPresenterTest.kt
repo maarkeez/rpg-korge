@@ -25,7 +25,7 @@ import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -45,7 +45,7 @@ class ExplorationPresenterTest {
     // (2,2), selling a health potion and a mana potion. There is no battle yet.
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             effects = listOf(healEffect(id = "cure").toDto()),
             lootableItems =
                 listOf(
@@ -340,7 +340,7 @@ class ExplorationPresenterTest {
     // Three knights stand on water, healing them every second, in a column from (1,0), the leader first. Sand is north.
     private fun partyOnWaterApis() =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("water")).toDto(), occupiableTerrain(id = "water", effectId = "water-heal").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("water")).toDto(), terrainThatCanBeOccupied(id = "water", effectId = "water-heal").toDto()),
             effects = listOf(healEffect(id = "water-heal").toDto()),
             units = listOf(unit(id = "knight").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),

@@ -2,8 +2,8 @@ package com.mkz.rpg.screen.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.FakeWorldBuilderCallToActionView.Actions
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
-import com.mkz.rpg.terrain.domain.TerrainMother.nonOccupiableTerrain
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
 import com.mkz.rpg.worldBuilder.adapters.presentation.WorldBuilderApi
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -20,9 +20,9 @@ class WorldBuilderPresenterTest {
         SubdomainApis(
             terrains =
                 listOf(
-                    occupiableTerrain(id = "sand", allowedTransitionTo = setOf("lava", "water")).toDto(),
-                    nonOccupiableTerrain(id = "lava").toDto(),
-                    occupiableTerrain(id = "water").toDto(),
+                    terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("lava", "water")).toDto(),
+                    terrainThatCanNotBeOccupied(id = "lava").toDto(),
+                    terrainThatCanBeOccupied(id = "water").toDto(),
                 ),
         ).also(SubdomainApis::initialise)
     private val eventBus = apis.eventBus

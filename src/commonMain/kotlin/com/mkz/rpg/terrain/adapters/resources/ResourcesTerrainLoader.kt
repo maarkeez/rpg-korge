@@ -31,20 +31,20 @@ class ResourcesTerrainLoader(
                 Terrain.Dto(
                     id = terrainId,
                     canBeOccupied = definition.canBeOccupied,
-                    allowedTransitionTo = computeAllowedTransitions(terrainId),
+                    transitionsTo = transitionsTo(terrainId),
                     effectId = definition.effectId,
                 )
             }
     }
 
-    private fun computeAllowedTransitions(terrainId: String): Set<String> {
-        val allowedTransitions = mutableSetOf(terrainId)
+    private fun transitionsTo(terrainId: String): Set<String> {
+        val transitionsTo = mutableSetOf(terrainId)
         transitions.forEach { (transitionFrom, transitionTo) ->
             if (transitionFrom == terrainId) {
-                allowedTransitions += transitionTo
+                transitionsTo += transitionTo
             }
         }
-        return allowedTransitions
+        return transitionsTo
     }
 
     private suspend fun loadTransitions(): Map<String, Set<String>> {
@@ -55,8 +55,8 @@ class ResourcesTerrainLoader(
         transitionFileNames
             .filter { it.endsWith(PNG_EXTENSION) }
             .mapNotNull { fileName -> parseTransition(fileName) }
-            .forEach { (terrainId, transitionToTerrainId) ->
-                transitions.getOrPut(terrainId) { mutableSetOf() }.add(transitionToTerrainId)
+            .forEach { (terrainId, toTerrainId) ->
+                transitions.getOrPut(terrainId) { mutableSetOf() }.add(toTerrainId)
             }
         return transitions
     }

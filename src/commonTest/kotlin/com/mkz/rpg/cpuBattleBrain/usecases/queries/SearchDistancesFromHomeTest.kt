@@ -5,7 +5,7 @@ import com.mkz.rpg.battlefield.domain.BattlefieldMother
 import com.mkz.rpg.effect.domain.EffectMother.damageEffect
 import com.mkz.rpg.effect.domain.EffectMother.healEffect
 import com.mkz.rpg.shared.usecases.InMemoryQueries
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import io.kotest.matchers.maps.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -15,9 +15,9 @@ class SearchDistancesFromHomeTest {
     private val searchDistancesFromHome = queries.searchDistancesFromHome
 
     init {
-        queries.terrainRepository.create(occupiableTerrain(id = "sand"))
-        queries.terrainRepository.create(occupiableTerrain(id = "lava", effectId = "effect-lava"))
-        queries.terrainRepository.create(occupiableTerrain(id = "water", effectId = "effect-water"))
+        queries.terrainRepository.create(terrainThatCanBeOccupied(id = "sand"))
+        queries.terrainRepository.create(terrainThatCanBeOccupied(id = "lava", effectId = "effect-lava"))
+        queries.terrainRepository.create(terrainThatCanBeOccupied(id = "water", effectId = "effect-water"))
         queries.effectRepository.create(damageEffect(id = "effect-lava", damage = 10))
         queries.effectRepository.create(healEffect(id = "effect-water", healing = 10))
     }

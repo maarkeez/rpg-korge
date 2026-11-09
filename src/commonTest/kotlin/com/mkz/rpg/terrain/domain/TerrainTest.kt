@@ -15,19 +15,19 @@ class TerrainTest {
         // Given
         val id = "sand"
         val canBeOccupied = true
-        val allowedTransitionTo = setOf("void")
+        val transitionsTo = setOf("void")
         // When
         val terrain =
             Terrain.create(
                 Terrain.Dto(
                     id = id,
                     canBeOccupied = canBeOccupied,
-                    allowedTransitionTo = allowedTransitionTo,
+                    transitionsTo = transitionsTo,
                     effectId = null,
                 ),
             )
         // Then
-        terrain.toDto() shouldBe Terrain.Dto(id = id, canBeOccupied = canBeOccupied, allowedTransitionTo = allowedTransitionTo, effectId = null)
+        terrain.toDto() shouldBe Terrain.Dto(id = id, canBeOccupied = canBeOccupied, transitionsTo = transitionsTo, effectId = null)
     }
 
     @Test
@@ -36,7 +36,7 @@ class TerrainTest {
         val id = "swamp"
         val effectId = "swamp-effect"
         // When
-        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = effectId))
+        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, transitionsTo = emptySet(), effectId = effectId))
         // Then
         terrain.toDto().effectId shouldBe effectId
     }
@@ -46,7 +46,7 @@ class TerrainTest {
         // Given
         val id = "sand"
         // When
-        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = null))
+        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, transitionsTo = emptySet(), effectId = null))
         // Then
         terrain.toDto().effectId.shouldBeNull()
     }
@@ -56,56 +56,56 @@ class TerrainTest {
         // Given
         val id = "sand"
         // When
-        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = null))
+        val terrain = Terrain.create(Terrain.Dto(id = id, canBeOccupied = true, transitionsTo = emptySet(), effectId = null))
         val (events, _) = terrain.pullEvents()
         // Then
         events.shouldContainExactly(TerrainEvent.TerrainCreated(terrainId = id))
     }
 
     @Test
-    fun `CanTransitionTo should be true when the terrain allows the transition`() {
+    fun `HasTransitionTo should be true when the terrain has the transition`() {
         // Given
-        val terrain = TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("void"))
+        val terrain = TerrainMother.terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("void"))
         // When
-        val canTransition = terrain.canTransitionTo("void")
+        val hasTransition = terrain.hasTransitionTo("void")
         // Then
-        canTransition.shouldBeTrue()
+        hasTransition.shouldBeTrue()
     }
 
     @Test
-    fun `CanTransitionTo should be false when the terrain does not allow the transition`() {
+    fun `HasTransitionTo should be false when the terrain does not have the transition`() {
         // Given
-        val terrain = TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("void"))
+        val terrain = TerrainMother.terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("void"))
         // When
-        val canTransition = terrain.canTransitionTo("forest")
+        val hasTransition = terrain.hasTransitionTo("forest")
         // Then
-        canTransition.shouldBeFalse()
+        hasTransition.shouldBeFalse()
     }
 
     @Test
-    fun `CanTransitionTo should be false when the terrain has no allowed transitions`() {
+    fun `HasTransitionTo should be false when the terrain has no transitions`() {
         // Given
-        val terrain = TerrainMother.occupiableTerrain(id = "sand")
+        val terrain = TerrainMother.terrainThatCanBeOccupied(id = "sand")
         // When
-        val canTransition = terrain.canTransitionTo("void")
+        val hasTransition = terrain.hasTransitionTo("void")
         // Then
-        canTransition.shouldBeFalse()
+        hasTransition.shouldBeFalse()
     }
 
     @Test
     fun `ToDto should expose the terrain data when converted to dto`() {
         // Given
-        val terrain = TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("void"))
+        val terrain = TerrainMother.terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("void"))
         // When
         val dto = terrain.toDto()
         // Then
-        dto shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("void"), effectId = null)
+        dto shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("void"), effectId = null)
     }
 
     @Test
     fun `ToDto should expose the effect id when the terrain has an effect assigned`() {
         // Given
-        val terrain = Terrain.create(Terrain.Dto(id = "swamp", canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = "swamp-effect"))
+        val terrain = Terrain.create(Terrain.Dto(id = "swamp", canBeOccupied = true, transitionsTo = emptySet(), effectId = "swamp-effect"))
         // When
         val dto = terrain.toDto()
         // Then
@@ -115,7 +115,7 @@ class TerrainTest {
     @Test
     fun `PullEvents should pull the created event when the terrain has pending events`() {
         // Given
-        val terrain = TerrainMother.occupiableTerrain(id = "sand")
+        val terrain = TerrainMother.terrainThatCanBeOccupied(id = "sand")
         // When
         val (events, _) = terrain.pullEvents()
         // Then
@@ -125,7 +125,7 @@ class TerrainTest {
     @Test
     fun `PullEvents should not pull events when there are no pending events`() {
         // Given
-        val (events, terrain) = TerrainMother.occupiableTerrain(id = "sand").pullEvents()
+        val (events, terrain) = TerrainMother.terrainThatCanBeOccupied(id = "sand").pullEvents()
         // When
         val (pulledEvents, _) = terrain.pullEvents()
         // Then

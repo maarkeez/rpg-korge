@@ -24,8 +24,8 @@ import com.mkz.rpg.save.domain.Save
 import com.mkz.rpg.save.domain.SaveError
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.FixedDoublesRandom
-import com.mkz.rpg.terrain.domain.TerrainMother.nonOccupiableTerrain
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContainExactly
@@ -58,7 +58,7 @@ class SaveFixtureTest {
     ) {
         val apis =
             SubdomainApis(
-                terrains = listOf(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("void")).toDto(), nonOccupiableTerrain(id = "void").toDto()),
+                terrains = listOf(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("void")).toDto(), terrainThatCanNotBeOccupied(id = "void").toDto()),
                 effects = listOf(healEffect(id = "cure").toDto()),
                 lootableItems = listOf(consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("cure"))).toDto()),
                 lootTables = listOf(lootTable(id = "rat-loot", entries = listOf(lootableItemEntry(lootableItemId = "health-potion"), nothingEntry())).toDto()),

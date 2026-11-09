@@ -58,7 +58,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.shouldContainExactly(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand"), effectId = null))
+            terrains.shouldContainExactly(Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("sand"), effectId = null))
         }
 
     @Test
@@ -82,7 +82,7 @@ class ResourcesTerrainLoaderTest {
         }
 
     @Test
-    fun `LoadTerrains should allow the transition only to the target terrain when a transition asset exists`() =
+    fun `LoadTerrains should give a transition only to the target terrain when a transition asset exists`() =
         runTest {
             // Given
             val terrainRoot =
@@ -96,12 +96,12 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactlyInAnyOrder("sand", "void")
-            terrains.first { it.id == "void" }.allowedTransitionTo.shouldContainExactly("void")
+            terrains.first { it.id == "sand" }.transitionsTo.shouldContainExactlyInAnyOrder("sand", "void")
+            terrains.first { it.id == "void" }.transitionsTo.shouldContainExactly("void")
         }
 
     @Test
-    fun `LoadTerrains should allow the transition to itself when a terrain is loaded`() =
+    fun `LoadTerrains should give a terrain a transition to itself when it is loaded`() =
         runTest {
             // Given
             val terrainRoot = MemoryVfsMix("terrain/sand.toml" to "canBeOccupied = true")["terrain"]
@@ -110,7 +110,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContain("sand")
+            terrains.first { it.id == "sand" }.transitionsTo.shouldContain("sand")
         }
 
     @Test
@@ -130,8 +130,8 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactlyInAnyOrder("sand", "void", "forest")
-            terrains.first { it.id == "void" }.allowedTransitionTo.shouldContainExactly("void")
+            terrains.first { it.id == "sand" }.transitionsTo.shouldContainExactlyInAnyOrder("sand", "void", "forest")
+            terrains.first { it.id == "void" }.transitionsTo.shouldContainExactly("void")
         }
 
     @Test
@@ -170,7 +170,7 @@ class ResourcesTerrainLoaderTest {
             // When
             val terrains = loader.loadTerrains()
             // Then
-            terrains.first { it.id == "sand" }.allowedTransitionTo.shouldContainExactly("sand")
+            terrains.first { it.id == "sand" }.transitionsTo.shouldContainExactly("sand")
         }
 
     @Test
@@ -228,8 +228,8 @@ class ResourcesTerrainLoaderTest {
             val terrainIds = terrains.map { it.id }.toSet()
             terrainIds.shouldNotBeEmpty()
             terrains.forEach { terrain ->
-                terrainIds.shouldContainAll(terrain.allowedTransitionTo)
-                terrain.allowedTransitionTo.shouldContain(terrain.id)
+                terrainIds.shouldContainAll(terrain.transitionsTo)
+                terrain.transitionsTo.shouldContain(terrain.id)
             }
         }
 }

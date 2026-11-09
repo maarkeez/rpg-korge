@@ -25,8 +25,8 @@ class WorldBuilderApi(
     val createWorld = CreateWorld(worldBuilderRepository, eventBus)
     val resizeWorld = ResizeWorld(worldBuilderRepository, eventBus)
     val selectTerrain = SelectTerrain(worldBuilderRepository, eventBus)
-    val paintTile = PaintTile(worldBuilderRepository, terrainApi.isTransitionAllowed, eventBus)
-    val importWorld = ImportWorld(worldBuilderRepository, battlefieldApi.parseBattlefield, terrainApi.searchTerrainById, terrainApi.isTransitionAllowed, eventBus)
+    val paintTile = PaintTile(worldBuilderRepository, terrainApi.hasTerrainTransition, eventBus)
+    val importWorld = ImportWorld(worldBuilderRepository, battlefieldApi.parseBattlefield, terrainApi.searchTerrainById, terrainApi.hasTerrainTransition, eventBus)
 
     // Queries
     val searchWorld = SearchWorld(worldBuilderRepository)

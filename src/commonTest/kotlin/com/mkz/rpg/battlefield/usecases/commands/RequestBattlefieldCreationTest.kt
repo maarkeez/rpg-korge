@@ -44,8 +44,8 @@ class RequestBattlefieldCreationTest {
                     terrainId()
                 }
             }
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void")))
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "void", allowedTransitionTo = setOf("sand", "void")))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("sand", "void")))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "void", transitionsTo = setOf("sand", "void")))
         // When
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then
@@ -81,8 +81,8 @@ class RequestBattlefieldCreationTest {
             listOf(
                 listOf("sand", "void"),
             )
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand"))
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "void"))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "sand"))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "void"))
         // When
         val error = shouldThrowAny { requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles) }
         // Then
@@ -102,8 +102,8 @@ class RequestBattlefieldCreationTest {
             listOf(
                 listOf("void", "sand"),
             )
-        terrainRepository.create(TerrainMother.nonOccupiableTerrain(id = "void"))
-        terrainRepository.create(TerrainMother.occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "void")))
+        terrainRepository.create(TerrainMother.terrainThatCanNotBeOccupied(id = "void"))
+        terrainRepository.create(TerrainMother.terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("sand", "void")))
         // When
         requestBattlefieldCreation(rows = rows, columns = columns, tiles = tiles)
         // Then

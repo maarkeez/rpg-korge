@@ -18,7 +18,7 @@ import com.mkz.rpg.screen.adapters.presentation.InventoryView.Slot
 import com.mkz.rpg.screen.adapters.presentation.selection.domain.Selection.Dto.TileDto
 import com.mkz.rpg.screen.adapters.presentation.selection.domain.SelectionEvent
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -32,7 +32,7 @@ class InventoryPresenterSwitchTest {
     // around, dropped by a rat.
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             effects = listOf(healEffect(id = "heal", healing = 10).toDto()),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", price = 10, consumable = consumable(effectIds = setOf("heal"))).toDto()),
             units =

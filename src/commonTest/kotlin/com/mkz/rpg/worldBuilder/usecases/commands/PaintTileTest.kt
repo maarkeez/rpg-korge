@@ -3,9 +3,9 @@ package com.mkz.rpg.worldBuilder.usecases.commands
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.domain.TerrainMother.nonOccupiableTerrain
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
-import com.mkz.rpg.terrain.usecases.queries.IsTransitionAllowed
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
+import com.mkz.rpg.terrain.usecases.queries.HasTerrainTransition
 import com.mkz.rpg.worldBuilder.adapters.storage.InMemoryWorldBuilderRepository
 import com.mkz.rpg.worldBuilder.domain.WorldBuilder
 import com.mkz.rpg.worldBuilder.domain.WorldBuilderError.WorldNotCreated
@@ -22,11 +22,11 @@ class PaintTileTest {
     // Only sand has transitions: to lava and water.
     private val terrainRepository =
         InMemoryTerrainRepository().apply {
-            create(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("sand", "lava", "water")))
-            create(nonOccupiableTerrain(id = "lava", allowedTransitionTo = setOf("lava")))
-            create(occupiableTerrain(id = "water", allowedTransitionTo = setOf("water")))
+            create(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("sand", "lava", "water")))
+            create(terrainThatCanNotBeOccupied(id = "lava", transitionsTo = setOf("lava")))
+            create(terrainThatCanBeOccupied(id = "water", transitionsTo = setOf("water")))
         }
-    private val paintTile = PaintTile(worldBuilderRepository, IsTransitionAllowed(terrainRepository), eventBus)
+    private val paintTile = PaintTile(worldBuilderRepository, HasTerrainTransition(terrainRepository), eventBus)
 
     private fun givenWorld(vararg paintedTiles: Triple<Int, Int, String>) {
         var worldBuilder = WorldBuilder.create()

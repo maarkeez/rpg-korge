@@ -5,8 +5,8 @@ import com.mkz.rpg.battlefield.domain.Battlefield.Dto.PositionDto
 import com.mkz.rpg.battlefield.domain.BattlefieldError.TileTerrainTransitionNotAllowed
 import com.mkz.rpg.battlefield.usecases.services.BattlefieldCreation
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.domain.TerrainMother.nonOccupiableTerrain
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanNotBeOccupied
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldBeNull
@@ -17,9 +17,9 @@ class PreviewBattlefieldTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
     private val terrainRepository =
         InMemoryTerrainRepository().apply {
-            create(occupiableTerrain(id = "sand", allowedTransitionTo = setOf("lava", "water")))
-            create(nonOccupiableTerrain(id = "lava"))
-            create(occupiableTerrain(id = "water"))
+            create(terrainThatCanBeOccupied(id = "sand", transitionsTo = setOf("lava", "water")))
+            create(terrainThatCanNotBeOccupied(id = "lava"))
+            create(terrainThatCanBeOccupied(id = "water"))
         }
     private val previewBattlefield = PreviewBattlefield(BattlefieldCreation(battlefieldRepository, SearchTerrainById(terrainRepository)))
 

@@ -2,7 +2,7 @@ package com.mkz.rpg.terrain.usecases.queries
 
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
 import kotlin.test.Test
@@ -14,9 +14,9 @@ class SearchTerrainsTest {
     @Test
     fun `should list every terrain in id order when there are terrains`() {
         // Given
-        terrainRepository.create(occupiableTerrain(id = "water"))
-        terrainRepository.create(occupiableTerrain(id = "lava"))
-        terrainRepository.create(occupiableTerrain(id = "sand"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "water"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "lava"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand"))
         // When
         val terrains = searchTerrains()
         // Then

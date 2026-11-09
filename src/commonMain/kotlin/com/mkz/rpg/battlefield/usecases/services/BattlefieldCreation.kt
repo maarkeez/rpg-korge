@@ -52,7 +52,7 @@ class BattlefieldCreation(
             .flatten()
             .distinct()
             .flatMap { terrainId ->
-                (searchTerrainById(terrainId)?.allowedTransitionTo ?: emptySet())
+                (searchTerrainById(terrainId)?.transitionsTo ?: emptySet())
                     .filter { it != terrainId }
                     .map { TerrainTransitionRuleDto(terrainId, it) }
             }.toSet()

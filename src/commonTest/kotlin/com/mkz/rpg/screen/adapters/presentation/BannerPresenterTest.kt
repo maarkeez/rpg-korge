@@ -12,7 +12,7 @@ import com.mkz.rpg.screen.adapters.presentation.FakeBannerView.Banner
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -34,7 +34,7 @@ class BannerPresenterTest {
     ) {
         apis =
             SubdomainApis(
-                terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+                terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
                 units = listOf(unit(id = "knight").toDto()),
                 players = listOf(player(id = "player-1", type = type).toDto(), player(id = "player-2").toDto()),
                 tiles = listOf(listOf("sand", "sand")),

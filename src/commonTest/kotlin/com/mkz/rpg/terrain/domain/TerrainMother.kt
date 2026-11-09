@@ -1,30 +1,30 @@
 package com.mkz.rpg.terrain.domain
 
 object TerrainMother {
-    fun occupiableTerrain(
+    fun terrainThatCanBeOccupied(
         id: String = terrainId(),
-        allowedTransitionTo: Set<String> = emptySet(),
+        transitionsTo: Set<String> = emptySet(),
         effectId: String? = null,
     ) = Terrain
         .create(
             Terrain.Dto(
                 id = id,
                 canBeOccupied = true,
-                allowedTransitionTo = allowedTransitionTo,
+                transitionsTo = transitionsTo,
                 effectId = effectId,
             ),
         )
 
-    fun nonOccupiableTerrain(
+    fun terrainThatCanNotBeOccupied(
         id: String = terrainId(),
-        allowedTransitionTo: Set<String> = emptySet(),
+        transitionsTo: Set<String> = emptySet(),
         effectId: String? = null,
     ) = Terrain
         .create(
             Terrain.Dto(
                 id = id,
                 canBeOccupied = false,
-                allowedTransitionTo = allowedTransitionTo,
+                transitionsTo = transitionsTo,
                 effectId = effectId,
             ),
         )

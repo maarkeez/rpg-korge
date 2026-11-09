@@ -10,7 +10,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.terrain.usecases.queries.SearchTerrainById
 import kotlin.test.Test
 
@@ -30,7 +30,7 @@ class ApplyTerrainEffectsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand", effectId = "effect-1"))
         // When
         applyTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -57,7 +57,7 @@ class ApplyTerrainEffectsTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand", effectId = "effect-1"))
         // When
         applyTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -93,7 +93,7 @@ class ApplyTerrainEffectsTest {
                 .pullEvents()
                 .second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand", effectId = "effect-1"))
         // When
         applyTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -114,7 +114,7 @@ class ApplyTerrainEffectsTest {
     fun `should not apply terrain effects when the battlefield has no occupant`() {
         // Given
         battlefieldRepository.create(battlefield())
-        terrainRepository.create(occupiableTerrain(id = "sand", effectId = "effect-1"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand", effectId = "effect-1"))
         // When
         applyTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then
@@ -126,7 +126,7 @@ class ApplyTerrainEffectsTest {
         // Given
         val occupiedBattlefield = battlefield().occupy(1, 1, "battle-unit-1").pullEvents().second
         battlefieldRepository.create(occupiedBattlefield)
-        terrainRepository.create(occupiableTerrain(id = "sand"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand"))
         // When
         applyTerrainEffects(occupantIds = setOf("battle-unit-1", "battle-unit-2"))
         // Then

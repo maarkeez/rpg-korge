@@ -3,7 +3,7 @@ package com.mkz.rpg.terrain.usecases.queries
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainRepository
 
-/** Every terrain, in id order, e.g.: to choose the terrain of a tile while designing a map. */
+/** Every terrain, in id order, e.g.: to select the terrain to paint with in the world builder. */
 class SearchTerrains(
     private val terrainRepository: TerrainRepository,
 ) {

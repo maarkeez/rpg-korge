@@ -9,7 +9,7 @@ import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameScen
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.shared.domain.subscribe
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -22,7 +22,7 @@ class FormationPresenterTest {
     // The knight leads from (1,1), followed by the viking at (2,1) and the herbalist at (2,2). There is no battle.
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             units = listOf(unit(id = "knight").toDto(), unit(id = "viking").toDto(), unit(id = "herbalist").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto(), player(id = "cpu", type = CPU).toDto()),
             tiles = List(3) { List(3) { "sand" } },

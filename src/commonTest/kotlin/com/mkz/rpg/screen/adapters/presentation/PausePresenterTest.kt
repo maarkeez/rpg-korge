@@ -8,7 +8,7 @@ import com.mkz.rpg.save.domain.Save.Dto.SlotStateDto
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.gameSceneTimeline
 import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLongStep
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -23,7 +23,7 @@ class PausePresenterTest {
     // The knight explores the sand, alone.
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             units = listOf(unit(id = "knight").toDto()),
             players = listOf(player(id = "human", type = HUMAN).toDto()),
             tiles = List(2) { List(2) { "sand" } },

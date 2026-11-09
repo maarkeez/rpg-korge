@@ -17,7 +17,7 @@ import com.mkz.rpg.screen.adapters.presentation.GameSceneTimelineMother.playLong
 import com.mkz.rpg.screen.adapters.presentation.ShopView.Mode
 import com.mkz.rpg.shared.adapters.presentation.GameButton
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.domain.UnitMother.unit
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
@@ -33,7 +33,7 @@ class ShopPresenterTest {
     private val merchant = npc(id = "merchant", row = 0, column = 1, stock = listOf("health-potion", "hammer")).toDto()
     private val apis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             effects = listOf(healEffect(id = "cure").toDto(), increaseMaximumHealthEffect(id = "sturdy").toDto()),
             lootableItems =
                 listOf(

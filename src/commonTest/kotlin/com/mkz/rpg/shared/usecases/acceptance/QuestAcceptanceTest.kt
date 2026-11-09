@@ -53,7 +53,7 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.SubdomainApis
 import com.mkz.rpg.terrain.adapters.presentation.TerrainApi
 import com.mkz.rpg.terrain.adapters.resources.ResourcesTerrainLoader
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.unit.adapters.presentation.UnitApi
 import com.mkz.rpg.unit.adapters.resources.ResourcesUnitLoader
 import com.mkz.rpg.unit.domain.UnitMother.unit
@@ -142,7 +142,7 @@ class QuestAcceptanceTest {
     // A small game: a knight explores from (1,0), next to a farmer at (0,0), on a 3x6 field of sand, with a rat at (1,5).
     private fun smallGame(vararg quests: Quest.Dto): SubdomainApis =
         SubdomainApis(
-            terrains = listOf(occupiableTerrain(id = "sand").toDto()),
+            terrains = listOf(terrainThatCanBeOccupied(id = "sand").toDto()),
             effects = listOf(healEffect(id = "cure").toDto(), damageEffect(id = "smite", damage = 100, timingType = "IMMEDIATELY").toDto()),
             lootableItems = listOf(consumableLootableItem(id = "health-potion", consumable = consumable(effectIds = setOf("cure"))).toDto()),
             units = listOf(unit(id = "knight", healthPoints = 30, abilities = emptyList(), movementRange = 3).toDto(), unit(id = "rat", healthPoints = 8, abilities = emptyList()).toDto()),

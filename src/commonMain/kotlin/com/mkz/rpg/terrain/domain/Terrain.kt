@@ -7,7 +7,7 @@ import kotlin.jvm.JvmInline
 data class Terrain private constructor(
     private val id: Id,
     private val canBeOccupied: CanBeOccupied,
-    private val allowedTransitionTo: AllowedTransitionTo,
+    private val transitionsTo: TransitionsTo,
     private val effectId: EffectId?,
     private val events: Set<TerrainEvent>,
 ) {
@@ -16,19 +16,19 @@ data class Terrain private constructor(
             Terrain(
                 Id(terrain.id),
                 CanBeOccupied(terrain.canBeOccupied),
-                AllowedTransitionTo(terrain.allowedTransitionTo),
+                TransitionsTo(terrain.transitionsTo),
                 terrain.effectId?.let { EffectId(it) },
                 setOf(TerrainCreated(terrainId = terrain.id)),
             )
     }
 
-    fun canTransitionTo(terrainId: String): Boolean = allowedTransitionTo.value.contains(terrainId)
+    fun hasTransitionTo(terrainId: String): Boolean = transitionsTo.value.contains(terrainId)
 
     fun toDto() =
         Dto(
             id = id.value,
             canBeOccupied = canBeOccupied.value,
-            allowedTransitionTo = allowedTransitionTo.value,
+            transitionsTo = transitionsTo.value,
             effectId = effectId?.value,
         )
 
@@ -42,7 +42,7 @@ data class Terrain private constructor(
         val value: Boolean,
     )
 
-    @JvmInline private value class AllowedTransitionTo(
+    @JvmInline private value class TransitionsTo(
         val value: Set<String>,
     )
 
@@ -53,7 +53,7 @@ data class Terrain private constructor(
     data class Dto(
         val id: String,
         val canBeOccupied: Boolean,
-        val allowedTransitionTo: Set<String>,
+        val transitionsTo: Set<String>,
         val effectId: String?,
     )
 }

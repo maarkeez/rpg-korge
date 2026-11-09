@@ -44,8 +44,8 @@ class TerrainEffectAcceptanceTest {
             eventBus,
             StubTerrainLoader(
                 listOf(
-                    Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("forest"), effectId = terrainEffectId),
-                    Terrain.Dto(id = "forest", canBeOccupied = true, allowedTransitionTo = setOf("sand"), effectId = null),
+                    Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("forest"), effectId = terrainEffectId),
+                    Terrain.Dto(id = "forest", canBeOccupied = true, transitionsTo = setOf("sand"), effectId = null),
                 ),
             ),
         )

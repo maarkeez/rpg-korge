@@ -6,7 +6,7 @@ import com.mkz.rpg.terrain.adapters.storage.InMemoryTerrainRepository
 import com.mkz.rpg.terrain.domain.Terrain
 import com.mkz.rpg.terrain.domain.TerrainError.TerrainAlreadyExists
 import com.mkz.rpg.terrain.domain.TerrainEvent
-import com.mkz.rpg.terrain.domain.TerrainMother.occupiableTerrain
+import com.mkz.rpg.terrain.domain.TerrainMother.terrainThatCanBeOccupied
 import com.mkz.rpg.terrain.usecases.services.FakeTerrainLoader
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -26,8 +26,8 @@ class InitialiseTerrainsTest {
                 FakeTerrainLoader(
                     terrains =
                         listOf(
-                            Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void"), effectId = null),
-                            Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand"), effectId = null),
+                            Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("sand", "void"), effectId = null),
+                            Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = setOf("void", "sand"), effectId = null),
                         ),
                 ),
                 terrainRepository,
@@ -36,8 +36,8 @@ class InitialiseTerrainsTest {
         // When
         initialiseTerrains()
         // Then
-        terrainRepository.searchById("sand")?.toDto() shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = setOf("sand", "void"), effectId = null)
-        terrainRepository.searchById("void")?.toDto() shouldBe Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = setOf("void", "sand"), effectId = null)
+        terrainRepository.searchById("sand")?.toDto() shouldBe Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = setOf("sand", "void"), effectId = null)
+        terrainRepository.searchById("void")?.toDto() shouldBe Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = setOf("void", "sand"), effectId = null)
     }
 
     @Test
@@ -48,8 +48,8 @@ class InitialiseTerrainsTest {
                 FakeTerrainLoader(
                     terrains =
                         listOf(
-                            Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = null),
-                            Terrain.Dto(id = "void", canBeOccupied = false, allowedTransitionTo = emptySet(), effectId = null),
+                            Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = emptySet(), effectId = null),
+                            Terrain.Dto(id = "void", canBeOccupied = false, transitionsTo = emptySet(), effectId = null),
                         ),
                 ),
                 terrainRepository,
@@ -67,9 +67,9 @@ class InitialiseTerrainsTest {
     @Test
     fun `should fail when a terrain already exists`() {
         // Given
-        terrainRepository.create(occupiableTerrain(id = "sand"))
+        terrainRepository.create(terrainThatCanBeOccupied(id = "sand"))
         val initialiseTerrains =
-            InitialiseTerrains(FakeTerrainLoader(terrains = listOf(Terrain.Dto(id = "sand", canBeOccupied = true, allowedTransitionTo = emptySet(), effectId = null))), terrainRepository, eventBus)
+            InitialiseTerrains(FakeTerrainLoader(terrains = listOf(Terrain.Dto(id = "sand", canBeOccupied = true, transitionsTo = emptySet(), effectId = null))), terrainRepository, eventBus)
         // When
         val result = runCatching { initialiseTerrains() }
         // Then
