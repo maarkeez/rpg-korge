@@ -1,6 +1,6 @@
 # Plan: Rename the code of the screen subdomain to the words of the glossary
 
-> **Status:** built on `main` in `f40b048e`, with its screenshots of the inventory full message still to be approved.
+> **Status:** done, built on `main` in `f40b048e`.
 >
 > **Summary:** The screen names what players see with words the [glossary](../../GLOSSARY.md) gives to other things, or
 > rejects. E.g.: `BattleScene` holds the whole game, exploring included. `BattlefieldHud` is not the HUD but what the
