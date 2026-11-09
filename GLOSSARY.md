@@ -320,7 +320,7 @@ Said of a tile with an occupant.
 
 **Occupiable**:
 Said of a tile an occupant can stand on, given its terrain and the terrains around it.
-_Avoid_: Walkable, can be occupied
+_Avoid_: Walkable
 
 **Vacant**:
 Said of an occupiable tile with no occupant.
@@ -1218,6 +1218,24 @@ Where and at what size the screen draws the Storybook, zoomed from Fit to 4×.
 
 **Fit**:
 The zoom that shows the whole Storybook, as on its 1280x900 window.
+
+### Terrain
+
+**Terrain**:
+What a tile is made of, such as sand, grass, water, lava or void.
+_Avoid_: Ground, tile type, floor
+
+**Can be occupied**:
+Said of a terrain an occupant can stand on, unlike void.
+_Avoid_: Occupiable, walkable
+
+#### Terrain effects
+
+**Harmful terrain**:
+A terrain whose terrain effect damages the occupant standing on it, such as lava.
+
+**Healing terrain**:
+A terrain whose terrain effect heals the occupant standing on it, such as water.
 
 ### World builder
 
