@@ -1,6 +1,6 @@
 # Plan: Rename the code of the unit subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `da23243e`.
 >
 > **Summary:** The game data of a unit says `healthPoints`, `manaPoints`, `movementRange` and `abilities`. E.g.:
 > `unit/knight.toml` has `healthPoints = 100`, `movementRange = 3` and six `abilities`. The [glossary](../../GLOSSARY.md)
@@ -95,3 +95,12 @@
 
 None: `unit` is the last section. It answers what `battleUnit`, `cpuBattleBrain`, `lootDrop`, `npc` and `storybook` left
 waiting.
+
+## Changes while building
+
+- `BattleUnitTest`'s private `hurtBattleUnit` helper also says `baseMaximumHealth` and `baseMaximumMana` for the
+  parameters it passes to `UnitMother.unit`, beyond the callers the plan named.
+- `SelectionTest` keeps its local `movementRange`, a `Selection.BattleUnitSelected` rather than a unit's maximum steps,
+  as it belongs to the screen.
+- `docs/architecture/dependencies.html` did not change, as no dependency between subdomains did.
+- No screenshot: `AbilityInfoViewStories` only renames the field it passes, and the summon line reads the same.
