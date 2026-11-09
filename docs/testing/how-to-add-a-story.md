@@ -28,7 +28,7 @@ object ManaBarViewStories : StoryBinding {
     private const val MAXIMUM = "maximum"
 
     private val full = StoryDto(id = "screen-mana-bar--full", name = "Full", description = "A battle unit that has cast no ability.", args = emptyMap())
-    private val empty = StoryDto(id = "screen-mana-bar--empty", name = "Empty", description = "A battle unit with no mana left.", args = mapOf(REMAINING to ArgDto.int(0)))
+    private val empty = StoryDto(id = "screen-mana-bar--empty", name = "Empty", description = "A battle unit with no mana left.", args = mapOf(REMAINING to ValueDto.int(0)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -37,7 +37,7 @@ object ManaBarViewStories : StoryBinding {
             title = "Mana bar",
             description = "The mana a battle unit has left, out of its maximum, in the info of the selected battle unit.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = 999), ControlDto.int(MAXIMUM, minimum = 1, maximum = 999)),
-            args = mapOf(REMAINING to ArgDto.int(20), MAXIMUM to ArgDto.int(20)),
+            args = mapOf(REMAINING to ValueDto.int(20), MAXIMUM to ValueDto.int(20)),
             stories = listOf(full, empty),
         )
 
@@ -70,8 +70,8 @@ One control per value the view is displayed with, named as the view names it, wi
 | `ControlDto.text(name)`                    | A free text, e.g.: a name.                                  | `args.text(name)`         |
 | `ControlDto.color(name)`                   | A color, as its hex without `#`, e.g.: `FF375F`.            | `args.color(name)`        |
 
-- The args of an enum, a pick or a color are texts: `ArgDto.text("SELL")`. The others are `ArgDto.boolean(true)` and
-  `ArgDto.int(3)`.
+- The args of an enum, a pick or a color are texts: `ValueDto.text("SELL")`. The others are `ValueDto.boolean(true)` and
+  `ValueDto.int(3)`.
 - **Item ids**: use `context.lootableItemIds()`, the items that have an image, for a pick control or the items of a
   view, never a list written by hand. A pick that may be empty adds an option of its own, e.g.: `none` for an empty
   slot.
@@ -81,7 +81,7 @@ One control per value the view is displayed with, named as the view names it, wi
   whose options do not fit on one line, e.g.: long names, wraps to two lines and takes two rows. If they do not fit,
   keep the controls that matter to an artist or a designer, and fix the rest in the binding.
 
-### 3. Log the callbacks
+### 3. Record the callbacks
 
 Hand every callback of the view to `context.action(name, arguments)`, named as the callback, so it is listed in the
 Actions:
@@ -90,7 +90,7 @@ Actions:
 setDelegate(
     object : ShopView.Delegate {
         override fun shopSlotSelected(index: Int) =
-            context.action("shopSlotSelected", index, setArg = SELECTED_SLOT to ArgDto.text("$index"))
+            context.action("shopSlotSelected", index, setArg = SELECTED_SLOT to ValueDto.text("$index"))
 
         override fun shopBuyerStepped(step: Int) = context.action("shopBuyerStepped", step)
     },
@@ -149,5 +149,5 @@ view lists its actions.
   not in `StorybookApi.kt`, or the view has no story: every view needs one.
 - **`ViewArchitectureTest` fails**: the view imports a `.domain` or `.usecases` package. Take a data class of
   `adapters.presentation` holding what the view draws instead, and map the domain to it in the presenter.
-- **A tap on the view logs nothing**: the callback is not handed to `context.action(...)`, or the view needs to be
+- **A tap on the view records nothing**: the callback is not handed to `context.action(...)`, or the view needs to be
   added to the stage to be tapped, which the phone does.

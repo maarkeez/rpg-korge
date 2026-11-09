@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.BarView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -22,8 +22,8 @@ object BarViewStories : StoryBinding {
     private const val MANA_COLOR = "0091FF"
 
     private val full = StoryDto(id = "shared-bar--full", name = "Full", description = "A bar filled up to its maximum.", args = emptyMap())
-    private val half = StoryDto(id = "shared-bar--half", name = "Half", description = "A bar filled up to half of its maximum.", args = mapOf(REMAINING to ArgDto.int(MAXIMUM_VALUE / 2)))
-    private val empty = StoryDto(id = "shared-bar--empty", name = "Empty", description = "A bar with nothing left, over its dark track.", args = mapOf(REMAINING to ArgDto.int(0)))
+    private val half = StoryDto(id = "shared-bar--half", name = "Half", description = "A bar filled up to half of its maximum.", args = mapOf(REMAINING to ValueDto.int(MAXIMUM_VALUE / 2)))
+    private val empty = StoryDto(id = "shared-bar--empty", name = "Empty", description = "A bar with nothing left, over its dark track.", args = mapOf(REMAINING to ValueDto.int(0)))
     private val otherColor =
         StoryDto(
             id = "shared-bar--other-color",
@@ -31,7 +31,7 @@ object BarViewStories : StoryBinding {
             description = "The color of the mana bar instead of the health bar's: the bar fills up with any color.",
             args =
                 mapOf(
-                    COLOR to ArgDto.text(MANA_COLOR),
+                    COLOR to ValueDto.text(MANA_COLOR),
                 ),
         )
 
@@ -42,7 +42,7 @@ object BarViewStories : StoryBinding {
             title = "Bar",
             description = "The base of the health and mana bars: a rounded bar of the remaining value out of its maximum, filled with a color, and the value after it.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = VALUE_LIMIT), ControlDto.int(MAXIMUM, minimum = 1, maximum = VALUE_LIMIT), ControlDto.color(COLOR)),
-            args = mapOf(REMAINING to ArgDto.int(MAXIMUM_VALUE), MAXIMUM to ArgDto.int(MAXIMUM_VALUE), COLOR to ArgDto.text(HEALTH_COLOR)),
+            args = mapOf(REMAINING to ValueDto.int(MAXIMUM_VALUE), MAXIMUM to ValueDto.int(MAXIMUM_VALUE), COLOR to ValueDto.text(HEALTH_COLOR)),
             stories = listOf(full, half, empty, otherColor),
         )
 

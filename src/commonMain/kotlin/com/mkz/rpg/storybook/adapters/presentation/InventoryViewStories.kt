@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.InventoryView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -28,32 +28,32 @@ object InventoryViewStories : StoryBinding {
     private const val PARTY_INDEX = "partyIndex"
     private const val PARTY_SIZE = "partySize"
 
-    private val empty = StoryDto(id = "screen-inventory--empty", name = "Empty", description = "A party member who carries nothing.", args = mapOf(ITEMS to ArgDto.int(0), GOLD to ArgDto.int(0)))
+    private val empty = StoryDto(id = "screen-inventory--empty", name = "Empty", description = "A party member who carries nothing.", args = mapOf(ITEMS to ValueDto.int(0), GOLD to ValueDto.int(0)))
     private val stored = StoryDto(id = "screen-inventory--stored", name = "Stored", description = "Some items stored, and the gold on the title line.", args = emptyMap())
-    private val full = StoryDto(id = "screen-inventory--full", name = "Full", description = "All the storage spaces taken.", args = mapOf(ITEMS to ArgDto.int(InventoryView.SLOTS)))
+    private val full = StoryDto(id = "screen-inventory--full", name = "Full", description = "All the storage spaces taken.", args = mapOf(ITEMS to ValueDto.int(InventoryView.SLOTS)))
     private val equipped =
-        StoryDto(id = "screen-inventory--equipped", name = "Equipped", description = "An item the battle unit wears, framed in gold.", args = mapOf(EQUIPPED_SLOT to ArgDto.text("0")))
-    private val selected = StoryDto(id = "screen-inventory--selected", name = "Selected", description = "The slot tapped last, framed in white.", args = mapOf(SELECTED_SLOT to ArgDto.text("1")))
+        StoryDto(id = "screen-inventory--equipped", name = "Equipped", description = "An item the battle unit wears, framed in gold.", args = mapOf(EQUIPPED_SLOT to ValueDto.text("0")))
+    private val selected = StoryDto(id = "screen-inventory--selected", name = "Selected", description = "The slot tapped last, framed in white.", args = mapOf(SELECTED_SLOT to ValueDto.text("1")))
     private val exploring =
         StoryDto(
             id = "screen-inventory--exploring",
             name = "Exploring",
             description = "While exploring the title names the party member between two arrows, which switch to the previous or next one. The first has no previous.",
-            args = mapOf(EXPLORING to ArgDto.boolean(true)),
+            args = mapOf(EXPLORING to ValueDto.boolean(true)),
         )
     private val exploringLastMember =
         StoryDto(
             id = "screen-inventory--exploring-last-member",
             name = "Exploring, last member",
             description = "The last party member has no next one: its arrow is disabled.",
-            args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_INDEX to ArgDto.int(PARTY_LIMIT - 1)),
+            args = mapOf(EXPLORING to ValueDto.boolean(true), PARTY_INDEX to ValueDto.int(PARTY_LIMIT - 1)),
         )
     private val exploringOnlyMember =
         StoryDto(
             id = "screen-inventory--exploring-only-member",
             name = "Exploring, only member",
             description = "A party of one has no other member to switch to: both arrows are disabled.",
-            args = mapOf(EXPLORING to ArgDto.boolean(true), PARTY_SIZE to ArgDto.int(1)),
+            args = mapOf(EXPLORING to ValueDto.boolean(true), PARTY_SIZE to ValueDto.int(1)),
         )
 
     private val exploringNoGold =
@@ -61,7 +61,7 @@ object InventoryViewStories : StoryBinding {
             id = "screen-inventory--exploring-no-gold",
             name = "Exploring, no gold",
             description = "A party member who carries no gold: its gold button is faded, and can still be tapped, to read why.",
-            args = mapOf(EXPLORING to ArgDto.boolean(true), GOLD to ArgDto.int(0)),
+            args = mapOf(EXPLORING to ValueDto.boolean(true), GOLD to ValueDto.int(0)),
         )
 
     override fun component(context: StoryContext) =
@@ -83,14 +83,14 @@ object InventoryViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    ITEMS to ArgDto.int(4),
-                    GOLD to ArgDto.int(120),
-                    EQUIPPED_SLOT to ArgDto.text(NO_SLOT),
-                    SELECTED_SLOT to ArgDto.text(NO_SLOT),
-                    EXPLORING to ArgDto.boolean(false),
-                    OWNER to ArgDto.text("Knight"),
-                    PARTY_INDEX to ArgDto.int(0),
-                    PARTY_SIZE to ArgDto.int(PARTY_LIMIT),
+                    ITEMS to ValueDto.int(4),
+                    GOLD to ValueDto.int(120),
+                    EQUIPPED_SLOT to ValueDto.text(NO_SLOT),
+                    SELECTED_SLOT to ValueDto.text(NO_SLOT),
+                    EXPLORING to ValueDto.boolean(false),
+                    OWNER to ValueDto.text("Knight"),
+                    PARTY_INDEX to ValueDto.int(0),
+                    PARTY_SIZE to ValueDto.int(PARTY_LIMIT),
                 ),
             stories = listOf(empty, stored, full, equipped, selected, exploring, exploringLastMember, exploringOnlyMember, exploringNoGold),
         )
@@ -113,13 +113,13 @@ object InventoryViewStories : StoryBinding {
                     // Tapping the selected item, or an empty slot, clears the selection.
                     override fun slotSelected(index: Int) {
                         val selected = index.takeIf { index < items && index != selectedSlot }
-                        context.action("slotSelected", index, setArg = SELECTED_SLOT to ArgDto.text(selected?.toString() ?: NO_SLOT))
+                        context.action("slotSelected", index, setArg = SELECTED_SLOT to ValueDto.text(selected?.toString() ?: NO_SLOT))
                     }
 
                     // The party member stays at the ends of the party.
                     override fun inventoryOwnerStepped(step: Int) {
                         val stepped = (partyIndex + step).takeIf { index -> index in 0 until partySize }
-                        context.action("inventoryOwnerStepped", step, setArg = stepped?.let { index -> PARTY_INDEX to ArgDto.int(index) })
+                        context.action("inventoryOwnerStepped", step, setArg = stepped?.let { index -> PARTY_INDEX to ValueDto.int(index) })
                     }
 
                     override fun inventoryClosed() = context.action("inventoryClosed")

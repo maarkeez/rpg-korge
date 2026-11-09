@@ -3,13 +3,13 @@ package com.mkz.rpg.storybook.adapters.presentation
 import com.mkz.rpg.screen.adapters.presentation.ButtonRowView
 import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.HudStyle
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [ButtonRowView], from a lone button to three. Tapping a button logs itself. */
+/** The stories of [ButtonRowView], from a lone button to three. Tapping a button records itself. */
 object ButtonRowViewStories : StoryBinding {
     private const val FIRST = "first"
     private const val SECOND = "second"
@@ -22,14 +22,14 @@ object ButtonRowViewStories : StoryBinding {
         id: String,
         name: String,
         description: String,
-        vararg args: Pair<String, ArgDto>,
-    ) = StoryDto(id = "screen-action-row--$id", name = name, description = description, args = mapOf(*args))
+        vararg args: Pair<String, ValueDto>,
+    ) = StoryDto(id = "screen-button-row--$id", name = name, description = description, args = mapOf(*args))
 
     override fun component(context: StoryContext) =
         ComponentDto(
-            id = "screen-action-row",
+            id = "screen-button-row",
             group = "Screen",
-            title = "Action row",
+            title = "Button row",
             description = "The buttons of a panel, at the level of the finish turn, sharing its width equally. An empty label draws no button.",
             controls =
                 listOf(
@@ -42,33 +42,33 @@ object ButtonRowViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    FIRST to ArgDto.text("Back"),
-                    SECOND to ArgDto.text(""),
-                    THIRD to ArgDto.text(""),
-                    LAST_IS_PRIMARY to ArgDto.boolean(false),
-                    LAST_IS_DANGER to ArgDto.boolean(false),
-                    LAST_IS_ENABLED to ArgDto.boolean(true),
+                    FIRST to ValueDto.text("Back"),
+                    SECOND to ValueDto.text(""),
+                    THIRD to ValueDto.text(""),
+                    LAST_IS_PRIMARY to ValueDto.boolean(false),
+                    LAST_IS_DANGER to ValueDto.boolean(false),
+                    LAST_IS_ENABLED to ValueDto.boolean(true),
                 ),
             stories =
                 listOf(
-                    story("one-action", "One action", "A lone button fills the row, e.g.: Back of the journal."),
-                    story("two-actions", "Two actions", "Two buttons share it in halves, e.g.: Back and Buy in the shop.", SECOND to ArgDto.text("Buy"), LAST_IS_PRIMARY to ArgDto.boolean(true)),
-                    story("danger", "Danger", "An action that can not be undone, in red, e.g.: Abandon.", SECOND to ArgDto.text("Abandon"), LAST_IS_DANGER to ArgDto.boolean(true)),
+                    story("one-button", "One button", "A lone button fills the row, e.g.: Back of the journal."),
+                    story("two-buttons", "Two buttons", "Two buttons share it in halves, e.g.: Back and Buy in the shop.", SECOND to ValueDto.text("Buy"), LAST_IS_PRIMARY to ValueDto.boolean(true)),
+                    story("danger", "Danger", "An action that can not be undone, in red, e.g.: Abandon.", SECOND to ValueDto.text("Abandon"), LAST_IS_DANGER to ValueDto.boolean(true)),
                     story(
-                        "three-actions",
-                        "Three actions",
+                        "three-buttons",
+                        "Three buttons",
                         "Three buttons share it in thirds, e.g.: the merchant's choices.",
-                        FIRST to ArgDto.text("Leave"),
-                        SECOND to ArgDto.text("Sell"),
-                        THIRD to ArgDto.text("Buy"),
-                        LAST_IS_PRIMARY to ArgDto.boolean(true),
+                        FIRST to ValueDto.text("Leave"),
+                        SECOND to ValueDto.text("Sell"),
+                        THIRD to ValueDto.text("Buy"),
+                        LAST_IS_PRIMARY to ValueDto.boolean(true),
                     ),
                     story(
-                        "disabled-action",
-                        "Disabled action",
+                        "disabled-button",
+                        "Disabled button",
                         "An action that can not be done, faded, reading why, e.g.: in the shop.",
-                        SECOND to ArgDto.text("Not enough gold"),
-                        LAST_IS_ENABLED to ArgDto.boolean(false),
+                        SECOND to ValueDto.text("Not enough gold"),
+                        LAST_IS_ENABLED to ValueDto.boolean(false),
                     ),
                 ),
         )

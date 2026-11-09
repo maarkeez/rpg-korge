@@ -13,7 +13,7 @@ class SearchSelectedStoryTest {
     private val searchSelectedStory = SearchSelectedStory(storybookRepository)
 
     @Test
-    fun `should return the story on show when the catalogue is initialised`() {
+    fun `should return the selected story when the catalogue is open`() {
         // Given
         val empty = story(id = "screen-health-bar--empty", name = "Empty")
         val healthBar = component(id = "screen-health-bar", stories = listOf(story(id = "screen-health-bar--full"), empty))
@@ -25,7 +25,7 @@ class SearchSelectedStoryTest {
     }
 
     @Test
-    fun `should return null when the catalogue is not initialised`() {
+    fun `should return null when the catalogue is not open`() {
         // When
         val selectedStory = searchSelectedStory()
         // Then

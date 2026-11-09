@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView
 import com.mkz.rpg.screen.adapters.presentation.QuestAnnouncementView.Moment
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [QuestAnnouncementView], at the start and the end of a quest, held so it can be looked at. */
@@ -22,7 +22,7 @@ object QuestAnnouncementViewStories : StoryBinding {
         id = "screen-quest-announcement--$id",
         name = name,
         description = sample.state,
-        args = mapOf(MOMENT to ArgDto.text(moment.name), QUEST to ArgDto.text(sample.name)),
+        args = mapOf(MOMENT to ValueDto.text(moment.name), QUEST to ValueDto.text(sample.name)),
     )
 
     override fun component(context: StoryContext) =
@@ -32,7 +32,7 @@ object QuestAnnouncementViewStories : StoryBinding {
             title = "Quest announcement",
             description = "A toast over the top of the battlefield, which fades by itself and takes no taps, announcing that a quest started, or completed with its reward.",
             controls = listOf(ControlDto.enum(MOMENT, Moment.entries.map { moment -> moment.name }), ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name })),
-            args = mapOf(MOMENT to ArgDto.text(Moment.STARTED.name), QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name)),
+            args = mapOf(MOMENT to ValueDto.text(Moment.STARTED.name), QUEST to ValueDto.text(QuestSample.GOAT_WIZARD.name)),
             stories =
                 listOf(
                     story("started", "Started", Moment.STARTED, QuestSample.GOAT_WIZARD),

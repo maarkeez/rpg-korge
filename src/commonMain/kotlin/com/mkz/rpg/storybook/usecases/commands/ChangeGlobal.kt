@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.usecases.commands
 
 import com.mkz.rpg.shared.domain.EventBus
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
@@ -16,7 +16,7 @@ class ChangeGlobal(
 ) {
     operator fun invoke(
         name: String,
-        value: ArgDto,
+        value: ValueDto,
     ) {
         val storybook = storybookRepository.search() ?: return
         val (events, changedStorybook) = storybook.changeGlobal(name, value).pullEvents()

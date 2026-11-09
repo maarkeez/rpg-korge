@@ -54,7 +54,7 @@ Leave out any section with nothing to say (e.g. no Storybook section when no vie
 
 ## 5. Write the plan
 
-Write it to `docs/plans/<slug>.md`: `slug` is the topic in lowercase with dashes (e.g. `lingering-health-flash.md`),
+Write it to `docs/plans/<slug>.md`: `slug` is the topic in lowercase with dashes (e.g. `lingering-health-blink.md`),
 with no number. Don't overwrite a plan that already exists: pick another slug. Follow the [template](template.md), with
 `> **Status:** to do.`
 
@@ -81,7 +81,7 @@ Ask whether to commit the plan. On a yes:
 How the plans are written, to keep each one sounding like the others:
 
 - Plain English, in the present tense, as if the change were already built: "`hold()` stops the blinks".
-- Concrete: the actual units, terrains, items, numbers, durations, colors and constants (e.g. `HEALTH_FLASH_DURATION`,
+- Concrete: the actual units, terrains, items, numbers, durations, colors and constants (e.g. `HEALTH_BLINK_DURATION`,
   1.5s, `#3A3A3A`). Examples start with "E.g.:".
 - In the Decisions table, each topic is one or two sentences. When an alternative was dropped, give it and why: "Chosen
   over ..., as ...".

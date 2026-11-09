@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.AbilityButtonView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -22,20 +22,21 @@ object AbilityButtonViewStories : StoryBinding {
     private const val SELECTED = "selected"
 
     private val ready = StoryDto(id = "screen-ability-button--ready", name = "Ready", description = "An ability the battle unit can cast.", args = emptyMap())
-    private val selected = StoryDto(id = "screen-ability-button--selected", name = "Selected", description = "The ability tapped last, ringed in gold.", args = mapOf(SELECTED to ArgDto.boolean(true)))
+    private val selected =
+        StoryDto(id = "screen-ability-button--selected", name = "Selected", description = "The ability tapped last, ringed in gold.", args = mapOf(SELECTED to ValueDto.boolean(true)))
     private val inCooldown =
         StoryDto(
             id = "screen-ability-button--in-cooldown",
             name = "In cooldown",
             description = "An ability that can not be cast again yet: darkened under a dark overlay, with the turns left in its middle.",
-            args = mapOf(COOLDOWN_TURNS_LEFT to ArgDto.int(2)),
+            args = mapOf(COOLDOWN_TURNS_LEFT to ValueDto.int(2)),
         )
     private val notEnoughMana =
         StoryDto(
             id = "screen-ability-button--not-enough-mana",
             name = "Not enough mana",
             description = "An ability that costs more mana than the battle unit has: its icon in shades of blue, as the mana bar, with its mana cost in a blue badge.",
-            args = mapOf(HAS_ENOUGH_MANA to ArgDto.boolean(false)),
+            args = mapOf(HAS_ENOUGH_MANA to ValueDto.boolean(false)),
         )
 
     override fun component(context: StoryContext) =
@@ -54,11 +55,11 @@ object AbilityButtonViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    ABILITY to ArgDto.text(DEFAULT_ABILITY),
-                    COOLDOWN_TURNS_LEFT to ArgDto.int(0),
-                    HAS_ENOUGH_MANA to ArgDto.boolean(true),
-                    MANA_COST to ArgDto.int(10),
-                    SELECTED to ArgDto.boolean(false),
+                    ABILITY to ValueDto.text(DEFAULT_ABILITY),
+                    COOLDOWN_TURNS_LEFT to ValueDto.int(0),
+                    HAS_ENOUGH_MANA to ValueDto.boolean(true),
+                    MANA_COST to ValueDto.int(10),
+                    SELECTED to ValueDto.boolean(false),
                 ),
             stories = listOf(ready, selected, inCooldown, notEnoughMana),
         )
@@ -70,7 +71,7 @@ object AbilityButtonViewStories : StoryBinding {
         AbilityButtonView(SIZE, context.resourcesLoader).apply {
             setDelegate(
                 object : AbilityButtonView.Delegate {
-                    override fun abilitySelected(abilityId: String) = context.action("abilitySelected", abilityId, setArg = SELECTED to ArgDto.boolean(true))
+                    override fun abilitySelected(abilityId: String) = context.action("abilitySelected", abilityId, setArg = SELECTED to ValueDto.boolean(true))
                 },
             )
             display(abilityId = args.text(ABILITY), remainingCooldown = args.int(COOLDOWN_TURNS_LEFT), hasEnoughMana = args.boolean(HAS_ENOUGH_MANA), manaCost = args.int(MANA_COST))

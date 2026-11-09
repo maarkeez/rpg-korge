@@ -19,7 +19,7 @@ fun SidebarView.componentTitles(): List<String> = componentTexts.map { text -> t
 /** The names of the stories listed, in their order, e.g.: `Full`. */
 fun SidebarView.storyNames(): List<String> = storyRows.map { row -> row.label.text }
 
-/** The names of the stories highlighted as on show. */
+/** The names of the stories highlighted as selected. */
 fun SidebarView.selectedStoryNames(): List<String> = storyRows.filter { row -> row.background.color == SidebarView.SELECTED_COLOR }.map { row -> row.label.text }
 
 /** Whether the title and the search are on top, and the groups, components and stories are listed top down under them, each in its order, all of them shown. */

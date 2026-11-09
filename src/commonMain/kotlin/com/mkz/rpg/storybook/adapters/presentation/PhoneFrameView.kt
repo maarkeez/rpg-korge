@@ -16,7 +16,7 @@ import korlibs.math.geom.RectCorners
 import korlibs.math.geom.Size
 
 /**
- * A phone, holding the view of the story on show at its real size, in the middle of a screen as large as the game
+ * A phone, holding the view of the selected story at its real size, in the middle of a screen as large as the game
  * window (390x844). The screen has the background of the game, and crops what does not fit in it.
  */
 open class PhoneFrameView : Container() {

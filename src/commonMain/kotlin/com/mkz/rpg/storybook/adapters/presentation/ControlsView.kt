@@ -1,8 +1,8 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto.TypeDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.image.color.Colors
 import korlibs.korge.annotations.KorgeExperimental
 import korlibs.korge.ui.UITextInput
@@ -17,7 +17,7 @@ import korlibs.korge.view.text
 import korlibs.math.geom.Size
 
 /**
- * The args of the story on show, under its info: one row per control of its component, with its name and its editor,
+ * The args of the selected story, under its info: one row per control of its component, with its name and its editor,
  * e.g.: `-` and `+` around an int. Editing an arg asks to change it, and `Reset` asks for the story's own args back.
  * An editor only asks for the values its control accepts, e.g.: an int within its minimum and maximum.
  */
@@ -42,7 +42,7 @@ open class ControlsView : Container() {
     interface Delegate {
         fun argChanged(
             name: String,
-            value: ArgDto,
+            value: ValueDto,
         )
 
         fun argsReset()
@@ -72,7 +72,7 @@ open class ControlsView : Container() {
     /** Lists the controls, in their order, each with the value of its arg. */
     open fun display(
         controls: List<ControlDto>,
-        args: Map<String, ArgDto>,
+        args: Map<String, ValueDto>,
     ) {
         rows.removeChildren()
         var y = 0.0
@@ -85,7 +85,7 @@ open class ControlsView : Container() {
     /** The name of a control and the editor of its arg. */
     internal inner class ControlRow(
         val control: ControlDto,
-        val arg: ArgDto,
+        val arg: ValueDto,
     ) : Container() {
         internal val nameText: Text = text(control.name, textSize = 16.0, color = StoryInfoView.SECONDARY_COLOR).position(0.0, (StorybookButton.HEIGHT - 16.0) / 2)
 
@@ -126,7 +126,7 @@ open class ControlsView : Container() {
         // A switch, highlighted while it is on.
         private fun booleanEditor() {
             val value = requireNotNull(arg.boolean)
-            button("toggle", value.toString(), x = 0.0, size = StorybookButton.sizeFor(false.toString())) { change(ArgDto.boolean(!value)) }.isSelected = value
+            button("toggle", value.toString(), x = 0.0, size = StorybookButton.sizeFor(false.toString())) { change(ValueDto.boolean(!value)) }.isSelected = value
         }
 
         // `-` and `+` around the value, which stop at the minimum and the maximum, followed by them.
@@ -134,9 +134,9 @@ open class ControlsView : Container() {
             val value = requireNotNull(arg.int)
             val minimum = requireNotNull(control.minimum)
             val maximum = requireNotNull(control.maximum)
-            button("decrease", "-", x = 0.0) { if (value > minimum) change(ArgDto.int(value - 1)) }
+            button("decrease", "-", x = 0.0) { if (value > minimum) change(ValueDto.int(value - 1)) }
             valueText = centeredText(value.toString(), x = StorybookButton.HEIGHT, width = INT_VALUE_WIDTH)
-            button("increase", "+", x = StorybookButton.HEIGHT + INT_VALUE_WIDTH) { if (value < maximum) change(ArgDto.int(value + 1)) }
+            button("increase", "+", x = StorybookButton.HEIGHT + INT_VALUE_WIDTH) { if (value < maximum) change(ValueDto.int(value + 1)) }
             editor.text("$minimum – $maximum", textSize = 14.0, color = StoryInfoView.SECONDARY_COLOR).position(2 * StorybookButton.HEIGHT + INT_VALUE_WIDTH + BUTTON_GAP * 2, 6.0)
         }
 
@@ -150,7 +150,7 @@ open class ControlsView : Container() {
                     x = 0.0
                     y += StorybookButton.HEIGHT + BUTTON_GAP
                 }
-                button("option:$option", option, x = x, y = y, size = size) { change(ArgDto.text(option)) }.isSelected = option == arg.text
+                button("option:$option", option, x = x, y = y, size = size) { change(ValueDto.text(option)) }.isSelected = option == arg.text
                 x += size.width + BUTTON_GAP
             }
         }
@@ -159,14 +159,14 @@ open class ControlsView : Container() {
         private fun pickEditor() {
             val options = requireNotNull(control.options)
             val index = options.indexOf(arg.text)
-            button("previous", "<", x = 0.0) { change(ArgDto.text(options[(index - 1 + options.size) % options.size])) }
+            button("previous", "<", x = 0.0) { change(ValueDto.text(options[(index - 1 + options.size) % options.size])) }
             valueText = centeredText(requireNotNull(arg.text), x = StorybookButton.HEIGHT, width = PICK_VALUE_WIDTH)
-            button("next", ">", x = StorybookButton.HEIGHT + PICK_VALUE_WIDTH) { change(ArgDto.text(options[(index + 1) % options.size])) }
+            button("next", ">", x = StorybookButton.HEIGHT + PICK_VALUE_WIDTH) { change(ValueDto.text(options[(index + 1) % options.size])) }
         }
 
         // Changed once it is entered, or left.
         private fun textEditor() {
-            input(requireNotNull(arg.text), x = 0.0, width = TEXT_INPUT_WIDTH) { text -> change(ArgDto.text(text)) }
+            input(requireNotNull(arg.text), x = 0.0, width = TEXT_INPUT_WIDTH) { text -> change(ValueDto.text(text)) }
         }
 
         // A swatch of the color and its hex, changed once it is entered, or left. A hex that is no color is undone.
@@ -175,11 +175,11 @@ open class ControlsView : Container() {
             colorSwatch = editor.solidRect(Size(StorybookButton.HEIGHT, StorybookButton.HEIGHT), Colors["#$hex"])
             input(hex, x = StorybookButton.HEIGHT + BUTTON_GAP, width = COLOR_INPUT_WIDTH) { text ->
                 val color = text.removePrefix("#").uppercase()
-                if (HEX_COLOR.matches(color)) change(ArgDto.text(color)) else textInput?.text = hex
+                if (HEX_COLOR.matches(color)) change(ValueDto.text(color)) else textInput?.text = hex
             }
         }
 
-        private fun change(value: ArgDto) {
+        private fun change(value: ValueDto) {
             if (value != arg) delegate?.argChanged(control.name, value)
         }
 

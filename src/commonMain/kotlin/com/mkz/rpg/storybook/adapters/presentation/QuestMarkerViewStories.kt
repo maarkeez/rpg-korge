@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldView
 import com.mkz.rpg.screen.adapters.presentation.QuestMarkerView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [QuestMarkerView], over the npc of the tiny map of [BattlefieldViewStories]. */
@@ -19,7 +19,7 @@ object QuestMarkerViewStories : StoryBinding {
         name: String,
         description: String,
         sign: QuestMarkerView.Sign,
-    ) = StoryDto(id = "screen-quest-marker--$id", name = name, description = description, args = mapOf(SIGN to ArgDto.text(sign.name)))
+    ) = StoryDto(id = "screen-quest-marker--$id", name = name, description = description, args = mapOf(SIGN to ValueDto.text(sign.name)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -28,7 +28,7 @@ object QuestMarkerViewStories : StoryBinding {
             title = "Quest marker",
             description = "The sign over an npc's head while exploring: gold when it can start a side quest, and green when a current task is to talk to it.",
             controls = listOf(ControlDto.enum(SIGN, QuestMarkerView.Sign.entries.map { sign -> sign.name })),
-            args = mapOf(SIGN to ArgDto.text(QuestMarkerView.Sign.QUEST_TO_START.name)),
+            args = mapOf(SIGN to ValueDto.text(QuestMarkerView.Sign.QUEST_TO_START.name)),
             stories =
                 listOf(
                     story("quest-to-start", "Quest to start", "The npc can start a side quest.", QuestMarkerView.Sign.QUEST_TO_START),

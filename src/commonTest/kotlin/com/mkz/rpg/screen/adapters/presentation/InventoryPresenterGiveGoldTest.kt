@@ -354,7 +354,7 @@ class InventoryPresenterGiveGoldTest {
     }
 
     @Test
-    fun `Give should move the gold, display the inventory again with the new gold, and flash the receiver`() {
+    fun `Give should move the gold, display the inventory again with the new gold, and blink the receiver`() {
         // Given
         val scene = Scene()
         scene.openPanel()
@@ -373,7 +373,7 @@ class InventoryPresenterGiveGoldTest {
             .shouldBeTrue()
         scene.hudView.displays.last() shouldBe Display.INVENTORY
         scene.callToActionView.displayedGiveGold.shouldBeNull()
-        scene.battlefieldView.flashedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
+        scene.battlefieldView.blinkedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
         scene.battlefieldView.tileSelections.last() shouldBe knightTile
         scene.battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)
     }

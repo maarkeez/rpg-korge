@@ -3,8 +3,8 @@ package com.mkz.rpg.storybook.usecases.commands
 import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
-import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
+import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueOpened
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 import com.mkz.rpg.storybook.domain.StorybookMother.LANGUAGE_CONTROL
 import com.mkz.rpg.storybook.domain.StorybookMother.component
@@ -14,7 +14,7 @@ import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class InitialiseCatalogueTest {
+class OpenCatalogueTest {
     private val storybookRepository = InMemoryStorybookRepository()
     private val eventBus = FakeEventBus()
     private val healthBar =
@@ -27,23 +27,23 @@ class InitialiseCatalogueTest {
     fun `should open the catalogue on the story of the location when it is in the catalogue`() {
         // Given
         val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--empty")
-        val initialiseCatalogue = InitialiseCatalogue(storybookRepository, storyLocation, eventBus)
+        val openCatalogue = OpenCatalogue(storybookRepository, storyLocation, eventBus)
         // When
-        initialiseCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ArgDto.text("en")))
+        openCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ValueDto.text("en")))
         // Then
         val storybook = storybookRepository.search()?.toDto()
         storybook?.components shouldBe listOf(healthBar)
         storybook?.selectedStoryId shouldBe "screen-health-bar--empty"
-        eventBus.shouldHavePublishedEvents(CatalogueInitialised, StorySelected(storyId = "screen-health-bar--empty"))
+        eventBus.shouldHavePublishedEvents(CatalogueOpened, StorySelected(storyId = "screen-health-bar--empty"))
     }
 
     @Test
     fun `should open the catalogue on its first story, keeping the location, when the location asks for an unknown story`() {
         // Given
         val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--renamed")
-        val initialiseCatalogue = InitialiseCatalogue(storybookRepository, storyLocation, eventBus)
+        val openCatalogue = OpenCatalogue(storybookRepository, storyLocation, eventBus)
         // When
-        initialiseCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ArgDto.text("en")))
+        openCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ValueDto.text("en")))
         // Then
         storybookRepository.search()?.toDto()?.selectedStoryId shouldBe "screen-health-bar--full"
         storyLocation.keptStoryIds.shouldBeEmpty()
@@ -53,12 +53,12 @@ class InitialiseCatalogueTest {
     fun `should open the story with the args and globals of the location when their controls accept them`() {
         // Given
         val storyLocation = FakeStoryLocation(requestedStoryId = "screen-health-bar--empty", requestedArgs = mapOf("remaining" to "10"), requestedGlobals = mapOf("language" to "es"))
-        val initialiseCatalogue = InitialiseCatalogue(storybookRepository, storyLocation, eventBus)
+        val openCatalogue = OpenCatalogue(storybookRepository, storyLocation, eventBus)
         // When
-        initialiseCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ArgDto.text("en")))
+        openCatalogue(listOf(healthBar), globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ValueDto.text("en")))
         // Then
         val storybook = storybookRepository.search()?.toDto()
-        storybook?.args shouldBe mapOf("remaining" to ArgDto.int(10))
-        storybook?.globals shouldBe mapOf("language" to ArgDto.text("es"))
+        storybook?.args shouldBe mapOf("remaining" to ValueDto.int(10))
+        storybook?.globals shouldBe mapOf("language" to ValueDto.text("es"))
     }
 }

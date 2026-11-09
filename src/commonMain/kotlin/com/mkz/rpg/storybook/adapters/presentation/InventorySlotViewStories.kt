@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.InventorySlotView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -21,12 +21,12 @@ object InventorySlotViewStories : StoryBinding {
     private const val DIMMED = "dimmed"
     private const val SELECTED = "selected"
 
-    private val empty = StoryDto(id = "screen-inventory-slot--empty", name = "Empty", description = "A storage space with no item.", args = mapOf(ITEM to ArgDto.text(NO_ITEM)))
+    private val empty = StoryDto(id = "screen-inventory-slot--empty", name = "Empty", description = "A storage space with no item.", args = mapOf(ITEM to ValueDto.text(NO_ITEM)))
     private val stored = StoryDto(id = "screen-inventory-slot--stored", name = "Stored", description = "A storage space holding an item.", args = emptyMap())
     private val equipped =
-        StoryDto(id = "screen-inventory-slot--equipped", name = "Equipped", description = "An item the battle unit wears, framed in gold.", args = mapOf(EQUIPPED to ArgDto.boolean(true)))
+        StoryDto(id = "screen-inventory-slot--equipped", name = "Equipped", description = "An item the battle unit wears, framed in gold.", args = mapOf(EQUIPPED to ValueDto.boolean(true)))
     private val selected =
-        StoryDto(id = "screen-inventory-slot--selected", name = "Selected", description = "The slot tapped last, framed in white.", args = mapOf(SELECTED to ArgDto.boolean(true)))
+        StoryDto(id = "screen-inventory-slot--selected", name = "Selected", description = "The slot tapped last, framed in white.", args = mapOf(SELECTED to ValueDto.boolean(true)))
     private val dimmed =
         StoryDto(
             id = "screen-inventory-slot--dimmed",
@@ -34,7 +34,7 @@ object InventorySlotViewStories : StoryBinding {
             description = "An item that can not be traded in the shop, e.g.: one the buyer can not afford.",
             args =
                 mapOf(
-                    DIMMED to ArgDto.boolean(true),
+                    DIMMED to ValueDto.boolean(true),
                 ),
         )
 
@@ -51,7 +51,7 @@ object InventorySlotViewStories : StoryBinding {
                     ControlDto.boolean(DIMMED),
                     ControlDto.boolean(SELECTED),
                 ),
-            args = mapOf(ITEM to ArgDto.text(DEFAULT_ITEM), EQUIPPED to ArgDto.boolean(false), DIMMED to ArgDto.boolean(false), SELECTED to ArgDto.boolean(false)),
+            args = mapOf(ITEM to ValueDto.text(DEFAULT_ITEM), EQUIPPED to ValueDto.boolean(false), DIMMED to ValueDto.boolean(false), SELECTED to ValueDto.boolean(false)),
             stories = listOf(empty, stored, equipped, selected, dimmed),
         )
 

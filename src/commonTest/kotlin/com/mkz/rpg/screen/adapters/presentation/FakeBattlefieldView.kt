@@ -80,16 +80,16 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
     val trailedTiles = mutableListOf<TilePosition>()
     var stopTrailingCount = 0
         private set
-    var removeHealthFlashesCount = 0
+    var removeHealthBlinksCount = 0
         private set
     val tints = mutableListOf<RGBA>()
-    val flashedBattleUnits = mutableListOf<BattleUnitAt>()
+    val blinkedBattleUnits = mutableListOf<BattleUnitAt>()
 
-    // The health flashed on each tile, in order.
-    val flashedHealth = mutableListOf<Pair<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>>()
+    // The health blinked on each tile, in order.
+    val blinkedHealth = mutableListOf<Pair<TilePosition, BattlefieldHealthBarPreviewView.PreviewOption>>()
 
-    // When set, every flash lasts until it is completed, e.g.: to keep the timeline playing while it flashes.
-    var flashing: CompletableDeferred<Unit>? = null
+    // When set, every blink lasts until it is completed, e.g.: to keep the timeline playing while it blinks.
+    var blinking: CompletableDeferred<Unit>? = null
 
     // The loot last displayed on each tile.
     val displayedDroppedItems = mutableMapOf<TilePosition, List<String>>()
@@ -202,8 +202,8 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
         stopTrailingCount++
     }
 
-    override fun removeHealthFlashes() {
-        removeHealthFlashesCount++
+    override fun removeHealthBlinks() {
+        removeHealthBlinksCount++
     }
 
     override fun removeNpc(
@@ -278,21 +278,21 @@ class FakeBattlefieldView : BattlefieldView(GameSceneResourcesLoader()) {
         tints += color
     }
 
-    override suspend fun flashBattleUnit(
+    override suspend fun blinkBattleUnit(
         row: Int,
         column: Int,
         unitId: String,
     ) {
-        flashedBattleUnits += BattleUnitAt(row, column, unitId)
-        flashing?.await()
+        blinkedBattleUnits += BattleUnitAt(row, column, unitId)
+        blinking?.await()
     }
 
-    override suspend fun flashHealth(
+    override suspend fun blinkHealth(
         row: Int,
         column: Int,
         previewOption: BattlefieldHealthBarPreviewView.PreviewOption,
     ) {
-        flashedHealth += TilePosition(row, column) to previewOption
-        flashing?.await()
+        blinkedHealth += TilePosition(row, column) to previewOption
+        blinking?.await()
     }
 }

@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.WorldBuilderInfoView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -29,21 +29,21 @@ object WorldBuilderInfoViewStories : StoryBinding {
             id = "screen-world-builder-info--error",
             name = "Error",
             description = "Why a tile can not be painted, in red: it pops, stays two seconds and the size comes back.",
-            args = mapOf(MESSAGE_KIND to ArgDto.text(MessageKind.ERROR.name), MESSAGE to ArgDto.text("Water can not be next to lava")),
+            args = mapOf(MESSAGE_KIND to ValueDto.text(MessageKind.ERROR.name), MESSAGE to ValueDto.text("Water can not be next to lava")),
         )
     private val info =
         StoryDto(
             id = "screen-world-builder-info--info",
             name = "Info",
             description = "The world was copied, in blue: it pops, stays two seconds and the size comes back.",
-            args = mapOf(MESSAGE_KIND to ArgDto.text(MessageKind.INFO.name)),
+            args = mapOf(MESSAGE_KIND to ValueDto.text(MessageKind.INFO.name)),
         )
     private val largeWorld =
         StoryDto(
             id = "screen-world-builder-info--large-world",
             name = "Large world",
             description = "The largest world, whose size takes the most characters.",
-            args = mapOf(ROWS to ArgDto.int(SIZE_LIMIT), COLUMNS to ArgDto.int(SIZE_LIMIT)),
+            args = mapOf(ROWS to ValueDto.int(SIZE_LIMIT), COLUMNS to ValueDto.int(SIZE_LIMIT)),
         )
     private val longMessage =
         StoryDto(
@@ -52,8 +52,8 @@ object WorldBuilderInfoViewStories : StoryBinding {
             description = "A message longer than the line, as translations may be.",
             args =
                 mapOf(
-                    MESSAGE_KIND to ArgDto.text(MessageKind.ERROR.name),
-                    MESSAGE to ArgDto.text("The world must be 1 to 128 tiles wide and tall, and the file has a world of more tiles"),
+                    MESSAGE_KIND to ValueDto.text(MessageKind.ERROR.name),
+                    MESSAGE to ValueDto.text("The world must be 1 to 128 tiles wide and tall, and the file has a world of more tiles"),
                 ),
         )
 
@@ -74,10 +74,10 @@ object WorldBuilderInfoViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    ROWS to ArgDto.int(16),
-                    COLUMNS to ArgDto.int(16),
-                    MESSAGE_KIND to ArgDto.text(MessageKind.NONE.name),
-                    MESSAGE to ArgDto.text("World copied to the clipboard"),
+                    ROWS to ValueDto.int(16),
+                    COLUMNS to ValueDto.int(16),
+                    MESSAGE_KIND to ValueDto.text(MessageKind.NONE.name),
+                    MESSAGE to ValueDto.text("World copied to the clipboard"),
                 ),
             stories = listOf(size, error, info, largeWorld, longMessage),
         )

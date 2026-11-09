@@ -4,7 +4,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 import korlibs.io.net.URL
 
 /**
- * What is on show, in the query of a page URL, as Storybook writes it: the story, the args changed from its own and the
+ * What is shown, in the query of a page URL, as Storybook writes it: the story, the args changed from its own and the
  * globals changed from their defaults, each `<name>:<value>`, separated by `;`, with the values URL-encoded, e.g.:
  * `story=screen-health-bar--full&args=remaining:3;maximum:40&globals=language:es`.
  */

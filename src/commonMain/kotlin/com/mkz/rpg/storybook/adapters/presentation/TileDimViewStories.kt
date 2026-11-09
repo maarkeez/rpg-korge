@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.TileDimView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [TileDimView], over a terrain tile and the battle unit standing on it, as the battlefield draws it. */
@@ -22,7 +22,7 @@ object TileDimViewStories : StoryBinding {
             description = "A tile that can not be selected, with no one on it: its terrain is darkened.",
             args =
                 mapOf(
-                    UNIT to ArgDto.text(NONE),
+                    UNIT to ValueDto.text(NONE),
                 ),
         )
     private val overBattleUnit =
@@ -32,7 +32,7 @@ object TileDimViewStories : StoryBinding {
             id = "screen-tile-dim--over-lava",
             name = "Over lava",
             description = "The mask over another terrain.",
-            args = mapOf(TERRAIN to ArgDto.text("lava"), UNIT to ArgDto.text("rat")),
+            args = mapOf(TERRAIN to ValueDto.text("lava"), UNIT to ValueDto.text("rat")),
         )
 
     override fun component(context: StoryContext) =
@@ -42,7 +42,7 @@ object TileDimViewStories : StoryBinding {
             title = "Tile dim",
             description = "The black mask over the tiles of the battlefield that can not be selected, e.g.: the ones the selected battle unit can not move to, so the others stand out.",
             controls = listOf(ControlDto.pick(TERRAIN, context.terrainIds()), ControlDto.pick(UNIT, listOf(NONE) + context.unitIds())),
-            args = mapOf(TERRAIN to ArgDto.text(DEFAULT_TERRAIN), UNIT to ArgDto.text(DEFAULT_UNIT)),
+            args = mapOf(TERRAIN to ValueDto.text(DEFAULT_TERRAIN), UNIT to ValueDto.text(DEFAULT_UNIT)),
             stories = listOf(overTerrain, overBattleUnit, overLava),
         )
 

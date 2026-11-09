@@ -131,10 +131,10 @@ fun BattlefieldView.hasBuildingAt(
 }
 
 /** Whether the battle unit on the tile is blinking in white, e.g.: when it receives an effect. */
-fun BattlefieldView.isFlashingAt(
+fun BattlefieldView.isBlinkingAt(
     row: Int,
     column: Int,
-): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.FLASH) == true
+): Boolean = isDisplayed && tileOrNull(row, column)?.hasLayer(BattlefieldView.BLINK) == true
 
 /** The colour the battlefield is tinted with, or `null` when it is not tinted. */
 fun BattlefieldView.tintColor(): RGBA? = tintOverlay?.color?.withA(255)
@@ -320,39 +320,39 @@ fun BattlefieldView.healthPreviewPlacementAt(
     column: Int,
 ): TilePlacement? = healthPreview(row, column)?.let { preview -> TilePlacement(preview.x, preview.y, preview.width, preview.height) }
 
-/** The health flashed on the tile, e.g.: by a terrain effect while exploring, or `null` when there is none. */
-fun BattlefieldView.flashedHealthAt(
+/** The health blinked on the tile, e.g.: by a terrain effect while exploring, or `null` when there is none. */
+fun BattlefieldView.blinkedHealthAt(
     row: Int,
     column: Int,
-): BattlefieldHealthBarPreviewView.PreviewOption? = (tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.previewOption
+): BattlefieldHealthBarPreviewView.PreviewOption? = (tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView)?.previewOption
 
-/** The health bar flashed on the tile, or `null` when there is none. */
-fun BattlefieldView.flashedHealthBarAt(
+/** The health bar blinked on the tile, or `null` when there is none. */
+fun BattlefieldView.blinkedHealthBarAt(
     row: Int,
     column: Int,
-): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView
+): BattlefieldHealthBarPreviewView? = tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView
 
-/** How many health bars are flashed on the tile, e.g.: to check one never piles up over another. */
-fun BattlefieldView.flashedHealthCountAt(
+/** How many health bars are blinked on the tile, e.g.: to check one never piles up over another. */
+fun BattlefieldView.blinkedHealthCountAt(
     row: Int,
     column: Int,
-): Int = tile(row, column).children.count { child -> child.name == BattlefieldView.HEALTH_FLASH }
+): Int = tile(row, column).children.count { child -> child.name == BattlefieldView.HEALTH_BLINK }
 
-/** The health flashed over each battle unit gliding between tiles, `null` for the ones without it. */
-fun BattlefieldView.glidingFlashedHealth(): List<BattlefieldHealthBarPreviewView.PreviewOption?> =
+/** The health blinked over each battle unit gliding between tiles, `null` for the ones without it. */
+fun BattlefieldView.glidingBlinkedHealth(): List<BattlefieldHealthBarPreviewView.PreviewOption?> =
     if (!isDisplayed) {
         emptyList()
     } else {
         movingBattleUnits.children.map { glidingUnit ->
-            ((glidingUnit as Container).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.previewOption
+            ((glidingUnit as Container).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView)?.previewOption
         }
     }
 
-/** The blinks of the health flashed on the tile, to check later whether they are still blinking. */
-fun BattlefieldView.flashedHealthBlinksAt(
+/** The blinks of the health blinked on the tile, to check later whether they are still blinking. */
+fun BattlefieldView.blinkedHealthBlinksAt(
     row: Int,
     column: Int,
-) = (tile(row, column).findViewByName(BattlefieldView.HEALTH_FLASH) as? BattlefieldHealthBarPreviewView)?.blinks().orEmpty()
+) = (tile(row, column).findViewByName(BattlefieldView.HEALTH_BLINK) as? BattlefieldHealthBarPreviewView)?.blinks().orEmpty()
 
 /** The blinks of the health preview displayed on the tile, to check later whether they are still blinking. */
 fun BattlefieldView.healthPreviewBlinksAt(

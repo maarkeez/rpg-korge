@@ -14,10 +14,10 @@ import korlibs.korge.view.position
 import korlibs.math.geom.Rectangle
 
 /**
- * The Storybook: the catalogue in a sidebar on the left, the story on show in a phone in the middle, and on the right
+ * The Storybook: the catalogue in a sidebar on the left, the selected story in a phone in the middle, and on the right
  * the globals, what the story is, its controls and its actions, all of them in a [ZoomView] that zooms and places them
- * on the screen. Localization: the messages of the views on show, in the language global.
- * Location: where what is on show is kept, e.g.: the page URL. Page: told when the story on show has rendered.
+ * on the screen. Localization: the messages of the views shown, in the language global.
+ * Location: where what is shown is kept, e.g.: the page URL. Page: told when the selected story has rendered.
  */
 class StorybookScene(
     localizationApi: LocalizationApi,
@@ -53,7 +53,7 @@ class StorybookScene(
         storybook.addChild(sidebarView)
         storybook.addChild(phoneFrameView.position(SidebarView.WIDTH + margin * 2, margin))
         zoomView.phoneArea = Rectangle(phoneFrameView.pos, PhoneFrameView.SIZE)
-        // The sidebar scrolls by dragging, and the view on show handles its own taps and drags, e.g.: the battlefield.
+        // The sidebar scrolls by dragging, and the view of the selected story handles its own taps and drags, e.g.: the battlefield.
         zoomView.dragOwners = listOf(sidebarView, phoneFrameView.screen)
         // On the right of the phone: the globals on top, then what the story is, its controls, and its actions under the
         // most the controls may take, which fit in the window.

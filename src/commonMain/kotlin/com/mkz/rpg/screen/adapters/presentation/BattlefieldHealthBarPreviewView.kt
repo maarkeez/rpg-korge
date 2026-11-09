@@ -94,7 +94,7 @@ class BattlefieldHealthBarPreviewView(
 
     /**
      * Stops blinking, leaving the health as it is after the change: the third that blinked is drawn when it is health
-     * left, and not drawn when no health is left, e.g.: once a battle unit has flashed while exploring.
+     * left, and not drawn when no health is left, e.g.: once a battle unit has blinked while exploring.
      */
     fun hold() {
         stop()

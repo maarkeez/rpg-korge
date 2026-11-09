@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [ConfirmButton], the primary action of the dialogs and the menu, e.g.: Confirm. */
@@ -23,7 +23,7 @@ object ConfirmButtonStories : StoryBinding {
             description = "The button as wide as the screen, as the menu lists its options.",
             args =
                 mapOf(
-                    BUTTON_WIDTH to ArgDto.int(MAXIMUM_WIDTH),
+                    BUTTON_WIDTH to ValueDto.int(MAXIMUM_WIDTH),
                 ),
         )
     private val longLabel =
@@ -31,7 +31,7 @@ object ConfirmButtonStories : StoryBinding {
             id = "screen-confirm-button--long-label",
             name = "Long label",
             description = "A label longer than the button, as a translation may be.",
-            args = mapOf(LABEL to ArgDto.text("Confirm and leave the shop for good")),
+            args = mapOf(LABEL to ValueDto.text("Confirm and leave the shop for good")),
         )
 
     override fun component(context: StoryContext) =
@@ -41,7 +41,7 @@ object ConfirmButtonStories : StoryBinding {
             title = "Confirm button",
             description = "A primary action button in blue, e.g.: Confirm in the dialogs, and Play new game in the menu.",
             controls = listOf(ControlDto.text(LABEL), ControlDto.int(BUTTON_WIDTH, minimum = MINIMUM_WIDTH, maximum = MAXIMUM_WIDTH)),
-            args = mapOf(LABEL to ArgDto.text("Confirm"), BUTTON_WIDTH to ArgDto.int(190)),
+            args = mapOf(LABEL to ValueDto.text("Confirm"), BUTTON_WIDTH to ValueDto.int(190)),
             stories = listOf(default, wide, longLabel),
         )
 

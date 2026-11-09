@@ -10,13 +10,13 @@ import korlibs.math.geom.Size
 object InventoryButtonViewStories : StoryBinding {
     private val SIZE = Size(40, 40)
 
-    private val chest = StoryDto(id = "screen-bag-button--chest", name = "Chest", description = "The chest to tap to open the inventory of the selected battle unit.", args = emptyMap())
+    private val chest = StoryDto(id = "screen-inventory-button--chest", name = "Chest", description = "The chest to tap to open the inventory of the selected battle unit.", args = emptyMap())
 
     override fun component(context: StoryContext) =
         ComponentDto(
-            id = "screen-bag-button",
+            id = "screen-inventory-button",
             group = "Screen",
-            title = "Bag button",
+            title = "Inventory button",
             description = "Opens the inventory of the selected battle unit, in its info. Drawn with the chest the battlefield shows on the tiles with several items.",
             controls = emptyList(),
             args = emptyMap(),

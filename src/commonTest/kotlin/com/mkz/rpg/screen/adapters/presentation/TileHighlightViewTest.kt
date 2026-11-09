@@ -16,7 +16,7 @@ class TileHighlightViewTest : ViewsForTesting() {
             // Given
             val resourcesLoader = loadedResourcesLoader()
             // When
-            val tileHighlightView = TileHighlightView(resourcesLoader, TileHighlightView.Kind.MOVE_RANGE)
+            val tileHighlightView = TileHighlightView(resourcesLoader, TileHighlightView.Kind.WALKING_RANGE)
             // Then
             tileHighlightView.drawnBitmap() shouldBe resourcesLoader.bitmap("battlefield/tile_selection_3.png")
         }

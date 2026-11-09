@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.UnitSpriteView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [UnitSpriteView], over a terrain tile as the battlefield draws it. */
@@ -28,21 +28,21 @@ object UnitSpriteViewStories : StoryBinding {
             id = "screen-unit-sprite--rat",
             name = "Rat",
             description = "A battle unit with 16x16 art, drawn at four times its size to fill the tile.",
-            args = mapOf(UNIT to ArgDto.text("rat")),
+            args = mapOf(UNIT to ValueDto.text("rat")),
         )
     private val npc =
         StoryDto(
             id = "screen-unit-sprite--npc",
             name = "Npc",
             description = "An npc stands on its tile as a battle unit does.",
-            args = mapOf(NPC to ArgDto.text("alchemist")),
+            args = mapOf(NPC to ValueDto.text("alchemist")),
         )
     private val onLava =
         StoryDto(
             id = "screen-unit-sprite--on-lava",
             name = "On lava",
             description = "A battle unit over another terrain.",
-            args = mapOf(UNIT to ArgDto.text("goat"), TERRAIN to ArgDto.text("lava")),
+            args = mapOf(UNIT to ValueDto.text("goat"), TERRAIN to ValueDto.text("lava")),
         )
 
     override fun component(context: StoryContext) =
@@ -59,7 +59,7 @@ object UnitSpriteViewStories : StoryBinding {
                     ControlDto.pick(NPC, listOf(NONE) + context.npcIds()),
                     ControlDto.pick(TERRAIN, context.terrainIds()),
                 ),
-            args = mapOf(UNIT to ArgDto.text(DEFAULT_UNIT), NPC to ArgDto.text(NONE), TERRAIN to ArgDto.text(DEFAULT_TERRAIN)),
+            args = mapOf(UNIT to ValueDto.text(DEFAULT_UNIT), NPC to ValueDto.text(NONE), TERRAIN to ValueDto.text(DEFAULT_TERRAIN)),
             stories = listOf(knight, rat, npc, onLava),
         )
 

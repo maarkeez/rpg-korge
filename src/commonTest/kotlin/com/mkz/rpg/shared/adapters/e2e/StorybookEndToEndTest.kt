@@ -158,7 +158,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
         }
 
     @Test
-    fun `should log the callbacks of the view on show, and select the slot tapped through its arg, when the shop is tapped`() =
+    fun `should record the callbacks of the view of the selected story, and select the slot tapped through its arg, when the shop is tapped`() =
         sharedViewsTest {
             // Given
             val storyLocation = FakeStoryLocation(requestedStoryId = "screen-shop--buy")
@@ -177,10 +177,10 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
         }
 
     @Test
-    fun `should only log a callback that changes no arg, the newest first, when a button of the button row is tapped`() =
+    fun `should only record a callback that changes no arg, the newest first, when a button of the button row is tapped`() =
         sharedViewsTest {
             // Given
-            startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--two-actions"))
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-button-row--two-buttons"))
             waitUntil { stage.phoneFrameView()?.displayedView() is ButtonRowView }
             val rowView = stage.phoneFrameView()?.displayedView() as ButtonRowView
             // When
@@ -196,7 +196,7 @@ class StorybookEndToEndTest : ViewsForTesting(windowSize = STORYBOOK_WINDOW_SIZE
     fun `should display the last button of the button row in blue when the story has it primary`() =
         sharedViewsTest {
             // When
-            startStorybook(FakeStoryLocation(requestedStoryId = "screen-action-row--three-actions"))
+            startStorybook(FakeStoryLocation(requestedStoryId = "screen-button-row--three-buttons"))
             waitUntil { stage.phoneFrameView()?.displayedView() is ButtonRowView }
             // Then
             val rowView = stage.phoneFrameView()?.displayedView() as ButtonRowView

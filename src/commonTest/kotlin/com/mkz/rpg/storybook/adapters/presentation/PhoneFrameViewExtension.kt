@@ -5,13 +5,13 @@ import korlibs.korge.view.View
 
 // Page object of [PhoneFrameView].
 
-/** The view of the story on show, or `null` while no story is shown. */
+/** The view of the selected story, or `null` while no story is shown. */
 fun PhoneFrameView.displayedView(): View? = storyView
 
 /** How many views the screen shows, besides its background. */
 fun PhoneFrameView.displayedViewCount(): Int = screen.children.count { child -> child != screenBackground }
 
-/** Whether the view on show is entirely on the screen of the phone, in its middle. */
+/** Whether the view of the selected story is entirely on the screen of the phone, in its middle. */
 fun PhoneFrameView.isViewCenteredOnScreen(): Boolean {
     val view = storyView ?: return false
     val screenBounds = screenBackground.getGlobalBounds()

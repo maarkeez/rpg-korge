@@ -2,9 +2,9 @@ package com.mkz.rpg.storybook.usecases.commands
 
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.Storybook
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
@@ -13,7 +13,7 @@ import com.mkz.rpg.storybook.usecases.services.StoryLocation
  * and globals it asks for. Anything unknown or invalid is ignored, never a failure, as a link may outlive its story: the
  * first story is opened instead, and an invalid arg or global keeps its own value.
  */
-class InitialiseCatalogue(
+class OpenCatalogue(
     private val storybookRepository: StorybookRepository,
     private val storyLocation: StoryLocation,
     private val eventBus: EventBus,
@@ -21,7 +21,7 @@ class InitialiseCatalogue(
     operator fun invoke(
         components: List<ComponentDto>,
         globalControls: List<ControlDto>,
-        defaultGlobals: Map<String, ArgDto>,
+        defaultGlobals: Map<String, ValueDto>,
     ) {
         val (events, storybook) = Storybook.create(components, globalControls, defaultGlobals, location = storyLocation.search()).pullEvents()
         storybookRepository.save(storybook)

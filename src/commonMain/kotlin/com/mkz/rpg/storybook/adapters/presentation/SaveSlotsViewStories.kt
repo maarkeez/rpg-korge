@@ -2,15 +2,15 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.SaveSlotsView
 import com.mkz.rpg.screen.adapters.presentation.UiMessage
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
  * The stories of [SaveSlotsView], built with its real buttons, with a control per slot for what it holds. A saved slot
- * shows the units that have a portrait, in alphabetical order, as its leader. Tapping a slot or Delete logs it.
+ * shows the units that have a portrait, in alphabetical order, as its leader. Tapping a slot or Delete records it.
  */
 object SaveSlotsViewStories : StoryBinding {
     private const val EMPTY = "empty"
@@ -33,7 +33,7 @@ object SaveSlotsViewStories : StoryBinding {
             id = "screen-save-slots--load",
             name = "Load",
             description = "Loading a game from the menu: only a saved slot can be chosen, faded otherwise, and every slot that is not empty has Delete.",
-            args = mapOf(LOADING to ArgDto.boolean(true)),
+            args = mapOf(LOADING to ValueDto.boolean(true)),
         )
 
     override fun component(context: StoryContext) =
@@ -43,7 +43,7 @@ object SaveSlotsViewStories : StoryBinding {
             title = "Save slots",
             description = "The 3 save slots, each empty, saved with when, its leader and its party size, or incompatible, evenly apart. Its Back is in the row of the call to action.",
             controls = SLOT_ARGS.map { slot -> ControlDto.pick(slot, STATES) } + ControlDto.boolean(LOADING),
-            args = mapOf(SLOT_ARGS[0] to ArgDto.text(EMPTY), SLOT_ARGS[1] to ArgDto.text(SAVED), SLOT_ARGS[2] to ArgDto.text(INCOMPATIBLE), LOADING to ArgDto.boolean(false)),
+            args = mapOf(SLOT_ARGS[0] to ValueDto.text(EMPTY), SLOT_ARGS[1] to ValueDto.text(SAVED), SLOT_ARGS[2] to ValueDto.text(INCOMPATIBLE), LOADING to ValueDto.boolean(false)),
             stories = listOf(save, load),
         )
 

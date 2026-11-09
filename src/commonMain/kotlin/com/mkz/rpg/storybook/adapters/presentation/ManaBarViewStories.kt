@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ManaBarView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -19,8 +19,8 @@ object ManaBarViewStories : StoryBinding {
 
     private val full = StoryDto(id = "screen-mana-bar--full", name = "Full", description = "A battle unit that has cast no ability.", args = emptyMap())
     private val half =
-        StoryDto(id = "screen-mana-bar--half", name = "Half", description = "A battle unit that has spent half of its mana.", args = mapOf(REMAINING to ArgDto.int(MAXIMUM_MANA / 2)))
-    private val empty = StoryDto(id = "screen-mana-bar--empty", name = "Empty", description = "A battle unit with no mana left.", args = mapOf(REMAINING to ArgDto.int(0)))
+        StoryDto(id = "screen-mana-bar--half", name = "Half", description = "A battle unit that has spent half of its mana.", args = mapOf(REMAINING to ValueDto.int(MAXIMUM_MANA / 2)))
+    private val empty = StoryDto(id = "screen-mana-bar--empty", name = "Empty", description = "A battle unit with no mana left.", args = mapOf(REMAINING to ValueDto.int(0)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -29,7 +29,7 @@ object ManaBarViewStories : StoryBinding {
             title = "Mana bar",
             description = "The mana a battle unit has left, out of its maximum, in the info of the selected battle unit and in the formation.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = MANA_LIMIT), ControlDto.int(MAXIMUM, minimum = 1, maximum = MANA_LIMIT)),
-            args = mapOf(REMAINING to ArgDto.int(MAXIMUM_MANA), MAXIMUM to ArgDto.int(MAXIMUM_MANA)),
+            args = mapOf(REMAINING to ValueDto.int(MAXIMUM_MANA), MAXIMUM to ValueDto.int(MAXIMUM_MANA)),
             stories = listOf(full, half, empty),
         )
 

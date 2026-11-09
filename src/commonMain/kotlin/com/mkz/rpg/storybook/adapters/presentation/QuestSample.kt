@@ -114,9 +114,9 @@ enum class QuestSample(
     val quest: (Messages) -> QuestInfo,
 ) {
     GOAT_WIZARD("Goat wizard", "The quest the game ships: one task, gold only.", ::goatWizard),
-    COUNTED(
-        "Counted",
-        "A task with a count, under way: 3 of 5.",
+    DEFEATS_COUNTED(
+        "Defeats counted",
+        "A defeat task under way: 3 of its 5 required defeats.",
         { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.DEFEAT, "Defeat 5 Rats", defeatsCounted = 3, requiredDefeats = 5, portraitPath = RAT_PORTRAIT))) },
     ),
     TALK(
@@ -124,8 +124,8 @@ enum class QuestSample(
         "A task to talk to an npc.",
         { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.TALK, "Talk to the Elder", portraitPath = ELDER_PORTRAIT))) },
     ),
-    REACH(
-        "Reach",
+    VISIT(
+        "Visit",
         "A visit task: it has no portrait.",
         { messages -> goatWizard(messages).copy(tasks = listOf(Task(Kind.VISIT, "Visit the lair down south"))) },
     ),

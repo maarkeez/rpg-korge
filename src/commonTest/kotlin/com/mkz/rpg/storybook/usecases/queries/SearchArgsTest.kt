@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.usecases.queries
 
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookMother.storybook
 import io.kotest.matchers.maps.shouldBeEmpty
 import io.kotest.matchers.shouldBe
@@ -12,17 +12,17 @@ class SearchArgsTest {
     private val searchArgs = SearchArgs(storybookRepository)
 
     @Test
-    fun `should return the args of the story on show when the catalogue is initialised`() {
+    fun `should return the args of the selected story when the catalogue is open`() {
         // Given
         storybookRepository.save(storybook(requestedStoryId = "screen-health-bar--full", requestedArgs = mapOf("remaining" to "10")))
         // When
         val args = searchArgs()
         // Then
-        args shouldBe mapOf("remaining" to ArgDto.int(10))
+        args shouldBe mapOf("remaining" to ValueDto.int(10))
     }
 
     @Test
-    fun `should return no args when the catalogue is not initialised`() {
+    fun `should return no args when the catalogue is not open`() {
         // When
         val args = searchArgs()
         // Then

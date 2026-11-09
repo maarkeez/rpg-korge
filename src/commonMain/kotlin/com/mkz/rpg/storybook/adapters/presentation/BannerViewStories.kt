@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BannerView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.image.color.RGBA
 import korlibs.korge.view.View
 
@@ -31,28 +31,28 @@ object BannerViewStories : StoryBinding {
         CPU("player-two", BannerView.CPU_TURN_COLOR),
     }
 
-    private val exploring = StoryDto(id = "screen-battle-info--exploring", name = "Exploring", description = "Out of the battles.", args = mapOf(STATE to ArgDto.text(State.EXPLORING.name)))
-    private val humanTurn = StoryDto(id = "screen-battle-info--human-turn", name = "Human turn", description = "The round, and the turn of the human player, in blue.", args = emptyMap())
+    private val exploring = StoryDto(id = "screen-banner--exploring", name = "Exploring", description = "Out of the battles.", args = mapOf(STATE to ValueDto.text(State.EXPLORING.name)))
+    private val humanTurn = StoryDto(id = "screen-banner--human-turn", name = "Human turn", description = "The round, and the turn of the human player, in blue.", args = emptyMap())
     private val cpuTurn =
         StoryDto(
-            id = "screen-battle-info--cpu-turn",
+            id = "screen-banner--cpu-turn",
             name = "CPU turn",
             description = "The round, and the turn of the CPU player, in red.",
-            args = mapOf(PLAYER to ArgDto.text(Player.CPU.name), ROUND to ArgDto.int(3)),
+            args = mapOf(PLAYER to ValueDto.text(Player.CPU.name), ROUND to ValueDto.int(3)),
         )
     private val winner =
         StoryDto(
-            id = "screen-battle-info--winner",
+            id = "screen-banner--winner",
             name = "Winner",
             description = "The player who won the battle, in the middle of the line.",
-            args = mapOf(STATE to ArgDto.text(State.WINNER.name)),
+            args = mapOf(STATE to ValueDto.text(State.WINNER.name)),
         )
 
     override fun component(context: StoryContext) =
         ComponentDto(
-            id = "screen-battle-info",
+            id = "screen-banner",
             group = "Screen",
-            title = "Battle info",
+            title = "Banner",
             description = "On top of the screen: whether the player is exploring, the round and whose turn it is in a battle, or who won it.",
             controls =
                 listOf(
@@ -60,7 +60,7 @@ object BannerViewStories : StoryBinding {
                     ControlDto.enum(PLAYER, Player.entries.map { player -> player.name }),
                     ControlDto.int(ROUND, minimum = 1, maximum = ROUND_LIMIT),
                 ),
-            args = mapOf(STATE to ArgDto.text(State.TURN.name), PLAYER to ArgDto.text(Player.HUMAN.name), ROUND to ArgDto.int(1)),
+            args = mapOf(STATE to ValueDto.text(State.TURN.name), PLAYER to ValueDto.text(Player.HUMAN.name), ROUND to ValueDto.int(1)),
             stories = listOf(exploring, humanTurn, cpuTurn, winner),
         )
 

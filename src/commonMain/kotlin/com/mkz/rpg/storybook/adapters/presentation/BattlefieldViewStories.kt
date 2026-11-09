@@ -5,10 +5,10 @@ import com.mkz.rpg.screen.adapters.presentation.BattlefieldTerrain
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldView
 import com.mkz.rpg.screen.adapters.presentation.TerrainTransition
 import com.mkz.rpg.screen.adapters.presentation.TilePosition
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.io.async.launchImmediately
 import korlibs.korge.view.View
 import korlibs.korge.view.addUpdater
@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 
 /**
  * The stories of [BattlefieldView]: a tiny fixed map, as big as its viewport, with a few tiles of each terrain, a battle
- * unit and another, an npc, a building and loot. Tapping a tile logs `tileSelected` and selects it. The health flash plays
+ * unit and another, an npc, a building and dropped items. Tapping a tile records `tileSelected` and selects it. The health blink plays
  * once the battlefield is on the screen, and again whenever an arg changes, e.g.: `replay`.
  */
 object BattlefieldViewStories : StoryBinding {
@@ -43,19 +43,19 @@ object BattlefieldViewStories : StoryBinding {
     private val NPC_TILE = TilePosition(row = 2, column = 0)
     private val BATTLE_UNIT_TILE = TilePosition(row = 4, column = 2)
     private val OTHER_BATTLE_UNIT_TILE = TilePosition(row = 4, column = 4)
-    private val LOOT_TILE = TilePosition(row = 3, column = 1)
+    private val DROPPED_ITEM_TILE = TilePosition(row = 3, column = 1)
     private val CHEST_TILE = TilePosition(row = 5, column = 3)
 
-    // The tiles the battle unit can move to, and cast on, and the tiles of the cast previewed: the battlefield domain
+    // The tiles the battle unit can walk to, and cast on, and the tiles of the cast previewed: the battlefield domain
     // works them out in the game, which the Storybook can not import.
-    private val MOVE_RANGE = listOf(TilePosition(4, 1), TilePosition(4, 3), TilePosition(5, 2), TilePosition(3, 1), TilePosition(5, 3))
+    private val WALKING_RANGE = listOf(TilePosition(4, 1), TilePosition(4, 3), TilePosition(5, 2), TilePosition(3, 1), TilePosition(5, 3))
     private val CAST_RANGE = listOf(TilePosition(4, 1), TilePosition(4, 3), TilePosition(4, 4), TilePosition(5, 2), TilePosition(5, 3), TilePosition(3, 1))
     private val CAST_GROUP = listOf(TilePosition(4, 3), OTHER_BATTLE_UNIT_TILE, TilePosition(5, 3))
 
     private const val DEFAULT_UNIT = "knight"
     private const val OTHER_UNIT = "rat"
     private const val DEFAULT_NPC = "alchemist"
-    private const val DEFAULT_LOOT = "health-potion"
+    private const val DEFAULT_DROPPED_ITEM = "health-potion"
     private const val BUILDING = "fortress"
     private const val CHEST_ITEMS = 2
 
@@ -67,65 +67,65 @@ object BattlefieldViewStories : StoryBinding {
     private const val HEALTH_PREVIEW = "healthPreview"
     private const val UNIT = "unit"
     private const val NPC = "npc"
-    private const val LOOT = "loot"
+    private const val DROPPED_ITEM = "droppedItem"
     private const val REPLAY = "replay"
     private const val REPLAY_MAXIMUM = 9
 
     /** What is drawn over the tiles, as the battle does for the battle unit selected. */
     private enum class Layer {
         NONE,
-        MOVE_RANGE,
+        WALKING_RANGE,
         CAST_RANGE,
         HEALTH_PREVIEW,
-        HEALTH_FLASH,
+        HEALTH_BLINK,
     }
 
     private val map =
         StoryDto(id = "screen-battlefield--map", name = "Map", description = "The tiny map as the battlefield draws it, with nothing selected.", args = emptyMap())
-    private val moveRange =
+    private val walkingRange =
         StoryDto(
-            id = "screen-battlefield--move-range",
-            name = "Move range",
-            description = "The battle unit selected: its tile selected, the tiles it can move to framed, and the others dimmed.",
-            args = mapOf(LAYER to ArgDto.text(Layer.MOVE_RANGE.name), SELECTED_TILE to ArgDto.text("${BATTLE_UNIT_TILE.row},${BATTLE_UNIT_TILE.column}")),
+            id = "screen-battlefield--walking-range",
+            name = "Walking range",
+            description = "The battle unit selected: its tile selected, the tiles it can walk to framed, and the others dimmed.",
+            args = mapOf(LAYER to ValueDto.text(Layer.WALKING_RANGE.name), SELECTED_TILE to ValueDto.text("${BATTLE_UNIT_TILE.row},${BATTLE_UNIT_TILE.column}")),
         )
     private val castRange =
         StoryDto(
             id = "screen-battlefield--cast-range",
             name = "Cast range",
             description = "An ability selected: the tiles it can be cast on framed, and the others dimmed.",
-            args = mapOf(LAYER to ArgDto.text(Layer.CAST_RANGE.name)),
+            args = mapOf(LAYER to ValueDto.text(Layer.CAST_RANGE.name)),
         )
     private val selectedTile =
         StoryDto(
             id = "screen-battlefield--selected-tile",
             name = "Selected tile",
-            description = "A tile selected, e.g.: by tapping it: the tile is framed and logged in the Actions as `tileSelected`.",
-            args = mapOf(SELECTED_TILE to ArgDto.text("${LOOT_TILE.row},${LOOT_TILE.column}")),
+            description = "A tile selected, e.g.: by tapping it: the tile is framed and recorded in the Actions as `tileSelected`.",
+            args = mapOf(SELECTED_TILE to ValueDto.text("${DROPPED_ITEM_TILE.row},${DROPPED_ITEM_TILE.column}")),
         )
     private val healthPreview =
         StoryDto(
             id = "screen-battlefield--health-preview",
             name = "Health preview",
             description = "A cast previewed: the battle unit on the cast tiles shows the health it would have left, over its tile, and the vacant tiles are selected.",
-            args = mapOf(LAYER to ArgDto.text(Layer.HEALTH_PREVIEW.name), HEALTH_PREVIEW to ArgDto.text(PreviewOption.TWO_OUT_OF_THREE.name)),
+            args = mapOf(LAYER to ValueDto.text(Layer.HEALTH_PREVIEW.name), HEALTH_PREVIEW to ValueDto.text(PreviewOption.TWO_OUT_OF_THREE.name)),
         )
     private val defeatedPreview =
         StoryDto(
             id = "screen-battlefield--health-preview-defeated",
             name = "Health preview, defeated",
             description = "A cast that would defeat the battle unit: its health preview is empty.",
-            args = mapOf(LAYER to ArgDto.text(Layer.HEALTH_PREVIEW.name), HEALTH_PREVIEW to ArgDto.text(PreviewOption.EMPTY.name)),
+            args = mapOf(LAYER to ValueDto.text(Layer.HEALTH_PREVIEW.name), HEALTH_PREVIEW to ValueDto.text(PreviewOption.EMPTY.name)),
         )
 
-    private val healthFlash =
+    private val healthBlink =
         StoryDto(
-            id = "screen-battlefield--health-flash",
-            name = "Health flash",
+            id = "screen-battlefield--health-blink",
+            name = "Health blink",
             description =
-                "The health of the battle unit changed while exploring, e.g.: standing on lava: it flashes, and the health it has left " +
-                    "blinks over it as long as it flashes, stays still, and fades out. Change replay to play it again.",
-            args = mapOf(LAYER to ArgDto.text(Layer.HEALTH_FLASH.name), HEALTH_PREVIEW to ArgDto.text(PreviewOption.TWO_OUT_OF_THREE.name)),
+                "The health of the battle unit changed while exploring, e.g.: standing on lava: it blinks, and the health it has left " +
+                    "blinks over it as long as it blinks, stays still, and fades out. Change replay to play it again.",
+            args = mapOf(LAYER to ValueDto.text(Layer.HEALTH_BLINK.name), HEALTH_PREVIEW to ValueDto.text(PreviewOption.TWO_OUT_OF_THREE.name)),
         )
 
     override fun component(context: StoryContext) =
@@ -134,9 +134,9 @@ object BattlefieldViewStories : StoryBinding {
             group = "Screen",
             title = "Battlefield",
             description =
-                "The map of the game, dragged to scroll, with its battle units, npcs, buildings and loot. " +
+                "The map of the game, dragged to scroll, with its battle units, npcs, buildings and dropped items. " +
                     "layer: what is drawn over the tiles. selectedTile: `row,column`, or none. healthPreview: what a cast leaves, " +
-                    "or the health left flashed. replay: changed to play the health flash again.",
+                    "or the health left blinked. replay: changed to play the health blink again.",
             controls =
                 listOf(
                     ControlDto.enum(LAYER, Layer.entries.map { layer -> layer.name }),
@@ -144,20 +144,20 @@ object BattlefieldViewStories : StoryBinding {
                     ControlDto.pick(HEALTH_PREVIEW, PreviewOption.entries.map { option -> option.name }),
                     ControlDto.pick(UNIT, context.unitIds()),
                     ControlDto.pick(NPC, listOf(NONE) + context.npcIds()),
-                    ControlDto.pick(LOOT, context.lootableItemIds()),
+                    ControlDto.pick(DROPPED_ITEM, context.lootableItemIds()),
                     ControlDto.int(REPLAY, minimum = 0, maximum = REPLAY_MAXIMUM),
                 ),
             args =
                 mapOf(
-                    LAYER to ArgDto.text(Layer.NONE.name),
-                    SELECTED_TILE to ArgDto.text(NONE),
-                    HEALTH_PREVIEW to ArgDto.text(PreviewOption.FULL.name),
-                    UNIT to ArgDto.text(DEFAULT_UNIT),
-                    NPC to ArgDto.text(DEFAULT_NPC),
-                    LOOT to ArgDto.text(DEFAULT_LOOT),
-                    REPLAY to ArgDto.int(0),
+                    LAYER to ValueDto.text(Layer.NONE.name),
+                    SELECTED_TILE to ValueDto.text(NONE),
+                    HEALTH_PREVIEW to ValueDto.text(PreviewOption.FULL.name),
+                    UNIT to ValueDto.text(DEFAULT_UNIT),
+                    NPC to ValueDto.text(DEFAULT_NPC),
+                    DROPPED_ITEM to ValueDto.text(DEFAULT_DROPPED_ITEM),
+                    REPLAY to ValueDto.int(0),
                 ),
-            stories = listOf(map, moveRange, castRange, selectedTile, healthPreview, defeatedPreview, healthFlash),
+            stories = listOf(map, walkingRange, castRange, selectedTile, healthPreview, defeatedPreview, healthBlink),
         )
 
     override fun render(
@@ -170,7 +170,7 @@ object BattlefieldViewStories : StoryBinding {
                     override fun tileSelected(
                         row: Int,
                         column: Int,
-                    ) = context.action("tileSelected", row, column, setArg = SELECTED_TILE to ArgDto.text("$row,$column"))
+                    ) = context.action("tileSelected", row, column, setArg = SELECTED_TILE to ValueDto.text("$row,$column"))
                 },
             )
             displayBattlefield(terrain(context))
@@ -178,14 +178,14 @@ object BattlefieldViewStories : StoryBinding {
             args.text(NPC).takeUnless { npcId -> npcId == NONE }?.let { npcId -> displayNpc(NPC_TILE.row, NPC_TILE.column, npcId, unitId = null) }
             displayBattleUnit(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, args.text(UNIT))
             displayBattleUnit(OTHER_BATTLE_UNIT_TILE.row, OTHER_BATTLE_UNIT_TILE.column, OTHER_UNIT)
-            displayDroppedItems(LOOT_TILE.row, LOOT_TILE.column, listOf(args.text(LOOT)))
-            displayDroppedItems(CHEST_TILE.row, CHEST_TILE.column, List(CHEST_ITEMS) { args.text(LOOT) })
+            displayDroppedItems(DROPPED_ITEM_TILE.row, DROPPED_ITEM_TILE.column, listOf(args.text(DROPPED_ITEM)))
+            displayDroppedItems(CHEST_TILE.row, CHEST_TILE.column, List(CHEST_ITEMS) { args.text(DROPPED_ITEM) })
             val selected = selectedTile(args.text(SELECTED_TILE))
             when (Layer.valueOf(args.text(LAYER))) {
                 Layer.NONE -> Unit
-                Layer.MOVE_RANGE -> {
-                    MOVE_RANGE.forEach { tile -> displayPotentialMovement(tile.row, tile.column) }
-                    dimTilesExcept((MOVE_RANGE + selected + BATTLE_UNIT_TILE).filterNotNull().toSet())
+                Layer.WALKING_RANGE -> {
+                    WALKING_RANGE.forEach { tile -> displayPotentialMovement(tile.row, tile.column) }
+                    dimTilesExcept((WALKING_RANGE + selected + BATTLE_UNIT_TILE).filterNotNull().toSet())
                 }
                 Layer.CAST_RANGE -> {
                     CAST_RANGE.forEach { tile -> displayPotentialCast(tile.row, tile.column) }
@@ -201,25 +201,25 @@ object BattlefieldViewStories : StoryBinding {
                     }
                     dimTilesExcept((CAST_GROUP + BATTLE_UNIT_TILE).toSet())
                 }
-                Layer.HEALTH_FLASH -> flashHealthOnScreen(args.text(UNIT), PreviewOption.valueOf(args.text(HEALTH_PREVIEW)))
+                Layer.HEALTH_BLINK -> blinkHealthOnScreen(args.text(UNIT), PreviewOption.valueOf(args.text(HEALTH_PREVIEW)))
             }
             selected?.let { tile -> displayTileSelection(tile.row, tile.column) }
         }
 
-    // Flashes the battle unit with the health it has left, as exploring does, once the battlefield is on the screen, as
+    // Blinks the battle unit with the health it has left, as exploring does, once the battlefield is on the screen, as
     // its animations only play there.
-    private fun BattlefieldView.flashHealthOnScreen(
+    private fun BattlefieldView.blinkHealthOnScreen(
         unitId: String,
         previewOption: PreviewOption,
     ) {
-        var isFlashed = false
+        var isBlinked = false
         addUpdater {
             val views = stage?.views ?: return@addUpdater
-            if (isFlashed) return@addUpdater
-            isFlashed = true
+            if (isBlinked) return@addUpdater
+            isBlinked = true
             val scope = CoroutineScope(views.coroutineContext)
-            scope.launchImmediately { flashBattleUnit(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, unitId) }
-            scope.launchImmediately { flashHealth(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, previewOption) }
+            scope.launchImmediately { blinkBattleUnit(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, unitId) }
+            scope.launchImmediately { blinkHealth(BATTLE_UNIT_TILE.row, BATTLE_UNIT_TILE.column, previewOption) }
         }
     }
 

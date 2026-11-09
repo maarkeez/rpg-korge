@@ -15,7 +15,7 @@ class ClearActionsTest {
     private val clearActions = ClearActions(storybookRepository, eventBus)
 
     @Test
-    fun `should empty the log of actions when actions were logged`() {
+    fun `should empty the actions recorded when actions were recorded`() {
         // Given
         storybookRepository.save(storybook().recordAction("shopSlotSelected", listOf("3")).pullEvents().second)
         // When
@@ -30,7 +30,7 @@ class ClearActionsTest {
     }
 
     @Test
-    fun `should do nothing when no action was logged`() {
+    fun `should do nothing when no action was recorded`() {
         // Given
         storybookRepository.save(storybook())
         // When
@@ -40,7 +40,7 @@ class ClearActionsTest {
     }
 
     @Test
-    fun `should do nothing when the catalogue is not initialised`() {
+    fun `should do nothing when the catalogue is not open`() {
         // When
         clearActions()
         // Then

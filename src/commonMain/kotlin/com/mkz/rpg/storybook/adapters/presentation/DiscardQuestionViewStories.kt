@@ -1,13 +1,13 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.DiscardQuestionView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [DiscardQuestionView], with the texts of the language global. Tapping a button logs itself. */
+/** The stories of [DiscardQuestionView], with the texts of the language global. Tapping a button records itself. */
 object DiscardQuestionViewStories : StoryBinding {
     private const val ITEM_NAME = "itemName"
 
@@ -17,7 +17,7 @@ object DiscardQuestionViewStories : StoryBinding {
             id = "screen-discard-question--longest-name",
             name = "Longest name",
             description = "The longest item name has to fit the line, in every language.",
-            args = mapOf(ITEM_NAME to ArgDto.text("Esencia de teletransporte")),
+            args = mapOf(ITEM_NAME to ValueDto.text("Esencia de teletransporte")),
         )
 
     override fun component(context: StoryContext) =
@@ -27,7 +27,7 @@ object DiscardQuestionViewStories : StoryBinding {
             title = "Discard question",
             description = "Asks whether to discard an item, in place of its actions, with Back and Discard in red.",
             controls = listOf(ControlDto.text(ITEM_NAME)),
-            args = mapOf(ITEM_NAME to ArgDto.text("Health Potion")),
+            args = mapOf(ITEM_NAME to ValueDto.text("Health Potion")),
             stories = listOf(question, longestName),
         )
 

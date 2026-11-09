@@ -4,7 +4,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookError
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookMother.location
@@ -23,13 +23,13 @@ class ChangeArgTest {
     private val changeArg = ChangeArg(storybookRepository, storyLocation, eventBus)
 
     @Test
-    fun `should change the arg of the story on show and keep it in the location when its control accepts it`() {
+    fun `should change the arg of the selected story and keep it in the location when its control accepts it`() {
         // Given
         storybookRepository.save(storybook())
         // When
-        changeArg(name = "remaining", value = ArgDto.int(10))
+        changeArg(name = "remaining", value = ValueDto.int(10))
         // Then
-        storybookRepository.search()?.toDto()?.args shouldBe mapOf("remaining" to ArgDto.int(10))
+        storybookRepository.search()?.toDto()?.args shouldBe mapOf("remaining" to ValueDto.int(10))
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "10")))
         eventBus.shouldHavePublishedEvents(ArgChanged(storyId = "screen-health-bar--full", argName = "remaining"))
     }
@@ -39,7 +39,7 @@ class ChangeArgTest {
         // Given
         storybookRepository.save(storybook())
         // When
-        changeArg(name = "remaining", value = ArgDto.int(30))
+        changeArg(name = "remaining", value = ValueDto.int(30))
         // Then
         storyLocation.keptLocations.shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()
@@ -50,16 +50,16 @@ class ChangeArgTest {
         // Given
         storybookRepository.save(storybook())
         // When
-        val result = runCatching { changeArg(name = "remaining", value = ArgDto.int(31)) }
+        val result = runCatching { changeArg(name = "remaining", value = ValueDto.int(31)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
         storyLocation.keptLocations.shouldBeEmpty()
     }
 
     @Test
-    fun `should do nothing when the catalogue is not initialised`() {
+    fun `should do nothing when the catalogue is not open`() {
         // When
-        changeArg(name = "remaining", value = ArgDto.int(10))
+        changeArg(name = "remaining", value = ValueDto.int(10))
         // Then
         storyLocation.keptLocations.shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()

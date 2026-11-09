@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.GiveGoldView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -31,21 +31,21 @@ object GiveGoldViewStories : StoryBinding {
             id = "screen-give-gold--several-receivers",
             name = "Several receivers",
             description = "The arrows switch the receiver, disabled at each end of the receivers.",
-            args = mapOf(RECEIVERS to ArgDto.int(RECEIVERS_LIMIT)),
+            args = mapOf(RECEIVERS to ValueDto.int(RECEIVERS_LIMIT)),
         )
     private val limited =
         StoryDto(
             id = "screen-give-gold--limited",
             name = "Limited by the receiver",
             description = "A receiver with 99,990 G takes at most 9 G, however much the giver carries.",
-            args = mapOf(AMOUNT to ArgDto.int(9), RECEIVER_GOLD to ArgDto.int(99_990)),
+            args = mapOf(AMOUNT to ValueDto.int(9), RECEIVER_GOLD to ValueDto.int(99_990)),
         )
     private val longNames =
         StoryDto(
             id = "screen-give-gold--long-names",
             name = "Long names",
             description = "Names longer than their column are drawn smaller.",
-            args = mapOf(GIVER_NAME to ArgDto.text("Sir Reginald the Unbreakable of the North"), RECEIVER_NAME to ArgDto.text("Archmage Eleanor of the Silver Wind")),
+            args = mapOf(GIVER_NAME to ValueDto.text("Sir Reginald the Unbreakable of the North"), RECEIVER_NAME to ValueDto.text("Archmage Eleanor of the Silver Wind")),
         )
 
     override fun component(context: StoryContext) =
@@ -53,7 +53,7 @@ object GiveGoldViewStories : StoryBinding {
             id = "screen-give-gold",
             group = "Screen",
             title = "Give gold",
-            description = "Takes the place of the bag while exploring: the giver, the receiver, what each would carry and the amount on a slider. Its buttons are in the call to action.",
+            description = "Takes the place of the inventory while exploring: the giver, the receiver, what each would carry and the amount on a slider. Its buttons are in the call to action.",
             controls =
                 listOf(
                     ControlDto.int(AMOUNT, minimum = 1, maximum = MAXIMUM_GOLD),
@@ -67,13 +67,13 @@ object GiveGoldViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    AMOUNT to ArgDto.int(25),
-                    GIVER_GOLD to ArgDto.int(120),
-                    RECEIVER_GOLD to ArgDto.int(100),
-                    RECEIVERS to ArgDto.int(1),
-                    RECEIVER_INDEX to ArgDto.int(0),
-                    GIVER_NAME to ArgDto.text("Knight"),
-                    RECEIVER_NAME to ArgDto.text("Viking"),
+                    AMOUNT to ValueDto.int(25),
+                    GIVER_GOLD to ValueDto.int(120),
+                    RECEIVER_GOLD to ValueDto.int(100),
+                    RECEIVERS to ValueDto.int(1),
+                    RECEIVER_INDEX to ValueDto.int(0),
+                    GIVER_NAME to ValueDto.text("Knight"),
+                    RECEIVER_NAME to ValueDto.text("Viking"),
                 ),
             stories = listOf(default, severalReceivers, limited, longNames),
         )
@@ -93,9 +93,9 @@ object GiveGoldViewStories : StoryBinding {
                 object : GiveGoldView.Delegate {
                     override fun amountChanged(amount: Int) = context.action("amountChanged", amount)
 
-                    override fun amountSettled(amount: Int) = context.action("amountSettled", amount, setArg = AMOUNT to ArgDto.int(amount))
+                    override fun amountSettled(amount: Int) = context.action("amountSettled", amount, setArg = AMOUNT to ValueDto.int(amount))
 
-                    override fun receiverStepped(step: Int) = context.action("receiverStepped", step, setArg = RECEIVER_INDEX to ArgDto.int(receiverIndex + step))
+                    override fun receiverStepped(step: Int) = context.action("receiverStepped", step, setArg = RECEIVER_INDEX to ValueDto.int(receiverIndex + step))
                 },
             )
             display(

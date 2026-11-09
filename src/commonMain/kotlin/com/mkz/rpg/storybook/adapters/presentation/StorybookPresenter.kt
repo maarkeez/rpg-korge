@@ -4,19 +4,19 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Subscription
 import com.mkz.rpg.shared.domain.subscribe
 import com.mkz.rpg.storybook.adapters.page.StorybookPage
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgsReset
-import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
+import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueOpened
 import com.mkz.rpg.storybook.domain.StorybookEvent.GlobalChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 
 /**
- * Lists the catalogue in the sidebar, and shows the story on show with its args and globals, rebuilding its view from
+ * Lists the catalogue in the sidebar, and shows the selected story with its args and globals, rebuilding its view from
  * scratch whenever any of them changes. The language global selects the language of the texts the views are built with.
- * The callbacks the view makes are logged in the actions, and change the arg they are mapped to, if any. The page is told
+ * The callbacks the view makes are recorded in the actions, and change the arg they are mapped to, if any. The page is told
  * once the story has rendered, so a script can wait for it.
  */
 class StorybookPresenter(
@@ -33,7 +33,7 @@ class StorybookPresenter(
 ) {
     private val subscriptions =
         listOf(
-            eventBus.subscribe<CatalogueInitialised> {
+            eventBus.subscribe<CatalogueOpened> {
                 sidebarView.display(storybookApi.searchCatalogue())
             },
             eventBus.subscribe<StorySelected> { displayStory() },
@@ -52,14 +52,14 @@ class StorybookPresenter(
         )
         toolbarView.setDelegate(
             object : ToolbarView.Delegate {
-                override fun languageSelected(languageCode: String) = storybookApi.changeGlobal(StorybookApi.LANGUAGE_GLOBAL, ArgDto.text(languageCode))
+                override fun languageSelected(languageCode: String) = storybookApi.changeGlobal(StorybookApi.LANGUAGE_GLOBAL, ValueDto.text(languageCode))
             },
         )
         controlsView.setDelegate(
             object : ControlsView.Delegate {
                 override fun argChanged(
                     name: String,
-                    value: ArgDto,
+                    value: ValueDto,
                 ) = storybookApi.changeArg(name, value)
 
                 override fun argsReset() = storybookApi.resetArgs()
@@ -75,7 +75,7 @@ class StorybookPresenter(
                 override fun actionCalled(
                     name: String,
                     arguments: List<String>,
-                    setArg: Pair<String, ArgDto>?,
+                    setArg: Pair<String, ValueDto>?,
                 ) {
                     storybookApi.recordAction(name, arguments)
                     setArg?.let { (argName, value) -> storybookApi.changeArg(argName, value) }

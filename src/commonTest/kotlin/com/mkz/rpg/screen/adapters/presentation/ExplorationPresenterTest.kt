@@ -316,11 +316,11 @@ class ExplorationPresenterTest {
         }
 
     @Test
-    fun `StepParty should step the party when an arrow is tapped while its three members flash every second on water`() {
+    fun `StepParty should step the party when an arrow is tapped while its three members blink every second on water`() {
         // Given
         val apis = partyOnWaterApis()
         val timeline = gameSceneTimeline()
-        val battlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val battlefieldView = FakeBattlefieldView().apply { blinking = CompletableDeferred() }
         val presenter = partyOnWaterPresenters(apis, battlefieldView, timeline)
         apis.partyApi.startExploration()
         apis.eventBus.dispatch()
@@ -328,7 +328,7 @@ class ExplorationPresenterTest {
             presenter.tick(1.seconds)
             apis.eventBus.dispatch()
         }
-        require(battlefieldView.flashedBattleUnits.size == 9) { "The three members flash every second" }
+        require(battlefieldView.blinkedBattleUnits.size == 9) { "The three members blink every second" }
         // When
         tapArrow(Direction.NORTH)
         presenter.tick(1.milliseconds)
@@ -348,7 +348,7 @@ class ExplorationPresenterTest {
             deployments = (1..3).map { index -> Deployment(battleUnitId = "knight-$index", unitId = "knight", playerId = "human", row = index, column = 0) },
         ).also(SubdomainApis::initialise)
 
-    // The battlefield presenter flashes the battle units on the same timeline the exploration presenter walks with.
+    // The battlefield presenter blinks the battle units on the same timeline the exploration presenter walks with.
     private fun partyOnWaterPresenters(
         apis: SubdomainApis,
         battlefieldView: FakeBattlefieldView,

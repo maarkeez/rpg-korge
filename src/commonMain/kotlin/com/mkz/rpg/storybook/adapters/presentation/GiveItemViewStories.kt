@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.GiveItemView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [GiveItemView], at the width of the screen, with the texts of the language global. */
@@ -17,7 +17,7 @@ object GiveItemViewStories : StoryBinding {
             id = "screen-give-item--long-name",
             name = "Long name",
             description = "An item with a name longer than the line.",
-            args = mapOf(ITEM_NAME to ArgDto.text("Enchanted greatsword of the forgotten mountain king")),
+            args = mapOf(ITEM_NAME to ValueDto.text("Enchanted greatsword of the forgotten mountain king")),
         )
 
     override fun component(context: StoryContext) =
@@ -27,7 +27,7 @@ object GiveItemViewStories : StoryBinding {
             title = "Give item",
             description = "Asks the player, while exploring, to tap the party member who receives the item chosen in the inventory, with Cancel.",
             controls = listOf(ControlDto.text(ITEM_NAME)),
-            args = mapOf(ITEM_NAME to ArgDto.text("Health potion")),
+            args = mapOf(ITEM_NAME to ValueDto.text("Health potion")),
             stories = listOf(default, longName),
         )
 

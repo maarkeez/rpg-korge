@@ -4,7 +4,7 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.domain.StorybookRepository
 
 /**
- * Logs a callback the view on show made, e.g.: `shopSlotSelected` with `3`, as the newest action. A link does not keep
+ * Records a callback the view of the selected story made, e.g.: `shopSlotSelected` with `3`, as the newest action. A link does not keep
  * the actions.
  */
 class RecordAction(

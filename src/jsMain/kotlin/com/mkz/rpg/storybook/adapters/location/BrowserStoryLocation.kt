@@ -5,7 +5,7 @@ import com.mkz.rpg.storybook.usecases.services.StoryLocation
 import kotlinx.browser.window
 
 /**
- * Keeps what is on show in the URL of the page, e.g.: `/storybook/?story=screen-health-bar--full&args=remaining:3`, so
+ * Keeps what is shown in the URL of the page, e.g.: `/storybook/?story=screen-health-bar--full&args=remaining:3`, so
  * the URL is a link to it, which also opens it after a reload. See [LocationQuery]. The URL is replaced rather than
  * pushed, so going back leaves the Storybook instead of stepping through every change.
  */

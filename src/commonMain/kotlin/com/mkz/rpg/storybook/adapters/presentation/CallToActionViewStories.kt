@@ -5,10 +5,10 @@ import com.mkz.rpg.screen.adapters.presentation.CallToActionView
 import com.mkz.rpg.screen.adapters.presentation.ConfirmButton
 import com.mkz.rpg.screen.adapters.presentation.ItemButtonsView
 import com.mkz.rpg.screen.adapters.presentation.UiMessage
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -22,106 +22,106 @@ object CallToActionViewStories : StoryBinding {
     private const val MAXIMUM_GIVEN_GOLD = 120
 
     private const val CALL_TO_ACTION = "callToAction"
-    private const val FINISH_TURN_ENABLED = "finishTurnEnabled"
+    private const val FINISH_PLAYER_TURN_ENABLED = "finishPlayerTurnEnabled"
     private const val ITEM_NAME = "itemName"
     private const val ITEM_SELL_PRICE = "itemSellPrice"
     private const val ITEM = "item"
 
     /** What the player is called to do. */
-    private enum class CallToAction { FINISH_TURN, CANCEL_AND_CONFIRM, ITEM_ACTIONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, ACTIONS, CONFIRMATION }
+    private enum class CallToAction { FINISH_PLAYER_TURN, CANCEL_AND_CONFIRM, ITEM_BUTTONS, GIVE_ITEM, GIVE_GOLD, GIVE_GOLD_REFUSAL, INVENTORY_FULL, BUTTON_ROW, CONFIRMATION }
 
     private val finishPlayerTurn =
-        StoryDto(id = "screen-player-call-to-action--finish-turn", name = "Finish turn", description = "The player has nothing else to choose: the button ends the turn.", args = emptyMap())
+        StoryDto(id = "screen-call-to-action--finish-turn", name = "Finish turn", description = "The player has nothing else to choose: the button ends the turn.", args = emptyMap())
     private val finishPlayerTurnDisabled =
         StoryDto(
-            id = "screen-player-call-to-action--finish-turn-disabled",
+            id = "screen-call-to-action--finish-turn-disabled",
             name = "Finish turn, disabled",
             description = "The turn can not be ended for now: the button is faded.",
-            args = mapOf(FINISH_TURN_ENABLED to ArgDto.boolean(false)),
+            args = mapOf(FINISH_PLAYER_TURN_ENABLED to ValueDto.boolean(false)),
         )
     private val cancelAndConfirm =
         StoryDto(
-            id = "screen-player-call-to-action--cancel-and-confirm",
+            id = "screen-call-to-action--cancel-and-confirm",
             name = "Cancel and confirm",
             description = "A cast waiting for the player to confirm it, or to cancel it.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.CANCEL_AND_CONFIRM.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.CANCEL_AND_CONFIRM.name)),
         )
     private val itemButtons =
         StoryDto(
-            id = "screen-player-call-to-action--item-actions",
-            name = "Item actions",
+            id = "screen-call-to-action--item-buttons",
+            name = "Item buttons",
             description = "An item selected in the inventory: its name and sell price, and what to do with it.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.ITEM_ACTIONS.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.ITEM_BUTTONS.name)),
         )
     private val giveItem =
         StoryDto(
-            id = "screen-player-call-to-action--give-item",
+            id = "screen-call-to-action--give-item",
             name = "Give item",
             description = "Asks to tap the party member who receives the item, with Cancel.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_ITEM.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.GIVE_ITEM.name)),
         )
     private val giveGold =
         StoryDto(
-            id = "screen-player-call-to-action--give-gold",
+            id = "screen-call-to-action--give-gold",
             name = "Give gold",
-            description = "The panel to give gold on show: Cancel, All and Give, which reads the amount.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_GOLD.name)),
+            description = "The panel to give gold: Cancel, All and Give, which reads the amount.",
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.GIVE_GOLD.name)),
         )
     private val giveGoldRefusal =
         StoryDto(
-            id = "screen-player-call-to-action--give-gold-refusal",
+            id = "screen-call-to-action--give-gold-refusal",
             name = "Give gold refusal",
             description = "The faded gold button tapped: why no gold can be given, with OK.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.GIVE_GOLD_REFUSAL.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.GIVE_GOLD_REFUSAL.name)),
         )
     private val inventoryFull =
         StoryDto(
-            id = "screen-player-call-to-action--inventory-full",
+            id = "screen-call-to-action--inventory-full",
             name = "Inventory full",
             description = "An item found with a full inventory: discard a stored one for it, or leave it.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.INVENTORY_FULL.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.INVENTORY_FULL.name)),
         )
 
-    private val actions =
+    private val buttonRow =
         StoryDto(
-            id = "screen-player-call-to-action--actions",
-            name = "Actions",
+            id = "screen-call-to-action--button-row",
+            name = "Button row",
             description = "A panel open in place of the pad: its buttons, which stay until the presenter displays what follows.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.ACTIONS.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.BUTTON_ROW.name)),
         )
     private val confirmation =
         StoryDto(
-            id = "screen-player-call-to-action--confirmation",
+            id = "screen-call-to-action--confirmation",
             name = "Confirmation",
             description = "A question asked before an action that can not be undone: Cancel, and the action in red.",
-            args = mapOf(CALL_TO_ACTION to ArgDto.text(CallToAction.CONFIRMATION.name)),
+            args = mapOf(CALL_TO_ACTION to ValueDto.text(CallToAction.CONFIRMATION.name)),
         )
 
     override fun component(context: StoryContext) =
         ComponentDto(
-            id = "screen-player-call-to-action",
+            id = "screen-call-to-action",
             group = "Screen",
-            title = "Player call to action",
+            title = "Call to action",
             description =
                 "Under the battlefield: what the player is called to do, in place of the pad's buttons. " +
                     "callToAction: what is displayed. item: the icon of the item found, with the inventory full.",
             controls =
                 listOf(
-                    ControlDto.enum(CALL_TO_ACTION, CallToAction.entries.map { callToAction -> callToAction.name }),
-                    ControlDto.boolean(FINISH_TURN_ENABLED),
+                    ControlDto.pick(CALL_TO_ACTION, CallToAction.entries.map { callToAction -> callToAction.name }),
+                    ControlDto.boolean(FINISH_PLAYER_TURN_ENABLED),
                     ControlDto.text(ITEM_NAME),
                     ControlDto.int(ITEM_SELL_PRICE, minimum = 0, maximum = SELL_PRICE_LIMIT),
                     ControlDto.pick(ITEM, context.lootableItemIds()),
                 ),
             args =
                 mapOf(
-                    CALL_TO_ACTION to ArgDto.text(CallToAction.FINISH_TURN.name),
-                    FINISH_TURN_ENABLED to ArgDto.boolean(true),
-                    ITEM_NAME to ArgDto.text("Health potion"),
-                    ITEM_SELL_PRICE to ArgDto.int(25),
-                    ITEM to ArgDto.text(DEFAULT_ITEM),
+                    CALL_TO_ACTION to ValueDto.text(CallToAction.FINISH_PLAYER_TURN.name),
+                    FINISH_PLAYER_TURN_ENABLED to ValueDto.boolean(true),
+                    ITEM_NAME to ValueDto.text("Health potion"),
+                    ITEM_SELL_PRICE to ValueDto.int(25),
+                    ITEM to ValueDto.text(DEFAULT_ITEM),
                 ),
-            stories = listOf(finishPlayerTurn, finishPlayerTurnDisabled, cancelAndConfirm, itemButtons, giveItem, giveGold, giveGoldRefusal, inventoryFull, actions, confirmation),
+            stories = listOf(finishPlayerTurn, finishPlayerTurnDisabled, cancelAndConfirm, itemButtons, giveItem, giveGold, giveGoldRefusal, inventoryFull, buttonRow, confirmation),
         )
 
     override fun render(
@@ -129,20 +129,20 @@ object CallToActionViewStories : StoryBinding {
         context: StoryContext,
     ): View {
         // Choosing dismisses the call to action, and the finish turn is displayed again.
-        val dismissed = CALL_TO_ACTION to ArgDto.text(CallToAction.FINISH_TURN.name)
+        val dismissed = CALL_TO_ACTION to ValueDto.text(CallToAction.FINISH_PLAYER_TURN.name)
         val messages = context.messages
         return CallToActionView(messages, context.resourcesLoader).apply {
             when (CallToAction.valueOf(args.text(CALL_TO_ACTION))) {
-                CallToAction.FINISH_TURN -> {
+                CallToAction.FINISH_PLAYER_TURN -> {
                     displayFinishPlayerTurn(onPlayerTurnFinished = { context.action("onPlayerTurnFinished") })
-                    setFinishPlayerTurnEnabled(args.boolean(FINISH_TURN_ENABLED))
+                    setFinishPlayerTurnEnabled(args.boolean(FINISH_PLAYER_TURN_ENABLED))
                 }
                 CallToAction.CANCEL_AND_CONFIRM ->
                     displayCancelAndConfirm(
                         onCancelled = { context.action("onCancelled", setArg = dismissed) },
                         onConfirmed = { context.action("onConfirmed", setArg = dismissed) },
                     )
-                CallToAction.ITEM_ACTIONS ->
+                CallToAction.ITEM_BUTTONS ->
                     displayItemButtons(
                         itemName = args.text(ITEM_NAME),
                         itemSellPrice = args.int(ITEM_SELL_PRICE),
@@ -174,7 +174,7 @@ object CallToActionViewStories : StoryBinding {
                         foundItemId = args.text(ITEM),
                         onLeft = { context.action("onLeft", setArg = dismissed) },
                     )
-                CallToAction.ACTIONS ->
+                CallToAction.BUTTON_ROW ->
                     displayButtons(
                         listOf(UiMessage.QUEST_DETAIL_BACK, UiMessage.QUEST_ABANDON).map { text ->
                             val label = messages[text]

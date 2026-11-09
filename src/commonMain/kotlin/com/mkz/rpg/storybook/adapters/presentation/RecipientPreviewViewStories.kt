@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattleUnitInfo
 import com.mkz.rpg.screen.adapters.presentation.RecipientPreviewView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [RecipientPreviewView], whose battle unit has 30 of its 30 health points and 10 of its 20 mana points before the cast. */
@@ -21,34 +21,34 @@ object RecipientPreviewViewStories : StoryBinding {
     private const val EFFECTS = "effects"
     private const val NEW_EFFECTS = "newEffects"
 
-    private val hurt = StoryDto(id = "screen-receiver-preview--hurt", name = "Hurt", description = "A receiver that the cast would hurt: the health it would have left.", args = emptyMap())
+    private val hurt = StoryDto(id = "screen-recipient-preview--hurt", name = "Hurt", description = "A recipient that the cast would hurt: the health it would have left.", args = emptyMap())
     private val unharmed =
         StoryDto(
-            id = "screen-receiver-preview--unharmed",
+            id = "screen-recipient-preview--unharmed",
             name = "Unharmed",
-            description = "A receiver whose health the cast would not change.",
-            args = mapOf(HEALTH_AFTER to ArgDto.int(MAXIMUM_HEALTH)),
+            description = "A recipient whose health the cast would not change.",
+            args = mapOf(HEALTH_AFTER to ValueDto.int(MAXIMUM_HEALTH)),
         )
     private val defeated =
         StoryDto(
-            id = "screen-receiver-preview--defeated",
+            id = "screen-recipient-preview--defeated",
             name = "Defeated",
-            description = "A receiver that the cast would leave with no health.",
-            args = mapOf(HEALTH_AFTER to ArgDto.int(0)),
+            description = "A recipient that the cast would leave with no health.",
+            args = mapOf(HEALTH_AFTER to ValueDto.int(0)),
         )
     private val newEffects =
         StoryDto(
-            id = "screen-receiver-preview--new-effects",
+            id = "screen-recipient-preview--new-effects",
             name = "New effects",
-            description = "The effects the cast would apply, after the ones the receiver has already.",
-            args = mapOf(EFFECTS to ArgDto.int(1), NEW_EFFECTS to ArgDto.int(2)),
+            description = "The effects the cast would apply, after the ones the recipient has already.",
+            args = mapOf(EFFECTS to ValueDto.int(1), NEW_EFFECTS to ValueDto.int(2)),
         )
 
     override fun component(context: StoryContext) =
         ComponentDto(
-            id = "screen-receiver-preview",
+            id = "screen-recipient-preview",
             group = "Screen",
-            title = "Receiver preview",
+            title = "Recipient preview",
             description =
                 "A row of the forecast: a battle unit receiving the cast, with its portrait and name, the health it would lose or gain, its mana and its effects, " +
                     "the new ones blinking.",
@@ -61,10 +61,10 @@ object RecipientPreviewViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    UNIT to ArgDto.text(DEFAULT_UNIT),
-                    HEALTH_AFTER to ArgDto.int(18),
-                    EFFECTS to ArgDto.int(0),
-                    NEW_EFFECTS to ArgDto.int(0),
+                    UNIT to ValueDto.text(DEFAULT_UNIT),
+                    HEALTH_AFTER to ValueDto.int(18),
+                    EFFECTS to ValueDto.int(0),
+                    NEW_EFFECTS to ValueDto.int(0),
                 ),
             stories = listOf(hurt, unharmed, defeated, newEffects),
         )

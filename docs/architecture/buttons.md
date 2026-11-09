@@ -61,7 +61,7 @@ abilities, the inventory button, the virtual pad, the terrains of the world buil
 ## Seeing and testing it
 
 - The **Shared / Game button** stories of the [Storybook](storybook.md) show it enabled, disabled and in another color,
-  and **Screen / Action row** the row, from a lone button to three.
+  and **Screen / Button row** the row, from a lone button to three.
   The stories of each view above show its disabled buttons, e.g.: **Screen / Inventory › Exploring, only member**.
 - `GameButtonTest` checks it fades when disabled, and not once enabled again. The page object `isFaded()`, in
   `GameButtonExtension`, lets the tests of each view check its disabled buttons are displayed faded, besides disabled.

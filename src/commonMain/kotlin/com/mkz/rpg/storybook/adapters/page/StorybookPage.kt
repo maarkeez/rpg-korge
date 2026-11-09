@@ -1,7 +1,7 @@
 package com.mkz.rpg.storybook.adapters.page
 
 /**
- * The page the Storybook runs in, told when the story on show has rendered, so a script driving the browser (e.g.:
+ * The page the Storybook runs in, told when the selected story has rendered, so a script driving the browser (e.g.:
  * Playwright, see the `storybook` skill) knows when to take a screenshot, instead of waiting for the resources to load.
  */
 interface StorybookPage {

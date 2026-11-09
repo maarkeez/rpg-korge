@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.CancelButton
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [CancelButton], the secondary action of the dialogs and the menu, e.g.: Cancel. */
@@ -23,7 +23,7 @@ object CancelButtonStories : StoryBinding {
             description = "The button as wide as the screen, as the menu lists its options.",
             args =
                 mapOf(
-                    BUTTON_WIDTH to ArgDto.int(MAXIMUM_WIDTH),
+                    BUTTON_WIDTH to ValueDto.int(MAXIMUM_WIDTH),
                 ),
         )
     private val longLabel =
@@ -31,7 +31,7 @@ object CancelButtonStories : StoryBinding {
             id = "screen-cancel-button--long-label",
             name = "Long label",
             description = "A label longer than the button, as a translation may be.",
-            args = mapOf(LABEL to ArgDto.text("Cancel and go back to the previous screen")),
+            args = mapOf(LABEL to ValueDto.text("Cancel and go back to the previous screen")),
         )
 
     override fun component(context: StoryContext) =
@@ -41,7 +41,7 @@ object CancelButtonStories : StoryBinding {
             title = "Cancel button",
             description = "A secondary action button in gray, e.g.: Cancel in the dialogs, and the options of the menu other than playing.",
             controls = listOf(ControlDto.text(LABEL), ControlDto.int(BUTTON_WIDTH, minimum = MINIMUM_WIDTH, maximum = MAXIMUM_WIDTH)),
-            args = mapOf(LABEL to ArgDto.text("Cancel"), BUTTON_WIDTH to ArgDto.int(190)),
+            args = mapOf(LABEL to ValueDto.text("Cancel"), BUTTON_WIDTH to ValueDto.int(190)),
             stories = listOf(default, wide, longLabel),
         )
 

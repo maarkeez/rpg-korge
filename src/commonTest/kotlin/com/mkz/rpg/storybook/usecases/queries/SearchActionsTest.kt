@@ -12,7 +12,7 @@ class SearchActionsTest {
     private val searchActions = SearchActions(storybookRepository)
 
     @Test
-    fun `should return the actions logged, the newest first, when the catalogue is initialised`() {
+    fun `should return the actions recorded, the newest first, when the catalogue is open`() {
         // Given
         storybookRepository.save(storybook().recordAction("shopSlotSelected", listOf("3")).recordAction("shopBackSelected", emptyList()))
         // When
@@ -22,7 +22,7 @@ class SearchActionsTest {
     }
 
     @Test
-    fun `should return no actions when the catalogue is not initialised`() {
+    fun `should return no actions when the catalogue is not open`() {
         // When
         val actions = searchActions()
         // Then

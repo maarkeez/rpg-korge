@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.HealthBarView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -19,8 +19,8 @@ object HealthBarViewStories : StoryBinding {
 
     private val full = StoryDto(id = "screen-health-bar--full", name = "Full", description = "A battle unit that has not been hurt.", args = emptyMap())
     private val half =
-        StoryDto(id = "screen-health-bar--half", name = "Half", description = "A battle unit that has lost half of its health.", args = mapOf(REMAINING to ArgDto.int(MAXIMUM_HEALTH / 2)))
-    private val empty = StoryDto(id = "screen-health-bar--empty", name = "Empty", description = "A battle unit that has been defeated.", args = mapOf(REMAINING to ArgDto.int(0)))
+        StoryDto(id = "screen-health-bar--half", name = "Half", description = "A battle unit that has lost half of its health.", args = mapOf(REMAINING to ValueDto.int(MAXIMUM_HEALTH / 2)))
+    private val empty = StoryDto(id = "screen-health-bar--empty", name = "Empty", description = "A battle unit that has been defeated.", args = mapOf(REMAINING to ValueDto.int(0)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -29,7 +29,7 @@ object HealthBarViewStories : StoryBinding {
             title = "Health bar",
             description = "The health a battle unit has left, out of its maximum, in the info of the selected battle unit.",
             controls = listOf(ControlDto.int(REMAINING, minimum = 0, maximum = HEALTH_LIMIT), ControlDto.int(MAXIMUM, minimum = 1, maximum = HEALTH_LIMIT)),
-            args = mapOf(REMAINING to ArgDto.int(MAXIMUM_HEALTH), MAXIMUM to ArgDto.int(MAXIMUM_HEALTH)),
+            args = mapOf(REMAINING to ValueDto.int(MAXIMUM_HEALTH), MAXIMUM to ValueDto.int(MAXIMUM_HEALTH)),
             stories = listOf(full, half, empty),
         )
 

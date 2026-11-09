@@ -4,7 +4,7 @@ import com.mkz.rpg.shared.domain.FakeEventBus
 import com.mkz.rpg.shared.domain.shouldHavePublishedEvents
 import com.mkz.rpg.shared.domain.shouldNotHavePublishedEvents
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookError
 import com.mkz.rpg.storybook.domain.StorybookEvent.GlobalChanged
 import com.mkz.rpg.storybook.domain.StorybookMother.location
@@ -27,9 +27,9 @@ class ChangeGlobalTest {
         // Given
         storybookRepository.save(storybook())
         // When
-        changeGlobal(name = "language", value = ArgDto.text("es"))
+        changeGlobal(name = "language", value = ValueDto.text("es"))
         // Then
-        storybookRepository.search()?.toDto()?.globals shouldBe mapOf("language" to ArgDto.text("es"))
+        storybookRepository.search()?.toDto()?.globals shouldBe mapOf("language" to ValueDto.text("es"))
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", globals = mapOf("language" to "es")))
         eventBus.shouldHavePublishedEvents(GlobalChanged(globalName = "language"))
     }
@@ -39,7 +39,7 @@ class ChangeGlobalTest {
         // Given
         storybookRepository.save(storybook())
         // When
-        changeGlobal(name = "language", value = ArgDto.text("en"))
+        changeGlobal(name = "language", value = ValueDto.text("en"))
         // Then
         storyLocation.keptLocations.shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()
@@ -50,15 +50,15 @@ class ChangeGlobalTest {
         // Given
         storybookRepository.save(storybook())
         // When
-        val result = runCatching { changeGlobal(name = "language", value = ArgDto.text("fr")) }
+        val result = runCatching { changeGlobal(name = "language", value = ValueDto.text("fr")) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
 
     @Test
-    fun `should do nothing when the catalogue is not initialised`() {
+    fun `should do nothing when the catalogue is not open`() {
         // When
-        changeGlobal(name = "language", value = ArgDto.text("es"))
+        changeGlobal(name = "language", value = ValueDto.text("es"))
         // Then
         storyLocation.keptLocations.shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()

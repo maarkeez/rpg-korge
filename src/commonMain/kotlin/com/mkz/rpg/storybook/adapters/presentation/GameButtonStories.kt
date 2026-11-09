@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.GameButton
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.input.onClick
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
@@ -26,14 +26,14 @@ object GameButtonStories : StoryBinding {
             id = "shared-game-button--disabled",
             name = "Disabled",
             description = "A button that can not be tapped, faded: its background dark, its label grey and its border dim.",
-            args = mapOf(ENABLED to ArgDto.boolean(false)),
+            args = mapOf(ENABLED to ValueDto.boolean(false)),
         )
     private val otherColor =
         StoryDto(
             id = "shared-game-button--other-color",
             name = "Other color",
             description = "The blue of Finish turn instead of the grey: a button of any color fades the same once disabled.",
-            args = mapOf(LABEL to ArgDto.text("Finish turn"), COLOR to ArgDto.text(FINISH_TURN_BLUE)),
+            args = mapOf(LABEL to ValueDto.text("Finish turn"), COLOR to ValueDto.text(FINISH_TURN_BLUE)),
         )
 
     override fun component(context: StoryContext) =
@@ -41,9 +41,9 @@ object GameButtonStories : StoryBinding {
             id = "shared-game-button",
             group = "Shared",
             title = "Game button",
-            description = "The button of the game, e.g.: the arrows, Close and the item actions. A disabled one is still displayed, but faded, so the player tells it can not be tapped.",
+            description = "The button of the game, e.g.: the arrows, Close and the item buttons. A disabled one is still displayed, but faded, so the player tells it can not be tapped.",
             controls = listOf(ControlDto.text(LABEL), ControlDto.boolean(ENABLED), ControlDto.color(COLOR)),
-            args = mapOf(LABEL to ArgDto.text("Close"), ENABLED to ArgDto.boolean(true), COLOR to ArgDto.text(GREY)),
+            args = mapOf(LABEL to ValueDto.text("Close"), ENABLED to ValueDto.boolean(true), COLOR to ValueDto.text(GREY)),
             stories = listOf(enabled, disabled, otherColor),
         )
 

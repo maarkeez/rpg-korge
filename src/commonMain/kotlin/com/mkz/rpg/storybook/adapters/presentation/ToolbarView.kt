@@ -9,7 +9,7 @@ import korlibs.korge.view.position
 import korlibs.korge.view.text
 
 /**
- * The globals, shared by every story, above the story info: the language of the views on show, each language named in
+ * The globals, shared by every story, above the story info: the language of the views shown, each language named in
  * its own language, e.g.: `Español`, the one selected highlighted. Tapping another one asks to select it.
  */
 open class ToolbarView : Container() {

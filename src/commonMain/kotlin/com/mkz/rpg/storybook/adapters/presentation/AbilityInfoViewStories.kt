@@ -5,10 +5,10 @@ import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Effect
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Reason
 import com.mkz.rpg.screen.adapters.presentation.AbilityInfoView.AbilityInfo.Targeting
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -44,29 +44,29 @@ object AbilityInfoViewStories : StoryBinding {
             id = "screen-ability-info--skull",
             name = "Skull",
             description = "An effect applied when the target is defeated, expanded one level.",
-            args = mapOf(ABILITY to ArgDto.text("skull")),
+            args = mapOf(ABILITY to ValueDto.text("skull")),
         )
-    private val bat = StoryDto(id = "screen-ability-info--bat", name = "Bat", description = "A summon, with its turns and health.", args = mapOf(ABILITY to ArgDto.text("bat")))
+    private val bat = StoryDto(id = "screen-ability-info--bat", name = "Bat", description = "A summon, with its turns and health.", args = mapOf(ABILITY to ValueDto.text("bat")))
     private val mending =
         StoryDto(
             id = "screen-ability-info--mending",
             name = "Mending",
             description = "A heal of the caster and of its adjacent allies, marked green in the diagram.",
-            args = mapOf(ABILITY to ArgDto.text("mending")),
+            args = mapOf(ABILITY to ValueDto.text("mending")),
         )
     private val inCooldown =
         StoryDto(
             id = "screen-ability-info--in-cooldown",
             name = "In cooldown",
             description = "Mending, cast last turn: the turns left, in an orange banner under its header.",
-            args = mapOf(ABILITY to ArgDto.text("mending"), COOLDOWN_TURNS_LEFT to ArgDto.int(2)),
+            args = mapOf(ABILITY to ValueDto.text("mending"), COOLDOWN_TURNS_LEFT to ValueDto.int(2)),
         )
     private val notEnoughMana =
         StoryDto(
             id = "screen-ability-info--not-enough-mana",
             name = "Not enough mana",
             description = "Bat, with 4 mana left: the mana missing, in a blue banner under its header.",
-            args = mapOf(ABILITY to ArgDto.text("bat"), REMAINING_MANA to ArgDto.int(4)),
+            args = mapOf(ABILITY to ValueDto.text("bat"), REMAINING_MANA to ValueDto.int(4)),
         )
 
     override fun component(context: StoryContext) =
@@ -81,7 +81,7 @@ object AbilityInfoViewStories : StoryBinding {
                     ControlDto.int(COOLDOWN_TURNS_LEFT, minimum = 0, maximum = COOLDOWN_LIMIT),
                     ControlDto.int(REMAINING_MANA, minimum = 0, maximum = MANA_LIMIT),
                 ),
-            args = mapOf(ABILITY to ArgDto.text("sword"), COOLDOWN_TURNS_LEFT to ArgDto.int(0), REMAINING_MANA to ArgDto.int(MANA_LIMIT)),
+            args = mapOf(ABILITY to ValueDto.text("sword"), COOLDOWN_TURNS_LEFT to ValueDto.int(0), REMAINING_MANA to ValueDto.int(MANA_LIMIT)),
             stories = listOf(sword, skull, bat, mending, inCooldown, notEnoughMana),
         )
 

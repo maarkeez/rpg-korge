@@ -2,22 +2,22 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.GameSceneResourcesLoader
 import com.mkz.rpg.screen.adapters.presentation.Messages
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 
 /**
  * What the stories build their views with, as the game does: its images, loaded once, and its messages. The callbacks of
- * the views are handed to [action], which logs them in the Actions.
+ * the views are handed to [action], which records them in the Actions.
  */
 class StoryContext(
     val resourcesLoader: GameSceneResourcesLoader,
     val messages: Messages,
 ) {
     interface Delegate {
-        /** The view on show made a callback, which may change an arg, e.g.: `shopSlotSelected(3)` sets `selectedSlot`. */
+        /** The view of the selected story made a callback, which may change an arg, e.g.: `shopSlotSelected(3)` sets `selectedSlot`. */
         fun actionCalled(
             name: String,
             arguments: List<String>,
-            setArg: Pair<String, ArgDto>?,
+            setArg: Pair<String, ValueDto>?,
         )
     }
 
@@ -73,14 +73,14 @@ class StoryContext(
             .sorted()
 
     /**
-     * Logs a callback of the view on show, by its name and its arguments, e.g.: `action("shopSlotSelected", 3)`. It may
-     * also change an arg, as the game would, e.g.: `setArg = "selectedSlot" to ArgDto.text("3")`, to a value its control
+     * Records a callback of the view of the selected story, by its name and its arguments, e.g.: `action("shopSlotSelected", 3)`. It may
+     * also change an arg, as the game would, e.g.: `setArg = "selectedSlot" to ValueDto.text("3")`, to a value its control
      * accepts.
      */
     fun action(
         name: String,
         vararg arguments: Any?,
-        setArg: Pair<String, ArgDto>? = null,
+        setArg: Pair<String, ValueDto>? = null,
     ) {
         delegate?.actionCalled(name, arguments.map { argument -> argument.toString() }, setArg)
     }

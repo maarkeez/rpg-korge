@@ -14,7 +14,7 @@ import korlibs.korge.view.textBlock
 import korlibs.math.geom.Size
 
 /**
- * What the story on show is, for whoever browses the catalogue: its component, e.g.: `Screen / Health bar`, with its
+ * What the selected story is, for whoever browses the catalogue: its component, e.g.: `Screen / Health bar`, with its
  * description, and the story, e.g.: `Full`, with its description.
  */
 open class StoryInfoView : Container() {

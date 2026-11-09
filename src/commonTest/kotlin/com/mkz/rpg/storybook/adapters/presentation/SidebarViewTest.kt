@@ -82,7 +82,7 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `SelectStory should highlight only the story on show`() =
+    fun `SelectStory should highlight only the selected story`() =
         sharedViewsTest {
             // Given
             val sidebarView = newSidebarView()
@@ -262,7 +262,7 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `SelectStory should keep the scroll when the story on show is selected again`() =
+    fun `SelectStory should keep the scroll when the selected story is selected again`() =
         sharedViewsTest {
             // Given
             val sidebarView = newSidebarView()
@@ -376,7 +376,7 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `TypeSearch should keep the story on show, highlighted again once it is listed`() =
+    fun `TypeSearch should keep the selected story, highlighted again once it is listed`() =
         sharedViewsTest {
             // Given
             val sidebarView = newSidebarView()
@@ -423,7 +423,7 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `ClickClearSearch should scroll the list to the story on show when it is not in sight`() =
+    fun `ClickClearSearch should scroll the list to the selected story when it is not in sight`() =
         sharedViewsTest {
             // Given
             val sidebarView = newSidebarView()
@@ -439,7 +439,7 @@ class SidebarViewTest : ViewsForTesting() {
         }
 
     @Test
-    fun `ClickClearSearch should keep the list at the top when the story on show is in sight`() =
+    fun `ClickClearSearch should keep the list at the top when the selected story is in sight`() =
         sharedViewsTest {
             // Given
             val sidebarView = newSidebarView()

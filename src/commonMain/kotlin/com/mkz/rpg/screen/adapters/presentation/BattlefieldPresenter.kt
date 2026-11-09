@@ -75,12 +75,12 @@ class BattlefieldPresenter(
             eventBus.subscribe<NpcEvent.NpcPlaced> { event ->
                 timeline.play { battlefieldView.displayNpc(event.row, event.column, event.npcId, event.unitId) }
             },
-            // A recruited npc leaves its tile, where the battle unit it joins the party as is displayed, flashing once it has joined.
+            // A recruited npc leaves its tile, where the battle unit it joins the party as is displayed, blinking once it has joined.
             eventBus.subscribe<NpcEvent.NpcRecruited> { event ->
                 timeline.play { battlefieldView.removeNpc(event.row, event.column) }
             },
             eventBus.subscribe<PartyEvent.PartyJoined> { event ->
-                flashUnit(event.battleUnitId)
+                blinkUnit(event.battleUnitId)
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitMoved> { event ->
                 moveUnit(event)
@@ -95,11 +95,11 @@ class BattlefieldPresenter(
             eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
             // The camera eases to the new leader once the formation is closed.
             eventBus.subscribe<PartyEvent.FormationClosed> { trailPartyLeader() },
-            // The health flashed while exploring is removed too, so it does not linger over the battle.
+            // The health blinked while exploring is removed too, so it does not linger over the battle.
             eventBus.subscribe<PartyEvent.ExplorationInterrupted> {
                 timeline.play {
                     battlefieldView.stopTrailing()
-                    battlefieldView.removeHealthFlashes()
+                    battlefieldView.removeHealthBlinks()
                 }
             },
             // The selected caster is displayed again once its cast has been resolved.
@@ -112,21 +112,21 @@ class BattlefieldPresenter(
             },
             // While exploring, alongside the timeline, so the party keeps walking, e.g.: while standing on water heals it.
             eventBus.subscribe<BattleUnitEvent.EffectReceived> { event ->
-                flashUnit(event.battleUnitId, isAlongside = !isBattling())
+                blinkUnit(event.battleUnitId, isAlongside = !isBattling())
             },
             eventBus.subscribe<BattleUnitEvent.OnPlayerTurnStartedEffectTriggered> { event ->
-                flashUnit(event.battleUnitId)
+                blinkUnit(event.battleUnitId)
             },
-            // While exploring, the health is displayed as the battle unit flashes, e.g.: so standing on lava is seen hurting.
+            // While exploring, the health is displayed as the battle unit blinks, e.g.: so standing on lava is seen hurting.
             eventBus.subscribe<BattleUnitEvent.BattleUnitDamaged> { event ->
-                if (!isBattling()) flashHealth(event.battleUnitId)
+                if (!isBattling()) blinkHealth(event.battleUnitId)
             },
             eventBus.subscribe<BattleUnitEvent.BattleUnitHealed> { event ->
-                if (!isBattling()) flashHealth(event.battleUnitId)
+                if (!isBattling()) blinkHealth(event.battleUnitId)
             },
-            // A vanished summon is deleted, so it is flashed from the event, before the occupant is removed.
+            // A vanished summon is deleted, so it is blinked from the event, before the occupant is removed.
             eventBus.subscribe<BattleUnitEvent.BattleUnitVanished> { event ->
-                timeline.play { battlefieldView.flashBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
+                timeline.play { battlefieldView.blinkBattleUnit(row = event.row, column = event.column, unitId = event.unitId) }
             },
             // A removed occupant (e.g.: a battle unit defeated) may open paths of the selected battle unit.
             eventBus.subscribe<BattlefieldEvent.OccupantRemoved> { event ->
@@ -352,18 +352,18 @@ class BattlefieldPresenter(
         battlefieldView.lootDroppedItem(row = row, column = column, lootableItemId = lootableItemId, remainingLootableItemIds = remainingLootableItemIds)
     }
 
-    private fun flashUnit(
+    private fun blinkUnit(
         battleUnitId: String,
         isAlongside: Boolean = false,
     ) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
-        val step: suspend () -> Unit = { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
+        val step: suspend () -> Unit = { battlefieldView.blinkBattleUnit(row = position.row, column = position.column, unitId = battleUnit.unitId) }
         if (isAlongside) timeline.playAlongside(step) else timeline.play(step)
     }
 
-    // Alongside the timeline, as the flash while exploring, so the party keeps walking.
-    private fun flashHealth(battleUnitId: String) {
+    // Alongside the timeline, as the blink while exploring, so the party keeps walking.
+    private fun blinkHealth(battleUnitId: String) {
         val battleUnit = battleUnitApi.searchBattleUnitById(battleUnitId) ?: return
         val position = battlefieldApi.searchPosition(battleUnitId) ?: return
         val previewOption =
@@ -371,7 +371,7 @@ class BattlefieldPresenter(
                 remaining = battleUnit.remainingHealth,
                 maximum = battleUnit.maximumHealth,
             )
-        timeline.playAlongside { battlefieldView.flashHealth(row = position.row, column = position.column, previewOption = previewOption) }
+        timeline.playAlongside { battlefieldView.blinkHealth(row = position.row, column = position.column, previewOption = previewOption) }
     }
 
     private fun displayWalkingRange(battleUnitSelectedEvent: SelectionEvent.BattleUnitSelected): suspend () -> Unit {

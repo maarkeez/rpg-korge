@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.HudStyle
 import com.mkz.rpg.screen.adapters.presentation.UnitPortraitView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.image.color.RGBA
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
@@ -37,7 +37,7 @@ object UnitPortraitViewStories : StoryBinding {
             description = "The portrait of another unit: any unit with a portrait can be picked.",
             args =
                 mapOf(
-                    UNIT to ArgDto.text(OTHER_UNIT),
+                    UNIT to ValueDto.text(OTHER_UNIT),
                 ),
         )
 
@@ -46,14 +46,14 @@ object UnitPortraitViewStories : StoryBinding {
             id = "screen-unit-portrait--ally",
             name = "Ally",
             description = "A battle unit of the human player, ringed green.",
-            args = mapOf(RING to ArgDto.text(Ring.ALLY.name)),
+            args = mapOf(RING to ValueDto.text(Ring.ALLY.name)),
         )
     private val enemy =
         StoryDto(
             id = "screen-unit-portrait--enemy",
             name = "Enemy",
             description = "A battle unit of the CPU, ringed red.",
-            args = mapOf(UNIT to ArgDto.text("rat"), RING to ArgDto.text(Ring.ENEMY.name)),
+            args = mapOf(UNIT to ValueDto.text("rat"), RING to ValueDto.text(Ring.ENEMY.name)),
         )
 
     override fun component(context: StoryContext) =
@@ -63,7 +63,7 @@ object UnitPortraitViewStories : StoryBinding {
             title = "Unit portrait",
             description = "The portrait of a unit in a dark rounded slot, in the info of the selected battle unit, the formation and the previews, ringed with its team's colour in a battle.",
             controls = listOf(ControlDto.pick(UNIT, context.unitIds()), ControlDto.enum(RING, Ring.entries.map { ring -> ring.name })),
-            args = mapOf(UNIT to ArgDto.text(DEFAULT_UNIT), RING to ArgDto.text(Ring.NONE.name)),
+            args = mapOf(UNIT to ValueDto.text(DEFAULT_UNIT), RING to ValueDto.text(Ring.NONE.name)),
             stories = listOf(hero, otherUnit, ally, enemy),
         )
 

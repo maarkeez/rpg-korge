@@ -2,13 +2,13 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.storybook.adapters.storage.InMemoryStorybookRepository
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 import com.mkz.rpg.storybook.usecases.commands.ChangeArg
 import com.mkz.rpg.storybook.usecases.commands.ChangeGlobal
 import com.mkz.rpg.storybook.usecases.commands.ClearActions
-import com.mkz.rpg.storybook.usecases.commands.InitialiseCatalogue
+import com.mkz.rpg.storybook.usecases.commands.OpenCatalogue
 import com.mkz.rpg.storybook.usecases.commands.RecordAction
 import com.mkz.rpg.storybook.usecases.commands.ResetArgs
 import com.mkz.rpg.storybook.usecases.commands.SelectStory
@@ -20,7 +20,7 @@ import com.mkz.rpg.storybook.usecases.queries.SearchSelectedStory
 import com.mkz.rpg.storybook.usecases.services.StoryLocation
 
 /**
- * The Storybook: the views of the game shown in isolation, in each of their states. Location: where what is on show is
+ * The Storybook: the views of the game shown in isolation, in each of their states. Location: where what is shown is
  * kept. Story bindings: the components of the catalogue, every story binding unless a test needs fewer.
  */
 class StorybookApi(
@@ -69,7 +69,7 @@ class StorybookApi(
                 TerrainTileViewStories,
                 TileHighlightViewStories,
                 TileDimViewStories,
-                TileFlashViewStories,
+                TileBlinkViewStories,
                 UnitSpriteViewStories,
                 BattlefieldHealthBarPreviewViewStories,
                 BattleUnitInfoViewStories,
@@ -97,7 +97,7 @@ class StorybookApi(
                 ShopViewStories,
             )
 
-        /** The global choosing the language of the views on show, by its code, e.g.: `es`. */
+        /** The global choosing the language of the views shown, by its code, e.g.: `es`. */
         const val LANGUAGE_GLOBAL = "language"
     }
 
@@ -105,7 +105,7 @@ class StorybookApi(
     private val storybookRepository: StorybookRepository = InMemoryStorybookRepository()
 
     // Commands
-    val initialiseCatalogue = InitialiseCatalogue(storybookRepository, storyLocation, eventBus)
+    val openCatalogue = OpenCatalogue(storybookRepository, storyLocation, eventBus)
     val selectStory = SelectStory(storybookRepository, storyLocation, eventBus)
     val changeArg = ChangeArg(storybookRepository, storyLocation, eventBus)
     val resetArgs = ResetArgs(storybookRepository, storyLocation, eventBus)
@@ -131,10 +131,10 @@ class StorybookApi(
         val components = storyBindings.map { binding -> binding.component(context) }
         bindingsByComponentId = components.map { component -> component.id }.zip(storyBindings).toMap()
         val languageCodes = context.messages.languages().map { language -> language.code }
-        initialiseCatalogue(
+        openCatalogue(
             components = components,
             globalControls = listOf(ControlDto.pick(LANGUAGE_GLOBAL, languageCodes)),
-            defaultGlobals = mapOf(LANGUAGE_GLOBAL to ArgDto.text(languageCodes.first())),
+            defaultGlobals = mapOf(LANGUAGE_GLOBAL to ValueDto.text(languageCodes.first())),
         )
     }
 

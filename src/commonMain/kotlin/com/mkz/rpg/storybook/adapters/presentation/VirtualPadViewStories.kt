@@ -6,7 +6,7 @@ import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import korlibs.korge.view.View
 
 /**
- * The stories of [VirtualPadView], at the size the game displays it. Pressing an arrow logs `onDirectionPressed`, and the
+ * The stories of [VirtualPadView], at the size the game displays it. Pressing an arrow records `onDirectionPressed`, and the
  * first frame it is held `onDirectionHeld`, which the game calls on every frame the arrow is held and would fill the
  * Actions.
  */
@@ -25,7 +25,7 @@ object VirtualPadViewStories : StoryBinding {
             group = "Screen",
             title = "Virtual pad",
             description =
-                "The pad the player explores with, in the place of the battle HUD: the arrows walk the party, A talks to the npc next to the leader, " +
+                "The pad the player explores with, in the place of the HUD: the arrows walk the party, A talks to the npc next to the leader, " +
                     "B opens the formation and Start pauses the game.",
             controls = emptyList(),
             args = emptyMap(),
@@ -37,14 +37,14 @@ object VirtualPadViewStories : StoryBinding {
         context: StoryContext,
     ): View =
         VirtualPadView(VirtualPadView.SIZE).apply {
-            var isHeldLogged = false
+            var isHeldRecorded = false
             setOnDirectionPressed { direction ->
-                isHeldLogged = false
+                isHeldRecorded = false
                 context.action("onDirectionPressed", direction)
             }
             setOnDirectionHeld { direction ->
-                if (!isHeldLogged) context.action("onDirectionHeld", direction)
-                isHeldLogged = true
+                if (!isHeldRecorded) context.action("onDirectionHeld", direction)
+                isHeldRecorded = true
             }
             setOnAPressed { context.action("onAPressed") }
             setOnBPressed { context.action("onBPressed") }

@@ -8,7 +8,7 @@ import korlibs.image.color.Colors
  * A battle unit blinking in white, e.g.: when it receives an effect: the silhouette of its image over its tile. The
  * battlefield view draws it and removes it again to make it blink.
  */
-class TileFlashView(
+class TileBlinkView(
     unitBitmap: Bitmap,
 ) : UnitSpriteView(whiteSilhouette(unitBitmap)) {
     private companion object {

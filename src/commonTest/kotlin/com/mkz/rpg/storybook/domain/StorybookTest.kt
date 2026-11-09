@@ -1,15 +1,15 @@
 package com.mkz.rpg.storybook.domain
 
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgsReset
-import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
+import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueOpened
 import com.mkz.rpg.storybook.domain.StorybookEvent.GlobalChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 import com.mkz.rpg.storybook.domain.StorybookMother.LANGUAGE_CONTROL
@@ -25,7 +25,7 @@ import kotlin.test.Test
 
 class StorybookTest {
     private val full = story(id = "screen-health-bar--full", name = "Full")
-    private val empty = story(id = "screen-health-bar--empty", name = "Empty", args = mapOf("remaining" to ArgDto.int(0)))
+    private val empty = story(id = "screen-health-bar--empty", name = "Empty", args = mapOf("remaining" to ValueDto.int(0)))
     private val healthBar = component(id = "screen-health-bar", stories = listOf(full, empty))
     private val inventorySlot =
         component(
@@ -41,12 +41,12 @@ class StorybookTest {
                 ),
             args =
                 mapOf(
-                    "equipped" to ArgDto.boolean(false),
-                    "size" to ArgDto.int(60),
-                    "mode" to ArgDto.text("BUY"),
-                    "label" to ArgDto.text("Potion"),
-                    "item" to ArgDto.text("health-potion"),
-                    "frame" to ArgDto.text("FFBB31"),
+                    "equipped" to ValueDto.boolean(false),
+                    "size" to ValueDto.int(60),
+                    "mode" to ValueDto.text("BUY"),
+                    "label" to ValueDto.text("Potion"),
+                    "item" to ValueDto.text("health-potion"),
+                    "frame" to ValueDto.text("FFBB31"),
                 ),
             stories = listOf(story(id = "screen-inventory-slot--stored")),
         )
@@ -54,7 +54,7 @@ class StorybookTest {
     private fun create(
         components: List<ComponentDto>,
         location: LocationDto = location(),
-    ) = Storybook.create(components, globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ArgDto.text("en")), location = location)
+    ) = Storybook.create(components, globalControls = listOf(LANGUAGE_CONTROL), defaultGlobals = mapOf("language" to ValueDto.text("en")), location = location)
 
     private val manaBar = component(id = "screen-mana-bar", title = "Mana bar", stories = listOf(story(id = "screen-mana-bar--full")))
 
@@ -67,10 +67,10 @@ class StorybookTest {
             Storybook.Dto(
                 components = listOf(healthBar, manaBar),
                 globalControls = listOf(LANGUAGE_CONTROL),
-                defaultGlobals = mapOf("language" to ArgDto.text("en")),
+                defaultGlobals = mapOf("language" to ValueDto.text("en")),
                 selectedStoryId = "screen-health-bar--full",
-                args = mapOf("remaining" to ArgDto.int(30)),
-                globals = mapOf("language" to ArgDto.text("en")),
+                args = mapOf("remaining" to ValueDto.int(30)),
+                globals = mapOf("language" to ValueDto.text("en")),
                 actions = emptyList(),
             )
     }
@@ -92,11 +92,11 @@ class StorybookTest {
     }
 
     @Test
-    fun `Create should publish the catalogue initialised, then the story selected, when the catalogue is created`() {
+    fun `Create should publish the catalogue opened, then the story selected, when the catalogue is created`() {
         // When
         val (events, _) = create(listOf(healthBar), location(storyId = "screen-health-bar--empty")).pullEvents()
         // Then
-        events.shouldContainExactly(CatalogueInitialised, StorySelected(storyId = "screen-health-bar--empty"))
+        events.shouldContainExactly(CatalogueOpened, StorySelected(storyId = "screen-health-bar--empty"))
     }
 
     @Test
@@ -175,7 +175,7 @@ class StorybookTest {
     }
 
     @Test
-    fun `SelectStory should change nothing when the story is already on show`() {
+    fun `SelectStory should change nothing when the story is already selected`() {
         // Given
         val storybook = storybook(components = listOf(healthBar), requestedStoryId = "screen-health-bar--empty")
         // When
@@ -200,7 +200,7 @@ class StorybookTest {
         // When
         val storybook = create(listOf(healthBar), location(storyId = "screen-health-bar--empty"))
         // Then
-        storybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(0))
+        storybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(0))
     }
 
     @Test
@@ -208,7 +208,7 @@ class StorybookTest {
         // When
         val storybook = create(listOf(healthBar), location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "10")))
         // Then
-        storybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(10))
+        storybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(10))
     }
 
     @Test
@@ -220,12 +220,12 @@ class StorybookTest {
         // Then
         storybook.toDto().args shouldBe
             mapOf(
-                "equipped" to ArgDto.boolean(true),
-                "size" to ArgDto.int(45),
-                "mode" to ArgDto.text("SELL"),
-                "label" to ArgDto.text("Iron hammer"),
-                "item" to ArgDto.text("none"),
-                "frame" to ArgDto.text("FF375F"),
+                "equipped" to ValueDto.boolean(true),
+                "size" to ValueDto.int(45),
+                "mode" to ValueDto.text("SELL"),
+                "label" to ValueDto.text("Iron hammer"),
+                "item" to ValueDto.text("none"),
+                "frame" to ValueDto.text("FF375F"),
             )
     }
 
@@ -244,18 +244,18 @@ class StorybookTest {
         // When
         val storybook = create(listOf(healthBar), location(storyId = "screen-health-bar--renamed", args = mapOf("remaining" to "10")))
         // Then
-        storybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(30))
+        storybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(30))
     }
 
     @Test
     fun `Create should display the globals the location asks for, keeping the default of those not accepted`() {
         // Given
         val globalControls = listOf(LANGUAGE_CONTROL, ControlDto.boolean("paused"))
-        val defaultGlobals = mapOf("language" to ArgDto.text("en"), "paused" to ArgDto.boolean(false))
+        val defaultGlobals = mapOf("language" to ValueDto.text("en"), "paused" to ValueDto.boolean(false))
         // When
         val storybook = Storybook.create(listOf(healthBar), globalControls, defaultGlobals, location(globals = mapOf("language" to "es", "paused" to "maybe")))
         // Then
-        storybook.toDto().globals shouldBe mapOf("language" to ArgDto.text("es"), "paused" to ArgDto.boolean(false))
+        storybook.toDto().globals shouldBe mapOf("language" to ValueDto.text("es"), "paused" to ValueDto.boolean(false))
     }
 
     @Test
@@ -309,7 +309,7 @@ class StorybookTest {
     @Test
     fun `Create should fail when a story has an arg with no control`() {
         // When
-        val result = runCatching { create(listOf(component(stories = listOf(story(args = mapOf("maximum" to ArgDto.int(30))))))) }
+        val result = runCatching { create(listOf(component(stories = listOf(story(args = mapOf("maximum" to ValueDto.int(30))))))) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.ControlNotFound>()
     }
@@ -317,7 +317,7 @@ class StorybookTest {
     @Test
     fun `Create should fail when a default arg is not accepted by its control`() {
         // When
-        val result = runCatching { create(listOf(component(args = mapOf("remaining" to ArgDto.text("30"))))) }
+        val result = runCatching { create(listOf(component(args = mapOf("remaining" to ValueDto.text("30"))))) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
@@ -325,7 +325,7 @@ class StorybookTest {
     @Test
     fun `Create should fail when a story arg is out of the range of its control`() {
         // When
-        val result = runCatching { create(listOf(component(stories = listOf(story(args = mapOf("remaining" to ArgDto.int(31))))))) }
+        val result = runCatching { create(listOf(component(stories = listOf(story(args = mapOf("remaining" to ValueDto.int(31))))))) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
@@ -333,19 +333,19 @@ class StorybookTest {
     @Test
     fun `Create should fail when a default global is not accepted by its control`() {
         // When
-        val result = runCatching { Storybook.create(listOf(healthBar), listOf(LANGUAGE_CONTROL), mapOf("language" to ArgDto.text("fr")), location()) }
+        val result = runCatching { Storybook.create(listOf(healthBar), listOf(LANGUAGE_CONTROL), mapOf("language" to ValueDto.text("fr")), location()) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
 
     @Test
-    fun `SelectStory should display the story with its own args when args of the story on show were changed`() {
+    fun `SelectStory should display the story with its own args when args of the selected story were changed`() {
         // Given
-        val storybook = storybook(components = listOf(healthBar)).changeArg("remaining", ArgDto.int(10))
+        val storybook = storybook(components = listOf(healthBar)).changeArg("remaining", ValueDto.int(10))
         // When
         val selectedStorybook = storybook.selectStory("screen-health-bar--empty")
         // Then
-        selectedStorybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(0))
+        selectedStorybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(0))
         selectedStorybook.toLocation().args shouldBe emptyMap()
     }
 
@@ -354,9 +354,9 @@ class StorybookTest {
         // Given
         val storybook = storybook(components = listOf(healthBar))
         // When
-        val (events, changedStorybook) = storybook.changeArg("remaining", ArgDto.int(10)).pullEvents()
+        val (events, changedStorybook) = storybook.changeArg("remaining", ValueDto.int(10)).pullEvents()
         // Then
-        changedStorybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(10))
+        changedStorybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(10))
         events.shouldContainExactly(ArgChanged(storyId = "screen-health-bar--full", argName = "remaining"))
     }
 
@@ -366,12 +366,12 @@ class StorybookTest {
         val storybook = storybook(components = listOf(inventorySlot))
         val args =
             mapOf(
-                "equipped" to ArgDto.boolean(true),
-                "size" to ArgDto.int(90),
-                "mode" to ArgDto.text("SELL"),
-                "label" to ArgDto.text(""),
-                "item" to ArgDto.text("none"),
-                "frame" to ArgDto.text("000000"),
+                "equipped" to ValueDto.boolean(true),
+                "size" to ValueDto.int(90),
+                "mode" to ValueDto.text("SELL"),
+                "label" to ValueDto.text(""),
+                "item" to ValueDto.text("none"),
+                "frame" to ValueDto.text("000000"),
             )
         // When
         val changedStorybook = args.entries.fold(storybook) { changed, (name, value) -> changed.changeArg(name, value) }
@@ -384,7 +384,7 @@ class StorybookTest {
         // Given
         val storybook = storybook(components = listOf(healthBar))
         // When
-        val (events, changedStorybook) = storybook.changeArg("remaining", ArgDto.int(30)).pullEvents()
+        val (events, changedStorybook) = storybook.changeArg("remaining", ValueDto.int(30)).pullEvents()
         // Then
         changedStorybook shouldBe storybook
         events.shouldBeEmpty()
@@ -393,7 +393,7 @@ class StorybookTest {
     @Test
     fun `ChangeArg should fail when the value is out of the range of its control`() {
         // When
-        val result = runCatching { storybook(components = listOf(healthBar)).changeArg("remaining", ArgDto.int(-1)) }
+        val result = runCatching { storybook(components = listOf(healthBar)).changeArg("remaining", ValueDto.int(-1)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
@@ -401,7 +401,7 @@ class StorybookTest {
     @Test
     fun `ChangeArg should fail when a color is not a hex in upper case`() {
         // When
-        val result = runCatching { storybook(components = listOf(inventorySlot)).changeArg("frame", ArgDto.text("ff375f")) }
+        val result = runCatching { storybook(components = listOf(inventorySlot)).changeArg("frame", ValueDto.text("ff375f")) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
@@ -409,15 +409,15 @@ class StorybookTest {
     @Test
     fun `ChangeArg should fail when the value is not an option of its control`() {
         // When
-        val result = runCatching { storybook(components = listOf(inventorySlot)).changeArg("mode", ArgDto.text("RENT")) }
+        val result = runCatching { storybook(components = listOf(inventorySlot)).changeArg("mode", ValueDto.text("RENT")) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
 
     @Test
-    fun `ChangeArg should fail when the component of the story on show has no such control`() {
+    fun `ChangeArg should fail when the component of the selected story has no such control`() {
         // When
-        val result = runCatching { storybook(components = listOf(healthBar)).changeArg("maximum", ArgDto.int(10)) }
+        val result = runCatching { storybook(components = listOf(healthBar)).changeArg("maximum", ValueDto.int(10)) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.ControlNotFound>()
     }
@@ -425,11 +425,11 @@ class StorybookTest {
     @Test
     fun `ResetArgs should display the story with its own args and publish the args reset when args were changed`() {
         // Given
-        val storybook = storybook(components = listOf(healthBar)).changeArg("remaining", ArgDto.int(10)).pullEvents().second
+        val storybook = storybook(components = listOf(healthBar)).changeArg("remaining", ValueDto.int(10)).pullEvents().second
         // When
         val (events, resetStorybook) = storybook.resetArgs().pullEvents()
         // Then
-        resetStorybook.toDto().args shouldBe mapOf("remaining" to ArgDto.int(30))
+        resetStorybook.toDto().args shouldBe mapOf("remaining" to ValueDto.int(30))
         events.shouldContainExactly(ArgsReset(storyId = "screen-health-bar--full"))
     }
 
@@ -449,9 +449,9 @@ class StorybookTest {
         // Given
         val storybook = storybook(components = listOf(healthBar))
         // When
-        val (events, changedStorybook) = storybook.changeGlobal("language", ArgDto.text("es")).pullEvents()
+        val (events, changedStorybook) = storybook.changeGlobal("language", ValueDto.text("es")).pullEvents()
         // Then
-        changedStorybook.toDto().globals shouldBe mapOf("language" to ArgDto.text("es"))
+        changedStorybook.toDto().globals shouldBe mapOf("language" to ValueDto.text("es"))
         events.shouldContainExactly(GlobalChanged(globalName = "language"))
     }
 
@@ -460,7 +460,7 @@ class StorybookTest {
         // Given
         val storybook = storybook(components = listOf(healthBar))
         // When
-        val (events, changedStorybook) = storybook.changeGlobal("language", ArgDto.text("en")).pullEvents()
+        val (events, changedStorybook) = storybook.changeGlobal("language", ValueDto.text("en")).pullEvents()
         // Then
         changedStorybook shouldBe storybook
         events.shouldBeEmpty()
@@ -469,7 +469,7 @@ class StorybookTest {
     @Test
     fun `ChangeGlobal should fail when its control does not accept the value`() {
         // When
-        val result = runCatching { storybook(components = listOf(healthBar)).changeGlobal("language", ArgDto.text("fr")) }
+        val result = runCatching { storybook(components = listOf(healthBar)).changeGlobal("language", ValueDto.text("fr")) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<StorybookError.InvalidValue>()
     }
@@ -479,11 +479,11 @@ class StorybookTest {
         // Given
         val storybook =
             storybook(components = listOf(inventorySlot))
-                .changeArg("frame", ArgDto.text("FF375F"))
-                .changeArg("equipped", ArgDto.boolean(true))
-                .changeArg("size", ArgDto.int(45))
-                .changeArg("size", ArgDto.int(60))
-                .changeGlobal("language", ArgDto.text("es"))
+                .changeArg("frame", ValueDto.text("FF375F"))
+                .changeArg("equipped", ValueDto.boolean(true))
+                .changeArg("size", ValueDto.int(45))
+                .changeArg("size", ValueDto.int(60))
+                .changeGlobal("language", ValueDto.text("es"))
         // When
         val location = storybook.toLocation()
         // Then
@@ -493,7 +493,7 @@ class StorybookTest {
     @Test
     fun `ToLocation should keep no global when every global has its default`() {
         // Given
-        val storybook = storybook(components = listOf(healthBar)).changeGlobal("language", ArgDto.text("es")).changeGlobal("language", ArgDto.text("en"))
+        val storybook = storybook(components = listOf(healthBar)).changeGlobal("language", ValueDto.text("es")).changeGlobal("language", ValueDto.text("en"))
         // When
         val location = storybook.toLocation()
         // Then
@@ -501,7 +501,7 @@ class StorybookTest {
     }
 
     @Test
-    fun `RecordAction should log the action as the newest one and publish the action recorded`() {
+    fun `RecordAction should record the action as the newest one and publish the action recorded`() {
         // Given
         val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3")).pullEvents().second
         // When
@@ -512,7 +512,7 @@ class StorybookTest {
     }
 
     @Test
-    fun `RecordAction should keep only the newest actions when the log is full`() {
+    fun `RecordAction should keep only the newest actions when the most actions are recorded`() {
         // Given
         val storybook = (1..Storybook.MAXIMUM_ACTIONS).fold(storybook()) { recorded, index -> recorded.recordAction("shopSlotSelected", listOf(index.toString())) }
         // When
@@ -525,17 +525,17 @@ class StorybookTest {
     }
 
     @Test
-    fun `RecordAction should keep the actions when an arg of the story on show is changed`() {
+    fun `RecordAction should keep the actions when an arg of the selected story is changed`() {
         // Given
         val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3"))
         // When
-        val changedStorybook = storybook.changeArg("remaining", ArgDto.int(3))
+        val changedStorybook = storybook.changeArg("remaining", ValueDto.int(3))
         // Then
         changedStorybook.toDto().actions.shouldContainExactly(ActionDto(name = "shopSlotSelected", arguments = listOf("3")))
     }
 
     @Test
-    fun `SelectStory should show the story with no actions when actions of the story on show were logged`() {
+    fun `SelectStory should show the story with no actions when actions of the selected story were recorded`() {
         // Given
         val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3"))
         // When
@@ -545,7 +545,7 @@ class StorybookTest {
     }
 
     @Test
-    fun `ClearActions should empty the log and publish the actions cleared when actions were logged`() {
+    fun `ClearActions should empty the actions recorded and publish the actions cleared when actions were recorded`() {
         // Given
         val storybook = storybook(components = listOf(healthBar)).recordAction("shopSlotSelected", listOf("3")).pullEvents().second
         // When
@@ -556,7 +556,7 @@ class StorybookTest {
     }
 
     @Test
-    fun `ClearActions should change nothing when no action was logged`() {
+    fun `ClearActions should change nothing when no action was recorded`() {
         // Given
         val storybook = storybook(components = listOf(healthBar))
         // When

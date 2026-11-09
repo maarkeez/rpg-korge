@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.domain
 
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 
 object StorybookMother {
     val LANGUAGE_CONTROL = ControlDto.pick("language", listOf("en", "es"))
@@ -15,7 +15,7 @@ object StorybookMother {
         requestedArgs: Map<String, String> = emptyMap(),
         requestedGlobals: Map<String, String> = emptyMap(),
         globalControls: List<ControlDto> = listOf(LANGUAGE_CONTROL),
-        defaultGlobals: Map<String, ArgDto> = mapOf("language" to ArgDto.text("en")),
+        defaultGlobals: Map<String, ValueDto> = mapOf("language" to ValueDto.text("en")),
     ): Storybook = Storybook.create(components, globalControls, defaultGlobals, location(requestedStoryId, requestedArgs, requestedGlobals)).pullEvents().second
 
     fun component(
@@ -24,7 +24,7 @@ object StorybookMother {
         title: String = "Health bar",
         description: String = "The health of a battle unit.",
         controls: List<ControlDto> = listOf(ControlDto.int("remaining", minimum = 0, maximum = 30)),
-        args: Map<String, ArgDto> = mapOf("remaining" to ArgDto.int(30)),
+        args: Map<String, ValueDto> = mapOf("remaining" to ValueDto.int(30)),
         stories: List<StoryDto> = listOf(story(id = "$id--full")),
     ): ComponentDto = ComponentDto(id = id, group = group, title = title, description = description, controls = controls, args = args, stories = stories)
 
@@ -32,7 +32,7 @@ object StorybookMother {
         id: String = "screen-health-bar--full",
         name: String = "Full",
         description: String = "Every health point left.",
-        args: Map<String, ArgDto> = emptyMap(),
+        args: Map<String, ValueDto> = emptyMap(),
     ): StoryDto = StoryDto(id = id, name = name, description = description, args = args)
 
     fun location(

@@ -502,7 +502,7 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `ExplorationInterrupted should remove the health flashes`() {
+    fun `ExplorationInterrupted should remove the health blinks`() {
         // Given
         val exploringApis = exploringApis(deployments = partyOfTwoKnights)
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -511,7 +511,7 @@ class BattlefieldPresenterTest {
         // When
         exploringApis.eventBus.dispatch()
         // Then
-        exploringBattlefieldView.removeHealthFlashesCount shouldBe 1
+        exploringBattlefieldView.removeHealthBlinksCount shouldBe 1
     }
 
     @Test
@@ -626,47 +626,47 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit on view when it receives an effect`() {
+    fun `BlinkUnit should blink the battle unit on view when it receives an effect`() {
         // Given
         eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "lava-damage"))
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit in the timeline when it receives an effect while battling`() {
+    fun `BlinkUnit should blink the battle unit in the timeline when it receives an effect while battling`() {
         // Given
-        battlefieldView.flashing = CompletableDeferred()
+        battlefieldView.blinking = CompletableDeferred()
         eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "lava-damage"))
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
-        withClue("The scene plays until the flash finishes") { timeline.isPlaying.shouldBeTrue() }
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        withClue("The scene plays until the blink finishes") { timeline.isPlaying.shouldBeTrue() }
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit alongside the timeline when it receives an effect while exploring`() {
+    fun `BlinkUnit should blink the battle unit alongside the timeline when it receives an effect while exploring`() {
         // Given
         val exploringApis = exploringApis()
-        val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val exploringBattlefieldView = FakeBattlefieldView().apply { blinking = CompletableDeferred() }
         val exploringTimeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
         exploringApis.eventBus.publish(EffectReceived(battleUnitId = "knight-1", effectId = "water-heal"))
         // When
         exploringApis.eventBus.dispatch()
         // Then
-        exploringBattlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
-        withClue("The party can walk while it flashes") { exploringTimeline.isPlaying.shouldBeFalse() }
+        exploringBattlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        withClue("The party can walk while it blinks") { exploringTimeline.isPlaying.shouldBeFalse() }
     }
 
     @Test
-    fun `FlashHealth should flash the health left of the battle unit alongside the timeline when it is damaged while exploring`() {
+    fun `BlinkHealth should blink the health left of the battle unit alongside the timeline when it is damaged while exploring`() {
         // Given
         val exploringApis = exploringApis(effects = listOf(damageEffect(id = "lava-damage", damage = 15, timingType = "IMMEDIATELY").toDto()))
-        val exploringBattlefieldView = FakeBattlefieldView().apply { flashing = CompletableDeferred() }
+        val exploringBattlefieldView = FakeBattlefieldView().apply { blinking = CompletableDeferred() }
         val exploringTimeline = gameSceneTimeline()
         exploringPresenter(exploringApis, exploringBattlefieldView, exploringTimeline)
         val lavaDamage = EffectApplicationDto(source = SourceDto.terrain("lava"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "lava-damage", destination = null)
@@ -675,13 +675,13 @@ class BattlefieldPresenterTest {
         exploringApis.eventBus.dispatch()
         // Then
         withClue("15 of its 30 health points are left") {
-            exploringBattlefieldView.flashedHealth.shouldContainExactly(position(1, 1) to PreviewOption.TWO_OUT_OF_THREE)
+            exploringBattlefieldView.blinkedHealth.shouldContainExactly(position(1, 1) to PreviewOption.TWO_OUT_OF_THREE)
         }
         withClue("The party can walk while its health is displayed") { exploringTimeline.isPlaying.shouldBeFalse() }
     }
 
     @Test
-    fun `FlashHealth should flash the full health of the battle unit when it is healed at full health while exploring`() {
+    fun `BlinkHealth should blink the full health of the battle unit when it is healed at full health while exploring`() {
         // Given
         val exploringApis = exploringApis(effects = listOf(healEffect(id = "water-heal", healing = 5).toDto()))
         val exploringBattlefieldView = FakeBattlefieldView()
@@ -691,29 +691,29 @@ class BattlefieldPresenterTest {
         // When
         exploringApis.eventBus.dispatch()
         // Then
-        exploringBattlefieldView.flashedHealth.shouldContainExactly(position(1, 1) to PreviewOption.FULL)
+        exploringBattlefieldView.blinkedHealth.shouldContainExactly(position(1, 1) to PreviewOption.FULL)
     }
 
     @Test
-    fun `FlashHealth should not flash the health of the battle unit when it is damaged in a battle`() {
+    fun `BlinkHealth should not blink the health of the battle unit when it is damaged in a battle`() {
         // Given
         val poisoning = EffectApplicationDto(source = SourceDto.battleUnit("rat-1"), recipient = RecipientDto.battleUnit("knight-1"), effectId = "poison", destination = null)
         apis.battleUnitApi.applyEffect(poisoning)
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
-        battlefieldView.flashedHealth.shouldBeEmpty()
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.blinkedHealth.shouldBeEmpty()
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit on view when it joins the party`() {
+    fun `BlinkUnit should blink the battle unit on view when it joins the party`() {
         // Given
         eventBus.publish(PartyEvent.PartyJoined(playerId = "player-1", battleUnitId = "knight-1", unitId = "knight"))
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
     }
 
     @Test
@@ -729,17 +729,17 @@ class BattlefieldPresenterTest {
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit on view when an effect is applied at the start of its turn`() {
+    fun `BlinkUnit should blink the battle unit on view when an effect is applied at the start of its turn`() {
         // Given
         eventBus.publish(OnPlayerTurnStartedEffectTriggered(battleUnitId = "knight-1", effectId = "venom-damage"))
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
     }
 
     @Test
-    fun `FlashUnit should not flash the battle unit on view when it is not on the battlefield`() {
+    fun `BlinkUnit should not blink the battle unit on view when it is not on the battlefield`() {
         // Given
         apis.battlefieldApi.removeOccupant("rat-1")
         eventBus.dispatch()
@@ -747,29 +747,29 @@ class BattlefieldPresenterTest {
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldBeEmpty()
+        battlefieldView.blinkedBattleUnits.shouldBeEmpty()
     }
 
     @Test
-    fun `FlashUnit should flash a vanished summon on the tile it vanished from, as it is deleted`() {
+    fun `BlinkUnit should blink a vanished summon on the tile it vanished from, as it is deleted`() {
         // Given
         eventBus.publish(BattleUnitVanished(playerId = "human", battleUnitId = "bee-1", unitId = "bee", row = 2, column = 3))
         // When
         eventBus.dispatch()
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "bee"))
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 2, column = 3, unitId = "bee"))
     }
 
     @Test
-    fun `FlashUnit should flash the battle unit once the previous steps have been played`() {
+    fun `BlinkUnit should blink the battle unit once the previous steps have been played`() {
         // Given
         val previousStep = timeline.playLongStep()
         publish(EffectReceived(battleUnitId = "knight-1", effectId = "lava-damage"))
-        battlefieldView.flashedBattleUnits.shouldBeEmpty()
+        battlefieldView.blinkedBattleUnits.shouldBeEmpty()
         // When
         previousStep.complete(Unit)
         // Then
-        battlefieldView.flashedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
+        battlefieldView.blinkedBattleUnits.shouldContainExactly(BattleUnitAt(row = 1, column = 1, unitId = "knight"))
     }
 
     @Test

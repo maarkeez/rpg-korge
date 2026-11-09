@@ -1,14 +1,14 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.PreviewBarView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [PreviewBarView], at the size the attack preview displays its bars, in any colors. */
+/** The stories of [PreviewBarView], at the size the cast preview displays its bars, in any colors. */
 object PreviewBarViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_VALUE = 30
@@ -33,21 +33,21 @@ object PreviewBarViewStories : StoryBinding {
             id = "shared-preview-bar--decreased",
             name = "Decreased",
             description = "The bar after a change, over the paler one it had before.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_VALUE), AFTER to ArgDto.int(MAXIMUM_VALUE / 3)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_VALUE), AFTER to ValueDto.int(MAXIMUM_VALUE / 3)),
         )
     private val emptied =
         StoryDto(
             id = "shared-preview-bar--emptied",
             name = "Emptied",
             description = "A change that takes everything the bar has left.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_VALUE / 2), AFTER to ArgDto.int(0)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_VALUE / 2), AFTER to ValueDto.int(0)),
         )
     private val otherColors =
         StoryDto(
             id = "shared-preview-bar--other-colors",
             name = "Other colors",
             description = "The colors of the mana bar instead of the health bar's: the bar and its preview fill up with any color.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_VALUE), AFTER to ArgDto.int(MAXIMUM_VALUE / 3), FILLED_COLOR to ArgDto.text(MANA_COLOR)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_VALUE), AFTER to ValueDto.int(MAXIMUM_VALUE / 3), FILLED_COLOR to ValueDto.text(MANA_COLOR)),
         )
 
     override fun component(context: StoryContext) =
@@ -66,11 +66,11 @@ object PreviewBarViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    BEFORE to ArgDto.int(MAXIMUM_VALUE),
-                    AFTER to ArgDto.int(MAXIMUM_VALUE),
-                    MAXIMUM to ArgDto.int(MAXIMUM_VALUE),
-                    FILLED_COLOR to ArgDto.text(HEALTH_COLOR),
-                    PREVIEW_COLOR to ArgDto.text(WHITE),
+                    BEFORE to ValueDto.int(MAXIMUM_VALUE),
+                    AFTER to ValueDto.int(MAXIMUM_VALUE),
+                    MAXIMUM to ValueDto.int(MAXIMUM_VALUE),
+                    FILLED_COLOR to ValueDto.text(HEALTH_COLOR),
+                    PREVIEW_COLOR to ValueDto.text(WHITE),
                 ),
             stories = listOf(unchanged, decreased, emptied, otherColors),
         )

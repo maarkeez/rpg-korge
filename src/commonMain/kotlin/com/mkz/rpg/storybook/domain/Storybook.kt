@@ -1,11 +1,11 @@
 package com.mkz.rpg.storybook.domain
 
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.LocationDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookError.ComponentWithoutStories
 import com.mkz.rpg.storybook.domain.StorybookError.ControlNotFound
 import com.mkz.rpg.storybook.domain.StorybookError.EmptyCatalogue
@@ -22,19 +22,19 @@ import com.mkz.rpg.storybook.domain.StorybookEvent.ActionRecorded
 import com.mkz.rpg.storybook.domain.StorybookEvent.ActionsCleared
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.ArgsReset
-import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueInitialised
+import com.mkz.rpg.storybook.domain.StorybookEvent.CatalogueOpened
 import com.mkz.rpg.storybook.domain.StorybookEvent.GlobalChanged
 import com.mkz.rpg.storybook.domain.StorybookEvent.StorySelected
 import kotlin.jvm.JvmInline
 
 /**
- * The views of the game shown in isolation, and the story on show. The catalogue lists the components, each a view of
+ * The views of the game shown in isolation, and the selected story. The catalogue lists the components, each a view of
  * the game (e.g.: the health bar), with its stories, each a state of the view (e.g.: full). Their ids are kept in the
  * links shared, so they are stable: renaming a component or a story keeps its id.
  *
- * The story on show is displayed with its args, one per control of its component (e.g.: `remaining = 15`), which can be
+ * The selected story is displayed with its args, one per control of its component (e.g.: `remaining = 15`), which can be
  * changed to any value its control accepts, and with the globals shared by every story (e.g.: `language = es`). The
- * actions log the callbacks the view on show made, e.g.: `shopSlotSelected(3)`, the newest first, until another story
+ * actions record the callbacks the view of the selected story made, e.g.: `shopSlotSelected(3)`, the newest first, until another story
  * is shown.
  */
 @ConsistentCopyVisibility
@@ -49,7 +49,7 @@ data class Storybook private constructor(
     private val events: Set<StorybookEvent>,
 ) {
     companion object {
-        /** How many actions the log keeps: the newest ones. */
+        /** How many actions are recorded: the newest ones. */
         const val MAXIMUM_ACTIONS = 50
 
         private val KEBAB_CASE = Regex("[a-z0-9]+(-[a-z0-9]+)*")
@@ -66,7 +66,7 @@ data class Storybook private constructor(
         fun create(
             components: List<ComponentDto>,
             globalControls: List<ControlDto>,
-            defaultGlobals: Map<String, ArgDto>,
+            defaultGlobals: Map<String, ValueDto>,
             location: LocationDto,
         ): Storybook {
             val catalogue = Components.fromDtos(components)
@@ -84,7 +84,7 @@ data class Storybook private constructor(
                 changedArgs = changedArgs,
                 globals = defaults + controls.parse(location.globals),
                 actions = emptyList(),
-                events = setOf(CatalogueInitialised, StorySelected(storyId = selectedStoryId.value)),
+                events = setOf(CatalogueOpened, StorySelected(storyId = selectedStoryId.value)),
             )
         }
     }
@@ -102,7 +102,7 @@ data class Storybook private constructor(
             actions = actions.map(Action::toDto),
         )
 
-    /** What a link keeps to open the same: the story on show, the args changed from its own, and the globals changed from their defaults. */
+    /** What a link keeps to open the same: the selected story, the args changed from its own, and the globals changed from their defaults. */
     fun toLocation() =
         LocationDto(
             storyId = selectedStoryId.value,
@@ -111,8 +111,8 @@ data class Storybook private constructor(
         )
 
     /**
-     * Shows the story, with its own args and no actions, as those were of the story on show. Nothing changes when it is
-     * already on show. Fails when it is not in the catalogue.
+     * Shows the story, with its own args and no actions, as those were of the selected story. Nothing changes when it is
+     * already selected. Fails when it is not in the catalogue.
      */
     fun selectStory(storyId: String): Storybook {
         val story = components.storyIdOrNull(storyId) ?: throw StoryNotFound(storyId)
@@ -120,10 +120,10 @@ data class Storybook private constructor(
         return copy(selectedStoryId = story, changedArgs = Values.NONE, actions = emptyList(), events = events + StorySelected(storyId = story.value))
     }
 
-    /** Changes an arg of the story on show. Nothing changes when it has that value. Fails when its control does not accept it. */
+    /** Changes an arg of the selected story. Nothing changes when it has that value. Fails when its control does not accept it. */
     fun changeArg(
         name: String,
-        value: ArgDto,
+        value: ValueDto,
     ): Storybook {
         val arg = selectedComponent().controls.valueOf(name, value)
         if (args()[name] == arg) return this
@@ -134,7 +134,7 @@ data class Storybook private constructor(
         )
     }
 
-    /** Gives the story on show its own args back. Nothing changes when none was changed. */
+    /** Gives the selected story its own args back. Nothing changes when none was changed. */
     fun resetArgs(): Storybook {
         if (changedArgs == Values.NONE) return this
         return copy(changedArgs = Values.NONE, events = events + ArgsReset(storyId = selectedStoryId.value))
@@ -143,7 +143,7 @@ data class Storybook private constructor(
     /** Changes a global of every story. Nothing changes when it has that value. Fails when its control does not accept it. */
     fun changeGlobal(
         name: String,
-        value: ArgDto,
+        value: ValueDto,
     ): Storybook {
         val global = globalControls.valueOf(name, value)
         if (globals[name] == global) return this
@@ -151,7 +151,7 @@ data class Storybook private constructor(
     }
 
     /**
-     * Logs an action of the view on show, e.g.: `shopSlotSelected` with `3`, as the newest one, keeping the last
+     * Records an action of the view of the selected story, e.g.: `shopSlotSelected` with `3`, as the newest one, keeping the last
      * [MAXIMUM_ACTIONS].
      */
     fun recordAction(
@@ -163,7 +163,7 @@ data class Storybook private constructor(
             events = events + ActionRecorded(storyId = selectedStoryId.value, actionName = name),
         )
 
-    /** Empties the log of actions. Nothing changes when it is empty. */
+    /** Empties the actions recorded. Nothing changes when it is empty. */
     fun clearActions(): Storybook {
         if (actions.isEmpty()) return this
         return copy(actions = emptyList(), events = events + ActionsCleared(storyId = selectedStoryId.value))
@@ -267,17 +267,17 @@ data class Storybook private constructor(
         }
 
         /** A value for every control, as the defaults. Fails when one is missing, has no control or is not accepted. */
-        fun defaultsOf(dtos: Map<String, ArgDto>): Values {
+        fun defaultsOf(dtos: Map<String, ValueDto>): Values {
             value.firstOrNull { control -> control.name !in dtos }?.let { control -> throw MissingValue(control.name) }
             return valuesOf(dtos)
         }
 
         /** Values for some controls. Fails when one has no control or is not accepted. */
-        fun valuesOf(dtos: Map<String, ArgDto>): Values = Values(dtos.mapValues { (name, dto) -> valueOf(name, dto) })
+        fun valuesOf(dtos: Map<String, ValueDto>): Values = Values(dtos.mapValues { (name, dto) -> valueOf(name, dto) })
 
         fun valueOf(
             name: String,
-            dto: ArgDto,
+            dto: ValueDto,
         ): Value {
             val control = controlOf(name) ?: throw ControlNotFound(name)
             return control.valueOrNull(dto) ?: throw InvalidValue(name, dto.text ?: dto.int ?: dto.boolean)
@@ -299,7 +299,7 @@ data class Storybook private constructor(
         val name: String
 
         /** The value, when the control accepts it, or `null`. */
-        fun valueOrNull(dto: ArgDto): Value?
+        fun valueOrNull(dto: ValueDto): Value?
 
         /** The value written as text, e.g.: `15`, when the control accepts it, or `null`. */
         fun parseOrNull(text: String): Value?
@@ -328,7 +328,7 @@ data class Storybook private constructor(
     private data class BooleanControl(
         override val name: String,
     ) : Control {
-        override fun valueOrNull(dto: ArgDto): Value? = dto.boolean?.takeIf { dto.type == ArgDto.TypeDto.BOOLEAN }?.let(::BooleanValue)
+        override fun valueOrNull(dto: ValueDto): Value? = dto.boolean?.takeIf { dto.type == ValueDto.TypeDto.BOOLEAN }?.let(::BooleanValue)
 
         override fun parseOrNull(text: String): Value? = text.toBooleanStrictOrNull()?.let(::BooleanValue)
 
@@ -344,9 +344,9 @@ data class Storybook private constructor(
             if (minimum > maximum) throw InvalidControl(name, "its minimum $minimum is greater than its maximum $maximum")
         }
 
-        override fun valueOrNull(dto: ArgDto): Value? = dto.int?.takeIf { dto.type == ArgDto.TypeDto.INT && it in minimum..maximum }?.let(::IntValue)
+        override fun valueOrNull(dto: ValueDto): Value? = dto.int?.takeIf { dto.type == ValueDto.TypeDto.INT && it in minimum..maximum }?.let(::IntValue)
 
-        override fun parseOrNull(text: String): Value? = text.toIntOrNull()?.let { int -> valueOrNull(ArgDto.int(int)) }
+        override fun parseOrNull(text: String): Value? = text.toIntOrNull()?.let { int -> valueOrNull(ValueDto.int(int)) }
 
         override fun toDto() = ControlDto.int(name, minimum = minimum, maximum = maximum)
     }
@@ -355,9 +355,9 @@ data class Storybook private constructor(
         override val name: String,
         val options: OptionList,
     ) : Control {
-        override fun valueOrNull(dto: ArgDto): Value? = options.valueOrNull(dto)
+        override fun valueOrNull(dto: ValueDto): Value? = options.valueOrNull(dto)
 
-        override fun parseOrNull(text: String): Value? = options.valueOrNull(ArgDto.text(text))
+        override fun parseOrNull(text: String): Value? = options.valueOrNull(ValueDto.text(text))
 
         override fun toDto() = ControlDto.enum(name, options.value)
     }
@@ -365,7 +365,7 @@ data class Storybook private constructor(
     private data class TextControl(
         override val name: String,
     ) : Control {
-        override fun valueOrNull(dto: ArgDto): Value? = dto.text?.takeIf { dto.type == ArgDto.TypeDto.TEXT }?.let(::TextValue)
+        override fun valueOrNull(dto: ValueDto): Value? = dto.text?.takeIf { dto.type == ValueDto.TypeDto.TEXT }?.let(::TextValue)
 
         override fun parseOrNull(text: String): Value = TextValue(text)
 
@@ -376,9 +376,9 @@ data class Storybook private constructor(
         override val name: String,
         val options: OptionList,
     ) : Control {
-        override fun valueOrNull(dto: ArgDto): Value? = options.valueOrNull(dto)
+        override fun valueOrNull(dto: ValueDto): Value? = options.valueOrNull(dto)
 
-        override fun parseOrNull(text: String): Value? = options.valueOrNull(ArgDto.text(text))
+        override fun parseOrNull(text: String): Value? = options.valueOrNull(ValueDto.text(text))
 
         override fun toDto() = ControlDto.pick(name, options.value)
     }
@@ -387,10 +387,10 @@ data class Storybook private constructor(
     private data class ColorControl(
         override val name: String,
     ) : Control {
-        override fun valueOrNull(dto: ArgDto): Value? = dto.text?.takeIf { dto.type == ArgDto.TypeDto.TEXT && HEX_COLOR.matches(it) }?.let(::TextValue)
+        override fun valueOrNull(dto: ValueDto): Value? = dto.text?.takeIf { dto.type == ValueDto.TypeDto.TEXT && HEX_COLOR.matches(it) }?.let(::TextValue)
 
         // A link may write it in lower case, e.g.: `ff375f`.
-        override fun parseOrNull(text: String): Value? = valueOrNull(ArgDto.text(text.uppercase()))
+        override fun parseOrNull(text: String): Value? = valueOrNull(ValueDto.text(text.uppercase()))
 
         override fun toDto() = ControlDto.color(name)
     }
@@ -404,13 +404,13 @@ data class Storybook private constructor(
             value.firstRepeatedOrNull()?.let { option -> throw InvalidControl(name, "its option '$option' is repeated") }
         }
 
-        fun valueOrNull(dto: ArgDto): Value? = dto.text?.takeIf { dto.type == ArgDto.TypeDto.TEXT && it in value }?.let(::TextValue)
+        fun valueOrNull(dto: ValueDto): Value? = dto.text?.takeIf { dto.type == ValueDto.TypeDto.TEXT && it in value }?.let(::TextValue)
     }
 
     private sealed interface Value {
         fun asText(): String
 
-        fun toDto(): ArgDto
+        fun toDto(): ValueDto
     }
 
     private data class BooleanValue(
@@ -418,7 +418,7 @@ data class Storybook private constructor(
     ) : Value {
         override fun asText() = value.toString()
 
-        override fun toDto() = ArgDto.boolean(value)
+        override fun toDto() = ValueDto.boolean(value)
     }
 
     private data class IntValue(
@@ -426,7 +426,7 @@ data class Storybook private constructor(
     ) : Value {
         override fun asText() = value.toString()
 
-        override fun toDto() = ArgDto.int(value)
+        override fun toDto() = ValueDto.int(value)
     }
 
     private data class TextValue(
@@ -434,7 +434,7 @@ data class Storybook private constructor(
     ) : Value {
         override fun asText() = value
 
-        override fun toDto() = ArgDto.text(value)
+        override fun toDto() = ValueDto.text(value)
     }
 
     /** The values of some controls, by the name of their control. */
@@ -453,10 +453,10 @@ data class Storybook private constructor(
         /** Only the values that differ from the [original] ones. */
         fun changedFrom(original: Values): Values = Values(value.filter { (name, value) -> original[name] != value })
 
-        fun toDto(): Map<String, ArgDto> = value.mapValues { (_, value) -> value.toDto() }
+        fun toDto(): Map<String, ValueDto> = value.mapValues { (_, value) -> value.toDto() }
     }
 
-    /** A callback the view on show made, e.g.: `shopSlotSelected` with `3`. */
+    /** A callback the view of the selected story made, e.g.: `shopSlotSelected` with `3`. */
     private data class Action(
         val name: String,
         val arguments: List<String>,
@@ -486,17 +486,17 @@ data class Storybook private constructor(
     /**
      * Components: in the order they are listed, each with its stories in order, the first one opened by default.
      * Global controls: the settings shared by every story, e.g.: the language, with their default values.
-     * Selected story: the id of the story on show. Args: the values the story on show is displayed with, one per
-     * control of its component. Globals: the value of each global control. Actions: the callbacks the view on show made,
+     * Selected story: the id of the selected story. Args: the values the selected story is displayed with, one per
+     * control of its component. Globals: the value of each global control. Actions: the callbacks the view of the selected story made,
      * the newest first.
      */
     data class Dto(
         val components: List<ComponentDto>,
         val globalControls: List<ControlDto>,
-        val defaultGlobals: Map<String, ArgDto>,
+        val defaultGlobals: Map<String, ValueDto>,
         val selectedStoryId: String,
-        val args: Map<String, ArgDto>,
-        val globals: Map<String, ArgDto>,
+        val args: Map<String, ValueDto>,
+        val globals: Map<String, ValueDto>,
         val actions: List<ActionDto>,
     ) {
         /**
@@ -510,7 +510,7 @@ data class Storybook private constructor(
             val title: String,
             val description: String,
             val controls: List<ControlDto>,
-            val args: Map<String, ArgDto>,
+            val args: Map<String, ValueDto>,
             val stories: List<StoryDto>,
         )
 
@@ -522,7 +522,7 @@ data class Storybook private constructor(
             val id: String,
             val name: String,
             val description: String,
-            val args: Map<String, ArgDto>,
+            val args: Map<String, ValueDto>,
         )
 
         /**
@@ -577,18 +577,18 @@ data class Storybook private constructor(
         }
 
         /** The value of an arg or a global: a boolean, an int, or a text (also the option of an enum or a pick, and a color). */
-        data class ArgDto(
+        data class ValueDto(
             val type: TypeDto,
             val boolean: Boolean?,
             val int: Int?,
             val text: String?,
         ) {
             companion object {
-                fun boolean(value: Boolean) = ArgDto(type = TypeDto.BOOLEAN, boolean = value, int = null, text = null)
+                fun boolean(value: Boolean) = ValueDto(type = TypeDto.BOOLEAN, boolean = value, int = null, text = null)
 
-                fun int(value: Int) = ArgDto(type = TypeDto.INT, boolean = null, int = value, text = null)
+                fun int(value: Int) = ValueDto(type = TypeDto.INT, boolean = null, int = value, text = null)
 
-                fun text(value: String) = ArgDto(type = TypeDto.TEXT, boolean = null, int = null, text = value)
+                fun text(value: String) = ValueDto(type = TypeDto.TEXT, boolean = null, int = null, text = value)
             }
 
             enum class TypeDto {
@@ -599,7 +599,7 @@ data class Storybook private constructor(
         }
 
         /**
-         * A callback the view on show made, by its name, e.g.: `shopSlotSelected`. Arguments: what it was made with, as
+         * A callback the view of the selected story made, by its name, e.g.: `shopSlotSelected`. Arguments: what it was made with, as
          * text, e.g.: `3`.
          */
         data class ActionDto(
@@ -608,7 +608,7 @@ data class Storybook private constructor(
         )
 
         /**
-         * Where a link keeps what is on show, as text, e.g.: the page URL `?story=screen-health-bar--full&args=remaining:3`.
+         * Where a link keeps what is shown, as text, e.g.: the page URL `?story=screen-health-bar--full&args=remaining:3`.
          * Story: the id of the story, or `null` when none is asked for. Args: those changed from the story's own. Globals:
          * those changed from their defaults.
          */

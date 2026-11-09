@@ -34,7 +34,7 @@ import kotlin.time.Duration.Companion.seconds
  * effects of the battle units standing still. Once the game is over, the pad is hidden and the seconds are no longer
  * counted.
  *
- * A press while the scene is still playing (e.g.: a battle unit flashing with its terrain effect) is not lost: the last
+ * A press while the scene is still playing (e.g.: a battle unit blinking with its terrain effect) is not lost: the last
  * arrow or A pressed is acted on once the scene is idle, unless the pad is hidden meanwhile.
  *
  * Pressing A talks to the npc next to the leader: its talk panel takes the place of the pad until it is tapped. Time stops

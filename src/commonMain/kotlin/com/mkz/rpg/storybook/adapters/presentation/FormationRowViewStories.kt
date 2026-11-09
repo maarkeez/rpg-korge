@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.FormationRowView
 import com.mkz.rpg.screen.adapters.presentation.FormationView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
@@ -26,7 +26,7 @@ object FormationRowViewStories : StoryBinding {
 
     private val member = StoryDto(id = "screen-formation-row--member", name = "Member", description = "A party member who is not the leader.", args = emptyMap())
     private val leader =
-        StoryDto(id = "screen-formation-row--leader", name = "Leader", description = "The party member who leads: the crown on its left.", args = mapOf(LEADER to ArgDto.boolean(true)))
+        StoryDto(id = "screen-formation-row--leader", name = "Leader", description = "The party member who leads: the crown on its left.", args = mapOf(LEADER to ValueDto.boolean(true)))
     private val selected =
         StoryDto(
             id = "screen-formation-row--selected",
@@ -34,7 +34,7 @@ object FormationRowViewStories : StoryBinding {
             description = "The row tapped last, in blue, to be swapped with the next one tapped.",
             args =
                 mapOf(
-                    SELECTED to ArgDto.boolean(true),
+                    SELECTED to ValueDto.boolean(true),
                 ),
         )
     private val hurt =
@@ -42,14 +42,14 @@ object FormationRowViewStories : StoryBinding {
             id = "screen-formation-row--hurt",
             name = "Hurt",
             description = "A party member who lost health and mana.",
-            args = mapOf(REMAINING_HEALTH to ArgDto.int(8), REMAINING_MANA to ArgDto.int(3)),
+            args = mapOf(REMAINING_HEALTH to ValueDto.int(8), REMAINING_MANA to ValueDto.int(3)),
         )
     private val longName =
         StoryDto(
             id = "screen-formation-row--long-name",
             name = "Long name",
             description = "A name longer than the room it has.",
-            args = mapOf(NAME to ArgDto.text("Sir Reginald the Unbreakable")),
+            args = mapOf(NAME to ValueDto.text("Sir Reginald the Unbreakable")),
         )
 
     override fun component(context: StoryContext) =
@@ -71,14 +71,14 @@ object FormationRowViewStories : StoryBinding {
                 ),
             args =
                 mapOf(
-                    UNIT to ArgDto.text(DEFAULT_UNIT),
-                    NAME to ArgDto.text("Knight"),
-                    REMAINING_HEALTH to ArgDto.int(20),
-                    MAXIMUM_HEALTH to ArgDto.int(20),
-                    REMAINING_MANA to ArgDto.int(10),
-                    MAXIMUM_MANA to ArgDto.int(10),
-                    LEADER to ArgDto.boolean(false),
-                    SELECTED to ArgDto.boolean(false),
+                    UNIT to ValueDto.text(DEFAULT_UNIT),
+                    NAME to ValueDto.text("Knight"),
+                    REMAINING_HEALTH to ValueDto.int(20),
+                    MAXIMUM_HEALTH to ValueDto.int(20),
+                    REMAINING_MANA to ValueDto.int(10),
+                    MAXIMUM_MANA to ValueDto.int(10),
+                    LEADER to ValueDto.boolean(false),
+                    SELECTED to ValueDto.boolean(false),
                 ),
             stories = listOf(member, leader, selected, hurt, longName),
         )
@@ -89,7 +89,7 @@ object FormationRowViewStories : StoryBinding {
     ): View =
         FormationRowView(SIZE, context.resourcesLoader).apply {
             // Tapping the selected row selects none.
-            setOnSelected { context.action("onSelected", setArg = SELECTED to ArgDto.boolean(!isSelected)) }
+            setOnSelected { context.action("onSelected", setArg = SELECTED to ValueDto.boolean(!isSelected)) }
             display(
                 FormationView.Row(
                     unitId = args.text(UNIT),

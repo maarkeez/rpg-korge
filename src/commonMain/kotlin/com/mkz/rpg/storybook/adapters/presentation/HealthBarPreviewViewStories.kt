@@ -1,14 +1,14 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.HealthBarPreviewView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 import korlibs.math.geom.Size
 
-/** The stories of [HealthBarPreviewView], at the size the attack and receiver previews display it. */
+/** The stories of [HealthBarPreviewView], at the size the cast preview and the recipient preview display it. */
 object HealthBarPreviewViewStories : StoryBinding {
     private val SIZE = Size(281.5, 16)
     private const val MAXIMUM_HEALTH = 30
@@ -24,21 +24,21 @@ object HealthBarPreviewViewStories : StoryBinding {
             id = "screen-health-bar-preview--hurt",
             name = "Hurt",
             description = "The health a battle unit would have left after a hit, over the health it has now.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_HEALTH), AFTER to ArgDto.int(MAXIMUM_HEALTH / 3)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_HEALTH), AFTER to ValueDto.int(MAXIMUM_HEALTH / 3)),
         )
     private val defeated =
         StoryDto(
             id = "screen-health-bar-preview--defeated",
             name = "Defeated",
             description = "A hit that takes all the health the battle unit has left.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_HEALTH / 2), AFTER to ArgDto.int(0)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_HEALTH / 2), AFTER to ValueDto.int(0)),
         )
     private val healed =
         StoryDto(
             id = "screen-health-bar-preview--healed",
             name = "Healed",
             description = "A heal on a hurt battle unit: the health it would have after it, over the health it has now.",
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_HEALTH / 3), AFTER to ArgDto.int(MAXIMUM_HEALTH)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_HEALTH / 3), AFTER to ValueDto.int(MAXIMUM_HEALTH)),
         )
 
     override fun component(context: StoryContext) =
@@ -46,14 +46,14 @@ object HealthBarPreviewViewStories : StoryBinding {
             id = "screen-health-bar-preview",
             group = "Screen",
             title = "Health bar preview",
-            description = "The health a battle unit would have left after a cast, over the health it has now, in the attack and receiver previews.",
+            description = "The health a battle unit would have left after a cast, over the health it has now, in the cast preview and the recipient preview.",
             controls =
                 listOf(
                     ControlDto.int(BEFORE, minimum = 0, maximum = HEALTH_LIMIT),
                     ControlDto.int(AFTER, minimum = 0, maximum = HEALTH_LIMIT),
                     ControlDto.int(MAXIMUM, minimum = 1, maximum = HEALTH_LIMIT),
                 ),
-            args = mapOf(BEFORE to ArgDto.int(MAXIMUM_HEALTH), AFTER to ArgDto.int(MAXIMUM_HEALTH), MAXIMUM to ArgDto.int(MAXIMUM_HEALTH)),
+            args = mapOf(BEFORE to ValueDto.int(MAXIMUM_HEALTH), AFTER to ValueDto.int(MAXIMUM_HEALTH), MAXIMUM to ValueDto.int(MAXIMUM_HEALTH)),
             stories = listOf(unchanged, hurt, defeated, healed),
         )
 

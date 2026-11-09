@@ -1,8 +1,8 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.shared.adapters.presentation.sharedViewsTest
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -12,7 +12,7 @@ import korlibs.korge.tests.ViewsForTesting
 import kotlin.test.Test
 
 class ControlsViewTest : ViewsForTesting() {
-    private val changedArgs = mutableListOf<Pair<String, ArgDto>>()
+    private val changedArgs = mutableListOf<Pair<String, ValueDto>>()
     private var resets = 0
 
     private val controls =
@@ -26,12 +26,12 @@ class ControlsViewTest : ViewsForTesting() {
         )
     private val args =
         mapOf(
-            "equipped" to ArgDto.boolean(false),
-            "remaining" to ArgDto.int(15),
-            "mode" to ArgDto.text("SELL"),
-            "label" to ArgDto.text("Potion"),
-            "item" to ArgDto.text("none"),
-            "frame" to ArgDto.text("FF375F"),
+            "equipped" to ValueDto.boolean(false),
+            "remaining" to ValueDto.int(15),
+            "mode" to ValueDto.text("SELL"),
+            "label" to ValueDto.text("Potion"),
+            "item" to ValueDto.text("none"),
+            "frame" to ValueDto.text("FF375F"),
         )
 
     private fun newControlsView() =
@@ -40,7 +40,7 @@ class ControlsViewTest : ViewsForTesting() {
                 object : ControlsView.Delegate {
                     override fun argChanged(
                         name: String,
-                        value: ArgDto,
+                        value: ValueDto,
                     ) {
                         changedArgs += name to value
                     }
@@ -92,7 +92,7 @@ class ControlsViewTest : ViewsForTesting() {
             val controlsView = newControlsView()
             controlsView.display(controls, args)
             // When
-            controlsView.display(listOf(ControlDto.int("remaining", minimum = 0, maximum = 30)), mapOf("remaining" to ArgDto.int(3)))
+            controlsView.display(listOf(ControlDto.int("remaining", minimum = 0, maximum = 30)), mapOf("remaining" to ValueDto.int(3)))
             // Then
             controlsView.controlNames().shouldContainExactly("remaining")
             controlsView.displayedValue("remaining") shouldBe "3"
@@ -104,7 +104,7 @@ class ControlsViewTest : ViewsForTesting() {
             // When
             clickControlButton(controlsView, "equipped", "toggle")
             // Then
-            changedArgs.shouldContainExactly("equipped" to ArgDto.boolean(true))
+            changedArgs.shouldContainExactly("equipped" to ValueDto.boolean(true))
         }
 
     @Test
@@ -114,12 +114,12 @@ class ControlsViewTest : ViewsForTesting() {
             clickControlButton(controlsView, "remaining", "increase")
             clickControlButton(controlsView, "remaining", "decrease")
             // Then
-            changedArgs.shouldContainExactly("remaining" to ArgDto.int(16), "remaining" to ArgDto.int(14))
+            changedArgs.shouldContainExactly("remaining" to ValueDto.int(16), "remaining" to ValueDto.int(14))
         }
 
     @Test
     fun `ClickControlButton should not change an int arg when it is at its maximum`() =
-        controlsTest(mapOf("remaining" to ArgDto.int(30))) { controlsView ->
+        controlsTest(mapOf("remaining" to ValueDto.int(30))) { controlsView ->
             // When
             clickControlButton(controlsView, "remaining", "increase")
             // Then
@@ -133,7 +133,7 @@ class ControlsViewTest : ViewsForTesting() {
             clickControlButton(controlsView, "mode", "option:BUY")
             clickControlButton(controlsView, "mode", "option:SELL")
             // Then
-            changedArgs.shouldContainExactly("mode" to ArgDto.text("BUY"))
+            changedArgs.shouldContainExactly("mode" to ValueDto.text("BUY"))
         }
 
     @Test
@@ -143,7 +143,7 @@ class ControlsViewTest : ViewsForTesting() {
             clickControlButton(controlsView, "item", "next")
             clickControlButton(controlsView, "item", "previous")
             // Then
-            changedArgs.shouldContainExactly("item" to ArgDto.text("hammer"), "item" to ArgDto.text("health-potion"))
+            changedArgs.shouldContainExactly("item" to ValueDto.text("hammer"), "item" to ValueDto.text("health-potion"))
         }
 
     @Test
@@ -152,7 +152,7 @@ class ControlsViewTest : ViewsForTesting() {
             // When
             controlsView.enterText("label", "Iron hammer")
             // Then
-            changedArgs.shouldContainExactly("label" to ArgDto.text("Iron hammer"))
+            changedArgs.shouldContainExactly("label" to ValueDto.text("Iron hammer"))
         }
 
     @Test
@@ -161,7 +161,7 @@ class ControlsViewTest : ViewsForTesting() {
             // When
             controlsView.enterText("frame", "#ffbb31")
             // Then
-            changedArgs.shouldContainExactly("frame" to ArgDto.text("FFBB31"))
+            changedArgs.shouldContainExactly("frame" to ValueDto.text("FFBB31"))
         }
 
     @Test
@@ -184,7 +184,7 @@ class ControlsViewTest : ViewsForTesting() {
         }
 
     private fun controlsTest(
-        changedArgs: Map<String, ArgDto> = emptyMap(),
+        changedArgs: Map<String, ValueDto> = emptyMap(),
         block: suspend ViewsForTesting.(ControlsView) -> Unit,
     ) = sharedViewsTest {
         // Given

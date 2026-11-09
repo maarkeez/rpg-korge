@@ -215,7 +215,7 @@ class InventoryPresenterGiveTest {
         inventoryView.displayedSlots.last().shouldContainExactly(Slot("health-potion", isEquipped = false))
         inventoryView.selectedSlot.shouldBeNull()
         callToActionView.displayedGiveItem.shouldBeNull()
-        battlefieldView.flashedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
+        battlefieldView.blinkedBattleUnits.last() shouldBe BattleUnitAt(row = 1, column = 2, unitId = "viking")
         // The tiles look as when the giver was selected.
         battlefieldView.tileSelections.last() shouldBe knightTile
         battlefieldView.tilesNotDimmed.last() shouldBe setOf(knightTile)

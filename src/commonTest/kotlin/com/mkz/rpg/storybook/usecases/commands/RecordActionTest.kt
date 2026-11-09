@@ -17,7 +17,7 @@ class RecordActionTest {
     private val recordAction = RecordAction(storybookRepository, eventBus)
 
     @Test
-    fun `should log the action as the newest one when the catalogue is initialised`() {
+    fun `should record the action as the newest one when the catalogue is open`() {
         // Given
         storybookRepository.save(storybook())
         // When
@@ -32,7 +32,7 @@ class RecordActionTest {
     }
 
     @Test
-    fun `should do nothing when the catalogue is not initialised`() {
+    fun `should do nothing when the catalogue is not open`() {
         // When
         recordAction(name = "shopSlotSelected", arguments = listOf("3"))
         // Then

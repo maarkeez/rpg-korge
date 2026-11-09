@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.BattlefieldView
 import com.mkz.rpg.screen.adapters.presentation.WorldBuilderHudView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -28,21 +28,21 @@ object WorldBuilderHudViewStories : StoryBinding {
             id = "screen-world-builder-hud--smallest-world",
             name = "Smallest world",
             description = "The steps that would make the world smaller are disabled.",
-            args = mapOf(ROWS to ArgDto.int(MINIMUM_SIZE), COLUMNS to ArgDto.int(MINIMUM_SIZE)),
+            args = mapOf(ROWS to ValueDto.int(MINIMUM_SIZE), COLUMNS to ValueDto.int(MINIMUM_SIZE)),
         )
     private val largestWorld =
         StoryDto(
             id = "screen-world-builder-hud--largest-world",
             name = "Largest world",
             description = "The steps that would make the world larger are disabled.",
-            args = mapOf(ROWS to ArgDto.int(MAXIMUM_SIZE), COLUMNS to ArgDto.int(MAXIMUM_SIZE)),
+            args = mapOf(ROWS to ValueDto.int(MAXIMUM_SIZE), COLUMNS to ValueDto.int(MAXIMUM_SIZE)),
         )
     private val otherTerrain =
         StoryDto(
             id = "screen-world-builder-hud--other-terrain",
             name = "Other terrain",
             description = "Another terrain selected, framed in white.",
-            args = mapOf(SELECTED_TERRAIN to ArgDto.text("water")),
+            args = mapOf(SELECTED_TERRAIN to ValueDto.text("water")),
         )
 
     override fun component(context: StoryContext) =
@@ -57,7 +57,7 @@ object WorldBuilderHudViewStories : StoryBinding {
                     ControlDto.int(COLUMNS, minimum = MINIMUM_SIZE, maximum = MAXIMUM_SIZE),
                     ControlDto.pick(SELECTED_TERRAIN, context.terrainIds()),
                 ),
-            args = mapOf(ROWS to ArgDto.int(16), COLUMNS to ArgDto.int(16), SELECTED_TERRAIN to ArgDto.text(DEFAULT_TERRAIN)),
+            args = mapOf(ROWS to ValueDto.int(16), COLUMNS to ValueDto.int(16), SELECTED_TERRAIN to ValueDto.text(DEFAULT_TERRAIN)),
             stories = listOf(default, smallestWorld, largestWorld, otherTerrain),
         )
 
@@ -80,9 +80,9 @@ object WorldBuilderHudViewStories : StoryBinding {
                     override fun sizeChanged(
                         rows: Int,
                         columns: Int,
-                    ) = context.action("sizeChanged", rows, columns, setArg = if (rows != args.int(ROWS)) ROWS to ArgDto.int(rows) else COLUMNS to ArgDto.int(columns))
+                    ) = context.action("sizeChanged", rows, columns, setArg = if (rows != args.int(ROWS)) ROWS to ValueDto.int(rows) else COLUMNS to ValueDto.int(columns))
 
-                    override fun terrainSelected(terrainId: String) = context.action("terrainSelected", terrainId, setArg = SELECTED_TERRAIN to ArgDto.text(terrainId))
+                    override fun terrainSelected(terrainId: String) = context.action("terrainSelected", terrainId, setArg = SELECTED_TERRAIN to ValueDto.text(terrainId))
                 },
             )
             displaySize(rows = rows, columns = columns, allowedSizes = MINIMUM_SIZE..MAXIMUM_SIZE)

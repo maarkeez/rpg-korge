@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.CancelAndConfirmView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [CancelAndConfirmView], built with its real [com.mkz.rpg.screen.adapters.presentation.CancelButton] and [com.mkz.rpg.screen.adapters.presentation.ConfirmButton]. */
@@ -18,21 +18,21 @@ object CancelAndConfirmViewStories : StoryBinding {
             id = "screen-cancel-and-confirm--export-and-back",
             name = "Export and back",
             description = "The labels the world builder gives it to export the world or go back to the menu.",
-            args = mapOf(CANCEL_LABEL to ArgDto.text("Back"), CONFIRM_LABEL to ArgDto.text("Export")),
+            args = mapOf(CANCEL_LABEL to ValueDto.text("Back"), CONFIRM_LABEL to ValueDto.text("Export")),
         )
     private val leaveConfirmation =
         StoryDto(
             id = "screen-cancel-and-confirm--leave-confirmation",
             name = "Leave confirmation",
             description = "The labels the world builder gives it to confirm leaving, as the world is lost.",
-            args = mapOf(CANCEL_LABEL to ArgDto.text("Stay"), CONFIRM_LABEL to ArgDto.text("Leave")),
+            args = mapOf(CANCEL_LABEL to ValueDto.text("Stay"), CONFIRM_LABEL to ValueDto.text("Leave")),
         )
     private val longLabels =
         StoryDto(
             id = "screen-cancel-and-confirm--long-labels",
             name = "Long labels",
             description = "Labels longer than the buttons, as translations may be.",
-            args = mapOf(CANCEL_LABEL to ArgDto.text("Cancel and go back"), CONFIRM_LABEL to ArgDto.text("Confirm and continue")),
+            args = mapOf(CANCEL_LABEL to ValueDto.text("Cancel and go back"), CONFIRM_LABEL to ValueDto.text("Confirm and continue")),
         )
 
     override fun component(context: StoryContext) =
@@ -42,7 +42,7 @@ object CancelAndConfirmViewStories : StoryBinding {
             title = "Cancel and confirm",
             description = "A secondary action on the left and a primary one on the right, as the call to action of the world builder shows them.",
             controls = listOf(ControlDto.text(CANCEL_LABEL), ControlDto.text(CONFIRM_LABEL)),
-            args = mapOf(CANCEL_LABEL to ArgDto.text("Cancel"), CONFIRM_LABEL to ArgDto.text("Confirm")),
+            args = mapOf(CANCEL_LABEL to ValueDto.text("Cancel"), CONFIRM_LABEL to ValueDto.text("Confirm")),
             stories = listOf(default, exportAndBack, leaveConfirmation, longLabels),
         )
 

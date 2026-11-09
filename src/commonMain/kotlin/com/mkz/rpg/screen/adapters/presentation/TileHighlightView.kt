@@ -16,7 +16,7 @@ class TileHighlightView(
         internal val path: String,
     ) {
         /** A tile the selected battle unit can move to. */
-        MOVE_RANGE("battlefield/tile_selection_3.png"),
+        WALKING_RANGE("battlefield/tile_selection_3.png"),
 
         /** A tile the selected ability can be cast on. */
         CAST_RANGE("battlefield/tile_selection_2.png"),

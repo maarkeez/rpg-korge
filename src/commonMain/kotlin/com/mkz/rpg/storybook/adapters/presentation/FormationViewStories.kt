@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.FormationView
 import com.mkz.rpg.screen.adapters.presentation.UiMessage
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /**
@@ -32,7 +32,7 @@ object FormationViewStories : StoryBinding {
             description = "A row tapped, in blue: the hint asks to tap another one to reorder them.",
             args =
                 mapOf(
-                    SELECTED_ROW to ArgDto.text("1"),
+                    SELECTED_ROW to ValueDto.text("1"),
                 ),
         )
     private val fullParty =
@@ -42,12 +42,12 @@ object FormationViewStories : StoryBinding {
             description = "As many party members as rows fit in place of the pad.",
             args =
                 mapOf(
-                    MEMBERS to ArgDto.int(FormationView.ROWS),
+                    MEMBERS to ValueDto.int(FormationView.ROWS),
                 ),
         )
     private val hurtParty =
-        StoryDto(id = "screen-formation--hurt-party", name = "Hurt party", description = "Party members who lost health and mana.", args = mapOf(HURT to ArgDto.boolean(true)))
-    private val alone = StoryDto(id = "screen-formation--alone", name = "Alone", description = "A party of one: the leader only.", args = mapOf(MEMBERS to ArgDto.int(1)))
+        StoryDto(id = "screen-formation--hurt-party", name = "Hurt party", description = "Party members who lost health and mana.", args = mapOf(HURT to ValueDto.boolean(true)))
+    private val alone = StoryDto(id = "screen-formation--alone", name = "Alone", description = "A party of one: the leader only.", args = mapOf(MEMBERS to ValueDto.int(1)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -63,7 +63,7 @@ object FormationViewStories : StoryBinding {
                     ControlDto.pick(SELECTED_ROW, listOf(NO_ROW) + (0 until FormationView.ROWS).map { index -> index.toString() }),
                     ControlDto.boolean(HURT),
                 ),
-            args = mapOf(MEMBERS to ArgDto.int(3), SELECTED_ROW to ArgDto.text(NO_ROW), HURT to ArgDto.boolean(false)),
+            args = mapOf(MEMBERS to ValueDto.int(3), SELECTED_ROW to ValueDto.text(NO_ROW), HURT to ValueDto.boolean(false)),
             stories = listOf(party, rowSelected, fullParty, hurtParty, alone),
         )
 
@@ -95,7 +95,7 @@ object FormationViewStories : StoryBinding {
                     // Tapping the selected row selects none.
                     override fun formationRowSelected(index: Int) {
                         val selected = index.takeIf { index != selectedRow }
-                        context.action("formationRowSelected", index, setArg = SELECTED_ROW to ArgDto.text(selected?.toString() ?: NO_ROW))
+                        context.action("formationRowSelected", index, setArg = SELECTED_ROW to ValueDto.text(selected?.toString() ?: NO_ROW))
                     }
                 },
             )

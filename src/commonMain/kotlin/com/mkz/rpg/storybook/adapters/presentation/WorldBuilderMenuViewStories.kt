@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.UiMessage
 import com.mkz.rpg.screen.adapters.presentation.WorldBuilderMenuView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.FixedSizeContainer
 import korlibs.korge.view.View
 import korlibs.korge.view.addUpdater
@@ -31,7 +31,7 @@ object WorldBuilderMenuViewStories : StoryBinding {
             description = "The options below the button, as the world builder lists them: Import.",
             args =
                 mapOf(
-                    OPEN to ArgDto.boolean(true),
+                    OPEN to ValueDto.boolean(true),
                 ),
         )
     private val severalOptions =
@@ -39,7 +39,7 @@ object WorldBuilderMenuViewStories : StoryBinding {
             id = "screen-world-builder-menu--several-options",
             name = "Several options",
             description = "More options than the world builder has, one under the other.",
-            args = mapOf(OPEN to ArgDto.boolean(true), OPTIONS to ArgDto.int(4)),
+            args = mapOf(OPEN to ValueDto.boolean(true), OPTIONS to ValueDto.int(4)),
         )
 
     override fun component(context: StoryContext) =
@@ -49,7 +49,7 @@ object WorldBuilderMenuViewStories : StoryBinding {
             title = "World builder menu",
             description = "At the top right of the world builder: a hamburger button which opens a list of options below it, over the screen. open: whether the options are listed. options: how many.",
             controls = listOf(ControlDto.boolean(OPEN), ControlDto.int(OPTIONS, minimum = 1, maximum = OPTIONS_LIMIT)),
-            args = mapOf(OPEN to ArgDto.boolean(false), OPTIONS to ArgDto.int(1)),
+            args = mapOf(OPEN to ValueDto.boolean(false), OPTIONS to ValueDto.int(1)),
             stories = listOf(closed, open, severalOptions),
         )
 
@@ -63,7 +63,7 @@ object WorldBuilderMenuViewStories : StoryBinding {
             WorldBuilderMenuView().apply {
                 displayOptions(
                     labels.map { label ->
-                        WorldBuilderMenuView.Option(label = label) { context.action("onSelected", label, setArg = OPEN to ArgDto.boolean(false)) }
+                        WorldBuilderMenuView.Option(label = label) { context.action("onSelected", label, setArg = OPEN to ValueDto.boolean(false)) }
                     },
                 )
                 // Opened once on the phone, as the menu measures where it is on the screen to catch the taps out of it.

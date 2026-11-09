@@ -81,7 +81,7 @@ node tools/storybook/screenshot.cjs 'story=screen-shop--sell&globals=language:es
 ## 5. Click and type
 
 Steps run in order after the story has rendered, each one waiting briefly for the story to render again (it prints
-`rendered again` or `nothing rendered again`, e.g.: an action that only logs itself):
+`rendered again` or `nothing rendered again`, e.g.: an action that only records itself):
 
 | Step              | Does                                                                                       |
 |-------------------|--------------------------------------------------------------------------------------------|
@@ -108,8 +108,8 @@ The page is 1280x900, the Storybook window, so a coordinate of the page is one o
 
 | Area                                 | Coordinates                                                                                                 |
 |--------------------------------------|-------------------------------------------------------------------------------------------------------------|
-| Sidebar                              | x 0 to 260. The search at (114, 70), its `×` at (229, 70). The stories are rows 28 high under their component, their names from x ≈ 37, e.g.: `Shop / Sell` at (48, 789) with it on show. Searching puts the first story listed at (48, 159), e.g.: `--click 114,70 --type 'shop sell' --click 48,159`. |
-| Phone screen, the view on show       | From (304, 28), 390x844, the game window: a point (x, y) of the game is at (304 + x, 28 + y).              |
+| Sidebar                              | x 0 to 260. The search at (114, 70), its `×` at (229, 70). The stories are rows 28 high under their component, their names from x ≈ 37, e.g.: `Shop / Sell` at (48, 789) with it selected. Searching puts the first story listed at (48, 159), e.g.: `--click 114,70 --type 'shop sell' --click 48,159`. |
+| Phone screen, the view of the selected story       | From (304, 28), 390x844, the game window: a point (x, y) of the game is at (304 + x, 28 + y).              |
 | Toolbar, the language                | `Language` at y ≈ 46; the languages from x ≈ 835, e.g.: `English` (880, 46), `Español` (979, 46).          |
 | Story info                           | From (738, 90): the component and its description, then the story and its description.                     |
 | Controls                             | Title and `Reset` (1180, 357), then a row every 38 from y ≈ 401: names from x 738, editors from x 888. An int has `-` at x 900 and `+` at x 993, a pick `<` at x 900 and `>` at x 1129, a text input from x 888 to 1188. |

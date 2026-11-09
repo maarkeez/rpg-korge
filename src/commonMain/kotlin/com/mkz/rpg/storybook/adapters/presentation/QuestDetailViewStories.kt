@@ -1,10 +1,10 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.QuestDetailView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [QuestDetailView], with each kind of quest. */
@@ -14,7 +14,7 @@ object QuestDetailViewStories : StoryBinding {
     private fun story(
         id: String,
         sample: QuestSample,
-    ) = StoryDto(id = "screen-quest-detail--$id", name = sample.title, description = sample.state, args = mapOf(QUEST to ArgDto.text(sample.name)))
+    ) = StoryDto(id = "screen-quest-detail--$id", name = sample.title, description = sample.state, args = mapOf(QUEST to ValueDto.text(sample.name)))
 
     override fun component(context: StoryContext) =
         ComponentDto(
@@ -23,13 +23,13 @@ object QuestDetailViewStories : StoryBinding {
             title = "Quest detail",
             description = "A quest in full, in place of the pad, led by who its current task is about, its content evenly apart. Its buttons are in the row of the call to action.",
             controls = listOf(ControlDto.pick(QUEST, QuestSample.entries.map { sample -> sample.name })),
-            args = mapOf(QUEST to ArgDto.text(QuestSample.GOAT_WIZARD.name)),
+            args = mapOf(QUEST to ValueDto.text(QuestSample.GOAT_WIZARD.name)),
             stories =
                 listOf(
                     story("goat-wizard", QuestSample.GOAT_WIZARD),
-                    story("counted", QuestSample.COUNTED),
+                    story("defeats-counted", QuestSample.DEFEATS_COUNTED),
                     story("talk", QuestSample.TALK),
-                    story("reach", QuestSample.REACH),
+                    story("visit", QuestSample.VISIT),
                     story("several-tasks", QuestSample.SEVERAL_TASKS),
                     story("item-rewards", QuestSample.ITEM_REWARDS),
                     story("long-text", QuestSample.LONG_TEXT),

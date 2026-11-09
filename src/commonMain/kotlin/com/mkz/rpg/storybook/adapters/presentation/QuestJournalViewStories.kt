@@ -1,13 +1,13 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.QuestJournalView
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
-/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row or a pin logs itself. */
+/** The stories of [QuestJournalView], from two quests to more than fit, dragged to scroll. Tapping a row or a pin records itself. */
 object QuestJournalViewStories : StoryBinding {
     private const val COUNT = "count"
     private const val SCROLL = "scroll"
@@ -28,7 +28,7 @@ object QuestJournalViewStories : StoryBinding {
         id = "screen-quest-journal--$id",
         name = name,
         description = description,
-        args = mapOf(COUNT to ArgDto.int(count), SCROLL to ArgDto.int(scroll), LONG_TEXT to ArgDto.boolean(isLong)),
+        args = mapOf(COUNT to ValueDto.int(count), SCROLL to ValueDto.int(scroll), LONG_TEXT to ValueDto.boolean(isLong)),
     )
 
     override fun component(context: StoryContext) =
@@ -43,7 +43,7 @@ object QuestJournalViewStories : StoryBinding {
                     ControlDto.int(SCROLL, minimum = 0, maximum = MAXIMUM_SCROLL),
                     ControlDto.boolean(LONG_TEXT),
                 ),
-            args = mapOf(COUNT to ArgDto.int(MINIMUM_COUNT), SCROLL to ArgDto.int(0), LONG_TEXT to ArgDto.boolean(false)),
+            args = mapOf(COUNT to ValueDto.int(MINIMUM_COUNT), SCROLL to ValueDto.int(0), LONG_TEXT to ValueDto.boolean(false)),
             stories =
                 listOf(
                     story("two-quests", "Two quests", "The main quest and a side quest: it all fits.", count = 2),

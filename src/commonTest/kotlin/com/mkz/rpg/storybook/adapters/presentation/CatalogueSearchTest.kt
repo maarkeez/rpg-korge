@@ -14,7 +14,12 @@ class CatalogueSearchTest {
             id = "screen-shop",
             group = "Screen",
             title = "Shop",
-            stories = listOf(story(id = "screen-shop--buy", name = "Buy"), story(id = "screen-shop--sell", name = "Sell"), story(id = "screen-shop--sell-bag-full", name = "Sell, bag full")),
+            stories =
+                listOf(
+                    story(id = "screen-shop--buy", name = "Buy"),
+                    story(id = "screen-shop--sell", name = "Sell"),
+                    story(id = "screen-shop--sell-inventory-full", name = "Sell, inventory full"),
+                ),
         )
     private val healthBar =
         component(
@@ -58,7 +63,7 @@ class CatalogueSearchTest {
         val found = CatalogueSearch.search(catalogue, "full")
         // Then
         found.map(ComponentDto::id).shouldContainExactly("screen-shop", "screen-health-bar")
-        found.storyIds().shouldContainExactly("screen-shop--sell-bag-full", "screen-health-bar--full")
+        found.storyIds().shouldContainExactly("screen-shop--sell-inventory-full", "screen-health-bar--full")
     }
 
     @Test
@@ -74,8 +79,8 @@ class CatalogueSearchTest {
         // When
         val found = CatalogueSearch.search(catalogue, "sell shop")
         // Then
-        found.storyIds().shouldContainExactly("screen-shop--sell", "screen-shop--sell-bag-full")
-        CatalogueSearch.search(catalogue, "shop sell bag").storyIds().shouldContainExactly("screen-shop--sell-bag-full")
+        found.storyIds().shouldContainExactly("screen-shop--sell", "screen-shop--sell-inventory-full")
+        CatalogueSearch.search(catalogue, "shop sell inventory").storyIds().shouldContainExactly("screen-shop--sell-inventory-full")
     }
 
     @Test

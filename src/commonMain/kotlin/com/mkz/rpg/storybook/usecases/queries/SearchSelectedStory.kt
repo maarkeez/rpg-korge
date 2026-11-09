@@ -3,7 +3,7 @@ package com.mkz.rpg.storybook.usecases.queries
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
 import com.mkz.rpg.storybook.domain.StorybookRepository
 
-/** The story on show, or `null` while the catalogue is not initialised. */
+/** The selected story, or `null` while the catalogue is not open. */
 class SearchSelectedStory(
     private val storybookRepository: StorybookRepository,
 ) {

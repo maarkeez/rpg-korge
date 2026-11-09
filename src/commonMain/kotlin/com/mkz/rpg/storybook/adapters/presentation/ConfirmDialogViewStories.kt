@@ -2,10 +2,10 @@ package com.mkz.rpg.storybook.adapters.presentation
 
 import com.mkz.rpg.screen.adapters.presentation.ConfirmDialogView
 import com.mkz.rpg.screen.adapters.presentation.UiMessage
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ComponentDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.StoryDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import korlibs.korge.view.View
 
 /** The stories of [ConfirmDialogView], with the questions the game asks. */
@@ -28,7 +28,7 @@ object ConfirmDialogViewStories : StoryBinding {
             id = "screen-confirm-dialog--delete",
             name = "Delete",
             description = "Asked before deleting the game saved in slot 2, from Load game.",
-            args = mapOf(QUESTION to ArgDto.text(Question.DELETE.name.lowercase())),
+            args = mapOf(QUESTION to ValueDto.text(Question.DELETE.name.lowercase())),
         )
 
     private val overwrite =
@@ -36,7 +36,7 @@ object ConfirmDialogViewStories : StoryBinding {
             id = "screen-confirm-dialog--overwrite",
             name = "Overwrite",
             description = "Asked before saving into slot 2, which holds a game, as that game is lost.",
-            args = mapOf(QUESTION to ArgDto.text(Question.OVERWRITE.name.lowercase())),
+            args = mapOf(QUESTION to ValueDto.text(Question.OVERWRITE.name.lowercase())),
         )
 
     private val quit =
@@ -44,7 +44,7 @@ object ConfirmDialogViewStories : StoryBinding {
             id = "screen-confirm-dialog--quit",
             name = "Quit",
             description = "Asked before quitting to the menu from the pause screen, as the progress since the last save is lost.",
-            args = mapOf(QUESTION to ArgDto.text(Question.QUIT.name.lowercase())),
+            args = mapOf(QUESTION to ValueDto.text(Question.QUIT.name.lowercase())),
         )
 
     private val abandon =
@@ -52,7 +52,7 @@ object ConfirmDialogViewStories : StoryBinding {
             id = "screen-confirm-dialog--abandon",
             name = "Abandon",
             description = "Asked before abandoning a side quest from its detail view, as its progress is lost.",
-            args = mapOf(QUESTION to ArgDto.text(Question.ABANDON.name.lowercase())),
+            args = mapOf(QUESTION to ValueDto.text(Question.ABANDON.name.lowercase())),
         )
 
     override fun component(context: StoryContext) =
@@ -62,7 +62,7 @@ object ConfirmDialogViewStories : StoryBinding {
             title = "Confirm dialog",
             description = "A question displayed in place of the pad before an action that can not be undone. Its choices are in the row of the call to action.",
             controls = listOf(ControlDto.pick(QUESTION, Question.entries.map { question -> question.name.lowercase() })),
-            args = mapOf(QUESTION to ArgDto.text(Question.QUIT.name.lowercase())),
+            args = mapOf(QUESTION to ValueDto.text(Question.QUIT.name.lowercase())),
             stories = listOf(overwrite, delete, quit, abandon),
         )
 

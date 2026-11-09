@@ -39,7 +39,7 @@ class SelectStoryTest {
     }
 
     @Test
-    fun `should do nothing when the story is already on show`() {
+    fun `should do nothing when the story is already selected`() {
         // Given
         storybookRepository.save(storybook(components = listOf(healthBar)))
         // When
@@ -50,7 +50,7 @@ class SelectStoryTest {
     }
 
     @Test
-    fun `should do nothing when the catalogue is not initialised`() {
+    fun `should do nothing when the catalogue is not open`() {
         // When
         selectStory(storyId = "screen-health-bar--empty")
         // Then

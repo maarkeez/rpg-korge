@@ -10,7 +10,7 @@ import korlibs.korge.view.position
 import korlibs.korge.view.text
 
 /**
- * The callbacks the view on show made, under the controls, e.g.: `shopSlotSelected(3)`, the newest on top, as many as
+ * The callbacks the view of the selected story made, under the controls, e.g.: `shopSlotSelected(3)`, the newest on top, as many as
  * fit, and how many there are in the title. `Clear` asks to empty them. With none, a hint tells where they come from.
  */
 open class ActionsView : Container() {

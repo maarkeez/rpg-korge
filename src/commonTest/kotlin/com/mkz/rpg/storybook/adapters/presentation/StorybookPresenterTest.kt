@@ -8,7 +8,7 @@ import com.mkz.rpg.shared.adapters.events.InMemoryEventBus
 import com.mkz.rpg.shared.adapters.presentation.labelText
 import com.mkz.rpg.storybook.adapters.page.FakeStorybookPage
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ActionDto
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 import com.mkz.rpg.storybook.domain.StorybookMother.location
 import com.mkz.rpg.storybook.usecases.services.FakeStoryLocation
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -46,7 +46,7 @@ class StorybookPresenterTest {
             .labelText()
 
     @Test
-    fun `CatalogueInitialised should list the catalogue in the sidebar when the catalogue is initialised`() {
+    fun `CatalogueOpened should list the catalogue in the sidebar when the catalogue is open`() {
         // When
         val storybookApi = startStorybook()
         // Then
@@ -54,14 +54,14 @@ class StorybookPresenterTest {
     }
 
     @Test
-    fun `StorySelected should show the story the location asks for, highlighted, described and with its controls, when the catalogue is initialised`() {
+    fun `StorySelected should show the story the location asks for, highlighted, described and with its controls, when the catalogue is open`() {
         // When
         startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--half"))
         // Then
         sidebarView.selectedStoryIds.shouldContainExactly("screen-health-bar--half")
         storyInfoView.displayedStories.map { (component, story) -> component.title to story.name }.shouldContainExactly("Health bar" to "Half")
         controlsView.displayedControls.map { control -> control.name }.shouldContainExactly("remaining", "maximum")
-        controlsView.displayedArgs.shouldContainExactly(mapOf("remaining" to ArgDto.int(15), "maximum" to ArgDto.int(30)))
+        controlsView.displayedArgs.shouldContainExactly(mapOf("remaining" to ValueDto.int(15), "maximum" to ValueDto.int(30)))
         toolbarView.displayedLanguages.map { language -> language.code } shouldBe storyContext.messages.languages().map { language -> language.code }
         toolbarView.selectedLanguageCodes.shouldContainExactly("en")
         phoneFrameView.displayedViews.size shouldBe 1
@@ -71,7 +71,7 @@ class StorybookPresenterTest {
     }
 
     @Test
-    fun `StorySelected should show the story with the args and language the location asks for when the catalogue is initialised`() {
+    fun `StorySelected should show the story with the args and language the location asks for when the catalogue is open`() {
         // When
         startStorybook(FakeStoryLocation(requestedStoryId = "screen-health-bar--half", requestedArgs = mapOf("maximum" to "40"), requestedGlobals = mapOf("language" to "es")))
         // Then
@@ -101,11 +101,11 @@ class StorybookPresenterTest {
         val storyLocation = FakeStoryLocation()
         startStorybook(storyLocation)
         // When
-        controlsView.delegate.shouldNotBeNull().argChanged("remaining", ArgDto.int(7))
+        controlsView.delegate.shouldNotBeNull().argChanged("remaining", ValueDto.int(7))
         eventBus.dispatch()
         // Then
         displayedHealthBarLabel() shouldBe "7/30"
-        controlsView.displayedArgs.last() shouldBe mapOf("remaining" to ArgDto.int(7), "maximum" to ArgDto.int(30))
+        controlsView.displayedArgs.last() shouldBe mapOf("remaining" to ValueDto.int(7), "maximum" to ValueDto.int(30))
         storybookPage.renderedStoryIds.shouldContainExactly("screen-health-bar--full", "screen-health-bar--full")
         storyLocation.keptLocations.shouldContainExactly(location(storyId = "screen-health-bar--full", args = mapOf("remaining" to "7")))
     }
@@ -137,7 +137,7 @@ class StorybookPresenterTest {
     }
 
     @Test
-    fun `ActionRecorded should list the action, without showing the story again, when the view on show makes a callback`() {
+    fun `ActionRecorded should list the action, without showing the story again, when the view of the selected story makes a callback`() {
         // Given
         startStorybook()
         // When
@@ -155,7 +155,7 @@ class StorybookPresenterTest {
         val storyLocation = FakeStoryLocation()
         startStorybook(storyLocation)
         // When
-        storyContext.action("barTapped", 7, setArg = "remaining" to ArgDto.int(7))
+        storyContext.action("barTapped", 7, setArg = "remaining" to ValueDto.int(7))
         eventBus.dispatch()
         // Then
         actionsView.displayedActions.last().shouldContainExactly(ActionDto(name = "barTapped", arguments = listOf("7")))

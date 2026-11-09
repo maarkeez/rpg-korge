@@ -160,7 +160,7 @@ class InventoryPresenter(
             eventBus.subscribe<InventoryEvent.ItemUnequipped> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemBought> { event -> refreshInventory(event.battleUnitId) },
             eventBus.subscribe<InventoryEvent.ItemSold> { event -> refreshInventory(event.battleUnitId) },
-            // The giver's inventory stays open, with nothing selected, and the receiver flashes on its tile.
+            // The giver's inventory stays open, with nothing selected, and the receiver blinks on its tile.
             eventBus.subscribe<ItemGiven> { event ->
                 refreshInventory(event.battleUnitId)
                 val giverPosition = battlefieldApi.searchPosition(event.battleUnitId)
@@ -168,17 +168,17 @@ class InventoryPresenter(
             },
             eventBus.subscribe<ItemReceived> { event ->
                 refreshInventory(event.battleUnitId)
-                flashReceiver(event.battleUnitId)
+                blinkReceiver(event.battleUnitId)
             },
             // A battle starting abandons the giving, as the HUD takes over.
             eventBus.subscribe<ExplorationInterrupted> { timeline.play { abandonGiving() } },
             // The giver leaves the party, or a receiver can no longer receive: back to the item's actions, when the giver remains.
             eventBus.subscribe<BattleUnitDefeated> { event -> timeline.play { abandonGivingOf(event.battleUnitId) } },
-            // The inventory is displayed again with the new gold, so the next give can start straight away, and the receiver flashes on its tile.
+            // The inventory is displayed again with the new gold, so the next give can start straight away, and the receiver blinks on its tile.
             eventBus.subscribe<GoldGiven> { event -> timeline.play { finishGivingGold(event.battleUnitId) } },
             eventBus.subscribe<GoldReceived> { event ->
                 refreshInventory(event.battleUnitId)
-                flashReceiver(event.battleUnitId)
+                blinkReceiver(event.battleUnitId)
             },
             // The gold and the room are read again, e.g.: a wandering rat dies on lava and completes a task.
             eventBus.subscribe<RewardGranted> { event -> timeline.play { readGivingGoldAgain(event.battleUnitId) } },
@@ -512,11 +512,11 @@ class InventoryPresenter(
         }
     }
 
-    private fun flashReceiver(receiverBattleUnitId: String) {
+    private fun blinkReceiver(receiverBattleUnitId: String) {
         val receiver = battleUnitApi.searchBattleUnitById(receiverBattleUnitId) ?: return
         val position = battlefieldApi.searchPosition(receiverBattleUnitId) ?: return
         // Alongside the timeline, so the player can give the next item straight away.
-        timeline.playAlongside { battlefieldView.flashBattleUnit(row = position.row, column = position.column, unitId = receiver.unitId) }
+        timeline.playAlongside { battlefieldView.blinkBattleUnit(row = position.row, column = position.column, unitId = receiver.unitId) }
     }
 
     // Reads why no gold can be given, or opens the panel. Either way, the selected item is cleared.

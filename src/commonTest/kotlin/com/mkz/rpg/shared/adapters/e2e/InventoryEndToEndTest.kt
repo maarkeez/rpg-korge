@@ -122,7 +122,7 @@ class InventoryEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         waitUntil { talkView.isDialogShown() }
         clickDialog(talkView)
         waitUntil { stage.virtualPadView()?.isPadShown() == true && stage.battlefieldView()?.hasBattleUnitAt(HERBALIST_ROW, HERBALIST_COLUMN) == true }
-        // The screen flashes it as it joins, and tapping a tile meanwhile is ignored.
+        // The screen blinks it as it joins, and tapping a tile meanwhile is ignored.
         waitFor(1.seconds)
     }
 

@@ -27,7 +27,7 @@ import korlibs.math.geom.Size
 
 /**
  * The catalogue, on the left of the Storybook: the components, grouped by their subdomain, each with its stories below
- * it. Tapping a story shows it, and the story on show is highlighted. The list scrolls under the title and the search,
+ * it. Tapping a story shows it, and the selected story is highlighted. The list scrolls under the title and the search,
  * with the mouse wheel or by dragging it, and scrolls to a story that is not in sight when it is shown, e.g.: from a
  * link. Typing in the search lists only the stories that match it (see [CatalogueSearch]).
  */
@@ -36,7 +36,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         const val WIDTH = 260.0
         val BACKGROUND_COLOR = RGBA(0x1A, 0x1A, 0x1A)
 
-        // Storybook's own blue, so the story on show stands out as in Storybook.
+        // Storybook's own blue, so the selected story stands out as in Storybook.
         val SELECTED_COLOR = RGBA(0x1E, 0xA7, 0xFD)
         val HOVER_COLOR = RGBA(0x33, 0x33, 0x33)
         val GROUP_COLOR = RGBA(0x99, 0x99, 0x99)
@@ -90,7 +90,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
 
     private var selectedStoryId: String? = null
 
-    // The story on show last time it was scrolled to, so the list only moves when the story changes.
+    // The selected story last time it was scrolled to, so the list only moves when the story changes.
     private var scrolledStoryId: String? = null
 
     init {
@@ -99,7 +99,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         catalogue = list.container()
         // The scroll moves by as much as the finger did since the previous drag event, in the units of the list, so it
         // follows the finger also when the Storybook is zoomed, and a tap, which does not move, keeps what it scrolled,
-        // e.g.: the `×` of the search scrolling to the story on show.
+        // e.g.: the `×` of the search scrolling to the selected story.
         var draggedY = 0.0
         onMouseDrag { event ->
             if (event.start) draggedY = 0.0
@@ -141,7 +141,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         scrollTo(catalogue.y)
     }
 
-    /** Highlights the story on show, and only that one, scrolling to it when it is not in sight. */
+    /** Highlights the selected story, and only that one, scrolling to it when it is not in sight. */
     open fun selectStory(storyId: String) {
         selectedStoryId = storyId
         storyRows.forEach { row -> row.isSelected = row.storyId == storyId }
@@ -150,7 +150,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         scrollToWhenOutOfSight(storyId)
     }
 
-    // From the top of the list, or, once the search is emptied, to the story on show, when it is out of sight.
+    // From the top of the list, or, once the search is emptied, to the selected story, when it is out of sight.
     private fun searchChanged() {
         val isEmpty = searchInput.text.isEmpty()
         searchPlaceholder.visible = isEmpty
@@ -204,7 +204,7 @@ open class SidebarView : UIContainer(Size(WIDTH, STORYBOOK_WINDOW_SIZE.height)) 
         catalogue.y = y.coerceIn(minOf(0.0, LIST_HEIGHT - contentHeight), 0.0)
     }
 
-    /** A story of the list, highlighted while it is on show or under the mouse, that shows it when tapped. */
+    /** A story of the list, highlighted while it is selected or under the mouse, that shows it when tapped. */
     internal inner class StoryRow(
         val storyId: String,
         name: String,

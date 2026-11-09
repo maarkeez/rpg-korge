@@ -1,11 +1,11 @@
 package com.mkz.rpg.storybook.adapters.presentation
 
-import com.mkz.rpg.storybook.domain.Storybook.Dto.ArgDto
 import com.mkz.rpg.storybook.domain.Storybook.Dto.ControlDto
+import com.mkz.rpg.storybook.domain.Storybook.Dto.ValueDto
 
 // Records the controls and args the presenter asks to display, instead of drawing them.
 class FakeControlsView : ControlsView() {
-    val displayedArgs = mutableListOf<Map<String, ArgDto>>()
+    val displayedArgs = mutableListOf<Map<String, ValueDto>>()
     var displayedControls: List<ControlDto> = emptyList()
         private set
     var delegate: Delegate? = null
@@ -17,7 +17,7 @@ class FakeControlsView : ControlsView() {
 
     override fun display(
         controls: List<ControlDto>,
-        args: Map<String, ArgDto>,
+        args: Map<String, ValueDto>,
     ) {
         displayedControls = controls
         displayedArgs += args

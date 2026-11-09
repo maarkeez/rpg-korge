@@ -12,7 +12,7 @@ class SearchCatalogueTest {
     private val searchCatalogue = SearchCatalogue(storybookRepository)
 
     @Test
-    fun `should return the components in their order when the catalogue is initialised`() {
+    fun `should return the components in their order when the catalogue is open`() {
         // Given
         val healthBar = component(id = "screen-health-bar")
         val manaBar = component(id = "screen-mana-bar")
@@ -24,7 +24,7 @@ class SearchCatalogueTest {
     }
 
     @Test
-    fun `should return no component when the catalogue is not initialised`() {
+    fun `should return no component when the catalogue is not open`() {
         // When
         val components = searchCatalogue()
         // Then
