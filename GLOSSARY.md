@@ -1133,7 +1133,8 @@ _Avoid_: Progress bar, gauge
 A bar of what a cast would leave, such as a recipient's health: 30 → 18 in the cast preview, or blinking over its tile.
 
 **Blink**:
-Fading in and out in a loop, to show what a cast would change.
+Showing and hiding in a loop, to draw the eye: to what a cast would change, or to a battle unit that receives something,
+such as an effect, an item or gold, or that joins the party.
 _Avoid_: Flash, pulse
 
 #### Buttons
@@ -1141,6 +1142,82 @@ _Avoid_: Flash, pulse
 **Disabled**:
 Said of a button shown faded, as it can't be tapped now, such as Discard for an equipped item.
 _Avoid_: Greyed out, inactive
+
+### Storybook
+
+**Storybook**:
+The views of the game shown in isolation, each in its states, without playing up to them.
+
+**Catalogue**:
+Every component of the Storybook with its stories, listed by group in the sidebar.
+
+**Component**:
+A view of the game in the catalogue, named by its group and title, such as **Screen / Shop**.
+
+**Group**:
+The subdomain of a component's view, such as Screen or Shared.
+
+**Story**:
+A named state of a component, such as **Screen / Shop › Sell, inventory full**.
+
+**Selected story**:
+The story the phone shows.
+_Avoid_: Story on show
+
+**Story binding**:
+What ties a component to the real view of the game it shows.
+
+**Location**:
+The selected story, its changed args and its changed globals, kept in the page URL so that a link opens the same.
+
+**Open**:
+Starting the Storybook on what its location asks for.
+_Avoid_: Initialise
+
+#### Controls
+
+**Control**:
+The editor of an arg or a global, which defines the values it accepts: a boolean, an int, an enum, a pick, a text or a
+color.
+
+**Option**:
+One of the values an enum or a pick control accepts, such as a lootable item id.
+
+**Value**:
+What a control holds: an arg or a global.
+
+**Arg**:
+The value of a control of the selected story's component, such as `gold = 120`, which its view is displayed with.
+
+**Global**:
+A value shared by every story, such as the language.
+
+**Action**:
+A callback made by the view of the selected story, such as `shopSlotSelected(3)`.
+
+**Record**:
+Adding an action to the Actions, the newest on top.
+_Avoid_: Log
+
+#### Layout
+
+**Sidebar**:
+The catalogue on the left, with its search, where a story is selected.
+
+**Phone**:
+The 390x844 screen of the game window, in the middle, showing the selected story at its real size.
+
+**Toolbar**:
+The globals, on the top right.
+
+**Story info**:
+What the selected story and its component are, each with its description.
+
+**Viewport**:
+Where and at what size the screen draws the Storybook, zoomed from Fit to 4×.
+
+**Fit**:
+The zoom that shows the whole Storybook, as on its 1280x900 window.
 
 ### World builder
 
