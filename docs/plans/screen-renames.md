@@ -1,6 +1,6 @@
 # Plan: Rename the code of the screen subdomain to the words of the glossary
 
-> **Status:** to do.
+> **Status:** built on `main` in `f40b048e`, with its screenshots of the inventory full message still to be approved.
 >
 > **Summary:** The screen names what players see with words the [glossary](../../GLOSSARY.md) gives to other things, or
 > rejects. E.g.: `BattleScene` holds the whole game, exploring included. `BattlefieldHud` is not the HUD but what the
@@ -199,3 +199,31 @@
   and **Screen / Item actions**, `BAG_USED`, `BAG_SIZE`, `buyBagFull`, `sellBagFull` and `bagsFull`, the stories **Buy,
   bag full**, **Sell, bag full** and **Bags full**, `QuestSample.REACH` and the `reach` stories, and the **Equippable**
   story's "e.g.: a sword", while the game has only hammers.
+
+## Changes while building
+
+- The story bindings follow their views (e.g.: `CastPreviewViewStories`, `HudViewStories`, `TalkViewStories`), as
+  `StoryCoverageArchitectureTest` asks every view for a `<View>Stories` binding. Their story ids, titles, story names and
+  args stay, waiting for the `storybook` section, and so do `FINISH_TURN` and `ITEM_ACTIONS` of the call to action
+  stories, as `FINISH_PLAYER_TURN` made its controls cover the actions.
+- The Spanish reads "Toca un objeto a descartar por: Health potion (25 G)", not "para descartarlo por", which cut
+  "(25 G)" on **Screen / Inventory full › Default**. It is shorter than "para cambiarlo por".
+- `AbilityInfoView.isOneOfTheNeighbours` is `isOneOfTheAdjacentTiles`, not `isAdjacent`: it lives in the ability info's
+  diagram, not in `BattlefieldView`, and says the ability reaches one of the adjacent tiles marked, not all of them.
+- `BAG_SIZE` of `BattleUnitInfoView` is `INVENTORY_BUTTON_SIZE`, as it is the size of the button, not a storage space.
+  `InventoryButtonView.BAG`, the name of its chest, is `CHEST`.
+- `LOOT_SCALE` is `DROPPED_ITEM_SCALE`, so the `PICK_UP_*` constants are `LOOTED_ITEM_RISE`, `LOOTED_ITEM_SCALE` and
+  `LOOTED_ITEM_DURATION`, and the Loot heading of [Presentation timeline](../architecture/presentation-timeline.md) is
+  Dropped items.
+- More names follow the selection: the states' `idle()` is `deselect()`, `walkingRange(tile, walkingRange)` is
+  `refreshWalkingRange`, the events built in `Selection` are written `SelectionEvent.<Event>`, as a state and an event
+  share a name, and `SelectionMother` builds `nothingSelected()`, `battleUnitSelected()`, `abilitySelected()`,
+  `abilityInfoDisplayed()` and `castPreviewed()`.
+- More names follow the buttons: `CallToActionView.displayItemButtons`, `ItemButtonsView.Button`, and the call to action
+  in `GameSceneExtension` and its tests. `isBattleHudShown` is `isHudShown`, the quest announcement's `TOAST_*`,
+  `playToasts` and `fadeToast` say announcement, and `InventoryPresenter` discards a stored item for a found one
+  (`askToDiscardFor`, `discardFor`), for swap.
+- `QuestMapper.countOf` is `requiredDefeatsOf`, and `QuestInfoMother.task` takes `defeatsCounted` and `requiredDefeats`.
+- [CPU battle brain](../architecture/cpu-battle-brain.md) divides by the maximum steps, which it called "movement range"
+  as the battle unit section had avoided it, not by the walking range.
+- The comments say the game screen for "the battle scene" and the player's colour for "the team's".
