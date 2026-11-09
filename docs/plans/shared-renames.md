@@ -1,6 +1,6 @@
 # Plan: Rename the loading of a snapshot to the words of the glossary
 
-> **Status:** to do.
+> **Status:** done, built on `main` in `3e1f4eb8`.
 >
 > **Summary:** Every subdomain holding runtime state takes its snapshot back into play with a word the
 > [glossary](../../GLOSSARY.md) rejects: `Snapshottable.restore(snapshot)`, the `Restore…` commands (`RestoreParty`,
@@ -118,3 +118,11 @@ The tests are renamed with the code, and their names and comments say the new wo
 - A comment of `HudStyle` says "the health a heal would restore", while the glossary gives Restore to mana only.
 - `ColorPalette.TRANSPARENT` and `ColorPalette.SystemGray3` are never used, and `TRANSPARENT` is `RGBA(0, 0, 0, 1)`,
   with an alpha of 1, not 0. Whether to delete them is still to be decided.
+
+## Changes while building
+
+- `BattlefieldPresenter.displayRestoredGame` is `displayLoadedGame`, as it draws the battlefield once a save is loaded.
+- `QuestEndToEndTest` says `should keep the pinned quest and the markers when a game is loaded`, for "should restore",
+  as "should load … when a game is loaded" would say the same word twice.
+- The comment of `GameScene` says the saved game is loaded "once the game data read from the resources is set up", for
+  "the content", following the Game data of the glossary.
