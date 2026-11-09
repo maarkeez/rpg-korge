@@ -997,6 +997,122 @@ A save that can't be loaded, as it was written by another save version or names 
 only be deleted or overwritten.
 _Avoid_: Corrupt save, broken save
 
+### Screen
+
+**Game screen**:
+Where a game is played, from a new game or a loaded save until the player quits: the banner, the battlefield, the HUD
+and the call to action.
+_Avoid_: Battle scene
+
+**Main menu**:
+Where the player plays a new game, loads a save, builds a world or selects a language.
+
+**New game**:
+A game played from its start, not loaded from a save.
+
+**Pause screen**:
+Where the player, with time stopped, resumes, saves the game or quits.
+
+**Quit**:
+The player going back to the main menu from the pause screen, losing what was played since the last save.
+
+#### The battlefield on the screen
+
+**Camera**:
+What part of the battlefield is visible, 6 by 6 tiles, trailing the leader while exploring.
+_Avoid_: View
+
+**Viewport**:
+Where and at what size the game screen draws what the camera shows.
+
+**Building piece**:
+The part of a building's image drawn on one of its tiles.
+
+**Banner**:
+The line at the top of the game screen telling whether the party is exploring, or the round and player turn of a battle,
+and announcing a battle, its end and the victory.
+_Avoid_: Header, battle info
+
+#### Selection
+
+**Selection**:
+What the player has selected on the battlefield: nothing, a battle unit, one of its abilities, or a cast to preview.
+_Avoid_: Battlefield HUD
+
+**Selected battle unit**:
+The battle unit whose tile the player tapped, which the HUD shows.
+
+**Walking range**:
+The tiles the selected battle unit can walk to with its remaining steps, in a battle.
+_Avoid_: Movement range
+
+**Selected ability**:
+An ability the selected battle unit can cast now, chosen by the player to cast it.
+
+**Cast range**:
+The tiles the selected ability can be cast on.
+
+**Ability info**:
+What an ability does and costs, and why it can not be cast now, when it can not.
+
+**Cast preview**:
+The forecast of a cast before the player confirms it: the ability, its caster and the mana spent, and what each
+recipient would be left with.
+_Avoid_: Attack preview
+
+#### HUD
+
+**HUD**:
+The panel under the battlefield showing the selected battle unit and its abilities, a cast preview, or an inventory, in
+battles and while exploring.
+_Avoid_: Battle HUD
+
+**Battle unit info**:
+The part of the HUD showing the selected battle unit: its portrait, name, health, mana, remaining steps and casts,
+effects and abilities.
+_Avoid_: Unit info
+
+**Inventory button**:
+The chest that opens the inventory of the selected party member.
+_Avoid_: Bag
+
+**Call to action**:
+The place under the HUD, at the player's thumb, holding Finish turn, Cancel and Confirm of a cast, or a button row.
+
+**Button row**:
+The buttons of a panel in the call to action, such as Back and Abandon of a quest.
+_Avoid_: Action row, actions
+
+**Item buttons**:
+What a party member can do with the selected stored item, such as Consume, Give or Discard.
+_Avoid_: Item actions
+
+**Virtual pad**:
+The arrows the player steers the leader with while exploring.
+
+#### Panels
+
+**Talk panel**:
+The panel showing the npc the party talks to: its portrait, name and line, and Buy, Sell and Leave for a merchant.
+_Avoid_: Dialog, npc dialog
+
+**Shop**:
+The panel where a party member buys from the stock of the merchant the party talks to, or sells its stored items.
+_Avoid_: Store, market
+
+**Tracker**:
+The capsule naming the current task of the pinned quest while exploring.
+
+**Journal**:
+The list of every quest started, read with time stopped.
+
+**Quest detail**:
+One quest in full: its description, current task, tasks done and reward.
+
+**Quest announcement**:
+The notice that a quest starts or is completed, shown for a moment without stopping the game.
+_Avoid_: Toast
+
 ### World builder
 
 **World**:
