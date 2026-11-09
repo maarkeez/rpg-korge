@@ -13,12 +13,12 @@ import com.mkz.rpg.quest.adapters.storage.InMemoryQuestRepository
 import com.mkz.rpg.quest.domain.QuestRepository
 import com.mkz.rpg.quest.usecases.commands.AbandonQuest
 import com.mkz.rpg.quest.usecases.commands.CreateQuests
+import com.mkz.rpg.quest.usecases.commands.LoadQuestsSnapshot
 import com.mkz.rpg.quest.usecases.commands.PinQuest
 import com.mkz.rpg.quest.usecases.commands.ProgressDefeatTasks
 import com.mkz.rpg.quest.usecases.commands.ProgressVisitTasks
 import com.mkz.rpg.quest.usecases.commands.RequestQuestReward
 import com.mkz.rpg.quest.usecases.commands.ResolveNpcTalk
-import com.mkz.rpg.quest.usecases.commands.RestoreQuests
 import com.mkz.rpg.quest.usecases.commands.StartMainQuest
 import com.mkz.rpg.quest.usecases.queries.SearchQuestMarkers
 import com.mkz.rpg.quest.usecases.queries.SearchQuests
@@ -39,8 +39,8 @@ class QuestApi(
 
     // Save
     private val searchQuestsSnapshot = SearchQuestsSnapshot(questRepository)
-    private val restoreQuests = RestoreQuests(questRepository)
-    val snapshottable: Snapshottable = QuestSnapshottable(searchQuestsSnapshot, restoreQuests)
+    private val loadQuestsSnapshot = LoadQuestsSnapshot(questRepository)
+    val snapshottable: Snapshottable = QuestSnapshottable(searchQuestsSnapshot, loadQuestsSnapshot)
 
     // Services
     private val publishQuestProgress = PublishQuestProgress(questRepository, eventBus)

@@ -6,7 +6,7 @@ import com.mkz.rpg.lootableItem.usecases.queries.SearchLootableItemById
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcMother.npc
 import com.mkz.rpg.npc.domain.NpcRepository
-import com.mkz.rpg.npc.usecases.commands.RestoreNpcs
+import com.mkz.rpg.npc.usecases.commands.LoadNpcsSnapshot
 import com.mkz.rpg.npc.usecases.queries.SearchNpcsSnapshot
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -16,17 +16,17 @@ class NpcSnapshottableTest {
     private val searchLootableItemById = SearchLootableItemById(InMemoryLootableItemRepository().apply { create(lootableItem(id = "health-potion")) })
     private val npcs = listOf(npc(id = "elder", row = 1, column = 0, unitId = "mage"), npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion")))
 
-    private fun snapshottable(repository: NpcRepository) = NpcSnapshottable(SearchNpcsSnapshot(repository), RestoreNpcs(repository, searchLootableItemById))
+    private fun snapshottable(repository: NpcRepository) = NpcSnapshottable(SearchNpcsSnapshot(repository), LoadNpcsSnapshot(repository, searchLootableItemById))
 
     @Test
-    fun `Restore should rebuild the same state when it restores the snapshot it took`() {
+    fun `Load should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val snapshot = snapshottable(InMemoryNpcRepository().apply { npcs.forEach(::save) }).snapshot()
-        val restoredRepository = InMemoryNpcRepository()
+        val loadedRepository = InMemoryNpcRepository()
         // When
-        snapshottable(restoredRepository).restore(snapshot)
+        snapshottable(loadedRepository).load(snapshot)
         // Then
-        restoredRepository.searchAll().shouldContainExactlyInAnyOrder(npcs)
+        loadedRepository.searchAll().shouldContainExactlyInAnyOrder(npcs)
     }
 
     @Test

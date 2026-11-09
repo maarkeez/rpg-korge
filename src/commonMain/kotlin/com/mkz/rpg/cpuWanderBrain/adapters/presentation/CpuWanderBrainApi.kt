@@ -15,10 +15,10 @@ import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainReposit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.AwaitRespawn
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.ClaimHome
+import com.mkz.rpg.cpuWanderBrain.usecases.commands.LoadCpuWanderBrainSnapshot
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.ResolveRespawn
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.ResolveWanderingStep
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.RespawnDefeatedBattleUnits
-import com.mkz.rpg.cpuWanderBrain.usecases.commands.RestoreCpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderAfterRound
 import com.mkz.rpg.cpuWanderBrain.usecases.commands.WanderWhileExploring
 import com.mkz.rpg.cpuWanderBrain.usecases.queries.IsInSight
@@ -42,8 +42,8 @@ class CpuWanderBrainApi(
 
     // Save
     private val searchCpuWanderBrainSnapshot = SearchCpuWanderBrainSnapshot(cpuWanderBrainRepository)
-    private val restoreCpuWanderBrain = RestoreCpuWanderBrain(cpuWanderBrainRepository)
-    val snapshottable: Snapshottable = CpuWanderBrainSnapshottable(searchCpuWanderBrainSnapshot, restoreCpuWanderBrain)
+    private val loadCpuWanderBrainSnapshot = LoadCpuWanderBrainSnapshot(cpuWanderBrainRepository)
+    val snapshottable: Snapshottable = CpuWanderBrainSnapshottable(searchCpuWanderBrainSnapshot, loadCpuWanderBrainSnapshot)
 
     // Queries
     val isInSight = IsInSight(partyApi.searchParty, battlefieldApi.searchPosition, battlefieldApi.searchBattlefieldSize)

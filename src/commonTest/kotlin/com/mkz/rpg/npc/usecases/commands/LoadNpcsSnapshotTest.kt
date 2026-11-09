@@ -9,17 +9,17 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
-class RestoreNpcsTest {
+class LoadNpcsSnapshotTest {
     private val npcRepository = InMemoryNpcRepository()
-    private val restoreNpcs = RestoreNpcs(npcRepository, SearchLootableItemById(InMemoryLootableItemRepository().apply { create(lootableItem(id = "health-potion")) }))
+    private val loadNpcsSnapshot = LoadNpcsSnapshot(npcRepository, SearchLootableItemById(InMemoryLootableItemRepository().apply { create(lootableItem(id = "health-potion")) }))
 
     @Test
-    fun `should rebuild the same state when it restores the snapshot it took`() {
+    fun `should rebuild the same state when it loads the snapshot it took`() {
         // Given: the elder was recruited meanwhile, and another npc placed.
         val npcs = listOf(npc(id = "elder", row = 1, column = 0, unitId = "mage"), npc(id = "merchant", row = 2, column = 2, stock = listOf("health-potion")))
         npcRepository.save(npc(id = "guard"))
         // When
-        restoreNpcs(npcs.map { npc -> npc.toDto() })
+        loadNpcsSnapshot(npcs.map { npc -> npc.toDto() })
         // Then
         npcRepository.searchAll().shouldContainExactlyInAnyOrder(npcs)
     }
@@ -27,7 +27,7 @@ class RestoreNpcsTest {
     @Test
     fun `should fail when a merchant sells a lootable item the game no longer has`() {
         // When
-        val result = runCatching { restoreNpcs(listOf(npc(stock = listOf("old-sword")).toDto())) }
+        val result = runCatching { loadNpcsSnapshot(listOf(npc(stock = listOf("old-sword")).toDto())) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "old-sword"
     }

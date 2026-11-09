@@ -7,7 +7,7 @@ import com.mkz.rpg.party.adapters.storage.InMemoryPartyRepository
 import com.mkz.rpg.party.domain.Party.Dto.PositionDto
 import com.mkz.rpg.party.domain.PartyMother.party
 import com.mkz.rpg.party.domain.PartyRepository
-import com.mkz.rpg.party.usecases.commands.RestoreParty
+import com.mkz.rpg.party.usecases.commands.LoadPartySnapshot
 import com.mkz.rpg.party.usecases.queries.SearchPartySnapshot
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -23,17 +23,17 @@ class PartySnapshottableTest {
             .pullEvents()
             .second
 
-    private fun snapshottable(partyRepository: PartyRepository) = PartySnapshottable(SearchPartySnapshot(partyRepository), RestoreParty(partyRepository, searchBattleUnitById))
+    private fun snapshottable(partyRepository: PartyRepository) = PartySnapshottable(SearchPartySnapshot(partyRepository), LoadPartySnapshot(partyRepository, searchBattleUnitById))
 
     @Test
-    fun `Restore should rebuild the same state when it restores the snapshot it took`() {
+    fun `Load should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val snapshot = snapshottable(InMemoryPartyRepository().apply { save(party) }).snapshot()
-        val restoredRepository = InMemoryPartyRepository()
+        val loadedRepository = InMemoryPartyRepository()
         // When
-        snapshottable(restoredRepository).restore(snapshot)
+        snapshottable(loadedRepository).load(snapshot)
         // Then
-        restoredRepository.search() shouldBe party
+        loadedRepository.search() shouldBe party
     }
 
     @Test

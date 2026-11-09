@@ -11,40 +11,41 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
-class RestoreQuestsTest {
+class LoadQuestsSnapshotTest {
     private val questRepository = InMemoryQuestRepository()
-    private val restoreQuests = RestoreQuests(questRepository)
+    private val loadQuestsSnapshot = LoadQuestsSnapshot(questRepository)
 
     @Test
-    fun `RestoreQuests should put back the progress of each quest, publishing no events`() {
+    fun `LoadQuestsSnapshot should put back the progress of each quest, publishing no events`() {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
         questRepository.save(sideQuest(id = "clear-the-rats", tasks = listOf(defeat(unitId = "bat"), defeat(unitId = "rat", requiredDefeats = 5))))
         val mainProgress = ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.COMPLETED, currentTaskIndex = 0, currentTaskDefeats = 1, isPinned = false)
         val sideProgress = ProgressDto(questId = "clear-the-rats", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 3, isPinned = false)
         // When
-        restoreQuests(listOf(mainProgress, sideProgress))
+        loadQuestsSnapshot(listOf(mainProgress, sideProgress))
         // Then
-        val restoredMain = questRepository.searchById("defeat-the-goat-wizard")!!
-        restoredMain.toDto().progress shouldBe mainProgress
-        restoredMain.pullEvents().first.shouldBeEmpty()
+        val loadedMain = questRepository.searchById("defeat-the-goat-wizard")!!
+        loadedMain.toDto().progress shouldBe mainProgress
+        loadedMain.pullEvents().first.shouldBeEmpty()
         questRepository.searchById("clear-the-rats")!!.toDto().progress shouldBe sideProgress
     }
 
     @Test
-    fun `RestoreQuests should fail when the quest no longer exists`() {
+    fun `LoadQuestsSnapshot should fail when the quest no longer exists`() {
         // When
-        val result = runCatching { restoreQuests(listOf(ProgressDto.notStarted("old-quest"))) }
+        val result = runCatching { loadQuestsSnapshot(listOf(ProgressDto.notStarted("old-quest"))) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "old-quest"
     }
 
     @Test
-    fun `RestoreQuests should fail when the task no longer exists`() {
+    fun `LoadQuestsSnapshot should fail when the task no longer exists`() {
         // Given
         questRepository.save(mainQuest(id = "defeat-the-goat-wizard"))
         // When
-        val result = runCatching { restoreQuests(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 0, isPinned = false))) }
+        val result =
+            runCatching { loadQuestsSnapshot(listOf(ProgressDto(questId = "defeat-the-goat-wizard", status = StatusDto.ACTIVE, currentTaskIndex = 1, currentTaskDefeats = 0, isPinned = false))) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "defeat-the-goat-wizard"
     }

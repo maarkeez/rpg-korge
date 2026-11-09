@@ -4,7 +4,7 @@ import com.mkz.rpg.cpuWanderBrain.adapters.storage.InMemoryCpuWanderBrainReposit
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainMother.cpuWanderBrain
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrainRepository
-import com.mkz.rpg.cpuWanderBrain.usecases.commands.RestoreCpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.usecases.commands.LoadCpuWanderBrainSnapshot
 import com.mkz.rpg.cpuWanderBrain.usecases.queries.SearchCpuWanderBrainSnapshot
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
@@ -19,17 +19,17 @@ class CpuWanderBrainSnapshottableTest {
             .pullEvents()
             .second
 
-    private fun snapshottable(repository: CpuWanderBrainRepository) = CpuWanderBrainSnapshottable(SearchCpuWanderBrainSnapshot(repository), RestoreCpuWanderBrain(repository))
+    private fun snapshottable(repository: CpuWanderBrainRepository) = CpuWanderBrainSnapshottable(SearchCpuWanderBrainSnapshot(repository), LoadCpuWanderBrainSnapshot(repository))
 
     @Test
-    fun `Restore should rebuild the same state when it restores the snapshot it took`() {
+    fun `Load should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val snapshot = snapshottable(InMemoryCpuWanderBrainRepository().apply { save(cpuWanderBrain) }).snapshot()
-        val restoredRepository = InMemoryCpuWanderBrainRepository()
+        val loadedRepository = InMemoryCpuWanderBrainRepository()
         // When
-        snapshottable(restoredRepository).restore(snapshot)
+        snapshottable(loadedRepository).load(snapshot)
         // Then
-        restoredRepository.search() shouldBe cpuWanderBrain
+        loadedRepository.search() shouldBe cpuWanderBrain
     }
 
     @Test

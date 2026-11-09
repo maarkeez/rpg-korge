@@ -21,14 +21,14 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
-class RestoreBattleUnitsTest {
+class LoadBattleUnitsSnapshotTest {
     private val knightUnit = unit(id = "knight", healthPoints = 30, abilities = listOf("slash"))
     private val knight = knightUnit.toDto()
     private val human = player(id = "human").toDto()
     private val effectRepository = InMemoryEffectRepository().apply { listOf(increaseMaximumHealthEffect(id = "iron-helmet"), healEffect(id = "regeneration")).forEach(::create) }
     private val battleUnitRepository = InMemoryBattleUnitRepository()
-    private val restoreBattleUnits =
-        RestoreBattleUnits(
+    private val loadBattleUnitsSnapshot =
+        LoadBattleUnitsSnapshot(
             battleUnitRepository,
             SearchUnitById(InMemoryUnitRepository().apply { create(knightUnit) }),
             SearchPlayerById(InMemoryPlayerRepository().apply { create(player(id = "human")) }),
@@ -47,12 +47,12 @@ class RestoreBattleUnitsTest {
             .second
 
     @Test
-    fun `should rebuild the same state when it restores the snapshot it took`() {
+    fun `should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val knights = listOf(hurtKnight(), battleUnit(id = "knight-2", unit = knight, player = human))
         battleUnitRepository.create(battleUnit(id = "knight-3", unit = knight, player = human))
         // When
-        restoreBattleUnits(knights.map(BattleUnit::toSnapshot))
+        loadBattleUnitsSnapshot(knights.map(BattleUnit::toSnapshot))
         // Then
         battleUnitRepository.searchAll().shouldContainExactlyInAnyOrder(knights)
         battleUnitRepository.searchById("knight-1")!!.toDto().maximumHealth shouldBe knight.healthPoints + 10
@@ -63,7 +63,7 @@ class RestoreBattleUnitsTest {
         // Given
         val goblin = battleUnit(id = "goblin-1", unit = unit(id = "goblin-archer").toDto(), player = human)
         // When
-        val result = runCatching { restoreBattleUnits(listOf(goblin.toSnapshot())) }
+        val result = runCatching { loadBattleUnitsSnapshot(listOf(goblin.toSnapshot())) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "goblin-archer"
     }

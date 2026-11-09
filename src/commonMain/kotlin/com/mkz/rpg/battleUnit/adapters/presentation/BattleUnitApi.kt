@@ -26,6 +26,7 @@ import com.mkz.rpg.battleUnit.usecases.commands.ApplyEffect
 import com.mkz.rpg.battleUnit.usecases.commands.CastAbility
 import com.mkz.rpg.battleUnit.usecases.commands.DeployBattleUnit
 import com.mkz.rpg.battleUnit.usecases.commands.InitialiseBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.LoadBattleUnitsSnapshot
 import com.mkz.rpg.battleUnit.usecases.commands.RecoverBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.ReduceRemainingSummonDurations
 import com.mkz.rpg.battleUnit.usecases.commands.RemoveEquippedEffects
@@ -35,7 +36,6 @@ import com.mkz.rpg.battleUnit.usecases.commands.RequestJoinBattle
 import com.mkz.rpg.battleUnit.usecases.commands.RequestLeaveBattle
 import com.mkz.rpg.battleUnit.usecases.commands.ResetBattleUnitActionsAndReduceCooldowns
 import com.mkz.rpg.battleUnit.usecases.commands.RespawnBattleUnit
-import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.SwapBattleUnits
 import com.mkz.rpg.battleUnit.usecases.commands.TriggerOnDefeatedEffects
 import com.mkz.rpg.battleUnit.usecases.commands.TriggerOnPlayerTurnStartedEffects
@@ -79,8 +79,8 @@ class BattleUnitApi(
 
     // Save
     private val searchBattleUnitsSnapshot = SearchBattleUnitsSnapshot(battleUnitRepository)
-    private val restoreBattleUnits = RestoreBattleUnits(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
-    val snapshottable: Snapshottable = BattleUnitSnapshottable(searchBattleUnitsSnapshot, restoreBattleUnits)
+    private val loadBattleUnitsSnapshot = LoadBattleUnitsSnapshot(battleUnitRepository, unitApi.searchUnitById, playerApi.searchPlayerById, abilityApi.searchAbilityById, effectApi.searchEffectById)
+    val snapshottable: Snapshottable = BattleUnitSnapshottable(searchBattleUnitsSnapshot, loadBattleUnitsSnapshot)
 
     // Services
     private val adjacencyService = AdjacencyService()

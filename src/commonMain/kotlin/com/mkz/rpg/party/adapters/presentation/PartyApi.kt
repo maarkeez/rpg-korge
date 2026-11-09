@@ -25,6 +25,7 @@ import com.mkz.rpg.party.usecases.commands.FinishTalk
 import com.mkz.rpg.party.usecases.commands.InterruptExploration
 import com.mkz.rpg.party.usecases.commands.JoinParty
 import com.mkz.rpg.party.usecases.commands.LeaveParty
+import com.mkz.rpg.party.usecases.commands.LoadPartySnapshot
 import com.mkz.rpg.party.usecases.commands.MarkBattleUnitMoved
 import com.mkz.rpg.party.usecases.commands.OpenFormation
 import com.mkz.rpg.party.usecases.commands.OpenPause
@@ -32,7 +33,6 @@ import com.mkz.rpg.party.usecases.commands.OpenQuest
 import com.mkz.rpg.party.usecases.commands.RecruitMember
 import com.mkz.rpg.party.usecases.commands.RemoveMemberEquippedEffects
 import com.mkz.rpg.party.usecases.commands.ResolvePartyStep
-import com.mkz.rpg.party.usecases.commands.RestoreParty
 import com.mkz.rpg.party.usecases.commands.ResumeExploration
 import com.mkz.rpg.party.usecases.commands.StartExploration
 import com.mkz.rpg.party.usecases.commands.StartTalk
@@ -56,8 +56,8 @@ class PartyApi(
 
     // Save
     private val searchPartySnapshot = SearchPartySnapshot(partyRepository)
-    private val restoreParty = RestoreParty(partyRepository, battleUnitApi.searchBattleUnitById)
-    val snapshottable: Snapshottable = PartySnapshottable(searchPartySnapshot, restoreParty)
+    private val loadPartySnapshot = LoadPartySnapshot(partyRepository, battleUnitApi.searchBattleUnitById)
+    val snapshottable: Snapshottable = PartySnapshottable(searchPartySnapshot, loadPartySnapshot)
 
     // Services
     private val partyStepping = PartyStepping(partyRepository, battlefieldApi.searchPosition, battlefieldApi.searchShortestPath, eventBus)

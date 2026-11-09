@@ -42,7 +42,7 @@ data class Npc private constructor(
             )
 
         /** Rebuilds the npc as it was when the game was saved, from its [toDto], publishing no events. */
-        fun restore(dto: Dto): Npc =
+        fun load(dto: Dto): Npc =
             Npc(
                 id = Id(dto.id),
                 tile = Tile(row = dto.row, column = dto.column),

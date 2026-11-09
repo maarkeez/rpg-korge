@@ -1520,7 +1520,7 @@ class BattlefieldPresenterTest {
     @Test
     fun `GameLoaded should display every battle unit, npc and dropped item when a save is loaded`() {
         // Given: a health potion was dropped at (2,2) by a rat, as the save holds it.
-        apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":2,"column":2,"lootableItemIds":["health-potion"]}]}]""")
+        apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":2,"column":2,"lootableItemIds":["health-potion"]}]}]""")
         // When
         eventBus.publish(SaveEvent.GameLoaded(slot = 1))
         eventBus.dispatch()

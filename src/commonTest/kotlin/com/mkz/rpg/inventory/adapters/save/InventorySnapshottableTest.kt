@@ -3,7 +3,7 @@ package com.mkz.rpg.inventory.adapters.save
 import com.mkz.rpg.inventory.adapters.storage.InMemoryInventoryRepository
 import com.mkz.rpg.inventory.domain.InventoryMother.inventory
 import com.mkz.rpg.inventory.domain.InventoryRepository
-import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
+import com.mkz.rpg.inventory.usecases.commands.LoadInventoriesSnapshot
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoriesSnapshot
 import com.mkz.rpg.lootableItem.adapters.storage.InMemoryLootableItemRepository
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
@@ -23,17 +23,17 @@ class InventorySnapshottableTest {
             inventory(battleUnitId = "mage-1"),
         )
 
-    private fun snapshottable(repository: InventoryRepository) = InventorySnapshottable(SearchInventoriesSnapshot(repository), RestoreInventories(repository, searchLootableItemById))
+    private fun snapshottable(repository: InventoryRepository) = InventorySnapshottable(SearchInventoriesSnapshot(repository), LoadInventoriesSnapshot(repository, searchLootableItemById))
 
     @Test
-    fun `Restore should rebuild the same state when it restores the snapshot it took`() {
+    fun `Load should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val snapshot = snapshottable(InMemoryInventoryRepository().apply { inventories.forEach(::create) }).snapshot()
-        val restoredRepository = InMemoryInventoryRepository()
+        val loadedRepository = InMemoryInventoryRepository()
         // When
-        snapshottable(restoredRepository).restore(snapshot)
+        snapshottable(loadedRepository).load(snapshot)
         // Then
-        restoredRepository.searchAll().shouldContainExactlyInAnyOrder(inventories)
+        loadedRepository.searchAll().shouldContainExactlyInAnyOrder(inventories)
     }
 
     @Test

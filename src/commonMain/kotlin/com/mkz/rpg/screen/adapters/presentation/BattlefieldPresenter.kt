@@ -89,7 +89,7 @@ class BattlefieldPresenter(
             eventBus.subscribe<PartyEvent.ExplorationStarted> { trailPartyLeader() },
             // A save is loaded without announcing what it holds: it is all drawn at once, then the camera trails the leader.
             eventBus.subscribe<SaveEvent.GameLoaded> {
-                displayRestoredGame()
+                displayLoadedGame()
                 trailPartyLeader()
             },
             eventBus.subscribe<PartyEvent.ExplorationResumed> { trailPartyLeader() },
@@ -199,7 +199,7 @@ class BattlefieldPresenter(
 
     // Every battle unit and npc on its tile, and every dropped item, as the game was saved. The buildings are already
     // displayed, as they are placed when the scene is set up.
-    private fun displayRestoredGame() {
+    private fun displayLoadedGame() {
         val battlefield = battlefieldApi.searchBattlefield() ?: return
         val occupants = battlefield.tiles.mapNotNull { (position, tile) -> tile.occupantId?.let { occupantId -> position to occupantId } }
         val battleUnits = occupants.mapNotNull { (position, occupantId) -> battleUnitApi.searchBattleUnitById(occupantId)?.let { battleUnit -> position to battleUnit } }

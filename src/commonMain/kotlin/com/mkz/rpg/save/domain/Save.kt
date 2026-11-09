@@ -78,7 +78,7 @@ data class Save private constructor(
         )
 
     /**
-     * The snapshot of each subdomain, to restore them, then announces the game is loaded. Fails with
+     * The snapshot of each subdomain, to load them, then announces the game is loaded. Fails with
      * [SaveError.IncompatibleSave] when it was saved with another version.
      */
     fun load(): Pair<Map<String, String>, Save> {

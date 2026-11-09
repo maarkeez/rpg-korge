@@ -78,7 +78,7 @@ data class Party private constructor(
          * Rebuilds the party as it was when the game was saved, from its [toSnapshot], exploring, done stepping, and with
          * no battle unit moved in the current second. It publishes no events.
          */
-        fun restore(snapshot: Dto.SnapshotDto): Party {
+        fun load(snapshot: Dto.SnapshotDto): Party {
             if (snapshot.battleUnitIds.isEmpty()) throw PartyRequired()
             return Party(
                 playerId = PlayerId(snapshot.playerId),
@@ -108,7 +108,7 @@ data class Party private constructor(
             isReadingQuest = mode == Mode.READING_QUEST,
         )
 
-    /** What is kept when the game is saved: the members and the walking order, as [restore] explores again. */
+    /** What is kept when the game is saved: the members and the walking order, as [load] explores again. */
     fun toSnapshot() = Dto.SnapshotDto(playerId = playerId.value, battleUnitIds = members.value, walkingOrderBattleUnitIds = walkingOrder.value)
 
     /** Whether the party can step: it is exploring and its party step is done. */

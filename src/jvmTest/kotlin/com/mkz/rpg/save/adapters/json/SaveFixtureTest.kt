@@ -120,7 +120,7 @@ class SaveFixtureTest {
         // The main quest starts, the knight walks east onto the health potion, which it stores, then the game is saved in slot 1.
         fun playAndSave(): String {
             apis.questApi.startMainQuest()
-            apis.lootDropApi.snapshottable.restore("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
+            apis.lootDropApi.snapshottable.load("""[{"unitId":"rat","droppedItems":[{"row":1,"column":1,"lootableItemIds":["health-potion"]}]}]""")
             apis.partyApi.stepParty(DirectionDto.EAST)
             apis.eventBus.dispatch()
             apis.partyApi.openPause()
@@ -162,7 +162,7 @@ class SaveFixtureTest {
     }
 
     @Test
-    fun `LoadGame should restore the fixture's leader tile, items and gold when it loads the fixture of SAVE_VERSION`() {
+    fun `LoadGame should load the fixture's leader tile, items and gold when it loads the fixture of SAVE_VERSION`() {
         // Given
         val game = Game(isPlayed = false)
         // When

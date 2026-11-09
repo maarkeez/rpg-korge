@@ -20,27 +20,27 @@ class LoadGameTest {
     private val storage = InmemoryStorage()
     private val saveRepository = NativeStorageSaveRepository(storage)
     private val eventBus = FakeEventBus()
-    private val restored = mutableListOf<String>()
+    private val loaded = mutableListOf<String>()
 
     private fun snapshottables(failure: Throwable? = null) =
         listOf(
-            FakeSnapshottable("battleUnit", restored = restored, failure = failure),
-            FakeSnapshottable("battlefield", restored = restored),
-            FakeSnapshottable("party", restored = restored),
+            FakeSnapshottable("battleUnit", loaded = loaded, failure = failure),
+            FakeSnapshottable("battlefield", loaded = loaded),
+            FakeSnapshottable("party", loaded = loaded),
         )
 
     private fun save(snapshots: Map<String, String> = mapOf("battleUnit" to "{\"hp\":18}", "battlefield" to "{}", "party" to "{}")) =
         saveRepository.save(Save.save(slot = 2, savedAt = 0.0, leaderUnitId = "knight", partySize = 3, snapshots = snapshots))
 
     @Test
-    fun `LoadGame should restore every snapshot in order and publish GameLoaded when the slot is compatible`() {
+    fun `LoadGame should load every snapshot in order and publish GameLoaded when the slot is compatible`() {
         // Given
         save()
         val snapshottables = snapshottables()
         // When
         LoadGame(saveRepository, snapshottables, eventBus)(slot = 2)
         // Then
-        restored.shouldContainExactly("battleUnit", "battlefield", "party")
+        loaded.shouldContainExactly("battleUnit", "battlefield", "party")
         snapshottables.first().snapshot() shouldBe "{\"hp\":18}"
         eventBus.shouldHavePublishedEvents(SaveEvent.GameLoaded(slot = 2))
     }
@@ -53,7 +53,7 @@ class LoadGameTest {
         val result = runCatching { LoadGame(saveRepository, snapshottables(), eventBus)(slot = 2) }
         // Then
         result.exceptionOrNull().shouldBeTypeOf<SaveError.IncompatibleSave>()
-        restored.shouldBeEmpty()
+        loaded.shouldBeEmpty()
         eventBus.shouldNotHavePublishedEvents()
     }
 

@@ -20,7 +20,7 @@ import com.mkz.rpg.unit.domain.UnitEvent
  * Initialises each subdomain from its resources, then starts exploring and the main quest. The order matters, as each
  * subdomain requires the ones it refers to (e.g.: abilities require their effects). The battle starts once the CPU engages.
  *
- * To load a save, only what never changes while playing is initialised, up to the quests: the save restores
+ * To load a save, only what never changes while playing is initialised, up to the quests: the save loads
  * the rest (the battle units, the npcs and the party) and how far each quest went.
  */
 class SetUpGame(

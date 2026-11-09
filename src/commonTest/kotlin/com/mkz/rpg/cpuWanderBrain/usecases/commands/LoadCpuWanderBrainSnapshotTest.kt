@@ -7,9 +7,9 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class RestoreCpuWanderBrainTest {
+class LoadCpuWanderBrainSnapshotTest {
     private val cpuWanderBrainRepository = InMemoryCpuWanderBrainRepository()
-    private val restoreCpuWanderBrain = RestoreCpuWanderBrain(cpuWanderBrainRepository)
+    private val loadCpuWanderBrainSnapshot = LoadCpuWanderBrainSnapshot(cpuWanderBrainRepository)
 
     // rat-1 is returning home, and rat-2 was defeated 12 party steps ago.
     private val cpuWanderBrain: CpuWanderBrain =
@@ -21,11 +21,11 @@ class RestoreCpuWanderBrainTest {
             .second
 
     @Test
-    fun `should rebuild the same state when it restores the snapshot it took`() {
+    fun `should rebuild the same state when it loads the snapshot it took`() {
         // Given
         cpuWanderBrainRepository.save(CpuWanderBrain.create())
         // When
-        restoreCpuWanderBrain(cpuWanderBrain.toSnapshot())
+        loadCpuWanderBrainSnapshot(cpuWanderBrain.toSnapshot())
         // Then
         cpuWanderBrainRepository.search() shouldBe cpuWanderBrain
     }
@@ -33,7 +33,7 @@ class RestoreCpuWanderBrainTest {
     @Test
     fun `should keep no CPU wander brain when the snapshot has none`() {
         // When
-        restoreCpuWanderBrain(null)
+        loadCpuWanderBrainSnapshot(null)
         // Then
         cpuWanderBrainRepository.search().shouldBeNull()
     }

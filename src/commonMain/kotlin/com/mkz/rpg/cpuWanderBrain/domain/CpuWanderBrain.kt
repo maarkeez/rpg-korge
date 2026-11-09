@@ -53,7 +53,7 @@ data class CpuWanderBrain private constructor(
          * Rebuilds the homes, the battle units returning home and the awaited respawns as they were when the game was saved,
          * from its [toSnapshot], wandering no battle unit. It publishes no events.
          */
-        fun restore(snapshot: Dto.SnapshotDto): CpuWanderBrain =
+        fun load(snapshot: Dto.SnapshotDto): CpuWanderBrain =
             CpuWanderBrain(
                 homes =
                     Homes(

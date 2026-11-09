@@ -130,7 +130,7 @@ class GameScene(
         val inventoryApi = InventoryApi(effectApi, lootableItemApi, unitApi, battleApi, partyApi, npcApi, eventBus)
         val questApi = QuestApi(battlefieldApi, partyApi, eventBus, ResourcesQuestLoader())
         val gameSetupApi = GameSetupApi(eventBus)
-        // The subdomains holding runtime state, in the order they are initialised, so they are restored in that order.
+        // The subdomains holding runtime state, in the order they are initialised, so they are loaded in that order.
         val saveApi =
             SaveApi(
                 storage = storage ?: views.storage,
@@ -322,7 +322,7 @@ class GameScene(
         // Over everything, taking no room in the stack.
         addChild(questAnnouncementView)
 
-        // Start game: a new one, or the one saved in the slot, restored once the content read from the resources is set
+        // Start game: a new one, or the one saved in the slot, loaded once the game data read from the resources is set
         // up. A save that can not be loaded goes back to Load game, where it is shown as incompatible.
         if (slot == null) {
             gameSetupApi.setUpGame()

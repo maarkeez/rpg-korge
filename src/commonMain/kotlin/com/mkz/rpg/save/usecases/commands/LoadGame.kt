@@ -8,11 +8,11 @@ import com.mkz.rpg.shared.domain.EventBus
 import com.mkz.rpg.shared.domain.Snapshottable
 
 /**
- * Loads the game saved in the slot: restores the snapshot of each subdomain, in order, as the game was saved, without
+ * Loads the game saved in the slot: loads the snapshot of each subdomain, in order, as the game was saved, without
  * announcing any of them, then announces the game is loaded (`GameLoaded`), so the screen draws it all.
  *
- * Fails with [IncompatibleSave] when it was saved with another version, or a snapshot can not be restored (e.g.: it
- * names a unit the game no longer has, or a subdomain has no snapshot): the subdomains restored so far are left as they
+ * Fails with [IncompatibleSave] when it was saved with another version, or a snapshot can not be loaded (e.g.: it
+ * names a unit the game no longer has, or a subdomain has no snapshot): the subdomains loaded so far are left as they
  * are, so the scene is to be left.
  */
 class LoadGame(
@@ -26,7 +26,7 @@ class LoadGame(
         val (snapshots, loadedSave) = save.load()
         snapshottables.forEach { snapshottable ->
             try {
-                snapshottable.restore(requireNotNull(snapshots[snapshottable.key]) { "No snapshot of ${snapshottable.key}" })
+                snapshottable.load(requireNotNull(snapshots[snapshottable.key]) { "No snapshot of ${snapshottable.key}" })
             } catch (failure: Throwable) {
                 throw IncompatibleSave(slot, failure)
             }

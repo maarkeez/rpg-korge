@@ -137,7 +137,7 @@ The detail view of an active side quest has Abandon beside Back in the button ro
 
 - It takes no taps, so whatever is under it can be pressed.
 - It holds nothing: time runs, and the player can act. Announcements play one after the other, so a talk starting two quests takes 9 seconds. See [Presentation timeline](presentation-timeline.md#announcing-a-quest).
-- A loaded game announces nothing, as `SetUpGame` only starts the main quest in a new game and `RestoreQuests` publishes nothing.
+- A loaded game announces nothing, as `SetUpGame` only starts the main quest in a new game and `LoadQuestsSnapshot` publishes nothing.
 
 For example, a new game, then defeating the goat wizard in a battle:
 

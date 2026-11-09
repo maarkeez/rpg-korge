@@ -7,7 +7,7 @@ import com.mkz.rpg.battleUnit.adapters.storage.InMemoryBattleUnitRepository
 import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitMother.battleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnitRepository
-import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.LoadBattleUnitsSnapshot
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.effect.adapters.storage.InMemoryEffectRepository
 import com.mkz.rpg.effect.domain.EffectMother.healEffect
@@ -35,7 +35,7 @@ class BattleUnitSnapshottableTest {
     private fun snapshottable(repository: BattleUnitRepository) =
         BattleUnitSnapshottable(
             SearchBattleUnitsSnapshot(repository),
-            RestoreBattleUnits(repository, SearchUnitById(unitRepository), SearchPlayerById(playerRepository), SearchAbilityById(abilityRepository), SearchEffectById(effectRepository)),
+            LoadBattleUnitsSnapshot(repository, SearchUnitById(unitRepository), SearchPlayerById(playerRepository), SearchAbilityById(abilityRepository), SearchEffectById(effectRepository)),
         )
 
     // A knight at 18 of 30 health, wearing an iron helmet (+10 maximum health), regenerating for 2 more turns,
@@ -49,15 +49,15 @@ class BattleUnitSnapshottableTest {
             .second
 
     @Test
-    fun `Restore should rebuild the same state when it restores the snapshot it took`() {
+    fun `Load should rebuild the same state when it loads the snapshot it took`() {
         // Given
         val knights = listOf(hurtKnight(), battleUnit(id = "knight-2", unit = knight, player = human))
         val snapshot = snapshottable(InMemoryBattleUnitRepository().apply { knights.forEach(::create) }).snapshot()
-        val restoredRepository = InMemoryBattleUnitRepository()
+        val loadedRepository = InMemoryBattleUnitRepository()
         // When
-        snapshottable(restoredRepository).restore(snapshot)
+        snapshottable(loadedRepository).load(snapshot)
         // Then
-        restoredRepository.searchAll().shouldContainExactlyInAnyOrder(knights)
+        loadedRepository.searchAll().shouldContainExactlyInAnyOrder(knights)
     }
 
     @Test

@@ -139,7 +139,7 @@ data class Quest private constructor(
     private fun currentTask(): Task = tasks.value[progress.currentTaskIndex]
 
     /** Puts back how far it went when the game was saved, publishing no events. */
-    fun restoreProgress(progress: ProgressDto): Quest {
+    fun loadProgress(progress: ProgressDto): Quest {
         require(progress.currentTaskIndex in tasks.value.indices) { "Quest ${id.value} has no task ${progress.currentTaskIndex}" }
         return copy(progress = Progress(status = progress.status, currentTaskIndex = progress.currentTaskIndex, currentTaskDefeats = progress.currentTaskDefeats, isPinned = progress.isPinned))
     }

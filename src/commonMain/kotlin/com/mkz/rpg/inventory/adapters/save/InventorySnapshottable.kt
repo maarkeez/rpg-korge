@@ -1,7 +1,7 @@
 package com.mkz.rpg.inventory.adapters.save
 
 import com.mkz.rpg.inventory.domain.Inventory
-import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
+import com.mkz.rpg.inventory.usecases.commands.LoadInventoriesSnapshot
 import com.mkz.rpg.inventory.usecases.queries.SearchInventoriesSnapshot
 import com.mkz.rpg.lootableItem.domain.LootableItem.Dto.LootTypeDto.EquippableDto.EquipmentZoneDto
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
@@ -10,10 +10,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The inventory of every battle unit: its stored and equipped items, and its gold, see [SearchInventoriesSnapshot] and [RestoreInventories]. */
+/** The inventory of every battle unit: its stored and equipped items, and its gold, see [SearchInventoriesSnapshot] and [LoadInventoriesSnapshot]. */
 class InventorySnapshottable(
     private val searchInventoriesSnapshot: SearchInventoriesSnapshot,
-    private val restoreInventories: RestoreInventories,
+    private val loadInventoriesSnapshot: LoadInventoriesSnapshot,
 ) : Snapshottable {
     override val key = "inventory"
 
@@ -30,8 +30,8 @@ class InventorySnapshottable(
             },
         )
 
-    override fun restore(snapshot: String) =
-        restoreInventories(
+    override fun load(snapshot: String) =
+        loadInventoriesSnapshot(
             SnapshotJson.decodeFromString<List<InventorySnapshot>>(snapshot).map { inventory ->
                 Inventory.Dto(
                     battleUnitId = inventory.battleUnitId,

@@ -7,9 +7,9 @@ import com.mkz.rpg.npc.adapters.events.OnRequestPlaceNpcs
 import com.mkz.rpg.npc.adapters.save.NpcSnapshottable
 import com.mkz.rpg.npc.adapters.storage.InMemoryNpcRepository
 import com.mkz.rpg.npc.domain.NpcRepository
+import com.mkz.rpg.npc.usecases.commands.LoadNpcsSnapshot
 import com.mkz.rpg.npc.usecases.commands.PlaceNpcs
 import com.mkz.rpg.npc.usecases.commands.RecruitNpc
-import com.mkz.rpg.npc.usecases.commands.RestoreNpcs
 import com.mkz.rpg.npc.usecases.commands.TalkToAdjacentNpc
 import com.mkz.rpg.npc.usecases.queries.SearchAdjacentNpc
 import com.mkz.rpg.npc.usecases.queries.SearchIsMerchant
@@ -32,8 +32,8 @@ class NpcApi(
 
     // Save
     private val searchNpcsSnapshot = SearchNpcsSnapshot(npcRepository)
-    private val restoreNpcs = RestoreNpcs(npcRepository, lootableItemApi.searchLootableItemById)
-    val snapshottable: Snapshottable = NpcSnapshottable(searchNpcsSnapshot, restoreNpcs)
+    private val loadNpcsSnapshot = LoadNpcsSnapshot(npcRepository, lootableItemApi.searchLootableItemById)
+    val snapshottable: Snapshottable = NpcSnapshottable(searchNpcsSnapshot, loadNpcsSnapshot)
 
     // Queries
     val searchNpcById = SearchNpcById(npcRepository)

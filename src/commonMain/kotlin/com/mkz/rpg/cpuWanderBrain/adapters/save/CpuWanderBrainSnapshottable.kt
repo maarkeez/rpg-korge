@@ -1,7 +1,7 @@
 package com.mkz.rpg.cpuWanderBrain.adapters.save
 
 import com.mkz.rpg.cpuWanderBrain.domain.CpuWanderBrain
-import com.mkz.rpg.cpuWanderBrain.usecases.commands.RestoreCpuWanderBrain
+import com.mkz.rpg.cpuWanderBrain.usecases.commands.LoadCpuWanderBrainSnapshot
 import com.mkz.rpg.cpuWanderBrain.usecases.queries.SearchCpuWanderBrainSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
@@ -11,11 +11,11 @@ import kotlinx.serialization.encodeToString
 
 /**
  * The home of each CPU battle unit, the ones returning home, and the awaited respawns: the party steps each defeated
- * one has counted until it respawns, see [SearchCpuWanderBrainSnapshot] and [RestoreCpuWanderBrain].
+ * one has counted until it respawns, see [SearchCpuWanderBrainSnapshot] and [LoadCpuWanderBrainSnapshot].
  */
 class CpuWanderBrainSnapshottable(
     private val searchCpuWanderBrainSnapshot: SearchCpuWanderBrainSnapshot,
-    private val restoreCpuWanderBrain: RestoreCpuWanderBrain,
+    private val loadCpuWanderBrainSnapshot: LoadCpuWanderBrainSnapshot,
 ) : Snapshottable {
     override val key = "cpuWanderBrain"
 
@@ -33,8 +33,8 @@ class CpuWanderBrainSnapshottable(
             },
         )
 
-    override fun restore(snapshot: String) =
-        restoreCpuWanderBrain(
+    override fun load(snapshot: String) =
+        loadCpuWanderBrainSnapshot(
             SnapshotJson.decodeFromString<CpuWanderBrainSnapshot?>(snapshot)?.let { cpuWanderBrain ->
                 CpuWanderBrain.Dto.SnapshotDto(
                     homes =

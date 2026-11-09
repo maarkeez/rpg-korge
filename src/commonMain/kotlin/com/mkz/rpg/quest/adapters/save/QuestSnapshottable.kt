@@ -2,7 +2,7 @@ package com.mkz.rpg.quest.adapters.save
 
 import com.mkz.rpg.quest.domain.Quest.Dto.ProgressDto
 import com.mkz.rpg.quest.domain.Quest.Dto.StatusDto
-import com.mkz.rpg.quest.usecases.commands.RestoreQuests
+import com.mkz.rpg.quest.usecases.commands.LoadQuestsSnapshot
 import com.mkz.rpg.quest.usecases.queries.SearchQuestsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
@@ -10,10 +10,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** How far each quest went, see [SearchQuestsSnapshot] and [RestoreQuests]. */
+/** How far each quest went, see [SearchQuestsSnapshot] and [LoadQuestsSnapshot]. */
 class QuestSnapshottable(
     private val searchQuestsSnapshot: SearchQuestsSnapshot,
-    private val restoreQuests: RestoreQuests,
+    private val loadQuestsSnapshot: LoadQuestsSnapshot,
 ) : Snapshottable {
     override val key = "quest"
 
@@ -30,8 +30,8 @@ class QuestSnapshottable(
             },
         )
 
-    override fun restore(snapshot: String) =
-        restoreQuests(
+    override fun load(snapshot: String) =
+        loadQuestsSnapshot(
             SnapshotJson.decodeFromString<List<QuestSnapshot>>(snapshot).map { quest ->
                 ProgressDto(
                     questId = quest.questId,

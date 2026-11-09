@@ -1,7 +1,7 @@
 package com.mkz.rpg.lootDrop.adapters.save
 
 import com.mkz.rpg.lootDrop.domain.LootDrop
-import com.mkz.rpg.lootDrop.usecases.commands.RestoreLootDrops
+import com.mkz.rpg.lootDrop.usecases.commands.LoadLootDropsSnapshot
 import com.mkz.rpg.lootDrop.usecases.queries.SearchLootDropsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
@@ -9,10 +9,10 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** The items lying on the battlefield, by the unit that dropped them, see [SearchLootDropsSnapshot] and [RestoreLootDrops]. */
+/** The items lying on the battlefield, by the unit that dropped them, see [SearchLootDropsSnapshot] and [LoadLootDropsSnapshot]. */
 class LootDropSnapshottable(
     private val searchLootDropsSnapshot: SearchLootDropsSnapshot,
-    private val restoreLootDrops: RestoreLootDrops,
+    private val loadLootDropsSnapshot: LoadLootDropsSnapshot,
 ) : Snapshottable {
     override val key = "lootDrop"
 
@@ -26,8 +26,8 @@ class LootDropSnapshottable(
             },
         )
 
-    override fun restore(snapshot: String) =
-        restoreLootDrops(
+    override fun load(snapshot: String) =
+        loadLootDropsSnapshot(
             SnapshotJson.decodeFromString<List<LootDropSnapshot>>(snapshot).associate { lootDrop ->
                 lootDrop.unitId to lootDrop.droppedItems.associate { tile -> LootDrop.Dto.PositionDto(row = tile.row, column = tile.column) to tile.lootableItemIds }
             },

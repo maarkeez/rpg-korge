@@ -59,18 +59,18 @@ half loaded:
 
 ## Snapshots
 
-Each subdomain holding runtime state takes and restores its own snapshot, through the
+Each subdomain holding runtime state takes and loads its own snapshot, through the
 [`Snapshottable`](../../src/commonMain/kotlin/com/mkz/rpg/shared/domain/Snapshottable.kt) port of `shared.domain`: its
-`key` (e.g.: `battleUnit`), `snapshot()` and `restore(snapshot)`. Each one writes its own JSON, so the `save` subdomain
+`key` (e.g.: `battleUnit`), `snapshot()` and `load(snapshot)`. Each one writes its own JSON, so the `save` subdomain
 never knows their shapes:
 
 - A `Search…Snapshot` query takes what is saved (e.g.: `SearchPartySnapshot`), as the plain snapshot of the aggregate:
   its `Dto.SnapshotDto` (`toSnapshot()`) when its `Dto` does not hold all it needs to be rebuilt (`battleUnit`, `party`,
   `cpuWanderBrain`), its `Dto` (or a part of it) elsewhere. A subdomain gets a `SnapshotDto` once its `Dto` holds
-  something its restore should not have to take.
-- A `Restore…` command takes it back (e.g.: `RestoreParty`): it checks the ids against the other subdomains, and
-  replaces the whole state of the subdomain through a `restore` factory of the aggregate, e.g.:
-  `BattleUnit.restore(snapshot)`. It takes no `EventBus`, so it publishes no events, and fails with `require` when the
+  something its load should not have to take.
+- A `Load…Snapshot` command takes it back (e.g.: `LoadPartySnapshot`): it checks the ids against the other subdomains, and
+  replaces the whole state of the subdomain through a `load` factory of the aggregate, e.g.:
+  `BattleUnit.load(snapshot)`. It takes no `EventBus`, so it publishes no events, and fails with `require` when the
   snapshot names an id the game no longer has (e.g.: a unit, a lootable item, a tile).
 - `<subdomain>.adapters.save.<Subdomain>Snapshottable` only maps them to JSON: it holds its `key` and the
   `@Serializable` classes, never annotating the domain, and takes the query and the command, which its Api builds and
@@ -95,7 +95,7 @@ The battle and the CPU battle brain hold no state while exploring, so they are n
 its state with a CPU turn. The random rolls are not saved either, so a reload rolls anew.
 
 `GameScene` hands `SaveApi` the snapshottables in this order, the order the subdomains are initialised in, so each is
-restored after the ones it refers to (e.g.: the party after its battle units).
+loaded after the ones it refers to (e.g.: the party after its battle units).
 [`SnapshotCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SnapshotCoverageArchitectureTest.kt)
 fails when a subdomain with a repository has no `Snapshottable` and is not listed as not saved, with why.
 
@@ -107,7 +107,7 @@ fails when a subdomain with a repository has no `Snapshottable` and is not liste
    Back and the choices of the question are in the [button row](buttons.md#the-button-row), directly below the panel, as the menu has no battlefield above it: `MenuScene` displays the panel centred at y 272 and the row at y 587, with the same 15 as in a game.
 2. Choosing a slot starts `GameScene` with it. It runs the first 11 steps of the [setup](game-data.md#how-the-game-is-set-up),
    terrains to quests, as a new game does, and dispatches them, so the battlefield and its buildings are drawn.
-3. [`LoadGame`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/LoadGame.kt) restores each snapshot in
+3. [`LoadGame`](../../src/commonMain/kotlin/com/mkz/rpg/save/usecases/commands/LoadGame.kt) loads each snapshot in
    order, silently, without creation events, as replaying them would create empty inventories and new homes. Then it
    publishes one `GameLoaded`.
 4. On `GameLoaded`, the presenters draw the whole state from the queries: `BattlefieldPresenter` places every battle

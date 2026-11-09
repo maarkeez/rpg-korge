@@ -13,7 +13,7 @@ import com.mkz.rpg.unit.usecases.queries.SearchUnitById
  * Replaces every battle unit by the ones a save took, publishing no events. Fails when a battle unit names a unit, a
  * player, an ability or an effect the game no longer has.
  */
-class RestoreBattleUnits(
+class LoadBattleUnitsSnapshot(
     private val battleUnitRepository: BattleUnitRepository,
     private val searchUnitById: SearchUnitById,
     private val searchPlayerById: SearchPlayerById,
@@ -23,7 +23,7 @@ class RestoreBattleUnits(
     operator fun invoke(battleUnits: List<BattleUnit.Dto.SnapshotDto>) {
         battleUnits.forEach(::requireKnownIds)
         battleUnitRepository.searchAll().forEach { battleUnit -> battleUnitRepository.delete(battleUnit.toDto().id) }
-        battleUnits.forEach { battleUnit -> battleUnitRepository.create(BattleUnit.restore(battleUnit)) }
+        battleUnits.forEach { battleUnit -> battleUnitRepository.create(BattleUnit.load(battleUnit)) }
     }
 
     private fun requireKnownIds(battleUnit: BattleUnit.Dto.SnapshotDto) {

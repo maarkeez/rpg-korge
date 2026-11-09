@@ -355,7 +355,7 @@ class QuestEndToEndTest : ViewsForTesting(windowSize = GAME_WINDOW_SIZE) {
         }
 
     @Test
-    fun `should restore the pinned quest and the markers when a game is loaded`() =
+    fun `should keep the pinned quest and the markers when a game is loaded`() =
         sharedViewsTest {
             // Given
             startWithTheFarmerNextToTheKnight()

@@ -12,11 +12,11 @@ import com.mkz.rpg.battlefield.adapters.save.BattlefieldSnapshottable
 import com.mkz.rpg.battlefield.adapters.storage.InMemoryBattlefieldRepository
 import com.mkz.rpg.battlefield.usecases.commands.ApplyTerrainEffects
 import com.mkz.rpg.battlefield.usecases.commands.InitialiseBattlefield
+import com.mkz.rpg.battlefield.usecases.commands.LoadBattlefieldSnapshot
 import com.mkz.rpg.battlefield.usecases.commands.OccupyTile
 import com.mkz.rpg.battlefield.usecases.commands.OccupyTiles
 import com.mkz.rpg.battlefield.usecases.commands.RemoveOccupant
 import com.mkz.rpg.battlefield.usecases.commands.RequestBattlefieldCreation
-import com.mkz.rpg.battlefield.usecases.commands.RestoreBattlefield
 import com.mkz.rpg.battlefield.usecases.commands.SwapOccupants
 import com.mkz.rpg.battlefield.usecases.queries.ExportBattlefield
 import com.mkz.rpg.battlefield.usecases.queries.IsTileOccupiable
@@ -52,8 +52,8 @@ class BattlefieldApi(
 
     // Save
     private val searchBattlefieldSnapshot = SearchBattlefieldSnapshot(battlefieldRepository)
-    private val restoreBattlefield = RestoreBattlefield(battlefieldRepository)
-    val snapshottable: Snapshottable = BattlefieldSnapshottable(searchBattlefieldSnapshot, restoreBattlefield)
+    private val loadBattlefieldSnapshot = LoadBattlefieldSnapshot(battlefieldRepository)
+    val snapshottable: Snapshottable = BattlefieldSnapshottable(searchBattlefieldSnapshot, loadBattlefieldSnapshot)
 
     // Services
     private val battlefieldCreation = BattlefieldCreation(battlefieldRepository, terrainApi.searchTerrainById)

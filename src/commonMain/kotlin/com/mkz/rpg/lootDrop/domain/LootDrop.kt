@@ -96,7 +96,7 @@ data class LootDrop private constructor(
         )
 
     /** Puts back the items dropped by the unit when the game was saved, in place of the ones lying now, publishing no events. */
-    fun restoreDroppedItems(droppedItems: Map<Dto.PositionDto, List<String>>): LootDrop = copy(droppedItems = DroppedItems.create(droppedItems))
+    fun loadDroppedItems(droppedItems: Map<Dto.PositionDto, List<String>>): LootDrop = copy(droppedItems = DroppedItems.create(droppedItems))
 
     /** Whether it is the ownerless loot drop with no item lying, which a save leaves out. */
     fun isOwnerlessAndEmpty(): Boolean = unitId.value == OWNERLESS_UNIT_ID && droppedItems.value.isEmpty()

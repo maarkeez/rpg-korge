@@ -17,7 +17,7 @@ import com.mkz.rpg.inventory.usecases.commands.EquipItem
 import com.mkz.rpg.inventory.usecases.commands.GiveGold
 import com.mkz.rpg.inventory.usecases.commands.GiveItem
 import com.mkz.rpg.inventory.usecases.commands.GrantReward
-import com.mkz.rpg.inventory.usecases.commands.RestoreInventories
+import com.mkz.rpg.inventory.usecases.commands.LoadInventoriesSnapshot
 import com.mkz.rpg.inventory.usecases.commands.SellItem
 import com.mkz.rpg.inventory.usecases.commands.StoreLootedItem
 import com.mkz.rpg.inventory.usecases.commands.UnequipItem
@@ -56,8 +56,8 @@ class InventoryApi(
 
     // Save
     private val searchInventoriesSnapshot = SearchInventoriesSnapshot(inventoryRepository)
-    private val restoreInventories = RestoreInventories(inventoryRepository, lootableItemApi.searchLootableItemById)
-    val snapshottable: Snapshottable = InventorySnapshottable(searchInventoriesSnapshot, restoreInventories)
+    private val loadInventoriesSnapshot = LoadInventoriesSnapshot(inventoryRepository, lootableItemApi.searchLootableItemById)
+    val snapshottable: Snapshottable = InventorySnapshottable(searchInventoriesSnapshot, loadInventoriesSnapshot)
 
     // Services
     private val playerTurnRule = PlayerTurnRule(partyApi.searchParty, battleApi.searchBattle)

@@ -67,7 +67,7 @@ The [Storybook](storybook.md) shows each view of the game in isolation, in each 
   `adapters.save` package implementing `shared.domain.Snapshottable` (e.g.: `battleUnit.adapters.save.BattleUnitSnapshottable`),
   or be listed as not saved, with why (e.g.: read from the resources). The `@Serializable` snapshot classes live in that
   package too, never in the domain. The snapshottable only maps them to JSON: it takes the snapshot through a
-  `Search…Snapshot` query and restores it through a `Restore…` command (e.g.: `SearchPartySnapshot` and `RestoreParty`),
+  `Search…Snapshot` query and loads it through a `Load…Snapshot` command (e.g.: `SearchPartySnapshot` and `LoadPartySnapshot`),
   which the Api builds and keeps private. This is enforced by [`SnapshotCoverageArchitectureTest`](../../src/jvmTest/kotlin/com/mkz/rpg/shared/adapters/architecture/SnapshotCoverageArchitectureTest.kt).
   See [Save and load](save-and-load.md#snapshots).
 

@@ -69,7 +69,7 @@ data class Inventory private constructor(
             )
 
         /** Rebuilds the inventory as it was when the game was saved, from its [toDto], publishing no events. */
-        fun restore(dto: Dto): Inventory =
+        fun load(dto: Dto): Inventory =
             Inventory(
                 battleUnitId = BattleUnitId(dto.battleUnitId),
                 maximumStorageSpace = MaximumStorageSpace(dto.maximumStorageSpace),

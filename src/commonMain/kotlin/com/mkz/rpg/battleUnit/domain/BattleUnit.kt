@@ -99,7 +99,7 @@ data class BattleUnit private constructor(
             )
 
         /** Rebuilds the battle unit as it was when the game was saved, from its [toSnapshot], publishing no events. */
-        fun restore(snapshot: Dto.SnapshotDto): BattleUnit =
+        fun load(snapshot: Dto.SnapshotDto): BattleUnit =
             BattleUnit(
                 Id(snapshot.id),
                 UnitId(snapshot.unitId),
@@ -108,15 +108,15 @@ data class BattleUnit private constructor(
                 RemainingMana(snapshot.remainingMana),
                 BaseMaximumHealth(snapshot.baseMaximumHealth),
                 BaseMaximumMana(snapshot.baseMaximumMana),
-                EquippedEffects.restore(snapshot.equippedEffects),
-                RemainingActions(snapshot.remainingActions.maximumSteps).restore(
+                EquippedEffects.load(snapshot.equippedEffects),
+                RemainingActions(snapshot.remainingActions.maximumSteps).load(
                     remainingSteps = snapshot.remainingActions.remainingSteps,
                     remainingCasts = snapshot.remainingActions.remainingCasts,
                 ),
-                KnownAbilities.restore(snapshot.knownAbilities),
+                KnownAbilities.load(snapshot.knownAbilities),
                 LearnedAbilities(snapshot.learnedAbilityIds),
                 MaximumAbilities(snapshot.maximumAbilities),
-                OngoingEffects.restore(snapshot.ongoingEffects),
+                OngoingEffects.load(snapshot.ongoingEffects),
                 snapshot.remainingSummonDuration?.let(::RemainingSummonDuration),
                 events = emptySet(),
             )
@@ -140,7 +140,7 @@ data class BattleUnit private constructor(
             remainingSummonDuration = remainingSummonDuration?.value,
         )
 
-    /** Its whole state, to save the game: [restore] rebuilds it as it is. */
+    /** Its whole state, to save the game: [load] rebuilds it as it is. */
     fun toSnapshot() =
         Dto.SnapshotDto(
             id = id.value,
@@ -620,7 +620,7 @@ data class BattleUnit private constructor(
         constructor() : this(emptyList())
 
         companion object {
-            fun restore(snapshots: List<Dto.EquippedEffectSnapshotDto>) =
+            fun load(snapshots: List<Dto.EquippedEffectSnapshotDto>) =
                 EquippedEffects(
                     snapshots.map { snapshot ->
                         val bonus =
@@ -754,7 +754,7 @@ data class BattleUnit private constructor(
 
         fun reduceRemainingCasts() = copy(remainingCasts = RemainingCasts(remainingCasts.value - 1))
 
-        fun restore(
+        fun load(
             remainingSteps: Int,
             remainingCasts: Int,
         ) = copy(remainingSteps = RemainingSteps(remainingSteps), remainingCasts = RemainingCasts(remainingCasts))
@@ -770,7 +770,7 @@ data class BattleUnit private constructor(
         )
 
         companion object {
-            fun restore(remainingCooldowns: Map<String, Int>) =
+            fun load(remainingCooldowns: Map<String, Int>) =
                 KnownAbilities(
                     remainingCooldowns.entries.associate { (abilityId, remainingCooldown) ->
                         AbilityId(abilityId) to
@@ -895,7 +895,7 @@ data class BattleUnit private constructor(
         constructor() : this(emptyList())
 
         companion object {
-            fun restore(snapshots: List<Dto.OngoingEffectSnapshotDto>) =
+            fun load(snapshots: List<Dto.OngoingEffectSnapshotDto>) =
                 OngoingEffects(
                     snapshots.map { snapshot ->
                         when (snapshot.timing) {

@@ -12,10 +12,10 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import kotlin.test.Test
 
-class RestorePartyTest {
+class LoadPartySnapshotTest {
     private val searchBattleUnitById = SearchBattleUnitById(InMemoryBattleUnitRepository().apply { listOf("knight-1", "knight-2", "knight-3").forEach { id -> create(battleUnit(id = id)) } })
     private val partyRepository = InMemoryPartyRepository()
-    private val restoreParty = RestoreParty(partyRepository, searchBattleUnitById)
+    private val loadPartySnapshot = LoadPartySnapshot(partyRepository, searchBattleUnitById)
 
     // K leads in the corridor "M L K", after swapping with M: the line is K, M, L.
     private val party =
@@ -26,21 +26,21 @@ class RestorePartyTest {
             .second
 
     @Test
-    fun `should rebuild the same state when it restores the snapshot it took`() {
+    fun `should rebuild the same state when it loads the snapshot it took`() {
         // Given
         partyRepository.save(party(battleUnitIds = listOf("knight-2")).openPause().pullEvents().second)
         // When
-        restoreParty(party.toSnapshot())
+        loadPartySnapshot(party.toSnapshot())
         // Then
-        val restored = partyRepository.search()!!
-        restored shouldBe party
-        restored.canStep().shouldBeTrue()
+        val loaded = partyRepository.search()!!
+        loaded shouldBe party
+        loaded.canStep().shouldBeTrue()
     }
 
     @Test
     fun `should keep no party when the snapshot has none`() {
         // When
-        restoreParty(null)
+        loadPartySnapshot(null)
         // Then
         partyRepository.search().shouldBeNull()
     }
@@ -48,7 +48,7 @@ class RestorePartyTest {
     @Test
     fun `should fail when a member is not a battle unit`() {
         // When
-        val result = runCatching { restoreParty(party(battleUnitIds = listOf("knight-1", "ghost-1")).toSnapshot()) }
+        val result = runCatching { loadPartySnapshot(party(battleUnitIds = listOf("knight-1", "ghost-1")).toSnapshot()) }
         // Then
         result.exceptionOrNull()?.message.orEmpty() shouldContain "ghost-1"
     }

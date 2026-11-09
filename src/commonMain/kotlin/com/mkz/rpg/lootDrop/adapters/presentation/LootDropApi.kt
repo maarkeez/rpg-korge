@@ -12,8 +12,8 @@ import com.mkz.rpg.lootDrop.usecases.commands.DropItemWithoutRolling
 import com.mkz.rpg.lootDrop.usecases.commands.DropItems
 import com.mkz.rpg.lootDrop.usecases.commands.FindDroppedItems
 import com.mkz.rpg.lootDrop.usecases.commands.InitialiseLootDrops
+import com.mkz.rpg.lootDrop.usecases.commands.LoadLootDropsSnapshot
 import com.mkz.rpg.lootDrop.usecases.commands.LootDroppedItem
-import com.mkz.rpg.lootDrop.usecases.commands.RestoreLootDrops
 import com.mkz.rpg.lootDrop.usecases.commands.RollLootDrop
 import com.mkz.rpg.lootDrop.usecases.queries.SearchDroppedItems
 import com.mkz.rpg.lootDrop.usecases.queries.SearchLootDropsSnapshot
@@ -36,8 +36,8 @@ class LootDropApi(
 
     // Save
     private val searchLootDropsSnapshot = SearchLootDropsSnapshot(lootDropRepository)
-    private val restoreLootDrops = RestoreLootDrops(lootDropRepository)
-    val snapshottable: Snapshottable = LootDropSnapshottable(searchLootDropsSnapshot, restoreLootDrops)
+    private val loadLootDropsSnapshot = LoadLootDropsSnapshot(lootDropRepository)
+    val snapshottable: Snapshottable = LootDropSnapshottable(searchLootDropsSnapshot, loadLootDropsSnapshot)
 
     // Commands
     val initialiseLootDrops = InitialiseLootDrops(lootDropLoader, lootDropRepository, unitApi.searchUnitById, lootTableApi.searchLootTableById, eventBus)

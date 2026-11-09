@@ -4,7 +4,7 @@ import com.mkz.rpg.battleUnit.domain.BattleUnit
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.EquippedEffectSnapshotDto
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.OngoingEffectSnapshotDto
 import com.mkz.rpg.battleUnit.domain.BattleUnit.Dto.RemainingActionsDto
-import com.mkz.rpg.battleUnit.usecases.commands.RestoreBattleUnits
+import com.mkz.rpg.battleUnit.usecases.commands.LoadBattleUnitsSnapshot
 import com.mkz.rpg.battleUnit.usecases.queries.SearchBattleUnitsSnapshot
 import com.mkz.rpg.shared.adapters.save.SnapshotJson
 import com.mkz.rpg.shared.domain.Snapshottable
@@ -12,16 +12,16 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
-/** Every battle unit as it is, see [SearchBattleUnitsSnapshot] and [RestoreBattleUnits]. */
+/** Every battle unit as it is, see [SearchBattleUnitsSnapshot] and [LoadBattleUnitsSnapshot]. */
 class BattleUnitSnapshottable(
     private val searchBattleUnitsSnapshot: SearchBattleUnitsSnapshot,
-    private val restoreBattleUnits: RestoreBattleUnits,
+    private val loadBattleUnitsSnapshot: LoadBattleUnitsSnapshot,
 ) : Snapshottable {
     override val key = "battleUnit"
 
     override fun snapshot(): String = SnapshotJson.encodeToString(searchBattleUnitsSnapshot().map(BattleUnitSnapshot::from))
 
-    override fun restore(snapshot: String) = restoreBattleUnits(SnapshotJson.decodeFromString<List<BattleUnitSnapshot>>(snapshot).map(BattleUnitSnapshot::toDto))
+    override fun load(snapshot: String) = loadBattleUnitsSnapshot(SnapshotJson.decodeFromString<List<BattleUnitSnapshot>>(snapshot).map(BattleUnitSnapshot::toDto))
 }
 
 @Serializable

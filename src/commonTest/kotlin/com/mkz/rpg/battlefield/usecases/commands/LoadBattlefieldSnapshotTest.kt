@@ -7,9 +7,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
 
-class RestoreBattlefieldTest {
+class LoadBattlefieldSnapshotTest {
     private val battlefieldRepository = InMemoryBattlefieldRepository()
-    private val restoreBattlefield = RestoreBattlefield(battlefieldRepository)
+    private val loadBattlefieldSnapshot = LoadBattlefieldSnapshot(battlefieldRepository)
 
     // The knight at (0,0), the elder at (1,2), and a 2x1 house on (2,0) and (2,1).
     private fun occupiedBattlefield(): Battlefield =
@@ -21,11 +21,11 @@ class RestoreBattlefieldTest {
             .second
 
     @Test
-    fun `should rebuild the same state when it restores the snapshot it took`() {
+    fun `should rebuild the same state when it loads the snapshot it took`() {
         // Given
         battlefieldRepository.create(battlefield(rows = 3, columns = 3).occupy(row = 1, column = 1, occupantId = "rat-1").pullEvents().second)
         // When
-        restoreBattlefield(occupiedBattlefield().occupants())
+        loadBattlefieldSnapshot(occupiedBattlefield().occupants())
         // Then
         battlefieldRepository.search()!!.toDto() shouldBe occupiedBattlefield().toDto()
     }
@@ -35,7 +35,7 @@ class RestoreBattlefieldTest {
         // Given
         battlefieldRepository.create(battlefield(rows = 2, columns = 2).pullEvents().second)
         // When
-        val result = runCatching { restoreBattlefield(occupiedBattlefield().occupants()) }
+        val result = runCatching { loadBattlefieldSnapshot(occupiedBattlefield().occupants()) }
         // Then
         result.exceptionOrNull().shouldNotBeNull()
     }
@@ -43,7 +43,7 @@ class RestoreBattlefieldTest {
     @Test
     fun `should fail when the battlefield is not created yet`() {
         // When
-        val result = runCatching { restoreBattlefield(occupiedBattlefield().occupants()) }
+        val result = runCatching { loadBattlefieldSnapshot(occupiedBattlefield().occupants()) }
         // Then
         result.exceptionOrNull().shouldNotBeNull()
     }

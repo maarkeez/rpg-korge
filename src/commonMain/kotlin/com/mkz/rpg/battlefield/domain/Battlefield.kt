@@ -121,7 +121,7 @@ data class Battlefield private constructor(
      * Puts back the occupants of a saved game, from its [occupants], no other tile with an occupant, publishing no events.
      * Fails when a tile is not found, e.g.: the battlefield is smaller now.
      */
-    fun restoreOccupants(occupants: List<Dto.OccupantDto>): Battlefield = copy(tiles = tiles.restoreOccupants(occupants))
+    fun loadOccupants(occupants: List<Dto.OccupantDto>): Battlefield = copy(tiles = tiles.loadOccupants(occupants))
 
     fun isVacant(
         row: Int,
@@ -252,7 +252,7 @@ data class Battlefield private constructor(
         fun occupants(): List<Dto.OccupantDto> =
             tiles.values.mapNotNull { tile -> tile.occupantId()?.let { occupantId -> Dto.OccupantDto(occupantId = occupantId, row = tile.row(), column = tile.column()) } }
 
-        fun restoreOccupants(occupants: List<Dto.OccupantDto>): Tiles {
+        fun loadOccupants(occupants: List<Dto.OccupantDto>): Tiles {
             val tilesWithNoOccupant = tiles.mapValues { (_, tile) -> tile.removeOccupant() }
             val occupiedTiles =
                 occupants.associate { occupant ->
