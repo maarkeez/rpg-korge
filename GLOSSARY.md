@@ -959,6 +959,44 @@ _Avoid_: Followed quest, tracked quest
 **Quest marker**:
 The sign over an npc's head that it has a quest to start, or is the npc of a current talk task.
 
+### Save
+
+**Save**:
+A game as it was saved into a save slot, to be loaded again.
+_Avoid_: Saved game, savegame
+
+**Save slot**:
+One of the 3 places a save is kept, empty or holding one save.
+
+**Summary**:
+What a save slot shows of its save: when it was saved, its leader and the party size.
+_Avoid_: Header, metadata
+
+**Snapshot**:
+The runtime state of one subdomain as kept in a save, such as the health and mana of every battle unit.
+_Avoid_: Saved state
+
+#### Saving and loading
+
+**Overwrite**:
+Saving into a save slot that holds a save, in place of it, once confirmed.
+_Avoid_: Replace
+
+**Load**:
+Taking a save back into play, the game as it was when saved.
+_Avoid_: Restore
+
+#### Compatibility
+
+**Save version**:
+The version of the shape of the saves the game writes; a save of another one is incompatible.
+_Avoid_: Format version, schema version
+
+**Incompatible save**:
+A save that can't be loaded, as it was written by another save version or names what the game no longer has; it can
+only be deleted or overwritten.
+_Avoid_: Corrupt save, broken save
+
 ### World builder
 
 **World**:
